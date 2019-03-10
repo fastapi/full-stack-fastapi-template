@@ -10,7 +10,7 @@ from jwt.exceptions import InvalidTokenError
 
 from app.core import config
 
-password_reset_jwt_subject = "preset"
+password_reset_jwt_subject = "reset"
 
 
 def send_email(email_to: str, subject_template="", html_template="", environment={}):
