@@ -5,10 +5,10 @@ from fastapi.encoders import jsonable_encoder
 from pydantic.types import EmailStr
 from sqlalchemy.orm import Session
 
+from app import crud
 from app.api.utils.db import get_db
 from app.api.utils.security import get_current_user
 from app.core import config
-from app.crud import user as crud_user
 from app.db_models.user import User as DBUser
 from app.models.user import User, UserInCreate, UserInDB, UserInUpdate
 from app.utils import send_new_account_email
@@ -26,13 +26,13 @@ def read_users(
     """
     Retrieve users
     """
-    if not crud_user.is_active(current_user):
+    if not crud.user.is_active(current_user):
         raise HTTPException(status_code=400, detail="Inactive user")
-    elif not crud_user.is_superuser(current_user):
+    elif not crud.user.is_superuser(current_user):
         raise HTTPException(
             status_code=400, detail="The user doesn't have enough privileges"
         )
-    users = crud_user.get_multi(db, skip=skip, limit=limit)
+    users = crud.user.get_multi(db, skip=skip, limit=limit)
     return users
 
 
@@ -46,19 +46,19 @@ def create_user(
     """
     Create new user
     """
-    if not crud_user.is_active(current_user):
+    if not crud.user.is_active(current_user):
         raise HTTPException(status_code=400, detail="Inactive user")
-    elif not crud_user.is_superuser(current_user):
+    elif not crud.user.is_superuser(current_user):
         raise HTTPException(
             status_code=400, detail="The user doesn't have enough privileges"
         )
-    user = crud_user.get_by_email(db, email=user_in.email)
+    user = crud.user.get_by_email(db, email=user_in.email)
     if user:
         raise HTTPException(
             status_code=400,
             detail="The user with this username already exists in the system.",
         )
-    user = crud_user.create(db, user_in=user_in)
+    user = crud.user.create(db, user_in=user_in)
     if config.EMAILS_ENABLED and user_in.email:
         send_new_account_email(
             email_to=user_in.email, username=user_in.email, password=user_in.password
@@ -78,7 +78,7 @@ def update_user_me(
     """
     Update own user
     """
-    if not crud_user.is_active(current_user):
+    if not crud.user.is_active(current_user):
         raise HTTPException(status_code=400, detail="Inactive user")
     current_user_data = jsonable_encoder(current_user)
     user_in = UserInUpdate(**current_user_data)
@@ -88,7 +88,7 @@ def update_user_me(
         user_in.full_name = full_name
     if email is not None:
         user_in.email = email
-    user = crud_user.update(db, user=current_user, user_in=user_in)
+    user = crud.user.update(db, user=current_user, user_in=user_in)
     return user
 
 
@@ -99,7 +99,7 @@ def read_user_me(
     """
     Get current user
     """
-    if not crud_user.is_active(current_user):
+    if not crud.user.is_active(current_user):
         raise HTTPException(status_code=400, detail="Inactive user")
     return current_user
 
@@ -120,14 +120,14 @@ def create_user_open(
             status_code=403,
             detail="Open user resgistration is forbidden on this server",
         )
-    user = crud_user.get_by_email(db, email=email)
+    user = crud.user.get_by_email(db, email=email)
     if user:
         raise HTTPException(
             status_code=400,
             detail="The user with this username already exists in the system",
         )
     user_in = UserInCreate(password=password, email=email, full_name=full_name)
-    user = crud_user.create(db, user_in=user_in)
+    user = crud.user.create(db, user_in=user_in)
     return user
 
 
@@ -140,12 +140,12 @@ def read_user_by_id(
     """
     Get a specific user by username (email)
     """
-    if not crud_user.is_active(current_user):
+    if not crud.user.is_active(current_user):
         raise HTTPException(status_code=400, detail="Inactive user")
-    user = crud_user.get(db, user_id=user_id)
+    user = crud.user.get(db, user_id=user_id)
     if user == current_user:
         return user
-    if not crud_user.is_superuser(current_user):
+    if not crud.user.is_superuser(current_user):
         raise HTTPException(
             status_code=400, detail="The user doesn't have enough privileges"
         )
@@ -163,18 +163,18 @@ def update_user(
     """
     Update a user
     """
-    if not crud_user.is_active(current_user):
+    if not crud.user.is_active(current_user):
         raise HTTPException(status_code=400, detail="Inactive user")
-    elif not crud_user.is_superuser(current_user):
+    elif not crud.user.is_superuser(current_user):
         raise HTTPException(
             status_code=400, detail="The user doesn't have enough privileges"
         )
-    user = crud_user.get(db, user_id=user_id)
+    user = crud.user.get(db, user_id=user_id)
 
     if not user:
         raise HTTPException(
             status_code=404,
             detail="The user with this username does not exist in the system",
         )
-    user = crud_user.update(db, user=user, user_in=user_in)
+    user = crud.user.update(db, user=user, user_in=user_in)
     return user
