@@ -10,7 +10,7 @@ from jwt.exceptions import InvalidTokenError
 
 from app.core import config
 
-password_reset_jwt_subject = "reset"
+password_reset_jwt_subject = "preset"
 
 
 def send_email(email_to: str, subject_template="", html_template="", environment={}):
@@ -71,7 +71,7 @@ def send_reset_password_email(email_to: str, email: str, token: str):
 
 def send_new_account_email(email_to: str, username: str, password: str):
     project_name = config.PROJECT_NAME
-    subject = f"{project_name} - New acccount for user {username}"
+    subject = f"{project_name} - New account for user {username}"
     with open(Path(config.EMAIL_TEMPLATES_DIR) / "new_account.html") as f:
         template_str = f.read()
     link = config.SERVER_HOST
