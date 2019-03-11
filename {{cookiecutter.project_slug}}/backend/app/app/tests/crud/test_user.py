@@ -31,7 +31,7 @@ def test_not_authenticate_user():
     email = random_lower_string()
     password = random_lower_string()
     user = crud.user.authenticate(db_session, email=email, password=password)
-    assert user is False
+    assert user is None
 
 
 def test_check_if_user_is_active():
