@@ -1,5 +1,8 @@
 version: '3.3'
 services:
+  db:
+    ports:
+      - '5432:5432'
   pgadmin:
     ports:
       - '5050:5050'
