@@ -1,4 +1,7 @@
 from __future__ import with_statement
+
+import os
+
 from alembic import context
 from sqlalchemy import engine_from_config, pool
 from logging.config import fileConfig
@@ -27,6 +30,15 @@ target_metadata = Base.metadata
 # ... etc.
 
 
+def get_url():
+    return "postgresql://%s:%s@%s/%s" % (
+        os.getenv("POSTGRES_USER", "postgres"),
+        os.getenv("POSTGRES_PASSWORD", ""),
+        os.getenv("POSTGRES_SERVER", "db"),
+        os.getenv("POSTGRES_DB", "app"),
+    )
+
+
 def run_migrations_offline():
     """Run migrations in 'offline' mode.
 
@@ -39,7 +51,7 @@ def run_migrations_offline():
     script output.
 
     """
-    url = config.get_main_option("sqlalchemy.url")
+    url = get_url()
     context.configure(
         url=url, target_metadata=target_metadata, literal_binds=True, compare_type=True
     )
@@ -55,8 +67,10 @@ def run_migrations_online():
     and associate a connection with the context.
 
     """
+    configuration = config.get_section(config.config_ini_section)
+    configuration['sqlalchemy.url'] = get_url()
     connectable = engine_from_config(
-        config.get_section(config.config_ini_section),
+        configuration,
         prefix="sqlalchemy.",
         poolclass=pool.NullPool,
     )
