@@ -17,8 +17,8 @@ def user_authentication_headers(server_api, email, password):
     return headers
 
 
-def create_random_user():
-    email = random_lower_string()
+def create_random_user(email=None):
+    email = email or random_lower_string()
     password = random_lower_string()
     user_in = UserCreate(username=email, email=email, password=password)
     user = crud.user.create(db_session=db_session, user_in=user_in)
@@ -34,7 +34,7 @@ def byemail_authentication_token(email):
     password = random_lower_string()
     user = crud.user.get_by_email(db_session, email=email)
     if not user:
-        user = create_random_user()
+        user = create_random_user(email=email)
     else:
         user_in = UserUpdate(password=password)
         user = crud.user.update(db_session, user=user, user_in=user_in)
