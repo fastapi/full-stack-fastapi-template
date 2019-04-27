@@ -3,8 +3,8 @@ import requests
 from app import crud
 from app.core import config
 from app.db.session import db_session
-from app.models.user import UserCreate
-from app.tests.utils.utils import random_lower_string
+from app.models.user import UserCreate, UserUpdate
+from app.tests.utils.utils import get_server_api, random_lower_string
 
 
 def user_authentication_headers(server_api, email, password):
@@ -23,3 +23,20 @@ def create_random_user():
     user_in = UserCreate(username=email, email=email, password=password)
     user = crud.user.create(db_session=db_session, user_in=user_in)
     return user
+
+
+def byemail_authentication_token(email):
+    """ 
+        Return a valid token for the user with given email, eventhough the user existed in the first place or not.
+
+        The function generated the User if necessary, and update it with a fresh password otherwise. That allows to use again and again the same user during the test (instead of creating a new one every time), without storing any password in the code.
+    """
+    password = random_lower_string()
+    user = crud.user.get_by_email(db_session, email=email)
+    if not user:
+        user = create_random_user()
+    else:
+        user_in = UserUpdate(password=password)
+        user = crud.user.update(db_session, user=user, user_in=user_in)
+
+    return user_authentication_headers(get_server_api(), email, password)
