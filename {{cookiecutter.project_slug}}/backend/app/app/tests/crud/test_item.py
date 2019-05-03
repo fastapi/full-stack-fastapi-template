@@ -52,7 +52,7 @@ def test_delete_item():
     item_in = ItemCreate(title=title, description=description)
     user = create_random_user()
     item = crud.item.create(db_session=db_session, item_in=item_in, owner_id=user.id)
-    item2 = crud.item.remove(db_session=db_session, id=item.id)
+    item2 = crud.item.remove(db_session=db_session, obj_id=item.id)
     item3 = crud.item.get(db_session=db_session, id=item.id)
     assert item3 is None
     assert item2.id == item.id
