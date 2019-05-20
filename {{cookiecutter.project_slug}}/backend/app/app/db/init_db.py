@@ -2,6 +2,8 @@ from app import crud
 from app.core import config
 from app.models.user import UserCreate
 
+from .base import *  # noqa
+
 
 def init_db(db_session):
     # Tables should be created with Alembic migrations
