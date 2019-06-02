@@ -3,6 +3,11 @@
 # Exit in case of error
 set -e
 
+if [ -z ${TAG} ]; then
+    echo "Variable TAG must be provided"
+    exit 1
+fi
+
 TAG=${TAG} \
 FRONTEND_ENV=${FRONTEND_ENV-production} \
 docker-compose \
