@@ -28,7 +28,9 @@ class UserUpdate(UserBaseInDB):
 
 # Additional properties to return via API
 class User(UserBaseInDB):
-    pass
+    
+    class Config:
+        orm_mode = True
 
 
 # Additional properties stored in DB
