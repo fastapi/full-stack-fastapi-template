@@ -26,7 +26,9 @@ class ItemInDBBase(ItemBase):
 
 # Properties to return to client
 class Item(ItemInDBBase):
-    pass
+    
+    class Config:
+        orm_mode = True
 
 
 # Properties properties stored in DB
