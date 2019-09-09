@@ -10,7 +10,7 @@ from app.api.utils.security import get_current_user
 from app.core import config
 from app.core.jwt import create_access_token
 from app.core.security import get_password_hash
-from app.db_models.user import User as DBUser
+from app.models.user import User as DBUser
 from app.schemas.msg import Msg
 from app.schemas.token import Token
 from app.schemas.user import User

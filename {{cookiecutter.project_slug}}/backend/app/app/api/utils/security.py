@@ -9,7 +9,7 @@ from app import crud
 from app.api.utils.db import get_db
 from app.core import config
 from app.core.jwt import ALGORITHM
-from app.db_models.user import User
+from app.models.user import User
 from app.schemas.token import TokenPayload
 
 reusable_oauth2 = OAuth2PasswordBearer(tokenUrl="/api/v1/login/access-token")

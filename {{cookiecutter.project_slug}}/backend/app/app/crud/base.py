@@ -27,13 +27,13 @@ class CrudBase:
             class ItemUpdate(...)
                 ...
 
-            # model definition in app/db_models/item.py
+            # model definition in app/models/item.py
             class Item(Base):
                 id: int
                 ...
 
             # crud definition in app/crud/item.py
-            from app.db_models.item import Item
+            from app.models.item import Item
             from app.schemas.item import ItemUpdate, ItemCreate
             from app.crud.base import CrudBase
 

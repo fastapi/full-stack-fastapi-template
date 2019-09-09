@@ -8,5 +8,5 @@ from .sub_item import sub_item
 # you could also simply add the following lines:
 
 # from app.crud.base import CrudBase
-# from app.db_models.group import Group
+# from app.models.group import Group
 # group = CrudBase(Group)
