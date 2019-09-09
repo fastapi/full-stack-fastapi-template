@@ -8,6 +8,9 @@ class SubItemBase(BaseModel):
     name: str = None
     item_id: int
 
+    class Config:
+        orm_mode = True
+
 
 # Properties to receive on item creation
 class SubItemCreate(SubItemBase):

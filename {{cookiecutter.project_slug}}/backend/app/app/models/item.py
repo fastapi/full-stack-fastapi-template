@@ -6,6 +6,9 @@ class ItemBase(BaseModel):
     title: str = None
     description: str = None
 
+    class Config:
+        orm_mode = True
+
 
 # Properties to receive on item creation
 class ItemCreate(ItemBase):
