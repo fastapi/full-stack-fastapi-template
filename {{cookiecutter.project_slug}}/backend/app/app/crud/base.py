@@ -73,6 +73,21 @@ class CrudBase:
         """  # noqa
         return db_session.query(self.db_model).get(obj_id)
 
+    def get_first_by(self, db_session: Session, **kwargs: Any) -> Optional[Base]:
+        """
+        get_by provides extended filtering capabilities: it returns the first object that matches all given **kwargs
+        
+        Arguments:
+            db_session {Session} -- Dependency injection of the Database session, which will be used to commit/rollback changes.
+        
+        Keyword Arguments:
+            kwargs {dict} -- filters formated as {attribute_name: attribute_value}
+        
+        Returns:
+            Optional[Base] -- Returns an instance of self.db_model class if an object is found in the Database. Returns None if there is no match found.
+        """  # noqa
+        return db_session.query(self.db_model).filter_by(**kwargs).first()
+
     def get_multi(self, db_session: Session, *, skip=0, limit=100) -> List[Optional[Base]]:
         """
         get_multi queries all Database rows, without any filters, but with offset and limit options (for pagination purpose)
@@ -88,6 +103,23 @@ class CrudBase:
             List[Optional[Base]] -- Array of DB instances according given parameters. Might be empty if no objets are found.
         """  # noqa
         return db_session.query(self.db_model).offset(skip).limit(limit).all()
+
+    def get_multi_by(self, db_session: Session, *, skip=0, limit=100, **kwargs: Any) -> List[Optional[Base]]:
+        """
+        get_multi_by behaves like get_by but returns all filtered objects with the same pagination behavior as in get_multi
+        
+        Arguments:
+            db_session {Session} -- Dependency injection of the Database session, which will be used to commit/rollback changes.
+        
+        Keyword Arguments:
+            skip {int} -- Number of rows to skip from the results (default: {0})
+            limit {int} -- Maximum number of rows to return (default: {100})
+            kwargs {dict} -- filters formated as {attribute_name: attribute_value}
+        
+        Returns:
+            List[Optional[Base]] -- Array of DB instances according given parameters. Might be empty if no objets are found.
+        """  # noqa
+        return db_session.query(self.db_model).filter_by(**kwargs).offset(skip).limit(limit).all()
 
     def create(self, db_session: Session, *, obj_in: BaseModel) -> Base:
         """
@@ -149,7 +181,7 @@ class CrudBase:
 
     def remove(self, db_session: Session, *, obj_id: int) -> Optional[Base]:
         """
-        remove does the same job as delete, with a different return valie
+        remove does the same job as delete, with a different return value
         
         Returns:
             deleted object, if the deletion was successfull

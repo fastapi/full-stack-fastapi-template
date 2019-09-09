@@ -20,6 +20,9 @@ class CrudItem(CrudBase):
     def get_multi(self, db_session: Session, *, skip=0, limit=100) -> List[Optional[Item]]:
         return super(CrudItem, self).get_multi(db_session, skip=skip, limit=limit)
 
+    def get_multi_by_owner(db_session: Session, *, owner_id: int, skip=0, limit=100) -> List[Optional[Item]]:
+        return self.get_multi_by(db_session, owner_id=owner_id, skip=skip, limit=limit)
+
     def create(self, db_session: Session, *, item_in: ItemCreate, owner_id: int) -> Item:
         item_in_data = jsonable_encoder(item_in)
         item = Item(**item_in_data, owner_id=owner_id)
