@@ -2,7 +2,7 @@ from fastapi.encoders import jsonable_encoder
 
 from app import crud
 from app.db.session import db_session
-from app.models.user import UserCreate
+from app.schemas.user import UserCreate
 from app.tests.utils.utils import random_lower_string
 
 

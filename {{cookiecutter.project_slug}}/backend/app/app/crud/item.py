@@ -4,7 +4,7 @@ from fastapi.encoders import jsonable_encoder
 from sqlalchemy.orm import Session
 
 from app.db_models.item import Item
-from app.models.item import ItemCreate, ItemUpdate
+from app.schemas.item import ItemCreate, ItemUpdate
 from app.crud.base import CrudBase
 
 

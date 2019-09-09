@@ -20,7 +20,7 @@ class CrudBase:
         
         E.g.:
 
-            # model definition in app/models/item.py
+            # model definition in app/schemas/item.py
             class ItemCreate(...)
                 ...
 
@@ -34,7 +34,7 @@ class CrudBase:
 
             # crud definition in app/crud/item.py
             from app.db_models.item import Item
-            from app.models.item import ItemUpdate, ItemCreate
+            from app.schemas.item import ItemUpdate, ItemCreate
             from app.crud.base import CrudBase
 
 

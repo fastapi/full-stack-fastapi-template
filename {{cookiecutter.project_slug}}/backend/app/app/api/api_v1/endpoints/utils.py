@@ -3,8 +3,8 @@ from pydantic.types import EmailStr
 
 from app.api.utils.security import get_current_active_superuser
 from app.core.celery_app import celery_app
-from app.models.msg import Msg
-from app.models.user import UserInDB
+from app.schemas.msg import Msg
+from app.schemas.user import UserInDB
 from app.utils import send_test_email
 
 router = APIRouter()

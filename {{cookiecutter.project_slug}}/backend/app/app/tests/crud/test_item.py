@@ -1,5 +1,5 @@
 from app import crud
-from app.models.item import ItemCreate, ItemUpdate
+from app.schemas.item import ItemCreate, ItemUpdate
 from app.tests.utils.user import create_random_user
 from app.tests.utils.utils import random_lower_string
 from app.db.session import db_session
