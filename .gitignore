@@ -1,3 +1,7 @@
 .vscode
-testing-project
 .mypy_cache
+.pytest_cache
+Pipfile.lock
+
+testing-project
+docker-stack.yml
