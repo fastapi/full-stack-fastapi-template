@@ -10,7 +10,7 @@ from app.api.utils.db import get_db
 from app.api.utils.security import get_current_active_superuser, get_current_active_user
 from app.core import config
 from app.models.user import User as DBUser
-from app.schemas.user import User, UserCreate, UserInDB, UserUpdate
+from app.schemas.user import User, UserCreate, UserUpdate
 from app.utils import send_new_account_email
 
 router = APIRouter()
@@ -141,7 +141,7 @@ def update_user(
     db: Session = Depends(get_db),
     user_id: int,
     user_in: UserUpdate,
-    current_user: UserInDB = Depends(get_current_active_superuser),
+    current_user: User = Depends(get_current_active_superuser),
 ):
     """
     Update a user.

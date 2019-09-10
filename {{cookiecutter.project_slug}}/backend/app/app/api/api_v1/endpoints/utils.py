@@ -4,7 +4,7 @@ from pydantic.types import EmailStr
 from app.api.utils.security import get_current_active_superuser
 from app.core.celery_app import celery_app
 from app.schemas.msg import Msg
-from app.schemas.user import UserInDB
+from app.schemas.user import User
 from app.utils import send_test_email
 
 router = APIRouter()
@@ -12,7 +12,7 @@ router = APIRouter()
 
 @router.post("/test-celery/", response_model=Msg, status_code=201)
 def test_celery(
-    msg: Msg, current_user: UserInDB = Depends(get_current_active_superuser)
+    msg: Msg, current_user: User = Depends(get_current_active_superuser)
 ):
     """
     Test Celery worker.
@@ -23,7 +23,7 @@ def test_celery(
 
 @router.post("/test-email/", response_model=Msg, status_code=201)
 def test_email(
-    email_to: EmailStr, current_user: UserInDB = Depends(get_current_active_superuser)
+    email_to: EmailStr, current_user: User = Depends(get_current_active_superuser)
 ):
     """
     Test emails.

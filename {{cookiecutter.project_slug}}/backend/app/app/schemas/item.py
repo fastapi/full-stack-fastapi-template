@@ -1,3 +1,4 @@
+from typing import List, Optional
 from pydantic import BaseModel
 
 from .user import User
@@ -12,13 +13,13 @@ class ItemBase(BaseModel):
         orm_mode = True
 
 
-# Properties to receive on item creation
+# Mandatory properties for item creation
 class ItemCreate(ItemBase):
     title: str
     owner_id: int
 
 
-# Properties to receive on item update
+# Specific properties to receive on item update
 class ItemUpdate(ItemBase):
     pass
 
@@ -26,11 +27,13 @@ class ItemUpdate(ItemBase):
 # Properties shared by models stored in DB
 class ItemInDBBase(ItemBase):
     id: int
-    title: str
-
-    owner: User
 
 
 # Properties to return to client
 class Item(ItemInDBBase):
-    pass
+    owner: User
+
+
+class ItemExpanded(ItemInDBBase):
+    owner: User
+    subitems: Optional[List['SubItem']]

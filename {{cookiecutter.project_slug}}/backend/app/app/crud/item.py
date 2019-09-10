@@ -23,13 +23,8 @@ class CrudItem(CrudBase):
     def get_multi_by_owner(db_session: Session, *, owner_id: int, skip=0, limit=100) -> List[Optional[Item]]:
         return self.get_multi_by(db_session, owner_id=owner_id, skip=skip, limit=limit)
 
-    def create(self, db_session: Session, *, item_in: ItemCreate, owner_id: int) -> Item:
-        item_in_data = jsonable_encoder(item_in)
-        item = Item(**item_in_data, owner_id=owner_id)
-        db_session.add(item)
-        db_session.commit()
-        db_session.refresh(item)
-        return item
+    def create(self, db_session: Session, *, item_in: ItemCreate) -> Item:
+        return super(CrudItem, self).create(db_session, obj_in=item_in)
 
     def update(self, db_session: Session, *, item: Item, item_in: ItemUpdate) -> Item:
         return super(CrudItem, self).update(db_session, obj=item, obj_in=item_in)

@@ -41,7 +41,8 @@ def create_item(
     """
     Create new item.
     """
-    item = crud.item.create(db_session=db, item_in=item_in, owner_id=current_user.id)
+    item_in.owner_id = current_user.id
+    item = crud.item.create(db_session=db, item_in=item_in)
     return item
 
 

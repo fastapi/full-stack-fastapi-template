@@ -11,7 +11,5 @@ def create_random_item(owner_id: int = None):
         owner_id = user.id
     title = random_lower_string()
     description = random_lower_string()
-    item_in = ItemCreate(title=title, description=description, id=id)
-    return crud.item.create(
-        db_session=db_session, item_in=item_in, owner_id=owner_id
-    )
+    item_in = ItemCreate(title=title, owner_id=owner_id, description=description, id=id)
+    return crud.item.create(db_session=db_session, item_in=item_in)

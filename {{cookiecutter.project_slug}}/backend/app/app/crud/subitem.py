@@ -1,7 +1,7 @@
 from typing import Optional
 from sqlalchemy.orm import Session, subqueryload
 
-from app.models.sub_item import SubItem
+from app.models.subitem import SubItem
 from app.crud.base import CrudBase
 
 
@@ -18,4 +18,4 @@ class CrudSubItem(CrudBase):
         )
 
 
-sub_item = CrudSubItem(SubItem)
+subitem = CrudSubItem(SubItem)

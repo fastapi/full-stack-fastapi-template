@@ -7,20 +7,21 @@ from .item import Item
 class SubItemBase(BaseModel):
     title: str = None
     description: str = None
-    item_id: int
+    item_id: int = None
 
     class Config:
         orm_mode = True
 
 
-# Properties to receive on item creation
+# Mandatory properties for item creation
 class SubItemCreate(SubItemBase):
     title: str
+    item_id: int
 
 
-# Properties to receive on item update
+# Specific properties to receive on item update
 class SubItemUpdate(SubItemBase):
-    item_id: int = None
+    pass
 
 
 # Properties shared by models stored in DB
@@ -30,4 +31,4 @@ class SubItemInDBBase(SubItemBase):
 
 # Properties to return to client
 class SubItem(SubItemInDBBase):
-    item : Item
+    item: Item
