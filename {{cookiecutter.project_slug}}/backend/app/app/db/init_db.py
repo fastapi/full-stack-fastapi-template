@@ -2,11 +2,6 @@ from app import crud
 from app.core import config
 from app.schemas.user import UserCreate
 
-# make sure all SQL Alchemy models are imported before initializing DB
-# otherwise, SQL Alchemy might fail to initialize properly relationships
-# for more details: https://github.com/tiangolo/full-stack-fastapi-postgresql/issues/28
-from app.db import base
-
 
 def init_db(db_session):
     # Tables should be created with Alembic migrations
@@ -21,4 +16,4 @@ def init_db(db_session):
             password=config.FIRST_SUPERUSER_PASSWORD,
             is_superuser=True,
         )
-        user = crud.user.create(db_session, user_in=user_in)
+        user = crud.user.create(db_session, obj_in=user_in)

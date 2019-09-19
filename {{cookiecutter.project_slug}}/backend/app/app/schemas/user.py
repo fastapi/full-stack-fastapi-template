@@ -1,40 +1,49 @@
 from typing import List, Optional
+from datetime import datetime
 
-from pydantic import BaseModel
+from pydantic import BaseModel, Schema
 
 
 # Shared properties
 class UserBase(BaseModel):
-    email: Optional[str] = None
-    full_name: Optional[str] = None
-    is_active: Optional[bool] = True
-    is_superuser: Optional[bool] = False
+    email:str = None
+    full_name:str = None
+    is_active:bool = True
+    is_superuser:bool = False
 
     class Config:
         orm_mode = True
 
 
+# Additional properties stored in DB
+class UserBaseInDB(UserBase):
+    id: int = None
+    created_at: Optional[datetime] = None
+    updated_at: Optional[datetime] = None
+
+
 # Properties to receive via API on creation
-class UserCreate(UserBase):
+class UserCreate(UserBaseInDB):
     email: str
     password: str
+    created_at: datetime = Schema(datetime.utcnow())
 
 
 # Properties to receive via API on update
-class UserUpdate(UserBase):
-    password: Optional[str] = None
+class UserUpdate(UserBaseInDB):
+    password: str = None
+    updated_at: datetime = Schema(datetime.utcnow())
 
 
-# Properties shared by models stored in DB
-class UserBaseInDBBase(UserBase):
-    id: int = None
+# Additional properties stored in DB
+class UserInDB(UserBaseInDB):
     hashed_password: str
 
 
-# Properties to return to client
-class User(UserBaseInDBBase):
+# Additional properties to return via API
+class User(UserBaseInDB):
     pass
 
 
-class UserExpanded(UserBaseInDBBase):
+class UserExpanded(User):
     items: Optional[List['Item']]
