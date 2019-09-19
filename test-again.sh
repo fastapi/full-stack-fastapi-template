@@ -1,6 +1,8 @@
 #! /usr/bin/env bash
 
-# pre-requisite: use test.sh script at least once before using this script
+# pre-requisite: 
+# - container for training-project running
+# - which means run test.sh script at least once before using this script
 
 # this script produces the same result as test.sh, but faster
 # because it rsyncs the latest modification into testing-project
