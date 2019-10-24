@@ -6,6 +6,11 @@ class ItemBase(BaseModel):
     title: str = None
     description: str = None
 
+    # using Pydantic orm_mode
+    # https://fastapi.tiangolo.com/tutorial/sql-databases/#use-pydantics-orm_mode
+    class Config:
+        orm_mode = True
+
 
 # Properties to receive on item creation
 class ItemCreate(ItemBase):

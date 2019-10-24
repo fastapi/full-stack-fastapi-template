@@ -10,6 +10,11 @@ class UserBase(BaseModel):
     is_superuser: Optional[bool] = False
     full_name: Optional[str] = None
 
+    # using Pydantic orm_mode
+    # https://fastapi.tiangolo.com/tutorial/sql-databases/#use-pydantics-orm_mode
+    class Config:
+        orm_mode = True
+
 
 class UserBaseInDB(UserBase):
     id: int = None
