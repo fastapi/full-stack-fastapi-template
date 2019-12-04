@@ -15,7 +15,7 @@ class CrudBase:
         CrudBase instances are used to provide the basic CRUD methods for a given object type (get, get_multi, update, create and delete).
         
         In order to use it, follow this steps when you define a new DB model:
-        - create a class that inherites from CrudBase
+        - create a class that inherits from CrudBase
         - override basic methods with proper types in order to get better completion in your IDE
         - create an instance of your newly created class, providing the DB model as an argument
         
@@ -62,6 +62,7 @@ class CrudBase:
 
         Arguments:
             model {Base} -- Class of the DB model which CRUD methods will be provided for
+            schema {BaseModel} -- Class of the schema of the entity, used during the update process.
         """  # noqa
         self.model = model
         self.schema = schema
@@ -87,7 +88,7 @@ class CrudBase:
             db_session {Session} -- Dependency injection of the Database session, which will be used to commit/rollback changes.
         
         Keyword Arguments:
-            kwargs {dict} -- filters formated as {attribute_name: attribute_value}
+            kwargs {dict} -- filters formatted as {attribute_name: attribute_value}
         
         Returns:
             Optional[Base] -- Returns an instance of self.model class if an object is found in the Database. Returns None if there is no match found.
@@ -106,7 +107,7 @@ class CrudBase:
             limit {int} -- Maximum number of rows to return (default: {100})
         
         Returns:
-            List[Optional[Base]] -- Array of DB instances according given parameters. Might be empty if no objets are found.
+            List[Optional[Base]] -- Array of DB instances according given parameters. Might be empty if no objects are found.
         """  # noqa
         return db_session.query(self.model).offset(skip).limit(limit).all()
 
@@ -120,10 +121,10 @@ class CrudBase:
         Keyword Arguments:
             skip {int} -- Number of rows to skip from the results (default: {0})
             limit {int} -- Maximum number of rows to return (default: {100})
-            kwargs {dict} -- filters formated as {attribute_name: attribute_value}
+            kwargs {dict} -- filters formatted as {attribute_name: attribute_value}
         
         Returns:
-            List[Optional[Base]] -- Array of DB instances according given parameters. Might be empty if no objets are found.
+            List[Optional[Base]] -- Array of DB instances according given parameters. Might be empty if no objects are found.
         """  # noqa
         return db_session.query(self.model).filter_by(**kwargs).offset(skip).limit(limit).all()
 
@@ -141,7 +142,7 @@ class CrudBase:
         obj = self.model.from_schema(obj_in)
         logging.info(
             f"\033[33mCreating\033[0m \033[35m{obj.__class__.__name__}\033[0m"
-            f" \033[33mwith\033[0m {obj_in}"
+            f"\033[33m with\033[0m {obj_in}"
         )
         db_session.add(obj)
         db_session.commit()
@@ -171,7 +172,7 @@ class CrudBase:
         }
         logging.info(
             f"\033[33mUpdating\033[0m \033[35m{obj.__class__.__name__}\033[0m={obj_data}"
-            f" \033[33mwith\033[0m {formatted_data}"
+            f"\033[33m with\033[0m {formatted_data}"
         )
 
         for field, value in formatted_data.items():
@@ -195,7 +196,7 @@ class CrudBase:
         """  # noqa
         logging.info(
             f"\033[31mDeleting\033[0m \033[35m{self.model.__name__}\033[0m"
-            f" \033[33mwith\033[0m id={obj_id}"
+            f"\033[33m with\033[0m id={obj_id}"
         )
         queried = db_session.query(self.model).filter(self.model.id == obj_id)
         counted = queried.count()
@@ -209,7 +210,7 @@ class CrudBase:
         remove does the same job as delete, with a different return value
         
         Returns:
-            deleted object, if the deletion was successfull
+            deleted object, if the deletion was successful
             None if the object was already deleted from the Database
         """  # noqa
         obj = db_session.query(self.model).get(obj_id)

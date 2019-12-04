@@ -13,7 +13,7 @@ class CrudUser(CrudBase):
     """
         CrudUser provides authentication methods like `authenticate`
         
-        Basic methods like `get` are overriden to leverage auto-completion from IDE
+        Basic methods like `get` are overridden to leverage auto-completion from IDE
 
         It also overrides `create` and `update` in order to hash the `password` appropriately
     """
@@ -42,7 +42,7 @@ class CrudUser(CrudBase):
         if not verify_password(password, user.hashed_password):
             return None
         logging.info(
-            f"\033[33mAuthenticated\033[0m \033[35mUser\033[0m \033[33mwith\033[0m email={email}"
+            f"\033[33mAuthenticated\033[0m \033[35mUser\033[0m\033[33m with\033[0m email={email}"
         )
         return user
 
@@ -56,7 +56,7 @@ class CrudUser(CrudBase):
             is_superuser=obj_in.is_superuser,
         )
         logging.info(
-            f"\033[33mCreating\033[0m \033[35mUser\033[0m \033[33mwith\033[0m {obj_in}"
+            f"\033[33mCreating\033[0m \033[35mUser\033[0m\033[33m with\033[0m {obj_in}"
         )
         db_session.add(user)
         db_session.commit()
