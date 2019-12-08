@@ -2,7 +2,7 @@ from typing import List
 
 from fastapi import APIRouter, Body, Depends, HTTPException
 from fastapi.encoders import jsonable_encoder
-from pydantic.types import EmailStr
+from pydantic import EmailStr
 from sqlalchemy.orm import Session
 
 from app import crud
