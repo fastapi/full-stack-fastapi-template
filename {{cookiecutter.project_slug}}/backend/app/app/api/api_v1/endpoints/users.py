@@ -2,7 +2,7 @@ from typing import List
 
 from fastapi import APIRouter, Body, Depends, HTTPException
 from fastapi.encoders import jsonable_encoder
-from pydantic.types import EmailStr
+from pydantic import EmailStr
 from sqlalchemy.orm import Session
 
 from app import crud
@@ -103,7 +103,7 @@ def create_user_open(
     if not config.USERS_OPEN_REGISTRATION:
         raise HTTPException(
             status_code=403,
-            detail="Open user resgistration is forbidden on this server",
+            detail="Open user registration is forbidden on this server",
         )
     user = crud.user.get_by_email(db, email=email)
     if user:
