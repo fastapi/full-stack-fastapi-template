@@ -1,11 +1,10 @@
-from .user import user
-from .item import item
+from .crud_user import user
+from .crud_item import item
 
-# For a new basic set of CRUD operations, on a new object, let's say 'SubItem',
-# you could also simply add the following lines:
+# For a new basic set of CRUD operations you could just do
 
-from .base import CrudBase
-from app.models import subitem as models_subitem
-from app.schemas import subitem as schemas_subitem
+# from .base import CRUDBase
+# from app.models.item import Item
+# from app.schemas.item import ItemCreate, ItemUpdate
 
-subitem = CrudBase(models_subitem.SubItem, schemas_subitem.SubItem)
+# item = CRUDBase[Item, ItemCreate, ItemUpdate](Item)
