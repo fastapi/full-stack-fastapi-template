@@ -7,7 +7,6 @@ from app.tests.utils.user import create_random_user
 
 
 def test_create_item(superuser_token_headers):
-    user = create_random_user()
     server_api = get_server_api()
     data = {"title": "Foo", "description": "Fighters"}
     response = requests.post(
