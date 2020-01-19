@@ -25,11 +25,11 @@ def create_random_user():
     return user
 
 
-def byemail_authentication_token(email):
-    """ 
-        Return a valid token for the user with given email, eventhough the user existed in the first place or not.
+def authentication_token_from_email(email):
+    """
+    Return a valid token for the user with given email.
 
-        The function generated the User if necessary, and update it with a fresh password otherwise. That allows to use again and again the same user during the test (instead of creating a new one every time), without storing any password in the code.
+    If the user doesn't exist it is created first.
     """
     password = random_lower_string()
     user = crud.user.get_by_email(db_session, email=email)
