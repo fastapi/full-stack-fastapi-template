@@ -4,15 +4,7 @@ from app import crud
 from app.core import config
 from app.db.session import db_session
 from app.schemas.user import UserCreate, UserUpdate
-from app.tests.utils.utils import random_lower_string, get_server_api
-
-
-def create_random_user():
-    email = random_lower_string()
-    password = random_lower_string()
-    user_in = UserCreate(username=email, email=email, password=password)
-    user = crud.user.create(db_session=db_session, obj_in=user_in)
-    return user
+from app.tests.utils.utils import get_server_api, random_lower_string
 
 
 def user_authentication_headers(server_api, email, password):
@@ -25,19 +17,27 @@ def user_authentication_headers(server_api, email, password):
     return headers
 
 
-def byemail_authentication_token(email):
-    """
-        Return a valid token for the user with given email, eventhough the user existed in the first place or not.
+def create_random_user():
+    email = random_lower_string()
+    password = random_lower_string()
+    user_in = UserCreate(username=email, email=email, password=password)
+    user = crud.user.create(db_session=db_session, obj_in=user_in)
+    return user
 
-        The function generated the User if necessary, and update it with a fresh password otherwise. That allows to use again and again the same user during the test (instead of creating a new one every time), without storing any password in the code.
-    """  # noqa
+
+def authentication_token_from_email(email):
+    """
+    Return a valid token for the user with given email.
+
+    If the user doesn't exist it is created first.
+    """
     password = random_lower_string()
     user = crud.user.get_by_email(db_session, email=email)
     if not user:
-        user_in = UserCreate(email=email, password=password, city_id=51)
+        user_in = UserCreate(username=email, email=email, password=password)
         user = crud.user.create(db_session=db_session, obj_in=user_in)
     else:
         user_in = UserUpdate(password=password)
-        user = crud.user.update(db_session, obj=user, obj_in=user_in)
+        user = crud.user.update(db_session, obj_in=user, db_obj=user_in)
 
     return user_authentication_headers(get_server_api(), email, password)
