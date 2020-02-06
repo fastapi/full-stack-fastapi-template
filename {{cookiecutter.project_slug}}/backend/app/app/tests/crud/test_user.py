@@ -2,7 +2,7 @@ from fastapi.encoders import jsonable_encoder
 
 from app import crud
 from app.db.session import db_session
-from app.schemas.user import UserCreate
+from app.schemas.user import UserCreate, UserUpdate
 from app.tests.utils.utils import random_lower_string
 
 
@@ -25,6 +25,23 @@ def test_authenticate_user():
     )
     assert authenticated_user
     assert user.email == authenticated_user.email
+
+
+def test_update_password_authenticate_user():
+    email = random_lower_string()
+    password = random_lower_string()
+    user_in = UserCreate(email=email, password=password)
+    user = crud.user.create(db_session, obj_in=user_in)
+    authenticated_user = crud.user.authenticate(
+        db_session, email=email, password=password
+    )
+    assert authenticated_user
+    assert user.email == authenticated_user.email
+
+    new_password = random_lower_string()
+    update_user = UserUpdate()
+    update_user.password = new_password
+    _ = crud.user.update(db_session=db_session, db_obj=user, obj_in=update_user)
 
 
 def test_not_authenticate_user():
