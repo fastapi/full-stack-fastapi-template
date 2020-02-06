@@ -43,6 +43,18 @@ def test_update_password_authenticate_user():
     update_user.password = new_password
     _ = crud.user.update(db_session=db_session, db_obj=user, obj_in=update_user)
 
+    authenticated_user = crud.user.authenticate(
+        db_session, email=email, password=password
+    )
+    assert not authenticated_user
+
+    authenticated_user = crud.user.authenticate(
+        db_session, email=email, password=new_password
+    )
+    assert authenticated_user
+    assert user.email == authenticated_user.email
+
+
 
 def test_not_authenticate_user():
     email = random_lower_string()
