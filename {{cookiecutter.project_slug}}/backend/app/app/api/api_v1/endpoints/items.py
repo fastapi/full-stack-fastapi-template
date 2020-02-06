@@ -68,7 +68,7 @@ def update_item(
 
 
 @router.get("/{id}", response_model=Item)
-def read_user_me(
+def read_item(
     *,
     db: Session = Depends(get_db),
     id: int,
