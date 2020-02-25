@@ -22,7 +22,7 @@ class Settings(BaseSettings):
 
     @validator("BACKEND_CORS_ORIGINS", pre=True)
     def assemble_cors_origins(cls, v):
-        if isinstance(v, str):
+        if isinstance(v, str) and not v.startswith("["):
             return [i.strip() for i in v.split(",")]
         return v
 
