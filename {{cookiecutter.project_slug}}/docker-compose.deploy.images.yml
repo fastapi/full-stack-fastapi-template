@@ -1,4 +1,4 @@
-version: '3.3'
+version: '3.7'
 services:
   backend:
     image: '${DOCKER_IMAGE_BACKEND}:${TAG-latest}'
