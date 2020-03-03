@@ -3,19 +3,22 @@ services:
   backend:
     build: 
       context: ./backend
-      dockerfile: backend.dockerfile
+      dockerfile: Dockerfile
+      target: backend
       args: 
         env: dev
   celeryworker:
     build:
       context: ./backend
-      dockerfile: celeryworker.dockerfile
+      dockerfile: Dockerfile
+      target: celery-worker
       args: 
         env: dev
   backend-tests:
     build:
       context: ./backend
-      dockerfile: tests.dockerfile
+      dockerfile: Dockerfile
+      target: backend-tests
       args: 
         env: dev
   frontend:

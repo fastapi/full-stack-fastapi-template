@@ -3,11 +3,13 @@ services:
   backend:
     build: 
       context: ./backend
-      dockerfile: backend.dockerfile
+      dockerfile: Dockerfile
+      target: backend
   celeryworker:
     build:
       context: ./backend
-      dockerfile: celeryworker.dockerfile
+      dockerfile: Dockerfile
+      target: celery-worker
   frontend:
     build: 
       context: ./frontend

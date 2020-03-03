@@ -3,7 +3,8 @@ services:
   backend-tests:
     build:
       context: ./backend
-      dockerfile: tests.dockerfile
+      dockerfile: Dockerfile
+      target: backend-tests
     command: bash -c "while true; do sleep 1; done"
     env_file:
       - env-backend.env
