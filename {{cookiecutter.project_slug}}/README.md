@@ -52,7 +52,8 @@ If your Docker is not running in `localhost` (the URLs above wouldn't work) chec
 ## Windows development notes
 
 There are a few things on Windows / Docker that could cause issues, preventing the Docker backend to start, or other problems, such as the inability to run tests:
-* Ensure the files end with LF, and not CR + LF. There is a cookiecutter [issue](https://github.com/tiangolo/full-stack-fastapi-postgresql/issues/13) that will convert the files in Windows. It may be necessary to perform a manual [batch conversion](https://stackoverflow.com/questions/11341660/change-eol-on-multiple-files-in-one-go) to fix all the project line endings. Ensure the binary files such as .png are excluded from this conversion.
+* Ensure the files end with LF, and not CR + LF. There is a cookiecutter [issue](https://github.com/tiangolo/full-stack-fastapi-postgresql/issues/13) that will convert the files in Windows. It may be necessary to convert all line endings from command line: `find . -type f -exec dos2unix {} \;` [source](https://stackoverflow.com/questions/7068179/convert-line-endings-for-whole-directory-tree-git)
+
 * Keep the project files in a separate drive outside the Windows C drive, as recommended per Docker [docs](https://docs.docker.com/v17.12/docker-for-windows/#docker-settings).
 * Once Docker created all the images, running the tests is done with this command: 
 
