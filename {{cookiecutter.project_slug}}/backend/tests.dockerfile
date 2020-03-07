@@ -1,5 +1,7 @@
 FROM python:3.7
 
+ENV PIP_INDEX_URL={{cookiecutter.pip_mirror_url}}
+
 RUN pip install requests pytest tenacity passlib[bcrypt] "fastapi>=0.16.0" psycopg2-binary SQLAlchemy
 
 # For development, Jupyter remote kernel, Hydrogen

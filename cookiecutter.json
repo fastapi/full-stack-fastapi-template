@@ -1,6 +1,7 @@
 {
     "project_name": "Base Project",
     "project_slug": "{{ cookiecutter.project_name|lower|replace(' ', '-') }}",
+    "pip_mirror_url": "",
     "domain_main": "{{cookiecutter.project_slug}}.com",
     "domain_staging": "stag.{{cookiecutter.domain_main}}",
 

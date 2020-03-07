@@ -1,6 +1,7 @@
 default_context:
   project_name: '{{ cookiecutter.project_name }}'
   project_slug: '{{ cookiecutter.project_slug }}'
+  pip_mirror_url: '{{ cookiecutter.pip_mirror_url }}'
   domain_main: '{{ cookiecutter.domain_main }}'
   domain_staging: '{{ cookiecutter.domain_staging }}'
   docker_swarm_stack_name_main: '{{ cookiecutter.docker_swarm_stack_name_main }}'
