@@ -10,7 +10,7 @@ def random_lower_string():
 
 
 def random_email():
-    return f"{''.join(random.choices(string.ascii_lowercase, k=32))}@mail.com"
+    return f"{random_lower_string()}@{random_lower_string()}.com"
 
 
 def get_server_api():
