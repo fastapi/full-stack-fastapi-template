@@ -26,7 +26,7 @@ sqlalchemy = "*"
 
 [tool.poetry.dev-dependencies]
 mypy = "*"
-black = "*"
+black = "^v19.10b0"
 jupyter = "*"
 isort = "*"
 autoflake = "*"
