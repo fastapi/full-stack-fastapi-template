@@ -7,4 +7,4 @@ set -e
 poetry update
 
 # generate requirements.txt file [Optional with --dev]
-make-requirements
+./make-requirements.sh
