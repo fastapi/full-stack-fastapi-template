@@ -4,8 +4,10 @@ RUN apk update
 RUN apk add python3 curl
 RUN ln -s /usr/bin/python3 /usr/bin/python
 RUN curl -sSL https://raw.githubusercontent.com/sdispater/poetry/master/get-poetry.py | python
-RUN source $HOME/.poetry/env
-RUN poetry export -f requirements.txt -o requirements.txt
+
+ADD pyproject.toml .
+ADD poetry.lock .
+RUN $HOME/.poetry/bin/poetry export -f requirements.txt -o requirements.txt --dev
 
 
 FROM python:3.7
