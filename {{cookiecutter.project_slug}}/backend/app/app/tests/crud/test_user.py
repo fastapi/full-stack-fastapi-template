@@ -83,8 +83,8 @@ def test_get_user():
 
 def test_update_user():
     password = random_lower_string()
-    username = random_lower_string()
-    user_in = UserCreate(email=username, password=password, is_superuser=True)
+    email = random_email()
+    user_in = UserCreate(email=email, password=password, is_superuser=True)
     user = crud.user.create(db_session, obj_in=user_in)
     new_password = random_lower_string()
     user_in = UserUpdate(password=new_password, is_superuser=True)
