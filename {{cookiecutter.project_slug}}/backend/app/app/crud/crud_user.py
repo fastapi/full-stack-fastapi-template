@@ -28,10 +28,10 @@ class CRUDUser(CRUDBase[User, UserCreate, UserUpdate]):
         if obj_in.password:
             update_data = obj_in.dict(exclude_unset=True)
             hashed_password = get_password_hash(obj_in.password)
-            del update_data['password']
-            update_data['hashed_password'] = hashed_password
-            obj_in = UserInDB.parse_obj(update_data)
-        return super(CRUDUser, self).update(db_session, db_obj=db_obj, obj_in=obj_in)
+            del update_data["password"]
+            update_data["hashed_password"] = hashed_password
+            use_obj_in = UserInDB.parse_obj(update_data)
+        return super().update(db_session, db_obj=db_obj, obj_in=use_obj_in)
 
     def authenticate(
         self, db_session: Session, *, email: str, password: str
