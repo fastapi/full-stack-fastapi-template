@@ -95,7 +95,6 @@ The generator (cookiecutter) will ask you for some data, you might want to have 
 The input variables, with their default values (some auto generated) are:
 
 * `project_name`: The name of the project
-* `project_version`: The version of the project
 * `project_slug`: The development friendly name of the project. By default, based on the project name
 * `domain_main`: The domain in where to deploy the project for production (from the branch `production`), used by the load balancer, backend, etc. By default, based on the project slug.
 * `domain_staging`: The domain in where to deploy while staging (before production) (from the branch `master`). By default, based on the main domain.

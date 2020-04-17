@@ -1,3 +1,13 @@
+FROM alpine:3.11
+
+RUN apk update
+RUN apk add python3 curl
+RUN ln -s /usr/bin/python3 /usr/bin/python
+RUN curl -sSL https://raw.githubusercontent.com/sdispater/poetry/master/get-poetry.py | python
+RUN source $HOME/.poetry/env
+RUN poetry export -f requirements.txt -o requirements.txt
+
+
 FROM python:3.7
 
 RUN pip install requests pytest tenacity passlib[bcrypt] "fastapi>=0.47.0" email-validator psycopg2-binary SQLAlchemy

@@ -1,6 +1,5 @@
 default_context:
   project_name: '{{ cookiecutter.project_name }}'
-  project_version: '{{ cookiecutter.project_version }}'
   project_slug: '{{ cookiecutter.project_slug }}'
   domain_main: '{{ cookiecutter.domain_main }}'
   domain_staging: '{{ cookiecutter.domain_staging }}'
