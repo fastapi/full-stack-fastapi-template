@@ -1,5 +1,7 @@
 FROM tiangolo/uvicorn-gunicorn-fastapi:python3.7
 
+WORKDIR /app/
+
 # Install Poetry
 RUN pip install --no-cache-dir poetry && poetry config virtualenvs.create false
 
@@ -15,7 +17,6 @@ RUN bash -c "if [ $env == 'dev' ] ; then pip install jupyterlab ; fi"
 EXPOSE 8888
 
 COPY ./app /app
-WORKDIR /app/
 
 ENV PYTHONPATH=/app
 
