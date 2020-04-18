@@ -1,18 +1,11 @@
-FROM alpine:3.11
-
-RUN apk update
-RUN apk add python3 curl
-RUN ln -s /usr/bin/python3 /usr/bin/python
-RUN curl -sSL https://raw.githubusercontent.com/sdispater/poetry/master/get-poetry.py | python
-
-ADD pyproject.toml .
-ADD poetry.lock .
-RUN $HOME/.poetry/bin/poetry export -f requirements.txt -o requirements.txt --dev
-
-
 FROM python:3.7
 
-RUN pip install requests pytest tenacity passlib[bcrypt] "fastapi>=0.47.0" email-validator psycopg2-binary SQLAlchemy
+# Install Poetry
+RUN pip install --no-cache-dir poetry && poetry config virtualenvs.create false
+
+# Copy poetry.lock* in case it doesn't exist in the repo
+COPY ./app/pyproject.toml ./app/poetry.lock* /app/
+RUN poetry install --no-dev --no-root
 
 # For development, Jupyter remote kernel, Hydrogen
 # Using inside the container:

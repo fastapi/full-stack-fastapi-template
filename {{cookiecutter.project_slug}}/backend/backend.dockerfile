@@ -1,20 +1,11 @@
-FROM alpine:3.11
-
-RUN apk update
-RUN apk add python3 curl
-RUN ln -s /usr/bin/python3 /usr/bin/python
-RUN curl -sSL https://raw.githubusercontent.com/sdispater/poetry/master/get-poetry.py | python
-
-ADD pyproject.toml .
-ADD poetry.lock .
-RUN if [ "$env" = "dev" ] ; \
-    then $HOME/.poetry/bin/poetry export -f requirements.txt -o requirements.txt --dev; \
-    else $HOME/.poetry/bin/poetry export -f requirements.txt -o requirements.txt ; \
-    fi
-
 FROM tiangolo/uvicorn-gunicorn-fastapi:python3.7
 
-RUN pip install celery~=4.3 passlib[bcrypt] tenacity requests emails "fastapi>=0.47.0" "uvicorn>=0.11.1" gunicorn pyjwt python-multipart email-validator jinja2 psycopg2-binary alembic SQLAlchemy
+# Install Poetry
+RUN pip install --no-cache-dir poetry && poetry config virtualenvs.create false
+
+# Copy poetry.lock* in case it doesn't exist in the repo
+COPY ./app/pyproject.toml ./app/poetry.lock* /app/
+RUN poetry install --no-dev --no-root
 
 # For development, Jupyter remote kernel, Hydrogen
 # Using inside the container:
