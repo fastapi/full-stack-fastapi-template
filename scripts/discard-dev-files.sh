@@ -1,3 +1,7 @@
+#! /usr/bin/env bash
+
+set -e
+
 rm -rf \{\{cookiecutter.project_slug\}\}/.git
 rm -rf \{\{cookiecutter.project_slug\}\}/backend/app/poetry.lock
 rm -rf \{\{cookiecutter.project_slug\}\}/frontend/node_modules
