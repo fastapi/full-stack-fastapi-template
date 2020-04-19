@@ -3,6 +3,8 @@
 # Exit in case of error
 set -e
 
+# Run this from the root of the project
+
 rm -rf ./testing-project
 
 cookiecutter --config-file ./testing-config.yml --no-input -f ./

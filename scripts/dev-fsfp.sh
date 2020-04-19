@@ -1,9 +1,12 @@
 #! /usr/bin/env bash
 
-# Run this script from outside the project, to generate a dev-fsfp project
-
 # Exit in case of error
 set -e
+
+if [ ! -d ./full-stack-fastapi-postgresql ] ; then
+    echo "Run this script from outside the project, to generate a sibling dev-fsfp project with independent git"
+    exit 1
+fi
 
 rm -rf ./dev-fsfp
 
