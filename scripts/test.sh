@@ -7,7 +7,7 @@ set -e
 
 rm -rf ./testing-project
 
-cookiecutter --config-file ./testing-config.yml --no-input -f ./
+cookiecutter --no-input -f ./ project_name="Testing Project"
 
 cd ./testing-project
 

@@ -10,4 +10,4 @@ fi
 
 rm -rf ./dev-fsfp
 
-cookiecutter --config-file ./full-stack-fastapi-postgresql/dev-fsfp-config.yml --no-input -f ./full-stack-fastapi-postgresql
+cookiecutter --no-input -f ./full-stack-fastapi-postgresql project_name="Dev FSFP"
