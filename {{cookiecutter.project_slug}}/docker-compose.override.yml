@@ -72,4 +72,5 @@ services:
 
 networks:
   traefik-public:
-    external: ${TRAEFIK_PUBLIC_NETWORK_IS_EXTERNAL-false}
+    # For local dev, don't expect an external Traefik network
+    external: false
