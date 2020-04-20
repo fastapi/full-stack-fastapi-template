@@ -3,20 +3,18 @@ from typing import Any, List
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 
-from app import crud
+from app import crud, models, schemas
 from app.api import deps
-from app.models.user import User as DBUser
-from app.schemas.item import Item, ItemCreate, ItemUpdate
 
 router = APIRouter()
 
 
-@router.get("/", response_model=List[Item])
+@router.get("/", response_model=List[schemas.Item])
 def read_items(
     db: Session = Depends(deps.get_db),
     skip: int = 0,
     limit: int = 100,
-    current_user: DBUser = Depends(deps.get_current_active_user),
+    current_user: models.User = Depends(deps.get_current_active_user),
 ) -> Any:
     """
     Retrieve items.
@@ -30,12 +28,12 @@ def read_items(
     return items
 
 
-@router.post("/", response_model=Item)
+@router.post("/", response_model=schemas.Item)
 def create_item(
     *,
     db: Session = Depends(deps.get_db),
-    item_in: ItemCreate,
-    current_user: DBUser = Depends(deps.get_current_active_user),
+    item_in: schemas.ItemCreate,
+    current_user: models.User = Depends(deps.get_current_active_user),
 ) -> Any:
     """
     Create new item.
@@ -46,13 +44,13 @@ def create_item(
     return item
 
 
-@router.put("/{id}", response_model=Item)
+@router.put("/{id}", response_model=schemas.Item)
 def update_item(
     *,
     db: Session = Depends(deps.get_db),
     id: int,
-    item_in: ItemUpdate,
-    current_user: DBUser = Depends(deps.get_current_active_user),
+    item_in: schemas.ItemUpdate,
+    current_user: models.User = Depends(deps.get_current_active_user),
 ) -> Any:
     """
     Update an item.
@@ -66,12 +64,12 @@ def update_item(
     return item
 
 
-@router.get("/{id}", response_model=Item)
+@router.get("/{id}", response_model=schemas.Item)
 def read_item(
     *,
     db: Session = Depends(deps.get_db),
     id: int,
-    current_user: DBUser = Depends(deps.get_current_active_user),
+    current_user: models.User = Depends(deps.get_current_active_user),
 ) -> Any:
     """
     Get item by ID.
@@ -84,12 +82,12 @@ def read_item(
     return item
 
 
-@router.delete("/{id}", response_model=Item)
+@router.delete("/{id}", response_model=schemas.Item)
 def delete_item(
     *,
     db: Session = Depends(deps.get_db),
     id: int,
-    current_user: DBUser = Depends(deps.get_current_active_user),
+    current_user: models.User = Depends(deps.get_current_active_user),
 ) -> Any:
     """
     Delete an item.
