@@ -15,4 +15,4 @@ def create_random_item(db: Session, *, owner_id: Optional[int] = None) -> models
     title = random_lower_string()
     description = random_lower_string()
     item_in = ItemCreate(title=title, description=description, id=id)
-    return crud.item.create_with_owner(db_session=db, obj_in=item_in, owner_id=owner_id)
+    return crud.item.create_with_owner(db=db, obj_in=item_in, owner_id=owner_id)

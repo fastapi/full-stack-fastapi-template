@@ -23,25 +23,25 @@ class CRUDBase(Generic[ModelType, CreateSchemaType, UpdateSchemaType]):
         """
         self.model = model
 
-    def get(self, db_session: Session, id: Any) -> Optional[ModelType]:
-        return db_session.query(self.model).filter(self.model.id == id).first()
+    def get(self, db: Session, id: Any) -> Optional[ModelType]:
+        return db.query(self.model).filter(self.model.id == id).first()
 
     def get_multi(
-        self, db_session: Session, *, skip: int = 0, limit: int = 100
+        self, db: Session, *, skip: int = 0, limit: int = 100
     ) -> List[ModelType]:
-        return db_session.query(self.model).offset(skip).limit(limit).all()
+        return db.query(self.model).offset(skip).limit(limit).all()
 
-    def create(self, db_session: Session, *, obj_in: CreateSchemaType) -> ModelType:
+    def create(self, db: Session, *, obj_in: CreateSchemaType) -> ModelType:
         obj_in_data = jsonable_encoder(obj_in)
         db_obj = self.model(**obj_in_data)  # type: ignore
-        db_session.add(db_obj)
-        db_session.commit()
-        db_session.refresh(db_obj)
+        db.add(db_obj)
+        db.commit()
+        db.refresh(db_obj)
         return db_obj
 
     def update(
         self,
-        db_session: Session,
+        db: Session,
         *,
         db_obj: ModelType,
         obj_in: Union[UpdateSchemaType, Dict[str, Any]]
@@ -54,13 +54,13 @@ class CRUDBase(Generic[ModelType, CreateSchemaType, UpdateSchemaType]):
         for field in obj_data:
             if field in update_data:
                 setattr(db_obj, field, update_data[field])
-        db_session.add(db_obj)
-        db_session.commit()
-        db_session.refresh(db_obj)
+        db.add(db_obj)
+        db.commit()
+        db.refresh(db_obj)
         return db_obj
 
-    def remove(self, db_session: Session, *, id: int) -> ModelType:
-        obj = db_session.query(self.model).get(id)
-        db_session.delete(obj)
-        db_session.commit()
+    def remove(self, db: Session, *, id: int) -> ModelType:
+        obj = db.query(self.model).get(id)
+        db.delete(obj)
+        db.commit()
         return obj
