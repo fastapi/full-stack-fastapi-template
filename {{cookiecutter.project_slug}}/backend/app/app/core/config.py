@@ -1,5 +1,5 @@
 import secrets
-from typing import List
+from typing import List, Optional
 
 from pydantic import AnyHttpUrl, BaseSettings, EmailStr, HttpUrl, PostgresDsn, validator
 
@@ -26,7 +26,7 @@ class Settings(BaseSettings):
         return v
 
     PROJECT_NAME: str
-    SENTRY_DSN: HttpUrl = None
+    SENTRY_DSN: Optional[HttpUrl] = None
 
     @validator("SENTRY_DSN", pre=True)
     def sentry_dsn_can_be_blank(cls, v):
@@ -38,7 +38,7 @@ class Settings(BaseSettings):
     POSTGRES_USER: str
     POSTGRES_PASSWORD: str
     POSTGRES_DB: str
-    SQLALCHEMY_DATABASE_URI: PostgresDsn = None
+    SQLALCHEMY_DATABASE_URI: Optional[PostgresDsn] = None
 
     @validator("SQLALCHEMY_DATABASE_URI", pre=True)
     def assemble_db_connection(cls, v, values):
@@ -53,12 +53,12 @@ class Settings(BaseSettings):
         )
 
     SMTP_TLS: bool = True
-    SMTP_PORT: int = None
-    SMTP_HOST: str = None
-    SMTP_USER: str = None
-    SMTP_PASSWORD: str = None
-    EMAILS_FROM_EMAIL: EmailStr = None
-    EMAILS_FROM_NAME: str = None
+    SMTP_PORT: Optional[int] = None
+    SMTP_HOST: Optional[str] = None
+    SMTP_USER: Optional[str] = None
+    SMTP_PASSWORD: Optional[str] = None
+    EMAILS_FROM_EMAIL: Optional[EmailStr] = None
+    EMAILS_FROM_NAME: Optional[str] = None
 
     @validator("EMAILS_FROM_NAME")
     def get_project_name(cls, v, values):
@@ -78,7 +78,7 @@ class Settings(BaseSettings):
             and values.get("EMAILS_FROM_EMAIL")
         )
 
-    EMAIL_TEST_USER: EmailStr = "test@example.com"
+    EMAIL_TEST_USER: EmailStr = "test@example.com"  # type: ignore
 
     FIRST_SUPERUSER: EmailStr
     FIRST_SUPERUSER_PASSWORD: str
