@@ -4,20 +4,20 @@ from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 
 from app import crud
-from app.api.utils.db import get_db
-from app.api.utils.security import get_current_active_user
 from app.models.user import User as DBUser
 from app.schemas.item import Item, ItemCreate, ItemUpdate
+
+from ... import deps
 
 router = APIRouter()
 
 
 @router.get("/", response_model=List[Item])
 def read_items(
-    db: Session = Depends(get_db),
+    db: Session = Depends(deps.get_db),
     skip: int = 0,
     limit: int = 100,
-    current_user: DBUser = Depends(get_current_active_user),
+    current_user: DBUser = Depends(deps.get_current_active_user),
 ):
     """
     Retrieve items.
@@ -34,9 +34,9 @@ def read_items(
 @router.post("/", response_model=Item)
 def create_item(
     *,
-    db: Session = Depends(get_db),
+    db: Session = Depends(deps.get_db),
     item_in: ItemCreate,
-    current_user: DBUser = Depends(get_current_active_user),
+    current_user: DBUser = Depends(deps.get_current_active_user),
 ):
     """
     Create new item.
@@ -50,10 +50,10 @@ def create_item(
 @router.put("/{id}", response_model=Item)
 def update_item(
     *,
-    db: Session = Depends(get_db),
+    db: Session = Depends(deps.get_db),
     id: int,
     item_in: ItemUpdate,
-    current_user: DBUser = Depends(get_current_active_user),
+    current_user: DBUser = Depends(deps.get_current_active_user),
 ):
     """
     Update an item.
@@ -70,9 +70,9 @@ def update_item(
 @router.get("/{id}", response_model=Item)
 def read_item(
     *,
-    db: Session = Depends(get_db),
+    db: Session = Depends(deps.get_db),
     id: int,
-    current_user: DBUser = Depends(get_current_active_user),
+    current_user: DBUser = Depends(deps.get_current_active_user),
 ):
     """
     Get item by ID.
@@ -88,9 +88,9 @@ def read_item(
 @router.delete("/{id}", response_model=Item)
 def delete_item(
     *,
-    db: Session = Depends(get_db),
+    db: Session = Depends(deps.get_db),
     id: int,
-    current_user: DBUser = Depends(get_current_active_user),
+    current_user: DBUser = Depends(deps.get_current_active_user),
 ):
     """
     Delete an item.

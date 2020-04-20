@@ -1,4 +1,4 @@
-from typing import List, Optional, Generic, TypeVar, Type
+from typing import Any, Dict, Generic, List, Optional, Type, TypeVar, Union
 
 from fastapi.encoders import jsonable_encoder
 from pydantic import BaseModel
@@ -23,7 +23,7 @@ class CRUDBase(Generic[ModelType, CreateSchemaType, UpdateSchemaType]):
         """
         self.model = model
 
-    def get(self, db_session: Session, id: int) -> Optional[ModelType]:
+    def get(self, db_session: Session, id: Any) -> Optional[ModelType]:
         return db_session.query(self.model).filter(self.model.id == id).first()
 
     def get_multi(self, db_session: Session, *, skip=0, limit=100) -> List[ModelType]:
@@ -31,17 +31,24 @@ class CRUDBase(Generic[ModelType, CreateSchemaType, UpdateSchemaType]):
 
     def create(self, db_session: Session, *, obj_in: CreateSchemaType) -> ModelType:
         obj_in_data = jsonable_encoder(obj_in)
-        db_obj = self.model(**obj_in_data)
+        db_obj = self.model(**obj_in_data)  # type: ignore
         db_session.add(db_obj)
         db_session.commit()
         db_session.refresh(db_obj)
         return db_obj
 
     def update(
-        self, db_session: Session, *, db_obj: ModelType, obj_in: UpdateSchemaType
+        self,
+        db_session: Session,
+        *,
+        db_obj: ModelType,
+        obj_in: Union[UpdateSchemaType, Dict[str, Any]]
     ) -> ModelType:
         obj_data = jsonable_encoder(db_obj)
-        update_data = obj_in.dict(exclude_unset=True)
+        if isinstance(obj_in, dict):
+            update_data = obj_in
+        else:
+            update_data = obj_in.dict(exclude_unset=True)
         for field in obj_data:
             if field in update_data:
                 setattr(db_obj, field, update_data[field])

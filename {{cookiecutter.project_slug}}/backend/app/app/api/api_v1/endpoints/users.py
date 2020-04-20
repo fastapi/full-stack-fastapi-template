@@ -6,22 +6,22 @@ from pydantic.networks import EmailStr
 from sqlalchemy.orm import Session
 
 from app import crud
-from app.api.utils.db import get_db
-from app.api.utils.security import get_current_active_superuser, get_current_active_user
 from app.core.config import settings
 from app.models.user import User as DBUser
 from app.schemas.user import User, UserCreate, UserUpdate
 from app.utils import send_new_account_email
+
+from ... import deps
 
 router = APIRouter()
 
 
 @router.get("/", response_model=List[User])
 def read_users(
-    db: Session = Depends(get_db),
+    db: Session = Depends(deps.get_db),
     skip: int = 0,
     limit: int = 100,
-    current_user: DBUser = Depends(get_current_active_superuser),
+    current_user: DBUser = Depends(deps.get_current_active_superuser),
 ):
     """
     Retrieve users.
@@ -33,9 +33,9 @@ def read_users(
 @router.post("/", response_model=User)
 def create_user(
     *,
-    db: Session = Depends(get_db),
+    db: Session = Depends(deps.get_db),
     user_in: UserCreate,
-    current_user: DBUser = Depends(get_current_active_superuser),
+    current_user: DBUser = Depends(deps.get_current_active_superuser),
 ):
     """
     Create new user.
@@ -57,11 +57,11 @@ def create_user(
 @router.put("/me", response_model=User)
 def update_user_me(
     *,
-    db: Session = Depends(get_db),
+    db: Session = Depends(deps.get_db),
     password: str = Body(None),
     full_name: str = Body(None),
     email: EmailStr = Body(None),
-    current_user: DBUser = Depends(get_current_active_user),
+    current_user: DBUser = Depends(deps.get_current_active_user),
 ):
     """
     Update own user.
@@ -80,8 +80,8 @@ def update_user_me(
 
 @router.get("/me", response_model=User)
 def read_user_me(
-    db: Session = Depends(get_db),
-    current_user: DBUser = Depends(get_current_active_user),
+    db: Session = Depends(deps.get_db),
+    current_user: DBUser = Depends(deps.get_current_active_user),
 ):
     """
     Get current user.
@@ -92,7 +92,7 @@ def read_user_me(
 @router.post("/open", response_model=User)
 def create_user_open(
     *,
-    db: Session = Depends(get_db),
+    db: Session = Depends(deps.get_db),
     password: str = Body(...),
     email: EmailStr = Body(...),
     full_name: str = Body(None),
@@ -119,8 +119,8 @@ def create_user_open(
 @router.get("/{user_id}", response_model=User)
 def read_user_by_id(
     user_id: int,
-    current_user: DBUser = Depends(get_current_active_user),
-    db: Session = Depends(get_db),
+    current_user: DBUser = Depends(deps.get_current_active_user),
+    db: Session = Depends(deps.get_db),
 ):
     """
     Get a specific user by id.
@@ -138,10 +138,10 @@ def read_user_by_id(
 @router.put("/{user_id}", response_model=User)
 def update_user(
     *,
-    db: Session = Depends(get_db),
+    db: Session = Depends(deps.get_db),
     user_id: int,
     user_in: UserUpdate,
-    current_user: DBUser = Depends(get_current_active_superuser),
+    current_user: DBUser = Depends(deps.get_current_active_superuser),
 ):
     """
     Update a user.
