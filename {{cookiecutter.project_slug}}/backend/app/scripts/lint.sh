@@ -1,8 +1,10 @@
 #!/usr/bin/env bash
 
+set -e
 set -x
 
-autoflake --remove-all-unused-imports --recursive --remove-unused-variables --in-place app --exclude=__init__.py
-isort --multi-line=3 --trailing-comma --force-grid-wrap=0 --combine-as --line-width 88 --recursive --apply app
-black app
+mypy app
+black app --check
+isort --multi-line=3 --trailing-comma --force-grid-wrap=0 --combine-as --line-width 88 --recursive --check-only app
 vulture app --min-confidence 70
+flake8 --max-line-length 88 --exclude=__init__.py
