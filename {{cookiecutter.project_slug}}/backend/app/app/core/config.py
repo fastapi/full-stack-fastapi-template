@@ -1,5 +1,5 @@
 import secrets
-from typing import List, Optional
+from typing import Any, Dict, List, Optional, Union
 
 from pydantic import AnyHttpUrl, BaseSettings, EmailStr, HttpUrl, PostgresDsn, validator
 
@@ -20,7 +20,7 @@ class Settings(BaseSettings):
     BACKEND_CORS_ORIGINS: List[AnyHttpUrl] = []
 
     @validator("BACKEND_CORS_ORIGINS", pre=True)
-    def assemble_cors_origins(cls, v):
+    def assemble_cors_origins(cls, v: Union[str, List[str]]) -> List[str]:
         if isinstance(v, str) and not v.startswith("["):
             return [i.strip() for i in v.split(",")]
         return v
@@ -29,7 +29,7 @@ class Settings(BaseSettings):
     SENTRY_DSN: Optional[HttpUrl] = None
 
     @validator("SENTRY_DSN", pre=True)
-    def sentry_dsn_can_be_blank(cls, v):
+    def sentry_dsn_can_be_blank(cls, v: str) -> Optional[str]:
         if len(v) == 0:
             return None
         return v
@@ -41,7 +41,7 @@ class Settings(BaseSettings):
     SQLALCHEMY_DATABASE_URI: Optional[PostgresDsn] = None
 
     @validator("SQLALCHEMY_DATABASE_URI", pre=True)
-    def assemble_db_connection(cls, v, values):
+    def assemble_db_connection(cls, v: Optional[str], values: Dict[str, Any]) -> Any:
         if isinstance(v, str):
             return v
         return PostgresDsn.build(
@@ -61,7 +61,7 @@ class Settings(BaseSettings):
     EMAILS_FROM_NAME: Optional[str] = None
 
     @validator("EMAILS_FROM_NAME")
-    def get_project_name(cls, v, values):
+    def get_project_name(cls, v: Optional[str], values: Dict[str, Any]) -> str:
         if not v:
             return values["PROJECT_NAME"]
         return v
@@ -71,7 +71,7 @@ class Settings(BaseSettings):
     EMAILS_ENABLED: bool = False
 
     @validator("EMAILS_ENABLED", pre=True)
-    def get_emails_enabled(cls, v, values):
+    def get_emails_enabled(cls, v: bool, values: Dict[str, Any]) -> bool:
         return bool(
             values.get("SMTP_HOST")
             and values.get("SMTP_PORT")
