@@ -3,13 +3,12 @@ from typing import Any
 from fastapi import APIRouter, Depends
 from pydantic.networks import EmailStr
 
+from app.api import deps
 from app.core.celery_app import celery_app
 from app.models.user import User as DBUser
 from app.schemas.msg import Msg
 from app.schemas.user import User  # noqa: F401
 from app.utils import send_test_email
-
-from ... import deps
 
 router = APIRouter()
 

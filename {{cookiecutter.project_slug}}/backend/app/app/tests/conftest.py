@@ -4,10 +4,9 @@ import pytest
 from sqlalchemy.orm import Session
 
 from app.core.config import settings
+from app.db.session import SessionLocal
 from app.tests.utils.user import authentication_token_from_email
 from app.tests.utils.utils import get_server_api, get_superuser_token_headers
-
-from ..db.session import SessionLocal
 
 
 @pytest.fixture(scope="session")

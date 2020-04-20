@@ -4,10 +4,9 @@ from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 
 from app import crud
+from app.api import deps
 from app.models.user import User as DBUser
 from app.schemas.item import Item, ItemCreate, ItemUpdate
-
-from ... import deps
 
 router = APIRouter()
 

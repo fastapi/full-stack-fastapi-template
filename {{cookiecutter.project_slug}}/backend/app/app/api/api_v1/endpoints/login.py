@@ -6,6 +6,8 @@ from fastapi.security import OAuth2PasswordRequestForm
 from sqlalchemy.orm import Session
 
 from app import crud
+from app.api import deps
+from app.core import security
 from app.core.config import settings
 from app.core.security import get_password_hash
 from app.models.user import User as DBUser
@@ -17,9 +19,6 @@ from app.utils import (
     send_reset_password_email,
     verify_password_reset_token,
 )
-
-from ....core import security
-from ... import deps
 
 router = APIRouter()
 
