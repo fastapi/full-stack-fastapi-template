@@ -1,4 +1,4 @@
-from typing import List
+from typing import Any, List
 
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
@@ -18,7 +18,7 @@ def read_items(
     skip: int = 0,
     limit: int = 100,
     current_user: DBUser = Depends(deps.get_current_active_user),
-):
+) -> Any:
     """
     Retrieve items.
     """
@@ -37,7 +37,7 @@ def create_item(
     db: Session = Depends(deps.get_db),
     item_in: ItemCreate,
     current_user: DBUser = Depends(deps.get_current_active_user),
-):
+) -> Any:
     """
     Create new item.
     """
@@ -54,7 +54,7 @@ def update_item(
     id: int,
     item_in: ItemUpdate,
     current_user: DBUser = Depends(deps.get_current_active_user),
-):
+) -> Any:
     """
     Update an item.
     """
@@ -73,7 +73,7 @@ def read_item(
     db: Session = Depends(deps.get_db),
     id: int,
     current_user: DBUser = Depends(deps.get_current_active_user),
-):
+) -> Any:
     """
     Get item by ID.
     """
@@ -91,7 +91,7 @@ def delete_item(
     db: Session = Depends(deps.get_db),
     id: int,
     current_user: DBUser = Depends(deps.get_current_active_user),
-):
+) -> Any:
     """
     Delete an item.
     """

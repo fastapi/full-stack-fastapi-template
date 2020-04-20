@@ -7,7 +7,7 @@ from app.tests.utils.user import create_random_user  # noqa: F401
 from app.tests.utils.utils import get_server_api
 
 
-def test_create_item(superuser_token_headers: dict, db: Session):
+def test_create_item(superuser_token_headers: dict, db: Session) -> None:
     server_api = get_server_api()
     data = {"title": "Foo", "description": "Fighters"}
     response = requests.post(
@@ -23,7 +23,7 @@ def test_create_item(superuser_token_headers: dict, db: Session):
     assert "owner_id" in content
 
 
-def test_read_item(superuser_token_headers: dict, db: Session):
+def test_read_item(superuser_token_headers: dict, db: Session) -> None:
     item = create_random_item(db)
     server_api = get_server_api()
     response = requests.get(

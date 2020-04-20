@@ -1,4 +1,4 @@
-from typing import List
+from typing import Any, List
 
 from fastapi import APIRouter, Body, Depends, HTTPException
 from fastapi.encoders import jsonable_encoder
@@ -22,7 +22,7 @@ def read_users(
     skip: int = 0,
     limit: int = 100,
     current_user: DBUser = Depends(deps.get_current_active_superuser),
-):
+) -> Any:
     """
     Retrieve users.
     """
@@ -36,7 +36,7 @@ def create_user(
     db: Session = Depends(deps.get_db),
     user_in: UserCreate,
     current_user: DBUser = Depends(deps.get_current_active_superuser),
-):
+) -> Any:
     """
     Create new user.
     """
@@ -62,7 +62,7 @@ def update_user_me(
     full_name: str = Body(None),
     email: EmailStr = Body(None),
     current_user: DBUser = Depends(deps.get_current_active_user),
-):
+) -> Any:
     """
     Update own user.
     """
@@ -82,7 +82,7 @@ def update_user_me(
 def read_user_me(
     db: Session = Depends(deps.get_db),
     current_user: DBUser = Depends(deps.get_current_active_user),
-):
+) -> Any:
     """
     Get current user.
     """
@@ -96,7 +96,7 @@ def create_user_open(
     password: str = Body(...),
     email: EmailStr = Body(...),
     full_name: str = Body(None),
-):
+) -> Any:
     """
     Create new user without the need to be logged in.
     """
@@ -121,7 +121,7 @@ def read_user_by_id(
     user_id: int,
     current_user: DBUser = Depends(deps.get_current_active_user),
     db: Session = Depends(deps.get_db),
-):
+) -> Any:
     """
     Get a specific user by id.
     """
@@ -142,7 +142,7 @@ def update_user(
     user_id: int,
     user_in: UserUpdate,
     current_user: DBUser = Depends(deps.get_current_active_superuser),
-):
+) -> Any:
     """
     Update a user.
     """

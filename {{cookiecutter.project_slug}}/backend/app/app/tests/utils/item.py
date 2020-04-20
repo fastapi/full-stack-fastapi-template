@@ -1,3 +1,5 @@
+from typing import Optional
+
 from sqlalchemy.orm import Session
 
 from app import crud
@@ -8,7 +10,7 @@ from app.tests.utils.utils import random_lower_string
 from ... import models
 
 
-def create_random_item(db: Session, *, owner_id: int = None) -> models.Item:
+def create_random_item(db: Session, *, owner_id: Optional[int] = None) -> models.Item:
     if owner_id is None:
         user = create_random_user(db)
         owner_id = user.id

@@ -1,7 +1,7 @@
 import logging
 from datetime import datetime, timedelta
 from pathlib import Path
-from typing import Optional
+from typing import Any, Dict, Optional
 
 import emails
 from emails.template import JinjaTemplate
@@ -11,7 +11,10 @@ from app.core.config import settings
 
 
 def send_email(
-    email_to: str, subject_template="", html_template="", environment={}
+    email_to: str,
+    subject_template: str = "",
+    html_template: str = "",
+    environment: Dict[str, Any] = {},
 ) -> None:
     assert settings.EMAILS_ENABLED, "no provided configuration for email variables"
     message = emails.Message(

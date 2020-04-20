@@ -1,13 +1,18 @@
+from typing import Dict
+
 import requests
 from sqlalchemy.orm import Session
 
 from app import crud
 from app.core.config import settings
+from app.models.user import User
 from app.schemas.user import UserCreate, UserUpdate
 from app.tests.utils.utils import get_server_api, random_email, random_lower_string
 
 
-def user_authentication_headers(server_api, email, password):
+def user_authentication_headers(
+    server_api: str, email: str, password: str
+) -> Dict[str, str]:
     data = {"username": email, "password": password}
 
     r = requests.post(
@@ -19,7 +24,7 @@ def user_authentication_headers(server_api, email, password):
     return headers
 
 
-def create_random_user(db: Session):
+def create_random_user(db: Session) -> User:
     email = random_email()
     password = random_lower_string()
     user_in = UserCreate(username=email, email=email, password=password)
@@ -27,7 +32,7 @@ def create_random_user(db: Session):
     return user
 
 
-def authentication_token_from_email(email: str, db: Session):
+def authentication_token_from_email(*, email: str, db: Session) -> Dict[str, str]:
     """
     Return a valid token for the user with given email.
 

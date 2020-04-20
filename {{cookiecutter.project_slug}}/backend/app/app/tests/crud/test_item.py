@@ -6,7 +6,7 @@ from app.tests.utils.user import create_random_user
 from app.tests.utils.utils import random_lower_string
 
 
-def test_create_item(db: Session):
+def test_create_item(db: Session) -> None:
     title = random_lower_string()
     description = random_lower_string()
     item_in = ItemCreate(title=title, description=description)
@@ -17,7 +17,7 @@ def test_create_item(db: Session):
     assert item.owner_id == user.id
 
 
-def test_get_item(db: Session):
+def test_get_item(db: Session) -> None:
     title = random_lower_string()
     description = random_lower_string()
     item_in = ItemCreate(title=title, description=description)
@@ -31,7 +31,7 @@ def test_get_item(db: Session):
     assert item.owner_id == stored_item.owner_id
 
 
-def test_update_item(db: Session):
+def test_update_item(db: Session) -> None:
     title = random_lower_string()
     description = random_lower_string()
     item_in = ItemCreate(title=title, description=description)
@@ -46,7 +46,7 @@ def test_update_item(db: Session):
     assert item.owner_id == item2.owner_id
 
 
-def test_delete_item(db: Session):
+def test_delete_item(db: Session) -> None:
     title = random_lower_string()
     description = random_lower_string()
     item_in = ItemCreate(title=title, description=description)

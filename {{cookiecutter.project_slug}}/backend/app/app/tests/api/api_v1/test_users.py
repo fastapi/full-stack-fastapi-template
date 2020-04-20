@@ -1,3 +1,5 @@
+from typing import Dict
+
 import requests
 from sqlalchemy.orm import Session
 
@@ -7,7 +9,7 @@ from app.schemas.user import UserCreate
 from app.tests.utils.utils import get_server_api, random_email, random_lower_string
 
 
-def test_get_users_superuser_me(superuser_token_headers):
+def test_get_users_superuser_me(superuser_token_headers: Dict[str, str]) -> None:
     server_api = get_server_api()
     r = requests.get(
         f"{server_api}{settings.API_V1_STR}/users/me", headers=superuser_token_headers
@@ -19,7 +21,7 @@ def test_get_users_superuser_me(superuser_token_headers):
     assert current_user["email"] == settings.FIRST_SUPERUSER
 
 
-def test_get_users_normal_user_me(normal_user_token_headers):
+def test_get_users_normal_user_me(normal_user_token_headers: Dict[str, str]) -> None:
     server_api = get_server_api()
     r = requests.get(
         f"{server_api}{settings.API_V1_STR}/users/me", headers=normal_user_token_headers
@@ -31,7 +33,7 @@ def test_get_users_normal_user_me(normal_user_token_headers):
     assert current_user["email"] == settings.EMAIL_TEST_USER
 
 
-def test_create_user_new_email(superuser_token_headers: dict, db: Session):
+def test_create_user_new_email(superuser_token_headers: dict, db: Session) -> None:
     server_api = get_server_api()
     username = random_email()
     password = random_lower_string()
@@ -48,7 +50,7 @@ def test_create_user_new_email(superuser_token_headers: dict, db: Session):
     assert user.email == created_user["email"]
 
 
-def test_get_existing_user(superuser_token_headers: dict, db: Session):
+def test_get_existing_user(superuser_token_headers: dict, db: Session) -> None:
     server_api = get_server_api()
     username = random_email()
     password = random_lower_string()
@@ -66,7 +68,9 @@ def test_get_existing_user(superuser_token_headers: dict, db: Session):
     assert existing_user.email == api_user["email"]
 
 
-def test_create_user_existing_username(superuser_token_headers: dict, db: Session):
+def test_create_user_existing_username(
+    superuser_token_headers: dict, db: Session
+) -> None:
     server_api = get_server_api()
     username = random_email()
     # username = email
@@ -84,7 +88,7 @@ def test_create_user_existing_username(superuser_token_headers: dict, db: Sessio
     assert "_id" not in created_user
 
 
-def test_create_user_by_normal_user(normal_user_token_headers):
+def test_create_user_by_normal_user(normal_user_token_headers: Dict[str, str]) -> None:
     server_api = get_server_api()
     username = random_email()
     password = random_lower_string()
@@ -97,7 +101,7 @@ def test_create_user_by_normal_user(normal_user_token_headers):
     assert r.status_code == 400
 
 
-def test_retrieve_users(superuser_token_headers: dict, db: Session):
+def test_retrieve_users(superuser_token_headers: dict, db: Session) -> None:
     server_api = get_server_api()
     username = random_email()
     password = random_lower_string()

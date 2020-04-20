@@ -18,7 +18,7 @@ wait_seconds = 1
     before=before_log(logger, logging.INFO),
     after=after_log(logger, logging.WARN),
 )
-def init():
+def init() -> None:
     try:
         # Try to create session to check if DB is awake
         db = SessionLocal()
@@ -30,7 +30,7 @@ def init():
         raise e
 
 
-def main():
+def main() -> None:
     logger.info("Initializing service")
     init()
     logger.info("Service finished initializing")

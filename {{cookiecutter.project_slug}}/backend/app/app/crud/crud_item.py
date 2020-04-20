@@ -20,7 +20,7 @@ class CRUDItem(CRUDBase[Item, ItemCreate, ItemUpdate]):
         return db_obj
 
     def get_multi_by_owner(
-        self, db_session: Session, *, owner_id: int, skip=0, limit=100
+        self, db_session: Session, *, owner_id: int, skip: int = 0, limit: int = 100
     ) -> List[Item]:
         return (
             db_session.query(self.model)
