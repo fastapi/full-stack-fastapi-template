@@ -1,19 +1,17 @@
-import Vue from 'vue';
-import Vuex, { StoreOptions } from 'vuex';
-
-import { mainModule } from './main';
-import { State } from './state';
-import { adminModule } from './admin';
+import Vue from "vue";
+import Vuex, { Store } from "vuex";
+import { initializeStores, modules } from "@/utils/store-accessor";
 
 Vue.use(Vuex);
 
-const storeOptions: StoreOptions<State> = {
-  modules: {
-    main: mainModule,
-    admin: adminModule,
-  },
-};
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+const initializer = (store: Store<any>) => initializeStores(store);
 
-export const store = new Vuex.Store<State>(storeOptions);
+export const plugins = [initializer];
 
-export default store;
+export * from "@/utils/store-accessor";
+
+export default new Store({
+  plugins,
+  modules,
+});

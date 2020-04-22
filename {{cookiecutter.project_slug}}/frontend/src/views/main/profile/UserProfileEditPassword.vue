@@ -1,86 +1,121 @@
 <template>
   <v-container fluid>
-    <v-card class="ma-3 pa-3">
-      <v-card-title primary-title>
-        <div class="headline primary--text">Set Password</div>
-      </v-card-title>
-      <v-card-text>
-        <template>
-          <div class="my-3">
-            <div class="subheading secondary--text text--lighten-2">User</div>
-            <div class="title primary--text text--darken-2" v-if="userProfile.full_name">{{userProfile.full_name}}</div>
-            <div class="title primary--text text--darken-2" v-else>{{userProfile.email}}</div>
-          </div>
-          <v-form ref="form">
-            <v-text-field 
-              type="password"
-              ref="password"
-              label="Password"
-              data-vv-name="password"
-              data-vv-delay="100"
-              data-vv-rules="required"
-              v-validate="'required'"
-              v-model="password1"
-              :error-messages="errors.first('password')">
-            </v-text-field>
-            <v-text-field
-              type="password"
-              label="Confirm Password"
-              data-vv-name="password_confirmation"
-              data-vv-delay="100"
-              data-vv-rules="required|confirmed:$password"
-              data-vv-as="password"
-              v-validate="'required|confirmed:password'"
-              v-model="password2"
-              :error-messages="errors.first('password_confirmation')">
-            </v-text-field>
-          </v-form>
-        </template>
-      </v-card-text>
-      <v-card-actions>
-        <v-spacer></v-spacer>
-        <v-btn @click="cancel">Cancel</v-btn>
-        <v-btn @click="reset">Reset</v-btn>
-        <v-btn @click="submit" :disabled="!valid">Save</v-btn>
-      </v-card-actions>
-    </v-card>
+    <validation-observer ref="observer" v-slot="{ invalid }">
+      <form @submit.prevent="onSubmit" @reset.prevent="onReset">
+        <v-card class="ma-3 pa-3">
+          <v-card-title primary-title>
+            <div class="headline primary--text">Set Password</div>
+          </v-card-title>
+          <v-card-text>
+            <template>
+              <div class="my-3">
+                <div class="subheading secondary--text text--lighten-2">User</div>
+                <div
+                  v-if="userProfile.full_name"
+                  class="title primary--text text--darken-2"
+                >
+                  {{ userProfile.full_name }}
+                </div>
+                <div v-else class="title primary--text text--darken-2">
+                  {{ userProfile.email }}
+                </div>
+              </div>
+              <!-- password -->
+              <validation-provider
+                v-slot="{ errors }"
+                :debounce="100"
+                name="Password"
+                vid="password1"
+                rules="required"
+              >
+                <v-text-field
+                  v-model="password1"
+                  type="password"
+                  label="Password"
+                  :error-messages="errors"
+                ></v-text-field>
+              </validation-provider>
+
+              <!-- password confirmation -->
+              <validation-provider
+                v-slot="{ errors }"
+                :debounce="100"
+                name="Password confirmation"
+                vid="password2"
+                rules="required|confirmed:password1"
+              >
+                <v-text-field
+                  v-model="password2"
+                  type="password"
+                  label="Confirm Password"
+                  :error-messages="errors"
+                ></v-text-field>
+              </validation-provider>
+            </template>
+          </v-card-text>
+          <v-card-actions>
+            <v-spacer></v-spacer>
+            <v-btn @click="cancel">Cancel</v-btn>
+            <v-btn type="reset">Reset</v-btn>
+            <v-btn type="submit" :disabled="invalid">Save</v-btn>
+          </v-card-actions>
+        </v-card>
+      </form>
+    </validation-observer>
   </v-container>
 </template>
 
 <script lang="ts">
-import { Component, Vue } from 'vue-property-decorator';
-import { Store } from 'vuex';
-import { IUserProfileUpdate } from '@/interfaces';
-import { readUserProfile } from '@/store/main/getters';
-import { dispatchUpdateUserProfile } from '@/store/main/actions';
+  import { Component, Vue } from "vue-property-decorator";
+  import { IUserProfileUpdate } from "@/interfaces";
+  import { mainStore } from "@/store";
+  import { required, confirmed, email } from "vee-validate/dist/rules";
+  import { ValidationProvider, ValidationObserver, extend } from "vee-validate";
 
-@Component
-export default class UserProfileEdit extends Vue {
-  public valid = true;
-  public password1 = '';
-  public password2 = '';
+  // register validation rules
+  extend("required", { ...required, message: "{_field_} can not be empty" });
+  extend("confirmed", { ...confirmed, message: "Passwords do not match" });
+  extend("email", { ...email, message: "Invalid email address" });
 
-  get userProfile() {
-    return readUserProfile(this.$store);
-  }
+  @Component({
+    components: {
+      ValidationObserver,
+      ValidationProvider,
+    },
+  })
+  export default class UserProfileEdit extends Vue {
+    $refs!: {
+      observer: InstanceType<typeof ValidationObserver>;
+    };
 
-  public reset() {
-    this.password1 = '';
-    this.password2 = '';
-    this.$validator.reset();
-  }
+    password1 = "";
+    password2 = "";
 
-  public cancel() {
-    this.$router.back();
-  }
+    get userProfile() {
+      return mainStore.userProfile;
+    }
 
-  public async submit() {
-    if (await this.$validator.validateAll()) {
+    onReset() {
+      this.password1 = "";
+      this.password2 = "";
+      this.$refs.observer.reset();
+    }
+
+    cancel() {
+      this.$router.back();
+    }
+
+    async onSubmit() {
+      const success = await this.$refs.observer.validate();
+
+      if (!success) {
+        return;
+      }
+
       const updatedProfile: IUserProfileUpdate = {};
       updatedProfile.password = this.password1;
-      await dispatchUpdateUserProfile(this.$store, updatedProfile);
-      this.$router.push('/main/profile');
+      await mainStore.updateUserProfile(updatedProfile);
+      this.$router.push("/main/profile");
     }
   }
-}
 </script>

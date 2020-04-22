@@ -1,84 +1,132 @@
 <template>
   <v-content>
-    <v-container fluid fill-height>
-      <v-layout align-center justify-center>
-        <v-flex xs12 sm8 md4>
-          <v-card class="elevation-12">
-            <v-toolbar dark color="primary">
-              <v-toolbar-title>{{appName}} - Reset Password</v-toolbar-title>
-            </v-toolbar>
-            <v-card-text>
-              <p class="subheading">Enter your new password below</p>
-              <v-form @keyup.enter="submit" v-model="valid" ref="form" @submit.prevent="" lazy-validation>
-                <v-text-field type="password" ref="password" label="Password" data-vv-name="password" data-vv-delay="100" data-vv-rules="required" v-validate="'required'" v-model="password1" :error-messages="errors.first('password')">
-                </v-text-field>
-                <v-text-field type="password" label="Confirm Password" data-vv-name="password_confirmation" data-vv-delay="100" data-vv-rules="required|confirmed:$password" data-vv-as="password" v-validate="'required|confirmed:password'" v-model="password2" :error-messages="errors.first('password_confirmation')">
-                </v-text-field>
-              </v-form>
-            </v-card-text>
-            <v-card-actions>
-              <v-spacer></v-spacer>
-              <v-btn @click="cancel">Cancel</v-btn>
-              <v-btn @click="reset">Clear</v-btn>
-              <v-btn @click="submit" :disabled="!valid">Save</v-btn>
-            </v-card-actions>
-          </v-card>
-        </v-flex>
-      </v-layout>
+    <v-container fluid class="fill-height">
+      <v-row align="center" justify="center">
+        <v-col cols="12" sm="8" md="4">
+          <validation-observer ref="observer" v-slot="{ invalid }">
+            <form @submit.prevent="onSubmit" @reset.prevent="onReset">
+              <v-card class="elevation-12">
+                <v-toolbar dark color="primary">
+                  <v-toolbar-title>{{ appName }} - Reset Password</v-toolbar-title>
+                </v-toolbar>
+                <v-card-text>
+                  <p class="subheading">Enter your new password below</p>
+                </v-card-text>
+
+                <!-- password -->
+                <validation-provider
+                  v-slot="{ errors }"
+                  :debounce="100"
+                  name="Password"
+                  vid="password1"
+                  rules="required"
+                >
+                  <v-text-field
+                    v-model="password1"
+                    type="password"
+                    label="Password"
+                    :error-messages="errors"
+                  ></v-text-field>
+                </validation-provider>
+
+                <!-- password confirmation -->
+                <validation-provider
+                  v-slot="{ errors }"
+                  debounce="100"
+                  name="Password confirmation"
+                  vid="password2"
+                  rules="required|confirmed:password1"
+                >
+                  <v-text-field
+                    v-model="password2"
+                    type="password"
+                    label="Confirm Password"
+                    :error-messages="errors"
+                  ></v-text-field>
+                </validation-provider>
+
+                <v-card-actions>
+                  <v-spacer></v-spacer>
+                  <v-btn @click="cancel">Cancel</v-btn>
+                  <v-btn type="reset">Clear</v-btn>
+                  <v-btn type="submit" :disabled="invalid">Save</v-btn>
+                </v-card-actions>
+              </v-card>
+            </form>
+          </validation-observer>
+        </v-col>
+      </v-row>
     </v-container>
   </v-content>
 </template>
 
 <script lang="ts">
-import { Component, Vue } from 'vue-property-decorator';
-import { Store } from 'vuex';
-import { IUserProfileUpdate } from '@/interfaces';
-import { appName } from '@/env';
-import { commitAddNotification } from '@/store/main/mutations';
-import { dispatchResetPassword } from '@/store/main/actions';
+  import { Component, Vue } from "vue-property-decorator";
+  import { appName } from "@/env";
+  import { mainStore } from "@/store";
+  import { required, confirmed } from "vee-validate/dist/rules";
+  import { ValidationProvider, ValidationObserver, extend } from "vee-validate";
 
-@Component
-export default class UserProfileEdit extends Vue {
-  public appName = appName;
-  public valid = true;
-  public password1 = '';
-  public password2 = '';
+  // register validation rules
+  extend("required", { ...required, message: "{_field_} can not be empty" });
+  extend("confirmed", { ...confirmed, message: "Passwords do not match" });
 
-  public mounted() {
-    this.checkToken();
-  }
+  @Component({
+    components: {
+      ValidationObserver,
+      ValidationProvider,
+    },
+  })
+  export default class UserProfileEdit extends Vue {
+    $refs!: {
+      observer: InstanceType<typeof ValidationObserver>;
+    };
 
-  public reset() {
-    this.password1 = '';
-    this.password2 = '';
-    this.$validator.reset();
-  }
+    appName = appName;
+    valid = true;
+    password1 = "";
+    password2 = "";
 
-  public cancel() {
-    this.$router.push('/');
-  }
-
-  public checkToken() {
-    const token = (this.$router.currentRoute.query.token as string);
-    if (!token) {
-      commitAddNotification(this.$store, {
-        content: 'No token provided in the URL, start a new password recovery',
-        color: 'error',
-      });
-      this.$router.push('/recover-password');
-    } else {
-      return token;
+    mounted() {
+      this.checkToken();
     }
-  }
 
-  public async submit() {
-    if (await this.$validator.validateAll()) {
+    onReset() {
+      this.password1 = "";
+      this.password2 = "";
+      this.$refs.observer.reset();
+    }
+
+    cancel() {
+      this.$router.push("/");
+    }
+
+    checkToken() {
+      const token = this.$router.currentRoute.query.token as string;
+      if (!token) {
+        mainStore.addNotification({
+          content: "No token provided in the URL, start a new password recovery",
+          color: "error",
+        });
+        this.$router.push("/recover-password");
+      } else {
+        return token;
+      }
+    }
+
+    async onSubmit() {
+      const success = await this.$refs.observer.validate();
+
+      if (!success) {
+        return;
+      }
+
       const token = this.checkToken();
+
       if (token) {
-        await dispatchResetPassword(this.$store, { token, password: this.password1 });
-        this.$router.push('/');
+        await mainStore.resetPassword({ token, password: this.password1 });
+        this.$router.push("/");
       }
     }
   }
-}
 </script>
