@@ -1,7 +1,7 @@
-from typing import Optional
+from typing import Optional, List
 
 from pydantic import BaseModel, EmailStr
-
+from app.schemas import Item
 
 # Shared properties
 class UserBase(BaseModel):
@@ -31,7 +31,7 @@ class UserInDBBase(UserBase):
 
 # Additional properties to return via API
 class User(UserInDBBase):
-    pass
+    items: List[Item] = []
 
 
 # Additional properties stored in DB
