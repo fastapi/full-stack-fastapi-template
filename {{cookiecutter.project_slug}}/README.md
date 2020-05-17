@@ -74,8 +74,6 @@ Modify or add SQLAlchemy models in `./backend/app/app/models/`, Pydantic schemas
 
 Add and modify tasks to the Celery worker in `./backend/app/app/worker.py`.
 
-If you need to install any additional package to the worker, add it to the file `./backend/app/celeryworker.dockerfile`.
-
 ### Docker Compose Override
 
 During development, you can change Docker Compose settings that will only affect the local development environment, in the file `docker-compose.override.yml`.
