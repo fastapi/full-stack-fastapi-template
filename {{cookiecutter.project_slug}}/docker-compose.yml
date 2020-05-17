@@ -125,7 +125,7 @@ services:
         - traefik.tags=${TRAEFIK_TAG}
   
   celeryworker:
-    image: '${DOCKER_IMAGE_CELERYWORKER}:${TAG-latest}'
+    image: '${DOCKER_IMAGE_BACKEND}:${TAG-latest}'
     depends_on:
       - db
       - queue
@@ -136,9 +136,11 @@ services:
       - SERVER_HOST=https://${DOMAIN}
       # Allow explicit env var override for tests
       - SMTP_HOST=${SMTP_HOST}
+    command:
+      bash /app/worker-start.sh
     build:
       context: ./backend
-      dockerfile: celeryworker.dockerfile
+      dockerfile: backend.dockerfile
       args:
         INSTALL_DEV: ${INSTALL_DEV-false}
   

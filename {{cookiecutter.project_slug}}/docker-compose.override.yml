@@ -56,7 +56,7 @@ services:
       - SERVER_HOST=http://${DOMAIN}
     build:
       context: ./backend
-      dockerfile: celeryworker.dockerfile
+      dockerfile: backend.dockerfile
       args:
         INSTALL_DEV: ${INSTALL_DEV-true}
         INSTALL_JUPYTER: ${INSTALL_JUPYTER-true}
