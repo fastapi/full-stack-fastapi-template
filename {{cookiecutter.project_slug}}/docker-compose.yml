@@ -97,7 +97,7 @@ services:
         - traefik.constraint-label=${TRAEFIK_PUBLIC_TAG}
         - traefik.http.routers.${STACK_NAME}-pgadmin-http.rule=Host(`pgadmin.${DOMAIN}`)
         - traefik.http.routers.${STACK_NAME}-pgadmin-http.entrypoints=http
-        - traefik.http.routers.${STACK_NAME}-pgadmin-http.middlewares=https-redirect
+        - traefik.http.routers.${STACK_NAME}-pgadmin-http.middlewares=${STACK_NAME}-https-redirect
         - traefik.http.routers.${STACK_NAME}-pgadmin-https.rule=Host(`pgadmin.${DOMAIN}`)
         - traefik.http.routers.${STACK_NAME}-pgadmin-https.entrypoints=https
         - traefik.http.routers.${STACK_NAME}-pgadmin-https.tls=true
@@ -130,7 +130,7 @@ services:
         - traefik.constraint-label=${TRAEFIK_PUBLIC_TAG}
         - traefik.http.routers.${STACK_NAME}-flower-http.rule=Host(`flower.${DOMAIN}`)
         - traefik.http.routers.${STACK_NAME}-flower-http.entrypoints=http
-        - traefik.http.routers.${STACK_NAME}-flower-http.middlewares=https-redirect
+        - traefik.http.routers.${STACK_NAME}-flower-http.middlewares=${STACK_NAME}-https-redirect
         - traefik.http.routers.${STACK_NAME}-flower-https.rule=Host(`flower.${DOMAIN}`)
         - traefik.http.routers.${STACK_NAME}-flower-https.entrypoints=https
         - traefik.http.routers.${STACK_NAME}-flower-https.tls=true
