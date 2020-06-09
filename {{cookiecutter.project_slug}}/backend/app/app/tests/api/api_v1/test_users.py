@@ -47,6 +47,25 @@ def test_create_user_new_email(
     assert user.email == created_user["email"]
 
 
+def test_create_user_open(client: TestClient, db: Session
+) -> None:
+    username = random_email()
+    password = random_lower_string()
+    data = {"email": username, "password": password}
+
+    # Open the registration (default=False)
+    settings.USERS_OPEN_REGISTRATION = True
+
+    r = client.post(
+        f"{settings.API_V1_STR}/users/open", json=data,
+    )
+    assert 200 <= r.status_code < 300
+    created_user = r.json()
+    user = crud.user.get_by_email(db, email=username)
+    assert user
+    assert user.email == created_user["email"]
+
+
 def test_get_existing_user(
     client: TestClient, superuser_token_headers: dict, db: Session
 ) -> None:
