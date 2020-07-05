@@ -7,7 +7,7 @@ services:
       - ${TRAEFIK_PUBLIC_NETWORK?Variable not set}
       - default
     volumes:
-      - /var/run/docker.sock:/var/run/docker.sock
+      - /var/run/docker.sock:/var/run/docker.sock:ro
     command:
       # Enable Docker in Traefik, so that it reads labels from Docker services
       - --providers.docker
