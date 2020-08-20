@@ -40,7 +40,7 @@ def create_user(
     user = crud.user.get_by_email(db, email=user_in.email)
     if user:
         raise HTTPException(
-            status_code=400,
+            status_code=409,
             detail="The user with this username already exists in the system.",
         )
     user = crud.user.create(db, obj_in=user_in)
@@ -105,7 +105,7 @@ def create_user_open(
     user = crud.user.get_by_email(db, email=email)
     if user:
         raise HTTPException(
-            status_code=400,
+            status_code=409,
             detail="The user with this username already exists in the system",
         )
     user_in = schemas.UserCreate(password=password, email=email, full_name=full_name)
@@ -127,7 +127,7 @@ def read_user_by_id(
         return user
     if not crud.user.is_superuser(current_user):
         raise HTTPException(
-            status_code=400, detail="The user doesn't have enough privileges"
+            status_code=401, detail="The user doesn't have enough privileges"
         )
     return user
 
