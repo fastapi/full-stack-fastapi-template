@@ -147,7 +147,7 @@ export default class Main extends Vue {
     await dispatchUserLogOut(this.$store);
   }
 
-  data() {
+  private data() {
     return {
       drawerLinks: [
         { icon: 'web', text: 'Dashboard', route: '/main/dashboard'},
@@ -161,8 +161,8 @@ export default class Main extends Vue {
       ],
       menuLinks: [
         { icon: 'person', text: 'Profile', route: '/main/profile/view'},
-      ]
-    }
+      ],
+    };
   }
 }
 </script>
