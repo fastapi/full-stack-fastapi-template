@@ -157,7 +157,7 @@ export default class Main extends Vue {
       ],
       drawerAdminLinks: [
         { icon: 'group', text: 'Manage Users', route: '/main/admin/users/all'},
-        { icon: 'person_add', text: 'Create User', route: '/main/admin/users/crate'},
+        { icon: 'person_add', text: 'Create User', route: '/main/admin/users/create'},
       ],
       menuLinks: [
         { icon: 'person', text: 'Profile', route: '/main/profile/view'},
