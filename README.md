@@ -139,11 +139,8 @@ Please refer to <a href="https://dockerswarm.rocks" target="_blank">DockerSwarm.
 
 An easiest way to do that is to launch your service in docker container along with postgre and all its dependencies to get rid of dependencies installation problems so if you'd like to debug backend separately (like for adding your custom routes) you'll need to do following steps to get things work
 
-1. You'll need to have built backend image locally, so do
 
-> docker build -f backend.dockerfile . -t backend 
-
-2. Now you need to have postgres container, so put somewhere on your machine this and call it 'stack.yml':
+1. Put that handy stack.yml somewhere
 ```yml
 version: '3.1'
 services:
@@ -169,26 +166,43 @@ services:
     networks:
       - default
 
+  queue:
+    image: rabbitmq:3
+
   backend:
     image: backend
     ports:
       - 10088:80
-    links:
+    depends_on:
       - db
+    environment:
+      - POSTGRES_USER=example
+      - POSTGRES_PASSWORD=example
+      - POSTGRES_SERVER=db:5432
+      - POSTGRES_DB=example
+    build:
+      context: .
+      dockerfile: backend.dockerfile
     networks:
       - default
+
+  worker:
+    image: worker
+    depends_on:
+      - db
+      - queue
+#    env_file:
+#      - .env
+    environment:
+      - SERVER_NAME=127.0.0.1:10088
+      - SERVER_HOST=http://127.0.0.1:10088
+      - SMTP_HOST=mail.overbooru.world
+    build:
+      context: .
+      dockerfile: celeryworker.dockerfile
 ```
 
-3. Now set environment variables at your host machine
-
-```
-POSTGRES_USER = "example"
-POSTGRES_PASSWORD = "example"
-POSTGRES_SERVER = "db:5432"
-POSTGRES_DB = "example"
-```
-
-4. Next go to backend/app/app/core/config.py and pass settings:
+2. Next go to backend/app/app/core/config.py and pass settings:
 
 ```py
 kwargs = {
@@ -209,11 +223,11 @@ kwargs = {
 settings = Settings(**kwargs)
 ```
 
-5. You need to rebuild backend image and compose up your stack, so you do:
+3. Run
 
-> docker build -f backend.dockerfile . -t backend && docker-compose -f stack.yml up --force-recreate --build
+> docker-compose -f stack.yml up --force-recreate --build
 
-6. Check if swagger there http://0.0.0.0:10088/docs - backend must be running.
+4. Check if swagger there http://0.0.0.0:10088/docs - backend must be running.
 
 ## More details
 
