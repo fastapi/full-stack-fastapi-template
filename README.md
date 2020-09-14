@@ -202,25 +202,31 @@ services:
       dockerfile: celeryworker.dockerfile
 ```
 
-2. Next go to backend/app/app/core/config.py and pass settings:
+2. Next go to backend/app/app/core/config.py, checkout all settings you'll need to pass and put them right into previous yml's backend section
+should be something like
 
-```py
-kwargs = {
-    'SERVER_NAME': '',
-    'SERVER_HOST': 'http://127.0.0.1:10088',
-
-    'PROJECT_NAME': 'CookieBack',
-
-    ...
-
-    'POSTGRES_SERVER': 'example',
-    'POSTGRES_USER': 'example',
-    'POSTGRES_PASSWORD': 'example',
-    'POSTGRES_DB': 'example',
-    'SQLALCHEMY_DATABASE_URI': 'postgres://example:example@db/example',
-    ...}
-
-settings = Settings(**kwargs)
+```yml
+backend:
+    image: backend
+    ports:
+      - 10088:80
+    depends_on:
+      - db
+    environment:
+      - SERVER_NAME='',
+      - SERVER_HOST=http://127.0.0.1:10088,
+      - PROJECT_NAME=CookieBack,
+      ...
+      - POSTGRES_USER=example
+      - POSTGRES_PASSWORD=example
+      - POSTGRES_SERVER=db:5432
+      - POSTGRES_DB=example
+      ...
+    build:
+      context: .
+      dockerfile: backend.dockerfile
+    networks:
+      - default
 ```
 
 3. Run
