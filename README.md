@@ -25,7 +25,7 @@ Generate a backend and frontend stack using Python, including interactive API do
 * Full **Docker** integration (Docker based).
 * Docker Swarm Mode deployment.
 * **Docker Compose** integration and optimization for local development.
-* **Production ready** Python web server using Uvicorn and Gunicorn.
+* **Production ready** Python web server using Unicorn and Gunicorn.
 * Python <a href="https://github.com/tiangolo/fastapi" class="external-link" target="_blank">**FastAPI**</a> backend:
     * **Fast**: Very high performance, on par with **NodeJS** and **Go** (thanks to Starlette and Pydantic).
     * **Intuitive**: Great editor support. <abbr title="also known as auto-complete, autocompletion, IntelliSense">Completion</abbr> everywhere. Less time debugging.
