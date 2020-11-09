@@ -285,7 +285,7 @@ If you used the default CORS enabled domains while generating the project, `loca
 
 To configure it in your stack, follow the section **Change the development "domain"** below, using the domain `local.dockertoolbox.tiangolo.com`.
 
-After performing those steps you should be able to open: http://local.dockertoolbox.tiangolo.com and it will be server by your stack in your Docker Toolbox virtual machine.
+After performing those steps you should be able to open: http://local.dockertoolbox.tiangolo.com and it will be served by your stack in your Docker Toolbox virtual machine.
 
 Check all the corresponding available URLs in the section at the end.
 
@@ -299,7 +299,7 @@ If you used the default CORS enabled domains while generating the project, `loca
 
 To configure it in your stack, follow the section **Change the development "domain"** below, using the domain `localhost.tiangolo.com`.
 
-After performing those steps you should be able to open: http://localhost.tiangolo.com and it will be server by your stack in `localhost`.
+After performing those steps you should be able to open: http://localhost.tiangolo.com and it will be served by your stack in `localhost`.
 
 Check all the corresponding available URLs in the section at the end.
 
@@ -307,7 +307,7 @@ Check all the corresponding available URLs in the section at the end.
 
 If you are running Docker in an IP address different than `127.0.0.1` (`localhost`) and `192.168.99.100` (the default of Docker Toolbox), you will need to perform some additional steps. That will be the case if you are running a custom Virtual Machine, a secondary Docker Toolbox or your Docker is located in a different machine in your network.
 
-In that case, you will need to use a fake local domain (`dev.{{cookiecutter.domain_main}}`) and make your computer think that the domain is is served by the custom IP (e.g. `192.168.99.150`).
+In that case, you will need to use a fake local domain (`dev.{{cookiecutter.domain_main}}`) and make your computer think that the domain is served by the custom IP (e.g. `192.168.99.150`).
 
 If you used the default CORS enabled domains, `dev.{{cookiecutter.domain_main}}` was configured to be allowed. If you want a custom one, you need to add it to the list in the variable `BACKEND_CORS_ORIGINS` in the `.env` file.
 
@@ -627,7 +627,7 @@ If you change your mind and, for example, want to deploy everything to a differe
 
 Building and pushing is done with the `docker-compose.yml` file, using the `docker-compose` command. The file `docker-compose.yml` uses the file `.env` with default environment variables. And the scripts set some additional environment variables as well.
 
-The deployment requires using `docker stack` instead of `docker-swarm`, and it can't read environment variables or `.env` files. Because of that, the `deploy.sh` script generates a file `docker-stack.yml` with the configurations from `docker-compose.yml` and injecting the environment variables in it. And then uses it to deploy the stack.
+The deployment requires using `docker stack` instead of `docker-swarm`, and it can't read environment variables or `.env` files. Because of that, the `deploy.sh` script generates a file `docker-stack.yml` with the configurations from `docker-compose.yml` and injects the environment variables in it. It then uses the generated file to deploy the stack.
 
 You can do the process by hand based on those same scripts if you wanted. The general structure is like this:
 
