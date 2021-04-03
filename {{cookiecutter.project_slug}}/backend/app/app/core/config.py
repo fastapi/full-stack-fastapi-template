@@ -4,6 +4,10 @@ from typing import Any, Dict, List, Optional, Union
 from pydantic import AnyHttpUrl, BaseSettings, EmailStr, HttpUrl, PostgresDsn, validator
 
 
+class AsyncPostgresDsn(PostgresDsn):
+    allowed_schemes = {"postgres+asyncpg", "postgresql+asyncpg"}
+
+
 class Settings(BaseSettings):
     API_V1_STR: str = "/api/v1"
     SECRET_KEY: str = secrets.token_urlsafe(32)
@@ -37,14 +41,14 @@ class Settings(BaseSettings):
     POSTGRES_USER: str
     POSTGRES_PASSWORD: str
     POSTGRES_DB: str
-    SQLALCHEMY_DATABASE_URI: Optional[PostgresDsn] = None
+    SQLALCHEMY_DATABASE_URI: Optional[AsyncPostgresDsn] = None
 
     @validator("SQLALCHEMY_DATABASE_URI", pre=True)
     def assemble_db_connection(cls, v: Optional[str], values: Dict[str, Any]) -> Any:
         if isinstance(v, str):
             return v
-        return PostgresDsn.build(
-            scheme="postgresql",
+        return AsyncPostgresDsn.build(
+            scheme="postgresql+asyncpg",
             user=values.get("POSTGRES_USER"),
             password=values.get("POSTGRES_PASSWORD"),
             host=values.get("POSTGRES_SERVER"),
