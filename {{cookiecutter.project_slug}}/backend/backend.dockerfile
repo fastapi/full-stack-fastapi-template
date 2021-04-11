@@ -10,6 +10,8 @@ RUN curl -sSL https://raw.githubusercontent.com/python-poetry/poetry/master/get-
 
 # Copy poetry.lock* in case it doesn't exist in the repo
 COPY ./app/pyproject.toml ./app/poetry.lock* /app/
+# Update pip to make sure installation of python packages isn't broken
+RUN pip install -U pip
 
 # Allow installing dev dependencies to run tests
 ARG INSTALL_DEV=false
