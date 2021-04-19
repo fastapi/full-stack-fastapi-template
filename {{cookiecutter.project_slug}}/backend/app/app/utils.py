@@ -22,7 +22,7 @@ def send_email(
         html=JinjaTemplate(html_template),
         mail_from=(settings.EMAILS_FROM_NAME, settings.EMAILS_FROM_EMAIL),
     )
-    smtp_options = {"host": settings.SMTP_HOST, "port": settings.SMTP_PORT}
+    smtp_options = {"host": settings.SMTP_HOST, "port": settings.SMTP_PORT, "ssl": settings.SMTP_SSL}
     if settings.SMTP_TLS:
         smtp_options["tls"] = True
     if settings.SMTP_USER:

@@ -52,6 +52,7 @@ class Settings(BaseSettings):
         )
 
     SMTP_TLS: bool = True
+    SMTP_SSL: bool = True
     SMTP_PORT: Optional[int] = None
     SMTP_HOST: Optional[str] = None
     SMTP_USER: Optional[str] = None
