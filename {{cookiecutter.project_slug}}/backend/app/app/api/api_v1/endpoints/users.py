@@ -5,6 +5,7 @@ from fastapi.encoders import jsonable_encoder
 from pydantic.networks import EmailStr
 from sqlalchemy.orm import Session
 from sqlalchemy import exc
+
 from app import crud, models, schemas
 from app.api import deps
 from app.core.config import settings
