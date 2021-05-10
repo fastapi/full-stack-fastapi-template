@@ -1,14 +1,14 @@
 from typing import Dict
 
 import pytest
-from fastapi.testclient import TestClient
+from httpx import AsyncClient
 
 from app.core.config import settings
 
 pytestmark = pytest.mark.asyncio
 
 
-async def test_get_access_token(client: TestClient) -> None:
+async def test_get_access_token(client: AsyncClient) -> None:
     login_data = {
         "username": settings.FIRST_SUPERUSER,
         "password": settings.FIRST_SUPERUSER_PASSWORD,
@@ -21,7 +21,7 @@ async def test_get_access_token(client: TestClient) -> None:
 
 
 async def test_use_access_token(
-    client: TestClient, superuser_token_headers: Dict[str, str]
+    client: AsyncClient, superuser_token_headers: Dict[str, str]
 ) -> None:
     r = await client.post(
         f"{settings.API_V1_STR}/login/test-token", headers=superuser_token_headers,

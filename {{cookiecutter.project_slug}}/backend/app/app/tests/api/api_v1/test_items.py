@@ -1,5 +1,5 @@
 import pytest
-from fastapi.testclient import TestClient
+from httpx import AsyncClient
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.config import settings
@@ -9,7 +9,7 @@ pytestmark = pytest.mark.asyncio
 
 
 async def test_create_item(
-    client: TestClient, superuser_token_headers: dict, db: AsyncSession
+    client: AsyncClient, superuser_token_headers: dict, db: AsyncSession
 ) -> None:
     data = {"title": "Foo", "description": "Fighters"}
     response = await client.post(
@@ -24,7 +24,7 @@ async def test_create_item(
 
 
 async def test_read_item(
-    client: TestClient, superuser_token_headers: dict, db: AsyncSession
+    client: AsyncClient, superuser_token_headers: dict, db: AsyncSession
 ) -> None:
     item = await create_random_item(db)
     response = await client.get(

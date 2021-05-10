@@ -1,6 +1,6 @@
 from typing import Dict
 
-from fastapi.testclient import TestClient
+from httpx import AsyncClient
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app import crud
@@ -11,7 +11,7 @@ from app.tests.utils.utils import random_email, random_lower_string
 
 
 async def user_authentication_headers(
-    *, client: TestClient, email: str, password: str
+    *, client: AsyncClient, email: str, password: str
 ) -> Dict[str, str]:
     data = {"username": email, "password": password}
 
@@ -31,7 +31,7 @@ async def create_random_user(db: AsyncSession) -> User:
 
 
 async def authentication_token_from_email(
-    *, client: TestClient, email: str, db: AsyncSession
+    *, client: AsyncClient, email: str, db: AsyncSession
 ) -> Dict[str, str]:
     """
     Return a valid token for the user with given email.
