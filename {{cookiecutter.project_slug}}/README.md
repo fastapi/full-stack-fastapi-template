@@ -70,11 +70,17 @@ $ poetry shell
 
 Next, open your editor at `./backend/app/` (instead of the project root: `./`), so that you see an `./app/` directory with your code inside. That way, your editor will be able to find all the imports, etc. Make sure your editor uses the environment you just created with Poetry.
 
-Modify or add SQLAlchemy models in `./backend/app/app/models/`, Pydantic schemas in `./backend/app/app/schemas/`, API endpoints in `./backend/app/app/api/`, CRUD (Create, Read, Update, Delete) utils in `./backend/app/app/crud/`. The easiest might be to copy the ones for Items (models, endpoints, and CRUD utils) and update them to your needs.
+#### Making Changes
+It might be easiest to use "Items" (models, schemas, endpoints, and CRUD utils) as a template to copy/duplicate and modify to your needs. The below is a checklist to follow when making changes:
 
-Add and modify tasks to the Celery worker in `./backend/app/app/worker.py`.
-
-If you need to install any additional package to the worker, add it to the file `./backend/app/celeryworker.dockerfile`.
+* Modify or add:
+    * SQLAlchemy models in `./backend/app/app/models/`
+    * Pydantic schemas in `./backend/app/app/schemas/`
+    * API endpoints in `./backend/app/app/api/`
+    * CRUD (Create, Read, Update, Delete) utils in `./backend/app/app/crud/`. 
+* If you make any changes to the db models, don't forget to update the database revision using alembic. Read [here](#migrations) for instructions.
+* Add and modify tasks to the Celery worker in `./backend/app/app/worker.py`.
+* If you need to install any additional package to the worker, add it to the file `./backend/app/celeryworker.dockerfile`.
 
 ### Docker Compose Override
 
