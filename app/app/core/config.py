@@ -85,10 +85,10 @@ class Settings(BaseSettings):
             and values.get("EMAILS_FROM_EMAIL")
         )
 
-    EMAIL_TEST_USER: EmailStr = "test@example.com"  # type: ignore
-    FIRST_SUPERUSER: EmailStr
-    FIRST_SUPERUSER_PASSWORD: str
-    USERS_OPEN_REGISTRATION: bool = False"""
+    EMAIL_TEST_USER: EmailStr = "test@example.com"  # type: ignore"""
+    FIRST_SUPERUSER: EmailStr = "max@deintv.de"
+    FIRST_SUPERUSER_PASSWORD: str = "123456"
+    USERS_OPEN_REGISTRATION: bool = False
 
     class Config:
         case_sensitive = True
