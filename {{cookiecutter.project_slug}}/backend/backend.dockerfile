@@ -1,15 +1,9 @@
-FROM tiangolo/uvicorn-gunicorn-fastapi:python3.7
-
-WORKDIR /app/
-
-# Install Poetry
-RUN curl -sSL https://raw.githubusercontent.com/python-poetry/poetry/master/get-poetry.py | POETRY_HOME=/opt/poetry python && \
-    cd /usr/local/bin && \
-    ln -s /opt/poetry/bin/poetry && \
-    poetry config virtualenvs.create false
+FROM ghcr.io/br3ndonland/inboard:fastapi-python3.9
 
 # Copy poetry.lock* in case it doesn't exist in the repo
 COPY ./app/pyproject.toml ./app/poetry.lock* /app/
+
+WORKDIR /app/
 
 # Allow installing dev dependencies to run tests
 ARG INSTALL_DEV=false
@@ -21,5 +15,6 @@ RUN bash -c "if [ $INSTALL_DEV == 'true' ] ; then poetry install --no-root ; els
 ARG INSTALL_JUPYTER=false
 RUN bash -c "if [ $INSTALL_JUPYTER == 'true' ] ; then pip install jupyterlab ; fi"
 
-COPY ./app /app
-ENV PYTHONPATH=/app
+ARG BACKEND_APP_MODULE=app.main:app BACKEND_PRE_START_PATH=/app/prestart.sh
+ENV APP_MODULE=${BACKEND_APP_MODULE} PRE_START_PATH=${BACKEND_PRE_START_PATH}
+COPY ./app/ /app/
