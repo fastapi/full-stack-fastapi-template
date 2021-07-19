@@ -1,5 +1,5 @@
 .vscode
 testing-project
 .mypy_cache
-poetry.lock
+# poetry.lock
 dev-link/
