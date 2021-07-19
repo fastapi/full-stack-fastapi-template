@@ -15,6 +15,7 @@ RUN bash -c "if [ $INSTALL_DEV == 'true' ] ; then poetry install --no-root ; els
 ARG INSTALL_JUPYTER=false
 RUN bash -c "if [ $INSTALL_JUPYTER == 'true' ] ; then pip install jupyterlab ; fi"
 
-ARG BACKEND_APP_MODULE=app.main:app BACKEND_PRE_START_PATH=/app/prestart.sh
+ARG BACKEND_APP_MODULE=app.main:app
+ARG BACKEND_PRE_START_PATH=/app/prestart.sh
 ENV APP_MODULE=${BACKEND_APP_MODULE} PRE_START_PATH=${BACKEND_PRE_START_PATH}
 COPY ./app/ /app/
