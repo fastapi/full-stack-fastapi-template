@@ -49,6 +49,8 @@ services:
       args:
         BACKEND_APP_MODULE: ${BACKEND_APP_MODULE-app.main:app}
         BACKEND_PRE_START_PATH: ${BACKEND_PRE_START_PATH-/app/prestart.sh}
+        BACKEND_PROCESS_MANAGER: ${BACKEND_PROCESS_MANAGER-uvicorn}
+        BACKEND_WITH_RELOAD: ${BACKEND_WITH_RELOAD-true}
         INSTALL_DEV: ${INSTALL_DEV-true}
         INSTALL_JUPYTER: ${INSTALL_JUPYTER-true}
     labels:

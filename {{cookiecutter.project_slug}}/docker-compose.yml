@@ -153,6 +153,8 @@ services:
       args:
         BACKEND_APP_MODULE: ${BACKEND_APP_MODULE-app.main:app}
         BACKEND_PRE_START_PATH: ${BACKEND_PRE_START_PATH-/app/prestart.sh}
+        BACKEND_PROCESS_MANAGER: ${BACKEND_PROCESS_MANAGER-gunicorn}
+        BACKEND_WITH_RELOAD: ${BACKEND_WITH_RELOAD-false}
         INSTALL_DEV: ${INSTALL_DEV-false}
     deploy:
       labels:
