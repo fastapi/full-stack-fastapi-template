@@ -105,7 +105,6 @@ services:
 
   neo4j:
     image: neo4j
-    platform: linux/amd64
     networks:
       - ${TRAEFIK_PUBLIC_NETWORK?Variable not set}
       - default
