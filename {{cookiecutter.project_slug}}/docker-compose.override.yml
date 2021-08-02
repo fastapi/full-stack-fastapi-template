@@ -31,6 +31,10 @@ services:
     ports:
       - "5050:5050"
 
+  neo4j:
+    environment:
+      - NEO4J_AUTH=none
+
   flower:
     ports:
       - "5555:5555"

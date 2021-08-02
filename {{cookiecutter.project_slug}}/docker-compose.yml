@@ -103,6 +103,47 @@ services:
         - traefik.http.routers.${STACK_NAME?Variable not set}-pgadmin-https.tls.certresolver=le
         - traefik.http.services.${STACK_NAME?Variable not set}-pgadmin.loadbalancer.server.port=5050
 
+  neo4j:
+    image: neo4j
+    networks:
+      - ${TRAEFIK_PUBLIC_NETWORK?Variable not set}
+      - default
+    ports:
+      - "6477:6477"
+      - "7474:7474"
+      - "7687:7687"
+    volumes:
+      - app-neo4j-data:/data
+      - app-neo4j-plugins:/plugins
+    env_file:
+      - .env
+    environment:
+      - NEO4J_ACCEPT_LICENSE_AGREEMENT=yes
+      - NEO4J_AUTH=neo4j/neo4j
+      - NEO4J_dbms_default__advertised__address=0.0.0.0
+      - NEO4J_dbms_mode=SINGLE
+    deploy:
+      labels:
+        - traefik.enable=true
+        - traefik.docker.network=${TRAEFIK_PUBLIC_NETWORK?Variable not set}
+        - traefik.constraint-label=${TRAEFIK_PUBLIC_TAG?Variable not set}
+        - traefik.http.routers.${STACK_NAME?Variable not set}-neo4j-http.rule=Host(`neo4j.${DOMAIN?Variable not set}`)
+        - traefik.http.routers.${STACK_NAME?Variable not set}-neo4j-http.entrypoints=http
+        - traefik.http.routers.${STACK_NAME?Variable not set}-neo4j-http.middlewares=${STACK_NAME?Variable not set}-https-redirect
+        - traefik.http.routers.${STACK_NAME?Variable not set}-neo4j-https.rule=Host(`neo4j.${DOMAIN?Variable not set}`)
+        - traefik.http.routers.${STACK_NAME?Variable not set}-neo4j-https.entrypoints=https
+        - traefik.http.routers.${STACK_NAME?Variable not set}-neo4j-https.tls=true
+        - traefik.http.routers.${STACK_NAME?Variable not set}-neo4j-https.tls.certresolver=le
+        - traefik.http.services.${STACK_NAME?Variable not set}-neo4j.loadbalancer.server.port=7474
+      replicas: 1
+      resources:
+        limits:
+          memory: 1024M
+        reservations:
+          memory: 500M
+      restart_policy:
+        condition: on-failure
+
   queue:
     image: rabbitmq:3
     # Using the below image instead is required to enable the "Broker" tab in the flower UI:
@@ -196,6 +237,8 @@ services:
 
 volumes:
   app-db-data:
+  app-neo4j-data:
+  app-neo4j-plugins:
 
 networks:
   traefik-public:
