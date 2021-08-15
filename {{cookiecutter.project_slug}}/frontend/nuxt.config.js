@@ -1,3 +1,16 @@
+// NuxtJS config: https://nuxtjs.org/docs/2.x/directory-structure/nuxt-config
+
+// Environment-specific domain configuration
+let envName = process.env.VUE_APP_ENV
+let envApiUrl = ""
+if (envName === "production") {
+  envApiUrl = `https://${process.env.VUE_APP_DOMAIN_PROD}`
+} else if (envName === "staging") {
+  envApiUrl = `https://${process.env.VUE_APP_DOMAIN_STAG}`
+} else {
+  envApiUrl = `http://${process.env.VUE_APP_DOMAIN_DEV}`
+}
+
 export default {
   // Global page headers: https://go.nuxtjs.dev/config-head
   head: {
@@ -14,7 +27,7 @@ export default {
   env: {
     baseUrl: process.env.BASE_URL || "http://localhost:3000",
     appName: process.env.VUE_APP_NAME,
-    apiUrl: `http://${process.env.VUE_APP_DOMAIN}`,
+    apiUrl: envApiUrl,
   },
 
   // Global CSS: https://go.nuxtjs.dev/config-css
