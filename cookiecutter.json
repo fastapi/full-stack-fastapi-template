@@ -36,8 +36,9 @@
     "docker_image_frontend": "{{cookiecutter.docker_image_prefix}}frontend",
 
     "_copy_without_render": [
-        "frontend/src/**/*.html",
-        "frontend/src/**/*.vue",
+        "frontend/**/*.html",
+        "frontend/**/*.vue",
+        "frontend/.nuxt/*",
         "frontend/node_modules/*",
         "backend/app/app/email-templates/**"
     ]
