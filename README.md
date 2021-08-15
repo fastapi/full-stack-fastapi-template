@@ -44,20 +44,15 @@ Generate a backend and frontend stack using Python, including interactive API do
 * REST backend tests based on **Pytest**, integrated with Docker, so you can test the full API interaction, independent on the database. As it runs in Docker, it can build a new data store from scratch each time (so you can use ElasticSearch, MongoDB, CouchDB, or whatever you want, and just test that the API works).
 * Easy Python integration with **Jupyter Kernels** for remote or in-Docker development with extensions like Atom Hydrogen or Visual Studio Code Jupyter.
 * **Vue** frontend:
-    * Generated with Vue CLI.
     * **JWT Authentication** handling.
     * Login view.
     * After login, main dashboard view.
     * Main dashboard with user creation and edition.
     * Self user edition.
-    * **Vuex**.
-    * **Vue-router**.
-    * **Vuetify** for beautiful material design components.
     * **TypeScript**.
-    * Docker server based on **Nginx** (configured to play nicely with Vue-router).
+    * Docker server
     * Docker multi-stage building, so you don't need to save or commit compiled code.
-    * Frontend tests ran at build time (can be disabled too).
-    * Made as modular as possible, so it works out of the box, but you can re-generate with Vue CLI or create it as you need, and re-use what you want.
+    * Made as modular as possible, so it works out of the box, but you can re-generate as you need, and re-use what you want.
     * It's also easy to remove it if you have an API-only app, check the instructions in the generated `README.md`.
 * **PGAdmin** for PostgreSQL database, you can modify it to use PHPMyAdmin and MySQL easily.
 * **Flower** for Celery jobs monitoring.
