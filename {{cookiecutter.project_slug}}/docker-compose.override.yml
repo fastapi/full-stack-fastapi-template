@@ -78,10 +78,11 @@ services:
         INSTALL_JUPYTER: ${INSTALL_JUPYTER-true}
 
   frontend:
+    volumes:
+      - ./frontend:/app
     build:
       context: ./frontend
-      args:
-        FRONTEND_ENV: dev
+      target: run-dev
     labels:
       - traefik.enable=true
       - traefik.constraint-label-stack=${TRAEFIK_TAG?Variable not set}
