@@ -26,5 +26,5 @@ default_context:
   docker_image_backend: '{{ cookiecutter.docker_image_backend }}'
   docker_image_celeryworker: '{{ cookiecutter.docker_image_celeryworker }}'
   docker_image_frontend: '{{ cookiecutter.docker_image_frontend }}'
-  _copy_without_render: [frontend/src/**/*.html, frontend/src/**/*.vue, frontend/node_modules/*, backend/app/app/email-templates/**]
+  _copy_without_render: [frontend/**/*.html, frontend/**/*.vue, frontend/.nuxt/*, frontend/node_modules/*, backend/app/app/email-templates/**]
   _template: ./

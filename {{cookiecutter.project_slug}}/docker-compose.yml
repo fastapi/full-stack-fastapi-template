@@ -224,10 +224,16 @@ services:
 
   frontend:
     image: "${DOCKER_IMAGE_FRONTEND?Variable not set}:${TAG-latest}"
+    env_file:
+      - .env
+      - ./frontend/.env
+    environment:
+      - NUXT_HOST=0.0.0.0
+      - NUXT_PORT=80
     build:
       context: ./frontend
       args:
-        FRONTEND_ENV: ${FRONTEND_ENV-production}
+        NUXT_VERSION: ${NUXT_VERSION:-^2.15}
     deploy:
       labels:
         - traefik.enable=true

@@ -1,28 +1,28 @@
-# Stage 0, "build-stage", based on Node.js, to build and compile the frontend
-FROM tiangolo/node-frontend:10 as build-stage
-
+FROM node:lts AS build
+ENV NODE_ENV=development NUXT_HOST=${NUXT_HOST:-0.0.0.0} NUXT_PORT=${NUXT_PORT:-3000} NUXT_TELEMETRY_DISABLED=1
+COPY . /app
 WORKDIR /app
+RUN yarn install --frozen-lockfile --network-timeout 100000 --non-interactive
+RUN yarn build --standalone
+EXPOSE ${NUXT_PORT}
 
-COPY package*.json /app/
+FROM build AS run-dev
+ENTRYPOINT ["yarn"]
+CMD ["dev"]
 
-RUN npm install
+FROM build AS run-start
+ENV NODE_ENV=production
+ENTRYPOINT ["yarn"]
+CMD ["start"]
 
-COPY ./ /app/
-
-ARG FRONTEND_ENV=production
-
-ENV VUE_APP_ENV=${FRONTEND_ENV}
-
-# Comment out the next line to disable tests
-RUN npm run test:unit
-
-RUN npm run build
-
-
-# Stage 1, based on Nginx, to have only the compiled app, ready for production with Nginx
-FROM nginx:1.15
-
-COPY --from=build-stage /app/dist/ /usr/share/nginx/html
-
-COPY --from=build-stage /nginx.conf /etc/nginx/conf.d/default.conf
-COPY ./nginx-backend-not-found.conf /etc/nginx/extra-conf.d/backend-not-found.conf
+FROM node:lts-alpine AS run-minimal
+ARG NUXT_VERSION=^2.15
+ENV NODE_ENV=production NUXT_HOST=${NUXT_HOST:-0.0.0.0} NUXT_PORT=${NUXT_PORT:-3000} NUXT_TELEMETRY_DISABLED=1
+WORKDIR /app
+RUN yarn add @nuxtjs/axios @nuxt/content @nuxtjs/pwa nuxt-i18n nuxt-start@${NUXT_VERSION}
+COPY --from=build /app/.nuxt ./.nuxt
+COPY --from=build /app/content ./content
+COPY --from=build /app/static ./static
+COPY --from=build /app/nuxt.config* /app/api.ts /app/utils.ts ./
+ENTRYPOINT ["yarn"]
+CMD ["nuxt-start"]
