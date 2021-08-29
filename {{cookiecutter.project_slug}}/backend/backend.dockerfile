@@ -1,4 +1,4 @@
-FROM ghcr.io/br3ndonland/inboard:fastapi-python3.9
+FROM ghcr.io/br3ndonland/inboard:fastapi-0.10.4-python3.9
 
 # Copy poetry.lock* in case it doesn't exist in the repo
 COPY ./app/pyproject.toml ./app/poetry.lock* /app/
