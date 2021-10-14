@@ -621,6 +621,8 @@ bash ./scripts/deploy.sh
 
 ---
 
+* If you use a private docker registry, dont forget create a service for Swarm (like in [this example](https://docs.docker.com/engine/swarm/services/#create-a-service-using-an-image-on-a-private-registry)) to pass registry login token from your local client to the swarm nodes.
+
 If you change your mind and, for example, want to deploy everything to a different domain, you only have to change the `DOMAIN` environment variable in the previous commands. If you wanted to add a different version / environment of your stack, like "`preproduction`", you would only have to set `TAG=preproduction` in your command and update these other environment variables accordingly. And it would all work, that way you could have different environments and deployments of the same app in the same cluster.
 
 #### Deployment Technical Details
