@@ -638,7 +638,7 @@ TAG=${TAG?Variable not set} \
 # Set the environment variable FRONTEND_ENV to the same value passed to this script with
 # a default value of "production" if nothing else was passed
 FRONTEND_ENV=${FRONTEND_ENV-production?Variable not set} \
-# The actual comand that does the work: docker-compose
+# The actual command that does the work: docker-compose
 docker-compose \
 # Pass the file that should be used, setting explicitly docker-compose.yml avoids the
 # default of also using docker-compose.override.yml
