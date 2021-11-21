@@ -8,4 +8,5 @@ jobs:
       - uses: actions/setup-python@v2
       - run: pip install --upgrade pip
       - run: pip install cookiecutter
+      - run: chmod +x ./scripts/test.sh
       - run: ./scripts/test.sh
