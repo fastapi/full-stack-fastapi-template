@@ -1,0 +1,11 @@
+name: test_cookiecutter
+on: [pull_request, push]
+jobs:
+  test_cookiecutter:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - uses: actions/setup-python@v2
+      - run: pip install --upgrade pip
+      - run: pip install cookiecutter
+      - run: ./scripts/test.sh
