@@ -1,4 +1,4 @@
-from typing import Dict, Generator
+from typing import Dict, Generator, AsyncGenerator
 import asyncio
 import pytest
 from websockets.client import Connect
@@ -27,7 +27,7 @@ class WsTestClient(Connect):
 
 
 @pytest.fixture(scope="module")
-async def async_get_db(event_loop) -> Generator:
+async def async_get_db(event_loop) -> AsyncGenerator:
     async with async_session() as session:
         yield session
 
@@ -36,7 +36,7 @@ def ws_client() -> WsTestClient:
     return WsTestClient
 
 @pytest.fixture
-async def client(event_loop) -> Generator:
+async def client(event_loop) -> AsyncGenerator:
     async with AsyncClient(app=app, base_url="http://test") as c:
         yield c
 
