@@ -90,6 +90,8 @@ services:
       - db
     env_file:
       - .env
+    volumes:
+      - pgadmin-data:/var/lib/pgadmin
     deploy:
       labels:
         - traefik.enable=true
@@ -112,7 +114,7 @@ services:
     # You also have to change the flower command
   
   flower:
-    image: mher/flower
+    image: mher/flower:0.9.7
     networks:
       - ${TRAEFIK_PUBLIC_NETWORK?Variable not set}
       - default
@@ -193,6 +195,7 @@ services:
 
 volumes:
   app-db-data:
+  pgadmin-data:
 
 networks:
   traefik-public:
