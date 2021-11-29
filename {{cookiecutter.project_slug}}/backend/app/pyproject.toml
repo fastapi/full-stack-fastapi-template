@@ -6,7 +6,7 @@ authors = ["Admin <admin@example.com>"]
 
 [tool.poetry.dependencies]
 python = "^3.7"
-uvicorn = "^0.11.3"
+uvicorn = {extras = ["standard"], version = "^0.12"}
 fastapi = "^0.54.1"
 python-multipart = "^0.0.5"
 email-validator = "^1.0.5"
