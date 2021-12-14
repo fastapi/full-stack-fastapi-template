@@ -34,8 +34,8 @@ def get_url():
     user = os.getenv("POSTGRES_USER", "postgres")
     password = os.getenv("POSTGRES_PASSWORD", "")
     server = os.getenv("POSTGRES_SERVER", "db")
-    TEST_MODE = os.getenv("TEST_MODE", False)
-    if TEST_MODE:
+    TEST_MODE = os.getenv("TEST_MODE", 'False')
+    if TEST_MODE == 'True':
         db = "postgres"
     else:
         db = os.getenv("POSTGRES_DB", "app")
