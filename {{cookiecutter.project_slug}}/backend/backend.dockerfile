@@ -2,6 +2,7 @@ FROM tiangolo/uvicorn-gunicorn-fastapi:python3.7
 
 WORKDIR /app/
 
+# Setup Pypi
 ARG PYPI=pypi.doubanio.com
 ENV TZ=Asia/Shanghai
 
@@ -11,30 +12,27 @@ RUN echo "[global]" > /etc/pip.conf && \
     python -m pip install -U pip && \
     python -m pip install wheel
 
-# Install poetry
-RUN curl -sSL https://gitee.com/mirrors/poetry/raw/master/get-poetry.py -o get-poetry.py
+# Install Poetry
+ARG POETRY_CN_URL=https://gitee.com/featureoverload/poetry
+ARG POETRY_VERSION=1.1.11
 
-# ARG HTTP_PROXY=hostname:port
-# RUN export http_proxy="http://${HTTP_PROXY}" && https_proxy="http://${HTTP_PROXY}"
-
-RUN cat get-poetry.py | POETRY_HOME=/opt/poetry POETRY_VERSION=1.1.12 python
+# download
+RUN curl -sSL ${POETRY_CN_URL}/raw/master/get-poetry.py -o get-poetry.py
+### [alternative] download manually, and copy to /tmp to build image
+RUN curl -sSL ${POETRY_CN_URL}/attach_files/931744/download/poetry-1.1.1-linux.tar.gz -o /tmp/poetry-1.1.1-linux.tar.gz
+# install
+RUN POETRY_HOME=/opt/poetry python get-poetry.py --file /tmp/poetry-1.1.1-linux.tar.gz
 RUN cd /usr/local/bin && ln -s /opt/poetry/bin/poetry
 RUN POETRY_HOME=/opt/poetry poetry config virtualenvs.create false
 
-# RUN unset http_proxy && unset https_proxy
-
+# Install Image Environment
 # Copy poetry.lock* in case it doesn't exist in the repo
 COPY ./app/pyproject.toml ./app/poetry.lock* /app/
-
-# # Make pip cache  # TODO: not test yet
-# COPY ./.pip-cache /.pip-cache
-# RUN echo "download-cache = /.pip-cache" >> /etc/pip.conf
-# RUN export PIP_CACHE_DIR="/.pip-cache"
 
 # Allow installing dev dependencies to run tests
 RUN POETRY_HOME=/opt/poetry poetry config repositories.pypi https://${PYPI}/simple
 ARG INSTALL_DEV=false
-RUN bash -c "if [ $INSTALL_DEV == 'true' ] ; then poetry install --no-root ; else poetry install --no-root --no-dev ; fi"
+RUN bash -c "if [ $INSTALL_DEV == 'true' ] ; then poetry install -vvv --no-root ; else poetry install -vvv --no-root --no-dev ; fi"
 
 # For development, Jupyter remote kernel, Hydrogen
 # Using inside the container:

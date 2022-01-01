@@ -65,13 +65,13 @@ Generate a backend and frontend stack using Python, including interactive API do
 * Traefik integration, including Let's Encrypt **HTTPS** certificates automatic generation.
 * GitLab **CI** (continuous integration), including frontend and backend testing.
 
-## How to use it
+## 如何使用
 
-Go to the directory where you want to create your project and run:
+进入你想要创建项目的文件中，然后运行：
 
 ```bash
 pip install cookiecutter
-cookiecutter https://github.com/tiangolo/full-stack-fastapi-postgresql
+cookiecutter https://github.com/featureoverload/full-stack-fastapi-postgresql
 ```
 
 ### Generate passwords
@@ -86,7 +86,7 @@ openssl rand -hex 32
 Copy the contents and use that as password / secret key. And run that again to generate another secure key.
 
 
-### Input variables
+### 输入参数（说明）
 
 The generator (cookiecutter) will ask you for some data, you might want to have at hand before generating the project.
 
@@ -127,13 +127,13 @@ The input variables, with their default values (some auto generated) are:
 * `docker_image_celeryworker`: Docker image for the celery worker. By default, based on your Docker image prefix.
 * `docker_image_frontend`: Docker image for the frontend. By default, based on your Docker image prefix.
 
-## How to deploy
+## 如何部署
 
 This stack can be adjusted and used with several deployment options that are compatible with Docker Compose, but it is designed to be used in a cluster controlled with pure Docker in Swarm Mode with a Traefik main load balancer proxy handling automatic HTTPS certificates, using the ideas from <a href="https://dockerswarm.rocks" target="_blank">DockerSwarm.rocks</a>.
 
 Please refer to <a href="https://dockerswarm.rocks" target="_blank">DockerSwarm.rocks</a> to see how to deploy such a cluster in 20 minutes.
 
-## More details
+## 其它详细
 
 After using this generator, your new project (the directory created) will contain an extensive `README.md` with instructions for development, deployment, etc. You can pre-read [the project `README.md` template here too](./{{cookiecutter.project_slug}}/README.md).
 
