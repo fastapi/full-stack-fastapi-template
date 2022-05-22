@@ -6,15 +6,15 @@ authors = ["Admin <admin@example.com>"]
 
 [tool.poetry.dependencies]
 python = "^3.7"
-uvicorn = "^0.11.3"
-fastapi = "^0.54.1"
+uvicorn = "0.15.0"
+fastapi = "^0.78.0"
 python-multipart = "^0.0.5"
 email-validator = "^1.0.5"
 requests = "^2.23.0"
 celery = "^4.4.2"
 passlib = {extras = ["bcrypt"], version = "^1.7.2"}
 tenacity = "^6.1.0"
-pydantic = "^1.4"
+pydantic = "1.9.0"
 emails = "^0.5.15"
 raven = "^6.10.0"
 gunicorn = "^20.0.4"
