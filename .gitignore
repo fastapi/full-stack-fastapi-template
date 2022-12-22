@@ -1,4 +1,5 @@
 .vscode
+.idea
 testing-project
 .mypy_cache
 poetry.lock
