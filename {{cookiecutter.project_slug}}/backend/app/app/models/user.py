@@ -1,4 +1,4 @@
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, List
 
 from sqlalchemy import Boolean, Column, Integer, String
 from sqlalchemy.orm import relationship
@@ -10,10 +10,10 @@ if TYPE_CHECKING:
 
 
 class User(Base):
-    id = Column(Integer, primary_key=True, index=True)
+    id: int = Column(Integer, primary_key=True, index=True)
     full_name = Column(String, index=True)
-    email = Column(String, unique=True, index=True, nullable=False)
-    hashed_password = Column(String, nullable=False)
-    is_active = Column(Boolean(), default=True)
-    is_superuser = Column(Boolean(), default=False)
-    items = relationship("Item", back_populates="owner")
+    email: str = Column(String, unique=True, index=True, nullable=False)
+    hashed_password: str = Column(String, nullable=False)
+    is_active: bool = Column(Boolean(), default=True)
+    is_superuser: bool = Column(Boolean(), default=False)
+    items: List["Item"] = relationship("Item", back_populates="owner")

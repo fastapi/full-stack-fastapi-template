@@ -1,133 +1,150 @@
 <template>
   <div>
-    <v-navigation-drawer persistent :mini-variant="miniDrawer" v-model="showDrawer" fixed app>
+    <v-navigation-drawer
+      v-model="showDrawer"
+      persistent
+      :mini-variant="miniDrawer"
+      fixed
+      app
+    >
       <v-layout column fill-height>
         <v-list>
           <v-subheader>Main menu</v-subheader>
-          <v-list-tile to="/main/dashboard">
-            <v-list-tile-action>
-              <v-icon>web</v-icon>
-            </v-list-tile-action>
-            <v-list-tile-content>
-              <v-list-tile-title>Dashboard</v-list-tile-title>
-            </v-list-tile-content>
-          </v-list-tile>
-          <v-list-tile to="/main/profile/view">
-            <v-list-tile-action>
-              <v-icon>person</v-icon>
-            </v-list-tile-action>
-            <v-list-tile-content>
-              <v-list-tile-title>Profile</v-list-tile-title>
-            </v-list-tile-content>
-          </v-list-tile>
-          <v-list-tile to="/main/profile/edit">
-            <v-list-tile-action>
-              <v-icon>edit</v-icon>
-            </v-list-tile-action>
-            <v-list-tile-content>
-              <v-list-tile-title>Edit Profile</v-list-tile-title>
-            </v-list-tile-content>
-          </v-list-tile>
-          <v-list-tile to="/main/profile/password">
-            <v-list-tile-action>
-              <v-icon>vpn_key</v-icon>
-            </v-list-tile-action>
-            <v-list-tile-content>
-              <v-list-tile-title>Change Password</v-list-tile-title>
-            </v-list-tile-content>
-          </v-list-tile>
+          <v-list-item to="/main/dashboard">
+            <v-list-item-action>
+              <v-icon>mdi-view-dashboard</v-icon>
+            </v-list-item-action>
+            <v-list-item-content>
+              <v-list-item-title>Dashboard</v-list-item-title>
+            </v-list-item-content>
+          </v-list-item>
+          <v-list-item to="/main/profile/view">
+            <v-list-item-action>
+              <v-icon>mdi-account</v-icon>
+            </v-list-item-action>
+            <v-list-item-content>
+              <v-list-item-title>Profile</v-list-item-title>
+            </v-list-item-content>
+          </v-list-item>
+          <v-list-item to="/main/profile/edit">
+            <v-list-item-action>
+              <v-icon>mdi-pencil</v-icon>
+            </v-list-item-action>
+            <v-list-item-content>
+              <v-list-item-title>Edit Profile</v-list-item-title>
+            </v-list-item-content>
+          </v-list-item>
+          <v-list-item to="/main/profile/password">
+            <v-list-item-action>
+              <v-icon>mdi-key</v-icon>
+            </v-list-item-action>
+            <v-list-item-content>
+              <v-list-item-title>Change Password</v-list-item-title>
+            </v-list-item-content>
+          </v-list-item>
         </v-list>
         <v-divider></v-divider>
-        <v-list subheader v-show="hasAdminAccess">
+        <v-list v-show="hasAdminAccess" subheader>
           <v-subheader>Admin</v-subheader>
-          <v-list-tile to="/main/admin/users/all">
-            <v-list-tile-action>
-              <v-icon>group</v-icon>
-            </v-list-tile-action>
-            <v-list-tile-content>
-              <v-list-tile-title>Manage Users</v-list-tile-title>
-            </v-list-tile-content>
-          </v-list-tile>
-          <v-list-tile to="/main/admin/users/create">
-            <v-list-tile-action>
-              <v-icon>person_add</v-icon>
-            </v-list-tile-action>
-            <v-list-tile-content>
-              <v-list-tile-title>Create User</v-list-tile-title>
-            </v-list-tile-content>
-          </v-list-tile>
+          <v-list-item to="/main/admin/users/all">
+            <v-list-item-action>
+              <v-icon>mdi-account-multiple</v-icon>
+            </v-list-item-action>
+            <v-list-item-content>
+              <v-list-item-title>Manage Users</v-list-item-title>
+            </v-list-item-content>
+          </v-list-item>
+          <v-list-item to="/main/admin/users/create">
+            <v-list-item-action>
+              <v-icon>mdi-account-plus</v-icon>
+            </v-list-item-action>
+            <v-list-item-content>
+              <v-list-item-title>Create User</v-list-item-title>
+            </v-list-item-content>
+          </v-list-item>
         </v-list>
         <v-spacer></v-spacer>
         <v-list>
-          <v-list-tile @click="logout">
-            <v-list-tile-action>
-              <v-icon>close</v-icon>
-            </v-list-tile-action>
-            <v-list-tile-content>
-              <v-list-tile-title>Logout</v-list-tile-title>
-            </v-list-tile-content>
-          </v-list-tile>
+          <v-list-item @click="logout">
+            <v-list-item-action>
+              <v-icon>mdi-close</v-icon>
+            </v-list-item-action>
+            <v-list-item-content>
+              <v-list-item-title>Logout</v-list-item-title>
+            </v-list-item-content>
+          </v-list-item>
           <v-divider></v-divider>
-          <v-list-tile @click="switchMiniDrawer">
-            <v-list-tile-action>
-              <v-icon v-html="miniDrawer ? 'chevron_right' : 'chevron_left'"></v-icon>
-            </v-list-tile-action>
-            <v-list-tile-content>
-              <v-list-tile-title>Collapse</v-list-tile-title>
-            </v-list-tile-content>
-          </v-list-tile>
+          <v-list-item @click="switchMiniDrawer">
+            <v-list-item-action>
+              <v-icon>{{
+                miniDrawer ? "mdi-chevron-right" : "mdi-chevron-left"
+              }}</v-icon>
+            </v-list-item-action>
+            <v-list-item-content>
+              <v-list-item-title>Collapse</v-list-item-title>
+            </v-list-item-content>
+          </v-list-item>
         </v-list>
       </v-layout>
     </v-navigation-drawer>
-    <v-toolbar dark color="primary" app>
-      <v-toolbar-side-icon @click.stop="switchShowDrawer"></v-toolbar-side-icon>
-      <v-toolbar-title v-text="appName"></v-toolbar-title>
+    <v-app-bar dark color="primary" app>
+      <v-app-bar-nav-icon @click.stop="switchShowDrawer"></v-app-bar-nav-icon>
+      <v-toolbar-title>{{ appName }}</v-toolbar-title>
       <v-spacer></v-spacer>
       <v-menu bottom left offset-y>
-        <v-btn slot="activator" icon>
-          <v-icon>more_vert</v-icon>
-        </v-btn>
+        <template #activator="{ on }">
+          <v-btn icon v-on="on">
+            <v-icon>mdi-dots-vertical</v-icon>
+          </v-btn>
+        </template>
         <v-list>
-          <v-list-tile to="/main/profile">
-            <v-list-tile-content>
-              <v-list-tile-title>Profile</v-list-tile-title>
-            </v-list-tile-content>
-            <v-list-tile-action>
-              <v-icon>person</v-icon>
-            </v-list-tile-action>
-          </v-list-tile>
-          <v-list-tile @click="logout">
-            <v-list-tile-content>
-              <v-list-tile-title>Logout</v-list-tile-title>
-            </v-list-tile-content>
-            <v-list-tile-action>
-              <v-icon>close</v-icon>
-            </v-list-tile-action>
-          </v-list-tile>
+          <v-list-item to="/main/profile">
+            <v-list-item-content>
+              <v-list-item-title>Profile</v-list-item-title>
+            </v-list-item-content>
+            <v-list-item-action>
+              <v-icon>mdi-account</v-icon>
+            </v-list-item-action>
+          </v-list-item>
+          <v-list-item @click="logout">
+            <v-list-item-content>
+              <v-list-item-title>Logout</v-list-item-title>
+            </v-list-item-content>
+            <v-list-item-action>
+              <v-icon>mdi-close</v-icon>
+            </v-list-item-action>
+          </v-list-item>
         </v-list>
       </v-menu>
-    </v-toolbar>
-    <v-content>
+    </v-app-bar>
+    <v-main>
       <router-view></router-view>
-    </v-content>
+    </v-main>
     <v-footer class="pa-3" fixed app>
       <v-spacer></v-spacer>
-      <span>&copy; {{appName}}</span>
+      <span>&copy; {{ appName }}</span>
     </v-footer>
   </div>
 </template>
 
 <script lang="ts">
-import { Vue, Component } from 'vue-property-decorator';
+import { Vue, Component } from "vue-property-decorator";
 
-import { appName } from '@/env';
-import { readDashboardMiniDrawer, readDashboardShowDrawer, readHasAdminAccess } from '@/store/main/getters';
-import { commitSetDashboardShowDrawer, commitSetDashboardMiniDrawer } from '@/store/main/mutations';
-import { dispatchUserLogOut } from '@/store/main/actions';
+import { appName } from "@/env";
+import {
+  readDashboardMiniDrawer,
+  readDashboardShowDrawer,
+  readHasAdminAccess,
+} from "@/store/main/getters";
+import {
+  commitSetDashboardShowDrawer,
+  commitSetDashboardMiniDrawer,
+} from "@/store/main/mutations";
+import { dispatchUserLogOut } from "@/store/main/actions";
 
 const routeGuardMain = async (to, from, next) => {
-  if (to.path === '/main') {
-    next('/main/dashboard');
+  if (to.path === "/main") {
+    next("/main/dashboard");
   } else {
     next();
   }
@@ -158,17 +175,11 @@ export default class Main extends Vue {
   }
 
   public switchShowDrawer() {
-    commitSetDashboardShowDrawer(
-      this.$store,
-      !readDashboardShowDrawer(this.$store),
-    );
+    commitSetDashboardShowDrawer(this.$store, !readDashboardShowDrawer(this.$store));
   }
 
   public switchMiniDrawer() {
-    commitSetDashboardMiniDrawer(
-      this.$store,
-      !readDashboardMiniDrawer(this.$store),
-    );
+    commitSetDashboardMiniDrawer(this.$store, !readDashboardMiniDrawer(this.$store));
   }
 
   public get hasAdminAccess() {

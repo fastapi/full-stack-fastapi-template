@@ -1,9 +1,9 @@
-import Vue from 'vue';
-import Vuex, { StoreOptions } from 'vuex';
+import Vue from "vue";
+import Vuex, { StoreOptions } from "vuex";
 
-import { mainModule } from './main';
-import { State } from './state';
-import { adminModule } from './admin';
+import { mainModule } from "./main";
+import { State } from "./state";
+import { adminModule } from "./admin";
 
 Vue.use(Vuex);
 

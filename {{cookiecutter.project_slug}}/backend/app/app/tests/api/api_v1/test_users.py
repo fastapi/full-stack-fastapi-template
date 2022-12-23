@@ -38,7 +38,9 @@ def test_create_user_new_email(
     password = random_lower_string()
     data = {"email": username, "password": password}
     r = client.post(
-        f"{settings.API_V1_STR}/users/", headers=superuser_token_headers, json=data,
+        f"{settings.API_V1_STR}/users/",
+        headers=superuser_token_headers,
+        json=data,
     )
     assert 200 <= r.status_code < 300
     created_user = r.json()
@@ -56,7 +58,8 @@ def test_get_existing_user(
     user = crud.user.create(db, obj_in=user_in)
     user_id = user.id
     r = client.get(
-        f"{settings.API_V1_STR}/users/{user_id}", headers=superuser_token_headers,
+        f"{settings.API_V1_STR}/users/{user_id}",
+        headers=superuser_token_headers,
     )
     assert 200 <= r.status_code < 300
     api_user = r.json()
@@ -75,7 +78,9 @@ def test_create_user_existing_username(
     crud.user.create(db, obj_in=user_in)
     data = {"email": username, "password": password}
     r = client.post(
-        f"{settings.API_V1_STR}/users/", headers=superuser_token_headers, json=data,
+        f"{settings.API_V1_STR}/users/",
+        headers=superuser_token_headers,
+        json=data,
     )
     created_user = r.json()
     assert r.status_code == 400
@@ -89,7 +94,9 @@ def test_create_user_by_normal_user(
     password = random_lower_string()
     data = {"email": username, "password": password}
     r = client.post(
-        f"{settings.API_V1_STR}/users/", headers=normal_user_token_headers, json=data,
+        f"{settings.API_V1_STR}/users/",
+        headers=normal_user_token_headers,
+        json=data,
     )
     assert r.status_code == 400
 

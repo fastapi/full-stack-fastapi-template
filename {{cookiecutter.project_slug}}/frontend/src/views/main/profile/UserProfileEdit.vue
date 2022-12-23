@@ -1,60 +1,65 @@
 <template>
   <v-container fluid>
-    <v-card class="ma-3 pa-3">
-      <v-card-title primary-title>
-        <div class="headline primary--text">Edit User Profile</div>
-      </v-card-title>
-      <v-card-text>
-        <template>
-          <v-form
-            v-model="valid"
-            ref="form"
-            lazy-validation
-          >
-            <v-text-field
-              label="Full Name"
-              v-model="fullName"
-              required
-            ></v-text-field>
-            <v-text-field
-              label="E-mail"
-              type="email"
-              v-model="email"
-              v-validate="'required|email'"
-              data-vv-name="email"
-              :error-messages="errors.collect('email')"
-              required
-            ></v-text-field>
-          </v-form>
-        </template>
-      </v-card-text>
-      <v-card-actions>
-        <v-spacer></v-spacer>
-        <v-btn @click="cancel">Cancel</v-btn>
-        <v-btn @click="reset">Reset</v-btn>
-        <v-btn
-          @click="submit"
-          :disabled="!valid"
-        >
-          Save
-        </v-btn>
-      </v-card-actions>
-    </v-card>
+    <validation-observer ref="observer" v-slot="{ invalid }">
+      <form @submit.prevent="onSubmit" @reset.prevent="onReset">
+        <v-card class="ma-3 pa-3">
+          <v-card-title primary-title>
+            <div class="headline primary--text">Edit User Profile</div>
+          </v-card-title>
+          <v-card-text>
+            <v-text-field v-model="fullName" label="Full Name" required></v-text-field>
+            <validation-provider
+              v-slot="{ errors }"
+              rules="required|email"
+              name="E-mail"
+            >
+              <v-text-field
+                v-model="email"
+                label="E-mail"
+                type="email"
+                :error-messages="errors"
+                required
+              ></v-text-field>
+            </validation-provider>
+          </v-card-text>
+          <v-card-actions>
+            <v-spacer></v-spacer>
+            <v-btn @click="cancel">Cancel</v-btn>
+            <v-btn type="reset">Reset</v-btn>
+            <v-btn :disabled="invalid" type="submit"> Save </v-btn>
+          </v-card-actions>
+        </v-card>
+      </form>
+    </validation-observer>
   </v-container>
 </template>
 
 <script lang="ts">
-import { Component, Vue } from 'vue-property-decorator';
-import { Store } from 'vuex';
-import { IUserProfileUpdate } from '@/interfaces';
-import { readUserProfile } from '@/store/main/getters';
-import { dispatchUpdateUserProfile } from '@/store/main/actions';
+import { Component, Vue } from "vue-property-decorator";
+import { IUserProfileUpdate } from "@/interfaces";
+import { readUserProfile } from "@/store/main/getters";
+import { dispatchUpdateUserProfile } from "@/store/main/actions";
+import { ValidationProvider, ValidationObserver, extend } from "vee-validate";
+import { required, email } from "vee-validate/dist/rules";
 
-@Component
+// register validation rules
+extend("required", { ...required, message: "{_field_} can not be empty" });
+extend("email", { ...email, message: "Invalid email address" });
+
+@Component({
+  components: {
+    ValidationObserver,
+    ValidationProvider,
+  },
+})
 export default class UserProfileEdit extends Vue {
+  $refs!: {
+    observer: InstanceType<typeof ValidationObserver>;
+  };
+
   public valid = true;
-  public fullName: string = '';
-  public email: string = '';
+  public fullName = "";
+  public email = "";
 
   public created() {
     const userProfile = readUserProfile(this.$store);
@@ -68,7 +73,7 @@ export default class UserProfileEdit extends Vue {
     return readUserProfile(this.$store);
   }
 
-  public reset() {
+  public onReset() {
     const userProfile = readUserProfile(this.$store);
     if (userProfile) {
       this.fullName = userProfile.full_name;
@@ -80,18 +85,21 @@ export default class UserProfileEdit extends Vue {
     this.$router.back();
   }
 
-  public async submit() {
-    if ((this.$refs.form as any).validate()) {
-      const updatedProfile: IUserProfileUpdate = {};
-      if (this.fullName) {
-        updatedProfile.full_name = this.fullName;
-      }
-      if (this.email) {
-        updatedProfile.email = this.email;
-      }
-      await dispatchUpdateUserProfile(this.$store, updatedProfile);
-      this.$router.push('/main/profile');
+  public async onSubmit() {
+    const success = await this.$refs.observer.validate();
+    if (!success) {
+      return;
     }
+
+    const updatedProfile: IUserProfileUpdate = {};
+    if (this.fullName) {
+      updatedProfile.full_name = this.fullName;
+    }
+    if (this.email) {
+      updatedProfile.email = this.email;
+    }
+    await dispatchUpdateUserProfile(this.$store, updatedProfile);
+    this.$router.push("/main/profile");
   }
 }
 </script>

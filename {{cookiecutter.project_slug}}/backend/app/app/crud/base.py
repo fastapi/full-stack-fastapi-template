@@ -1,4 +1,4 @@
-from typing import Any, Dict, Generic, List, Optional, Type, TypeVar, Union
+from typing import Any, Dict, Generic, List, Optional, Type, TypeVar, Union, cast
 
 from fastapi.encoders import jsonable_encoder
 from pydantic import BaseModel
@@ -60,7 +60,8 @@ class CRUDBase(Generic[ModelType, CreateSchemaType, UpdateSchemaType]):
         return db_obj
 
     def remove(self, db: Session, *, id: int) -> ModelType:
-        obj = db.query(self.model).get(id)
+        obj = db.get(self.model, id)
+        assert obj is not None
         db.delete(obj)
         db.commit()
-        return obj
+        return cast(ModelType, obj)

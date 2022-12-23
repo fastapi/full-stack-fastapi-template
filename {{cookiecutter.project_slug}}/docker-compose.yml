@@ -1,4 +1,3 @@
-version: "3.3"
 services:
 
   proxy:
@@ -62,7 +61,7 @@ services:
         # Redirect a domain without www to www
         # To enable it remove the previous line and uncomment the next
         # - traefik.http.middlewares.${STACK_NAME}-www-redirect.redirectregex.replacement=https://www.${DOMAIN}/$${3}
-        # Middleware to redirect www, to disable it remove the next line 
+        # Middleware to redirect www, to disable it remove the next line
         - traefik.http.routers.${STACK_NAME?Variable not set}-proxy-https.middlewares=${STACK_NAME?Variable not set}-www-redirect
         # Middleware to redirect www, and redirect HTTP to HTTPS
         # to disable www redirection remove the section: ${STACK_NAME?Variable not set}-www-redirect,
@@ -105,24 +104,28 @@ services:
         - traefik.http.services.${STACK_NAME?Variable not set}-pgadmin.loadbalancer.server.port=5050
 
   queue:
-    image: rabbitmq:3
+    # image: rabbitmq:3
     # Using the below image instead is required to enable the "Broker" tab in the flower UI:
-    # image: rabbitmq:3-management
+    image: rabbitmq:3-management
     #
     # You also have to change the flower command
-  
+
   flower:
-    image: mher/flower:0.9.7
+    image: mher/flower
     networks:
       - ${TRAEFIK_PUBLIC_NETWORK?Variable not set}
       - default
+    depends_on:
+      - queue
     env_file:
       - .env
-    command:
-      - "--broker=amqp://guest@queue:5672//"
-      # For the "Broker" tab to work in the flower UI, uncomment the following command argument,
+    environment:
+      - CELERY_BROKER_URL=amqp://guest:guest@queue:5672//
+    # The sleep used below helps address https://github.com/mher/flower/issues/1112
+    command: /bin/sh -c "sleep 5s && celery flower --broker_api=http://guest:guest@queue:15672/api//"
+      # For the "Broker" tab to work in the flower UI, use the following command argument,
       # and change the queue service's image as well
-      # - "--broker_api=http://guest:guest@queue:15672/api//"
+      # --broker_api=http://guest:guest@queue:15672/api//
     deploy:
       labels:
         - traefik.enable=true
