@@ -8,6 +8,18 @@ This project is a comprehensively updated fork of [Sebastián Ramírez's](https:
 
 Generate a backend and frontend stack using Python, including interactive API documentation.
 
+### App landing page
+
+[![API docs](img/landing.png)](https://github.com/whythawk/full-stack-fastapi-postgresql)
+
+### Dashboard Login
+
+[![API docs](img/login.png)](https://github.com/whythawk/full-stack-fastapi-postgresql)
+
+### Dashboard User Management
+
+[![API docs](img/dashboard.png)](https://github.com/whythawk/full-stack-fastapi-postgresql)
+
 ### Interactive API documentation
 
 [![API docs](img/docs.png)](https://github.com/whythawk/full-stack-fastapi-postgresql)
@@ -16,13 +28,6 @@ Generate a backend and frontend stack using Python, including interactive API do
 
 [![API docs](img/redoc.png)](https://github.com/whythawk/full-stack-fastapi-postgresql)
 
-### Dashboard Login
-
-[![API docs](img/login.png)](https://github.com/whythawk/full-stack-fastapi-postgresql)
-
-### Dashboard - Create User
-
-[![API docs](img/dashboard.png)](https://github.com/whythawk/full-stack-fastapi-postgresql)
 
 ## Key features
 
