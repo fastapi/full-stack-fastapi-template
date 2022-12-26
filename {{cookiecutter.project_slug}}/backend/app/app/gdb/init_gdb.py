@@ -21,10 +21,11 @@ def createNodeIndices():
     With analyzer: StandardAnalyzer ('standard')
     Update as required.
     """
-    indices = [
-        # ("indexname1", "Node", "field_name1", "simple"),
-        # ("indexname2", "Node", "field_name2" , "standard"),
-    ]
+    # indices = [
+    #    ("indexname1", "Node", "field_name1", "simple"),
+    #    ("indexname2", "Node", "field_name2" , "standard"),
+    # ]
+    indices = []
     for (index, node, key, analyzer) in indices:
         try:
             q = f"CALL db.index.fulltext.createNodeIndex('{index}',['{node}'],['{key}'], {{analyzer: '{analyzer}'}})"
