@@ -18,7 +18,7 @@
     "smtp_user": "",
     "smtp_password": "",
     "smtp_emails_from_email": "info@{{cookiecutter.domain_main}}",
-    "smtp_emails_from_name": "Symona Adaro,
+    "smtp_emails_from_name": "Symona Adaro",
     "smtp_emails_to_email": "info@{{cookiecutter.domain_main}}",
 
     "postgres_password": "changethis",
