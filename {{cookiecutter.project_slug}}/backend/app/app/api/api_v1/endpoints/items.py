@@ -62,7 +62,7 @@ async def read_item(
 
 
 @router.put("/{id}", response_model=schemas.Item)
-def update_item(
+async def update_item(
         *,
         db: AsyncSession = Depends(deps.async_get_db),
         id: int,

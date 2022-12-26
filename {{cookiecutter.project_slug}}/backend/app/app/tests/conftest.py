@@ -1,7 +1,7 @@
 from typing import Dict, Generator, AsyncGenerator
 import asyncio
 import pytest
-from websockets.client import Connect
+from websockets.client import ClientConnection as Connect
 # from fastapi.testclient import TestClient
 # from sqlalchemy.orm import Session
 from sqlalchemy.ext.asyncio import AsyncSession
