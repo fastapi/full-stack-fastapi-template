@@ -28,7 +28,7 @@ def createNodeIndices():
     indices = []
     for (index, node, key, analyzer) in indices:
         try:
-            q = f"CALL db.index.fulltext.createNodeIndex('{index}',['{node}'],['{key}'], {{analyzer: '{analyzer}'}})"
+            q = f"CALL db.index.fulltext.createNodeIndex('{index}',['{node}'],['{key}'], {{analyzer: '{analyzer}'}})" # noqa
             db.cypher_query(q)
         except ClientError:
             pass
