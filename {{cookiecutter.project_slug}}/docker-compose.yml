@@ -89,6 +89,8 @@ services:
       - db
     env_file:
       - .env
+    volumes:
+      - pgadmin-data:/var/lib/pgadmin
     deploy:
       labels:
         - traefik.enable=true
@@ -196,6 +198,7 @@ services:
 
 volumes:
   app-db-data:
+  pgadmin-data:
 
 networks:
   traefik-public:
