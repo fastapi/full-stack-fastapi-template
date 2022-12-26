@@ -8,6 +8,7 @@ from emails.template import JinjaTemplate
 from jose import jwt
 
 from app.core.config import settings
+from app.schemas import EmailContent, EmailValidation
 
 
 def send_email(
@@ -29,8 +30,38 @@ def send_email(
         smtp_options["user"] = settings.SMTP_USER
     if settings.SMTP_PASSWORD:
         smtp_options["password"] = settings.SMTP_PASSWORD
+    # Add common template environment elements
+    environment["server_host"] = settings.SERVER_HOST
+    environment["server_name"] = settings.SERVER_NAME
+    environment["server_bot"] = settings.SERVER_BOT
     response = message.send(to=email_to, render=environment, smtp=smtp_options)
     logging.info(f"send email result: {response}")
+
+
+def send_email_validation_email(data: EmailValidation) -> None:
+    subject = f"{settings.PROJECT_NAME} - {data.subject}"
+    server_host = settings.SERVER_HOST
+    link = f"{server_host}?token={data.token}"
+    with open(Path(settings.EMAIL_TEMPLATES_DIR) / "confirm_email.html") as f:
+        template_str = f.read()
+    send_email(
+        email_to=data.email,
+        subject_template=subject,
+        html_template=template_str,
+        environment={"link": link},
+    )
+
+
+def send_web_contact_email(data: EmailContent) -> None:
+    subject = f"{settings.PROJECT_NAME} - {data.subject}"
+    with open(Path(settings.EMAIL_TEMPLATES_DIR) / "web_contact_email.html") as f:
+        template_str = f.read()
+    send_email(
+        email_to=settings.EMAILS_TO_EMAIL,
+        subject_template=subject,
+        html_template=template_str,
+        environment={"content": data.content, "email": data.email},
+    )
 
 
 def send_test_email(email_to: str) -> None:
@@ -93,7 +124,9 @@ def generate_password_reset_token(email: str) -> str:
     expires = now + delta
     exp = expires.timestamp()
     encoded_jwt = jwt.encode(
-        {"exp": exp, "nbf": now, "sub": email}, settings.SECRET_KEY, algorithm="HS256",
+        {"exp": exp, "nbf": now, "validate": email},
+        settings.SECRET_KEY,
+        algorithm="HS256",
     )
     return encoded_jwt
 
@@ -101,6 +134,6 @@ def generate_password_reset_token(email: str) -> str:
 def verify_password_reset_token(token: str) -> Optional[str]:
     try:
         decoded_token = jwt.decode(token, settings.SECRET_KEY, algorithms=["HS256"])
-        return decoded_token["email"]
+        return decoded_token["validate"]
     except jwt.JWTError:
         return None

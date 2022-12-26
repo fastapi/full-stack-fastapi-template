@@ -1,11 +1,18 @@
 from typing import Optional
-
+from uuid import UUID
 from pydantic import BaseModel, EmailStr
 
+class UserLogin(BaseModel):
+    username: str
+    password: str
+
+class UserRefresh(BaseModel):
+    refresh_token: str
 
 # Shared properties
 class UserBase(BaseModel):
     email: Optional[EmailStr] = None
+    email_validated: Optional[bool] = False
     is_active: Optional[bool] = True
     is_superuser: bool = False
     full_name: Optional[str] = None
@@ -23,7 +30,7 @@ class UserUpdate(UserBase):
 
 
 class UserInDBBase(UserBase):
-    id: Optional[int] = None
+    id: Optional[UUID] = None
 
     class Config:
         orm_mode = True

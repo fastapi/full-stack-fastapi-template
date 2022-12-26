@@ -1,0 +1,20 @@
+<mjml>
+  <mj-body>
+    <mj-section>
+      <mj-column>
+        <mj-image
+          width="60px"
+          src="https://tailwindui.com/img/logos/mark.svg?color=rose&shade=500"
+          href="{{ server_host }}"
+        ></mj-image>
+        <mj-divider border-color="#f43f5e"></mj-divider>
+        <mj-text font-size="16px" font-weight="bold" color="#635246"
+          >Email from: {{ email }}</mj-text
+        >
+        <mj-text font-size="16px" color="#635246" font-family="helvetica"
+          >{{ content }}</mj-text
+        >
+      </mj-column>
+    </mj-section>
+  </mj-body>
+</mjml>

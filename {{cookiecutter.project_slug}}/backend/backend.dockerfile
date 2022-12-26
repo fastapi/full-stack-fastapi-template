@@ -1,4 +1,4 @@
-FROM ghcr.io/br3ndonland/inboard:fastapi-0.10.4-python3.9
+FROM ghcr.io/br3ndonland/inboard:fastapi-0.37.0-python3.9
 
 # Copy poetry.lock* in case it doesn't exist in the repo
 COPY ./app/pyproject.toml ./app/poetry.lock* /app/
@@ -7,7 +7,14 @@ WORKDIR /app/
 
 # Allow installing dev dependencies to run tests
 ARG INSTALL_DEV=false
-RUN bash -c "if [ $INSTALL_DEV == 'true' ] ; then poetry install --no-root ; else poetry install --no-root --no-dev ; fi"
+RUN bash -c "if [ $INSTALL_DEV == 'true' ] ; then poetry install --no-interaction --no-root ; else poetry install --no-interaction --no-root --no-dev ; fi"
+RUN pip install --upgrade setuptools
+
+# /start Project-specific dependencies
+# RUN apt-get update && apt-get install -y --no-install-recommends \
+#  && rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*	
+# WORKDIR /app/
+# /end Project-specific dependencies
 
 # For development, Jupyter remote kernel, Hydrogen
 # Using inside the container:

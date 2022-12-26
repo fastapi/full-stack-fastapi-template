@@ -8,21 +8,30 @@
           href="{{ server_host }}"
         ></mj-image>
         <mj-divider border-color="#f43f5e"></mj-divider>
-        <mj-text font-size="20px" color="#635246" font-family="helvetica">{{ project_name }} - New Account</mj-text>
+        <mj-text font-size="16px" font-weight="bold" color="#635246"
+          >Confirm your email address</mj-text
+        >
         <mj-text font-size="16px" color="#635246" font-family="helvetica"
           >Hi,</mj-text
         >
-        <mj-text font-size="16px" color="#635246">You have a new account:</mj-text>
-        <mj-text font-size="16px" color="#635246">Username: {{ username }}</mj-text>
-        <mj-text font-size="16px" color="#635246">Password: {{ password }}</mj-text>
+        <mj-text font-size="16px" color="#635246" font-family="helvetica"
+          >You'll need to validate this email address before you can offer your
+          work. All you need to do is click this button.</mj-text
+        >
         <mj-button
           background-color="#f43f5e"
           color="white"
           font-family="helvetica"
           href="{{ link }}"
         >
-          Go to Dashboard
+          Confirm your email
         </mj-button>
+        <mj-text font-size="16px" color="#635246" font-family="helvetica"
+          >Or open the following link:</mj-text
+        >
+        <mj-text font-size="16px" color="#635246" font-family="helvetica"
+          ><a href="{{ link }}">{{ link }}</a></mj-text
+        >
         <mj-text font-size="16px" color="#635246" font-family="helvetica"
           >If you have no idea what this is about, then don't worry. You can
           safely ignore and delete this email.</mj-text
