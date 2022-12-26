@@ -50,4 +50,6 @@ Along the way, Walmart fell for the hype and entered into a costly partnership, 
 
 Magical thinking is not science and, given the range of challenges humanity faces, it’s time we took it a bit more seriously.
 
+---
+
 _:copyright: Gavin Chait 2016. All rights reserved._

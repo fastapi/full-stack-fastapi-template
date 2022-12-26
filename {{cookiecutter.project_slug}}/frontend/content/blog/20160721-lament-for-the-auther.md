@@ -50,6 +50,8 @@ Despite all the uncertainty - and the supposed destruction of mainstream publish
 
 I hope you’re interested in reading about how my hero escapes from an orbital prison, survives the subsequent fall and crash-landing in a small Nigerian village, and escapes the interest of a local warlord.
 
-Continues me, ‘It’ll be out on Friday. Like a real book, with pages and everything. It’s called “Lament for the Fallen”, go buy it.’
+Continues me, ‘It’ll be out on Friday. Like a real book, with pages and everything. It’s called [“Lament for the Fallen”](https://gavinchait.com/lament-for-the-fallen/), go buy it.’
+
+---
 
 _:copyright: Gavin Chait 2016. All rights reserved._
