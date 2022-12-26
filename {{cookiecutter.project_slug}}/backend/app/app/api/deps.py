@@ -1,4 +1,4 @@
-from typing import Generator
+from typing import Generator, AsyncGenerator
 
 from fastapi import Depends, HTTPException, status
 from fastapi.security import OAuth2PasswordBearer
@@ -26,7 +26,7 @@ def get_db() -> Generator:
         db.close()
 
 
-async def async_get_db() -> Generator:
+async def async_get_db() -> AsyncGenerator:
     async with async_session() as session:
         yield session
 
