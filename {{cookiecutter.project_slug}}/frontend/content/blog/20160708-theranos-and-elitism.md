@@ -49,3 +49,5 @@ Theranos was forced to void all their test results. One of their main labs has b
 Along the way, Walmart fell for the hype and entered into a costly partnership, and hundreds of normally reasonable investors have lost their shirts. Theranos is now worth nothing.
 
 Magical thinking is not science and, given the range of challenges humanity faces, it’s time we took it a bit more seriously.
+
+_:copyright: Gavin Chait 2016. All rights reserved._
