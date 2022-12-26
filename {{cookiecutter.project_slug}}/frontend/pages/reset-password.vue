@@ -1,219 +1,75 @@
 <template>
-  <div class="container mx-auto">
-    <!-- https://blog.lichter.io/posts/vue-hydration-error/ -->
-    <div>
-      <div
-        class="min-h-screen flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8"
-      >
-        <div class="max-w-md w-full space-y-8">
+    <main class="flex min-h-full">
+      <div class="flex flex-1 flex-col justify-center py-12 px-4 sm:px-6 lg:flex-none lg:px-20 xl:px-24">
+        <div class="mx-auto w-full max-w-sm lg:w-96">
           <div>
-            <img
-              class="mx-auto h-12 w-auto"
-              src="https://tailwindui.com/img/logos/workflow-mark-indigo-600.svg"
-              alt="Workflow"
-            />
-            <h2 class="mt-6 text-center text-3xl font-extrabold text-gray-900">
-              Reset your password
-            </h2>
+            <img class="h-12 w-auto" src="https://tailwindui.com/img/logos/mark.svg?color=rose&shade=500" alt="Your Company" />
+            <h2 class="mt-6 text-3xl font-bold tracking-tight text-gray-900">Reset your password</h2>
           </div>
-
-          <ValidationObserver v-slot="{ invalid }" immediate>
-            <form class="mt-8 space-y-6" @submit.prevent="submit">
-              <div class="rounded-md shadow-sm -space-y-px">
+  
+          <div class="mt-8">
+            <div class="mt-6">
+                <Form @submit="submit" :validation-schema="schema" class="space-y-6">
                 <div>
-                  <ValidationProvider
-                    v-slot="{ errors }"
-                    name="password1"
-                    vid="password1"
-                    rules="confirmed:password2"
-                  >
-                    <label for="password1" class="sr-only">New password</label>
-                    <div
-                      class="appearance-none rounded-none relative border rounded-t-md border-gray-300 flex w-full"
-                    >
-                      <span
-                        class="inline-flex items-center px-3 py-2 text-sm font-light text-gray-700 bg-gray-50"
-                      >
-                        <svg
-                          v-if="errors[0] === 'true'"
-                          class="w-5 h-5 text-red-700"
-                          xmlns="http://www.w3.org/2000/svg"
-                          fill="none"
-                          viewBox="0 0 24 24"
-                          stroke="currentColor"
-                        >
-                          <path
-                            stroke-linecap="round"
-                            stroke-linejoin="round"
-                            stroke-width="2"
-                            d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"
-                          />
-                        </svg>
-                        <svg
-                          v-else
-                          class="w-5 h-5"
-                          xmlns="http://www.w3.org/2000/svg"
-                          fill="none"
-                          viewBox="0 0 24 24"
-                          stroke="currentColor"
-                        >
-                          <path
-                            stroke-linecap="round"
-                            stroke-linejoin="round"
-                            stroke-width="2"
-                            d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"
-                          />
-                        </svg>
-                      </span>
-                      <input
-                        id="password1"
-                        v-model="password1"
-                        name="password1"
-                        type="password"
-                        autocomplete="current-password"
-                        placeholder="New password"
-                        required
-                        class="w-full px-3 py-2 placeholder-gray-500 text-gray-900 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 focus:z-10 sm:text-sm"
-                      />
-                    </div>
-                  </ValidationProvider>
+                  <label for="password" class="block text-sm font-medium text-gray-700">Password</label>
+                  <div class="mt-1 group relative inline-block w-full">
+                    <Field id="password" name="password" type="password" autocomplete="password" class="block w-full appearance-none rounded-md border border-gray-300 px-3 py-2 placeholder-gray-400 shadow-sm focus:border-rose-600 focus:outline-none focus:ring-rose-600 sm:text-sm" />
+                    <ErrorMessage name="password" class="absolute left-5 top-5 translate-y-full w-48 px-2 py-1 bg-gray-700 rounded-lg text-center text-white text-sm after:content-[''] after:absolute after:left-1/2 after:bottom-[100%] after:-translate-x-1/2 after:border-8 after:border-x-transparent after:border-t-transparent after:border-b-gray-700"/>
+                  </div>
+                </div>
+  
+                <div class="space-y-1">
+                  <label for="confirmation" class="block text-sm font-medium text-gray-700">Repeat password</label>
+                  <div class="mt-1 group relative inline-block w-full">
+                    <Field id="confirmation" name="confirmation" type="password" autocomplete="confirmation" class="block w-full appearance-none rounded-md border border-gray-300 px-3 py-2 placeholder-gray-400 shadow-sm focus:border-rose-600 focus:outline-none focus:ring-rose-600 sm:text-sm" />
+                    <ErrorMessage name="confirmation" class="absolute left-5 top-5 translate-y-full w-48 px-2 py-1 bg-gray-700 rounded-lg text-center text-white text-sm after:content-[''] after:absolute after:left-1/2 after:bottom-[100%] after:-translate-x-1/2 after:border-8 after:border-x-transparent after:border-t-transparent after:border-b-gray-700"/>
+                  </div>
                 </div>
                 <div>
-                  <ValidationProvider
-                    v-slot="{ errors }"
-                    vid="password2"
-                    name="password2"
-                  >
-                    <label for="password2" class="sr-only"
-                      >Confirm password</label
-                    >
-                    <div
-                      class="appearance-none rounded-none relative border rounded-b-md border-gray-300 flex w-full"
-                    >
-                      <span
-                        class="inline-flex items-center px-3 py-2 text-sm font-light text-gray-700 bg-gray-50"
-                      >
-                        <svg
-                          v-if="errors[0] === 'true'"
-                          class="w-5 h-5 text-red-700"
-                          xmlns="http://www.w3.org/2000/svg"
-                          fill="none"
-                          viewBox="0 0 24 24"
-                          stroke="currentColor"
-                        >
-                          <path
-                            stroke-linecap="round"
-                            stroke-linejoin="round"
-                            stroke-width="2"
-                            d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"
-                          />
-                        </svg>
-                        <svg
-                          v-else
-                          class="w-5 h-5"
-                          xmlns="http://www.w3.org/2000/svg"
-                          fill="none"
-                          viewBox="0 0 24 24"
-                          stroke="currentColor"
-                        >
-                          <path
-                            stroke-linecap="round"
-                            stroke-linejoin="round"
-                            stroke-width="2"
-                            d=""
-                          />
-                        </svg>
-                      </span>
-                      <input
-                        id="password2"
-                        v-model="password2"
-                        name="password2"
-                        type="password"
-                        autocomplete="current-password"
-                        placeholder="Confirm password"
-                        required
-                        class="w-full px-3 py-2 placeholder-gray-500 text-gray-900 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 focus:z-10 sm:text-sm"
-                      />
-                    </div>
-                  </ValidationProvider>
+                  <button type="submit" class="flex w-full justify-center rounded-md border border-transparent bg-rose-500 py-2 px-4 text-sm font-medium text-white shadow-sm hover:bg-rose-700 focus:outline-none focus:ring-2 focus:ring-rose-600 focus:ring-offset-2">
+                    Submit
+                  </button>
                 </div>
-              </div>
-              <div>
-                <button
-                  type="submit"
-                  class="group relative w-full flex justify-center py-2 px-4 border border-transparent text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
-                  :disabled="invalid"
-                >
-                  <span
-                    class="absolute left-0 inset-y-0 flex items-center pl-3"
-                  >
-                    <!-- Heroicon name: solid/lock-closed -->
-                    <svg
-                      class="h-5 w-5 text-indigo-500 group-hover:text-indigo-400"
-                      xmlns="http://www.w3.org/2000/svg"
-                      viewBox="0 0 20 20"
-                      fill="currentColor"
-                      aria-hidden="true"
-                    >
-                      <path
-                        fill-rule="evenodd"
-                        d="M5 9V7a5 5 0 0110 0v2a2 2 0 012 2v5a2 2 0 01-2 2H5a2 2 0 01-2-2v-5a2 2 0 012-2zm8-2v2H7V7a3 3 0 016 0z"
-                        clip-rule="evenodd"
-                      />
-                    </svg>
-                  </span>
-                  Reset
-                </button>
-              </div>
-            </form>
-          </ValidationObserver>
+                </Form>
+            </div>
+          </div>
         </div>
       </div>
-    </div>
-  </div>
+      <div class="relative hidden w-0 flex-1 lg:block">
+        <img class="absolute inset-0 h-full w-full object-cover" src="https://images.unsplash.com/photo-1561487138-99ccf59b135c?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=764&q=80" alt="" />
+      </div>
+    </main>
 </template>
 
-<script lang="ts">
-import { Action, Component, Vue } from "nuxt-property-decorator"
+<script setup lang="ts">
+import { useAuthStore } from "@/stores"
 
-@Component({
-  middleware: "anonymous",
+definePageMeta({
+  layout: "authentication",
+  middleware: ["anonymous"],
+});
+
+const schema = {
+    password: { required: true, min: 8 },
+    confirmation: { required: true, confirmed: "password" }
+}
+const auth = useAuthStore()
+const route = useRoute()
+const redirectRoute = "/login"
+
+async function submit(values: any) {
+  await auth.resetPassword(values.password, route.query.token as string)
+  await new Promise((resolve) => {
+    setTimeout(() => {
+      resolve(true)
+    }, 2000)
+  })
+  return await navigateTo(redirectRoute)    
+}
+
+onMounted(async () => {
+  // Check if token exists
+  if (!route.query || !route.query.token) await navigateTo("/")
 })
-export default class ResetPassword extends Vue {
-  @Action("main/resetPassword") resetPassword
-  public password1 = ""
-  public password2 = ""
 
-  public async submit() {
-    await this.resetPassword({
-      token: this.$route.query.token as string,
-      password: this.password1,
-    })
-    this.$router.push("/")
-  }
-
-  asyncData({ store, redirect, query }) {
-    store.commit("helpers/setHeadingTitle", null)
-    const token = query.token as string
-    if (!token) {
-      store.commit("main/addNotification", {
-        content: "No token provided, start a new password recovery",
-        color: "error",
-      })
-      redirect("/recover-password")
-    }
-  }
-}
 </script>
-
-<style>
-.inpt {
-  @apply mt-1 relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-md focus:outline-none focus:ring-indigo-300 focus:border-indigo-300 shadow-sm sm:text-sm;
-}
-.btn {
-  @apply mt-3 w-full inline-flex justify-center rounded-md border border-gray-300 shadow-sm px-4 py-2 bg-white text-base font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 sm:mt-0 sm:ml-3 sm:w-auto sm:text-sm;
-}
-.btn-indigo {
-  @apply text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500;
-}
-</style>

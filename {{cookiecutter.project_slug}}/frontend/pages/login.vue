@@ -1,124 +1,81 @@
 <template>
-  <div class="container mx-auto">
-    <div>
-      <div
-        class="min-h-screen flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8"
-      >
-        <div class="max-w-md w-full space-y-8">
+    <main class="flex min-h-full">
+      <div class="flex flex-1 flex-col justify-center py-12 px-4 sm:px-6 lg:flex-none lg:px-20 xl:px-24">
+        <div class="mx-auto w-full max-w-sm lg:w-96">
           <div>
-            <img
-              class="mx-auto h-12 w-auto"
-              src="https://tailwindui.com/img/logos/workflow-mark-indigo-600.svg"
-              alt="Workflow"
-            />
-            <h2 class="mt-6 text-center text-3xl font-extrabold text-gray-900">
-              Sign in to your account
-            </h2>
+            <img class="h-12 w-auto" src="https://tailwindui.com/img/logos/mark.svg?color=rose&shade=500" alt="Your Company" />
+            <h2 class="mt-6 text-3xl font-bold tracking-tight text-gray-900">Sign in to your account</h2>
           </div>
-          <form class="mt-8 space-y-6" action="#" method="POST">
-            <div class="rounded-md shadow-sm -space-y-px">
-              <div>
-                <label for="email-address" class="sr-only">Email address</label>
-                <input
-                  id="email-address"
-                  v-model="email"
-                  name="email"
-                  type="email"
-                  autocomplete="email"
-                  required
-                  class="appearance-none rounded-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-t-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 focus:z-10 sm:text-sm"
-                  placeholder="Email address"
-                  @keyup.enter="submit"
-                />
-              </div>
-              <div>
-                <label for="password" class="sr-only">Password</label>
-                <input
-                  id="password"
-                  v-model="password"
-                  name="password"
-                  type="password"
-                  autocomplete="current-password"
-                  required
-                  class="appearance-none rounded-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-b-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 focus:z-10 sm:text-sm"
-                  placeholder="Password"
-                  @keyup.enter="submit"
-                />
-              </div>
+  
+          <div class="mt-8">
+            <div class="mt-6">
+              <Form @submit="submit" :validation-schema="schema" class="space-y-6">
+                <div>
+                  <label for="email" class="block text-sm font-medium text-gray-700">Email address</label>
+                  <div class="mt-1 group relative inline-block w-full">
+                    <Field id="email" name="email" type="email" autocomplete="email" class="block w-full appearance-none rounded-md border border-gray-300 px-3 py-2 placeholder-gray-400 shadow-sm focus:border-rose-600 focus:outline-none focus:ring-rose-600 sm:text-sm" />
+                    <ErrorMessage name="email" class="absolute left-5 top-5 translate-y-full w-48 px-2 py-1 bg-gray-700 rounded-lg text-center text-white text-sm after:content-[''] after:absolute after:left-1/2 after:bottom-[100%] after:-translate-x-1/2 after:border-8 after:border-x-transparent after:border-t-transparent after:border-b-gray-700"/>
+                  </div>
+                </div>
+  
+                <div class="space-y-1">
+                  <label for="password" class="block text-sm font-medium text-gray-700">Password</label>
+                  <div class="mt-1 group relative inline-block w-full">
+                    <Field id="password" name="password" type="password" autocomplete="password" class="block w-full appearance-none rounded-md border border-gray-300 px-3 py-2 placeholder-gray-400 shadow-sm focus:border-rose-600 focus:outline-none focus:ring-rose-600 sm:text-sm" />
+                    <ErrorMessage name="password" class="absolute left-5 top-5 translate-y-full w-48 px-2 py-1 bg-gray-700 rounded-lg text-center text-white text-sm after:content-[''] after:absolute after:left-1/2 after:bottom-[100%] after:-translate-x-1/2 after:border-8 after:border-x-transparent after:border-t-transparent after:border-b-gray-700"/>
+                  </div>
+                </div>
+  
+                <div class="flex items-center justify-between">
+                  <div class="text-sm">
+                    <NuxtLink to="/join" class="font-medium text-rose-500 hover:text-rose-600">Create an account</NuxtLink>
+                  </div>
+  
+                  <div class="text-sm">
+                    <NuxtLink to="/recover-password" class="font-medium text-rose-500 hover:text-rose-600">Forgot your password?</NuxtLink>
+                  </div>
+                </div>
+  
+                <div>
+                  <button type="submit" class="flex w-full justify-center rounded-md border border-transparent bg-rose-500 py-2 px-4 text-sm font-medium text-white shadow-sm hover:bg-rose-700 focus:outline-none focus:ring-2 focus:ring-rose-600 focus:ring-offset-2">
+                    Submit
+                  </button>
+                </div>
+              </Form>
             </div>
-            <div class="flex items-center justify-between">
-              <div class="text-sm">
-                <NuxtLink
-                  to="/register"
-                  class="font-medium text-indigo-600 hover:text-indigo-500"
-                >
-                  Create an account
-                </NuxtLink>
-              </div>
-
-              <div class="text-sm">
-                <NuxtLink
-                  to="/recover-password"
-                  class="font-medium text-indigo-600 hover:text-indigo-500"
-                >
-                  Forgot your password?
-                </NuxtLink>
-              </div>
-            </div>
-
-            <div>
-              <button
-                type="submit"
-                class="group relative w-full flex justify-center py-2 px-4 border border-transparent text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
-                @click.prevent="submit"
-              >
-                <span class="absolute left-0 inset-y-0 flex items-center pl-3">
-                  <!-- Heroicon name: solid/lock-closed -->
-                  <svg
-                    class="h-5 w-5 text-indigo-500 group-hover:text-indigo-400"
-                    xmlns="http://www.w3.org/2000/svg"
-                    viewBox="0 0 20 20"
-                    fill="currentColor"
-                    aria-hidden="true"
-                  >
-                    <path
-                      fill-rule="evenodd"
-                      d="M5 9V7a5 5 0 0110 0v2a2 2 0 012 2v5a2 2 0 01-2 2H5a2 2 0 01-2-2v-5a2 2 0 012-2zm8-2v2H7V7a3 3 0 016 0z"
-                      clip-rule="evenodd"
-                    />
-                  </svg>
-                </span>
-                Sign in
-              </button>
-            </div>
-          </form>
+          </div>
         </div>
       </div>
-    </div>
-  </div>
+      <div class="relative hidden w-0 flex-1 lg:block">
+        <img class="absolute inset-0 h-full w-full object-cover" src="https://images.unsplash.com/photo-1561487138-99ccf59b135c?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=764&q=80" alt="" />
+      </div>
+    </main>
 </template>
 
-<script lang="ts">
-import { Action, Component, Vue } from "nuxt-property-decorator"
+<script setup lang="ts">
+import { useAuthStore } from "@/stores"
 
-@Component({
-  middleware: "anonymous",
-})
-export default class Login extends Vue {
-  @Action("main/logIn") logIn
-  public email: string = ""
-  public password: string = ""
+definePageMeta({
+  layout: "authentication",
+  middleware: ["anonymous"],
+});
 
-  public async submit() {
-    await this.logIn({
-      username: this.email,
-      password: this.password,
-    })
-    this.$router.push("/main/dashboard")
-  }
+const route = useRoute()
+const auth = useAuthStore()
+const redirectRoute = "/"
 
-  asyncData({ store }) {
-    store.commit("helpers/setHeadingTitle", null)
+const schema = {
+    email: { email: true, required: true },
+    password: { required: true, min: 8 },
+}
+
+async function submit(values: any) {
+  await auth.logIn({ username: values.email, password: values.password })
+  if (auth.loggedIn) {
+    if (route.query && route.query.token) {
+      await auth.validateEmail(route.query.token as string)
+    }
+    return await navigateTo(redirectRoute)    
   }
 }
 </script>

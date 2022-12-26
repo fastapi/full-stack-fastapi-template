@@ -1,30 +1,30 @@
-/* eslint-disable camelcase */
-export interface IUserProfile {
-  email: string
-  is_active: boolean
-  is_superuser: boolean
-  full_name: string
-  id: number
-}
+import {
+  IUserProfile,
+  IUserProfileUpdate,
+  IUserProfileCreate,
+  IUserOpenProfileCreate
+} from "./profile"
 
-export interface IUserProfileUpdate {
-  email?: string
-  full_name?: string
-  password?: string
-  is_active?: boolean
-  is_superuser?: boolean
-}
+import {
+  ITokenResponse,
+  ISendEmail,
+  IMsg,
+  INotification
+} from "./utilities"
 
-export interface IUserProfileCreate {
-  email: string
-  full_name?: string
-  password?: string
-  is_active?: boolean
-  is_superuser?: boolean
+// https://stackoverflow.com/a/64782482/295606
+interface IKeyable {
+  [key: string]: any | any[]
 }
-
-export interface IUserOpenProfileCreate {
-  email: string
-  full_name?: string
-  password: string
+  
+export {
+  IKeyable,
+  IUserProfile,
+  IUserProfileUpdate,
+  IUserProfileCreate,
+  IUserOpenProfileCreate,
+  ITokenResponse,
+  ISendEmail,
+  IMsg,
+  INotification
 }

@@ -1,12 +1,12 @@
 <template>
-  <div>
-    <NavBar />
-    <HeadingBar />
-    <main>
-      <div class="absolute z-50 top-auto w-full">
-        <NotificationsBar />
-      </div>
-      <Nuxt />
-    </main>
-  </div>
+    <div class="bg-white">
+        <slot name="header" >
+            <LayoutsDefaultNavigation />
+        </slot>
+        <slot />
+        <slot name="footer" >
+            <LayoutsNotification />
+            <LayoutsDefaultFooter />
+        </slot>
+    </div>
 </template>
