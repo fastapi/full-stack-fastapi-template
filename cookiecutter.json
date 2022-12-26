@@ -3,6 +3,8 @@
     "project_slug": "{{ cookiecutter.project_name|lower|replace(' ', '-') }}",
     "domain_main": "{{cookiecutter.project_slug}}.com",
     "domain_staging": "stag.{{cookiecutter.domain_main}}",
+    "domain_base_api_url": "http://{{cookiecutter.domain_main}}/api/v1",
+    "domain_base_ws_url": "ws://{{cookiecutter.domain_main}}/api/v1",
 
     "docker_swarm_stack_name_main": "{{cookiecutter.domain_main|replace('.', '-')}}",
     "docker_swarm_stack_name_staging": "{{cookiecutter.domain_staging|replace('.', '-')}}",
@@ -16,10 +18,13 @@
     "smtp_user": "",
     "smtp_password": "",
     "smtp_emails_from_email": "info@{{cookiecutter.domain_main}}",
+    "smtp_emails_from_name": "Symona Adaro,
+    "smtp_emails_to_email": "info@{{cookiecutter.domain_main}}",
 
     "postgres_password": "changethis",
     "pgadmin_default_user": "{{cookiecutter.first_superuser}}",
     "pgadmin_default_user_password": "{{cookiecutter.first_superuser_password}}",
+    "neo4j_password": "changethis",
 
     "traefik_constraint_tag": "{{cookiecutter.domain_main}}",
     "traefik_constraint_tag_staging": "{{cookiecutter.domain_staging}}",
