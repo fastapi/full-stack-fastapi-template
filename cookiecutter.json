@@ -46,6 +46,7 @@
         "frontend/**/*.vue",
         "frontend/.nuxt/*",
         "frontend/node_modules/*",
-        "backend/app/app/email-templates/**"
+        "backend/app/app/email-templates/**",
+        "backend/app/app/gdb/**"
     ]
 }
