@@ -24,6 +24,7 @@
     "postgres_password": "changethis",
     "pgadmin_default_user": "{{cookiecutter.first_superuser}}",
     "pgadmin_default_user_password": "{{cookiecutter.first_superuser_password}}",
+
     "neo4j_password": "changethis",
 
     "traefik_constraint_tag": "{{cookiecutter.domain_main}}",
