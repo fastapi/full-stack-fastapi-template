@@ -37,7 +37,7 @@ async def test_get_users_normal_user_me(
 
 
 async def test_create_user_new_email(
-    client: AsyncClient, superuser_token_headers: dict, db: AsyncSession
+    client: AsyncClient, superuser_token_headers: dict, async_get_db: AsyncSession
 ) -> None:
     username = random_email()
     password = random_lower_string()
@@ -49,18 +49,18 @@ async def test_create_user_new_email(
     )
     assert 200 <= r.status_code < 300
     created_user = r.json()
-    user = await crud.user.get_by_email(db, email=username)
+    user = await crud.user.get_by_email(async_get_db, email=username)
     assert user
     assert user.email == created_user["email"]
 
 
 async def test_get_existing_user(
-    client: AsyncClient, superuser_token_headers: dict, db: AsyncSession
+    client: AsyncClient, superuser_token_headers: dict, async_get_db: AsyncSession
 ) -> None:
     username = random_email()
     password = random_lower_string()
     user_in = UserCreate(email=username, password=password)
-    user = await crud.user.create(db, obj_in=user_in)
+    user = await crud.user.create(async_get_db, obj_in=user_in)
     user_id = user.id
     r = await client.get(
         f"{settings.API_V1_STR}/users/{user_id}",
@@ -68,18 +68,18 @@ async def test_get_existing_user(
     )
     assert 200 <= r.status_code < 300
     api_user = r.json()
-    existing_user = await crud.user.get_by_email(db, email=username)
+    existing_user = await crud.user.get_by_email(async_get_db, email=username)
     assert existing_user
     assert existing_user.email == api_user["email"]
 
 
 async def test_create_user_existing_username(
-    client: AsyncClient, superuser_token_headers: dict, db: AsyncSession
+    client: AsyncClient, superuser_token_headers: dict, async_get_db: AsyncSession
 ) -> None:
     username = random_email()
     password = random_lower_string()
     user_in = UserCreate(email=username, password=password)
-    await crud.user.create(db, obj_in=user_in)
+    await crud.user.create(async_get_db, obj_in=user_in)
     data = {"email": username, "password": password}
     r = await client.post(
         f"{settings.API_V1_STR}/users/",
@@ -106,17 +106,17 @@ async def test_create_user_by_normal_user(
 
 
 async def test_retrieve_users(
-    client: AsyncClient, superuser_token_headers: dict, db: AsyncSession
+    client: AsyncClient, superuser_token_headers: dict, async_get_db: AsyncSession
 ) -> None:
     username = random_email()
     password = random_lower_string()
     user_in = UserCreate(email=username, password=password)
-    await crud.user.create(db, obj_in=user_in)
+    await crud.user.create(async_get_db, obj_in=user_in)
 
     username2 = random_email()
     password2 = random_lower_string()
     user_in2 = UserCreate(email=username2, password=password2)
-    await crud.user.create(db, obj_in=user_in2)
+    await crud.user.create(async_get_db, obj_in=user_in2)
 
     r = await client.get(f"{settings.API_V1_STR}/users/", headers=superuser_token_headers)
     all_users = r.json()
