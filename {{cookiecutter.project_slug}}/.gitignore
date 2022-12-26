@@ -1,3 +1,7 @@
 .vscode
 .mypy_cache
 docker-stack.yml
+*.txt
+.env
+*.code-workspace
+.s3cfg

@@ -68,7 +68,7 @@ services:
         - traefik.http.routers.${STACK_NAME?Variable not set}-proxy-http.middlewares=${STACK_NAME?Variable not set}-www-redirect,${STACK_NAME?Variable not set}-https-redirect
 
   db:
-    image: postgres:12
+    image: postgres:14
     volumes:
       - app-db-data:/var/lib/postgresql/data/pgdata
     env_file:
@@ -104,7 +104,7 @@ services:
         - traefik.http.services.${STACK_NAME?Variable not set}-pgadmin.loadbalancer.server.port=5050
 
   neo4j:
-    image: neo4j
+    image: neo4j:5.2.0
     networks:
       - ${TRAEFIK_PUBLIC_NETWORK?Variable not set}
       - default
@@ -113,15 +113,33 @@ services:
       - "7474:7474"
       - "7687:7687"
     volumes:
+      #- ./conf/neo4j.conf:/var/lib/neo4j/conf
       - app-neo4j-data:/data
       - app-neo4j-plugins:/plugins
+      - app-neo4j-import:/var/lib/neo4j/import
     env_file:
       - .env
     environment:
       - NEO4J_ACCEPT_LICENSE_AGREEMENT=yes
-      - NEO4J_AUTH=neo4j/neo4j
-      - NEO4J_dbms_default__advertised__address=0.0.0.0
+      - NEO4J_AUTH=${NEO4J_USERNAME?Variable not set}/${NEO4J_PASSWORD?Variable not set}
+      - NEO4J_server_config_strict__validation_enabled=false
+      #- NEO4J_dbms_default__advertised__address=0.0.0.0
+      - NEO4J_dbms_default__listen__address=0.0.0.0
+      #- NEO4J_dbms_connector_bolt_advertised__address=0.0.0.0:7687
+      - NEO4J_dbms_connector_bolt_listen__address=0.0.0.0:7687
+      - NEO4J_dbms_connector_http_listen__address=:7474
+      - NEO4J_dbms_connector_http_advertised__address=:7474
+      - NEO4J_dbms_connector_https_listen__address=:6477
+      - NEO4J_dbms_connector_https_advertised__address=:6477
+      - NEO4J_dbms_connector_bolt_listen__address=:7687
       - NEO4J_dbms_mode=SINGLE
+      - NEO4J_PLUGINS=["graph-data-science", "apoc"]
+      - NEO4J_dbms_security_procedures_allowlist=gds.*, apoc.*
+      - NEO4J_dbms_security_procedures_unrestricted=gds.*, apoc.*
+      - NEO4J_dbms_memory_heap_initial__size=512m
+      - NEO4J_dbms_memory_heap_max__size=512m
+      - NEO4J_dbms_memory_pagecache_size=512m
+      - NEO4J_dbms_jvm_additional="-XX:+ExitOnOutOfMemoryError"
     deploy:
       labels:
         - traefik.enable=true
@@ -138,11 +156,11 @@ services:
       replicas: 1
       resources:
         limits:
-          memory: 1024M
+          memory: 2048M
         reservations:
-          memory: 500M
-      restart_policy:
-        condition: on-failure
+          memory: 512M
+      # restart_policy:
+      #  condition: on-failure
 
   queue:
     image: rabbitmq:3
@@ -150,6 +168,8 @@ services:
     # image: rabbitmq:3-management
     #
     # You also have to change the flower command
+    volumes:
+      - ./conf/rabbitmq.conf:/etc/rabbitmq/rabbitmq.conf
 
   flower:
     image: mher/flower:0.9.7
@@ -181,6 +201,14 @@ services:
     image: "${DOCKER_IMAGE_BACKEND?Variable not set}:${TAG-latest}"
     depends_on:
       - db
+      - neo4j
+    volumes:
+      - app-neo4j-import:/app/imports
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "200k"
+        max-file: "3"
     env_file:
       - .env
     environment:
@@ -208,7 +236,15 @@ services:
     image: "${DOCKER_IMAGE_CELERYWORKER?Variable not set}:${TAG-latest}"
     depends_on:
       - db
+      - neo4j
       - queue
+    volumes:
+      - app-neo4j-import:/app/imports
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "200k"
+        max-file: "3"
     env_file:
       - .env
     environment:
@@ -245,6 +281,7 @@ volumes:
   app-db-data:
   app-neo4j-data:
   app-neo4j-plugins:
+  app-neo4j-import:
 
 networks:
   traefik-public:
