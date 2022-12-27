@@ -124,6 +124,37 @@ The input variables, with their default values (some auto generated) are:
 - `docker_image_celeryworker`: Docker image for the celery worker. By default, based on your Docker image prefix.
 - `docker_image_frontend`: Docker image for the frontend. By default, based on your Docker image prefix.
 
+### Local development
+
+Once the Cookiecutter script has completed, you will have a folder populated with the base project and all input variables customised. 
+
+Change into the project folder and run the `docker-compose` script to build the project containers:
+
+```bash
+docker-compose build --no-cache
+```
+
+And start them:
+
+```bash
+docker-compose up -d 
+```
+
+**NOTE:** I find that the **Nuxt** container does not run well in development mode, and does not refresh on changes. In particular, `nuxt/content` is very unpredictable in dev mode running in the container. It is far better to run the `frontend` outside of the container to take advantage of live refresh.
+
+Change into the `/frontend` folder, and:
+
+```bash
+yarn install
+yarn dev
+```
+
+Be careful about the version of `Node.js` you're using. As of today (December 2022), the latest Node version supported by Nuxt is 16.18.1.
+
+You can then view the frontend at `http://localhost:3000` and the backend api endpoints at `http://localhost/redoc`.
+
+FastAPI `backend` updates will refresh automatically, but the `celeryworker` container must be restarted before changes take effect.
+
 ## How to deploy
 
 This stack can be adjusted and used with several deployment options that are compatible with Docker Compose, but it is designed to be used in a cluster controlled with pure Docker in Swarm Mode with a Traefik main load balancer proxy handling automatic HTTPS certificates, using the ideas from <a href="https://dockerswarm.rocks" target="_blank">DockerSwarm.rocks</a>.
