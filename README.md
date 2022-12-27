@@ -8,6 +8,20 @@ This project is a comprehensively updated fork of [Sebastián Ramírez's](https:
 
 Generate a backend and frontend stack using Python, including interactive API documentation.
 
+- [Screenshots](#screenshots)
+- [Key features](#key-features)
+- [How to use it](#how-to-use-it)
+   - [Generate passwords](#generate-passwords)
+   - [Input variables](#input-variables)
+   - [Local development](#local-development)
+   - [Starting Jupyter Lab](#starting-jupyter-lab)
+- [How to deploy](#how-to-deploy)
+- [More details](#more-details)
+- [Release notes](#release-notes)
+- [License](#license)
+
+## Screenshots
+
 ### App landing page
 
 [![API docs](img/landing.png)](https://github.com/whythawk/full-stack-fastapi-postgresql)
@@ -154,6 +168,28 @@ Be careful about the version of `Node.js` you're using. As of today (December 20
 You can then view the frontend at `http://localhost:3000` and the backend api endpoints at `http://localhost/redoc`.
 
 FastAPI `backend` updates will refresh automatically, but the `celeryworker` container must be restarted before changes take effect.
+
+### Starting Jupyter Lab
+
+If you like to do algorithmic development and testing in Jupyter Notebooks, then launch the `backend` terminal and start Jupyter as follows:
+
+```bash
+docker-compose exec backend bash
+```
+
+From the terminal:
+
+```bash
+$JUPYTER
+```
+
+Copy the link generated into your browser and start.
+
+**NOTE:** Notebooks developed in the container are not saved outside, so remember to copy them for persistence. You can do that from inside Jupyter (download), or:
+
+```bash
+docker cp <containerId>:/file/path/within/container /host/path/target
+```
 
 ## How to deploy
 
