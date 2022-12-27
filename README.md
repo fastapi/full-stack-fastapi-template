@@ -1,5 +1,26 @@
 # Full Stack FastAPI and PostgreSQL - Base Project Generator
 
+## How to use it
+
+Go to the directory where you want to create your project and run:
+
+```bash
+pip install cookiecutter
+cookiecutter https://github.com/da-maltsev/full-stack-fastapi-postgresql
+```
+
+### Generate passwords
+
+You will be asked to provide passwords and secret keys for several components. Open another terminal and run:
+
+```bash
+openssl rand -hex 32
+# Outputs something like: 99d3b1f01aa639e4a76f4fc281fc834747a543720ba4c8a8648ba755aef9be7f
+```
+
+Copy the contents and use that as password / secret key. And run that again to generate another secure key.
+
+
 [![Build Status](https://travis-ci.com/tiangolo/full-stack-fastapi-postgresql.svg?branch=master)](https://travis-ci.com/tiangolo/full-stack-fastapi-postgresql)
 
 Generate a backend and frontend stack using Python, including interactive API documentation.
@@ -64,27 +85,6 @@ Generate a backend and frontend stack using Python, including interactive API do
 * Load balancing between frontend and backend with **Traefik**, so you can have both under the same domain, separated by path, but served by different containers.
 * Traefik integration, including Let's Encrypt **HTTPS** certificates automatic generation.
 * GitLab **CI** (continuous integration), including frontend and backend testing.
-
-## How to use it
-
-Go to the directory where you want to create your project and run:
-
-```bash
-pip install cookiecutter
-cookiecutter https://github.com/da-maltsev/full-stack-fastapi-postgresql
-```
-
-### Generate passwords
-
-You will be asked to provide passwords and secret keys for several components. Open another terminal and run:
-
-```bash
-openssl rand -hex 32
-# Outputs something like: 99d3b1f01aa639e4a76f4fc281fc834747a543720ba4c8a8648ba755aef9be7f
-```
-
-Copy the contents and use that as password / secret key. And run that again to generate another secure key.
-
 
 ### Input variables
 
