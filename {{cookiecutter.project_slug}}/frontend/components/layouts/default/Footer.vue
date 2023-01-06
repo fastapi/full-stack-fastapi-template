@@ -18,8 +18,6 @@
 </template>
 
 <script setup lang="ts">
-import { defineComponent, h } from "vue"
-
 const siteName: String = "Your Company, Inc"
 
 const footerNavigation = {
