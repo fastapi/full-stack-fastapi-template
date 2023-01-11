@@ -1,0 +1,49 @@
+<mjml>
+  <mj-body>
+    <mj-section>
+      <mj-column>
+        <mj-image
+          width="60px"
+          src="https://tailwindui.com/img/logos/mark.svg?color=rose&shade=500"
+          href="{{ server_host }}"
+        ></mj-image>
+        <mj-divider border-color="#f43f5e"></mj-divider>
+        <mj-text font-size="16px" font-weight="bold" color="#635246"
+          >Log in to {{ project_name }}</mj-text
+        >
+        <mj-text font-size="16px" color="#635246"
+          >Welcome! Login to your account by clicking the button below within the next {{ valid_minutes }} minutes:</mj-text
+        >
+        <mj-button
+          background-color="#f43f5e"
+          color="white"
+          font-family="helvetica"
+          href="{{ link }}"
+        >
+          Login
+        </mj-button>
+        <mj-text font-size="16px" color="#635246"
+          >Or copy the following link and paste it in your browser:</mj-text
+        >
+        <mj-text font-size="16px" color="#635246"
+          ><a href="{{ link }}">{{ link }}</a></mj-text
+        >
+        <mj-divider border-color="#635246" border-width="2px" />
+        <mj-text font-size="16px" color="#635246"
+                 >Make sure you use this code on the <span style="font-weight: bold">same device</span> and in the <span style="font-weight: bold">same browser</span> where you made this request or it won't work.</mj-text
+        >
+
+        <mj-text font-size="16px" color="#635246" font-family="helvetica"
+          >For any concerns or queries, especially if you didn't make this request or feel you received it by mistake, just email me.</mj-text
+        >
+        <mj-text
+          font-size="16px"
+          font-weight="bold"
+          color="#635246"
+          font-family="helvetica"
+          >{{ server_bot }} @ {{ server_name }}</mj-text
+        >
+      </mj-column>
+    </mj-section>
+  </mj-body>
+</mjml>

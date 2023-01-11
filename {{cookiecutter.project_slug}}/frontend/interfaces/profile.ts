@@ -6,11 +6,14 @@ export interface IUserProfile {
   is_active: boolean
   is_superuser: boolean
   full_name: string
+  password: boolean
+  totp: boolean
 }
 
 export interface IUserProfileUpdate {
   email?: string
   full_name?: string
+  original?: string
   password?: string
   is_active?: boolean
   is_superuser?: boolean

@@ -4,7 +4,7 @@
     "build": "nuxt build",
     "dev": "nuxt dev",
     "generate": "nuxt generate",
-	"start": "nuxt start",
+    "start": "nuxt start",
     "preview": "nuxt preview"
   },
   "devDependencies": {
@@ -25,6 +25,7 @@
     "@pinia/nuxt": "^0.4.3",
     "@vee-validate/i18n": "^4.7.3",
     "@vee-validate/rules": "^4.7.3",
+    "qrcode.vue": "^3.3.3",
     "vee-validate": "^4.7.3"
   }
 }

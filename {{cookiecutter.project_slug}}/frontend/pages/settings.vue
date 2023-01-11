@@ -38,8 +38,8 @@
           <div v-if="selected === 'ACCOUNT'">
             <SettingsProfile />
           </div>
-          <div v-if="selected === 'PASSWORD'">
-            <SettingsPassword />
+          <div v-if="selected === 'SECURITY'">
+            <SettingsSecurity />
           </div>
         </div>
       </div>
@@ -59,7 +59,7 @@ const auth = useAuthStore()
 
 const navigation = [
   { name: "Account", id: "ACCOUNT", icon: UserCircleIcon },
-  { name: "Password", id: "PASSWORD", icon: KeyIcon },
+  { name: "Security", id: "SECURITY", icon: KeyIcon },
 ]
 const title = "Settings"
 const description = "Update your personal settings, or delete your account."

@@ -51,6 +51,7 @@ const schema = {
 const token = useTokenStore()
 const toast = useToastStore()
 
+// @ts-ignore
 async function submit(values: any, { resetForm }) {
   if (values.email) {
     await token.refreshTokens()
@@ -59,7 +60,7 @@ async function submit(values: any, { resetForm }) {
         password: generateUUID(),
         full_name: values.full_name ? values.full_name : ""
     }
-    const { data: response } = await apiAuth.createUserProfile(token.access_token, data)
+    const { data: response } = await apiAuth.createUserProfile(token.token, data)
     if (!response.value) {
         toast.addNotice({
             title: "Update error",

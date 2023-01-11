@@ -7,6 +7,9 @@ import {
 
 import {
   ITokenResponse,
+  IWebToken,
+  INewTOTP,
+  IEnableTOTP,
   ISendEmail,
   IMsg,
   INotification
@@ -24,6 +27,9 @@ export {
   IUserProfileCreate,
   IUserOpenProfileCreate,
   ITokenResponse,
+  IWebToken,
+  INewTOTP,
+  IEnableTOTP,
   ISendEmail,
   IMsg,
   INotification

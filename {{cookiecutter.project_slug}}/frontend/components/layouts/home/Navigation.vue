@@ -54,6 +54,7 @@
 
   const navigation = [
     { name: "About", to: "/about" },
+	{ name: "Authentication", to: "/authentication" },
     { name: "Blog", to: "/blog" },
   ]
   </script>

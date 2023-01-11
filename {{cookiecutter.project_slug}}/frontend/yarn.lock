@@ -4284,6 +4284,11 @@ prr@~1.0.1:
   resolved "https://registry.yarnpkg.com/prr/-/prr-1.0.1.tgz#d3fc114ba06995a45ec6893f484ceb1d78f5f476"
   integrity sha512-yPw4Sng1gWghHQWj0B3ZggWUm4qVbPwPFcRG8KyxiU7J2OHFSoEHKS+EZ3fv5l1t9CyCiop6l/ZYeWbrgoQejw==
 
+qrcode.vue@^3.3.3:
+  version "3.3.3"
+  resolved "https://registry.yarnpkg.com/qrcode.vue/-/qrcode.vue-3.3.3.tgz#00262244311a0ee1956fb7a0e238197ff7e14cfa"
+  integrity sha512-OsD4tQjIbxg/K6D5ZkWjBdYI9eg9K2i8qeYILdEAX5mdAydSAxV7xKmmZSP/hA12olLqEMZ9ryqDQrwa9jEMgw==
+
 queue-microtask@^1.2.2:
   version "1.2.3"
   resolved "https://registry.yarnpkg.com/queue-microtask/-/queue-microtask-1.2.3.tgz#4929228bbc724dfac43e0efb058caf7b6cfb6243"

@@ -16,6 +16,7 @@ Generate a backend and frontend stack using Python, including interactive API do
    - [Local development](#local-development)
    - [Starting Jupyter Lab](#starting-jupyter-lab)
 - [How to deploy](#how-to-deploy)
+- [Authentication with magic and TOTP](#authentication-with-magic-and-totp)
 - [More details](#more-details)
 - [Release notes](#release-notes)
 - [License](#license)
@@ -24,30 +25,30 @@ Generate a backend and frontend stack using Python, including interactive API do
 
 ### App landing page
 
-[![API docs](img/landing.png)](https://github.com/whythawk/full-stack-fastapi-postgresql)
+[![Landing page](img/landing.png)](https://github.com/whythawk/full-stack-fastapi-postgresql)
 
 ### Dashboard Login
 
-[![API docs](img/login.png)](https://github.com/whythawk/full-stack-fastapi-postgresql)
+[![Magic-link login](img/login.png)](https://github.com/whythawk/full-stack-fastapi-postgresql)
 
 ### Dashboard User Management
 
-[![API docs](img/dashboard.png)](https://github.com/whythawk/full-stack-fastapi-postgresql)
+[![Moderator user management](img/dashboard.png)](https://github.com/whythawk/full-stack-fastapi-postgresql)
 
 ### Interactive API documentation
 
-[![API docs](img/docs.png)](https://github.com/whythawk/full-stack-fastapi-postgresql)
+[![Interactive API docs](img/redoc.png)](https://github.com/whythawk/full-stack-fastapi-postgresql)
 
-### Alternative API documentation
+### Enabling two-factor security (TOTP)
 
-[![API docs](img/redoc.png)](https://github.com/whythawk/full-stack-fastapi-postgresql)
+[![Enabling TOTP](img/totp.png)](https://github.com/whythawk/full-stack-fastapi-postgresql)
 
 
 ## Key features
 
 - **Docker Compose** integration and optimization for local development.
+- **Authentication** user management schemas, models, crud and apis already built, with OAuth2 JWT token support & default hashing. Offers _magic link_ authentication, with password fallback, with cookie management, including `access` and `refresh` tokens.
 - [**FastAPI**](https://github.com/tiangolo/fastapi) backend with [Inboard](https://inboard.bws.bio/) one-repo Docker images:
-  - **Authentication** user management schemas, models, crud and apis already built, with OAuth2 JWT token support & default hashing.
   - **SQLAlchemy** version 1.4 support for models.
   - **MJML** templates for common email transactions.
   - **Metadata Schema** based on [Dublin Core](https://www.dublincore.org/specifications/dublin-core/dcmi-terms/#section-3) for inheritance.
@@ -55,7 +56,6 @@ Generate a backend and frontend stack using Python, including interactive API do
   - **Standards-based**: Based on (and fully compatible with) the open standards for APIs: [OpenAPI](https://github.com/OAI/OpenAPI-Specification) and [JSON Schema](http://json-schema.org/).
   - [**Many other features**]("https://fastapi.tiangolo.com/features/"): including automatic validation, serialization, interactive documentation, etc.
 - [**Nuxt/Vue 3**](https://nuxt.com/) frontend:
-  - **Authentication** with JWT and cookie management, including `access` and `refresh` tokens,
   - **Authorisation** via middleware for page access, including logged in or superuser.
   - **Model blog** project, with [Nuxt Content](https://content.nuxtjs.org/) for writing Markdown pages.
   - **Form validation** with [Vee-Validate 4](https://vee-validate.logaretm.com/v4/).
@@ -108,6 +108,7 @@ The input variables, with their default values (some auto generated) are:
 - `docker_swarm_stack_name_staging`: The name of the stack while deploying to Docker in Swarm mode for staging. By default, based on the domain.
 
 - `secret_key`: Backend server secret key. Use the method above to generate it.
+- `totp_secret_key`: Two-factor security (TOTP) server secret key.
 - `first_superuser`: The first superuser generated, with it you will be able to create more users, etc. By default, based on the domain.
 - `first_superuser_password`: First superuser password. Use the method above to generate it.
 - `backend_cors_origins`: Origins (domains, more or less) that are enabled for CORS (Cross Origin Resource Sharing). This allows a frontend in one domain (e.g. `https://dashboard.example.com`) to communicate with this backend, that could be living in another domain (e.g. `https://api.example.com`). It can also be used to allow your local frontend (with a custom `hosts` domain mapping, as described in the project's `README.md`) that could be living in `http://dev.example.com:8080` to communicate with the backend at `https://stag.example.com`. Notice the `http` vs `https` and the `dev.` prefix for local development vs the "staging" `stag.` prefix. By default, it includes origins for production, staging and development, with ports commonly used during local development by several popular frontend frameworks (Vue with `:8080`, React, Angular).
@@ -197,13 +198,34 @@ This stack can be adjusted and used with several deployment options that are com
 
 Please refer to <a href="https://dockerswarm.rocks" target="_blank">DockerSwarm.rocks</a> to see how to deploy such a cluster in 20 minutes.
 
+## Authentication with magic and TOTP
+
+> Any custodial changes to user-controlled information must be treated as requiring full authentication. Do **not** assume that a logged-in user is the authorised account holder.
+
+Most web applications permit account recovery through requesting a password reset via email. This has process has been hardened using dual JWT tokens, and is offered as a primary authentication method, with password fallback.
+
+Time-based One-Time Password (TOTP) authentication extends the login process to include a challenge-response component where the user needs to enter a time-based token after their preferred login method.
+
+For development, you may prefer to use login and password.
+
 ## More details
 
 After using this generator, your new project (the directory created) will contain an extensive `README.md` with instructions for development, deployment, etc. You can pre-read [the project `README.md` template here too](./{{cookiecutter.project_slug}}/README.md).
 
 ## Release Notes
 
-### Latest Changes
+### 0.7.0
+
+- New feature: magic (email-based) login, with password fallback
+- New feature: Time-based One-Time Password (TOTP) authentication
+- Security enhancements to improve consistency, safety and reliability of the authentication process (see full description in the frontend app)
+- Requires one new `frontend` dependency: [QRcode.vue](https://github.com/scopewu/qrcode.vue)
+
+### 0.6.1
+
+- Corrected error in variable name `ACCESS_TOKEN_EXPIRE_SECONDS`
+
+### 0.6.0
 
 - Inboard 0.10.4 -> 0.37.0, including FastAPI 0.88
 - SQLAlchemy 1.3 -> 1.4

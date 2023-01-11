@@ -1,19 +1,25 @@
 import {
     generateUUID,
-    isValidHttpUrl,
     getTimeInSeconds,
     tokenExpired,
     getKeyByValue,
+    isValidHttpUrl,
+    tokenParser,
 } from "./generic"
 import {
     readableDate,
 } from "./textual"
+import {
+    tokenIsTOTP
+} from "./totp"
 
 export {
     generateUUID,
-    isValidHttpUrl,
     getTimeInSeconds,
     tokenExpired,
     getKeyByValue,
+    isValidHttpUrl,
+    tokenParser,
     readableDate,
+    tokenIsTOTP,
 }

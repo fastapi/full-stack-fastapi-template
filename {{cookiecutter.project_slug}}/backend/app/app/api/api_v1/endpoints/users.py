@@ -8,10 +8,9 @@ from sqlalchemy.orm import Session
 from app import crud, models, schemas
 from app.api import deps
 from app.core.config import settings
+from app.core import security
 from app.utilities import (
-    generate_password_reset_token,
     send_email_validation_email,
-    verify_password_reset_token,
     send_new_account_email,
 )
 
@@ -33,7 +32,7 @@ def create_user_profile(
     if user:
         raise HTTPException(
             status_code=400,
-            detail="This username already exists in the system",
+            detail="This username is not available.",
         )
     # Create user auth
     user_in = schemas.UserCreate(password=password, email=email, full_name=full_name)
@@ -45,28 +44,30 @@ def create_user_profile(
 def update_user(
     *,
     db: Session = Depends(deps.get_db),
-    password: str = Body(None),
-    full_name: str = Body(None),
-    email: EmailStr = Body(None),
+    obj_in: schemas.UserUpdate,
     current_user: models.User = Depends(deps.get_current_active_user),
 ) -> Any:
     """
     Update user.
     """
+    if current_user.hashed_password:
+        user = crud.user.authenticate(db, email=current_user.email, password=obj_in.original)
+        if not obj_in.original or not user:
+            raise HTTPException(status_code=400, detail="Unable to authenticate this update.")
     current_user_data = jsonable_encoder(current_user)
     user_in = schemas.UserUpdate(**current_user_data)
-    if password is not None:
-        user_in.password = password
-    if full_name is not None:
-        user_in.full_name = full_name
-    if email is not None:
-        check_user = crud.user.get_by_email(db, email=email)
+    if obj_in.password is not None:
+        user_in.password = obj_in.password
+    if obj_in.full_name is not None:
+        user_in.full_name = obj_in.full_name
+    if obj_in.email is not None:
+        check_user = crud.user.get_by_email(db, email=obj_in.email)
         if check_user and check_user.email != current_user.email:
             raise HTTPException(
                 status_code=400,
-                detail="This username already exists in the system",
+                detail="This username is not available.",
             )
-        user_in.email = email
+        user_in.email = obj_in.email
     user = crud.user.update(db, db_obj=current_user, obj_in=user_in)
     return user
 
@@ -96,25 +97,39 @@ def read_all_users(
     return crud.user.get_multi(db=db, skip=skip, limit=limit)
 
 
-@router.post("/send-validation-email", response_model=schemas.Msg, status_code=201)
-def send_validation_email(
+@router.post("/new-totp", response_model=schemas.NewTOTP)
+def request_new_totp(
     *,
     current_user: models.User = Depends(deps.get_current_active_user),
 ) -> Any:
     """
-    Send validation email.
+    Request new keys to enable TOTP on the user account.
     """
-    password_validation_token = generate_password_reset_token(email=current_user.email)
-    data = schemas.EmailValidation(
-        **{
-            "email": current_user.email,
-            "subject": "Validate your email address",
-            "token": password_validation_token,
-        }
-    )
-    # EmailValidation
-    send_email_validation_email(data=data)
-    return {"msg": "Password validation email sent. Check your email and respond."}
+    obj_in = security.create_new_totp(label=current_user.email)
+    # Remove the secret ...
+    obj_in.secret = None
+    return obj_in
+
+
+# @router.post("/send-validation-email", response_model=schemas.Msg, status_code=201)
+# def send_validation_email(
+#     *,
+#     current_user: models.User = Depends(deps.get_current_active_user),
+# ) -> Any:
+#     """
+#     Send validation email.
+#     """
+#     password_validation_token = generate_password_reset_token(email=current_user.email)
+#     data = schemas.EmailValidation(
+#         **{
+#             "email": current_user.email,
+#             "subject": "Validate your email address",
+#             "token": password_validation_token,
+#         }
+#     )
+#     # EmailValidation
+#     send_email_validation_email(data=data)
+#     return {"msg": "Password validation email sent. Check your email and respond."}
 
 
 @router.post("/validate-email", response_model=schemas.Msg)

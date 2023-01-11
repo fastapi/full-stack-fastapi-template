@@ -44,6 +44,5 @@ watch(() => toasts.first, async () => {
     await toasts.timeoutNotice(toasts.first) 
     show.value = false
   }
-
 })
 </script>

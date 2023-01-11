@@ -28,6 +28,8 @@ export default defineNuxtConfig({
         appEnv: process.env.VUE_APP_ENV,
         apiWS: process.env.VUE_APP_DOMAIN_WS,
         apiUrl: process.env.VUE_APP_DOMAIN_API,
+        // idbName: process.env.VUE_IDB_NAME,
+        // idbVersion: process.env.VUE_IDB_VERSION,
       }
     },
     modules: [
@@ -65,6 +67,6 @@ export default defineNuxtConfig({
         },
     },
     build: {
-      transpile: ['@heroicons/vue']
+      transpile: ["@heroicons/vue"]
     }
 })

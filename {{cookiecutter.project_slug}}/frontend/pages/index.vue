@@ -76,13 +76,16 @@
 </template>
 
 <script setup lang="ts">
-import { ChevronRightIcon, StarIcon } from "@heroicons/vue/20/solid"
+import { ChevronRightIcon } from "@heroicons/vue/20/solid"
 import { useAuthStore } from "@/stores"
+import { tokenIsTOTP } from "@/utilities"
 
 definePageMeta({
   layout: "home",
 });
 
+const redirectTOTP = "/totp"
+const redirectAfterLogin = "/"
 const github = {
   name: "GitHub",
   href: "https://github.com/whythawk/full-stack-fastapi-postgresql",
@@ -102,14 +105,16 @@ onMounted(async () => {
   // Check if email is being validated
   const route = useRoute()
   const auth = useAuthStore()
-  if (route.query && route.query.token) {
-    if (auth.loggedIn) await auth.validateEmail(route.query.token as string)
-    else await navigateTo({
-      path: "/login",
-      query: { 
-        token: route.query.token as string 
-      }
+  if (route.query && route.query.magic) {
+    // No idea: https://stackoverflow.com/q/74759799/295606
+    await new Promise((resolve) => {
+      setTimeout(() => {
+        resolve(true)
+      }, 100)
     })
+    if (!auth.loggedIn) await auth.magicLogin(route.query.magic as string)
+    if (tokenIsTOTP(auth.authTokens.token)) await navigateTo(redirectTOTP)
+    else await navigateTo(redirectAfterLogin) 
   }
 })
 </script>

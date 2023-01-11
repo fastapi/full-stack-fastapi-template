@@ -7,7 +7,6 @@ from pydantic import ValidationError
 from sqlalchemy.orm import Session
 
 from app import crud, models, schemas
-from app.core import security
 from app.core.config import settings
 from app.db.session import SessionLocal
 
@@ -22,18 +21,25 @@ def get_db() -> Generator:
         db.close()
 
 
-def get_current_user(db: Session = Depends(get_db), token: str = Depends(reusable_oauth2)) -> models.User:
+def get_token_payload(token: str) -> schemas.TokenPayload:
     try:
-        payload = jwt.decode(token, settings.SECRET_KEY, algorithms=[security.ALGORITHM])
+        payload = jwt.decode(token, settings.SECRET_KEY, algorithms=[settings.JWT_ALGO])
         token_data = schemas.TokenPayload(**payload)
     except (jwt.JWTError, ValidationError):
         raise HTTPException(
-            status_code=status.HTTP_403_FORBIDDEN, detail="Could not validate credentials",
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Could not validate credentials",
         )
-    if token_data.refresh:
-        # Refresh token is not a valid access token
+    return token_data
+
+
+def get_current_user(db: Session = Depends(get_db), token: str = Depends(reusable_oauth2)) -> models.User:
+    token_data = get_token_payload(token)
+    if token_data.refresh or token_data.totp:
+        # Refresh token is not a valid access token and TOTP True can only be used to validate TOTP
         raise HTTPException(
-            status_code=status.HTTP_403_FORBIDDEN, detail="Could not validate credentials",
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Could not validate credentials",
         )
     user = crud.user.get(db, id=token_data.sub)
     if not user:
@@ -41,18 +47,39 @@ def get_current_user(db: Session = Depends(get_db), token: str = Depends(reusabl
     return user
 
 
-def get_refresh_user(db: Session = Depends(get_db), token: str = Depends(reusable_oauth2)) -> models.User:
+def get_totp_user(db: Session = Depends(get_db), token: str = Depends(reusable_oauth2)) -> models.User:
+    token_data = get_token_payload(token)
+    if token_data.refresh or not token_data.totp:
+        # Refresh token is not a valid access token and TOTP False cannot be used to validate TOTP
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Could not validate credentials",
+        )
+    user = crud.user.get(db, id=token_data.sub)
+    if not user:
+        raise HTTPException(status_code=404, detail="User not found")
+    return user
+
+
+def get_magic_token(token: str = Depends(reusable_oauth2)) -> schemas.MagicTokenPayload:
     try:
-        payload = jwt.decode(token, settings.SECRET_KEY, algorithms=[security.ALGORITHM])
-        token_data = schemas.TokenPayload(**payload)
+        payload = jwt.decode(token, settings.SECRET_KEY, algorithms=[settings.JWT_ALGO])
+        token_data = schemas.MagicTokenPayload(**payload)
     except (jwt.JWTError, ValidationError):
         raise HTTPException(
-            status_code=status.HTTP_403_FORBIDDEN, detail="Could not validate credentials",
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Could not validate credentials",
         )
+    return token_data
+
+
+def get_refresh_user(db: Session = Depends(get_db), token: str = Depends(reusable_oauth2)) -> models.User:
+    token_data = get_token_payload(token)
     if not token_data.refresh:
         # Access token is not a valid refresh token
         raise HTTPException(
-            status_code=status.HTTP_403_FORBIDDEN, detail="Could not validate credentials",
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Could not validate credentials",
         )
     user = crud.user.get(db, id=token_data.sub)
     if not user:
@@ -63,19 +90,24 @@ def get_refresh_user(db: Session = Depends(get_db), token: str = Depends(reusabl
     token_obj = crud.token.get(token=token, user=user)
     if not token_obj or not token_obj.is_valid:
         raise HTTPException(
-            status_code=status.HTTP_403_FORBIDDEN, detail="Could not validate credentials",
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Could not validate credentials",
         )
     crud.token.cancel_refresh_token(db, db_obj=token_obj)
     return user
 
 
-def get_current_active_user(current_user: models.User = Depends(get_current_user),) -> models.User:
+def get_current_active_user(
+    current_user: models.User = Depends(get_current_user),
+) -> models.User:
     if not crud.user.is_active(current_user):
         raise HTTPException(status_code=400, detail="Inactive user")
     return current_user
 
 
-def get_current_active_superuser(current_user: models.User = Depends(get_current_user),) -> models.User:
+def get_current_active_superuser(
+    current_user: models.User = Depends(get_current_user),
+) -> models.User:
     if not crud.user.is_superuser(current_user):
         raise HTTPException(status_code=400, detail="The user doesn't have enough privileges")
     return current_user
@@ -83,7 +115,7 @@ def get_current_active_superuser(current_user: models.User = Depends(get_current
 
 def get_active_websocket_user(*, db: Session, token: str) -> models.User:
     try:
-        payload = jwt.decode(token, settings.SECRET_KEY, algorithms=[security.ALGORITHM])
+        payload = jwt.decode(token, settings.SECRET_KEY, algorithms=[settings.JWT_ALGO])
         token_data = schemas.TokenPayload(**payload)
     except (jwt.JWTError, ValidationError):
         raise ValidationError("Could not validate credentials")

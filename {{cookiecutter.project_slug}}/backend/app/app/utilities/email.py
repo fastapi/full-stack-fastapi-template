@@ -1,11 +1,9 @@
 import logging
-from datetime import datetime, timedelta
 from pathlib import Path
-from typing import Any, Dict, Optional
+from typing import Any, Dict
 
 import emails
 from emails.template import JinjaTemplate
-from jose import jwt
 
 from app.core.config import settings
 from app.schemas import EmailContent, EmailValidation
@@ -77,6 +75,25 @@ def send_test_email(email_to: str) -> None:
     )
 
 
+def send_magic_login_email(email_to: str, token: str) -> None:
+    project_name = settings.PROJECT_NAME
+    subject = f"Your {project_name} magic login"
+    with open(Path(settings.EMAIL_TEMPLATES_DIR) / "magic_login.html") as f:
+        template_str = f.read()
+    server_host = settings.SERVER_HOST
+    link = f"{server_host}?magic={token}"
+    send_email(
+        email_to=email_to,
+        subject_template=subject,
+        html_template=template_str,
+        environment={
+            "project_name": settings.PROJECT_NAME,
+            "valid_minutes": int(settings.ACCESS_TOKEN_EXPIRE_SECONDS / 60),
+            "link": link,
+        },
+    )
+
+
 def send_reset_password_email(email_to: str, email: str, token: str) -> None:
     project_name = settings.PROJECT_NAME
     subject = f"{project_name} - Password recovery for user {email}"
@@ -92,7 +109,7 @@ def send_reset_password_email(email_to: str, email: str, token: str) -> None:
             "project_name": settings.PROJECT_NAME,
             "username": email,
             "email": email_to,
-            "valid_hours": settings.EMAIL_RESET_TOKEN_EXPIRE_HOURS,
+            "valid_hours": int(settings.ACCESS_TOKEN_EXPIRE_SECONDS / 60),
             "link": link,
         },
     )
@@ -116,24 +133,3 @@ def send_new_account_email(email_to: str, username: str, password: str) -> None:
             "link": link,
         },
     )
-
-
-def generate_password_reset_token(email: str) -> str:
-    delta = timedelta(hours=settings.EMAIL_RESET_TOKEN_EXPIRE_HOURS)
-    now = datetime.utcnow()
-    expires = now + delta
-    exp = expires.timestamp()
-    encoded_jwt = jwt.encode(
-        {"exp": exp, "nbf": now, "validate": email},
-        settings.SECRET_KEY,
-        algorithm="HS256",
-    )
-    return encoded_jwt
-
-
-def verify_password_reset_token(token: str) -> Optional[str]:
-    try:
-        decoded_token = jwt.decode(token, settings.SECRET_KEY, algorithms=["HS256"])
-        return decoded_token["validate"]
-    except jwt.JWTError:
-        return None

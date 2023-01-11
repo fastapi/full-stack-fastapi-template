@@ -48,7 +48,7 @@ const userProfiles = ref([] as IUserProfile[])
 
 async function getAllUsers() {
   await token.refreshTokens()
-  const { data: response } = await apiAuth.getAllUsers(token.access_token)
+  const { data: response } = await apiAuth.getAllUsers(token.token)
   if (response.value && response.value.length) userProfiles.value = response.value
 }
 

@@ -2,10 +2,13 @@ import {
   IUserProfile,
   IUserProfileUpdate,
   IUserOpenProfileCreate,
+  IEnableTOTP,
+  IWebToken,
 } from "@/interfaces"
 import { apiAuth } from "@/api"
 import { useTokenStore } from "./tokens"
 import { useToastStore } from "./toasts"
+import { tokenIsTOTP, tokenParser } from "@/utilities"
 
 const toasts = useToastStore()
 
@@ -16,7 +19,9 @@ export const useAuthStore = defineStore("authUser", {
     email_validated: false,
     is_active: false,
     is_superuser: false,
-    full_name: ""
+    full_name: "",
+    password: false,
+    totp: false
   }),
   persist: true,
   getters: {
@@ -34,10 +39,13 @@ export const useAuthStore = defineStore("authUser", {
     }
   },
   actions: {
-    async logIn(payload: { username: string; password: string }) {
+    // AUTHENTICATION
+    async logIn(payload: { username: string; password?: string }) {
       try {
-        await this.authTokens.getTokens(payload)       
-        await this.getUserProfile()
+        await this.authTokens.getTokens(payload)
+        if (this.authTokens.token && 
+            !tokenIsTOTP(this.authTokens.token)
+            ) await this.getUserProfile()
       } catch (error) {
         toasts.addNotice({
           title: "Login error",
@@ -47,6 +55,37 @@ export const useAuthStore = defineStore("authUser", {
         this.logOut()
       }
     },
+    async magicLogin(token: string) {
+      try {
+        await this.authTokens.validateMagicTokens(token)
+        if (this.authTokens.token && 
+          !tokenIsTOTP(this.authTokens.token)
+          ) await this.getUserProfile()
+      } catch (error) {
+        toasts.addNotice({
+          title: "Login error",
+          content: "Please check your details, or internet connection, and try again.",
+          icon: "error"
+        })
+        this.logOut()
+      }
+    },
+    async totpLogin(claim: string) {
+      try {
+        await this.authTokens.validateTOTPClaim(claim)
+        if (this.authTokens.token && 
+          !tokenIsTOTP(this.authTokens.token)
+          ) await this.getUserProfile()
+      } catch (error) {
+        toasts.addNotice({
+          title: "Login error",
+          content: "Please check your details, or internet connection, and try again.",
+          icon: "error"
+        })
+        this.logOut()
+      }
+    },
+    // PROFILE MANAGEMENT
     async createUserProfile(payload: IUserOpenProfileCreate) {
       try {
         const { data: response } = await apiAuth.createProfile(payload)
@@ -81,10 +120,60 @@ export const useAuthStore = defineStore("authUser", {
       if (this.loggedIn && this.authTokens.token) {
         try {
           const { data: response } = await apiAuth.updateProfile(this.authTokens.token, payload)
-          if (response.value) this.setUserProfile(response.value)
+          if (response.value) 
+          if (response.value) {
+            this.setUserProfile(response.value)
+            toasts.addNotice({
+              title: "Profile update",
+              content: "Your settings have been updated.",
+            })
+          } else throw "Error"
         } catch (error) {
           toasts.addNotice({
             title: "Profile update error",
+            content: "Please check your submission, or internet connection, and try again.",
+            icon: "error"
+          })
+        }
+      }
+    },
+    // MANAGING TOTP
+    async enableTOTPAuthentication(payload: IEnableTOTP) {
+      await this.authTokens.refreshTokens()
+      if (this.loggedIn && this.authTokens.token) {
+        try {
+          const { data: response } = await apiAuth.enableTOTPAuthentication(this.authTokens.token, payload)
+          if (response.value) {
+            this.totp = true
+            toasts.addNotice({
+              title: "Two-factor authentication",
+              content: response.value.msg,
+            })
+          } else throw "Error"
+        } catch (error) {
+          toasts.addNotice({
+            title: "Error enabling two-factor authentication",
+            content: "Please check your submission, or internet connection, and try again.",
+            icon: "error"
+          })
+        }
+      }
+    },
+    async disableTOTPAuthentication(payload: IUserProfileUpdate) {
+      await this.authTokens.refreshTokens()
+      if (this.loggedIn && this.authTokens.token) {
+        try {
+          const { data: response } = await apiAuth.disableTOTPAuthentication(this.authTokens.token, payload)
+          if (response.value) {
+            this.totp = false
+            toasts.addNotice({
+              title: "Two-factor authentication",
+              content: response.value.msg,
+            })
+          } else throw "Error"
+        } catch (error) {
+          toasts.addNotice({
+            title: "Error disabling two-factor authentication",
             content: "Please check your submission, or internet connection, and try again.",
             icon: "error"
           })
@@ -99,6 +188,8 @@ export const useAuthStore = defineStore("authUser", {
       this.is_active = payload.is_active
       this.is_superuser = payload.is_superuser
       this.full_name = payload.full_name
+      this.password = payload.password
+      this.totp = payload.totp
     },
     async sendEmailValidation() {
       await this.authTokens.refreshTokens()
@@ -150,36 +241,48 @@ export const useAuthStore = defineStore("authUser", {
       if (!this.loggedIn) {
         try {
           const { data: response } = await apiAuth.recoverPassword(email)
-          toasts.addNotice({
-            title: "Success",
-            content: response.value 
-              ? response.value.msg 
-              : "Password validation email sent. Check your email and respond.",
-          })
+          if (response.value) {
+            if (response.value.hasOwnProperty("claim")) 
+              this.authTokens.setMagicToken(response.value as unknown as IWebToken)
+            toasts.addNotice({
+              title: "Success",
+              content: "If that login exists, we'll send you an email to reset your password.",
+            })
+          } else throw "Error"
         } catch (error) {
           toasts.addNotice({
-            title: "Recovery error",
-            content: "Check your email and retry.",
+            title: "Login error",
+            content: "Please check your details, or internet connection, and try again.",
             icon: "error"
           })
+          this.authTokens.deleteTokens()
         }
       }
     },
     async resetPassword(password: string, token: string) {
       if (!this.loggedIn) {
         try {
-          const { data: response } = await apiAuth.resetPassword(password, token)
-          if (response.value) toasts.addNotice({
-            title: "Success",
-            content: response.value.msg,
-          })
-          else throw "Error"
+          const claim: string = this.authTokens.token
+          // Check the two magic tokens meet basic criteria
+          const localClaim = tokenParser(claim)
+          const magicClaim = tokenParser(token)
+          if (localClaim.hasOwnProperty("fingerprint") 
+              && magicClaim.hasOwnProperty("fingerprint")
+              && localClaim["fingerprint"] === magicClaim["fingerprint"]) {
+            const { data: response } = await apiAuth.resetPassword(password, claim, token)
+            if (response.value) toasts.addNotice({
+              title: "Success",
+              content: response.value.msg,
+            })
+            else throw "Error"
+          }
         } catch (error) {
           toasts.addNotice({
-            title: "Reset error",
-            content: "There was a problem. Please retry.",
+            title: "Login error",
+            content: "Ensure you're using the same browser and that the token hasn't expired.",
             icon: "error"
           })
+          this.authTokens.deleteTokens()
         }
       }
     },

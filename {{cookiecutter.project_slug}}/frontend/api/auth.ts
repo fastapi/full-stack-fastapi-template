@@ -4,7 +4,9 @@ import {
     IUserProfileCreate,
     IUserOpenProfileCreate,
     ITokenResponse,
-    ISendEmail,
+    IWebToken,
+    INewTOTP,
+    IEnableTOTP,
     IMsg
   } from "@/interfaces"
 import { apiCore } from "./core"
@@ -14,14 +16,30 @@ export const apiAuth = {
   async getTestText() {
     return await useFetch<IMsg>(`${apiCore.url()}/users/tester`)
   },
-  // MEMBER AUTH N AUTH
-  async logInGetToken(username: string, password: string) {
+  // LOGIN WITH MAGIC LINK OR OAUTH2 (USERNAME/PASSWORD)
+  async loginWithMagicLink(email: string) {
+    return await useFetch<IWebToken>(`${apiCore.url()}/login/magic/${email}`,
+      {
+        method: "POST",
+      }
+    )
+  },
+  async validateMagicLink(token: string, data: IWebToken) {
+    return await useFetch<ITokenResponse>(`${apiCore.url()}/login/claim`,
+      {
+        method: "POST",
+        body: data,
+        headers: apiCore.headers(token)
+      }
+    )
+  },
+  async loginWithOauth(username: string, password: string) {
     // Version of this: https://github.com/unjs/ofetch/issues/37#issuecomment-1262226065
     // useFetch is borked, so you'll need to ignore errors https://github.com/unjs/ofetch/issues/37
     const params = new URLSearchParams()
     params.append("username", username)
     params.append("password", password)
-    return await useFetch<ITokenResponse>(`${apiCore.url()}/login/access-token`,
+    return await useFetch<ITokenResponse>(`${apiCore.url()}/login/oauth`,
       {
         method: "POST",
         body: params,
@@ -30,8 +48,45 @@ export const apiAuth = {
       }
     )
   },
+  // TOTP SETUP AND AUTHENTICATION
+  async loginWithTOTP(token: string, data: IWebToken) {
+    return await useFetch<ITokenResponse>(`${apiCore.url()}/login/totp`,
+      {
+        method: "POST",
+        body: data,
+        headers: apiCore.headers(token)
+      }
+    )
+  },
+  async requestNewTOTP(token: string) {
+    return await useFetch<INewTOTP>(`${apiCore.url()}/users/new-totp`,
+      {
+        method: "POST",
+        headers: apiCore.headers(token)
+      }
+    )
+  },
+  async enableTOTPAuthentication(token: string, data: IEnableTOTP) {
+    return await useFetch<IMsg>(`${apiCore.url()}/login/totp`,
+      {
+        method: "PUT",
+        body: data,
+        headers: apiCore.headers(token)
+      }
+    )
+  },
+  async disableTOTPAuthentication(token: string, data: IUserProfileUpdate) {
+    return await useFetch<IMsg>(`${apiCore.url()}/login/totp`, 
+      {
+        method: "DELETE",
+        body: data,
+        headers: apiCore.headers(token)
+      }
+    )
+  },
+  // MANAGE JWT TOKENS (REFRESH / REVOKE)
   async getRefreshedToken(token: string) {
-    return await useFetch<ITokenResponse>(`${apiCore.url()}/login/refresh-token`,
+    return await useFetch<ITokenResponse>(`${apiCore.url()}/login/refresh`,
       {
         method: "POST",
         headers: apiCore.headers(token)
@@ -39,13 +94,14 @@ export const apiAuth = {
     )
   },
   async revokeRefreshedToken(token: string) {
-    return await useFetch<IMsg>(`${apiCore.url()}/login/revoke-token`,
+    return await useFetch<IMsg>(`${apiCore.url()}/login/revoke`,
       {
         method: "POST",
         headers: apiCore.headers(token)
       }
     )
   },
+  // USER PROFILE MANAGEMENT
   async createProfile(data: IUserOpenProfileCreate) {
     return await useFetch<IUserProfile>(`${apiCore.url()}/users/`, 
       {
@@ -70,21 +126,23 @@ export const apiAuth = {
       }
     )
   },
+  // ACCOUNT RECOVERY
   async recoverPassword(email: string) {
-    return await useFetch<IMsg>(`${apiCore.url()}/password-recovery/${email}`,
+    return await useFetch<IMsg | IWebToken>(`${apiCore.url()}/login/recover/${email}`,
       {
         method: "POST",
       }
     )
   },
-  async resetPassword(password: string, token: string) {
-    return await useFetch<IMsg>(`${apiCore.url()}/reset-password`,
+  async resetPassword(password: string, claim: string, token: string) {
+    return await useFetch<IMsg>(`${apiCore.url()}/login/reset`,
       {
         method: "POST",
         body: {
           new_password: password,
-          token,
-          }
+          claim,
+        },
+        headers: apiCore.headers(token)
       }
     )
   },
@@ -105,6 +163,7 @@ export const apiAuth = {
       }
     )
   },
+  // ADMIN USER MANAGEMENT
   async getAllUsers(token: string) {
     return await useFetch<IUserProfile[]>(`${apiCore.url()}/users/all`,
       {

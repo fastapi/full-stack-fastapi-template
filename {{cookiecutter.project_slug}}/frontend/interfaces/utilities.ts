@@ -6,6 +6,23 @@ export interface ITokenResponse {
   token_type: string
 }
 
+export interface IWebToken {
+  claim: string
+}
+
+export interface INewTOTP {
+  secret?: string
+  key: string
+  uri: string
+}
+
+
+export interface IEnableTOTP {
+  claim: string
+  uri: string
+  password?: string
+}
+
 export interface ISendEmail {
   email: string
   subject: string

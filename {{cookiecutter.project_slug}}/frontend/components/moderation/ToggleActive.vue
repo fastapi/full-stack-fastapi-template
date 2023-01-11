@@ -21,7 +21,7 @@ async function submit() {
         email: props.email,
         is_active: !props.check
     }
-    const { data: response } = await apiAuth.toggleUserState(token.access_token, data)
+    const { data: response } = await apiAuth.toggleUserState(token.token, data)
     if (!response.value || !response.value.msg) {
         toast.addNotice({
             title: "Update error",
