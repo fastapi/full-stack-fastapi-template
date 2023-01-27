@@ -11,6 +11,7 @@ default_context:
   first_superuser: '{{ cookiecutter.first_superuser }}'
   first_superuser_password: '{{ cookiecutter.first_superuser_password }}'
   backend_cors_origins: '{{ cookiecutter.backend_cors_origins }}'
+  smtp_tls: '{{ cookiecutter.smtp_tls }}'
   smtp_port: '{{ cookiecutter.smtp_port }}'
   smtp_host: '{{ cookiecutter.smtp_host }}'
   smtp_user: '{{ cookiecutter.smtp_user }}'
