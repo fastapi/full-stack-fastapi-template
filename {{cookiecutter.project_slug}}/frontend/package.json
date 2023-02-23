@@ -21,7 +21,7 @@
   },
   "dependencies": {
     "@headlessui/vue": "^1.7.3",
-    "@heroicons/vue": "^2.0.12",
+    "@heroicons/vue": "2.0.12",
     "@pinia/nuxt": "^0.4.3",
     "@vee-validate/i18n": "^4.7.3",
     "@vee-validate/rules": "^4.7.3",
