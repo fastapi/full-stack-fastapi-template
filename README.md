@@ -4,7 +4,7 @@
 
 Accelerate your next web development project with this FastAPI/Nuxt.js base project generator.
 
-This project is a comprehensively updated fork of [Sebastián Ramírez's](https://github.com/tiangolo) [Full Stack FastAPI and PostgreSQL Base Project Generator](https://github.com/tiangolo/full-stack-fastapi-postgresql). FastAPI is updated to version 0.88 (November 2022), SQLAlchemy to version 1.4.45 (December 2022), and the frontend to Nuxt 3 (November 2022).
+This project is a comprehensively updated fork of [Sebastián Ramírez's](https://github.com/tiangolo) [Full Stack FastAPI and PostgreSQL Base Project Generator](https://github.com/tiangolo/full-stack-fastapi-postgresql). FastAPI is updated to version 0.88 (November 2022), SQLAlchemy to version 2.0 (January 2023), and the frontend to Nuxt 3.2 (February 2023).
 
 Generate a backend and frontend stack using Python, including interactive API documentation.
 
@@ -49,7 +49,7 @@ Generate a backend and frontend stack using Python, including interactive API do
 - **Docker Compose** integration and optimization for local development.
 - **Authentication** user management schemas, models, crud and apis already built, with OAuth2 JWT token support & default hashing. Offers _magic link_ authentication, with password fallback, with cookie management, including `access` and `refresh` tokens.
 - [**FastAPI**](https://github.com/tiangolo/fastapi) backend with [Inboard](https://inboard.bws.bio/) one-repo Docker images:
-  - **SQLAlchemy** version 1.4 support for models.
+  - **SQLAlchemy** version 2.0 support for models.
   - **MJML** templates for common email transactions.
   - **Metadata Schema** based on [Dublin Core](https://www.dublincore.org/specifications/dublin-core/dcmi-terms/#section-3) for inheritance.
   - **Common CRUD** support via generic inheritance.
@@ -156,7 +156,7 @@ And start them:
 docker-compose up -d 
 ```
 
-**NOTE:** I find that the **Nuxt** container does not run well in development mode, and does not refresh on changes. In particular, `nuxt/content` is very unpredictable in dev mode running in the container. It is far better to run the `frontend` outside of the container to take advantage of live refresh.
+**NOTE:** If you install new Node packages, you will need to rebuild the `frontend`. I also find that `frontend` behaves inconsistently in development mode, and may not refresh on changes. In particular, `nuxt/content` is very unpredictable in dev mode running in the container. You may have more success running the `frontend` outside of the container to take advantage of live refresh.
 
 Change into the `/frontend` folder, and:
 
@@ -214,6 +214,15 @@ For development, you may prefer to use login and password.
 After using this generator, your new project (the directory created) will contain an extensive `README.md` with instructions for development, deployment, etc. You can pre-read [the project `README.md` template here too](./{{cookiecutter.project_slug}}/README.md).
 
 ## Release Notes
+
+### 0.7.1
+
+- SQLAlchemy 1.4 -> 2.0
+- Nuxt.js 3.0 -> 3.2.2
+- Fixed: `tokenUrl` in `app/api/deps.py`. Thanks to @Choiuijin1125.
+- Fixed: SMTP options for TLS must be `ssl`. Thanks to @raouldo.
+- Fixed: `libgeos` is a dependency for `shapely` which is a dependency for `neomodel`, and which doesn't appear to be installed correctly on Macs. Thanks to @valsha and @Mocha-L.
+- Fixed: `frontend` fails to start in development. Thanks to @pabloapast and @dividor.
 
 ### 0.7.0
 
