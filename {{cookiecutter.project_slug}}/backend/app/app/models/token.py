@@ -1,7 +1,8 @@
+from __future__ import annotations
 from typing import TYPE_CHECKING
-from sqlalchemy import Column, ForeignKey, String, Boolean
+from sqlalchemy.orm import Mapped, mapped_column, relationship
+from sqlalchemy import ForeignKey
 from sqlalchemy.dialects.postgresql import UUID
-from sqlalchemy.orm import relationship
 
 from app.db.base_class import Base
 
@@ -10,7 +11,7 @@ if TYPE_CHECKING:
 
 
 class Token(Base):
-    token = Column(String, primary_key=True, index=True)
-    is_valid = Column(Boolean(), default=True)
-    authenticates_id = Column(UUID(as_uuid=True), ForeignKey("user.id"))
-    authenticates = relationship("User", back_populates="refresh_tokens")
+    token: Mapped[str] = mapped_column(primary_key=True, index=True)
+    is_valid: Mapped[bool] = mapped_column(default=True)
+    authenticates_id: Mapped[UUID] = mapped_column(UUID(as_uuid=True), ForeignKey("user.id"))
+    authenticates: Mapped["User"] = relationship(back_populates="refresh_tokens")
