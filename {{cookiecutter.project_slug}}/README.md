@@ -757,11 +757,11 @@ Traefik UI: http://localhost.tiangolo.com:8090
 
 ## Project generation and updating, or re-generating
 
-This project was generated using https://github.com/tiangolo/full-stack-fastapi-postgresql with:
+This project was generated using https://github.com/whythawk/full-stack-fastapi-postgresql with:
 
 ```bash
 pip install cookiecutter
-cookiecutter https://github.com/tiangolo/full-stack-fastapi-postgresql
+cookiecutter https://github.com/whythawk/full-stack-fastapi-postgresql
 ```
 
 You can check the variables used during generation in the file `cookiecutter-config-file.yml`.
@@ -779,7 +779,7 @@ You can use that file while generating a new project to reuse all those variable
 For example, run:
 
 ```console
-$ cookiecutter --config-file ./cookiecutter-config-file.yml --output-dir ../project-copy https://github.com/tiangolo/full-stack-fastapi-postgresql
+$ cookiecutter --config-file ./cookiecutter-config-file.yml --output-dir ../project-copy https://github.com/whythawk/full-stack-fastapi-postgresql
 ```
 
 That will use the file `cookiecutter-config-file.yml` in the current directory (in this project) to generate a new project inside a sibling directory `project-copy`.
