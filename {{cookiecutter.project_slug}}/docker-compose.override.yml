@@ -81,7 +81,7 @@ services:
     volumes:
       # https://stackoverflow.com/a/32785014
       - ./frontend:/app
-      - ./app/node_modules
+      - /app/node_modules
     build:
       context: ./frontend
       target: run-dev
