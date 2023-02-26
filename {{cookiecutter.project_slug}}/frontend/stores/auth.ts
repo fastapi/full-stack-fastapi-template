@@ -191,52 +191,6 @@ export const useAuthStore = defineStore("authUser", {
       this.password = payload.password
       this.totp = payload.totp
     },
-    async sendEmailValidation() {
-      await this.authTokens.refreshTokens()
-      if (this.authTokens.token && !this.email_validated) {
-        try {
-          const { data: response } = await apiAuth.requestValidationEmail(this.authTokens.token)
-          if (response.value) {
-            toasts.addNotice({
-              title: "Validation sent",
-              content: response.value.msg,
-            })
-          }
-        } catch (error) {
-          toasts.addNotice({
-            title: "Validation error",
-            content: "Please check your email and try again.",
-            icon: "error"
-          })
-        }
-      }
-    },
-    async validateEmail(validationToken: string) {
-      await this.authTokens.refreshTokens()
-      if (this.authTokens.token && !this.email_validated) {
-        try {
-          const { data: response } = await apiAuth.validateEmail(
-            this.authTokens.token,
-            validationToken
-          )
-          if (response.value) {
-            this.email_validated = true
-            if (response.value) {
-              toasts.addNotice({
-                title: "Success",
-                content: response.value.msg,
-              })
-            }
-          }
-        } catch (error) {
-          toasts.addNotice({
-            title: "Validation error",
-            content: "Invalid token. Check your email and resend validation.",
-            icon: "error"
-          })
-        }
-      }
-    },
     async recoverPassword(email: string) {
       if (!this.loggedIn) {
         try {
