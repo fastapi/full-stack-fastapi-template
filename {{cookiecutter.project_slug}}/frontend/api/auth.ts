@@ -146,23 +146,6 @@ export const apiAuth = {
       }
     )
   },
-  async requestValidationEmail(token: string) {
-    return await useFetch<IMsg>(`${apiCore.url()}/users/send-validation-email`,
-      {
-        method: "POST",
-        headers: apiCore.headers(token)
-      }
-    )
-  },
-  async validateEmail(token: string, validation: string) {
-    return await useFetch<IMsg>(`${apiCore.url()}/users/validate-email`,
-      {
-        method: "POST",
-        body: { validation },
-        headers: apiCore.headers(token)
-      }
-    )
-  },
   // ADMIN USER MANAGEMENT
   async getAllUsers(token: string) {
     return await useFetch<IUserProfile[]>(`${apiCore.url()}/users/all`,

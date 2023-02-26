@@ -10,7 +10,6 @@ from app.api import deps
 from app.core.config import settings
 from app.core import security
 from app.utilities import (
-    send_email_validation_email,
     send_new_account_email,
 )
 
@@ -109,48 +108,6 @@ def request_new_totp(
     # Remove the secret ...
     obj_in.secret = None
     return obj_in
-
-
-# @router.post("/send-validation-email", response_model=schemas.Msg, status_code=201)
-# def send_validation_email(
-#     *,
-#     current_user: models.User = Depends(deps.get_current_active_user),
-# ) -> Any:
-#     """
-#     Send validation email.
-#     """
-#     password_validation_token = generate_password_reset_token(email=current_user.email)
-#     data = schemas.EmailValidation(
-#         **{
-#             "email": current_user.email,
-#             "subject": "Validate your email address",
-#             "token": password_validation_token,
-#         }
-#     )
-#     # EmailValidation
-#     send_email_validation_email(data=data)
-#     return {"msg": "Password validation email sent. Check your email and respond."}
-
-
-@router.post("/validate-email", response_model=schemas.Msg)
-def validate_email(
-    *,
-    db: Session = Depends(deps.get_db),
-    payload: dict = Body(...),
-    current_user: models.User = Depends(deps.get_current_active_user),
-) -> Any:
-    """
-    Reset password
-    """
-    # https://stackoverflow.com/a/65114346/295606
-    email = verify_password_reset_token(payload["validation"])
-    if not email or current_user.email != email:
-        raise HTTPException(
-            status_code=400,
-            detail="Invalid token",
-        )
-    crud.user.validate_email(db=db, db_obj=current_user)
-    return {"msg": "Email address validated successfully."}
 
 
 @router.post("/toggle-state", response_model=schemas.Msg)
