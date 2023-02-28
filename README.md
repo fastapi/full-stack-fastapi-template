@@ -217,6 +217,11 @@ After using this generator, your new project (the directory created) will contai
 
 See notes and [releases](https://github.com/whythawk/full-stack-fastapi-postgresql/releases).
 
+### 0.7.3
+- @nuxt/content 2.2.1 -> 2.4.3
+- Fixed: `@nuxt/content` default api, `/api/_content`, conflicts with the `backend` api url preventing content pages loading.
+- Documentation: Complete deployment guide in `DEPLOYMENT-README.md`
+
 ### 0.7.2
 - Fixed: URLs for recreating project in generated `README.md`. PR [#15](https://github.com/whythawk/full-stack-fastapi-postgresql/pull/15) by @FranzForstmayr
 - Fixed: Absolute path for mount point in `docker-compose.override.yml`. PR [#16](https://github.com/whythawk/full-stack-fastapi-postgresql/pull/16) by @FranzForstmayr
