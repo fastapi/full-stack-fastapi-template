@@ -266,10 +266,12 @@ services:
     environment:
       - NUXT_HOST=0.0.0.0
       - NUXT_PORT=80
+      - NITRO_HOST=0.0.0.0
+      - NITRO_PORT=80
     build:
       context: ./frontend
       args:
-        NUXT_VERSION: ${NUXT_VERSION:-^2.15}
+        NUXT_VERSION: ${NUXT_VERSION:-^3.0}
     deploy:
       labels:
         - traefik.enable=true
