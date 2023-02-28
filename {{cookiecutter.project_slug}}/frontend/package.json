@@ -4,11 +4,11 @@
     "build": "nuxt build",
     "dev": "nuxt dev",
     "generate": "nuxt generate",
-    "start": "nuxt start",
+    "start": "node .output/server/index.mjs",
     "preview": "nuxt preview"
   },
   "devDependencies": {
-    "@nuxt/content": "^2.2.1",
+    "@nuxt/content": "^2.4.3",
     "@pinia-plugin-persistedstate/nuxt": "^1.0.0",
     "@tailwindcss/aspect-ratio": "^0.4.2",
     "@tailwindcss/forms": "^0.5.3",
@@ -20,6 +20,8 @@
     "tailwindcss": "^3.2.1"
   },
   "dependencies": {
+    "@dicebear/bottts": "^5.3.4",
+    "@dicebear/core": "^5.3.4",
     "@headlessui/vue": "^1.7.3",
     "@heroicons/vue": "2.0.12",
     "@pinia/nuxt": "^0.4.3",

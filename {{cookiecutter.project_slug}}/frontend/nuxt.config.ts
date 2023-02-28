@@ -55,6 +55,8 @@ export default defineNuxtConfig({
     },
     content: {
       // https://content.nuxtjs.org/api/configuration
+      // @ts-ignore
+      api: { baseURL: '/apc/_content' },
       navigation: {
         fields: ["title", "author", "publishedAt"]
       }
