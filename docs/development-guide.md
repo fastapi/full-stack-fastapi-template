@@ -99,7 +99,7 @@ yarn install
 yarn dev
 ```
 
-Be careful about the version of `Node.js` you're using. As of today (December 2022), the latest Node version supported by Nuxt is 16.18.1.  [[Nuxt 3 - Setup and operations]]
+Be careful about the version of `Node.js` you're using. As of today (December 2022), the latest Node version supported by Nuxt is 16.18.1.
 
 FastAPI `backend` updates will refresh automatically, but the `celeryworker` container must be restarted before changes take effect.
 
