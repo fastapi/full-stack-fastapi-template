@@ -71,10 +71,10 @@ This FastAPI, PostgreSQL, Neo4j & Nuxt 3 repo will generate a complete web appli
 
 ## How to use it
 
--> [Getting started](getting-started.md)
--> [Development and installation](development-guide.md)
--> [Deployment for production](deployment-guide.md)
--> [Authentication and magic tokens](authentication-guide.md)
+- [Getting started](getting-started.md)
+- [Development and installation](development-guide.md)
+- [Deployment for production](deployment-guide.md)
+- [Authentication and magic tokens](authentication-guide.md)
 
 ## More details
 
