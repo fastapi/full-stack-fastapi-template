@@ -11,7 +11,7 @@ This is a comprehensively updated fork of [Sebastián Ramírez's](https://github
 - [Screenshots](#screenshots)
 - [Key features](#key-features)
 - [How to use it](#how-to-use-it)
-  - [Getting started](getting-started.md)
+  - [Getting started](#getting-started)
   - [Development and installation](#development-and-installation)
   - [Deployment for production](#deployment-for-production)
   - [Authentication and magic tokens](#authentication-and-magic-tokens)
@@ -71,10 +71,10 @@ This FastAPI, PostgreSQL, Neo4j & Nuxt 3 repo will generate a complete web appli
 
 ## How to use it
 
-- [Getting started](getting-started.md)
-- [Development and installation](development-guide.md)
-- [Deployment for production](deployment-guide.md)
-- [Authentication and magic tokens](authentication-guide.md)
+- [Getting started](./docs/getting-started.md)
+- [Development and installation](./docs/development-guide.md)
+- [Deployment for production](./docs/deployment-guide.md)
+- [Authentication and magic tokens](./docs/authentication-guide.md)
 
 ## More details
 
