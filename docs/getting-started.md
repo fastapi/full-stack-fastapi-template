@@ -58,23 +58,23 @@ It is for developers looking to build and maintain full feature progressive web 
 
 ### App landing page
 
-[![Landing page](../img/landing.png)]
+![Landing page](../img/landing.png)
 
 ### Dashboard Login
 
-[![Magic-link login](../img/login.png)]
+![Magic-link login](../img/login.png)
 
 ### Dashboard User Management
 
-[![Moderator user management](../img/dashboard.png)]
+![Moderator user management](../img/dashboard.png)
 
 ### Interactive API documentation
 
-[![Interactive API docs](../img/redoc.png)]
+![Interactive API docs](../img/redoc.png)
 
 ### Enabling two-factor security (TOTP)
 
-[![Enabling TOTP](../img/totp.png)]
+![Enabling TOTP](../img/totp.png)
 
 ## How to use it
 
@@ -82,19 +82,19 @@ It is for developers looking to build and maintain full feature progressive web 
 
 Running Cookiecutter to customise the deployment with your settings, and then building with Docker compose, takes about 20 minutes.
 
--> [Development and installation](development-guide.md)
+- [Development and installation](development-guide.md)
 
 ### Deploying for production
 
 This stack can be adjusted and used with several deployment options that are compatible with Docker Compose, but it is designed to be used in a cluster controlled with pure Docker in Swarm Mode with a Traefik main load balancer proxy handling automatic HTTPS certificates, using the ideas from [DockerSwarm.rocks](https://dockerswarm.rocks).
 
--> [Deployment for production](deployment-guide.md)
+- [Deployment for production](deployment-guide.md)
 
 ### Authentication with magic and TOTP
 
 Time-based One-Time Password (TOTP) authentication extends the login process to include a challenge-response component where the user needs to enter a time-based token after their preferred login method.
 
--> [Authentication and magic tokens](authentication-guide.md)
+- [Authentication and magic tokens](authentication-guide.md)
 
 ### More details
 
