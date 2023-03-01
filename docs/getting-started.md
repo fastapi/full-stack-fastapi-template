@@ -1,49 +1,26 @@
-# Full Stack FastAPI, PostgreSQL, Neo4j & Nuxt 3 Base Project Generator
+# Getting started with the Base Project Generator
 
-[![Build Status](https://app.travis-ci.com/whythawk/full-stack-fastapi-postgresql.svg?branch=master)](https://app.travis-ci.com/whythawk/full-stack-fastapi-postgresql)
+1. [Getting started](getting-started.md)
+2. [Development and installation](development-guide.md)
+3. [Deployment for production](deployment-guide.md)
+4. [Authentication and magic tokens](authentication-guide.md)
 
-Accelerate your next web development project with this FastAPI/Nuxt.js base project generator.
+---
 
-This project is for developers looking to build and maintain full-feature progressive web applications using Python on the backend / Typescript on the frontend, and want the complex-but-routine aspects of auth 'n auth, and component and deployment configuration, taken care of, including interactive API documentation. 
+## Contents
 
-This is a comprehensively updated fork of [Sebastián Ramírez's](https://github.com/tiangolo) [Full Stack FastAPI and PostgreSQL Base Project Generator](https://github.com/tiangolo/full-stack-fastapi-postgresql). FastAPI is updated to version 0.88 (November 2022), SQLAlchemy to version 2.0 (January 2023), and the frontend to Nuxt 3.2 (February 2023).
-
-- [Screenshots](#screenshots)
-- [Key features](#key-features)
+- [What is it?](#what-is-it)
+- [Who is it for?](#who-is-it-for)
+- [What does it look like?](#what-does-it-look-like)
 - [How to use it](#how-to-use-it)
-  - [Getting started](getting-started.md)
-  - [Development and installation](#development-and-installation)
-  - [Deployment for production](#deployment-for-production)
-  - [Authentication and magic tokens](#authentication-and-magic-tokens)
-- [More details](#more-details)
 - [Release notes](#release-notes)
 - [License](#license)
-  
-## Screenshots
 
-### App landing page
-
-![Landing page](img/landing.png)
-
-### Dashboard Login
-
-![Magic-link login](img/login.png)
-
-### Dashboard User Management
-
-![Moderator user management](img/dashboard.png)
-
-### Interactive API documentation
-
-![Interactive API docs](img/redoc.png)
-
-### Enabling two-factor security (TOTP)
-
-![Enabling TOTP](img/totp.png)
-
-## Key features
+## What is it?
 
 This FastAPI, PostgreSQL, Neo4j & Nuxt 3 repo will generate a complete web application stack as a foundation for your project development.
+
+It consists of the following key components:
 
 - **Docker Compose** integration and optimization for local development.
 - **Authentication** user management schemas, models, crud and apis already built, with OAuth2 JWT token support & default hashing. Offers _magic link_ authentication, with password fallback, with cookie management, including `access` and `refresh` tokens.
@@ -69,20 +46,63 @@ This FastAPI, PostgreSQL, Neo4j & Nuxt 3 repo will generate a complete web appli
 - Traefik integration, including Let's Encrypt **HTTPS** certificates automatic generation.
 - GitLab **CI** (continuous integration), including frontend and backend testing.
 
+## Who is it for?
+
+This project is a rock-solid foundation on which to build complex web applications which need parallel processing, scheduled event management, and a range of relational and graph database support. The base deployment - with PostgreSQL and Neo4j - takes up about 10Gb, and requires about 2Gb of memory to run. 
+
+This is **not** a light-weight system to deploy a blog or simple content-management-system.
+
+It is for developers looking to build and maintain full feature progressive web applications that can run online, or offline, want the complex-but-routine aspects of auth 'n auth, and component and deployment configuration taken care of. 
+
+## What does it look like?
+
+### App landing page
+
+![Landing page](../img/landing.png)
+
+### Dashboard Login
+
+![Magic-link login](../img/login.png)
+
+### Dashboard User Management
+
+![Moderator user management](../img/dashboard.png)
+
+### Interactive API documentation
+
+![Interactive API docs](../img/redoc.png)
+
+### Enabling two-factor security (TOTP)
+
+![Enabling TOTP](../img/totp.png)
+
 ## How to use it
 
-- [Getting started](getting-started.md)
+### Installing for local development
+
+Running Cookiecutter to customise the deployment with your settings, and then building with Docker compose, takes about 20 minutes.
+
 - [Development and installation](development-guide.md)
+
+### Deploying for production
+
+This stack can be adjusted and used with several deployment options that are compatible with Docker Compose, but it is designed to be used in a cluster controlled with pure Docker in Swarm Mode with a Traefik main load balancer proxy handling automatic HTTPS certificates, using the ideas from [DockerSwarm.rocks](https://dockerswarm.rocks).
+
 - [Deployment for production](deployment-guide.md)
+
+### Authentication with magic and TOTP
+
+Time-based One-Time Password (TOTP) authentication extends the login process to include a challenge-response component where the user needs to enter a time-based token after their preferred login method.
+
 - [Authentication and magic tokens](authentication-guide.md)
 
-## More details
+### More details
 
-After using this generator, your new project (the directory created) will contain an extensive `README.md` with instructions for development, deployment, etc. You can pre-read [the project `README.md` template here too](./{{cookiecutter.project_slug}}/README.md).
+After using this generator, your new project will contain an extensive `README.md` with instructions for development, deployment, etc. You can pre-read [the project `README.md` template here too](../{{cookiecutter.project_slug}}/README.md).
 
 ## Release Notes
 
-See notes and [releases](https://github.com/whythawk/full-stack-fastapi-postgresql/releases).
+See notes and [releases](https://github.com/whythawk/full-stack-fastapi-postgresql/releases). The last four release notes are listed here:
 
 ### 0.7.3
 - @nuxt/content 2.2.1 -> 2.4.3
@@ -111,22 +131,6 @@ See notes and [releases](https://github.com/whythawk/full-stack-fastapi-postgres
 - New feature: Time-based One-Time Password (TOTP) authentication
 - Security enhancements to improve consistency, safety and reliability of the authentication process (see full description in the frontend app)
 - Requires one new `frontend` dependency: [QRcode.vue](https://github.com/scopewu/qrcode.vue)
-
-### 0.6.1
-
-- Corrected error in variable name `ACCESS_TOKEN_EXPIRE_SECONDS`
-
-### 0.6.0
-
-- Inboard 0.10.4 -> 0.37.0, including FastAPI 0.88
-- SQLAlchemy 1.3 -> 1.4
-- Authentication refresh token tables and schemas for long-term issuing of a new access token.
-- Postgresql 12 -> 14
-- Neo4j pinned to 5.2.0
-- Nuxt.js 2.5 -> 3.0
-- Pinia for state management (replaces Vuex)
-- Vee-Validate 3 -> 4
-- Tailwind 2.2 -> 3.2
 
 [Historic changes from original](https://github.com/tiangolo/full-stack-fastapi-postgresql#release-notes)
 
