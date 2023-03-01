@@ -4,9 +4,9 @@
 
 Accelerate your next web development project with this FastAPI/Nuxt.js base project generator.
 
-This is for developers looking to build and maintain full-feature progressive web applications using Python on the backend / Typescript on the frontend, and want the complex-but-routine aspects of auth 'n auth, and component and deployment configuration, taken care of, including interactive API documentation. 
+This project is for developers looking to build and maintain full-feature progressive web applications using Python on the backend / Typescript on the frontend, and want the complex-but-routine aspects of auth 'n auth, and component and deployment configuration, taken care of, including interactive API documentation. 
 
-This project is a comprehensively updated fork of [Sebastián Ramírez's](https://github.com/tiangolo) [Full Stack FastAPI and PostgreSQL Base Project Generator](https://github.com/tiangolo/full-stack-fastapi-postgresql). FastAPI is updated to version 0.88 (November 2022), SQLAlchemy to version 2.0 (January 2023), and the frontend to Nuxt 3.2 (February 2023).
+This is a comprehensively updated fork of [Sebastián Ramírez's](https://github.com/tiangolo) [Full Stack FastAPI and PostgreSQL Base Project Generator](https://github.com/tiangolo/full-stack-fastapi-postgresql). FastAPI is updated to version 0.88 (November 2022), SQLAlchemy to version 2.0 (January 2023), and the frontend to Nuxt 3.2 (February 2023).
 
 - [Screenshots](#screenshots)
 - [Key features](#key-features)
@@ -23,23 +23,23 @@ This project is a comprehensively updated fork of [Sebastián Ramírez's](https:
 
 ### App landing page
 
-[![Landing page](img/landing.png)]
+![Landing page](img/landing.png)
 
 ### Dashboard Login
 
-[![Magic-link login](img/login.png)]
+![Magic-link login](img/login.png)
 
 ### Dashboard User Management
 
-[![Moderator user management](img/dashboard.png)]
+![Moderator user management](img/dashboard.png)
 
 ### Interactive API documentation
 
-[![Interactive API docs](img/redoc.png)]
+![Interactive API docs](img/redoc.png)
 
 ### Enabling two-factor security (TOTP)
 
-[![Enabling TOTP](img/totp.png)]
+![Enabling TOTP](img/totp.png)
 
 ## Key features
 
