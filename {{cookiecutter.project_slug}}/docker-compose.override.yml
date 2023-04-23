@@ -36,6 +36,10 @@ services:
     ports:
       - "5555:5555"
 
+  db:
+    ports:
+      - "5432:5432"
+
   backend:
     ports:
       - "8888:8888"

@@ -1,5 +1,7 @@
 from .crud_item import item
 from .crud_user import user
+from .crud_role import role
+from .crud_permission import permission
 
 # For a new basic set of CRUD operations you could just do
 

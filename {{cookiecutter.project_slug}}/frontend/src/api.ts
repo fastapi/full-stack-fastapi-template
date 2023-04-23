@@ -1,6 +1,14 @@
 import axios from 'axios';
 import { apiUrl } from '@/env';
-import { IUserProfile, IUserProfileUpdate, IUserProfileCreate } from './interfaces';
+import {
+  IUserProfile,
+  IUserProfileUpdate,
+  IUserProfileCreate,
+  IRoleCreate,
+  IRole,
+  IRoleUpdate,
+  IPermission, IPermissionUpdate,
+} from './interfaces';
 
 function authHeaders(token: string) {
   return {
@@ -41,5 +49,23 @@ export const api = {
       new_password: password,
       token,
     });
+  },
+  async getRoles(token: string) {
+    return axios.get<IRole[]>(`${apiUrl}/api/v1/roles/`, authHeaders(token));
+  },
+  async createRole(token: string, data: IRoleCreate) {
+    return axios.post(`${apiUrl}/api/v1/roles/`, data, authHeaders(token));
+  },
+  async updateRole(token: string, roleId: number, data: IRoleUpdate) {
+    return axios.put(`${apiUrl}/api/v1/roles/${roleId}`, data, authHeaders(token));
+  },
+  async getPermissions(token: string) {
+    return axios.get<IPermission[]>(`${apiUrl}/api/v1/permissions/`, authHeaders(token));
+  },
+  async createPermission(token: string, data: IPermission) {
+    return axios.post(`${apiUrl}/api/v1/permissions/`, data, authHeaders(token));
+  },
+  async updatePermission(token: string, permissionId: number, data: IPermissionUpdate) {
+    return axios.put(`${apiUrl}/api/v1/permissions/${permissionId}`, data, authHeaders(token));
   },
 };

@@ -9,6 +9,7 @@ import router from './router';
 import store from '@/store';
 import './registerServiceWorker';
 import 'vuetify/dist/vuetify.min.css';
+import './plugins/api_interceptor';
 
 Vue.config.productionTip = false;
 

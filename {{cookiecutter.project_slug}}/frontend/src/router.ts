@@ -5,7 +5,7 @@ import RouterComponent from './components/RouterComponent.vue';
 
 Vue.use(Router);
 
-export default new Router({
+const router =  new Router({
   mode: 'history',
   base: process.env.BASE_URL,
   routes: [
@@ -84,6 +84,48 @@ export default new Router({
                   component: () => import(
                     /* webpackChunkName: "main-admin-users-create" */ './views/main/admin/CreateUser.vue'),
                 },
+                //   ROLES
+                {
+                  path: 'roles',
+                  redirect: 'roles/all'
+                },
+                {
+                  path: 'roles/all',
+                  component: () => import('./views/main/admin/AdminRoles.vue'),
+                },
+                {
+                  path: 'roles/edit/:id',
+                  name: 'main-admin-roles-edit',
+                  component: () => import(
+                    /* webpackChunkName: "main-admin-users-edit" */ './views/main/admin/EditRole.vue'),
+                },
+                {
+                  path: 'roles/create',
+                  name: 'main-admin-roles-create',
+                  component: () => import(
+                    /* webpackChunkName: "main-admin-users-create" */ './views/main/admin/CreateRole.vue'),
+                },
+                //   PERMISSIONS
+                {
+                  path: 'permissions',
+                  redirect: 'permissions/all'
+                },
+                {
+                  path: 'permissions/all',
+                  component: () => import('./views/main/admin/AdminPermissions.vue'),
+                },
+                {
+                  path: 'permissions/edit/:id',
+                  name: 'main-admin-permissions-edit',
+                  component: () => import(
+                    /* webpackChunkName: "main-admin-users-edit" */ './views/main/admin/EditPermission.vue'),
+                },
+                {
+                  path: 'permissions/create',
+                  name: 'main-admin-permissions-create',
+                  component: () => import(
+                    /* webpackChunkName: "main-admin-users-create" */ './views/main/admin/CreatePermission.vue'),
+                },
               ],
             },
           ],
@@ -95,3 +137,10 @@ export default new Router({
     },
   ],
 });
+
+router.beforeEach((to, from, next) => {
+  console.log('Hit the route, Jack!', to);
+  return next();
+});
+
+export default router;

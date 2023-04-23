@@ -112,7 +112,7 @@ services:
     # You also have to change the flower command
   
   flower:
-    image: mher/flower
+    image: mher/flower:0.9.7
     networks:
       - ${TRAEFIK_PUBLIC_NETWORK?Variable not set}
       - default
@@ -190,6 +190,13 @@ services:
         - traefik.constraint-label-stack=${TRAEFIK_TAG?Variable not set}
         - traefik.http.routers.${STACK_NAME?Variable not set}-frontend-http.rule=PathPrefix(`/`)
         - traefik.http.services.${STACK_NAME?Variable not set}-frontend.loadbalancer.server.port=80
+  mailhog:
+    image: mailhog/mailhog
+    logging:
+      driver: 'none'
+    ports:
+      - 1025:1025
+      - 8025:8025
 
 volumes:
   app-db-data:
