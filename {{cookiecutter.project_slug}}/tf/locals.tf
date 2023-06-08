@@ -1,0 +1,1 @@
+# Variables de entorno local
