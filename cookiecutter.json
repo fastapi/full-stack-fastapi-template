@@ -10,12 +10,9 @@
     "secret_key": "changethis",
     "backend_cors_origins": "[\"http://localhost\", \"http://localhost:4200\", \"http://localhost:3000\", \"http://localhost:8080\", \"https://localhost\", \"https://localhost:4200\", \"https://localhost:3000\", \"https://localhost:8080\", \"http://dev.{{cookiecutter.domain_main}}\", \"https://{{cookiecutter.domain_staging}}\", \"https://{{cookiecutter.domain_main}}\"]",
     
-    "pgadmin_default_user": "{{cookiecutter.first_superuser}}",
-    "pgadmin_default_user_password": "{{cookiecutter.first_superuser_password}}",
+    "pgadmin_default_user": "admin@{{cookiecutter.domain_main}}",
+    "pgadmin_default_user_password": "changethis",
 
-    "docker_image_backend": "{{cookiecutter.docker_image_prefix}}backend",
-
-    "_copy_without_render": [
-        "app/app/email-templates/**"
-    ]
+    "docker_image_prefix": "changethis",
+    "docker_image_backend": "{{cookiecutter.docker_image_prefix}}backend"
 }

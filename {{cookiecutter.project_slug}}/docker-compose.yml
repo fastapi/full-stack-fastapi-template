@@ -4,7 +4,6 @@ services:
   proxy:
     image: traefik:v2.2
     networks:
-      - ${TRAEFIK_PUBLIC_NETWORK?Variable not set}
       - default
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
@@ -12,8 +11,6 @@ services:
       # Enable Docker in Traefik, so that it reads labels from Docker services
       - --providers.docker
       # Add a constraint to only use services with the label for this stack
-      # from the env var TRAEFIK_TAG
-      - --providers.docker.constraints=Label(`traefik.constraint-label-stack`, `${TRAEFIK_TAG?Variable not set}`)
       # Do not expose all Docker services, only the ones explicitly exposed
       - --providers.docker.exposedbydefault=false
       # Enable Docker Swarm mode
@@ -31,11 +28,6 @@ services:
       labels:
         # Enable Traefik for this service, to make it available in the public network
         - traefik.enable=true
-        # Use the traefik-public network (declared below)
-        - traefik.docker.network=${TRAEFIK_PUBLIC_NETWORK?Variable not set}
-        # Use the custom label "traefik.constraint-label=traefik-public"
-        # This public Traefik will only use services with this label
-        - traefik.constraint-label=${TRAEFIK_PUBLIC_TAG?Variable not set}
         # traefik-http set up only to use the middleware to redirect to https
         - traefik.http.middlewares.${STACK_NAME?Variable not set}-https-redirect.redirectscheme.scheme=https
         - traefik.http.middlewares.${STACK_NAME?Variable not set}-https-redirect.redirectscheme.permanent=true
@@ -100,14 +92,9 @@ services:
     deploy:
       labels:
         - traefik.enable=true
-        - traefik.constraint-label-stack=${TRAEFIK_TAG?Variable not set}
         - traefik.http.routers.${STACK_NAME?Variable not set}-backend-http.rule=PathPrefix(`/api`) || PathPrefix(`/docs`) || PathPrefix(`/redoc`)
         - traefik.http.services.${STACK_NAME?Variable not set}-backend.loadbalancer.server.port=80
 
 volumes:
   app-db-data:
 
-networks:
-  traefik-public:
-    # Allow setting it to false for testing
-    external: ${TRAEFIK_PUBLIC_NETWORK_IS_EXTERNAL-true}

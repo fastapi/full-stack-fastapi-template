@@ -444,17 +444,9 @@ This stack expects the public Traefik network to be named `traefik-public`, just
 
 If you need to use a different Traefik public network name, update it in the `docker-compose.yml` files, in the section:
 
-```YAML
-networks:
-  traefik-public:
-    external: true
-```
 
 Change `traefik-public` to the name of the used Traefik network. And then update it in the file `.env`:
 
-```bash
-TRAEFIK_PUBLIC_NETWORK=traefik-public
-```
 
 ### Persisting Docker named volumes
 
@@ -606,14 +598,12 @@ TAG=prod FRONTEND_ENV=production bash ./scripts/build-push.sh
 
 * Set these environment variables:
   * `DOMAIN={{cookiecutter.domain_main}}`
-  * `TRAEFIK_TAG={{cookiecutter.traefik_constraint_tag}}`
   * `STACK_NAME={{cookiecutter.docker_swarm_stack_name_main}}`
   * `TAG=prod`
 * Use the provided `scripts/deploy.sh` file with those environment variables:
 
 ```bash
 DOMAIN={{cookiecutter.domain_main}} \
-TRAEFIK_TAG={{cookiecutter.traefik_constraint_tag}} \
 STACK_NAME={{cookiecutter.docker_swarm_stack_name_main}} \
 TAG=prod \
 bash ./scripts/deploy.sh

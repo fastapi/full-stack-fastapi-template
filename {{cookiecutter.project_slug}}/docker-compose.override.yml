@@ -17,11 +17,6 @@ services:
     command: /start-reload.sh
     labels:
       - traefik.enable=true
-      - traefik.constraint-label-stack=${TRAEFIK_TAG?Variable not set}
       - traefik.http.routers.${STACK_NAME?Variable not set}-backend-http.rule=PathPrefix(`/api`) || PathPrefix(`/docs`) || PathPrefix(`/redoc`)
       - traefik.http.services.${STACK_NAME?Variable not set}-backend.loadbalancer.server.port=80
 
-networks:
-  traefik-public:
-    # For local dev, don't expect an external Traefik network
-    external: false

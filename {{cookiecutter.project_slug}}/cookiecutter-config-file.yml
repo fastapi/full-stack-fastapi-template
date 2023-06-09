@@ -9,5 +9,3 @@ default_context:
   backend_cors_origins: '{{ cookiecutter.backend_cors_origins }}'
   docker_image_prefix: '{{ cookiecutter.docker_image_prefix }}'
   docker_image_backend: '{{ cookiecutter.docker_image_backend }}'
-  _copy_without_render: [frontend/src/**/*.html, frontend/src/**/*.vue, frontend/node_modules/*, backend/app/app/email-templates/**]
-  _template: ./
