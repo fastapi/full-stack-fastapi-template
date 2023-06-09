@@ -4,7 +4,7 @@ services:
     ports:
       - "8888:8888"
     volumes:
-      - ./backend/app:/app
+      - ./app:/app
     environment:
       - SERVER_HOST=http://${DOMAIN?Variable not set}
     build:
