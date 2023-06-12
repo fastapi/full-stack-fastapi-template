@@ -2,7 +2,7 @@
     "project_name": "Base Project",
     "project_slug": "{{ cookiecutter.project_name|lower|replace(' ', '-') }}",
     "secret_key": "changethis",
-    "backend_cors_origins": "[\"*\"]",
+    "backend_cors_origins": "[\"http://localhost\", \"http://localhost:4200\", \"http://localhost:3000\", \"http://localhost:8080\"]",
     "pg_server": "db",
     "pg_user": "postgres",
     "pg_password": "changethis",
