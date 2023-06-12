@@ -13,7 +13,7 @@ class CRUDUser(CRUDBase[User, UserCreate, UserUpdate]):
         return db.query(User).filter(User.email == email).first()
 
     def create(self, db: Session, *, obj_in: UserCreate) -> User:
-        db_obj = User(
+        db_obj = User(  # type: ignore
             email=obj_in.email,
             hashed_password=get_password_hash(obj_in.password),
             full_name=obj_in.full_name,
@@ -46,10 +46,10 @@ class CRUDUser(CRUDBase[User, UserCreate, UserUpdate]):
         return user
 
     def is_active(self, user: User) -> bool:
-        return user.is_active
+        return bool(user.is_active)
 
     def is_superuser(self, user: User) -> bool:
-        return user.is_superuser
+        return bool(user.is_superuser)
 
 
 user = CRUDUser(User)
