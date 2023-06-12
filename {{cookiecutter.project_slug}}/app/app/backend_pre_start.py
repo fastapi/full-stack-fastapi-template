@@ -1,8 +1,7 @@
 import logging
 
 from sqlalchemy import text
-from tenacity import (after_log, before_log, retry, stop_after_attempt,
-                      wait_fixed)
+from tenacity import after_log, before_log, retry, stop_after_attempt, wait_fixed
 
 from app.db.session import SessionLocal
 
