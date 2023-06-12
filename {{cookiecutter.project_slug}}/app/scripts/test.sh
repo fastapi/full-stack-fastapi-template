@@ -3,4 +3,5 @@
 set -e
 set -x
 
-pytest --cov=app --cov-report=term-missing app/tests "${@}"
+# app/tests
+pytest -W ignore::DeprecationWarning $1
