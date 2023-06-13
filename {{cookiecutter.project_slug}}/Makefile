@@ -29,7 +29,7 @@ build:
 bash:
 	docker compose exec api bash
 
-## test                		| Run unit tests
+## test   		  | Run unit tests
 test:
 	sh ./scripts/test.sh app/tests/$(TESTS_DIR)
 
