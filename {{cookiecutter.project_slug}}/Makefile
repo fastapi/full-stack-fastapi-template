@@ -2,7 +2,7 @@ include .env
 export
 .DEFAULT_GOAL := help
 
-.PHONY: help up up-quiet down build bash test qa cov report format migrate generate-migration
+.PHONY: help up up-quiet down build bash test lint cov report format migrate generate-migration
 
 help: Makefile
 	@sed -n 's/^##//p' $< | cat
@@ -33,8 +33,8 @@ bash:
 test:
 	sh ./scripts/test.sh app/tests/$(TESTS_DIR)
 
-## qa                       | Run qa checks, lint and format the application in docker
-qa:
+## lint                     | Run lint checks
+lint:
 	sh ./app/scripts/lint.sh
 
 ## cov                      | Run coverage
@@ -47,7 +47,6 @@ report:
 
 ## format                   | Run formats
 format:
-	sh ./scripts/test.sh
 	sh ./app/scripts/format.sh
 
 ## migrate                  | Run migrations

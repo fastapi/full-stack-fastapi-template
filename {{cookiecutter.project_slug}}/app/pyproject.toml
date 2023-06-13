@@ -32,6 +32,8 @@ pytest = "^7.3.2"
 sqlalchemy-stubs = "^0.4"
 pytest-cov = "^4.1.0"
 black = "^23.3.0"
+types-passlib = "^1.7.7.12"
+types-python-jose = "^3.3.4.7"
 
 [tool.isort]
 multi_line_output = 3
