@@ -1,7 +1,8 @@
-version: "3.3"
+version: '3.8'
+
 services:
   db:
-    image: postgres:15
+    image: postgres:13.0
     volumes:
       - /var/run/postgres/postgres.sock:/var/run/postgres/postgres.sock
       - db-volume:/var/lib/postgresql/data
