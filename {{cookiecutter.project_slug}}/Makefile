@@ -51,9 +51,9 @@ format:
 
 ## migrate                  | Run migrations
 migrate:
-	docker compose -f docker-stack.yml exec -T api alembic upgrade head
+	docker compose -f docker-compose.yml exec -T api alembic upgrade head
 
 ## generate-migration       | Generate migration template
 generate-migration:
 	@read -p "Enter description: " description; \
-	docker compose -f docker-stack.yml exec -T api alembic revision --autogenerate -m "$description"
+	docker compose -f docker-compose.yml exec -T api alembic revision --autogenerate -m "$description"
