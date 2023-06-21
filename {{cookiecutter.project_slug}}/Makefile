@@ -39,7 +39,7 @@ lint:
 
 ## cov                      | Run coverage
 cov:
-	sh ./app/scripts/cov.sh
+	sh ./scripts/cov.sh
 
 ## report                   | Run coverage report
 report:
