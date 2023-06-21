@@ -1,5 +1,0 @@
-.mypy_cache
-__pycache__
-app.egg-info
-.coverage
-htmlcov

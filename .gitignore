@@ -408,3 +408,4 @@ testing-project
 poetry.lock
 dev-link/
 .python-version
+.idea/

@@ -59,8 +59,9 @@ class CRUDBase(Generic[ModelType, CreateSchemaType, UpdateSchemaType]):
         db.refresh(db_obj)
         return db_obj
 
-    def remove(self, db: Session, *, id: int) -> ModelType:
-        obj = db.query(self.model).get(id)
-        db.delete(obj)
-        db.commit()
+    def remove(self, db: Session, *, id: int) -> Optional[ModelType]:
+        obj = self.get(db, id)
+        if obj is not None:
+            db.delete(obj)
+            db.commit()
         return obj
