@@ -3,6 +3,7 @@ version: '3.8'
 services:
   db:
     image: postgres:13.0
+    container_name: db
     volumes:
       - /var/run/postgres/postgres.sock:/var/run/postgres/postgres.sock
       - db-volume:/var/lib/postgresql/data
@@ -10,6 +11,7 @@ services:
       - .env
 
   api:
+    container_name: api
     depends_on:
       - db
     env_file:
