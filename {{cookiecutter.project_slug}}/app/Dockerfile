@@ -1,5 +1,7 @@
 FROM tiangolo/uvicorn-gunicorn-fastapi:python3.11
 
+ENV PYTHONUNBUFFERED 1
+
 WORKDIR /app/
 
 # Install Poetry
