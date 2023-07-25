@@ -48,7 +48,6 @@ import { ArrowLeftOnRectangleIcon } from "@heroicons/vue/24/outline"
 import { useAuthStore } from "@/stores"
 
 const auth = useAuthStore()
-
 const navigation = [
   { name: "Settings", to: "/settings" },
 ]

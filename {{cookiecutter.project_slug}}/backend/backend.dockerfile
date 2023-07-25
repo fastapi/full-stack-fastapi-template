@@ -1,16 +1,10 @@
-FROM ghcr.io/br3ndonland/inboard:fastapi-0.37.0-python3.9
+FROM ghcr.io/br3ndonland/inboard:fastapi-0.51.0-python3.11
 
-# Copy poetry.lock* in case it doesn't exist in the repo
-COPY ./app/pyproject.toml ./app/poetry.lock* /app/
-
+# Use file.name* in case it doesn't exist in the repo
+COPY ./app/pyproject.toml ./app/README.md ./app/__version__.py /app/
 WORKDIR /app/
-
-# Neomodel has shapely and libgeos as dependencies
-RUN apt-get update && apt-get install -y libgeos-dev
-
-# Allow installing dev dependencies to run tests
-ARG INSTALL_DEV=false
-RUN bash -c "if [ $INSTALL_DEV == 'true' ] ; then poetry install --no-interaction --no-root ; else poetry install --no-interaction --no-root --no-dev ; fi"
+ENV HATCH_ENV_TYPE_VIRTUAL_PATH=.venv
+RUN hatch env prune && hatch env create production
 RUN pip install --upgrade setuptools
 
 # /start Project-specific dependencies
@@ -19,7 +13,7 @@ RUN pip install --upgrade setuptools
 # WORKDIR /app/
 # /end Project-specific dependencies
 
-# For development, Jupyter remote kernel, Hydrogen
+# For development, Jupyter remote kernel
 # Using inside the container:
 # jupyter lab --ip=0.0.0.0 --allow-root --NotebookApp.custom_display_url=http://127.0.0.1:8888
 ARG INSTALL_JUPYTER=false

@@ -33,19 +33,17 @@ export default defineNuxtConfig({
       }
     },
     modules: [
-        [
-          "@pinia/nuxt",
-          {
-            autoImports: [
-              // automatically imports `defineStore`
-              "defineStore", // import { defineStore } from "pinia"
-            ],
-          },
-        ],
-        "@pinia-plugin-persistedstate/nuxt",
-        "@nuxt/content",
-        "tailwindcss"
+      "@pinia/nuxt",
+      "@pinia-plugin-persistedstate/nuxt",
+      "@nuxt/content",
+      "tailwindcss",
     ],
+    pinia: {
+      autoImports: [
+        "definePiniaStore",
+        "defineStore",
+      ],
+    },
     piniaPersistedstate: {
       cookieOptions: {
         path: "/",
@@ -55,8 +53,6 @@ export default defineNuxtConfig({
     },
     content: {
       // https://content.nuxtjs.org/api/configuration
-      // @ts-ignore
-      api: { baseURL: '/apc/_content' },
       navigation: {
         fields: ["title", "author", "publishedAt"]
       }

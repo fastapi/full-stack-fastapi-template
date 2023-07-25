@@ -6,11 +6,7 @@ import {
   IWebToken,
 } from "@/interfaces"
 import { apiAuth } from "@/api"
-import { useTokenStore } from "./tokens"
-import { useToastStore } from "./toasts"
 import { tokenIsTOTP, tokenParser } from "@/utilities"
-
-const toasts = useToastStore()
 
 export const useAuthStore = defineStore("authUser", {
   state: (): IUserProfile => ({
@@ -23,7 +19,17 @@ export const useAuthStore = defineStore("authUser", {
     password: false,
     totp: false
   }),
-  persist: true,
+  persist: {
+    storage: persistedState.cookiesWithOptions({
+      // https://prazdevs.github.io/pinia-plugin-persistedstate/frameworks/nuxt-3.html
+      // https://nuxt.com/docs/api/composables/use-cookie#options
+      // in seconds
+      path: "/",
+      secure: true,
+      maxAge: 60 * 60 * 24 * 90,
+      expires: new Date(new Date().getTime() + 60 * 60 * 24 * 90),
+    }),
+  },
   getters: {
     isAdmin: (state) => {
         return (
@@ -35,12 +41,15 @@ export const useAuthStore = defineStore("authUser", {
     profile: (state) => state,
     loggedIn: (state) => state.id !== "",
     authTokens: () => {
+      // @ts-ignore
       return ( useTokenStore() )
     }
   },
   actions: {
     // AUTHENTICATION
     async logIn(payload: { username: string; password?: string }) {
+      // @ts-ignore
+      const toasts = useToastStore()
       try {
         await this.authTokens.getTokens(payload)
         if (this.authTokens.token && 
@@ -56,6 +65,8 @@ export const useAuthStore = defineStore("authUser", {
       }
     },
     async magicLogin(token: string) {
+      // @ts-ignore
+      const toasts = useToastStore()
       try {
         await this.authTokens.validateMagicTokens(token)
         if (this.authTokens.token && 
@@ -71,6 +82,8 @@ export const useAuthStore = defineStore("authUser", {
       }
     },
     async totpLogin(claim: string) {
+      // @ts-ignore
+      const toasts = useToastStore()
       try {
         await this.authTokens.validateTOTPClaim(claim)
         if (this.authTokens.token && 
@@ -87,6 +100,8 @@ export const useAuthStore = defineStore("authUser", {
     },
     // PROFILE MANAGEMENT
     async createUserProfile(payload: IUserOpenProfileCreate) {
+      // @ts-ignore
+      const toasts = useToastStore()
       try {
         const { data: response } = await apiAuth.createProfile(payload)
         if (response.value) this.setUserProfile(response.value)
@@ -116,6 +131,8 @@ export const useAuthStore = defineStore("authUser", {
       }
     },
     async updateUserProfile(payload: IUserProfileUpdate) {
+      // @ts-ignore
+      const toasts = useToastStore()
       await this.authTokens.refreshTokens()
       if (this.loggedIn && this.authTokens.token) {
         try {
@@ -139,6 +156,8 @@ export const useAuthStore = defineStore("authUser", {
     },
     // MANAGING TOTP
     async enableTOTPAuthentication(payload: IEnableTOTP) {
+      // @ts-ignore
+      const toasts = useToastStore()
       await this.authTokens.refreshTokens()
       if (this.loggedIn && this.authTokens.token) {
         try {
@@ -160,6 +179,8 @@ export const useAuthStore = defineStore("authUser", {
       }
     },
     async disableTOTPAuthentication(payload: IUserProfileUpdate) {
+      // @ts-ignore
+      const toasts = useToastStore()
       await this.authTokens.refreshTokens()
       if (this.loggedIn && this.authTokens.token) {
         try {
@@ -191,7 +212,59 @@ export const useAuthStore = defineStore("authUser", {
       this.password = payload.password
       this.totp = payload.totp
     },
+    async sendEmailValidation() {
+      // @ts-ignore
+      const toasts = useToastStore()
+      await this.authTokens.refreshTokens()
+      if (this.authTokens.token && !this.email_validated) {
+        try {
+          const { data: response } = await apiAuth.requestValidationEmail(this.authTokens.token)
+          if (response.value) {
+            toasts.addNotice({
+              title: "Validation sent",
+              content: response.value.msg,
+            })
+          }
+        } catch (error) {
+          toasts.addNotice({
+            title: "Validation error",
+            content: "Please check your email and try again.",
+            icon: "error"
+          })
+        }
+      }
+    },
+    async validateEmail(validationToken: string) {
+      // @ts-ignore
+      const toasts = useToastStore()
+      await this.authTokens.refreshTokens()
+      if (this.authTokens.token && !this.email_validated) {
+        try {
+          const { data: response } = await apiAuth.validateEmail(
+            this.authTokens.token,
+            validationToken
+          )
+          if (response.value) {
+            this.email_validated = true
+            if (response.value) {
+              toasts.addNotice({
+                title: "Success",
+                content: response.value.msg,
+              })
+            }
+          }
+        } catch (error) {
+          toasts.addNotice({
+            title: "Validation error",
+            content: "Invalid token. Check your email and resend validation.",
+            icon: "error"
+          })
+        }
+      }
+    },
     async recoverPassword(email: string) {
+      // @ts-ignore
+      const toasts = useToastStore()
       if (!this.loggedIn) {
         try {
           const { data: response } = await apiAuth.recoverPassword(email)
@@ -214,6 +287,8 @@ export const useAuthStore = defineStore("authUser", {
       }
     },
     async resetPassword(password: string, token: string) {
+      // @ts-ignore
+      const toasts = useToastStore()
       if (!this.loggedIn) {
         try {
           const claim: string = this.authTokens.token

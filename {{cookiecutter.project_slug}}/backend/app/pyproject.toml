@@ -1,50 +1,117 @@
-[tool.poetry]
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project]
 name = "app"
-version = "0.1.0"
-description = ""
-authors = ["Admin <admin@example.com>"]
+dynamic = ["version"]
+description = ''
+readme = "README.md"
+requires-python = ">=3.11"
+license = "MIT"
+keywords = []
+authors = [
+  { name = "U.N. Owen", email = "void@some.where" },
+]
+classifiers = [
+  "Development Status :: 4 - Beta",
+  "Programming Language :: Python",
+  "Programming Language :: Python :: 3.11",
+]
+dependencies = [
+  "inboard[fastapi]>=0.51.0",
+  "python-multipart>=0.0.5",
+  "email-validator>=1.3.0",
+  "requests>=2.28.1",
+  "celery>=5.2.7",
+  "passlib[bcrypt]>=1.7.4",
+  "tenacity>=8.1.0",
+  "emails>=0.6.0",
+  "raven>=6.10.0",
+  "jinja2>=3.1.2",
+  "alembic>=1.8.1",
+  "sqlalchemy>=2.0",
+  "python-jose[cryptography]>=3.3.0",
+  "httpx>=0.23.1",
+  "neo4j>=5.3.0",
+  "neomodel>=4.0.8",
+  "psycopg2-binary>=2.9.5",
+  "setuptools>=65.6.3",
+  "sqlalchemy2-stubs>=0.0.2a29",
+]
 
-[tool.poetry.dependencies]
-python = "^3.9.4"
-inboard = {version = "^0.37.0", extras = ["fastapi"]}
-python-multipart = "^0.0.5"
-email-validator = "^1.3.0"
-requests = "^2.28.1"
-celery = "^5.2.7"
-passlib = {extras = ["bcrypt"], version = "^1.7.4"}
-tenacity = "^8.1.0"
-emails = "^0.6.0"
-raven = "^6.10.0"
-jinja2 = "^3.1.2"
-alembic = "^1.8.1"
-sqlalchemy = "^2.0"
-python-jose = {extras = ["cryptography"], version = "^3.3.0"}
-httpx = "^0.23.1"
-neo4j = "^5.3.0"
-neomodel = "^4.0.8"
-psycopg2-binary = "^2.9.5"
-setuptools = "^65.6.3"
-argon2-cffi = "^21.3.0"
+[project.optional-dependencies]
+checks = [
+  "black>=23.1.0",
+  "mypy>=1.0.0",
+  "isort>=5.11.2",
+  "autoflake>=2.0.0",
+  "flake8>=6.0.0",
+]
 
-[tool.poetry.dev-dependencies]
-mypy = "^0.991"
-black = "^22.12.0"
-isort = "^5.11.2"
-autoflake = "^2.0.0"
-flake8 = "^6.0.0"
-pytest = "^7.2.0"
-sqlalchemy2-stubs = "^0.0.2a29"
-pytest-cov = "^4.0.0"
+[project.urls]
+Documentation = "https://github.com/unknown/app#readme"
+Issues = "https://github.com/unknown/app/issues"
+Source = "https://github.com/unknown/app"
+
+[tool.hatch.version]
+path = "./__version__.py"
+
+[dirs.env]
+virtual = "./.venv"
+
+[tool.hatch.envs.default]
+dev-mode = true
+dependencies = []
+
+[tool.hatch.build.targets.sdist]
+include = ["/app"]
+
+[tool.hatch.envs.production]
+dev-mode = false
+features = []
+path = ".venv"
+
+[[tool.hatch.envs.all.matrix]]
+python = ["3.11"]
+
+[tool.hatch.envs.lint]
+detached = true
+dependencies = [
+  "black>=23.1.0",
+  "mypy>=1.0.0",
+  "isort>=5.11.2",
+]
+[tool.hatch.envs.lint.scripts]
+typing = "mypy --install-types --non-interactive {args:src/app tests}"
+style = [
+  "isort {args:.}",
+  "black --check --diff {args:.}",
+]
+fmt = [
+  "black {args:.}",
+  "isort {args:.}",
+  "style",
+]
+all = [
+  "style",
+  "typing",
+]
+
+[tool.black]
+target-version = ["py311"]
+line-length = 120
 
 [tool.isort]
+profile = "black"
 multi_line_output = 3
 include_trailing_comma = true
 force_grid_wrap = 0
 line_length = 120
+src_paths = ["app", "tests"]
 
-[build-system]
-requires = ["poetry-core>=1.0.0"]
-build-backend = "poetry.core.masonry.api"
-
-[tool.black]
-line-length = 120
+[tool.mypy]
+files = ["**/*.py"]
+plugins = "pydantic.mypy"
+show_error_codes = true
+strict = true

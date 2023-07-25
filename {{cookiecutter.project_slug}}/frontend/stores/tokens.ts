@@ -1,9 +1,6 @@
 import { ITokenResponse, IWebToken } from "@/interfaces"
 import { apiAuth } from "@/api"
 import { tokenExpired, tokenParser } from "@/utilities"
-import { useToastStore } from "./toasts"
-
-const toasts = useToastStore()
 
 export const useTokenStore = defineStore("tokens", {
   state: (): ITokenResponse => ({
@@ -18,6 +15,8 @@ export const useTokenStore = defineStore("tokens", {
   },
   actions: {
     async getTokens(payload: { username: string; password?: string }) {
+      // @ts-ignore
+      const toasts = useToastStore()
       // https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Operators/Destructuring_assignment
       let response
       try {
@@ -44,6 +43,8 @@ export const useTokenStore = defineStore("tokens", {
       }
     },
     async validateMagicTokens(token: string) {
+      // @ts-ignore
+      const toasts = useToastStore()
       try {
         const data: string = this.token
         // Check the two magic tokens meet basic criteria
@@ -69,6 +70,8 @@ export const useTokenStore = defineStore("tokens", {
       }
     },
     async validateTOTPClaim(data: string) {
+      // @ts-ignore
+      const toasts = useToastStore()
       try {
         const { data: response } = await apiAuth.loginWithTOTP(
           this.access_token, { "claim": data }

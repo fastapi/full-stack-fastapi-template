@@ -12,21 +12,19 @@
     "@pinia-plugin-persistedstate/nuxt": "^1.0.0",
     "@tailwindcss/aspect-ratio": "^0.4.2",
     "@tailwindcss/forms": "^0.5.3",
-    "@tailwindcss/line-clamp": "^0.4.2",
     "@tailwindcss/typography": "^0.5.7",
     "autoprefixer": "^10.4.13",
-    "nuxt": "^3.0.0",
+    "nuxt": "^3.5.0",
     "postcss": "^8.4.18",
     "tailwindcss": "^3.2.1"
   },
   "dependencies": {
-    "@dicebear/bottts": "^5.3.4",
-    "@dicebear/core": "^5.3.4",
     "@headlessui/vue": "^1.7.3",
     "@heroicons/vue": "2.0.12",
-    "@pinia/nuxt": "^0.4.3",
+    "@pinia/nuxt": "^0.4.11",
     "@vee-validate/i18n": "^4.7.3",
     "@vee-validate/rules": "^4.7.3",
+    "pinia": "^2.1.4",
     "qrcode.vue": "^3.3.3",
     "vee-validate": "^4.7.3"
   }

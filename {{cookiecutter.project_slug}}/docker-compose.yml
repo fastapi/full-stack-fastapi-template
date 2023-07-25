@@ -68,7 +68,7 @@ services:
         - traefik.http.routers.${STACK_NAME?Variable not set}-proxy-http.middlewares=${STACK_NAME?Variable not set}-www-redirect,${STACK_NAME?Variable not set}-https-redirect
 
   db:
-    image: postgres:14
+    image: postgres:15
     volumes:
       - app-db-data:/var/lib/postgresql/data/pgdata
     env_file:
@@ -271,7 +271,7 @@ services:
     build:
       context: ./frontend
       args:
-        NUXT_VERSION: ${NUXT_VERSION:-^3.0}
+        NUXT_VERSION: ${NUXT_VERSION:-^3.5}
     deploy:
       labels:
         - traefik.enable=true

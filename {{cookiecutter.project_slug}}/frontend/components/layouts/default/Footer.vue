@@ -25,7 +25,6 @@ const footerNavigation = {
     { name: "About", to: "/about" },
 	{ name: "Authentication", to: "/authentication" },
     { name: "Blog", to: "/blog" },
-	{ name: "Contact", to: "/contact" },
   ],
   social: [
     {
