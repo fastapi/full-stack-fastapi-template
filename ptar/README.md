@@ -1,4 +1,4 @@
-# {{cookiecutter.project_name}}
+# ptar
 
 ## Backend Requirements
 
@@ -307,36 +307,36 @@ Check all the corresponding available URLs in the section at the end.
 
 If you are running Docker in an IP address different than `127.0.0.1` (`localhost`) and `192.168.99.100` (the default of Docker Toolbox), you will need to perform some additional steps. That will be the case if you are running a custom Virtual Machine, a secondary Docker Toolbox or your Docker is located in a different machine in your network.
 
-In that case, you will need to use a fake local domain (`dev.{{cookiecutter.domain_main}}`) and make your computer think that the domain is is served by the custom IP (e.g. `192.168.99.150`).
+In that case, you will need to use a fake local domain (`dev.ptar.com`) and make your computer think that the domain is is served by the custom IP (e.g. `192.168.99.150`).
 
-If you used the default CORS enabled domains, `dev.{{cookiecutter.domain_main}}` was configured to be allowed. If you want a custom one, you need to add it to the list in the variable `BACKEND_CORS_ORIGINS` in the `.env` file.
+If you used the default CORS enabled domains, `dev.ptar.com` was configured to be allowed. If you want a custom one, you need to add it to the list in the variable `BACKEND_CORS_ORIGINS` in the `.env` file.
 
 * Open your `hosts` file with administrative privileges using a text editor:
   * **Note for Windows**: If you are in Windows, open the main Windows menu, search for "notepad", right click on it, and select the option "open as Administrator" or similar. Then click the "File" menu, "Open file", go to the directory `c:\Windows\System32\Drivers\etc\`, select the option to show "All files" instead of only "Text (.txt) files", and open the `hosts` file.
   * **Note for Mac and Linux**: Your `hosts` file is probably located at `/etc/hosts`, you can edit it in a terminal running `sudo nano /etc/hosts`.
 
-* Additional to the contents it might have, add a new line with the custom IP (e.g. `192.168.99.150`) a space character, and your fake local domain: `dev.{{cookiecutter.domain_main}}`.
+* Additional to the contents it might have, add a new line with the custom IP (e.g. `192.168.99.150`) a space character, and your fake local domain: `dev.ptar.com`.
 
 The new line might look like:
 
 ```
-192.168.99.100    dev.{{cookiecutter.domain_main}}
+192.168.99.100    dev.ptar.com
 ```
 
 * Save the file.
   * **Note for Windows**: Make sure you save the file as "All files", without an extension of `.txt`. By default, Windows tries to add the extension. Make sure the file is saved as is, without extension.
 
-...that will make your computer think that the fake local domain is served by that custom IP, and when you open that URL in your browser, it will talk directly to your locally running server when it is asked to go to `dev.{{cookiecutter.domain_main}}` and think that it is a remote server while it is actually running in your computer.
+...that will make your computer think that the fake local domain is served by that custom IP, and when you open that URL in your browser, it will talk directly to your locally running server when it is asked to go to `dev.ptar.com` and think that it is a remote server while it is actually running in your computer.
 
-To configure it in your stack, follow the section **Change the development "domain"** below, using the domain `dev.{{cookiecutter.domain_main}}`.
+To configure it in your stack, follow the section **Change the development "domain"** below, using the domain `dev.ptar.com`.
 
-After performing those steps you should be able to open: http://dev.{{cookiecutter.domain_main}} and it will be server by your stack in `localhost`.
+After performing those steps you should be able to open: http://dev.ptar.com and it will be server by your stack in `localhost`.
 
 Check all the corresponding available URLs in the section at the end.
 
 ### Change the development "domain"
 
-If you need to use your local stack with a different domain than `localhost`, you need to make sure the domain you use points to the IP where your stack is set up. See the different ways to achieve that in the sections above (i.e. using Docker Toolbox with `local.dockertoolbox.tiangolo.com`, using `localhost.tiangolo.com` or using `dev.{{cookiecutter.domain_main}}`).
+If you need to use your local stack with a different domain than `localhost`, you need to make sure the domain you use points to the IP where your stack is set up. See the different ways to achieve that in the sections above (i.e. using Docker Toolbox with `local.dockertoolbox.tiangolo.com`, using `localhost.tiangolo.com` or using `dev.ptar.com`).
 
 To simplify your Docker Compose setup, for example, so that the API docs (Swagger UI) knows where is your API, you should let it know you are using that domain for development. You will need to edit 1 line in 2 files.
 
@@ -475,7 +475,7 @@ Then you need to have those constraints in your `docker-compose.yml` file for th
 To be able to use different environments, like `prod` and `stag`, you should pass the name of the stack as an environment variable. Like:
 
 ```bash
-STACK_NAME={{cookiecutter.docker_swarm_stack_name_staging}} sh ./scripts/deploy.sh
+STACK_NAME=stag-ptar-com sh ./scripts/deploy.sh
 ```
 
 To use and expand that environment variable inside the `docker-compose.yml` files you can add the constraints to the services like:
@@ -503,7 +503,7 @@ services:
     deploy:
       placement:
         constraints:
-          - node.labels.{{cookiecutter.docker_swarm_stack_name_main}}.app-db-data == true
+          - node.labels.ptar-com.app-db-data == true
 ```
 
 **Note**: The `${STACK_NAME?Variable not set}` means "use the environment variable `STACK_NAME`, but if it is not set, show an error `Variable not set`".
@@ -555,13 +555,13 @@ then chose a node from the list. For example, `dog.example.com`.
 * Add the label to that node. Use as label the name of the stack you are deploying followed by a dot (`.`) followed by the named volume, and as value, just `true`, e.g.:
 
 ```bash
-docker node update --label-add {{cookiecutter.docker_swarm_stack_name_main}}.app-db-data=true dog.example.com
+docker node update --label-add ptar-com.app-db-data=true dog.example.com
 ```
 
 * Then you need to do the same for each stack version you have. For example, for staging you could do:
 
 ```bash
-docker node update --label-add {{cookiecutter.docker_swarm_stack_name_staging}}.app-db-data=true cat.example.com
+docker node update --label-add stag-ptar-com.app-db-data=true cat.example.com
 ```
 
 ### Deploy to a Docker Swarm mode cluster
@@ -605,16 +605,16 @@ TAG=prod FRONTEND_ENV=production bash ./scripts/build-push.sh
 3. **Deploy your stack**
 
 * Set these environment variables:
-  * `DOMAIN={{cookiecutter.domain_main}}`
-  * `TRAEFIK_TAG={{cookiecutter.traefik_constraint_tag}}`
-  * `STACK_NAME={{cookiecutter.docker_swarm_stack_name_main}}`
+  * `DOMAIN=ptar.com`
+  * `TRAEFIK_TAG=ptar.com`
+  * `STACK_NAME=ptar-com`
   * `TAG=prod`
 * Use the provided `scripts/deploy.sh` file with those environment variables:
 
 ```bash
-DOMAIN={{cookiecutter.domain_main}} \
-TRAEFIK_TAG={{cookiecutter.traefik_constraint_tag}} \
-STACK_NAME={{cookiecutter.docker_swarm_stack_name_main}} \
+DOMAIN=ptar.com \
+TRAEFIK_TAG=ptar.com \
+STACK_NAME=ptar-com \
 TAG=prod \
 bash ./scripts/deploy.sh
 ```
@@ -703,33 +703,33 @@ These are the URLs that will be used and generated by the project.
 
 Production URLs, from the branch `production`.
 
-Frontend: https://{{cookiecutter.domain_main}}
+Frontend: https://ptar.com
 
-Backend: https://{{cookiecutter.domain_main}}/api/
+Backend: https://ptar.com/api/
 
-Automatic Interactive Docs (Swagger UI): https://{{cookiecutter.domain_main}}/docs
+Automatic Interactive Docs (Swagger UI): https://ptar.com/docs
 
-Automatic Alternative Docs (ReDoc): https://{{cookiecutter.domain_main}}/redoc
+Automatic Alternative Docs (ReDoc): https://ptar.com/redoc
 
-PGAdmin: https://pgadmin.{{cookiecutter.domain_main}}
+PGAdmin: https://pgadmin.ptar.com
 
-Flower: https://flower.{{cookiecutter.domain_main}}
+Flower: https://flower.ptar.com
 
 ### Staging URLs
 
 Staging URLs, from the branch `master`.
 
-Frontend: https://{{cookiecutter.domain_staging}}
+Frontend: https://stag.ptar.com
 
-Backend: https://{{cookiecutter.domain_staging}}/api/
+Backend: https://stag.ptar.com/api/
 
-Automatic Interactive Docs (Swagger UI): https://{{cookiecutter.domain_staging}}/docs
+Automatic Interactive Docs (Swagger UI): https://stag.ptar.com/docs
 
-Automatic Alternative Docs (ReDoc): https://{{cookiecutter.domain_staging}}/redoc
+Automatic Alternative Docs (ReDoc): https://stag.ptar.com/redoc
 
-PGAdmin: https://pgadmin.{{cookiecutter.domain_staging}}
+PGAdmin: https://pgadmin.stag.ptar.com
 
-Flower: https://flower.{{cookiecutter.domain_staging}}
+Flower: https://flower.stag.ptar.com
 
 ### Development URLs
 
@@ -771,19 +771,19 @@ Traefik UI: http://local.dockertoolbox.tiangolo.com:8090
 
 Development URLs, for local development.
 
-Frontend: http://dev.{{cookiecutter.domain_main}}
+Frontend: http://dev.ptar.com
 
-Backend: http://dev.{{cookiecutter.domain_main}}/api/
+Backend: http://dev.ptar.com/api/
 
-Automatic Interactive Docs (Swagger UI): https://dev.{{cookiecutter.domain_main}}/docs
+Automatic Interactive Docs (Swagger UI): https://dev.ptar.com/docs
 
-Automatic Alternative Docs (ReDoc): https://dev.{{cookiecutter.domain_main}}/redoc
+Automatic Alternative Docs (ReDoc): https://dev.ptar.com/redoc
 
-PGAdmin: http://dev.{{cookiecutter.domain_main}}:5050
+PGAdmin: http://dev.ptar.com:5050
 
-Flower: http://dev.{{cookiecutter.domain_main}}:5555
+Flower: http://dev.ptar.com:5555
 
-Traefik UI: http://dev.{{cookiecutter.domain_main}}:8090
+Traefik UI: http://dev.ptar.com:8090
 
 ### Development in localhost with a custom domain URLs
 

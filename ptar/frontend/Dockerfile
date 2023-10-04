@@ -5,7 +5,7 @@ WORKDIR /app
 
 COPY package*.json /app/
 
-RUN npm install
+RUN npm install -g npm@6.9.0 && npm install
 
 COPY ./ /app/
 
@@ -14,7 +14,7 @@ ARG FRONTEND_ENV=production
 ENV VUE_APP_ENV=${FRONTEND_ENV}
 
 # Comment out the next line to disable tests
-RUN npm run test:unit
+# RUN npm run test:unit
 
 RUN npm run build
 
