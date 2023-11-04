@@ -3,7 +3,7 @@ name: Latest Changes
 on:
   pull_request_target:
     branches:
-      - main
+      - master
     types:
       - closed
   workflow_dispatch:
