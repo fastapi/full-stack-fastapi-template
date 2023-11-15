@@ -1,10 +1,5 @@
 # frontend
 
-## Project setup
-```
-npm install
-```
-
 ## Node Requirements
 You can use either [fnm](https://github.com/Schniz/fnm) or [nvm](https://github.com/nvm-sh/nvm) to manage your Node.js versions.
 
@@ -18,6 +13,11 @@ nvm install
 If you prefer fnm, run the following command to install the recommended Node.js version:
 ```
 fnm install
+```
+
+## Project setup
+```
+npm install
 ```
 
 ### Compiles and hot-reloads for development
