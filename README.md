@@ -1,6 +1,22 @@
 # Full Stack FastAPI and PostgreSQL - Base Project Generator
 
-[![Build Status](https://travis-ci.com/tiangolo/full-stack-fastapi-postgresql.svg?branch=master)](https://travis-ci.com/tiangolo/full-stack-fastapi-postgresql)
+## 🚨 Warning: in (re) construction 😎 🏗️
+
+This project is currently being restructured, don't use it right now, hold for a bit.
+
+In the next couple of months it will be ready. 😎 🚀
+
+Some of the future new features and changes:
+
+* Upgrade to the latest FastAPI.
+* Migration from SQLAlchemy to SQLModel.
+* Upgrade to Pydantic v2.
+* Refactor and simplification of most of the code, a lot of the complexity won't be necessary anymore.
+* Migrate from Vue.js 2 to React with hooks and TypeScript.
+* Move from Docker Swarm Model to Kubernetes.
+* GitHub Actions for CI.
+
+---
 
 Generate a backend and frontend stack using Python, including interactive API documentation.
 
@@ -145,12 +161,20 @@ After using this generator, your new project (the directory created) will contai
 
 ### Latest Changes
 
-* Update issue-manager. PR [#211](https://github.com/tiangolo/full-stack-fastapi-postgresql/pull/211).
-* Add [GitHub Sponsors](https://github.com/sponsors/tiangolo) button. PR [#201](https://github.com/tiangolo/full-stack-fastapi-postgresql/pull/201).
+#### Features
+
+* 📌 Add NodeJS version management and instructions. PR [#551](https://github.com/tiangolo/full-stack-fastapi-postgresql/pull/551) by [@alejsdev](https://github.com/alejsdev).
 * Add consistent errors for env vars not set. PR [#200](https://github.com/tiangolo/full-stack-fastapi-postgresql/pull/200).
 * Upgrade Traefik to version 2, keeping in sync with DockerSwarm.rocks. PR [#199](https://github.com/tiangolo/full-stack-fastapi-postgresql/pull/199).
-* Add docs about reporting test coverage in HTML. PR [#161](https://github.com/tiangolo/full-stack-fastapi-postgresql/pull/161).
 * Run tests with `TestClient`. PR [#160](https://github.com/tiangolo/full-stack-fastapi-postgresql/pull/160).
+
+#### Fixes
+
+* 🐛 Fix Poetry installation in Dockerfile and upgrade Python version and packages to fix Docker build. PR [#480](https://github.com/tiangolo/full-stack-fastapi-postgresql/pull/480) by [@little7Li](https://github.com/little7Li).
+
+#### Refactors
+
+* ♻️ Refactor project generation, discard cookiecutter, use plain git/clone/fork. PR [#553](https://github.com/tiangolo/full-stack-fastapi-postgresql/pull/553) by [@tiangolo](https://github.com/tiangolo).
 * Refactor backend:
     * Simplify configs for tools and format to better support editor integration.
     * Add mypy configurations and plugins.
@@ -162,10 +186,24 @@ After using this generator, your new project (the directory created) will contai
     * Change from PyJWT to Python-JOSE as it supports additional use cases.
     * Fix JWT tokens using user email/ID as the subject in `sub`.
     * PR [#158](https://github.com/tiangolo/full-stack-fastapi-postgresql/pull/158).
-* Add docs about removing the frontend, for an API-only app. PR [#156](https://github.com/tiangolo/full-stack-fastapi-postgresql/pull/156).
-* Simplify scripts and development, update docs and configs. PR [#155](https://github.com/tiangolo/full-stack-fastapi-postgresql/pull/155).
 * Simplify `docker-compose.*.yml` files, refactor deployment to reduce config files. PR [#153](https://github.com/tiangolo/full-stack-fastapi-postgresql/pull/153).
 * Simplify env var files, merge to a single `.env` file. PR [#151](https://github.com/tiangolo/full-stack-fastapi-postgresql/pull/151).
+
+#### Docs
+
+* 📝 Update README with in construction notice. PR [#552](https://github.com/tiangolo/full-stack-fastapi-postgresql/pull/552) by [@tiangolo](https://github.com/tiangolo).
+* Add docs about reporting test coverage in HTML. PR [#161](https://github.com/tiangolo/full-stack-fastapi-postgresql/pull/161).
+* Add docs about removing the frontend, for an API-only app. PR [#156](https://github.com/tiangolo/full-stack-fastapi-postgresql/pull/156).
+
+#### Internal
+
+* 👷 Add dependabot. PR [#547](https://github.com/tiangolo/full-stack-fastapi-postgresql/pull/547) by [@tiangolo](https://github.com/tiangolo).
+* 👷 Fix latest-changes GitHub Action token, strike 2. PR [#546](https://github.com/tiangolo/full-stack-fastapi-postgresql/pull/546) by [@tiangolo](https://github.com/tiangolo).
+* 👷 Fix latest-changes GitHub Action token config. PR [#545](https://github.com/tiangolo/full-stack-fastapi-postgresql/pull/545) by [@tiangolo](https://github.com/tiangolo).
+* 👷 Add latest-changes GitHub Action. PR [#544](https://github.com/tiangolo/full-stack-fastapi-postgresql/pull/544) by [@tiangolo](https://github.com/tiangolo).
+* Update issue-manager. PR [#211](https://github.com/tiangolo/full-stack-fastapi-postgresql/pull/211).
+* Add [GitHub Sponsors](https://github.com/sponsors/tiangolo) button. PR [#201](https://github.com/tiangolo/full-stack-fastapi-postgresql/pull/201).
+* Simplify scripts and development, update docs and configs. PR [#155](https://github.com/tiangolo/full-stack-fastapi-postgresql/pull/155).
 
 ### 0.5.0
 
