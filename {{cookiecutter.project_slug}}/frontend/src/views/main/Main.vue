@@ -4,56 +4,24 @@
       <v-layout column fill-height>
         <v-list>
           <v-subheader>Main menu</v-subheader>
-          <v-list-tile to="/main/dashboard">
+          <v-list-tile v-for="link in drawerLinks" :key="link.text" router :to="link.route">
             <v-list-tile-action>
-              <v-icon>web</v-icon>
+              <v-icon>{{ link.icon }}</v-icon>
             </v-list-tile-action>
             <v-list-tile-content>
-              <v-list-tile-title>Dashboard</v-list-tile-title>
-            </v-list-tile-content>
-          </v-list-tile>
-          <v-list-tile to="/main/profile/view">
-            <v-list-tile-action>
-              <v-icon>person</v-icon>
-            </v-list-tile-action>
-            <v-list-tile-content>
-              <v-list-tile-title>Profile</v-list-tile-title>
-            </v-list-tile-content>
-          </v-list-tile>
-          <v-list-tile to="/main/profile/edit">
-            <v-list-tile-action>
-              <v-icon>edit</v-icon>
-            </v-list-tile-action>
-            <v-list-tile-content>
-              <v-list-tile-title>Edit Profile</v-list-tile-title>
-            </v-list-tile-content>
-          </v-list-tile>
-          <v-list-tile to="/main/profile/password">
-            <v-list-tile-action>
-              <v-icon>vpn_key</v-icon>
-            </v-list-tile-action>
-            <v-list-tile-content>
-              <v-list-tile-title>Change Password</v-list-tile-title>
+              <v-list-tile-title>{{ link.text }}</v-list-tile-title>
             </v-list-tile-content>
           </v-list-tile>
         </v-list>
         <v-divider></v-divider>
         <v-list subheader v-show="hasAdminAccess">
           <v-subheader>Admin</v-subheader>
-          <v-list-tile to="/main/admin/users/all">
+          <v-list-tile v-for="link in drawerAdminLinks" :key="link.text" router :to="link.route">
             <v-list-tile-action>
-              <v-icon>group</v-icon>
+              <v-icon>{{ link.icon }}</v-icon>
             </v-list-tile-action>
             <v-list-tile-content>
-              <v-list-tile-title>Manage Users</v-list-tile-title>
-            </v-list-tile-content>
-          </v-list-tile>
-          <v-list-tile to="/main/admin/users/create">
-            <v-list-tile-action>
-              <v-icon>person_add</v-icon>
-            </v-list-tile-action>
-            <v-list-tile-content>
-              <v-list-tile-title>Create User</v-list-tile-title>
+              <v-list-tile-title>{{ link.text }}</v-list-tile-title>
             </v-list-tile-content>
           </v-list-tile>
         </v-list>
@@ -88,12 +56,12 @@
           <v-icon>more_vert</v-icon>
         </v-btn>
         <v-list>
-          <v-list-tile to="/main/profile">
+          <v-list-tile v-for="link in menuLinks" :key="link.text" router :to="link.route">
             <v-list-tile-content>
-              <v-list-tile-title>Profile</v-list-tile-title>
+              <v-list-tile-title>{{ link.text }}</v-list-tile-title>
             </v-list-tile-content>
             <v-list-tile-action>
-              <v-icon>person</v-icon>
+              <v-icon>{{ link.icon }}</v-icon>
             </v-list-tile-action>
           </v-list-tile>
           <v-list-tile @click="logout">
@@ -177,6 +145,24 @@ export default class Main extends Vue {
 
   public async logout() {
     await dispatchUserLogOut(this.$store);
+  }
+
+  private data() {
+    return {
+      drawerLinks: [
+        { icon: 'web', text: 'Dashboard', route: '/main/dashboard'},
+        { icon: 'person', text: 'Profile', route: '/main/profile/view'},
+        { icon: 'edit', text: 'Edit Profile', route: '/main/profile/edit'},
+        { icon: 'vpn_key', text: 'Change Password', route: '/main/profile/password'},
+      ],
+      drawerAdminLinks: [
+        { icon: 'group', text: 'Manage Users', route: '/main/admin/users/all'},
+        { icon: 'person_add', text: 'Create User', route: '/main/admin/users/create'},
+      ],
+      menuLinks: [
+        { icon: 'person', text: 'Profile', route: '/main/profile/view'},
+      ],
+    };
   }
 }
 </script>
