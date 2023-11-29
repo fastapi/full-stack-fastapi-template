@@ -131,7 +131,7 @@ def read_user_by_id(
             status_code=400,
             detail="The user doesn't have enough privileges",
         )
-    return user  # type:ignore
+    return user  # type: ignore
 
 
 # TODO: Refactor when SQLModel has update
