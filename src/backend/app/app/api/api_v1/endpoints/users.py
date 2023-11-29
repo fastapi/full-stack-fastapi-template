@@ -19,11 +19,7 @@ router = APIRouter()
 
 
 @router.get("/", dependencies=[Depends(get_current_active_superuser)])
-def read_users(
-    session: SessionDep,
-    skip: int = 0,
-    limit: int = 100,
-) -> List[UserOut]:
+def read_users(session: SessionDep, skip: int = 0, limit: int = 100) -> List[UserOut]:
     """
     Retrieve users.
     """
@@ -33,11 +29,7 @@ def read_users(
 
 
 @router.post("/", dependencies=[Depends(get_current_active_superuser)])
-def create_user(
-    *,
-    session: SessionDep,
-    user_in: UserCreate,
-) -> UserOut:
+def create_user(*, session: SessionDep, user_in: UserCreate) -> UserOut:
     """
     Create new user.
     """
@@ -82,10 +74,7 @@ def create_user(
 
 
 @router.get("/me")
-def read_user_me(
-    session: SessionDep,
-    current_user: CurrentUser,
-) -> UserOut:
+def read_user_me(session: SessionDep, current_user: CurrentUser) -> UserOut:
     """
     Get current user.
     """
@@ -93,7 +82,7 @@ def read_user_me(
 
 
 @router.post("/open")
-def create_user_open(*, session: SessionDep, user_in: UserCreateOpen) -> UserOut:
+def create_user_open(session: SessionDep, user_in: UserCreateOpen) -> UserOut:
     """
     Create new user without the need to be logged in.
     """
@@ -115,9 +104,7 @@ def create_user_open(*, session: SessionDep, user_in: UserCreateOpen) -> UserOut
 
 @router.get("/{user_id}")
 def read_user_by_id(
-    session: SessionDep,
-    user_id: int,
-    current_user: CurrentUser,
+    user_id: int, session: SessionDep, current_user: CurrentUser
 ) -> UserOut:
     """
     Get a specific user by id.

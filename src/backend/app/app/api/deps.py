@@ -6,7 +6,6 @@ from jose import jwt
 from pydantic import ValidationError
 from sqlmodel import Session
 
-from app import crud
 from app.core import security
 from app.core.config import settings
 from app.db.engine import engine
