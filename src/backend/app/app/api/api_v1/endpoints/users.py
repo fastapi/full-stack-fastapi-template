@@ -67,16 +67,13 @@ def update_user_me(
     Update own user.
     """
     # TODO: Refactor when SQLModel has update
-    # current_user_data = jsonable_encoder(current_user)
-    # user_in = UserUpdate(**current_user_data)
-    # if password is not None:
-    #     user_in.password = password
-    # if full_name is not None:
-    #     user_in.full_name = full_name
-    # if email is not None:
-    #     user_in.email = email
-    # user = crud.user.update(session, session_obj=current_user, obj_in=user_in)
-    # return user
+    for field, value in body.model_dump(exclude_none=True).items():
+        if field == "password":
+            value = crud.get_password_hash(value)
+        setattr(current_user, field, value)
+    session.commit()
+
+    return current_user
 
 
 @router.get("/me", response_model=UserOut)
