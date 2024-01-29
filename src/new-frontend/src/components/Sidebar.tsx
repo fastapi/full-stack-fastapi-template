@@ -19,7 +19,7 @@ const Sidebar: React.FC = () => {
                 <DrawerOverlay />
                 <DrawerContent bg="gray.100" maxW="250px">
                     <DrawerCloseButton />
-                    <DrawerBody py={8} display="flex" flexDir="column" justifyContent="space-between" minH="100%">
+                    <DrawerBody py={8}>
                         <Flex flexDir="column" justify="space-between" h="100%">
                             <Box>
                                 <Image src={Logo} alt="Logo" />

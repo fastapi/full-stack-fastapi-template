@@ -19,9 +19,9 @@ const SidebarItems: React.FC = () => {
             borderRadius: "12px",
         }}>
             <Link to={item.path || "/"}>
-                <Flex color="teal.500">
+                <Flex color="teal.500" gap={4}>
                     <Icon as={item.icon} alignSelf="center" />
-                    <Text ml={4}>{item.title}</Text>
+                    <Text>{item.title}</Text>
                 </Flex>
             </Link>
         </Flex>
