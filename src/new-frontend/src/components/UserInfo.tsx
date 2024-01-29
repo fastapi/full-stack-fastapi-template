@@ -23,14 +23,14 @@ const UserInfo: React.FC = () => {
     return (
         <>
             {userData ? (
-                <Flex p={2} gap={3}>
+                <Flex gap={2} maxW="180px">
                     <Avatar icon={<FaUserAstronaut fontSize="18px" />} size='sm' alignSelf="center" />
-                    <Text color='gray' alignSelf={"center"}>{userData.email}</Text>
+                    {/* TODO: Conditional tooltip based on email length */}
+                    <Text color='gray' alignSelf={"center"} noOfLines={1} fontSize="14px">{userData.email}</Text>
                 </Flex>
             ) :
                 <Skeleton height='20px' />
             }
-
         </>
     );
 
