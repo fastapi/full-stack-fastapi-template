@@ -14,6 +14,7 @@ const UserInfo: React.FC = () => {
                 const userResponse = await UsersService.readUserMe();
                 setUserData(userResponse);
             } catch (error) {
+                // TODO: Handle error to give feedback to the user
                 console.error(error);
             }
         };
