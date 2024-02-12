@@ -41,9 +41,6 @@ const CreateItem: React.FC<CreateItemProps> = ({ isOpen, onClose }) => {
         }
     };
 
-    console.log(isLoading, "before return");
-
-
     return (
         <>
             <Modal
