@@ -14,7 +14,7 @@ const Appearance: React.FC = () => {
                 <RadioGroup onChange={setValue} value={value}>
                     <Stack>
                         <Radio value="system" colorScheme="teal" defaultChecked>
-                            Use system setting (default)
+                            Use system settings (default)
                         </Radio>
                         <Radio value="light" colorScheme="teal">
                             Light
