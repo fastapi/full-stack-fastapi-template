@@ -22,7 +22,7 @@ const Items: React.FC = () => {
                 setIsLoading(false);
                 toast({
                     title: 'Something went wrong.',
-                    description: 'Failed to fetch users. Please try again.',
+                    description: 'Failed to fetch items. Please try again.',
                     status: 'error',
                     isClosable: true,
                 });
