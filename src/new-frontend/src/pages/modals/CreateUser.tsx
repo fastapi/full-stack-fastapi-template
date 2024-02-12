@@ -21,24 +21,21 @@ const CreateUser: React.FC<CreateUserProps> = ({ isOpen, onClose }) => {
         try {
             setIsLoading(true);
             await addUser(data);
+            setIsLoading(false);
             toast({
                 title: 'Success!',
                 description: 'User created successfully.',
                 status: 'success',
-                duration: 9000,
                 isClosable: true,
             });
-            setIsLoading(false);
             onClose();
 
         } catch (err) {
             setIsLoading(false);
-            console.error('Error creating user:', err);
             toast({
                 title: 'Something went wrong.',
                 description: 'Failed to create user. Please try again.',
                 status: 'error',
-                duration: 9000,
                 isClosable: true,
             });
         }
@@ -54,6 +51,7 @@ const CreateUser: React.FC<CreateUserProps> = ({ isOpen, onClose }) => {
             >
                 <ModalOverlay />
                 <ModalContent as="form" onSubmit={handleSubmit(onSubmit)}>
+                    {/* TODO: Check passwords */}
                     <ModalHeader>Create User</ModalHeader>
                     <ModalCloseButton />
                     <ModalBody pb={6}>
@@ -81,16 +79,10 @@ const CreateUser: React.FC<CreateUserProps> = ({ isOpen, onClose }) => {
                                 <Checkbox {...register('is_active')} colorScheme='teal'>Is active?</Checkbox>
                             </FormControl>
                         </Flex>
-                        {isLoading && (
-                            <Box p={3} justifyContent="center">
-                                <Spinner size="lg" mr={4} />
-                                Creating user...
-                            </Box>
-                        )}
                     </ModalBody>
 
                     <ModalFooter gap={3}>
-                        <Button colorScheme='teal' type="submit">
+                        <Button bg="ui.main" color="white" type="submit" isLoading={isLoading}>
                             Save
                         </Button>
                         <Button onClick={onClose}>Cancel</Button>
