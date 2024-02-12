@@ -13,7 +13,6 @@ const Login: React.FC = () => {
 const [show, setShow] = useBoolean();
   const navigate = useNavigate();
   const { register, handleSubmit } = useForm<AccessToken>();
-  
   const onSubmit: SubmitHandler<AccessToken> = async (data) => {
     const response = await LoginService.loginAccessToken({
       formData: data,
