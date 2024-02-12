@@ -23,6 +23,7 @@ const SidebarItems: React.FC<SidebarItemsProps> = ({ onClose }) => {
     const handleLogout = async () => {
         localStorage.removeItem("access_token");
         navigate("/login");
+    // TODO: reset all Zustand states
     };
 
     const listItems = items.map((item) => (
