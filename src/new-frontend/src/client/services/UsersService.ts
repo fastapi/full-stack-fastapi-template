@@ -2,6 +2,7 @@
 /* istanbul ignore file */
 /* tslint:disable */
 /* eslint-disable */
+import type { Message } from '../models/Message';
 import type { UserCreate } from '../models/UserCreate';
 import type { UserCreateOpen } from '../models/UserCreateOpen';
 import type { UserOut } from '../models/UserOut';
@@ -172,14 +173,14 @@ requestBody: UserUpdate,
     /**
      * Delete User
      * Delete a user.
-     * @returns UserOut Successful Response
+     * @returns Message Successful Response
      * @throws ApiError
      */
     public static deleteUser({
 userId,
 }: {
 userId: number,
-}): CancelablePromise<UserOut> {
+}): CancelablePromise<Message> {
         return __request(OpenAPI, {
             method: 'DELETE',
             url: '/api/v1/users/{user_id}',
