@@ -169,4 +169,27 @@ requestBody: UserUpdate,
         });
     }
 
+    /**
+     * Delete User
+     * Delete a user.
+     * @returns UserOut Successful Response
+     * @throws ApiError
+     */
+    public static deleteUser({
+userId,
+}: {
+userId: number,
+}): CancelablePromise<UserOut> {
+        return __request(OpenAPI, {
+            method: 'DELETE',
+            url: '/api/v1/users/{user_id}',
+            path: {
+                'user_id': userId,
+            },
+            errors: {
+                422: `Validation Error`,
+            },
+        });
+    }
+
 }
