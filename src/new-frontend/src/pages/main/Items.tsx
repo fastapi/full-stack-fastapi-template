@@ -14,18 +14,18 @@ const Items: React.FC = () => {
 
     useEffect(() => {
         const fetchItems = async () => {
+            setIsLoading(true);
             try {
-                setIsLoading(true);
                 await getItems();
-                setIsLoading(false);
             } catch (err) {
-                setIsLoading(false);
                 toast({
                     title: 'Something went wrong.',
                     description: 'Failed to fetch items. Please try again.',
                     status: 'error',
                     isClosable: true,
                 });
+            } finally {
+                setIsLoading(false);
             }
         }
         fetchItems();

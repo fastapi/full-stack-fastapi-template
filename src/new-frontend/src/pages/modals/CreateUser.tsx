@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 
-import { Box, Button, Checkbox, Flex, FormControl, FormLabel, Input, Modal, ModalBody, ModalCloseButton, ModalContent, ModalFooter, ModalHeader, ModalOverlay, Spinner, useToast } from '@chakra-ui/react';
+import { Button, Checkbox, Flex, FormControl, FormLabel, Input, Modal, ModalBody, ModalCloseButton, ModalContent, ModalFooter, ModalHeader, ModalOverlay, Spinner, useToast } from '@chakra-ui/react';
 import { SubmitHandler, useForm } from 'react-hook-form';
 
 import { UserCreate } from '../../client';
@@ -18,10 +18,9 @@ const CreateUser: React.FC<CreateUserProps> = ({ isOpen, onClose }) => {
     const { addUser } = useUsersStore();
 
     const onSubmit: SubmitHandler<UserCreate> = async (data) => {
+        setIsLoading(true);
         try {
-            setIsLoading(true);
             await addUser(data);
-            setIsLoading(false);
             toast({
                 title: 'Success!',
                 description: 'User created successfully.',
@@ -31,13 +30,14 @@ const CreateUser: React.FC<CreateUserProps> = ({ isOpen, onClose }) => {
             onClose();
 
         } catch (err) {
-            setIsLoading(false);
             toast({
                 title: 'Something went wrong.',
                 description: 'Failed to create user. Please try again.',
                 status: 'error',
                 isClosable: true,
             });
+        } finally {
+            setIsLoading(false);
         }
     }
 
@@ -69,7 +69,7 @@ const CreateUser: React.FC<CreateUserProps> = ({ isOpen, onClose }) => {
                         </FormControl>
                         <FormControl mt={4}>
                             <FormLabel>Confirm Password</FormLabel>
-                            <Input placeholder='Password' type="password" />
+                            <Input {...register('confirmPassword')} placeholder='Password' type="password" />
                         </FormControl>
                         <Flex>
                             <FormControl mt={4}>

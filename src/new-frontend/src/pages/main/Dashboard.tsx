@@ -12,7 +12,7 @@ const Dashboard: React.FC = () => {
         <>
             {user ? (
                 <Box width="100%" p={8}>
-                    <Text fontSize="24px">Hi, {user.full_name || user.email} 👋🏼</Text>
+                    <Text fontSize="2xl">Hi, {user.full_name || user.email} 👋🏼</Text>
                     <Text>Welcome back, nice to see you again!</Text>
                 </Box>
             ) : null}

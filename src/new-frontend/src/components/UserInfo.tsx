@@ -8,7 +8,7 @@ import { useUserStore } from '../store/user-store';
 
 const UserInfo: React.FC = () => {
     const { user } = useUserStore();
-    
+
 
     return (
         <>
@@ -16,7 +16,7 @@ const UserInfo: React.FC = () => {
                 <Flex gap={2} maxW="180px">
                     <Avatar bg="ui.main" icon={<FaUserAstronaut fontSize="18px" />} size='sm' alignSelf="center" />
                     {/* TODO: Conditional tooltip based on email length */}
-                    <Text color='gray' alignSelf={"center"} noOfLines={1} fontSize="14px">{user.email}</Text>
+                    <Text color='gray' alignSelf={"center"} noOfLines={1} fontSize="sm">{user.email}</Text>
                 </Flex>
             ) :
                 <Skeleton height='20px' />

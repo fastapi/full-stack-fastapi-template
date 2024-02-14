@@ -13,18 +13,18 @@ const Admin: React.FC = () => {
 
     useEffect(() => {
         const fetchUsers = async () => {
+            setIsLoading(true);
             try {
-                setIsLoading(true);
                 await getUsers();
-                setIsLoading(false);
             } catch (err) {
-                setIsLoading(false);
                 toast({
                     title: 'Something went wrong.',
                     description: 'Failed to fetch users. Please try again.',
                     status: 'error',
                     isClosable: true,
                 });
+            } finally {
+                setIsLoading(false);
             }
         }
         fetchUsers();
@@ -35,7 +35,7 @@ const Admin: React.FC = () => {
             {isLoading ? (
                 // TODO: Add skeleton
                 <Flex justify="center" align="center" height="100vh" width="full">
-                    <Spinner size="xl" color='ui.main'/>
+                    <Spinner size="xl" color='ui.main' />
                 </Flex>
             ) : (
                 users &&

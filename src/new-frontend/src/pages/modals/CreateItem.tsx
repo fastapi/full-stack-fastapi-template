@@ -18,11 +18,9 @@ const CreateItem: React.FC<CreateItemProps> = ({ isOpen, onClose }) => {
     const { addItem } = useItemsStore();
 
     const onSubmit: SubmitHandler<ItemCreate> = async (data) => {
+        setIsLoading(true);
         try {
-            setIsLoading(true);
             await addItem(data);
-            setIsLoading(false);
-
             toast({
                 title: 'Success!',
                 description: 'Item created successfully.',
@@ -31,13 +29,14 @@ const CreateItem: React.FC<CreateItemProps> = ({ isOpen, onClose }) => {
             });
             onClose();
         } catch (err) {
-            setIsLoading(false);
             toast({
                 title: 'Something went wrong.',
                 description: 'Failed to create item. Please try again.',
                 status: 'error',
                 isClosable: true,
             });
+        } finally {
+            setIsLoading(false);
         }
     };
 
