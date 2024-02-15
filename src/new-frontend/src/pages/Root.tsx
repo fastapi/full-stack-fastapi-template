@@ -12,7 +12,7 @@ const Root: React.FC = () => {
     const { getUser } = useUserStore();
 
     useEffect(() => {
-        const fetchItems = async () => {
+        const fetchUser = async () => {
             const token = localStorage.getItem('access_token');
             if (token) {
                 try {
