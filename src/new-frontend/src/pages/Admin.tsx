@@ -2,9 +2,9 @@ import React, { useEffect, useState } from 'react';
 
 import { Box, Container, Flex, Heading, Spinner, Table, TableContainer, Tbody, Td, Th, Thead, Tr, useToast } from '@chakra-ui/react';
 
-import ActionsMenu from '../../components/ActionsMenu';
-import Navbar from '../../components/Navbar';
-import { useUsersStore } from '../../store/users-store';
+import ActionsMenu from '../components/ActionsMenu';
+import Navbar from '../components/Navbar';
+import { useUsersStore } from '../store/users-store';
 
 const Admin: React.FC = () => {
     const toast = useToast();
@@ -27,7 +27,9 @@ const Admin: React.FC = () => {
                 setIsLoading(false);
             }
         }
-        fetchUsers();
+        if (users.length === 0) {
+            fetchUsers();
+        }
     }, [])
 
     return (
@@ -52,6 +54,7 @@ const Admin: React.FC = () => {
                                     <Th>Email</Th>
                                     <Th>Role</Th>
                                     <Th>Status</Th>
+                                    <Th>Actions</Th>
                                 </Tr>
                             </Thead>
                             <Tbody>
