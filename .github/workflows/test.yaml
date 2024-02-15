@@ -1,0 +1,30 @@
+name: Pytest Backend
+
+on:
+  push:
+    branches:
+      - master
+
+jobs:
+
+  pytest:
+    runs-on: ubuntu-latest
+    defaults:
+        run:
+            working-directory: src
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+
+      - name: Setup python 3.10
+        uses: actions/setup-python@v2
+        with:
+          python-version: '3.10'
+
+      - name: docker-compose setup
+        run: |
+          docker-compose up -d
+
+      - name: docker-compose run pytest
+        run: |
+          docker exec src_backend_1 pytest --cov=app --cov-report=term-missing app/tests

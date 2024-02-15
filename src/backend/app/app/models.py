@@ -46,6 +46,11 @@ class UserOut(UserBase):
     id: int
 
 
+class UsersOut(BaseModel):
+    data: list[UserOut]
+    count: int
+
+
 # Shared properties
 class ItemBase(SQLModel):
     title: str
@@ -75,6 +80,12 @@ class Item(ItemBase, table=True):
 # Properties to return via API, id is always required
 class ItemOut(ItemBase):
     id: int
+    owner_id: int
+
+
+class ItemsOut(BaseModel):
+    data: list[ItemOut]
+    count: int
 
 
 # Generic message
