@@ -27,7 +27,7 @@ const Root: React.FC = () => {
                 }
             }
         }
-        fetchItems();
+        fetchUser();
     }, []);
 
     return (
