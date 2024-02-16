@@ -4,10 +4,11 @@ import { Box, Flex, Icon, Text, useColorModeValue } from '@chakra-ui/react';
 import { FiBriefcase, FiHome, FiSettings, FiUsers } from 'react-icons/fi';
 import { Link, useLocation } from 'react-router-dom';
 
+import { useUserStore } from '../store/user-store';
+
 const items = [
     { icon: FiHome, title: 'Dashboard', path: "/" },
     { icon: FiBriefcase, title: 'Items', path: "/items" },
-    { icon: FiUsers, title: 'Admin', path: "/admin" },
     { icon: FiSettings, title: 'User Settings', path: "/settings" },
 ];
 
@@ -19,8 +20,11 @@ const SidebarItems: React.FC<SidebarItemsProps> = ({ onClose }) => {
     const textColor = useColorModeValue("ui.main", "#E2E8F0");
     const bgActive = useColorModeValue("#E2E8F0", "#4A5568");
     const location = useLocation();
+    const { user } = useUserStore();
 
-    const listItems = items.map((item) => (
+    const finalItems = user?.is_superuser ? [...items, { icon: FiUsers, title: 'Admin', path: "/admin" }] : items;
+
+    const listItems = finalItems.map((item) => (
         <Flex
             as={Link}
             to={item.path}

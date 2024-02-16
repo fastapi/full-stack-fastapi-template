@@ -32,7 +32,7 @@ const Sidebar: React.FC = () => {
                             </Box>
                             {
                                 user?.email &&
-                                <Text color={text} noOfLines={2} fontSize="sm" p={2}>Logged in as: {user.email}</Text>
+                                <Text color={textColor} noOfLines={2} fontSize="sm" p={2}>Logged in as: {user.email}</Text>
                             }
                         </Flex>
                     </DrawerBody>
