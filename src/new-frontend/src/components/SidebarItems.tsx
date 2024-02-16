@@ -1,6 +1,6 @@
 import React from 'react';
 
-import { Box, Flex, Icon, Text } from '@chakra-ui/react';
+import { Box, Flex, Icon, Text, useColorModeValue } from '@chakra-ui/react';
 import { FiBriefcase, FiHome, FiSettings, FiUsers } from 'react-icons/fi';
 import { Link, useLocation } from 'react-router-dom';
 
@@ -16,6 +16,8 @@ interface SidebarItemsProps {
 }
 
 const SidebarItems: React.FC<SidebarItemsProps> = ({ onClose }) => {
+    const textColor = useColorModeValue("ui.main", "#E2E8F0");
+    const bgActive = useColorModeValue("#E2E8F0", "#4A5568");
     const location = useLocation();
 
     const listItems = items.map((item) => (
@@ -26,10 +28,10 @@ const SidebarItems: React.FC<SidebarItemsProps> = ({ onClose }) => {
             p={2}
             key={item.title}
             style={location.pathname === item.path ? {
-                background: "#E2E8F0",
+                background: bgActive,
                 borderRadius: "12px",
             } : {}}
-            color="ui.main"
+            color={textColor}
             onClick={onClose}
         >
             <Icon as={item.icon} alignSelf="center" />
@@ -42,7 +44,7 @@ const SidebarItems: React.FC<SidebarItemsProps> = ({ onClose }) => {
             <Box>
                 {listItems}
             </Box>
-           
+
         </>
     );
 };
