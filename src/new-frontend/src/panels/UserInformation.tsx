@@ -24,8 +24,8 @@ const UserInformation: React.FC = () => {
                     <FormLabel color={color}>Full name</FormLabel>
                     {
                         editMode ?
-                            <Input placeholder={user?.full_name || "Full name"} type="text" /> :
-                            <Text>
+                            <Input placeholder={user?.full_name || "Full name"} type="text" size="md" /> :
+                            <Text size="md" py={2}>
                                 {user?.full_name || "N/A"}
                             </Text>
                     }
@@ -34,8 +34,8 @@ const UserInformation: React.FC = () => {
                     <FormLabel color={color}>Email</FormLabel>
                     {
                         editMode ?
-                            <Input placeholder={user?.email} type="text" /> :
-                            <Text>
+                            <Input placeholder={user?.email} type="text" size="md" /> :
+                            <Text size="md" py={2}>
                                 {user?.email || "N/A"}
                             </Text>
                     }
