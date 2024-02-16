@@ -9,9 +9,9 @@ import { useUserStore } from '../store/user-store';
 
 
 const Sidebar: React.FC = () => {
-    const bg = useColorModeValue("white", "#1a202c");
-    const text = useColorModeValue("gray", "white");
-    const secBg = useColorModeValue("ui.secondary", "#252d3d");
+    const bgColor = useColorModeValue("white", "#1a202c");
+    const textColor = useColorModeValue("gray", "white");
+    const secBgColor = useColorModeValue("ui.secondary", "#252d3d");
 
     const { isOpen, onOpen, onClose } = useDisclosure();
     const { user } = useUserStore();
@@ -40,15 +40,15 @@ const Sidebar: React.FC = () => {
             </Drawer>
 
             {/* Desktop */}
-            <Box bg={bg} p={3} h="100vh" position="sticky" top="0" display={{ base: 'none', md: 'flex' }}>
-                <Flex flexDir="column" justify="space-between" bg={secBg} p={4} borderRadius={12}>
+            <Box bg={bgColor} p={3} h="100vh" position="sticky" top="0" display={{ base: 'none', md: 'flex' }}>
+                <Flex flexDir="column" justify="space-between" bg={secBgColor} p={4} borderRadius={12}>
                     <Box>
                         <Image src={Logo} alt="Logo" w="180px" maxW="2xs" p={6} />
                         <SidebarItems />
                     </Box>
                     {
                         user?.email &&
-                        <Text color={text} noOfLines={2} fontSize="sm" p={2} maxW="180px">Logged in as: {user.email}</Text>
+                        <Text color={textColor} noOfLines={2} fontSize="sm" p={2} maxW="180px">Logged in as: {user.email}</Text>
                     }
                 </Flex>
             </Box>
