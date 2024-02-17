@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 
 import { Button, Container, FormControl, FormLabel, Heading, Input, Text, useColorModeValue } from '@chakra-ui/react';
 
-import { useUserStore } from '../store/user-store';
+import { useUserStore } from '../../store/user-store';
 
 const UserInformation: React.FC = () => {
     const color = useColorModeValue("gray.700", "white");

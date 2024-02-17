@@ -3,8 +3,8 @@ import React, { useState } from 'react';
 import { AlertDialog, AlertDialogBody, AlertDialogContent, AlertDialogFooter, AlertDialogHeader, AlertDialogOverlay, Button, useToast } from '@chakra-ui/react';
 import { useForm } from 'react-hook-form';
 
-import { useItemsStore } from '../store/items-store';
-import { useUsersStore } from '../store/users-store';
+import { useItemsStore } from '../../store/items-store';
+import { useUsersStore } from '../../store/users-store';
 
 interface DeleteProps {
     type: string;

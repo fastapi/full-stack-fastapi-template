@@ -3,9 +3,9 @@ import React from 'react';
 import { Box, Drawer, DrawerBody, DrawerCloseButton, DrawerContent, DrawerOverlay, Flex, IconButton, Image, useDisclosure, Text, useColorModeValue } from '@chakra-ui/react';
 import { FiMenu } from 'react-icons/fi';
 
-import Logo from "../assets/images/fastapi-logo.svg";
+import Logo from "../../assets/images/fastapi-logo.svg";
 import SidebarItems from './SidebarItems';
-import { useUserStore } from '../store/user-store';
+import { useUserStore } from '../../store/user-store';
 
 
 const Sidebar: React.FC = () => {

@@ -2,10 +2,10 @@ import React from 'react';
 
 import { Container, Heading, Tab, TabList, TabPanel, TabPanels, Tabs } from '@chakra-ui/react';
 
-import Appearance from '../panels/Appearance';
-import ChangePassword from '../panels/ChangePassword';
-import DeleteAccount from '../panels/DeleteAccount';
-import UserInformation from '../panels/UserInformation';
+import Appearance from '../components/UserSettings/Appearance';
+import ChangePassword from '../components/UserSettings/ChangePassword';
+import DeleteAccount from '../components/UserSettings/DeleteAccount';
+import UserInformation from '../components/UserSettings/UserInformation';
 
 
 

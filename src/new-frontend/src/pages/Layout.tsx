@@ -1,14 +1,15 @@
 import { useEffect } from 'react';
 
-import { Outlet } from 'react-router-dom';
-import Sidebar from '../components/Sidebar';
+import { Outlet, useNavigate } from 'react-router-dom';
+import Sidebar from '../components/Common/Sidebar';
 
 import { Flex, useToast } from '@chakra-ui/react';
 import { useUserStore } from '../store/user-store';
-import UserMenu from '../components/UserMenu';
+import UserMenu from '../components/Common/UserMenu';
 
 const Layout: React.FC = () => {
     const toast = useToast();
+    const navigate = useNavigate();
     const { getUser } = useUserStore();
 
     useEffect(() => {
@@ -26,6 +27,7 @@ const Layout: React.FC = () => {
                     });
                 }
             }
+
         }
         fetchUser();
     }, []);

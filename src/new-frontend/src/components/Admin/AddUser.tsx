@@ -3,8 +3,8 @@ import React, { useState } from 'react';
 import { Button, Checkbox, Flex, FormControl, FormLabel, Input, Modal, ModalBody, ModalCloseButton, ModalContent, ModalFooter, ModalHeader, ModalOverlay, useToast } from '@chakra-ui/react';
 import { SubmitHandler, useForm } from 'react-hook-form';
 
-import { UserCreate } from '../client';
-import { useUsersStore } from '../store/users-store';
+import { UserCreate } from '../../client';
+import { useUsersStore } from '../../store/users-store';
 
 interface AddUserProps {
     isOpen: boolean;

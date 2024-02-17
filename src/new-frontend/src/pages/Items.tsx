@@ -2,8 +2,8 @@ import React, { useEffect, useState } from 'react';
 
 import { Container, Flex, Heading, Spinner, Table, TableContainer, Tbody, Td, Th, Thead, Tr, useToast } from '@chakra-ui/react';
 
-import ActionsMenu from '../components/ActionsMenu';
-import Navbar from '../components/Navbar';
+import ActionsMenu from '../components/Common/ActionsMenu';
+import Navbar from '../components/Common/Navbar';
 import { useItemsStore } from '../store/items-store';
 
 

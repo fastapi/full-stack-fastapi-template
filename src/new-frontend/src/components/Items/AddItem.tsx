@@ -3,8 +3,8 @@ import React, { useState } from 'react';
 import { Button, FormControl, FormLabel, Input, Modal, ModalBody, ModalCloseButton, ModalContent, ModalFooter, ModalHeader, ModalOverlay, useToast } from '@chakra-ui/react';
 import { SubmitHandler, useForm } from 'react-hook-form';
 
-import { ItemCreate } from '../client';
-import { useItemsStore } from '../store/items-store';
+import { ItemCreate } from '../../client';
+import { useItemsStore } from '../../store/items-store';
 
 interface AddItemProps {
     isOpen: boolean;
