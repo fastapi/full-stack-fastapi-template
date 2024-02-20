@@ -36,6 +36,14 @@ services:
     ports:
       - "5050:5050"
 
+  # Uncomment the section below to be able to debug locally
+  # queue:
+  #   ports:
+  #     - "5671:5671"
+  #     - "5672:5672"
+  #     - "15672:15672"
+  #     - "15671:15671"
+      
   flower:
     ports:
       - "5555:5555"
