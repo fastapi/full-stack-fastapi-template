@@ -4,9 +4,9 @@ import { Button, Menu, MenuButton, MenuItem, MenuList, useDisclosure } from '@ch
 import { BsThreeDotsVertical } from 'react-icons/bs';
 import { FiTrash, FiEdit } from 'react-icons/fi';
 
-import Delete from '../pages/modals/DeleteAlert';
-import EditUser from '../pages/modals/EditUser';
-import EditItem from '../pages/modals/EditItem';
+import Delete from '../modals/DeleteAlert';
+import EditUser from '../modals/EditUser';
+import EditItem from '../modals/EditItem';
 
 interface ActionsMenuProps {
     type: string;
@@ -20,7 +20,7 @@ const ActionsMenu: React.FC<ActionsMenuProps> = ({ type, id }) => {
     return (
         <>
             <Menu>
-                <MenuButton as={Button} bg="white" rightIcon={<BsThreeDotsVertical />} variant="unstyled">
+                <MenuButton as={Button} rightIcon={<BsThreeDotsVertical />} variant="unstyled">
                 </MenuButton>
                 <MenuList>
                     <MenuItem onClick={editUserModal.onOpen} icon={<FiEdit fontSize="16px" />}>Edit {type}</MenuItem>

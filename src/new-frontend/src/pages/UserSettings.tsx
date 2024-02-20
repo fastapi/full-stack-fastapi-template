@@ -9,17 +9,17 @@ import UserInformation from '../panels/UserInformation';
 
 
 
-const Profile: React.FC = () => {
+const UserSettings: React.FC = () => {
 
     return (
         <>
             <Container maxW="full">
-                <Heading size="lg" color="gray.700" textAlign={{ base: "center", md: "left" }} py={12}>
+                <Heading size="lg" textAlign={{ base: "center", md: "left" }} py={12}>
                     User Settings
                 </Heading>
                 <Tabs variant='enclosed' >
                     <TabList>
-                        <Tab>Profile</Tab>
+                        <Tab>My profile</Tab>
                         <Tab>Password</Tab>
                         <Tab>Appearance</Tab>
                         <Tab>Danger zone</Tab>
@@ -45,5 +45,5 @@ const Profile: React.FC = () => {
     );
 };
 
-export default Profile;
+export default UserSettings;
 

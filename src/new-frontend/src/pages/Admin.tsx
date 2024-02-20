@@ -2,9 +2,9 @@ import React, { useEffect, useState } from 'react';
 
 import { Box, Container, Flex, Heading, Spinner, Table, TableContainer, Tbody, Td, Th, Thead, Tr, useToast } from '@chakra-ui/react';
 
-import ActionsMenu from '../../components/ActionsMenu';
-import Navbar from '../../components/Navbar';
-import { useUsersStore } from '../../store/users-store';
+import ActionsMenu from '../components/ActionsMenu';
+import Navbar from '../components/Navbar';
+import { useUsersStore } from '../store/users-store';
 
 const Admin: React.FC = () => {
     const toast = useToast();
@@ -13,21 +13,23 @@ const Admin: React.FC = () => {
 
     useEffect(() => {
         const fetchUsers = async () => {
+            setIsLoading(true);
             try {
-                setIsLoading(true);
                 await getUsers();
-                setIsLoading(false);
             } catch (err) {
-                setIsLoading(false);
                 toast({
                     title: 'Something went wrong.',
                     description: 'Failed to fetch users. Please try again.',
                     status: 'error',
                     isClosable: true,
                 });
+            } finally {
+                setIsLoading(false);
             }
         }
-        fetchUsers();
+        if (users.length === 0) {
+            fetchUsers();
+        }
     }, [])
 
     return (
@@ -35,12 +37,12 @@ const Admin: React.FC = () => {
             {isLoading ? (
                 // TODO: Add skeleton
                 <Flex justify="center" align="center" height="100vh" width="full">
-                    <Spinner size="xl" color='ui.main'/>
+                    <Spinner size="xl" color='ui.main' />
                 </Flex>
             ) : (
                 users &&
                 <Container maxW="full">
-                    <Heading size="lg" color="gray.700" textAlign={{ base: "center", md: "left" }} pt={12}>
+                    <Heading size="lg" textAlign={{ base: "center", md: "left" }} pt={12}>
                         User Management
                     </Heading>
                     <Navbar type={"User"} />
@@ -52,6 +54,7 @@ const Admin: React.FC = () => {
                                     <Th>Email</Th>
                                     <Th>Role</Th>
                                     <Th>Status</Th>
+                                    <Th>Actions</Th>
                                 </Tr>
                             </Thead>
                             <Tbody>

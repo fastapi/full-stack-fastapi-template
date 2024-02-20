@@ -1,16 +1,15 @@
 import React from 'react';
 
-import { Flex, Icon, Text } from '@chakra-ui/react';
-import { FiBriefcase, FiHome, FiLogOut, FiSettings, FiUsers } from 'react-icons/fi';
-import { Link, useNavigate } from 'react-router-dom';
+import { Box, Flex, Icon, Text, useColorModeValue } from '@chakra-ui/react';
+import { FiBriefcase, FiHome, FiSettings, FiUsers } from 'react-icons/fi';
+import { Link, useLocation } from 'react-router-dom';
 
+import { useUserStore } from '../store/user-store';
 
 const items = [
     { icon: FiHome, title: 'Dashboard', path: "/" },
     { icon: FiBriefcase, title: 'Items', path: "/items" },
-    { icon: FiUsers, title: 'Admin', path: "/admin" },
     { icon: FiSettings, title: 'User Settings', path: "/settings" },
-    { icon: FiLogOut, title: 'Log out' }
 ];
 
 interface SidebarItemsProps {
@@ -18,32 +17,38 @@ interface SidebarItemsProps {
 }
 
 const SidebarItems: React.FC<SidebarItemsProps> = ({ onClose }) => {
-    const navigate = useNavigate();
+    const textColor = useColorModeValue("ui.main", "#E2E8F0");
+    const bgActive = useColorModeValue("#E2E8F0", "#4A5568");
+    const location = useLocation();
+    const { user } = useUserStore();
 
-    const handleLogout = async () => {
-        localStorage.removeItem("access_token");
-        navigate("/login");
-    // TODO: reset all Zustand states
-    };
+    const finalItems = user?.is_superuser ? [...items, { icon: FiUsers, title: 'Admin', path: "/admin" }] : items;
 
-    const listItems = items.map((item) => (
-        <Flex w="100%" p={2} key={item.title} _hover={{
-            background: "gray.200",
-            borderRadius: "12px",
-        }} onClick={item.title === 'Log out' ? handleLogout : onClose}>
-            <Link to={item.path || "/"}>
-                <Flex gap={4}>
-                    <Icon color="ui.main" as={item.icon} alignSelf="center" />
-                    <Text>{item.title}</Text>
-
-                </Flex>
-            </Link>
+    const listItems = finalItems.map((item) => (
+        <Flex
+            as={Link}
+            to={item.path}
+            w="100%"
+            p={2}
+            key={item.title}
+            style={location.pathname === item.path ? {
+                background: bgActive,
+                borderRadius: "12px",
+            } : {}}
+            color={textColor}
+            onClick={onClose}
+        >
+            <Icon as={item.icon} alignSelf="center" />
+            <Text ml={2}>{item.title}</Text>
         </Flex>
     ));
 
     return (
         <>
-            {listItems}
+            <Box>
+                {listItems}
+            </Box>
+
         </>
     );
 };
