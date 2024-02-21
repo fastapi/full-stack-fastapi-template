@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 
-import { Button, Container, FormControl, FormLabel, Heading, Input, Text, useColorModeValue } from '@chakra-ui/react';
+import { Button, Container, Flex, FormControl, FormLabel, Heading, Input, Text, useColorModeValue } from '@chakra-ui/react';
 
 import { useUserStore } from '../../store/user-store';
 
@@ -40,9 +40,15 @@ const UserInformation: React.FC = () => {
                             </Text>
                     }
                 </FormControl>
-                <Button bg='ui.main' color='white' _hover={{ opacity: 0.8 }} mt={4} onClick={toggleEditMode}>
-                    {editMode ? 'Save' : 'Edit'}
-                </Button>
+                <Flex mt={4} gap={3}>
+                    <Button bg='ui.main' color='white' _hover={{ opacity: 0.8 }} onClick={toggleEditMode}>
+                        {editMode ? 'Save' : 'Edit'}
+                    </Button>
+                    {editMode &&
+                        <Button onClick={() => setEditMode(false)}>
+                            Cancel
+                        </Button>}
+                </Flex>
             </ Container>
         </>
     );
