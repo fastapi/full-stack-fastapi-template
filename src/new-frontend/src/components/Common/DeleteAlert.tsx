@@ -1,8 +1,9 @@
 import React, { useState } from 'react';
 
-import { AlertDialog, AlertDialogBody, AlertDialogContent, AlertDialogFooter, AlertDialogHeader, AlertDialogOverlay, Button, useToast } from '@chakra-ui/react';
+import { AlertDialog, AlertDialogBody, AlertDialogContent, AlertDialogFooter, AlertDialogHeader, AlertDialogOverlay, Button } from '@chakra-ui/react';
 import { useForm } from 'react-hook-form';
 
+import useCustomToast from '../../hooks/useCustomToast';
 import { useItemsStore } from '../../store/items-store';
 import { useUsersStore } from '../../store/users-store';
 
@@ -14,7 +15,7 @@ interface DeleteProps {
 }
 
 const Delete: React.FC<DeleteProps> = ({ type, id, isOpen, onClose }) => {
-    const toast = useToast();
+    const showToast = useCustomToast();
     const cancelRef = React.useRef<HTMLButtonElement | null>(null);
     const [isLoading, setIsLoading] = useState(false);
     const { handleSubmit } = useForm();
@@ -25,20 +26,10 @@ const Delete: React.FC<DeleteProps> = ({ type, id, isOpen, onClose }) => {
         setIsLoading(true);
         try {
             type === 'Item' ? await deleteItem(id) : await deleteUser(id);
-            toast({
-                title: "Success",
-                description: `The ${type.toLowerCase()} was deleted successfully.`,
-                status: "success",
-                isClosable: true,
-            });
+            showToast('Success', `The ${type.toLowerCase()} was deleted successfully.`, 'success');
             onClose();
         } catch (err) {
-            toast({
-                title: "An error occurred.",
-                description: `An error occurred while deleting the ${type.toLowerCase()}.`,
-                status: "error",
-                isClosable: true,
-            });
+            showToast('An error occurred.', `An error occurred while deleting the ${type.toLowerCase()}.`, 'error');
         } finally {
             setIsLoading(false);
         }

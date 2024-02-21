@@ -6,18 +6,17 @@ import { SubmitHandler, useForm } from "react-hook-form";
 import { Link as ReactRouterLink, useNavigate } from "react-router-dom";
 
 import Logo from "../assets/images/fastapi-logo.svg";
-import { LoginService } from "../client";
 import { Body_login_login_access_token as AccessToken } from "../client/models/Body_login_login_access_token";
+import useAuth from "../hooks/useAuth";
 
 const Login: React.FC = () => {
   const [show, setShow] = useBoolean();
   const navigate = useNavigate();
   const { register, handleSubmit } = useForm<AccessToken>();
+  const { login } = useAuth();
+
   const onSubmit: SubmitHandler<AccessToken> = async (data) => {
-    const response = await LoginService.loginAccessToken({
-      formData: data,
-    });
-    localStorage.setItem("access_token", response.access_token);
+    await login(data);
     navigate("/");
   };
 

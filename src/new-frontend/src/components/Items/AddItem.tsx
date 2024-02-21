@@ -1,9 +1,10 @@
 import React, { useState } from 'react';
 
-import { Button, FormControl, FormLabel, Input, Modal, ModalBody, ModalCloseButton, ModalContent, ModalFooter, ModalHeader, ModalOverlay, useToast } from '@chakra-ui/react';
+import { Button, FormControl, FormLabel, Input, Modal, ModalBody, ModalCloseButton, ModalContent, ModalFooter, ModalHeader, ModalOverlay } from '@chakra-ui/react';
 import { SubmitHandler, useForm } from 'react-hook-form';
 
 import { ItemCreate } from '../../client';
+import useCustomToast from '../../hooks/useCustomToast';
 import { useItemsStore } from '../../store/items-store';
 
 interface AddItemProps {
@@ -12,7 +13,7 @@ interface AddItemProps {
 }
 
 const AddItem: React.FC<AddItemProps> = ({ isOpen, onClose }) => {
-    const toast = useToast();
+    const showToast = useCustomToast();
     const [isLoading, setIsLoading] = useState(false);
     const { register, handleSubmit, reset } = useForm<ItemCreate>();
     const { addItem } = useItemsStore();
@@ -21,21 +22,11 @@ const AddItem: React.FC<AddItemProps> = ({ isOpen, onClose }) => {
         setIsLoading(true);
         try {
             await addItem(data);
-            toast({
-                title: 'Success!',
-                description: 'Item created successfully.',
-                status: 'success',
-                isClosable: true,
-            });
+            showToast('Success!', 'Item created successfully.', 'success');
             reset();
             onClose();
         } catch (err) {
-            toast({
-                title: 'Something went wrong.',
-                description: 'Failed to create item. Please try again.',
-                status: 'error',
-                isClosable: true,
-            });
+            showToast('Something went wrong.', 'Failed to create item. Please try again.', 'error');
         } finally {
             setIsLoading(false);
         }

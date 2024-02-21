@@ -1,20 +1,19 @@
 import React from 'react';
 
-import { IconButton } from '@chakra-ui/button';
-import { Box } from '@chakra-ui/layout';
-import { Menu, MenuButton, MenuItem, MenuList } from '@chakra-ui/menu';
+import { Box, IconButton, Menu, MenuButton, MenuItem, MenuList } from '@chakra-ui/react';
 import { FaUserAstronaut } from 'react-icons/fa';
 import { FiLogOut, FiUser } from 'react-icons/fi';
-import { useNavigate } from 'react-router';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
+
+import useAuth from '../../hooks/useAuth';
 
 const UserMenu: React.FC = () => {
     const navigate = useNavigate();
+    const { logout } = useAuth();
 
     const handleLogout = async () => {
-        localStorage.removeItem("access_token");
+        logout()
         navigate("/login");
-        // TODO: reset all Zustand states
     };
 
     return (

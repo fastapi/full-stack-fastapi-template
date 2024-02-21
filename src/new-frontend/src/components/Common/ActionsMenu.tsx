@@ -27,8 +27,8 @@ const ActionsMenu: React.FC<ActionsMenuProps> = ({ type, id }) => {
                     <MenuItem onClick={deleteModal.onOpen} icon={<FiTrash fontSize="16px" />} color="ui.danger">Delete {type}</MenuItem>
                 </MenuList>
                 {
-                    type === "User" ? <EditUser isOpen={editUserModal.isOpen} onClose={editUserModal.onClose} />
-                        : <EditItem isOpen={editUserModal.isOpen} onClose={editUserModal.onClose} />
+                    type === "User" ? <EditUser user_id={id} isOpen={editUserModal.isOpen} onClose={editUserModal.onClose} />
+                        : <EditItem id={id} isOpen={editUserModal.isOpen} onClose={editUserModal.onClose} />
                 }
                 <Delete type={type} id={id} isOpen={deleteModal.isOpen} onClose={deleteModal.onClose} />
             </Menu>

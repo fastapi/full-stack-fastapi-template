@@ -1,14 +1,14 @@
 import React, { useEffect, useState } from 'react';
 
-import { Container, Flex, Heading, Spinner, Table, TableContainer, Tbody, Td, Th, Thead, Tr, useToast } from '@chakra-ui/react';
+import { Container, Flex, Heading, Spinner, Table, TableContainer, Tbody, Td, Th, Thead, Tr } from '@chakra-ui/react';
 
 import ActionsMenu from '../components/Common/ActionsMenu';
 import Navbar from '../components/Common/Navbar';
+import useCustomToast from '../hooks/useCustomToast';
 import { useItemsStore } from '../store/items-store';
 
-
 const Items: React.FC = () => {
-    const toast = useToast();
+    const showToast = useCustomToast();
     const [isLoading, setIsLoading] = useState(false);
     const { items, getItems } = useItemsStore();
 
@@ -18,12 +18,7 @@ const Items: React.FC = () => {
             try {
                 await getItems();
             } catch (err) {
-                toast({
-                    title: 'Something went wrong.',
-                    description: 'Failed to fetch items. Please try again.',
-                    status: 'error',
-                    isClosable: true,
-                });
+                showToast('Something went wrong.', 'Failed to fetch items. Please try again.', 'error');
             } finally {
                 setIsLoading(false);
             }
