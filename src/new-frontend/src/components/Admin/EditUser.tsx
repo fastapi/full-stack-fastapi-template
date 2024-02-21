@@ -46,30 +46,30 @@ const EditUser: React.FC<EditUserProps> = ({ user_id, isOpen, onClose }) => {
             <Modal
                 isOpen={isOpen}
                 onClose={onClose}
-                size={{ base: "sm", md: "md" }}
+                size={{ base: 'sm', md: 'md' }}
                 isCentered
             >
                 <ModalOverlay />
-                <ModalContent as="form" onSubmit={handleSubmit(onSubmit)}>
+                <ModalContent as='form' onSubmit={handleSubmit(onSubmit)}>
                     <ModalHeader>Edit User</ModalHeader>
                     <ModalCloseButton />
                     <ModalBody pb={6}>
                         <FormControl>
                             <FormLabel htmlFor='email'>Email</FormLabel>
-                            <Input id="email" {...register('email')} defaultValue={currentUser?.email} type="email" />
+                            <Input id="email" {...register('email')} defaultValue={currentUser?.email} type='email' />
                         </FormControl>
 
                         <FormControl mt={4}>
                             <FormLabel htmlFor='name'>Full name</FormLabel>
-                            <Input id="name" {...register('full_name')} defaultValue={currentUser?.full_name} type="text" />
+                            <Input id="name" {...register('full_name')} defaultValue={currentUser?.full_name} type='text' />
                         </FormControl>
                         <FormControl mt={4}>
                             <FormLabel htmlFor='password'>Password</FormLabel>
-                            <Input id="password" {...register('password')} placeholder='••••••••' type="password" />
+                            <Input id="password" {...register('password')} placeholder='••••••••' type='password' />
                         </FormControl>
                         <FormControl mt={4}>
                             <FormLabel htmlFor='confirmPassword'>Confirmation Password</FormLabel>
-                            <Input id='confirmPassword' {...register('confirmPassword')} placeholder='Password' type="password" />
+                            <Input id='confirmPassword' {...register('confirmPassword')} placeholder='Password' type='password' />
                         </FormControl>
                         <Flex>
                             <FormControl mt={4}>
@@ -82,7 +82,7 @@ const EditUser: React.FC<EditUserProps> = ({ user_id, isOpen, onClose }) => {
                     </ModalBody>
 
                     <ModalFooter gap={3}>
-                        <Button bg="ui.main" color="white" _hover={{ opacity: 0.8 }} type="submit" isLoading={isSubmitting}>
+                        <Button bg='ui.main' color='white' _hover={{ opacity: 0.8 }} type='submit' isLoading={isSubmitting}>
                             Save
                         </Button>
                         <Button onClick={onClose}>Cancel</Button>

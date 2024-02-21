@@ -33,18 +33,18 @@ const Items: React.FC = () => {
         <>
             {isLoading ? (
                 // TODO: Add skeleton
-                <Flex justify="center" align="center" height="100vh" width="full">
-                    <Spinner size="xl" color='ui.main' />
+                <Flex justify='center' align='center' height='100vh' width='full'>
+                    <Spinner size='xl' color='ui.main' />
                 </Flex>
             ) : (
                 items &&
-                <Container maxW="full">
-                    <Heading size="lg" textAlign={{ base: "center", md: "left" }} pt={12}>
+                <Container maxW='full'>
+                    <Heading size='lg' textAlign={{ base: 'center', md: 'left' }} pt={12}>
                         Items Management
                     </Heading>
-                    <Navbar type={"Item"} />
+                    <Navbar type={'Item'} />
                     <TableContainer>
-                        <Table size={{ base: "sm", md: "md" }}>
+                        <Table size={{ base: 'sm', md: 'md' }}>
                             <Thead>
                                 <Tr>
                                     <Th>ID</Th>
@@ -58,9 +58,9 @@ const Items: React.FC = () => {
                                     <Tr key={item.id}>
                                         <Td>{item.id}</Td>
                                         <Td>{item.title}</Td>
-                                        <Td color={!item.description ? "gray.600" : "inherit"}>{item.description || "N/A"}</Td>
+                                        <Td color={!item.description ? 'gray.600' : 'inherit'}>{item.description || 'N/A'}</Td>
                                         <Td>
-                                            <ActionsMenu type={"Item"} id={item.id} />
+                                            <ActionsMenu type={'Item'} id={item.id} />
                                         </Td>
                                     </Tr>
                                 ))}

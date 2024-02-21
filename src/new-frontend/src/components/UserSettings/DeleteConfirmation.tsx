@@ -33,11 +33,11 @@ const DeleteConfirmation: React.FC<DeleteProps> = ({ isOpen, onClose }) => {
                 isOpen={isOpen}
                 onClose={onClose}
                 leastDestructiveRef={cancelRef}
-                size={{ base: "sm", md: "md" }}
+                size={{ base: 'sm', md: 'md' }}
                 isCentered
             >
                 <AlertDialogOverlay>
-                    <AlertDialogContent as="form" onSubmit={handleSubmit(onSubmit)}>
+                    <AlertDialogContent as='form' onSubmit={handleSubmit(onSubmit)}>
                         <AlertDialogHeader>
                             Confirmation Required
                         </AlertDialogHeader>
@@ -47,7 +47,7 @@ const DeleteConfirmation: React.FC<DeleteProps> = ({ isOpen, onClose }) => {
                         </AlertDialogBody>
 
                         <AlertDialogFooter gap={3}>
-                            <Button bg="ui.danger" color="white" _hover={{ opacity: 0.8 }} type="submit" isLoading={isLoading}>
+                            <Button bg='ui.danger' color='white' _hover={{ opacity: 0.8 }} type='submit' isLoading={isLoading}>
                                 Confirm
                             </Button>
                             <Button ref={cancelRef} onClick={onClose} isDisabled={isLoading}>

@@ -11,7 +11,7 @@ const Layout: React.FC = () => {
     const { getUser } = useUserStore();
 
     useEffect(() => {
-        const token = localStorage.getItem("access_token");
+        const token = localStorage.getItem('access_token');
         if (token) {
             (async () => {
                 await getUser();
@@ -20,7 +20,7 @@ const Layout: React.FC = () => {
     }, [getUser]);
 
     return (
-        <Flex maxW="large" h="auto" position="relative">
+        <Flex maxW='large' h='auto' position='relative'>
             <Sidebar />
             <Outlet />
             <UserMenu />

@@ -36,25 +36,25 @@ const EditItem: React.FC<EditItemProps> = ({ id, isOpen, onClose }) => {
             <Modal
                 isOpen={isOpen}
                 onClose={onClose}
-                size={{ base: "sm", md: "md" }}
+                size={{ base: 'sm', md: 'md' }}
                 isCentered
             >
                 <ModalOverlay />
-                <ModalContent as="form" onSubmit={handleSubmit(onSubmit)}>
+                <ModalContent as='form' onSubmit={handleSubmit(onSubmit)}>
                     <ModalHeader>Edit Item</ModalHeader>
                     <ModalCloseButton />
                     <ModalBody pb={6}>
                         <FormControl>
                             <FormLabel htmlFor='title'>Title</FormLabel>
-                            <Input id="title" {...register('title')} defaultValue={currentItem?.title} type="text" />
+                            <Input id='title' {...register('title')} defaultValue={currentItem?.title} type='text' />
                         </FormControl>
                         <FormControl mt={4}>
                             <FormLabel htmlFor='description'>Description</FormLabel>
-                            <Input id="description" {...register('description')} defaultValue={currentItem?.description} placeholder='Description' type="text" />
+                            <Input id='description' {...register('description')} defaultValue={currentItem?.description} placeholder='Description' type='text' />
                         </FormControl>
                     </ModalBody>
                     <ModalFooter gap={3}>
-                        <Button bg="ui.main" color="white" _hover={{ opacity: 0.8 }} type="submit" isLoading={isSubmitting}>
+                        <Button bg='ui.main' color='white' _hover={{ opacity: 0.8 }} type='submit' isLoading={isSubmitting}>
                             Save
                         </Button>
                         <Button onClick={onClose}>Cancel</Button>

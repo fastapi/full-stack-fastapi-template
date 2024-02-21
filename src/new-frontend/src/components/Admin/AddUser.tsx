@@ -43,29 +43,29 @@ const AddUser: React.FC<AddUserProps> = ({ isOpen, onClose }) => {
             <Modal
                 isOpen={isOpen}
                 onClose={onClose}
-                size={{ base: "sm", md: "md" }}
+                size={{ base: 'sm', md: 'md' }}
                 isCentered
             >
                 <ModalOverlay />
-                <ModalContent as="form" onSubmit={handleSubmit(onSubmit)}>
+                <ModalContent as='form' onSubmit={handleSubmit(onSubmit)}>
                     <ModalHeader>Add User</ModalHeader>
                     <ModalCloseButton />
                     <ModalBody pb={6} >
                         <FormControl>
                             <FormLabel htmlFor='email'>Email</FormLabel>
-                            <Input id='email' {...register('email')} placeholder='Email' type="email" />
+                            <Input id='email' {...register('email')} placeholder='Email' type='email' />
                         </FormControl>
                         <FormControl mt={4}>
                             <FormLabel htmlFor='name'>Full name</FormLabel>
-                            <Input id='name' {...register('full_name')} placeholder='Full name' type="text" />
+                            <Input id='name' {...register('full_name')} placeholder='Full name' type='text' />
                         </FormControl>
                         <FormControl mt={4}>
                             <FormLabel htmlFor='password'>Set Password</FormLabel>
-                            <Input id='password' {...register('password')} placeholder='Password' type="password" />
+                            <Input id='password' {...register('password')} placeholder='Password' type='password' />
                         </FormControl>
                         <FormControl mt={4}>
                             <FormLabel htmlFor='confirmPassword'>Confirm Password</FormLabel>
-                            <Input id='confirmPassword' {...register('confirmPassword')} placeholder='Password' type="password" />
+                            <Input id='confirmPassword' {...register('confirmPassword')} placeholder='Password' type='password' />
                         </FormControl>
                         <Flex mt={4}>
                             <FormControl>
@@ -77,7 +77,7 @@ const AddUser: React.FC<AddUserProps> = ({ isOpen, onClose }) => {
                         </Flex>
                     </ModalBody>
                     <ModalFooter gap={3}>
-                        <Button bg="ui.main" color="white" type="submit" isLoading={isSubmitting}>
+                        <Button bg='ui.main' color='white' type='submit' isLoading={isSubmitting}>
                             Save
                         </Button>
                         <Button onClick={onClose}>Cancel</Button>

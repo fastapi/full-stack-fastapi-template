@@ -41,30 +41,32 @@ const AddItem: React.FC<AddItemProps> = ({ isOpen, onClose }) => {
                 isCentered
             >
                 <ModalOverlay />
-                <ModalContent as="form" onSubmit={handleSubmit(onSubmit)}>
+                <ModalContent as='form' onSubmit={handleSubmit(onSubmit)}>
                     <ModalHeader>Add Item</ModalHeader>
                     <ModalCloseButton />
                     <ModalBody pb={6}>
                         <FormControl>
-                            <FormLabel>Title</FormLabel>
+                            <FormLabel htmlFor='title'>Title</FormLabel>
                             <Input
+                                id='title'
                                 {...register('title')}
-                                placeholder="Title"
-                                type="text"
+                                placeholder='Title'
+                                type='text'
                             />
                         </FormControl>
                         <FormControl mt={4}>
-                            <FormLabel>Description</FormLabel>
+                            <FormLabel htmlFor='description'>Description</FormLabel>
                             <Input
+                                id='description'
                                 {...register('description')}
-                                placeholder="Description"
-                                type="text"
+                                placeholder='Description'
+                                type='text'
                             />
                         </FormControl>
                     </ModalBody>
 
                     <ModalFooter gap={3}>
-                        <Button bg="ui.main" color="white" _hover={{ opacity: 0.8 }} type="submit" isLoading={isLoading}>
+                        <Button bg='ui.main' color='white' _hover={{ opacity: 0.8 }} type='submit' isLoading={isLoading}>
                             Save
                         </Button>
                         <Button onClick={onClose} isDisabled={isLoading}>

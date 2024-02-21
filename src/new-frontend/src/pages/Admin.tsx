@@ -32,18 +32,18 @@ const Admin: React.FC = () => {
         <>
             {isLoading ? (
                 // TODO: Add skeleton
-                <Flex justify="center" align="center" height="100vh" width="full">
-                    <Spinner size="xl" color='ui.main' />
+                <Flex justify='center' align='center' height='100vh' width='full'>
+                    <Spinner size='xl' color='ui.main' />
                 </Flex>
             ) : (
                 users &&
-                <Container maxW="full">
-                    <Heading size="lg" textAlign={{ base: "center", md: "left" }} pt={12}>
+                <Container maxW='full'>
+                    <Heading size='lg' textAlign={{ base: 'center', md: 'left' }} pt={12}>
                         User Management
                     </Heading>
-                    <Navbar type={"User"} />
+                    <Navbar type={'User'} />
                     <TableContainer>
-                        <Table fontSize="md" size={{ base: "sm", md: "md" }}>
+                        <Table fontSize='md' size={{ base: 'sm', md: 'md' }}>
                             <Thead>
                                 <Tr>
                                     <Th>Full name</Th>
@@ -56,23 +56,23 @@ const Admin: React.FC = () => {
                             <Tbody>
                                 {users.map((user) => (
                                     <Tr key={user.id}>
-                                        <Td color={!user.full_name ? "gray.600" : "inherit"}>{user.full_name || "N/A"}</Td>
+                                        <Td color={!user.full_name ? 'gray.600' : 'inherit'}>{user.full_name || 'N/A'}</Td>
                                         <Td>{user.email}</Td>
-                                        <Td>{user.is_superuser ? "Superuser" : "User"}</Td>
+                                        <Td>{user.is_superuser ? 'Superuser' : 'User'}</Td>
                                         <Td>
                                             <Flex gap={2}>
                                                 <Box
-                                                    w="2"
-                                                    h="2"
-                                                    borderRadius="50%"
-                                                    bg={user.is_active ? "ui.success" : "ui.danger"}
-                                                    alignSelf="center"
+                                                    w='2'
+                                                    h='2'
+                                                    borderRadius='50%'
+                                                    bg={user.is_active ? 'ui.success' : 'ui.danger'}
+                                                    alignSelf='center'
                                                 />
-                                                {user.is_active ? "Active" : "Inactive"}
+                                                {user.is_active ? 'Active' : 'Inactive'}
                                             </Flex>
                                         </Td>
                                         <Td>
-                                            <ActionsMenu type="User" id={user.id} />
+                                            <ActionsMenu type='User' id={user.id} />
                                         </Td>
                                     </Tr>
                                 ))}

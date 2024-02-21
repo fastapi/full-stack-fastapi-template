@@ -10,12 +10,12 @@ const useAuth = () => {
         const response = await LoginService.loginAccessToken({
             formData: data,
         });
-        localStorage.setItem("access_token", response.access_token);
+        localStorage.setItem('access_token', response.access_token);
         await getUser();
     };
 
     const logout = () => {
-        localStorage.removeItem("access_token");
+        localStorage.removeItem('access_token');
         resetUser();
     };
 

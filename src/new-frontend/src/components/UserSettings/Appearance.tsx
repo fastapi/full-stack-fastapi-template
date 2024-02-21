@@ -7,16 +7,16 @@ const Appearance: React.FC = () => {
 
     return (
         <>
-            <Container maxW="full">
-                <Heading size="sm" py={4}>
+            <Container maxW='full'>
+                <Heading size='sm' py={4}>
                     Appearance
                 </Heading>
                 <RadioGroup onChange={toggleColorMode} value={colorMode}>
                     <Stack>
-                        <Radio value="light" colorScheme="teal">
+                        <Radio value='light' colorScheme='teal'>
                             Light <i>(default)</i>
                         </Radio>
-                        <Radio value="dark" colorScheme="teal">
+                        <Radio value='dark' colorScheme='teal'>
                             Dark
                         </Radio>
                     </Stack>

@@ -13,8 +13,8 @@ const UserSettings: React.FC = () => {
 
     return (
         <>
-            <Container maxW="full">
-                <Heading size="lg" textAlign={{ base: "center", md: "left" }} py={12}>
+            <Container maxW='full'>
+                <Heading size='lg' textAlign={{ base: 'center', md: 'left' }} py={12}>
                     User Settings
                 </Heading>
                 <Tabs variant='enclosed' >
