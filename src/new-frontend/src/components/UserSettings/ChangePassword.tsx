@@ -3,8 +3,8 @@ import React from 'react';
 import { Box, Button, Container, FormControl, FormLabel, Heading, Input, useColorModeValue } from '@chakra-ui/react';
 import { SubmitHandler, useForm } from 'react-hook-form';
 import { ApiError, UpdatePassword } from '../../client';
-import { useUserStore } from '../../store/user-store';
 import useCustomToast from '../../hooks/useCustomToast';
+import { useUserStore } from '../../store/user-store';
 
 interface UpdatePasswordForm extends UpdatePassword {
     confirm_password: string;
