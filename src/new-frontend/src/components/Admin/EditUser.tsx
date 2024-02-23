@@ -3,7 +3,7 @@ import React from 'react';
 import { Button, Checkbox, Flex, FormControl, FormLabel, Input, Modal, ModalBody, ModalCloseButton, ModalContent, ModalFooter, ModalHeader, ModalOverlay } from '@chakra-ui/react';
 import { SubmitHandler, useForm } from 'react-hook-form';
 
-import { UserUpdate } from '../../client';
+import { ApiError, UserUpdate } from '../../client';
 import useCustomToast from '../../hooks/useCustomToast';
 import { useUsersStore } from '../../store/users-store';
 
@@ -14,8 +14,7 @@ interface EditUserProps {
 }
 
 interface UserUpdateForm extends UserUpdate {
-    confirmPassword: string;
-
+    confirm_password: string;
 }
 
 const EditUser: React.FC<EditUserProps> = ({ user_id, isOpen, onClose }) => {
@@ -26,14 +25,15 @@ const EditUser: React.FC<EditUserProps> = ({ user_id, isOpen, onClose }) => {
     const currentUser = users.find((user) => user.id === user_id);
 
     const onSubmit: SubmitHandler<UserUpdateForm> = async (data) => {
-        if (data.password === data.confirmPassword) {
+        if (data.password === data.confirm_password) {
             try {
                 await editUser(user_id, data);
                 showToast('Success!', 'User updated successfully.', 'success');
                 reset();
                 onClose();
             } catch (err) {
-                showToast('Something went wrong.', 'Failed to update user. Please try again.', 'error');
+                const errDetail = (err as ApiError).body.detail;
+                showToast('Something went wrong.', `${errDetail}`, 'error');
             }
         } else {
             // TODO: Complete when form validation is implemented
@@ -58,7 +58,6 @@ const EditUser: React.FC<EditUserProps> = ({ user_id, isOpen, onClose }) => {
                             <FormLabel htmlFor='email'>Email</FormLabel>
                             <Input id="email" {...register('email')} defaultValue={currentUser?.email} type='email' />
                         </FormControl>
-
                         <FormControl mt={4}>
                             <FormLabel htmlFor='name'>Full name</FormLabel>
                             <Input id="name" {...register('full_name')} defaultValue={currentUser?.full_name} type='text' />
@@ -69,7 +68,7 @@ const EditUser: React.FC<EditUserProps> = ({ user_id, isOpen, onClose }) => {
                         </FormControl>
                         <FormControl mt={4}>
                             <FormLabel htmlFor='confirmPassword'>Confirmation Password</FormLabel>
-                            <Input id='confirmPassword' {...register('confirmPassword')} placeholder='Password' type='password' />
+                            <Input id='confirmPassword' {...register('confirm_password')} placeholder='••••••••' type='password' />
                         </FormControl>
                         <Flex>
                             <FormControl mt={4}>

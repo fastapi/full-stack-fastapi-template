@@ -3,7 +3,7 @@ import React from 'react';
 import { Button, FormControl, FormLabel, Input, Modal, ModalBody, ModalCloseButton, ModalContent, ModalFooter, ModalHeader, ModalOverlay } from '@chakra-ui/react';
 import { SubmitHandler, useForm } from 'react-hook-form';
 
-import { ItemUpdate } from '../../client';
+import { ApiError, ItemUpdate } from '../../client';
 import useCustomToast from '../../hooks/useCustomToast';
 import { useItemsStore } from '../../store/items-store';
 
@@ -27,7 +27,8 @@ const EditItem: React.FC<EditItemProps> = ({ id, isOpen, onClose }) => {
             reset();
             onClose();
         } catch (err) {
-            showToast('Something went wrong.', 'Failed to update item. Please try again.', 'error');
+            const errDetail = (err as ApiError).body.detail;
+            showToast('Something went wrong.', `${errDetail}`, 'error');
         }
     }
 

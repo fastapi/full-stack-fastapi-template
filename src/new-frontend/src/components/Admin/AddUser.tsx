@@ -6,6 +6,7 @@ import { SubmitHandler, useForm } from 'react-hook-form';
 import { UserCreate } from '../../client';
 import useCustomToast from '../../hooks/useCustomToast';
 import { useUsersStore } from '../../store/users-store';
+import { ApiError } from '../../client/core/ApiError';
 
 interface AddUserProps {
     isOpen: boolean;
@@ -30,7 +31,8 @@ const AddUser: React.FC<AddUserProps> = ({ isOpen, onClose }) => {
                 reset();
                 onClose();
             } catch (err) {
-                showToast('Something went wrong.', 'Failed to create user. Please try again.', 'error');
+                const errDetail = (err as ApiError).body.detail;
+                showToast('Something went wrong.', `${errDetail}`, 'error');
             }
         } else {
             // TODO: Complete when form validation is implemented

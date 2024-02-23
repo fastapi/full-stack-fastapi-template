@@ -1,5 +1,5 @@
-import { create } from "zustand";
-import { ItemCreate, ItemOut, ItemUpdate, ItemsService } from "../client";
+import { create } from 'zustand';
+import { ItemCreate, ItemOut, ItemUpdate, ItemsService } from '../client';
 
 interface ItemsStore {
     items: ItemOut[];

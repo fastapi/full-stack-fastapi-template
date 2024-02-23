@@ -51,6 +51,7 @@ const Delete: React.FC<DeleteProps> = ({ type, id, isOpen, onClose }) => {
                         </AlertDialogHeader>
 
                         <AlertDialogBody>
+                            {type === 'User' && <span>All items associated with this user will also be <strong>permantly deleted. </strong></span>}
                             Are you sure? You will not be able to undo this action.
                         </AlertDialogBody>
 

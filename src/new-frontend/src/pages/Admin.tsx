@@ -18,7 +18,8 @@ const Admin: React.FC = () => {
             try {
                 await getUsers();
             } catch (err) {
-                showToast('Something went wrong.', 'Failed to fetch users. Please try again.', 'error');
+                const errDetail = (err as ApiError).body.detail;
+                showToast('Something went wrong.', `${errDetail}`, 'error');
             } finally {
                 setIsLoading(false);
             }

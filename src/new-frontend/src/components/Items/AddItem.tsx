@@ -3,7 +3,7 @@ import React, { useState } from 'react';
 import { Button, FormControl, FormLabel, Input, Modal, ModalBody, ModalCloseButton, ModalContent, ModalFooter, ModalHeader, ModalOverlay } from '@chakra-ui/react';
 import { SubmitHandler, useForm } from 'react-hook-form';
 
-import { ItemCreate } from '../../client';
+import { ApiError, ItemCreate } from '../../client';
 import useCustomToast from '../../hooks/useCustomToast';
 import { useItemsStore } from '../../store/items-store';
 
@@ -26,7 +26,8 @@ const AddItem: React.FC<AddItemProps> = ({ isOpen, onClose }) => {
             reset();
             onClose();
         } catch (err) {
-            showToast('Something went wrong.', 'Failed to create item. Please try again.', 'error');
+            const errDetail = (err as ApiError).body.detail;
+            showToast('Something went wrong.', `${errDetail}`, 'error');
         } finally {
             setIsLoading(false);
         }

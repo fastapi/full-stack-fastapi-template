@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 
 import { Container, Flex, Heading, Spinner, Table, TableContainer, Tbody, Td, Th, Thead, Tr } from '@chakra-ui/react';
 
+import { ApiError } from '../client';
 import ActionsMenu from '../components/Common/ActionsMenu';
 import Navbar from '../components/Common/Navbar';
 import useCustomToast from '../hooks/useCustomToast';
@@ -18,7 +19,8 @@ const Items: React.FC = () => {
             try {
                 await getItems();
             } catch (err) {
-                showToast('Something went wrong.', 'Failed to fetch items. Please try again.', 'error');
+                const errDetail = (err as ApiError).body.detail;
+                showToast('Something went wrong.', `${errDetail}`, 'error');
             } finally {
                 setIsLoading(false);
             }
