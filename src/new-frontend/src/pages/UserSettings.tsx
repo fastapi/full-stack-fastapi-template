@@ -5,6 +5,7 @@ import Appearance from '../components/UserSettings/Appearance';
 import ChangePassword from '../components/UserSettings/ChangePassword';
 import DeleteAccount from '../components/UserSettings/DeleteAccount';
 import UserInformation from '../components/UserSettings/UserInformation';
+import { useUserStore } from '../store/user-store';
 
 const tabsConfig = [
     { title: 'My profile', component: UserInformation },
@@ -14,6 +15,11 @@ const tabsConfig = [
 ];
 
 const UserSettings: React.FC = () => {
+    const { user } = useUserStore();
+
+    const finalTabs = user?.is_superuser ? tabsConfig.slice(0, 3) : tabsConfig;
+
+
     return (
         <Container maxW='full'>
             <Heading size='lg' textAlign={{ base: 'center', md: 'left' }} py={12}>
@@ -21,12 +27,12 @@ const UserSettings: React.FC = () => {
             </Heading>
             <Tabs variant='enclosed'>
                 <TabList>
-                    {tabsConfig.map((tab, index) => (
+                    {finalTabs.map((tab, index) => (
                         <Tab key={index}>{tab.title}</Tab>
                     ))}
                 </TabList>
                 <TabPanels>
-                    {tabsConfig.map((tab, index) => (
+                    {finalTabs.map((tab, index) => (
                         <TabPanel key={index}>
                             <tab.component />
                         </TabPanel>

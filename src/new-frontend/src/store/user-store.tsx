@@ -2,7 +2,7 @@ import { create } from 'zustand';
 import { UpdatePassword, UserOut, UserUpdateMe, UsersService } from '../client';
 
 interface UserStore {
-    user: UserOut | UserUpdateMe | null;
+    user: UserOut | null;
     getUser: () => Promise<void>;
     editUser: (user: UserUpdateMe) => Promise<void>;
     editPassword: (password: UpdatePassword) => Promise<void>;

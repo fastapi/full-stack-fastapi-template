@@ -13,25 +13,26 @@ const UserMenu: React.FC = () => {
 
     const handleLogout = async () => {
         logout()
-        navigate("/login");
+        navigate('/login');
     };
 
     return (
         <>
-            <Box position="fixed" top={4} right={4}>
+            {/* Desktop */}
+            <Box display={{ base: 'none', md: 'block' }} position='fixed' top={4} right={4}>
                 <Menu>
                     <MenuButton
                         as={IconButton}
                         aria-label='Options'
-                        icon={<FaUserAstronaut color="white" fontSize="18px" />}
-                        bg="ui.main"
+                        icon={<FaUserAstronaut color='white' fontSize='18px' />}
+                        bg='ui.main'
                         isRound
                     />
                     <MenuList>
-                        <MenuItem icon={<FiUser fontSize="18px" />} as={Link} to="settings">
+                        <MenuItem icon={<FiUser fontSize='18px' />} as={Link} to='settings'>
                             My profile
                         </MenuItem>
-                        <MenuItem icon={<FiLogOut fontSize="18px" />} onClick={handleLogout} color="ui.danger" fontWeight="bold">
+                        <MenuItem icon={<FiLogOut fontSize='18px' />} onClick={handleLogout} color='ui.danger' fontWeight='bold'>
                             Log out
                         </MenuItem>
                     </MenuList>
