@@ -41,6 +41,11 @@ const EditUser: React.FC<EditUserProps> = ({ user_id, isOpen, onClose }) => {
         }
     }
 
+    const onCancel = () => {
+        reset();
+        onClose();
+    }
+
     return (
         <>
             <Modal
@@ -84,7 +89,7 @@ const EditUser: React.FC<EditUserProps> = ({ user_id, isOpen, onClose }) => {
                         <Button bg='ui.main' color='white' _hover={{ opacity: 0.8 }} type='submit' isLoading={isSubmitting}>
                             Save
                         </Button>
-                        <Button onClick={onClose}>Cancel</Button>
+                        <Button onClick={onCancel}>Cancel</Button>
                     </ModalFooter>
                 </ModalContent>
             </Modal>

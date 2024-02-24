@@ -11,7 +11,7 @@ const UserInformation: React.FC = () => {
     const color = useColorModeValue('gray.700', 'white');
     const showToast = useCustomToast();
     const [editMode, setEditMode] = useState(false);
-    const { register, handleSubmit, formState: { isSubmitting } } = useForm<UserOut>();
+    const { register, handleSubmit, reset, formState: { isSubmitting } } = useForm<UserOut>();
     const { user, editUser } = useUserStore();
 
     const toggleEditMode = () => {
@@ -26,6 +26,11 @@ const UserInformation: React.FC = () => {
             const errDetail = (err as ApiError).body.detail;
             showToast('Something went wrong.', `${errDetail}`, 'error');
         }
+    }
+
+    const onCancel = () => {
+        reset();
+        toggleEditMode();
     }
 
     return (
@@ -67,7 +72,7 @@ const UserInformation: React.FC = () => {
                             {editMode ? 'Save' : 'Edit'}
                         </Button>
                         {editMode &&
-                            <Button onClick={toggleEditMode}>
+                            <Button onClick={onCancel}>
                                 Cancel
                             </Button>}
                     </Flex>
