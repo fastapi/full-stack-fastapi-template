@@ -14,7 +14,7 @@ const Admin: React.FC = () => {
     const [isLoading, setIsLoading] = useState(false);
     const { users, getUsers } = useUsersStore();
     const { user: currentUser } = useUserStore();
-    
+
     useEffect(() => {
         const fetchUsers = async () => {
             setIsLoading(true);
@@ -60,7 +60,7 @@ const Admin: React.FC = () => {
                             <Tbody>
                                 {users.map((user) => (
                                     <Tr key={user.id}>
-                                        <Td color={!user.full_name ? 'gray.600' : 'inherit'}>{user.full_name || 'N/A'}{currentUser?.id === user.id && <Badge ml='1' colorScheme='green'>You</Badge>}</Td>
+                                        <Td color={!user.full_name ? 'gray.600' : 'inherit'}>{user.full_name || 'N/A'}{currentUser?.id === user.id && <Badge ml='1' colorScheme='teal'>You</Badge>}</Td>
                                         <Td>{user.email}</Td>
                                         <Td>{user.is_superuser ? 'Superuser' : 'User'}</Td>
                                         <Td>
@@ -76,7 +76,7 @@ const Admin: React.FC = () => {
                                             </Flex>
                                         </Td>
                                         <Td>
-                                            <ActionsMenu type='User' id={user.id} />
+                                            <ActionsMenu type='User' id={user.id} disabled={currentUser?.id === user.id ? true : false} />
                                         </Td>
                                     </Tr>
                                 ))}
