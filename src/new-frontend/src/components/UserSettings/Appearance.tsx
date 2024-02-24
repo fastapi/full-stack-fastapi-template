@@ -15,10 +15,10 @@ const Appearance: React.FC = () => {
                     <Stack>
                         {/* TODO: Add system default option */}
                         <Radio value='light' colorScheme='teal'>
-                            Light <Badge ml='1' colorScheme='teal'>Default</Badge>
+                            Light Mode<Badge ml='1' colorScheme='teal'>Default</Badge>
                         </Radio>
                         <Radio value='dark' colorScheme='teal'>
-                            Dark
+                            Dark Mode
                         </Radio>
                     </Stack>
                 </RadioGroup>
