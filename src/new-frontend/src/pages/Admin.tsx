@@ -1,16 +1,21 @@
 import React, { useEffect, useState } from 'react';
 
-import { Box, Container, Flex, Heading, Spinner, Table, TableContainer, Tbody, Td, Th, Thead, Tr } from '@chakra-ui/react';
+import { Badge, Box, Container, Flex, Heading, Spinner, Table, TableContainer, Tbody, Td, Th, Thead, Tr } from '@chakra-ui/react';
 
+import { ApiError } from '../client';
 import ActionsMenu from '../components/Common/ActionsMenu';
 import Navbar from '../components/Common/Navbar';
 import useCustomToast from '../hooks/useCustomToast';
+import { useUserStore } from '../store/user-store';
 import { useUsersStore } from '../store/users-store';
 
 const Admin: React.FC = () => {
     const showToast = useCustomToast();
     const [isLoading, setIsLoading] = useState(false);
     const { users, getUsers } = useUsersStore();
+    const { user: currentUser } = useUserStore();
+
+    // const currentUser = user?.id === id;
 
     useEffect(() => {
         const fetchUsers = async () => {
@@ -57,7 +62,7 @@ const Admin: React.FC = () => {
                             <Tbody>
                                 {users.map((user) => (
                                     <Tr key={user.id}>
-                                        <Td color={!user.full_name ? 'gray.600' : 'inherit'}>{user.full_name || 'N/A'}</Td>
+                                        <Td color={!user.full_name ? 'gray.600' : 'inherit'}>{user.full_name || 'N/A'}{currentUser?.id === user.id && <Badge ml='1' colorScheme='green'>You</Badge>}</Td>
                                         <Td>{user.email}</Td>
                                         <Td>{user.is_superuser ? 'Superuser' : 'User'}</Td>
                                         <Td>
