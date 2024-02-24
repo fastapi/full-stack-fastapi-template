@@ -14,9 +14,7 @@ const Admin: React.FC = () => {
     const [isLoading, setIsLoading] = useState(false);
     const { users, getUsers } = useUsersStore();
     const { user: currentUser } = useUserStore();
-
-    // const currentUser = user?.id === id;
-
+    
     useEffect(() => {
         const fetchUsers = async () => {
             setIsLoading(true);
