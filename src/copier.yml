@@ -53,11 +53,6 @@ emails_from_email:
   help: The email account to send emails from, you can set it later in .env
   default: info@example.com
 
-smtp_port:
-  type: int
-  help: The SMTP server port to send emails, you can set it later in .env
-  default: 587
-
 postgres_password:
   type: str
   help: |
