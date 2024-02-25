@@ -1,30 +1,37 @@
-name: Pytest Backend
+name: Test
 
 on:
   push:
     branches:
       - master
+  pull_request:
+    types:
+      - opened
+      - synchronize
 
 jobs:
 
-  pytest:
+  test:
     runs-on: ubuntu-latest
     defaults:
         run:
             working-directory: src
     steps:
       - name: Checkout
-        uses: actions/checkout@v2
+        uses: actions/checkout@v4
 
-      - name: Setup python 3.10
-        uses: actions/setup-python@v2
+      - name: Set up Python
+        uses: actions/setup-python@v5
         with:
           python-version: '3.10'
 
-      - name: docker-compose setup
-        run: |
-          docker-compose up -d
-
-      - name: docker-compose run pytest
-        run: |
-          docker exec src_backend_1 pytest --cov=app --cov-report=term-missing app/tests
+      - name: Docker Compose build
+        run: docker compose build
+      - name: Docker Compose remove old containers and volumes 
+        run: docker compose down -v --remove-orphans
+      - name: Docker Compose up
+        run: docker compose up -d
+      - name: Docker Compose run tests
+        run: exec -T backend bash /app/tests-start.sh
+      - name: Docker Compose cleanup
+        run: docker compose down -v --remove-orphans
