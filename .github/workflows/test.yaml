@@ -32,6 +32,6 @@ jobs:
       - name: Docker Compose up
         run: docker compose up -d
       - name: Docker Compose run tests
-        run: exec -T backend bash /app/tests-start.sh
+        run: docker compose exec -T backend bash /app/tests-start.sh
       - name: Docker Compose cleanup
         run: docker compose down -v --remove-orphans
