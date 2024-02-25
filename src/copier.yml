@@ -113,5 +113,7 @@ _exclude:
   - "*.sln"
   - "*.sw?"
 
+_answers_file: .copier/.copier-answers.yml
+
 _tasks:
-  - "python scripts/update_dotenv.py"
+  - "python .copier/update_dotenv.py"
