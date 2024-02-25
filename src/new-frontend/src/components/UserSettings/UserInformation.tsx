@@ -6,6 +6,7 @@ import { SubmitHandler, useForm } from 'react-hook-form';
 import { ApiError, UserOut, UserUpdateMe } from '../../client';
 import useCustomToast from '../../hooks/useCustomToast';
 import { useUserStore } from '../../store/user-store';
+import { useUsersStore } from '../../store/users-store';
 
 const UserInformation: React.FC = () => {
     const color = useColorModeValue('gray.700', 'white');
@@ -13,6 +14,7 @@ const UserInformation: React.FC = () => {
     const [editMode, setEditMode] = useState(false);
     const { register, handleSubmit, reset, formState: { isSubmitting } } = useForm<UserOut>();
     const { user, editUser } = useUserStore();
+    const { getUsers } = useUsersStore();
 
     const toggleEditMode = () => {
         setEditMode(!editMode);
@@ -21,6 +23,7 @@ const UserInformation: React.FC = () => {
     const onSubmit: SubmitHandler<UserUpdateMe> = async (data) => {
         try {
             await editUser(data);
+            await getUsers()
             showToast('Success!', 'User updated successfully.', 'success');
         } catch (err) {
             const errDetail = (err as ApiError).body.detail;

@@ -7,6 +7,7 @@ interface ItemsStore {
     addItem: (item: ItemCreate) => Promise<void>;
     editItem: (id: number, item: ItemUpdate) => Promise<void>;
     deleteItem: (id: number) => Promise<void>;
+    resetItems: () => void;
 }
 
 export const useItemsStore = create<ItemsStore>((set) => ({
@@ -28,5 +29,8 @@ export const useItemsStore = create<ItemsStore>((set) => ({
     deleteItem: async (id: number) => {
         await ItemsService.deleteItem({ id });
         set((state) => ({ items: state.items.filter((item) => item.id !== id) }));
+    },
+    resetItems: () => {
+        set({ items: [] });
     }
 }));

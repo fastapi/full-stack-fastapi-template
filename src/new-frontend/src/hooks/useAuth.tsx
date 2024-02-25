@@ -1,10 +1,12 @@
 import { useUserStore } from '../store/user-store';
 import { Body_login_login_access_token as AccessToken, LoginService } from '../client';
+import { useUsersStore } from '../store/users-store';
+import { useItemsStore } from '../store/items-store';
 
 const useAuth = () => {
-    const user = useUserStore((state) => state.user);
-    const getUser = useUserStore((state) => state.getUser);
-    const resetUser = useUserStore((state) => state.resetUser);
+    const { user, getUser, resetUser } = useUserStore();
+    const { resetUsers } = useUsersStore();
+    const { resetItems } = useItemsStore();
 
     const login = async (data: AccessToken) => {
         const response = await LoginService.loginAccessToken({
@@ -17,6 +19,8 @@ const useAuth = () => {
     const logout = () => {
         localStorage.removeItem('access_token');
         resetUser();
+        resetUsers();
+        resetItems();
     };
 
     const isLoggedIn = () => {

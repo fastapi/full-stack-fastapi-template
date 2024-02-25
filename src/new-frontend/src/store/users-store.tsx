@@ -7,6 +7,7 @@ interface UsersStore {
     addUser: (user: UserCreate) => Promise<void>;
     editUser: (id: number, user: UserUpdate) => Promise<void>;
     deleteUser: (id: number) => Promise<void>;
+    resetUsers: () => void;
 }
 
 export const useUsersStore = create<UsersStore>((set) => ({
@@ -28,5 +29,8 @@ export const useUsersStore = create<UsersStore>((set) => ({
     deleteUser: async (id: number) => {
         await UsersService.deleteUser({ userId: id });
         set((state) => ({ users: state.users.filter((user) => user.id !== id) }));
+    },
+    resetUsers: () => {
+        set({ users: [] });
     }
 }))
