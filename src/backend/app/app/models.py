@@ -51,7 +51,7 @@ class UserOut(UserBase):
     id: int
 
 
-class UsersOut(BaseModel):
+class UsersOut(SQLModel):
     data: list[UserOut]
     count: int
 
@@ -88,7 +88,7 @@ class ItemOut(ItemBase):
     owner_id: int
 
 
-class ItemsOut(BaseModel):
+class ItemsOut(SQLModel):
     data: list[ItemOut]
     count: int
 
