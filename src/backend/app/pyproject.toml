@@ -11,7 +11,7 @@ fastapi = "^0.104.1"
 python-multipart = "^0.0.6"
 email-validator = "^2.1.0.post1"
 celery = "^5.3.5"
-passlib = {extras = ["bcrypt"], version = "4.0.1"}
+passlib = {extras = ["bcrypt"], version = "^1.7.4"}
 tenacity = "^8.2.3"
 pydantic = "<2.0"
 emails = "^0.6"
@@ -23,6 +23,8 @@ python-jose = {extras = ["cryptography"], version = "^3.3.0"}
 httpx = "^0.25.1"
 psycopg = {extras = ["binary"], version = "^3.1.13"}
 sqlmodel = "^0.0.16"
+# Pin bcrypt until passlib supports the latest
+bcrypt = "4.0.1"
 
 [tool.poetry.group.dev.dependencies]
 mypy = "^1.7.0"
