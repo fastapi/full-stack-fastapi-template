@@ -50,14 +50,6 @@ class Settings(BaseSettings):
 
     @field_validator("SQLALCHEMY_DATABASE_URI", mode="before")
     def assemble_db_connection(cls, v: str | None, info: ValidationInfo) -> Any:
-        """
-        A function that validates and assembles the database connection string.
-        Args:
-            v (str | None): The database URI string.
-            info (ValidationInfo): Pydnatic Information related to the validation process.
-        Returns:
-            Any: The assembled database connection string.
-        """
         if isinstance(v, str):
             return v
         return PostgresDsn.build(
