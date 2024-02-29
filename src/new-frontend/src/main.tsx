@@ -6,6 +6,7 @@ import { createStandaloneToast } from '@chakra-ui/toast';
 import { RouterProvider, createBrowserRouter } from 'react-router-dom';
 
 import { OpenAPI } from './client';
+import { isLoggedIn } from './hooks/useAuth';
 import privateRoutes from './routes/private_route';
 import publicRoutes from './routes/public_route';
 import theme from './theme';
@@ -17,7 +18,7 @@ OpenAPI.TOKEN = async () => {
 }
 
 const router = createBrowserRouter([
-  localStorage.getItem('access_token') ? privateRoutes() : {},
+  isLoggedIn() ? privateRoutes() : {},
   ...publicRoutes(),
 ]);
 

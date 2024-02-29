@@ -6,7 +6,7 @@ export default function publicRoutes() {
     return [
         { path: '/login', element: <Login />, errorElement: <ErrorPage /> },
         { path: 'recover-password', element: <RecoverPassword />, errorElement: <ErrorPage /> },
-        // TODO: fix this
+        // TODO: complete this
         // { path: '*', element: <Navigate to='/login' replace /> }
     ];
 }
