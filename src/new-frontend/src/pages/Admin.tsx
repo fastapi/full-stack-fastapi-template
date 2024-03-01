@@ -1,36 +1,29 @@
-import React, { useEffect, useState } from 'react';
+import React from 'react';
 
 import { Badge, Box, Container, Flex, Heading, Spinner, Table, TableContainer, Tbody, Td, Th, Thead, Tr } from '@chakra-ui/react';
+import { useQuery } from 'react-query';
 
-import { ApiError } from '../client';
+import { ApiError, UsersService } from '../client';
 import ActionsMenu from '../components/Common/ActionsMenu';
 import Navbar from '../components/Common/Navbar';
 import useCustomToast from '../hooks/useCustomToast';
 import { useUserStore } from '../store/user-store';
-import { useUsersStore } from '../store/users-store';
 
 const Admin: React.FC = () => {
     const showToast = useCustomToast();
-    const [isLoading, setIsLoading] = useState(false);
-    const { users, getUsers } = useUsersStore();
     const { user: currentUser } = useUserStore();
 
-    useEffect(() => {
-        const fetchUsers = async () => {
-            setIsLoading(true);
-            try {
-                await getUsers();
-            } catch (err) {
-                const errDetail = (err as ApiError).body.detail;
-                showToast('Something went wrong.', `${errDetail}`, 'error');
-            } finally {
-                setIsLoading(false);
-            }
-        }
-        if (users.length === 0) {
-            fetchUsers();
-        }
-    }, [])
+    const getUsers = async () => {
+        const response = await UsersService.readUsers({ skip: 0, limit: 10 });
+        return response.data;
+    }
+
+    const { data: users, isLoading, isError, error } = useQuery({ queryKey: ['users'], queryFn: getUsers })
+
+    if (isError) {
+        const errDetail = (error as ApiError).body?.detail;
+        showToast('Something went wrong.', `${errDetail}`, 'error');
+    }
 
     return (
         <>
