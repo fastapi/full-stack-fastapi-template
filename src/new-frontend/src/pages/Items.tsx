@@ -16,7 +16,7 @@ const Items: React.FC = () => {
         return response.data;
     }
 
-    const { data: items, isLoading, isError, error } = useQuery({ queryKey: ['items'], queryFn: getItems })
+    const { data: items, isLoading, isError, error } = useQuery('items', getItems)
 
     if (isError) {
         const errDetail = (error as ApiError).body?.detail;

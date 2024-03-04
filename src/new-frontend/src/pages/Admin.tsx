@@ -6,19 +6,19 @@ import { useQuery } from 'react-query';
 import { ApiError, UsersService } from '../client';
 import ActionsMenu from '../components/Common/ActionsMenu';
 import Navbar from '../components/Common/Navbar';
+import { useCurrentUser } from '../hooks/useCurrentUser';
 import useCustomToast from '../hooks/useCustomToast';
-import { useUserStore } from '../store/user-store';
 
 const Admin: React.FC = () => {
     const showToast = useCustomToast();
-    const { user: currentUser } = useUserStore();
+    const { data: currentUser } = useCurrentUser();
 
     const getUsers = async () => {
         const response = await UsersService.readUsers({ skip: 0, limit: 10 });
         return response.data;
     }
 
-    const { data: users, isLoading, isError, error } = useQuery({ queryKey: ['users'], queryFn: getUsers })
+    const { data: users, isLoading, isError, error } = useQuery('users', getUsers)
 
     if (isError) {
         const errDetail = (error as ApiError).body?.detail;
