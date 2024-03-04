@@ -116,4 +116,5 @@ _exclude:
 _answers_file: .copier/.copier-answers.yml
 
 _tasks:
+  - "python .copier/quote_inputs.py"
   - "python .copier/update_dotenv.py"
