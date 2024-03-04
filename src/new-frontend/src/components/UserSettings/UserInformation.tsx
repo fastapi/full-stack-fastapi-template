@@ -3,32 +3,49 @@ import React, { useState } from 'react';
 import { Box, Button, Container, Flex, FormControl, FormLabel, Heading, Input, Text, useColorModeValue } from '@chakra-ui/react';
 
 import { SubmitHandler, useForm } from 'react-hook-form';
-import { ApiError, UserOut, UserUpdateMe } from '../../client';
+import { useMutation, useQueryClient } from 'react-query';
+import { ApiError, UserOut, UserUpdateMe, UsersService } from '../../client';
+import { useCurrentUser } from '../../hooks/useCurrentUser';
 import useCustomToast from '../../hooks/useCustomToast';
-import { useUserStore } from '../../store/user-store';
-import { useUsersStore } from '../../store/users-store';
 
 const UserInformation: React.FC = () => {
+    const queryClient = useQueryClient();
     const color = useColorModeValue('gray.700', 'white');
     const showToast = useCustomToast();
     const [editMode, setEditMode] = useState(false);
-    const { register, handleSubmit, reset, formState: { isSubmitting } } = useForm<UserOut>();
-    const { user, editUser } = useUserStore();
-    const { getUsers } = useUsersStore();
+    const { data: currentUser } = useCurrentUser();
+    const { register, handleSubmit, reset, formState: { isSubmitting } } = useForm<UserOut>({
+        mode: 'onBlur', criteriaMode: 'all', defaultValues: {
+            full_name: currentUser?.full_name,
+            email: currentUser?.email
+        }
+    })
 
     const toggleEditMode = () => {
         setEditMode(!editMode);
     };
 
-    const onSubmit: SubmitHandler<UserUpdateMe> = async (data) => {
-        try {
-            await editUser(data);
-            await getUsers()
+    const updateInfo = async (data: UserUpdateMe) => {
+        await UsersService.updateUserMe({ requestBody: data })
+    }
+
+    const mutation = useMutation(updateInfo, {
+        onSuccess: () => {
             showToast('Success!', 'User updated successfully.', 'success');
-        } catch (err) {
-            const errDetail = (err as ApiError).body.detail;
+            reset();
+        },
+        onError: (err: ApiError) => {
+            const errDetail = err.body.detail;
             showToast('Something went wrong.', `${errDetail}`, 'error');
+        },
+        onSettled: () => {
+            queryClient.invalidateQueries('users');
+            queryClient.invalidateQueries('currentUser');
         }
+    });
+
+    const onSubmit: SubmitHandler<UserUpdateMe> = async (data) => {
+        mutation.mutate(data)
     }
 
     const onCancel = () => {
@@ -47,9 +64,9 @@ const UserInformation: React.FC = () => {
                         <FormLabel color={color} htmlFor='name'>Full name</FormLabel>
                         {
                             editMode ?
-                                <Input id='name' {...register('full_name')} defaultValue={user?.full_name} type='text' size='md' /> :
+                                <Input id='name' {...register('full_name')} defaultValue={currentUser?.full_name ?? ''} type='text' size='md' /> :
                                 <Text size='md' py={2}>
-                                    {user?.full_name || 'N/A'}
+                                    {currentUser?.full_name || 'N/A'}
                                 </Text>
                         }
                     </FormControl>
@@ -57,9 +74,9 @@ const UserInformation: React.FC = () => {
                         <FormLabel color={color} htmlFor='email'>Email</FormLabel>
                         {
                             editMode ?
-                                <Input id='email' {...register('email')} defaultValue={user?.email} type='text' size='md' /> :
+                                <Input id='email' {...register('email')} defaultValue={currentUser?.email} type='text' size='md' /> :
                                 <Text size='md' py={2}>
-                                    {user?.email || 'N/A'}
+                                    {currentUser?.email || 'N/A'}
                                 </Text>
                         }
                     </FormControl>
