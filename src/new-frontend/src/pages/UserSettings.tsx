@@ -19,11 +19,7 @@ const tabsConfig = [
 const UserSettings: React.FC = () => {
     const queryClient = useQueryClient();
     const currentUser = queryClient.getQueryData<UserOut>('currentUser');
-
-
-
     const finalTabs = currentUser?.is_superuser ? tabsConfig.slice(0, 3) : tabsConfig;
-
 
     return (
         <Container maxW='full'>
