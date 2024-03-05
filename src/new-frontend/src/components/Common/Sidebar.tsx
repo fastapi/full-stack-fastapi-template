@@ -2,12 +2,12 @@ import React from 'react';
 
 import { Box, Drawer, DrawerBody, DrawerCloseButton, DrawerContent, DrawerOverlay, Flex, IconButton, Image, Text, useColorModeValue, useDisclosure } from '@chakra-ui/react';
 import { FiLogOut, FiMenu } from 'react-icons/fi';
+import { useQueryClient } from 'react-query';
 
 import Logo from '../../assets/images/fastapi-logo.svg';
+import { UserOut } from '../../client';
 import useAuth from '../../hooks/useAuth';
 import SidebarItems from './SidebarItems';
-import { UserOut } from '../../client';
-import { useQueryClient } from 'react-query';
 
 const Sidebar: React.FC = () => {
     const queryClient = useQueryClient();

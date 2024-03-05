@@ -2,8 +2,8 @@ import React from 'react';
 
 import { AlertDialog, AlertDialogBody, AlertDialogContent, AlertDialogFooter, AlertDialogHeader, AlertDialogOverlay, Button } from '@chakra-ui/react';
 import { useForm } from 'react-hook-form';
-
 import { useMutation, useQueryClient } from 'react-query';
+
 import { ItemsService, UsersService } from '../../client';
 import useCustomToast from '../../hooks/useCustomToast';
 

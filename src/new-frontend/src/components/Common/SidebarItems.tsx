@@ -4,6 +4,7 @@ import { Box, Flex, Icon, Text, useColorModeValue } from '@chakra-ui/react';
 import { FiBriefcase, FiHome, FiSettings, FiUsers } from 'react-icons/fi';
 import { useQueryClient } from 'react-query';
 import { Link, useLocation } from 'react-router-dom';
+
 import { UserOut } from '../../client';
 
 const items = [

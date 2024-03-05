@@ -1,9 +1,9 @@
 import React, { useState } from 'react';
 
 import { Box, Button, Container, Flex, FormControl, FormLabel, Heading, Input, Text, useColorModeValue } from '@chakra-ui/react';
-
 import { SubmitHandler, useForm } from 'react-hook-form';
 import { useMutation, useQueryClient } from 'react-query';
+
 import { ApiError, UserOut, UserUpdateMe, UsersService } from '../../client';
 import useCustomToast from '../../hooks/useCustomToast';
 

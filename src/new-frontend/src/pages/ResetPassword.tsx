@@ -2,8 +2,8 @@ import React from 'react';
 
 import { Button, Container, FormControl, FormErrorMessage, FormLabel, Heading, Input, Text } from '@chakra-ui/react';
 import { SubmitHandler, useForm } from 'react-hook-form';
-
 import { useMutation } from 'react-query';
+
 import { ApiError, LoginService, NewPassword } from '../client';
 import useCustomToast from '../hooks/useCustomToast';
 
