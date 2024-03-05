@@ -5,7 +5,7 @@ import privateRoutes from './routes/private_route';
 import publicRoutes from './routes/public_route';
 
 const router = createBrowserRouter([
-    isLoggedIn() ? privateRoutes() : {},
+    ...(isLoggedIn() ? privateRoutes() : []),
     ...publicRoutes(),
 ]);
 
