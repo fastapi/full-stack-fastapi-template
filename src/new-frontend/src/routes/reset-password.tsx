@@ -1,17 +1,29 @@
-import React from 'react';
 
 import { Button, Container, FormControl, FormErrorMessage, FormLabel, Heading, Input, Text } from '@chakra-ui/react';
+import { createFileRoute, redirect } from '@tanstack/react-router';
 import { SubmitHandler, useForm } from 'react-hook-form';
 import { useMutation } from 'react-query';
 
 import { ApiError, LoginService, NewPassword } from '../client';
+import { isLoggedIn } from '../hooks/useAuth';
 import useCustomToast from '../hooks/useCustomToast';
 
 interface NewPasswordForm extends NewPassword {
     confirm_password: string;
 }
 
-const ResetPassword: React.FC = () => {
+export const Route = createFileRoute('/reset-password')({
+    component: ResetPassword,
+    beforeLoad: async () => {
+        if (isLoggedIn()) {
+            throw redirect({
+                to: '/',
+            })
+        }
+    }
+})
+
+function ResetPassword() {
     const { register, handleSubmit, getValues, formState: { errors } } = useForm<NewPasswordForm>({
         mode: 'onBlur',
         criteriaMode: 'all',

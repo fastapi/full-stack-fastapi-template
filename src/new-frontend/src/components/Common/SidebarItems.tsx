@@ -2,8 +2,8 @@ import React from 'react';
 
 import { Box, Flex, Icon, Text, useColorModeValue } from '@chakra-ui/react';
 import { FiBriefcase, FiHome, FiSettings, FiUsers } from 'react-icons/fi';
+import { Link } from '@tanstack/react-router';
 import { useQueryClient } from 'react-query';
-import { Link, useLocation } from 'react-router-dom';
 
 import { UserOut } from '../../client';
 
@@ -21,7 +21,6 @@ const SidebarItems: React.FC<SidebarItemsProps> = ({ onClose }) => {
     const queryClient = useQueryClient();
     const textColor = useColorModeValue('ui.main', '#E2E8F0');
     const bgActive = useColorModeValue('#E2E8F0', '#4A5568');
-    const location = useLocation();
     const currentUser = queryClient.getQueryData<UserOut>('currentUser');
 
 
@@ -34,10 +33,12 @@ const SidebarItems: React.FC<SidebarItemsProps> = ({ onClose }) => {
             w='100%'
             p={2}
             key={item.title}
-            style={location.pathname === item.path ? {
-                background: bgActive,
-                borderRadius: '12px',
-            } : {}}
+            activeProps={{
+                style: {
+                    background: bgActive,
+                    borderRadius: '12px',
+                },
+            }}
             color={textColor}
             onClick={onClose}
         >

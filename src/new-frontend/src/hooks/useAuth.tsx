@@ -1,5 +1,5 @@
 import { useQuery } from 'react-query';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate } from '@tanstack/react-router';
 
 import { Body_login_login_access_token as AccessToken, LoginService, UserOut, UsersService } from '../client';
 
@@ -22,12 +22,12 @@ const useAuth = () => {
             formData: data,
         });
         localStorage.setItem('access_token', response.access_token);
-        navigate('/');
+        navigate({ to: '/' });
     };
 
     const logout = () => {
         localStorage.removeItem('access_token');
-        navigate('/login');
+        navigate({ to: '/login' });
     };
 
 

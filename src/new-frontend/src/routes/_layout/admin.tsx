@@ -1,23 +1,21 @@
-import React from 'react';
-
 import { Badge, Box, Container, Flex, Heading, Spinner, Table, TableContainer, Tbody, Td, Th, Thead, Tr } from '@chakra-ui/react';
+import { createFileRoute } from '@tanstack/react-router';
 import { useQuery, useQueryClient } from 'react-query';
 
-import { ApiError, UserOut, UsersService } from '../client';
-import ActionsMenu from '../components/Common/ActionsMenu';
-import Navbar from '../components/Common/Navbar';
-import useCustomToast from '../hooks/useCustomToast';
+import { ApiError, UserOut, UsersService } from '../../client';
+import ActionsMenu from '../../components/Common/ActionsMenu';
+import Navbar from '../../components/Common/Navbar';
+import useCustomToast from '../../hooks/useCustomToast';
 
-const getUsers = async () => {
-    const response = await UsersService.readUsers({ skip: 0, limit: 10 });
-    return response.data;
-}
+export const Route = createFileRoute('/_layout/admin')({
+    component: Admin,
+})
 
-const Admin: React.FC = () => {
+function Admin() {
     const queryClient = useQueryClient();
     const showToast = useCustomToast();
     const currentUser = queryClient.getQueryData<UserOut>('currentUser');
-    const { data: users, isLoading, isError, error } = useQuery('users', getUsers)
+    const { data: users, isLoading, isError, error } = useQuery('users', () => UsersService.readUsers({}))
 
     if (isError) {
         const errDetail = (error as ApiError).body?.detail;
@@ -50,7 +48,7 @@ const Admin: React.FC = () => {
                                 </Tr>
                             </Thead>
                             <Tbody>
-                                {users.map((user) => (
+                                {users.data.map((user) => (
                                     <Tr key={user.id}>
                                         <Td color={!user.full_name ? 'gray.600' : 'inherit'}>{user.full_name || 'N/A'}{currentUser?.id === user.id && <Badge ml='1' colorScheme='teal'>You</Badge>}</Td>
                                         <Td>{user.email}</Td>

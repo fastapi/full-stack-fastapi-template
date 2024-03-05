@@ -1,21 +1,19 @@
-import React from 'react';
-
 import { Container, Flex, Heading, Spinner, Table, TableContainer, Tbody, Td, Th, Thead, Tr } from '@chakra-ui/react';
+import { createFileRoute } from '@tanstack/react-router';
 import { useQuery } from 'react-query';
 
-import { ApiError, ItemsService } from '../client';
-import ActionsMenu from '../components/Common/ActionsMenu';
-import Navbar from '../components/Common/Navbar';
-import useCustomToast from '../hooks/useCustomToast';
+import { ApiError, ItemsService } from '../../client';
+import ActionsMenu from '../../components/Common/ActionsMenu';
+import Navbar from '../../components/Common/Navbar';
+import useCustomToast from '../../hooks/useCustomToast';
 
-const getItems = async () => {
-    const response = await ItemsService.readItems({ skip: 0, limit: 10 });
-    return response.data;
-}
+export const Route = createFileRoute('/_layout/items')({
+    component: Items,
+})
 
-const Items: React.FC = () => {
+function Items() {
     const showToast = useCustomToast();
-    const { data: items, isLoading, isError, error } = useQuery('items', getItems)
+    const { data: items, isLoading, isError, error } = useQuery('items', () => ItemsService.readItems({}))
 
     if (isError) {
         const errDetail = (error as ApiError).body?.detail;
@@ -47,7 +45,7 @@ const Items: React.FC = () => {
                                 </Tr>
                             </Thead>
                             <Tbody>
-                                {items.map((item) => (
+                                {items.data.map((item) => (
                                     <Tr key={item.id}>
                                         <Td>{item.id}</Td>
                                         <Td>{item.title}</Td>

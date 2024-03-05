@@ -1,10 +1,13 @@
 import ReactDOM from 'react-dom/client';
 import { ChakraProvider } from '@chakra-ui/react';
 import { QueryClient, QueryClientProvider } from 'react-query';
+import { RouterProvider, createRouter } from '@tanstack/react-router'
+import { routeTree } from './routeTree.gen'
 
 import App from './App';
 import { OpenAPI } from './client';
 import theme from './theme';
+import { StrictMode } from 'react';
 
 OpenAPI.BASE = import.meta.env.VITE_API_URL;
 OpenAPI.TOKEN = async () => {
@@ -13,10 +16,19 @@ OpenAPI.TOKEN = async () => {
 
 const queryClient = new QueryClient();
 
+const router = createRouter({ routeTree })
+declare module '@tanstack/react-router' {
+  interface Register {
+    router: typeof router
+  }
+}
+
 ReactDOM.createRoot(document.getElementById('root')!).render(
-  <ChakraProvider theme={theme}>
-    <QueryClientProvider client={queryClient}>
-      <App />
-    </QueryClientProvider>
-  </ChakraProvider>
+  <StrictMode>
+    <ChakraProvider theme={theme}>
+      <QueryClientProvider client={queryClient}>
+        <RouterProvider router={router} />
+      </QueryClientProvider>
+    </ChakraProvider>
+  </StrictMode>
 );

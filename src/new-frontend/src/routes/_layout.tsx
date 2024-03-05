@@ -1,18 +1,24 @@
 import { Flex, Spinner } from '@chakra-ui/react';
-import React from 'react';
-import { Outlet, useNavigate } from 'react-router-dom';
+import { Outlet, createFileRoute, redirect } from '@tanstack/react-router';
 
 import Sidebar from '../components/Common/Sidebar';
 import UserMenu from '../components/Common/UserMenu';
 import useAuth, { isLoggedIn } from '../hooks/useAuth';
 
-const Layout: React.FC = () => {
-    const navigate = useNavigate();
-    const { isLoading } = useAuth();
 
-    if (!isLoggedIn()) {
-        navigate('/login')
+export const Route = createFileRoute('/_layout')({
+    component: Layout,
+    beforeLoad: async () => {
+        if (!isLoggedIn()) {
+            throw redirect({
+                to: '/login',
+            })
+        }
     }
+})
+
+function Layout() {
+    const { isLoading } = useAuth();
 
     return (
         <Flex maxW='large' h='auto' position='relative'>

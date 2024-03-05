@@ -1,16 +1,27 @@
-import React from "react";
-
 import { Button, Container, FormControl, FormErrorMessage, Heading, Input, Text } from "@chakra-ui/react";
+import { createFileRoute, redirect } from "@tanstack/react-router";
 import { SubmitHandler, useForm } from "react-hook-form";
 
 import { LoginService } from "../client";
 import useCustomToast from "../hooks/useCustomToast";
+import { isLoggedIn } from "../hooks/useAuth";
 
 interface FormData {
   email: string;
 }
 
-const RecoverPassword: React.FC = () => {
+export const Route = createFileRoute('/recover-password')({
+  component: RecoverPassword,
+  beforeLoad: async () => {
+    if (isLoggedIn()) {
+      throw redirect({
+        to: '/',
+      })
+    }
+  }
+})
+
+function RecoverPassword() {
   const { register, handleSubmit, formState: { errors, isSubmitting } } = useForm<FormData>();
   const showToast = useCustomToast();
 

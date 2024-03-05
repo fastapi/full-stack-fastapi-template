@@ -4,7 +4,7 @@ import { Button, FormControl, FormLabel, Input, Modal, ModalBody, ModalCloseButt
 import { SubmitHandler, useForm } from 'react-hook-form';
 
 import { useMutation, useQueryClient } from 'react-query';
-import { ApiError, ItemOut, ItemUpdate, ItemsService } from '../../client';
+import { ApiError, ItemUpdate, ItemsOut, ItemsService } from '../../client';
 import useCustomToast from '../../hooks/useCustomToast';
 
 interface EditItemProps {
@@ -17,8 +17,8 @@ const EditItem: React.FC<EditItemProps> = ({ id, isOpen, onClose }) => {
     const queryClient = useQueryClient();
     const showToast = useCustomToast();
 
-    const items = queryClient.getQueryData<ItemOut[]>('items');
-    const currentItem = items?.find((item) => item.id === id);
+    const items = queryClient.getQueryData<ItemsOut>('items');
+    const currentItem = items?.data.find((item) => item.id === id);
 
     const { register, handleSubmit, reset, formState: { isSubmitting }, } = useForm<ItemUpdate>({ defaultValues: { title: currentItem?.title, description: currentItem?.description } });
 

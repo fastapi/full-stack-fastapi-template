@@ -4,7 +4,7 @@ import { Button, Checkbox, Flex, FormControl, FormErrorMessage, FormLabel, Input
 import { SubmitHandler, useForm } from 'react-hook-form';
 import { useMutation, useQueryClient } from 'react-query';
 
-import { ApiError, UserOut, UserUpdate, UsersService } from '../../client';
+import { ApiError, UserUpdate, UsersOut, UsersService } from '../../client';
 import useCustomToast from '../../hooks/useCustomToast';
 
 interface EditUserProps {
@@ -20,8 +20,8 @@ interface UserUpdateForm extends UserUpdate {
 const EditUser: React.FC<EditUserProps> = ({ user_id, isOpen, onClose }) => {
     const queryClient = useQueryClient();
     const showToast = useCustomToast();
-    const users = queryClient.getQueryData<UserOut[]>('users');
-    const currentUser = users?.find((user) => user.id === user_id);
+    const users = queryClient.getQueryData<UsersOut>('users');
+    const currentUser = users?.data.find((user) => user.id === user_id);
 
     const { register, handleSubmit, reset, getValues, formState: { errors, isSubmitting } } = useForm<UserUpdateForm>({
         mode: 'onBlur',

@@ -1,5 +1,5 @@
 import { Button, Container, Text } from '@chakra-ui/react';
-import { Link } from 'react-router-dom';
+import { Link } from '@tanstack/react-router';
 
 const NotFound: React.FC = () => {
 
