@@ -5,6 +5,7 @@ import { SubmitHandler, useForm } from 'react-hook-form';
 import { useMutation, useQueryClient } from 'react-query';
 
 import { ApiError, UserOut, UserUpdateMe, UsersService } from '../../client';
+import useAuth from '../../hooks/useAuth';
 import useCustomToast from '../../hooks/useCustomToast';
 
 const UserInformation: React.FC = () => {
@@ -12,7 +13,7 @@ const UserInformation: React.FC = () => {
     const color = useColorModeValue('gray.700', 'white');
     const showToast = useCustomToast();
     const [editMode, setEditMode] = useState(false);
-    const currentUser = queryClient.getQueryData<UserOut>('currentUser');
+    const { user: currentUser } = useAuth();
     const { register, handleSubmit, reset, formState: { isSubmitting } } = useForm<UserOut>({
         mode: 'onBlur', criteriaMode: 'all', defaultValues: {
             full_name: currentUser?.full_name,

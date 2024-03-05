@@ -1,17 +1,18 @@
-import React, { useEffect } from 'react';
 import { Flex, Spinner } from '@chakra-ui/react';
-import { Outlet } from 'react-router-dom';
+import React from 'react';
+import { Outlet, useNavigate } from 'react-router-dom';
 
 import Sidebar from '../components/Common/Sidebar';
 import UserMenu from '../components/Common/UserMenu';
-import useAuth from '../hooks/useAuth';
+import useAuth, { isLoggedIn } from '../hooks/useAuth';
 
 const Layout: React.FC = () => {
-    const { getUser, isLoading } = useAuth();
+    const navigate = useNavigate();
+    const { isLoading } = useAuth();
 
-    useEffect(() => {
-        getUser();
-    }, []);
+    if (!isLoggedIn()) {
+        navigate('/login')
+    }
 
     return (
         <Flex maxW='large' h='auto' position='relative'>
