@@ -8,14 +8,13 @@ import ActionsMenu from '../components/Common/ActionsMenu';
 import Navbar from '../components/Common/Navbar';
 import useCustomToast from '../hooks/useCustomToast';
 
+const getItems = async () => {
+    const response = await ItemsService.readItems({ skip: 0, limit: 10 });
+    return response.data;
+}
+
 const Items: React.FC = () => {
     const showToast = useCustomToast();
-
-    const getItems = async () => {
-        const response = await ItemsService.readItems({ skip: 0, limit: 10 });
-        return response.data;
-    }
-
     const { data: items, isLoading, isError, error } = useQuery('items', getItems)
 
     if (isError) {

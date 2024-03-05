@@ -1,18 +1,20 @@
-import { useUserStore } from '../store/user-store';
-import { Body_login_login_access_token as AccessToken, LoginService } from '../client';
-import { useUsersStore } from '../store/users-store';
-import { useItemsStore } from '../store/items-store';
+import { useQuery, useMutation } from 'react-query';
 import { useNavigate } from 'react-router-dom';
+import { Body_login_login_access_token as AccessToken, UserOut, UsersService, LoginService } from '../client';
 
 const isLoggedIn = () => {
     return localStorage.getItem('access_token') !== null;
 };
 
+async function fetchUser() {
+    return await UsersService.readUserMe();
+}
+
 const useAuth = () => {
-    const { getUser, resetUser } = useUserStore();
-    const { resetUsers } = useUsersStore();
-    const { resetItems } = useItemsStore();
     const navigate = useNavigate();
+    const { refetch: getUser, isLoading } = useQuery<UserOut | null, Error>('currentUser', fetchUser, {
+        enabled: isLoggedIn(),
+    });
 
     const login = async (data: AccessToken) => {
         const response = await LoginService.loginAccessToken({
@@ -25,13 +27,11 @@ const useAuth = () => {
 
     const logout = () => {
         localStorage.removeItem('access_token');
-        resetUser();
-        resetUsers();
-        resetItems();
         navigate('/login');
     };
 
-    return { login, logout };
+
+    return { login, logout, getUser, isLoading };
 }
 
 export { isLoggedIn };

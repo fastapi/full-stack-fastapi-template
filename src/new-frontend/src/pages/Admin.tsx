@@ -1,23 +1,22 @@
 import React from 'react';
 
 import { Badge, Box, Container, Flex, Heading, Spinner, Table, TableContainer, Tbody, Td, Th, Thead, Tr } from '@chakra-ui/react';
-import { useQuery } from 'react-query';
+import { useQuery, useQueryClient } from 'react-query';
 
-import { ApiError, UsersService } from '../client';
+import { ApiError, UserOut, UsersService } from '../client';
 import ActionsMenu from '../components/Common/ActionsMenu';
 import Navbar from '../components/Common/Navbar';
-import { useCurrentUser } from '../hooks/useCurrentUser';
 import useCustomToast from '../hooks/useCustomToast';
 
+const getUsers = async () => {
+    const response = await UsersService.readUsers({ skip: 0, limit: 10 });
+    return response.data;
+}
+
 const Admin: React.FC = () => {
+    const queryClient = useQueryClient();
     const showToast = useCustomToast();
-    const { data: currentUser } = useCurrentUser();
-
-    const getUsers = async () => {
-        const response = await UsersService.readUsers({ skip: 0, limit: 10 });
-        return response.data;
-    }
-
+    const currentUser = queryClient.getQueryData<UserOut>('currentUser');
     const { data: users, isLoading, isError, error } = useQuery('users', getUsers)
 
     if (isError) {

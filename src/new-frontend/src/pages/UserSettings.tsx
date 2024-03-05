@@ -1,11 +1,13 @@
 import React from 'react';
 
 import { Container, Heading, Tab, TabList, TabPanel, TabPanels, Tabs } from '@chakra-ui/react';
+import { useQueryClient } from 'react-query';
+
+import { UserOut } from '../client';
 import Appearance from '../components/UserSettings/Appearance';
 import ChangePassword from '../components/UserSettings/ChangePassword';
 import DeleteAccount from '../components/UserSettings/DeleteAccount';
 import UserInformation from '../components/UserSettings/UserInformation';
-import { useUserStore } from '../store/user-store';
 
 const tabsConfig = [
     { title: 'My profile', component: UserInformation },
@@ -15,9 +17,12 @@ const tabsConfig = [
 ];
 
 const UserSettings: React.FC = () => {
-    const { user } = useUserStore();
+    const queryClient = useQueryClient();
+    const currentUser = queryClient.getQueryData<UserOut>('currentUser');
 
-    const finalTabs = user?.is_superuser ? tabsConfig.slice(0, 3) : tabsConfig;
+
+
+    const finalTabs = currentUser?.is_superuser ? tabsConfig.slice(0, 3) : tabsConfig;
 
 
     return (

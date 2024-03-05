@@ -5,15 +5,17 @@ import { FiLogOut, FiMenu } from 'react-icons/fi';
 
 import Logo from '../../assets/images/fastapi-logo.svg';
 import useAuth from '../../hooks/useAuth';
-import { useUserStore } from '../../store/user-store';
 import SidebarItems from './SidebarItems';
+import { UserOut } from '../../client';
+import { useQueryClient } from 'react-query';
 
 const Sidebar: React.FC = () => {
+    const queryClient = useQueryClient();
     const bgColor = useColorModeValue('white', '#1a202c');
     const textColor = useColorModeValue('gray', 'white');
     const secBgColor = useColorModeValue('ui.secondary', '#252d3d');
+    const currentUser = queryClient.getQueryData<UserOut>('currentUser');
     const { isOpen, onOpen, onClose } = useDisclosure();
-    const { user } = useUserStore();
     const { logout } = useAuth();
 
     const handleLogout = async () => {
@@ -40,8 +42,8 @@ const Sidebar: React.FC = () => {
                                 </Flex>
                             </Box>
                             {
-                                user?.email &&
-                                <Text color={textColor} noOfLines={2} fontSize='sm' p={2}>Logged in as: {user.email}</Text>
+                                currentUser?.email &&
+                                <Text color={textColor} noOfLines={2} fontSize='sm' p={2}>Logged in as: {currentUser.email}</Text>
                             }
                         </Flex>
                     </DrawerBody>
@@ -56,8 +58,8 @@ const Sidebar: React.FC = () => {
                         <SidebarItems />
                     </Box>
                     {
-                        user?.email &&
-                        <Text color={textColor} noOfLines={2} fontSize='sm' p={2} maxW='180px'>Logged in as: {user.email}</Text>
+                        currentUser?.email &&
+                        <Text color={textColor} noOfLines={2} fontSize='sm' p={2} maxW='180px'>Logged in as: {currentUser.email}</Text>
                     }
                 </Flex>
             </Box>

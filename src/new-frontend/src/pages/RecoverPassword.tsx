@@ -18,7 +18,6 @@ const RecoverPassword: React.FC = () => {
     await LoginService.recoverPassword({
       email: data.email,
     });
-
     showToast("Email sent.", "We sent an email with a link to get back into your account.", "success");
   };
 

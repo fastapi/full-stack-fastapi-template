@@ -3,9 +3,9 @@ import React from 'react';
 import { Button, Checkbox, Flex, FormControl, FormErrorMessage, FormLabel, Input, Modal, ModalBody, ModalCloseButton, ModalContent, ModalFooter, ModalHeader, ModalOverlay } from '@chakra-ui/react';
 import { SubmitHandler, useForm } from 'react-hook-form';
 
-import { ApiError, UserUpdate } from '../../client';
+import { useMutation, useQueryClient } from 'react-query';
+import { ApiError, UserOut, UserUpdate, UsersService } from '../../client';
 import useCustomToast from '../../hooks/useCustomToast';
-import { useUsersStore } from '../../store/users-store';
 
 interface EditUserProps {
     user_id: number;
@@ -18,9 +18,11 @@ interface UserUpdateForm extends UserUpdate {
 }
 
 const EditUser: React.FC<EditUserProps> = ({ user_id, isOpen, onClose }) => {
+    const queryClient = useQueryClient();
     const showToast = useCustomToast();
-    const { editUser, users } = useUsersStore();
-    const currentUser = users.find((user) => user.id === user_id);
+    const users = queryClient.getQueryData<UserOut[]>('users');
+    const currentUser = users?.find((user) => user.id === user_id);
+
     const { register, handleSubmit, reset, getValues, formState: { errors, isSubmitting } } = useForm<UserUpdateForm>({
         mode: 'onBlur',
         criteriaMode: 'all',
@@ -34,20 +36,30 @@ const EditUser: React.FC<EditUserProps> = ({ user_id, isOpen, onClose }) => {
         }
     });
 
+    const updateUser = async (data: UserUpdateForm) => {
+        await UsersService.updateUser({ userId: user_id, requestBody: data });
+    }
 
-    const onSubmit: SubmitHandler<UserUpdateForm> = async (data) => {
-        try {
-            if (data.password === '') {
-                delete data.password;
-            }
-            await editUser(user_id, data);
+    const mutation = useMutation(updateUser, {
+        onSuccess: () => {
             showToast('Success!', 'User updated successfully.', 'success');
             reset();
             onClose();
-        } catch (err) {
-            const errDetail = (err as ApiError).body.detail;
+        },
+        onError: (err: ApiError) => {
+            const errDetail = err.body.detail;
             showToast('Something went wrong.', `${errDetail}`, 'error');
+        },
+        onSettled: () => {
+            queryClient.invalidateQueries('users');
         }
+    });
+
+    const onSubmit: SubmitHandler<UserUpdateForm> = async (data) => {
+        if (data.password === '') {
+            delete data.password;
+        }
+        mutation.mutate(data)
     }
 
     const onCancel = () => {

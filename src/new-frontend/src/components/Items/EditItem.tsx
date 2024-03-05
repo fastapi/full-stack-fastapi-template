@@ -3,9 +3,9 @@ import React from 'react';
 import { Button, FormControl, FormLabel, Input, Modal, ModalBody, ModalCloseButton, ModalContent, ModalFooter, ModalHeader, ModalOverlay } from '@chakra-ui/react';
 import { SubmitHandler, useForm } from 'react-hook-form';
 
-import { ApiError, ItemUpdate } from '../../client';
+import { useMutation, useQueryClient } from 'react-query';
+import { ApiError, ItemOut, ItemUpdate, ItemsService } from '../../client';
 import useCustomToast from '../../hooks/useCustomToast';
-import { useItemsStore } from '../../store/items-store';
 
 interface EditItemProps {
     id: number;
@@ -14,21 +14,35 @@ interface EditItemProps {
 }
 
 const EditItem: React.FC<EditItemProps> = ({ id, isOpen, onClose }) => {
+    const queryClient = useQueryClient();
     const showToast = useCustomToast();
-    const { editItem, items } = useItemsStore();
-    const currentItem = items.find((item) => item.id === id);
+
+    const items = queryClient.getQueryData<ItemOut[]>('items');
+    const currentItem = items?.find((item) => item.id === id);
+
     const { register, handleSubmit, reset, formState: { isSubmitting }, } = useForm<ItemUpdate>({ defaultValues: { title: currentItem?.title, description: currentItem?.description } });
 
-    const onSubmit: SubmitHandler<ItemUpdate> = async (data) => {
-        try {
-            await editItem(id, data);
+    const updateItem = async (data: ItemUpdate) => {
+        await ItemsService.updateItem({ id, requestBody: data });
+    }
+
+    const mutation = useMutation(updateItem, {
+        onSuccess: () => {
             showToast('Success!', 'Item updated successfully.', 'success');
             reset();
             onClose();
-        } catch (err) {
-            const errDetail = (err as ApiError).body.detail;
+        },
+        onError: (err: ApiError) => {
+            const errDetail = err.body.detail;
             showToast('Something went wrong.', `${errDetail}`, 'error');
+        },
+        onSettled: () => {
+            queryClient.invalidateQueries('items');
         }
+    });
+
+    const onSubmit: SubmitHandler<ItemUpdate> = async (data) => {
+        mutation.mutate(data)
     }
 
     const onCancel = () => {
