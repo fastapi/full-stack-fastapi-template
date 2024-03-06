@@ -32,7 +32,6 @@ const UserInformation: React.FC = () => {
     const mutation = useMutation(updateInfo, {
         onSuccess: () => {
             showToast('Success!', 'User updated successfully.', 'success');
-            reset();
         },
         onError: (err: ApiError) => {
             const errDetail = err.body.detail;
