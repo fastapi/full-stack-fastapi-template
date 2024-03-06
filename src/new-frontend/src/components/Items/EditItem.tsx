@@ -16,14 +16,11 @@ interface EditItemProps {
 const EditItem: React.FC<EditItemProps> = ({ item, isOpen, onClose }) => {
     const queryClient = useQueryClient();
     const showToast = useCustomToast();
-    const { register, handleSubmit, reset, formState: { isSubmitting, errors, isDirty }, watch } = useForm<ItemUpdate>({
+    const { register, handleSubmit, reset, formState: { isSubmitting, errors, isDirty } } = useForm<ItemUpdate>({
         mode: 'onBlur',
         criteriaMode: 'all',
         defaultValues: item
     });
-
-    const formValues = watch();
-    const hasChanges = JSON.stringify(formValues) !== JSON.stringify(item);
 
     const updateItem = async (data: ItemUpdate) => {
         await ItemsService.updateItem({ id: item.id, requestBody: data });
