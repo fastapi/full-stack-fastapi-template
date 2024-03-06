@@ -4,11 +4,11 @@ import { Button, Checkbox, Flex, FormControl, FormErrorMessage, FormLabel, Input
 import { SubmitHandler, useForm } from 'react-hook-form';
 import { useMutation, useQueryClient } from 'react-query';
 
-import { ApiError, UserUpdate, UsersOut, UsersService } from '../../client';
+import { ApiError, UserOut, UserUpdate, UsersService } from '../../client';
 import useCustomToast from '../../hooks/useCustomToast';
 
 interface EditUserProps {
-    user_id: number;
+    user: UserOut;
     isOpen: boolean;
     onClose: () => void;
 }
@@ -17,33 +17,23 @@ interface UserUpdateForm extends UserUpdate {
     confirm_password: string;
 }
 
-const EditUser: React.FC<EditUserProps> = ({ user_id, isOpen, onClose }) => {
+const EditUser: React.FC<EditUserProps> = ({ user, isOpen, onClose }) => {
     const queryClient = useQueryClient();
     const showToast = useCustomToast();
-    const users = queryClient.getQueryData<UsersOut>('users');
-    const currentUser = users?.data.find((user) => user.id === user_id);
 
-    const { register, handleSubmit, reset, getValues, formState: { errors, isSubmitting } } = useForm<UserUpdateForm>({
+    const { register, handleSubmit, reset, getValues, formState: { errors, isSubmitting, isDirty } } = useForm<UserUpdateForm>({
         mode: 'onBlur',
         criteriaMode: 'all',
-        defaultValues: {
-            email: currentUser?.email,
-            full_name: currentUser?.full_name,
-            password: '',
-            confirm_password: '',
-            is_superuser: currentUser?.is_superuser,
-            is_active: currentUser?.is_active
-        }
+        defaultValues: user
     });
 
     const updateUser = async (data: UserUpdateForm) => {
-        await UsersService.updateUser({ userId: user_id, requestBody: data });
+        await UsersService.updateUser({ userId: user.id, requestBody: data });
     }
 
     const mutation = useMutation(updateUser, {
         onSuccess: () => {
             showToast('Success!', 'User updated successfully.', 'success');
-            reset();
             onClose();
         },
         onError: (err: ApiError) => {
@@ -82,7 +72,7 @@ const EditUser: React.FC<EditUserProps> = ({ user_id, isOpen, onClose }) => {
                     <ModalBody pb={6}>
                         <FormControl isInvalid={!!errors.email}>
                             <FormLabel htmlFor='email'>Email</FormLabel>
-                            <Input id='email' {...register('email', { pattern: { value: /^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,4}$/i, message: 'Invalid email address' } })} placeholder='Email' type='email' />
+                            <Input id='email' {...register('email', { required: 'Email is required', pattern: { value: /^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,4}$/i, message: 'Invalid email address' } })} placeholder='Email' type='email' />
                             {errors.email && <FormErrorMessage>{errors.email.message}</FormErrorMessage>}
                         </FormControl>
                         <FormControl mt={4}>
@@ -112,7 +102,7 @@ const EditUser: React.FC<EditUserProps> = ({ user_id, isOpen, onClose }) => {
                     </ModalBody>
 
                     <ModalFooter gap={3}>
-                        <Button bg='ui.main' color='white' _hover={{ opacity: 0.8 }} type='submit' isLoading={isSubmitting}>
+                        <Button bg='ui.main' color='white' _hover={{ opacity: 0.8 }} type='submit' isLoading={isSubmitting} isDisabled={!isDirty}>
                             Save
                         </Button>
                         <Button onClick={onCancel}>Cancel</Button>

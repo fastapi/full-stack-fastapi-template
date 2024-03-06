@@ -66,7 +66,7 @@ function Admin() {
                                             </Flex>
                                         </Td>
                                         <Td>
-                                            <ActionsMenu type='User' id={user.id} disabled={currentUser?.id === user.id ? true : false} />
+                                            <ActionsMenu type='User' value={user} disabled={currentUser?.id === user.id ? true : false} />
                                         </Td>
                                     </Tr>
                                 ))}

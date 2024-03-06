@@ -51,7 +51,7 @@ function Items() {
                                         <Td>{item.title}</Td>
                                         <Td color={!item.description ? 'gray.600' : 'inherit'}>{item.description || 'N/A'}</Td>
                                         <Td>
-                                            <ActionsMenu type={'Item'} id={item.id} />
+                                            <ActionsMenu type={'Item'} value={item} />
                                         </Td>
                                     </Tr>
                                 ))}
