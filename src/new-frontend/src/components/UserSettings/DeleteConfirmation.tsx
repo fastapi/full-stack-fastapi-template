@@ -18,7 +18,7 @@ const DeleteConfirmation: React.FC<DeleteProps> = ({ isOpen, onClose }) => {
     const showToast = useCustomToast();
     const cancelRef = React.useRef<HTMLButtonElement | null>(null);
     const { handleSubmit, formState: { isSubmitting } } = useForm();
-    const currentUser = queryClient.getQueryData<UserOut>('ucurrentUser');
+    const currentUser = queryClient.getQueryData<UserOut>('currentUser');
     const { logout } = useAuth();
 
     const deleteCurrentUser = async (id: number) => {

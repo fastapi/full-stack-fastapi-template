@@ -26,7 +26,6 @@ const useAuth = () => {
         navigate({ to: '/login' });
     };
 
-
     return { login, logout, user, isLoading };
 }
 

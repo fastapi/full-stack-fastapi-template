@@ -4,7 +4,6 @@ import { QueryClient, QueryClientProvider } from 'react-query';
 import { RouterProvider, createRouter } from '@tanstack/react-router'
 import { routeTree } from './routeTree.gen'
 
-import App from './App';
 import { OpenAPI } from './client';
 import theme from './theme';
 import { StrictMode } from 'react';

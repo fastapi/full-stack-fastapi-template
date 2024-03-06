@@ -47,7 +47,7 @@ const ChangePassword: React.FC = () => {
                 <Box w={{ 'sm': 'full', 'md': '50%' }}>
                     <FormControl isRequired isInvalid={!!errors.current_password}>
                         <FormLabel color={color} htmlFor='current_password'>Current password</FormLabel>
-                        <Input id='current_password' {...register('current_password', { required: 'Password is required', minLength: { value: 8, message: 'Password must be at least 8 characters' } })} placeholder='••••••••' type='password' />
+                        <Input id='current_password' {...register('current_password', { required: 'Password is required', minLength: { value: 8, message: 'Password must be at least 8 characters' } })} placeholder='Password' type='password' />
                         {errors.current_password && <FormErrorMessage>{errors.current_password.message}</FormErrorMessage>}
                     </FormControl>
                     <FormControl mt={4} isRequired isInvalid={!!errors.new_password}>
