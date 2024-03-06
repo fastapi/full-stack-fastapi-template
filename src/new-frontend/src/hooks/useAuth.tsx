@@ -7,13 +7,9 @@ const isLoggedIn = () => {
     return localStorage.getItem('access_token') !== null;
 };
 
-async function fetchUser() {
-    return await UsersService.readUserMe();
-}
-
 const useAuth = () => {
     const navigate = useNavigate();
-    const { data: user, isLoading } = useQuery<UserOut | null, Error>('currentUser', fetchUser, {
+    const { data: user, isLoading } = useQuery<UserOut | null, Error>('currentUser', UsersService.readUserMe, {
         enabled: isLoggedIn(),
     });
 
