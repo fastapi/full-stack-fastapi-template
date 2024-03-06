@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 
-import { Box, Button, Container, Flex, FormControl, FormLabel, Heading, Input, Text, useColorModeValue } from '@chakra-ui/react';
+import { Box, Button, Container, Flex, FormControl, FormErrorMessage, FormLabel, Heading, Input, Text, useColorModeValue } from '@chakra-ui/react';
 import { SubmitHandler, useForm } from 'react-hook-form';
 import { useMutation, useQueryClient } from 'react-query';
 
@@ -14,7 +14,7 @@ const UserInformation: React.FC = () => {
     const showToast = useCustomToast();
     const [editMode, setEditMode] = useState(false);
     const { user: currentUser } = useAuth();
-    const { register, handleSubmit, reset, formState: { isSubmitting } } = useForm<UserOut>({
+    const { register, handleSubmit, reset, formState: { isSubmitting, errors, isDirty } } = useForm<UserOut>({
         mode: 'onBlur', criteriaMode: 'all', defaultValues: {
             full_name: currentUser?.full_name,
             email: currentUser?.email
@@ -64,21 +64,22 @@ const UserInformation: React.FC = () => {
                         <FormLabel color={color} htmlFor='name'>Full name</FormLabel>
                         {
                             editMode ?
-                                <Input id='name' {...register('full_name')} type='text' size='md' /> :
+                                <Input id='name' {...register('full_name', { maxLength: 30 })} type='text' size='md' /> :
                                 <Text size='md' py={2}>
                                     {currentUser?.full_name || 'N/A'}
                                 </Text>
                         }
                     </FormControl>
-                    <FormControl mt={4}>
+                    <FormControl mt={4} isInvalid={!!errors.email}>
                         <FormLabel color={color} htmlFor='email'>Email</FormLabel>
                         {
                             editMode ?
-                                <Input id='email' {...register('email')} type='text' size='md' /> :
+                                <Input id='email' {...register('email', { required: 'Email is required', pattern: { value: /^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,4}$/i, message: 'Invalid email address' } })} type='text' size='md' /> :
                                 <Text size='md' py={2}>
-                                    {currentUser?.email || 'N/A'}
+                                    {currentUser?.email}
                                 </Text>
                         }
+                        {errors.email && <FormErrorMessage>{errors.email.message}</FormErrorMessage>}
                     </FormControl>
                     <Flex mt={4} gap={3}>
                         <Button
@@ -88,6 +89,7 @@ const UserInformation: React.FC = () => {
                             onClick={toggleEditMode}
                             type={editMode ? 'button' : 'submit'}
                             isLoading={editMode ? isSubmitting : false}
+                            isDisabled={editMode ? !isDirty : false}
                         >
                             {editMode ? 'Save' : 'Edit'}
                         </Button>
