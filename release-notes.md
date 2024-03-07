@@ -2,6 +2,7 @@
 
 ## Latest Changes
 
+* 🐛 Fix copier to handle string vars with spaces in quotes. PR [#631](https://github.com/tiangolo/full-stack-fastapi-postgresql/pull/631) by [@estebanx64](https://github.com/estebanx64).
 * ⬆ Bump tiangolo/issue-manager from 0.2.0 to 0.5.0. PR [#591](https://github.com/tiangolo/full-stack-fastapi-postgresql/pull/591) by [@dependabot[bot]](https://github.com/apps/dependabot).
 * ✨ Upgrade items router with new SQLModel models, simplified logic, and new FastAPI Annotated dependencies. PR [#560](https://github.com/tiangolo/full-stack-fastapi-postgresql/pull/560) by [@tiangolo](https://github.com/tiangolo).
 * ✨ Adopt SQLModel, create models, start using it. PR [#559](https://github.com/tiangolo/full-stack-fastapi-postgresql/pull/559) by [@tiangolo](https://github.com/tiangolo).
@@ -52,6 +53,7 @@
 
 ### Refactors
 
+* ♻ Move project source files to top level from src, update Sentry dependency. PR [#630](https://github.com/tiangolo/full-stack-fastapi-postgresql/pull/630) by [@estebanx64](https://github.com/estebanx64).
 * ♻ Refactor Python folder tree. PR [#629](https://github.com/tiangolo/full-stack-fastapi-postgresql/pull/629) by [@estebanx64](https://github.com/estebanx64).
 * ♻️ Refactor old CRUD utils and tests. PR [#622](https://github.com/tiangolo/full-stack-fastapi-postgresql/pull/622) by [@alejsdev](https://github.com/alejsdev).
 * 🔧 Update .env to allow local debug for the backend. PR [#618](https://github.com/tiangolo/full-stack-fastapi-postgresql/pull/618) by [@tiangolo](https://github.com/tiangolo).
