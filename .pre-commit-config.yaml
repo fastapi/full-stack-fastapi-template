@@ -28,6 +28,7 @@ repos:
     rev: v8.56.0
     hooks:
       - id: eslint
+        files: \.(js|jsx|ts|tsx)$
         additional_dependencies:
           - eslint@8.57.0
           - eslint-config-standard-with-typescript@43.0.1
