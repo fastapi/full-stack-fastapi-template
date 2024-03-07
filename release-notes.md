@@ -11,6 +11,7 @@
 
 ### Features
 
+* 👷 Add coverage with Smokeshow to CI and badge. PR [#638](https://github.com/tiangolo/full-stack-fastapi-postgresql/pull/638) by [@estebanx64](https://github.com/estebanx64).
 * ✨ Migrate to TanStack Query (React Query) and TanStack Router. PR [#637](https://github.com/tiangolo/full-stack-fastapi-postgresql/pull/637) by [@alejsdev](https://github.com/alejsdev).
 * ✅ Add setup and teardown database for tests. PR [#626](https://github.com/tiangolo/full-stack-fastapi-postgresql/pull/626) by [@estebanx64](https://github.com/estebanx64).
 * ✨ Update new-frontend client. PR [#625](https://github.com/tiangolo/full-stack-fastapi-postgresql/pull/625) by [@alejsdev](https://github.com/alejsdev).
@@ -90,6 +91,7 @@
 
 ### Docs
 
+* 📝 Refactor README into separate README.md files for backend, frontend, deployment, development. PR [#639](https://github.com/tiangolo/full-stack-fastapi-postgresql/pull/639) by [@tiangolo](https://github.com/tiangolo).
 * 📝 Update README. PR [#628](https://github.com/tiangolo/full-stack-fastapi-postgresql/pull/628) by [@tiangolo](https://github.com/tiangolo).
 * 👷 Update GitHub Action latest-changes and move release notes to independent file. PR [#619](https://github.com/tiangolo/full-stack-fastapi-postgresql/pull/619) by [@tiangolo](https://github.com/tiangolo).
 * 📝 Update internal README and referred files. PR [#613](https://github.com/tiangolo/full-stack-fastapi-postgresql/pull/613) by [@tiangolo](https://github.com/tiangolo).
