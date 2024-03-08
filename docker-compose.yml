@@ -164,8 +164,8 @@ services:
       args:
         INSTALL_DEV: ${INSTALL_DEV-false}
 
-  new-frontend:
-    image: '${DOCKER_IMAGE_NEW_FRONTEND?Variable not set}:${TAG-latest}'
+  frontend:
+    image: '${DOCKER_IMAGE_FRONTEND?Variable not set}:${TAG-latest}'
     build:
       context: ./new-frontend
       labels:
