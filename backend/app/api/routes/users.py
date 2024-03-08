@@ -186,8 +186,8 @@ def delete_user(
         raise HTTPException(status_code=404, detail="User not found")
 
     if (user == current_user and not current_user.is_superuser) or (user != current_user and current_user.is_superuser):
-        statement = delete(Item).where(Item.owner_id == user_id)
-        session.exec(statement)
+        statement = delete(Item).where(Item.owner_id == user_id)  # type: ignore
+        session.exec(statement)  # type: ignore
         session.delete(user)
         session.commit()
         return Message(message="User deleted successfully")
@@ -195,3 +195,5 @@ def delete_user(
         raise HTTPException(
             status_code=403, detail="Super users are not allowed to delete themselves"
         )
+
+    return Message(message="User does not match the conditions to be deleted")

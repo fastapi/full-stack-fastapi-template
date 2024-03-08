@@ -1,4 +1,5 @@
 from fastapi.testclient import TestClient
+from pytest_mock import MockerFixture
 
 from app.core.config import settings
 
@@ -37,7 +38,7 @@ def test_use_access_token(
 
 
 def test_recovery_password(
-    client: TestClient, normal_user_token_headers: dict[str, str], mocker
+    client: TestClient, normal_user_token_headers: dict[str, str], mocker: MockerFixture
 ) -> None:
     mocker.patch("app.utils.send_reset_password_email", return_value=None)
     mocker.patch("app.utils.send_email", return_value=None)

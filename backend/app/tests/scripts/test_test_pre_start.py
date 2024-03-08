@@ -1,11 +1,12 @@
 from unittest.mock import MagicMock
 
+from pytest_mock import MockerFixture
 from sqlmodel import select
 
 from app.tests_pre_start import init, logger
 
 
-def test_init_successful_connection(mocker):
+def test_init_successful_connection(mocker: MockerFixture) -> None:
     engine_mock = MagicMock()
 
     session_mock = MagicMock()

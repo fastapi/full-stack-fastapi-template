@@ -1,4 +1,6 @@
+import pytest
 from fastapi.testclient import TestClient
+from pytest_mock import MockerFixture
 from sqlmodel import Session
 
 from app import crud
@@ -30,7 +32,7 @@ def test_get_users_normal_user_me(
 
 
 def test_create_user_new_email(
-    client: TestClient, superuser_token_headers: dict, db: Session, mocker
+    client: TestClient, superuser_token_headers: dict[str, str], db: Session, mocker: MockerFixture
 ) -> None:
     mocker.patch("app.utils.send_new_account_email")
     mocker.patch("app.core.config.settings.EMAILS_ENABLED", True)
@@ -50,7 +52,7 @@ def test_create_user_new_email(
 
 
 def test_get_existing_user(
-    client: TestClient, superuser_token_headers: dict, db: Session
+    client: TestClient, superuser_token_headers: dict[str, str], db: Session
 ) -> None:
     username = random_email()
     password = random_lower_string()
@@ -109,7 +111,7 @@ def test_get_existing_user_permissions_error(
 
 
 def test_create_user_existing_username(
-    client: TestClient, superuser_token_headers: dict, db: Session
+    client: TestClient, superuser_token_headers: dict[str, str], db: Session
 ) -> None:
     username = random_email()
     # username = email
@@ -142,7 +144,7 @@ def test_create_user_by_normal_user(
 
 
 def test_retrieve_users(
-    client: TestClient, superuser_token_headers: dict, db: Session
+    client: TestClient, superuser_token_headers: dict[str, str], db: Session
 ) -> None:
     username = random_email()
     password = random_lower_string()
@@ -181,7 +183,7 @@ def test_update_user_me(
 
 
 def test_update_password_me(
-    client: TestClient, superuser_token_headers: dict, db: Session
+    client: TestClient, superuser_token_headers: dict[str, str], db: Session
 ) -> None:
     new_password = random_lower_string()
     data = {"current_password": settings.FIRST_SUPERUSER_PASSWORD, "new_password": new_password}
@@ -205,7 +207,7 @@ def test_update_password_me(
 
 
 def test_update_password_me_incorrect_password(
-    client: TestClient, superuser_token_headers: dict, db: Session
+    client: TestClient, superuser_token_headers: dict[str, str], db: Session
 ) -> None:
     new_password = random_lower_string()
     data = {"current_password": new_password, "new_password": new_password}
@@ -220,7 +222,7 @@ def test_update_password_me_incorrect_password(
 
 
 def test_update_password_me_same_password_error(
-    client: TestClient, superuser_token_headers: dict, db: Session
+    client: TestClient, superuser_token_headers: dict[str, str], db: Session
 ) -> None:
     data = {"current_password": settings.FIRST_SUPERUSER_PASSWORD, "new_password": settings.FIRST_SUPERUSER_PASSWORD}
     r = client.patch(
@@ -234,7 +236,7 @@ def test_update_password_me_same_password_error(
 
 
 def test_create_user_open(
-    client: TestClient, mocker
+    client: TestClient, mocker: MockerFixture
 ) -> None:
     mocker.patch("app.core.config.settings.USERS_OPEN_REGISTRATION", True)
     username = random_email()
@@ -252,7 +254,7 @@ def test_create_user_open(
 
 
 def test_create_user_open_forbidden_error(
-    client: TestClient, mocker
+    client: TestClient, mocker: MockerFixture
 ) -> None:
     mocker.patch("app.core.config.settings.USERS_OPEN_REGISTRATION", False)
     username = random_email()
@@ -268,7 +270,7 @@ def test_create_user_open_forbidden_error(
 
 
 def test_create_user_open_already_exists_error(
-    client: TestClient, mocker
+    client: TestClient, mocker: MockerFixture
 ) -> None:
     mocker.patch("app.core.config.settings.USERS_OPEN_REGISTRATION", True)
     password = random_lower_string()
@@ -373,6 +375,8 @@ def test_delete_user_current_super_user_error(
     client: TestClient, superuser_token_headers: dict[str, str], db: Session
 ) -> None:
     super_user = crud.get_user_by_email(session=db, email=settings.FIRST_SUPERUSER)
+    if not super_user:
+        pytest.fail("Super user not found")
     user_id = super_user.id
 
     r = client.delete(

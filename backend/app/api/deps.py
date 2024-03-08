@@ -4,6 +4,7 @@ from typing import Annotated
 from fastapi import Depends, HTTPException, status
 from fastapi.security import OAuth2PasswordBearer
 from jose import jwt
+from jose.exceptions import JWTError
 from pydantic import ValidationError
 from sqlmodel import Session
 
@@ -17,7 +18,7 @@ reusable_oauth2 = OAuth2PasswordBearer(
 )
 
 
-def get_db() -> Generator:
+def get_db() -> Generator[Session, None, None]:
     with Session(engine) as session:
         yield session
 
@@ -32,7 +33,7 @@ def get_current_user(session: SessionDep, token: TokenDep) -> User:
             token, settings.SECRET_KEY, algorithms=[security.ALGORITHM]
         )
         token_data = TokenPayload(**payload)
-    except (jwt.JWTError, ValidationError):
+    except (JWTError, ValidationError):
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,
             detail="Could not validate credentials",
