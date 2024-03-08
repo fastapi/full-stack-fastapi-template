@@ -23,4 +23,6 @@ COPY ./prestart.sh /app/
 
 COPY ./tests-start.sh /app/
 
+COPY ./scripts/lint.sh /app/
+
 COPY ./app /app/app
