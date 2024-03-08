@@ -29,7 +29,7 @@ jobs:
       - name: Docker Compose up
         run: docker compose up -d
       - name: Docker compose lint backed
-        run: docker compose exec -T backend bash /scripts/lint.sh
+        run: docker compose exec -T backend bash /app/lint.sh
       - name: Docker Compose run tests
         run: docker compose exec -T backend bash /app/tests-start.sh "Coverage for ${{ github.sha }}"
       - name: Docker Compose cleanup
