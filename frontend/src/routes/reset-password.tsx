@@ -60,7 +60,6 @@ function ResetPassword() {
       showToast('Success!', 'Password updated.', 'success')
       reset()
       navigate({ to: '/login' })
-
     },
     onError: (err: ApiError) => {
       const errDetail = err.body.detail
