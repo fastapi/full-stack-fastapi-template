@@ -52,6 +52,7 @@
 
 ### Fixes
 
+* 🐛 Fix bug when editing own user. PR [#651](https://github.com/tiangolo/full-stack-fastapi-postgresql/pull/651) by [@alejsdev](https://github.com/alejsdev).
 * 🐛  Add `onClose` to `SidebarItems`. PR [#589](https://github.com/tiangolo/full-stack-fastapi-postgresql/pull/589) by [@alejsdev](https://github.com/alejsdev).
 * 🐛 Fix positional argument bug in `init_db.py`. PR [#562](https://github.com/tiangolo/full-stack-fastapi-postgresql/pull/562) by [@alejsdev](https://github.com/alejsdev).
 * 📌 Fix flower Docker image, pin version. PR [#396](https://github.com/tiangolo/full-stack-fastapi-postgresql/pull/396) by [@sanggusti](https://github.com/sanggusti).
@@ -60,6 +61,7 @@
 
 ### Refactors
 
+* 🔥 Remove unused schemas. PR [#656](https://github.com/tiangolo/full-stack-fastapi-postgresql/pull/656) by [@alejsdev](https://github.com/alejsdev).
 * 🔥 Remove old frontend. PR [#649](https://github.com/tiangolo/full-stack-fastapi-postgresql/pull/649) by [@tiangolo](https://github.com/tiangolo).
 * ♻ Move project source files to top level from src, update Sentry dependency. PR [#630](https://github.com/tiangolo/full-stack-fastapi-postgresql/pull/630) by [@estebanx64](https://github.com/estebanx64).
 * ♻ Refactor Python folder tree. PR [#629](https://github.com/tiangolo/full-stack-fastapi-postgresql/pull/629) by [@estebanx64](https://github.com/estebanx64).
@@ -97,6 +99,7 @@
 
 ### Docs
 
+* 📸 Add new screenshots . PR [#657](https://github.com/tiangolo/full-stack-fastapi-postgresql/pull/657) by [@alejsdev](https://github.com/alejsdev).
 * 📝 Refactor README into separate README.md files for backend, frontend, deployment, development. PR [#639](https://github.com/tiangolo/full-stack-fastapi-postgresql/pull/639) by [@tiangolo](https://github.com/tiangolo).
 * 📝 Update README. PR [#628](https://github.com/tiangolo/full-stack-fastapi-postgresql/pull/628) by [@tiangolo](https://github.com/tiangolo).
 * 👷 Update GitHub Action latest-changes and move release notes to independent file. PR [#619](https://github.com/tiangolo/full-stack-fastapi-postgresql/pull/619) by [@tiangolo](https://github.com/tiangolo).
@@ -107,6 +110,8 @@
 
 ### Internal
 
+* 🚚 Move new-frontend to frontend. PR [#652](https://github.com/tiangolo/full-stack-fastapi-postgresql/pull/652) by [@alejsdev](https://github.com/alejsdev).
+* 🔧 Add script for ESLint. PR [#650](https://github.com/tiangolo/full-stack-fastapi-postgresql/pull/650) by [@alejsdev](https://github.com/alejsdev).
 * ⚙️ Add Prettier config. PR [#647](https://github.com/tiangolo/full-stack-fastapi-postgresql/pull/647) by [@alejsdev](https://github.com/alejsdev).
 * 🔧 Update pre-commit config. PR [#645](https://github.com/tiangolo/full-stack-fastapi-postgresql/pull/645) by [@alejsdev](https://github.com/alejsdev).
 * 👷 Add dependabot. PR [#547](https://github.com/tiangolo/full-stack-fastapi-postgresql/pull/547) by [@tiangolo](https://github.com/tiangolo).

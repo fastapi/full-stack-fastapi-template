@@ -1,11 +1,12 @@
 {
-  "name": "new-frontend",
+  "name": "frontend",
   "private": true,
   "version": "0.0.0",
   "type": "module",
   "scripts": {
     "dev": "vite",
     "build": "tsc && vite build",
+    "lint": "eslint ./src --ext .ts,.tsx --fix",
     "format": "prettier --write ./src/**/*.{ts,tsx,js,jsx,json,md} --ignore-path .prettierignore",
     "preview": "vite preview",
     "generate-client": "openapi --input ./openapi.json --useOptions --useUnionTypes --output ./src/client --client axios --exportSchemas true"
