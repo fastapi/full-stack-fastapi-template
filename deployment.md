@@ -2,7 +2,7 @@
 
 You can deploy the project using Docker Compose in a remote server.
 
-It expects you to have a main Traefik proxy handling communication to the outside world and HTTPS certificates.
+It expects you to have a Traefik proxy handling communication to the outside world and HTTPS certificates.
 
 And you can use CI (continuous integration) systems to deploy automatically.
 
@@ -86,3 +86,39 @@ Now with the environment variables set and the `docker-compose.traefik.yml` in p
 ```bash
 docker compose -f docker-compose.traefik.yml up -d
 ```
+
+## Deploy the FastAPI Project
+
+Now that you have Traefik in place you can deploy your FastAPI project with Docker Compose.
+
+You could configure the variables in the `.env` file to match your domain, or you could override them before running the `docker compose` command.
+
+For example:
+
+```bash
+export DOMAIN=fastapi-project.example.com
+```
+
+And then deploy with Docker Compose:
+
+```bash
+docker compose -f docker-compose.yml up -d
+```
+
+For production you wouldn't want to have the overrides in `docker-compose.override.yml`, so you would need to explicitly specify the file to use, `docker-compose.yml`.
+
+## URLs
+
+Replace `fastapi-project.example.com` with your domain:
+
+Frontend: https://fastapi-project.example.com
+
+Backend API docs: https://fastapi-project.example.com/docs
+
+Backend API base URL: https://fastapi-project.example.com/api/
+
+PGAdmin: https://pgadmin.fastapi-project.example.com
+
+Flower: https://flower.fastapi-project.example.com
+
+Traefik UI: https://traefik.fastapi-project.example.com
