@@ -84,7 +84,7 @@ services:
 
   frontend:
     build:
-      context: ./new-frontend
+      context: ./frontend
       args:
         - VITE_API_URL=http://${DOMAIN?Variable not set}
         - NODE_ENV=development
