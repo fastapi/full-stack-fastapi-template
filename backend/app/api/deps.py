@@ -3,8 +3,7 @@ from typing import Annotated
 
 from fastapi import Depends, HTTPException, status
 from fastapi.security import OAuth2PasswordBearer
-from jose import jwt
-from jose.exceptions import JWTError
+from jose import JWTError, jwt
 from pydantic import ValidationError
 from sqlmodel import Session
 
