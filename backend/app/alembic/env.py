@@ -10,7 +10,7 @@ config = context.config
 
 # Interpret the config file for Python logging.
 # This line sets up loggers basically.
-fileConfig(config.config_file_name)  # type: ignore
+fileConfig(config.config_file_name)
 
 # add your model's MetaData object here
 # for 'autogenerate' support
@@ -28,7 +28,7 @@ target_metadata = SQLModel.metadata
 # ... etc.
 
 
-def get_url() -> str:
+def get_url():
     user = os.getenv("POSTGRES_USER", "postgres")
     password = os.getenv("POSTGRES_PASSWORD", "")
     server = os.getenv("POSTGRES_SERVER", "db")
@@ -36,7 +36,7 @@ def get_url() -> str:
     return f"postgresql+psycopg://{user}:{password}@{server}/{db}"
 
 
-def run_migrations_offline() -> None:
+def run_migrations_offline():
     """Run migrations in 'offline' mode.
 
     This configures the context with just a URL
@@ -57,7 +57,7 @@ def run_migrations_offline() -> None:
         context.run_migrations()
 
 
-def run_migrations_online() -> None:
+def run_migrations_online():
     """Run migrations in 'online' mode.
 
     In this scenario we need to create an Engine
@@ -65,8 +65,6 @@ def run_migrations_online() -> None:
 
     """
     configuration = config.get_section(config.config_ini_section)
-    if configuration is None:
-        configuration = {}
     configuration["sqlalchemy.url"] = get_url()
     connectable = engine_from_config(
         configuration,
