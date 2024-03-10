@@ -107,6 +107,73 @@ docker compose -f docker-compose.yml up -d
 
 For production you wouldn't want to have the overrides in `docker-compose.override.yml`, so you would need to explicitly specify the file to use, `docker-compose.yml`.
 
+## Continuous Deployment (CD)
+
+You can use GitHub Actions to deploy your project automatically, and you can have multiple environment deployments, like `staging` and `production`.
+
+* On your remote server, if you are running as the `root` user, create a user for your GitHub Actions:
+
+```bash
+adduser github
+```
+
+* Add Docker permissions to the `github` user:
+
+```bash
+usermod -aG docker github
+```
+
+* Temporarily switch to the `github` user:
+
+```bash
+su - github
+```
+
+* Go to the `github` user's home directory:
+
+```bash
+cd
+```
+
+* [Install a GitHub Action self-hosted runner following the official guide](https://docs.github.com/en/actions/hosting-your-own-runners/managing-self-hosted-runners/adding-self-hosted-runners#adding-a-self-hosted-runner-to-a-repository).
+
+* When asked about labels, add a label for the environment, e.g. `production`.
+
+After installing, the guide would tell you to run a command to start the runner. Nevertheless, it would stop once you terminate that process or if your local connection to your server is lost.
+
+To make sure it runs on startup and continues running, you can install it as a service. To do that, exit the `github` user and go back to the `root` user:
+
+```bash
+exit
+```
+
+After you do it, you would be on the `root` user again and on the previous directory again belonging to the `root` user.
+
+* Go to the `actions-runner` directory inside of the `github` user's home directory:
+
+```bash
+cd /home/github/actions-runner
+```
+
+* From there, [install the GitHub Actions runner service following the official guide](https://docs.github.com/en/actions/hosting-your-own-runners/managing-self-hosted-runners/configuring-the-self-hosted-runner-application-as-a-service#installing-the-service):
+
+```bash
+./svc.sh install github
+```
+
+* Start the service:
+
+```bash
+./svc.sh start
+```
+
+## GitHub Action Deployment Workflows
+
+There are GitHub Action workflows in the `.github/workflows` directory already configured for deploying to the environments (GitHub Actions runners with the labels):
+
+* `staging`: after pushing (or merging) to the branch `master`.
+* `production`: after publishing a release.
+
 ## URLs
 
 Replace `fastapi-project.example.com` with your domain:
