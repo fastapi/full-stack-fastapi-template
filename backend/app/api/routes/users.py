@@ -23,7 +23,7 @@ from app.models import (
     UserUpdate,
     UserUpdateMe,
 )
-from app.utils import send_new_account_email
+from app.utils import generate_new_account_email, send_email
 
 router = APIRouter()
 
@@ -61,8 +61,13 @@ def create_user(*, session: SessionDep, user_in: UserCreate) -> Any:
 
     user = crud.create_user(session=session, user_create=user_in)
     if settings.EMAILS_ENABLED and user_in.email:
-        send_new_account_email(
+        email_data = generate_new_account_email(
             email_to=user_in.email, username=user_in.email, password=user_in.password
+        )
+        send_email(
+            email_to=user_in.email,
+            subject=email_data.subject,
+            html_content=email_data.html_content,
         )
     return user
 

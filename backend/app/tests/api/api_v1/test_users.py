@@ -36,7 +36,7 @@ def test_create_user_new_email(
     db: Session,
     mocker: MockerFixture,
 ) -> None:
-    mocker.patch("app.utils.send_new_account_email")
+    mocker.patch("app.utils.send_email")
     mocker.patch("app.core.config.settings.EMAILS_ENABLED", True)
     username = random_email()
     password = random_lower_string()

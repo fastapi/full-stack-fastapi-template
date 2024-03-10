@@ -2,6 +2,7 @@ from fastapi.testclient import TestClient
 from pytest_mock import MockerFixture
 
 from app.core.config import settings
+from app.utils import generate_password_reset_token
 
 
 def test_get_access_token(client: TestClient) -> None:
@@ -40,8 +41,8 @@ def test_use_access_token(
 def test_recovery_password(
     client: TestClient, normal_user_token_headers: dict[str, str], mocker: MockerFixture
 ) -> None:
-    mocker.patch("app.utils.send_reset_password_email", return_value=None)
     mocker.patch("app.utils.send_email", return_value=None)
+    mocker.patch("app.core.config.settings.EMAILS_ENABLED", True)
     email = "test@example.com"
     r = client.post(
         f"{settings.API_V1_STR}/password-recovery/{email}",
@@ -65,18 +66,12 @@ def test_recovery_password_user_not_exits(
 def test_reset_password(
     client: TestClient, superuser_token_headers: dict[str, str]
 ) -> None:
-    login_data = {
-        "username": settings.FIRST_SUPERUSER,
-        "password": settings.FIRST_SUPERUSER_PASSWORD,
-    }
-    r = client.post(f"{settings.API_V1_STR}/login/access-token", data=login_data)
-    token = r.json().get("access_token")
-
+    token = generate_password_reset_token(email=settings.FIRST_SUPERUSER)
     data = {"new_password": "changethis", "token": token}
     r = client.post(
         f"{settings.API_V1_STR}/reset-password/",
         headers=superuser_token_headers,
-        json=data
+        json=data,
     )
     assert r.status_code == 200
     assert r.json() == {"message": "Password updated successfully"}
@@ -89,7 +84,7 @@ def test_reset_password_invalid_token(
     r = client.post(
         f"{settings.API_V1_STR}/reset-password/",
         headers=superuser_token_headers,
-        json=data
+        json=data,
     )
     response = r.json()
 

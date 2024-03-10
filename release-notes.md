@@ -13,6 +13,7 @@
 
 ### Features
 
+* ✨ Create endpoint to show password recovery email content and update email template. PR [#664](https://github.com/tiangolo/full-stack-fastapi-postgresql/pull/664) by [@alejsdev](https://github.com/alejsdev).
 * 🎨 Format with Prettier. PR [#646](https://github.com/tiangolo/full-stack-fastapi-postgresql/pull/646) by [@alejsdev](https://github.com/alejsdev).
 * ✅ Add tests to raise coverage to at least 90% and fix recover password logic. PR [#632](https://github.com/tiangolo/full-stack-fastapi-postgresql/pull/632) by [@estebanx64](https://github.com/estebanx64).
 * ⚙️ Add Prettier and ESLint config with pre-commit. PR [#640](https://github.com/tiangolo/full-stack-fastapi-postgresql/pull/640) by [@alejsdev](https://github.com/alejsdev).
@@ -52,6 +53,7 @@
 
 ### Fixes
 
+* 🔥 Remove unnecessary validation. PR [#662](https://github.com/tiangolo/full-stack-fastapi-postgresql/pull/662) by [@alejsdev](https://github.com/alejsdev).
 * 🐛 Fix bug when editing own user. PR [#651](https://github.com/tiangolo/full-stack-fastapi-postgresql/pull/651) by [@alejsdev](https://github.com/alejsdev).
 * 🐛  Add `onClose` to `SidebarItems`. PR [#589](https://github.com/tiangolo/full-stack-fastapi-postgresql/pull/589) by [@alejsdev](https://github.com/alejsdev).
 * 🐛 Fix positional argument bug in `init_db.py`. PR [#562](https://github.com/tiangolo/full-stack-fastapi-postgresql/pull/562) by [@alejsdev](https://github.com/alejsdev).
@@ -61,6 +63,11 @@
 
 ### Refactors
 
+* ♻️ Refactor email logic to allow re-using util functions for testing and development. PR [#663](https://github.com/tiangolo/full-stack-fastapi-postgresql/pull/663) by [@tiangolo](https://github.com/tiangolo).
+* 💬 Improve Delete Account description and confirmation. PR [#661](https://github.com/tiangolo/full-stack-fastapi-postgresql/pull/661) by [@alejsdev](https://github.com/alejsdev).
+* ♻️ Refactor email templates. PR [#659](https://github.com/tiangolo/full-stack-fastapi-postgresql/pull/659) by [@alejsdev](https://github.com/alejsdev).
+* 📝 Update deployment files and docs. PR [#660](https://github.com/tiangolo/full-stack-fastapi-postgresql/pull/660) by [@tiangolo](https://github.com/tiangolo).
+* 🔥 Remove unused schemas. PR [#656](https://github.com/tiangolo/full-stack-fastapi-postgresql/pull/656) by [@alejsdev](https://github.com/alejsdev).
 * 🔥 Remove old frontend. PR [#649](https://github.com/tiangolo/full-stack-fastapi-postgresql/pull/649) by [@tiangolo](https://github.com/tiangolo).
 * ♻ Move project source files to top level from src, update Sentry dependency. PR [#630](https://github.com/tiangolo/full-stack-fastapi-postgresql/pull/630) by [@estebanx64](https://github.com/estebanx64).
 * ♻ Refactor Python folder tree. PR [#629](https://github.com/tiangolo/full-stack-fastapi-postgresql/pull/629) by [@estebanx64](https://github.com/estebanx64).
@@ -98,6 +105,7 @@
 
 ### Docs
 
+* 📸 Add new screenshots . PR [#657](https://github.com/tiangolo/full-stack-fastapi-postgresql/pull/657) by [@alejsdev](https://github.com/alejsdev).
 * 📝 Refactor README into separate README.md files for backend, frontend, deployment, development. PR [#639](https://github.com/tiangolo/full-stack-fastapi-postgresql/pull/639) by [@tiangolo](https://github.com/tiangolo).
 * 📝 Update README. PR [#628](https://github.com/tiangolo/full-stack-fastapi-postgresql/pull/628) by [@tiangolo](https://github.com/tiangolo).
 * 👷 Update GitHub Action latest-changes and move release notes to independent file. PR [#619](https://github.com/tiangolo/full-stack-fastapi-postgresql/pull/619) by [@tiangolo](https://github.com/tiangolo).
