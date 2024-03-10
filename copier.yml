@@ -1,9 +1,16 @@
-domain:
+domain_staging:
   type: str
   help: |
-    Which domain name to use for the project, by default,
-    localhost, but you should change it later (in .env)
-  default: localhost
+    Which domain name to use for deploying the project to a staging environment.
+    By default, staging.localhost.tiangolo.com, but you should change it later (in .env)
+  default: staging.localhost.tiangolo.com
+
+domain_production:
+  type: str
+  help: |
+    Which domain name to use for deploying the project to a production environment.
+    By default, localhost.tiangolo.com, but you should change it later (in .env)
+  default: localhost.tiangolo.com
 
 project_name:
   type: str
