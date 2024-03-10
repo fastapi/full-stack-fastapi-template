@@ -1,0 +1,21 @@
+name: Deploy
+
+on:
+  push:
+    branches:
+      - master
+
+jobs:
+
+  deploy:
+    runs-on:
+      - self-hosted
+      - staging
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - run: docker compose build
+      - run: docker compose -f docker-compose.yml up -d
+        env:
+          ENVIRONMENT: staging

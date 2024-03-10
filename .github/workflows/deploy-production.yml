@@ -1,0 +1,21 @@
+name: Deploy
+
+on:
+  release:
+    types:
+      - published
+
+jobs:
+
+  deploy:
+    runs-on:
+      - self-hosted
+      - production
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - run: docker compose build
+      - run: docker compose -f docker-compose.yml up -d
+        env:
+          ENVIRONMENT: production
