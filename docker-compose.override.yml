@@ -24,6 +24,8 @@ services:
       - --accesslog
       # Enable the Traefik log, for configurations and errors
       - --log
+      # Enable debug logging for local development
+      - --log.level=DEBUG
       # Enable the Dashboard and API
       - --api
       # Enable the Dashboard and API in insecure mode for local development
