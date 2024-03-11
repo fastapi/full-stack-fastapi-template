@@ -32,12 +32,16 @@ const EditItem: React.FC<EditItemProps> = ({ item, isOpen, onClose }) => {
     register,
     handleSubmit,
     reset,
-    formState: { isSubmitting, errors, isDirty },
+    formState: { isSubmitting, errors },
+    watch,
   } = useForm<ItemUpdate>({
     mode: 'onBlur',
     criteriaMode: 'all',
     defaultValues: item,
   })
+
+  const formValues = watch()
+  const hasNoChanges = JSON.stringify(formValues) === JSON.stringify(item)
 
   const updateItem = async (data: ItemUpdate) => {
     await ItemsService.updateItem({ id: item.id, requestBody: data })
@@ -109,7 +113,7 @@ const EditItem: React.FC<EditItemProps> = ({ item, isOpen, onClose }) => {
               _hover={{ opacity: 0.8 }}
               type="submit"
               isLoading={isSubmitting}
-              isDisabled={!isDirty}
+              isDisabled={hasNoChanges}
             >
               Save
             </Button>
