@@ -81,8 +81,7 @@ services:
     env_file:
       - .env
     environment:
-      - DOMAIN_STAGING=${DOMAIN_STAGING}
-      - DOMAIN_PRODUCTION=${DOMAIN_PRODUCTION}
+      - DOMAIN=${DOMAIN}
       - ENVIRONMENT=${ENVIRONMENT}
       - BACKEND_CORS_ORIGINS=${BACKEND_CORS_ORIGINS}
       - SECRET_KEY=${SECRET_KEY?Variable not set}
@@ -129,8 +128,7 @@ services:
     env_file:
       - .env
     environment:
-      - DOMAIN_STAGING=${DOMAIN_STAGING}
-      - DOMAIN_PRODUCTION=${DOMAIN_PRODUCTION}
+      - DOMAIN=${DOMAIN}
       - ENVIRONMENT=${ENVIRONMENT}
       - BACKEND_CORS_ORIGINS=${BACKEND_CORS_ORIGINS}
       - SECRET_KEY=${SECRET_KEY?Variable not set}
