@@ -60,8 +60,6 @@ services:
       - "8888:8888"
     volumes:
       - ./backend/:/app
-    environment:
-      - SERVER_HOST=http://${DOMAIN?Variable not set}
     build:
       context: ./backend
       dockerfile: backend.dockerfile
@@ -75,7 +73,6 @@ services:
       - ./backend/:/app
     environment:
       - RUN=celery worker -A app.worker -l info -Q main-queue -c 1
-      - SERVER_HOST=http://${DOMAIN?Variable not set}
     build:
       context: ./backend
       dockerfile: celeryworker.dockerfile
