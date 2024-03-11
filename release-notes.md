@@ -14,6 +14,7 @@
 
 ### Features
 
+* 🎨 Improve styles. PR [#673](https://github.com/tiangolo/full-stack-fastapi-postgresql/pull/673) by [@alejsdev](https://github.com/alejsdev).
 * 🎨 Update theme. PR [#666](https://github.com/tiangolo/full-stack-fastapi-postgresql/pull/666) by [@alejsdev](https://github.com/alejsdev).
 * 👷 Add continuous deployment and refactors needed for it. PR [#667](https://github.com/tiangolo/full-stack-fastapi-postgresql/pull/667) by [@tiangolo](https://github.com/tiangolo).
 * ✨ Create endpoint to show password recovery email content and update email template. PR [#664](https://github.com/tiangolo/full-stack-fastapi-postgresql/pull/664) by [@alejsdev](https://github.com/alejsdev).
@@ -111,6 +112,7 @@
 
 ### Docs
 
+* 📝 Update frontend `README.md`. PR [#675](https://github.com/tiangolo/full-stack-fastapi-postgresql/pull/675) by [@alejsdev](https://github.com/alejsdev).
 * 📝 Update deployment docs to use a different directory for traefik-public. PR [#670](https://github.com/tiangolo/full-stack-fastapi-postgresql/pull/670) by [@tiangolo](https://github.com/tiangolo).
 * 📸 Add new screenshots . PR [#657](https://github.com/tiangolo/full-stack-fastapi-postgresql/pull/657) by [@alejsdev](https://github.com/alejsdev).
 * 📝 Refactor README into separate README.md files for backend, frontend, deployment, development. PR [#639](https://github.com/tiangolo/full-stack-fastapi-postgresql/pull/639) by [@tiangolo](https://github.com/tiangolo).
