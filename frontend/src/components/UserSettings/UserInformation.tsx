@@ -109,7 +109,7 @@ const UserInformation: React.FC = () => {
                     message: 'Invalid email address',
                   },
                 })}
-                type="text"
+                type="email"
                 size="md"
               />
             ) : (
