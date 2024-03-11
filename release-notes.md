@@ -68,6 +68,7 @@
 
 ### Refactors
 
+* 🔧 Update VS Code debug config. PR [#676](https://github.com/tiangolo/full-stack-fastapi-postgresql/pull/676) by [@tiangolo](https://github.com/tiangolo).
 * ♻️ Refactor code structure for tests. PR [#674](https://github.com/tiangolo/full-stack-fastapi-postgresql/pull/674) by [@tiangolo](https://github.com/tiangolo).
 * 🔧 Set TanStack Router devtools only in dev mode. PR [#668](https://github.com/tiangolo/full-stack-fastapi-postgresql/pull/668) by [@alejsdev](https://github.com/alejsdev).
 * ♻️ Refactor email logic to allow re-using util functions for testing and development. PR [#663](https://github.com/tiangolo/full-stack-fastapi-postgresql/pull/663) by [@tiangolo](https://github.com/tiangolo).
@@ -108,6 +109,7 @@
 
 ### Upgrades
 
+* ⬆ Add `uvicorn[standard] to include `watchgod` and `uvloop`. PR [#438](https://github.com/tiangolo/full-stack-fastapi-postgresql/pull/438) by [@alonme](https://github.com/alonme).
 * ⬆ Upgrade code to support pydantic V2. PR [#615](https://github.com/tiangolo/full-stack-fastapi-postgresql/pull/615) by [@estebanx64](https://github.com/estebanx64).
 
 ### Docs
