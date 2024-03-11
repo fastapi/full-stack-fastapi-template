@@ -28,13 +28,22 @@ class Settings(BaseSettings):
     SECRET_KEY: str = secrets.token_urlsafe(32)
     # 60 minutes * 24 hours * 8 days = 8 days
     ACCESS_TOKEN_EXPIRE_MINUTES: int = 60 * 24 * 8
-    DOMAIN: str = "localhost"
-    HOST_SCHEME: Literal["https", "http"] = "http"
+    DOMAIN_LOCAL: str = "localhost"
+    DOMAIN_STAGING: str = "staging.localhost.tiangolo.com"
+    DOMAIN_PRODUCTION: str = "localhost.tiangolo.com"
+    ENVIRONMENT: Literal["local", "staging", "production"] = "local"
 
     @computed_field  # type: ignore[misc]
     @property
     def server_host(self) -> str:
-        return f"{self.HOST_SCHEME}://{self.DOMAIN}"
+        # Use HTTPS for anything other than local development
+        if self.ENVIRONMENT == "local":
+            return f"http://{self.DOMAIN_LOCAL}"
+        elif self.ENVIRONMENT == "staging":
+            return f"https://{self.DOMAIN_STAGING}"
+        elif self.ENVIRONMENT == "production":
+            return f"https://{self.DOMAIN_PRODUCTION}"
+        raise RuntimeError(f"Unknown environment {self.ENVIRONMENT}")
 
     BACKEND_CORS_ORIGINS: Annotated[
         list[AnyUrl] | str, BeforeValidator(parse_cors)
