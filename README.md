@@ -53,6 +53,10 @@ Some of the future new features and changes:
 
 [![API docs](img/dashboard-user-settings.png)](https://github.com/tiangolo/full-stack-fastapi-postgresql)
 
+### Dashboard - Dark Mode
+
+[![API docs](img/dashboard-dark.png)](https://github.com/tiangolo/full-stack-fastapi-postgresql)
+
 ## Technology Stack and Features
 
 - ⚡ [**FastAPI**](https://fastapi.tiangolo.com) for the Python backend API.
@@ -60,7 +64,7 @@ Some of the future new features and changes:
     - 🔍 [Pydantic](https://docs.pydantic.dev), used by FastAPI, for the data validation and settings management.
     - 💾 [PostgreSQL](https://www.postgresql.org) as the SQL database.
 - 🚀 [React](https://react.dev) for the frontend.
-    - 💃 Using TypeScript, hooks, Vite, and other parts of a modern frontend stack.
+    - 💃 Using TypeScript, hooks, Vite, and other parts of a modern frontend stack, including dark mode support. 🦇
     - 🎨 [Chakra UI](https://chakra-ui.com) for the frontend components.
     - 🤖 An automatically generated frontend client.
 - 🐋 [Docker Compose](https://www.docker.com) for development and production.
