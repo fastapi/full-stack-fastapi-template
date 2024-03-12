@@ -84,8 +84,8 @@ def update_user_me(
         existing_user = crud.get_user_by_email(session=session, email=user_in.email)
         if existing_user:
             raise HTTPException(
-            status_code=409, detail="User with this email already exists"
-        )
+                status_code=409, detail="User with this email already exists"
+            )
     user_data = user_in.model_dump(exclude_unset=True)
     current_user.sqlmodel_update(user_data)
     session.add(current_user)
@@ -186,8 +186,8 @@ def update_user(
         existing_user = crud.get_user_by_email(session=session, email=user_in.email)
         if existing_user:
             raise HTTPException(
-            status_code=409, detail="User with this email already exists"
-        )
+                status_code=409, detail="User with this email already exists"
+            )
 
     db_user = crud.update_user(session=session, db_user=db_user, user_in=user_in)
     return db_user

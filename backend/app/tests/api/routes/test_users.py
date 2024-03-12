@@ -227,6 +227,7 @@ def test_update_password_me_incorrect_password(
     updated_user = r.json()
     assert updated_user["detail"] == "Incorrect password"
 
+
 def test_update_user_me_email_exists(
     client: TestClient, normal_user_token_headers: dict[str, str], db: Session
 ) -> None:
@@ -345,6 +346,7 @@ def test_update_user_not_exists(
     )
     assert r.status_code == 404
     assert r.json()["detail"] == "The user with this id does not exist in the system"
+
 
 def test_update_user_email_exists(
     client: TestClient, superuser_token_headers: dict[str, str], db: Session
