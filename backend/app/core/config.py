@@ -1,5 +1,6 @@
 import secrets
 import warnings
+from functools import lru_cache
 from typing import Annotated, Any, Literal
 
 from pydantic import (
@@ -118,4 +119,9 @@ class Settings(BaseSettings):
         return self
 
 
-settings = Settings()  # type: ignore
+@lru_cache
+def get_settings():
+    return Settings()
+
+
+settings = get_settings()
