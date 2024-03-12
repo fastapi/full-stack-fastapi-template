@@ -23,8 +23,10 @@ def read_items(
         statement = select(Item).offset(skip).limit(limit)
         items = session.exec(statement).all()
     else:
-        statment = select(func.count()).select_from(Item).where(
-            Item.owner_id == current_user.id
+        statment = (
+            select(func.count())
+            .select_from(Item)
+            .where(Item.owner_id == current_user.id)
         )
         count = session.exec(statment).one()
         statement = (
