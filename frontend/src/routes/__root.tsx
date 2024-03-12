@@ -1,0 +1,25 @@
+import React, { Suspense } from 'react'
+import { createRootRoute, Outlet } from '@tanstack/react-router'
+
+import NotFound from '../components/Common/NotFound'
+
+const TanStackRouterDevtools =
+  process.env.NODE_ENV === 'production'
+    ? () => null
+    : React.lazy(() =>
+        import('@tanstack/router-devtools').then((res) => ({
+          default: res.TanStackRouterDevtools,
+        })),
+      )
+
+export const Route = createRootRoute({
+  component: () => (
+    <>
+      <Outlet />
+      <Suspense>
+        <TanStackRouterDevtools />
+      </Suspense>
+    </>
+  ),
+  notFoundComponent: () => <NotFound />,
+})
