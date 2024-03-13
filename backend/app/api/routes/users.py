@@ -36,8 +36,8 @@ def read_users(session: SessionDep, skip: int = 0, limit: int = 100) -> Any:
     Retrieve users.
     """
 
-    statment = select(func.count()).select_from(User)
-    count = session.exec(statment).one()
+    statement = select(func.count()).select_from(User)
+    count = session.exec(statement).one()
 
     statement = select(User).offset(skip).limit(limit)
     users = session.exec(statement).all()
