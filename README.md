@@ -49,7 +49,7 @@
 
 ### Dashboard - Dark Mode
 
-[![API docs](img/dashboard-dark.png)](https://github.com/tiangolo/full-stack-fastapi-postgresql)
+[![API docs](img/dashboard-dark.png)](https://github.com/tiangolo/full-stack-fastapi-template)
 
 ## How to use it
 
