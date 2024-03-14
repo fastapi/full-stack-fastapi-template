@@ -59,7 +59,7 @@ const UserInformation: React.FC = () => {
       showToast('Success!', 'User updated successfully.', 'success')
     },
     onError: (err: ApiError) => {
-      const errDetail = err.body.detail
+      const errDetail = err.body?.detail
       showToast('Something went wrong.', `${errDetail}`, 'error')
     },
     onSettled: () => {
@@ -124,7 +124,7 @@ const UserInformation: React.FC = () => {
               />
             ) : (
               <Text size="md" py={2}>
-                {currentUser!.email}
+                {currentUser?.email}
               </Text>
             )}
             {errors.email && (
