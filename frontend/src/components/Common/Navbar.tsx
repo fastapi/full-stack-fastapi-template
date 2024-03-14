@@ -1,5 +1,5 @@
-import React from 'react'
 import { Button, Flex, Icon, useDisclosure } from '@chakra-ui/react'
+import type React from 'react'
 import { FaPlus } from 'react-icons/fa'
 
 import AddUser from '../Admin/AddUser'

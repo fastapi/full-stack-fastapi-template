@@ -1,4 +1,3 @@
-import React from 'react'
 import {
   Button,
   Checkbox,
@@ -15,11 +14,12 @@ import {
   ModalHeader,
   ModalOverlay,
 } from '@chakra-ui/react'
-import { SubmitHandler, useForm } from 'react-hook-form'
+import type React from 'react'
+import { type SubmitHandler, useForm } from 'react-hook-form'
 import { useMutation, useQueryClient } from 'react-query'
 
-import { UserCreate, UsersService } from '../../client'
-import { ApiError } from '../../client/core/ApiError'
+import { type UserCreate, UsersService } from '../../client'
+import type { ApiError } from '../../client/core/ApiError'
 import useCustomToast from '../../hooks/useCustomToast'
 
 interface AddUserProps {

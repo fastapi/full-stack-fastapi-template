@@ -1,10 +1,10 @@
-import { useQuery } from 'react-query'
 import { useNavigate } from '@tanstack/react-router'
+import { useQuery } from 'react-query'
 
 import {
-  Body_login_login_access_token as AccessToken,
+  type Body_login_login_access_token as AccessToken,
   LoginService,
-  UserOut,
+  type UserOut,
   UsersService,
 } from '../client'
 

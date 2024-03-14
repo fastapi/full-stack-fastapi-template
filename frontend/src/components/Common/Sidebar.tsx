@@ -1,4 +1,3 @@
-import React from 'react'
 import {
   Box,
   Drawer,
@@ -13,11 +12,12 @@ import {
   useColorModeValue,
   useDisclosure,
 } from '@chakra-ui/react'
+import type React from 'react'
 import { FiLogOut, FiMenu } from 'react-icons/fi'
 import { useQueryClient } from 'react-query'
 
 import Logo from '../../assets/images/fastapi-logo.svg'
-import { UserOut } from '../../client'
+import type { UserOut } from '../../client'
 import useAuth from '../../hooks/useAuth'
 import SidebarItems from './SidebarItems'
 

@@ -9,10 +9,10 @@ import {
   Text,
 } from '@chakra-ui/react'
 import { createFileRoute, redirect, useNavigate } from '@tanstack/react-router'
-import { SubmitHandler, useForm } from 'react-hook-form'
+import { type SubmitHandler, useForm } from 'react-hook-form'
 import { useMutation } from 'react-query'
 
-import { ApiError, LoginService, NewPassword } from '../client'
+import { type ApiError, LoginService, type NewPassword } from '../client'
 import { isLoggedIn } from '../hooks/useAuth'
 import useCustomToast from '../hooks/useCustomToast'
 

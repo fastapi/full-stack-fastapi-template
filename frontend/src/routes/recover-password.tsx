@@ -8,11 +8,11 @@ import {
   Text,
 } from '@chakra-ui/react'
 import { createFileRoute, redirect } from '@tanstack/react-router'
-import { SubmitHandler, useForm } from 'react-hook-form'
+import { type SubmitHandler, useForm } from 'react-hook-form'
 
 import { LoginService } from '../client'
-import useCustomToast from '../hooks/useCustomToast'
 import { isLoggedIn } from '../hooks/useAuth'
+import useCustomToast from '../hooks/useCustomToast'
 
 interface FormData {
   email: string

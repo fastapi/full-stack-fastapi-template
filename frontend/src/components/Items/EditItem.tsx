@@ -1,4 +1,3 @@
-import React from 'react'
 import {
   Button,
   FormControl,
@@ -13,10 +12,16 @@ import {
   ModalHeader,
   ModalOverlay,
 } from '@chakra-ui/react'
-import { SubmitHandler, useForm } from 'react-hook-form'
+import type React from 'react'
+import { type SubmitHandler, useForm } from 'react-hook-form'
 
 import { useMutation, useQueryClient } from 'react-query'
-import { ApiError, ItemOut, ItemUpdate, ItemsService } from '../../client'
+import {
+  type ApiError,
+  type ItemOut,
+  type ItemUpdate,
+  ItemsService,
+} from '../../client'
 import useCustomToast from '../../hooks/useCustomToast'
 
 interface EditItemProps {

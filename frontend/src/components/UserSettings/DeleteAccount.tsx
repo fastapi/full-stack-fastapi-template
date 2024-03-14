@@ -1,4 +1,3 @@
-import React from 'react'
 import {
   Button,
   Container,
@@ -6,6 +5,7 @@ import {
   Text,
   useDisclosure,
 } from '@chakra-ui/react'
+import type React from 'react'
 
 import DeleteConfirmation from './DeleteConfirmation'
 

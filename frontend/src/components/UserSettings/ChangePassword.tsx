@@ -1,4 +1,3 @@
-import React from 'react'
 import {
   Box,
   Button,
@@ -10,10 +9,11 @@ import {
   Input,
   useColorModeValue,
 } from '@chakra-ui/react'
-import { SubmitHandler, useForm } from 'react-hook-form'
+import type React from 'react'
+import { type SubmitHandler, useForm } from 'react-hook-form'
 import { useMutation } from 'react-query'
 
-import { ApiError, UpdatePassword, UsersService } from '../../client'
+import { type ApiError, type UpdatePassword, UsersService } from '../../client'
 import useCustomToast from '../../hooks/useCustomToast'
 
 interface UpdatePasswordForm extends UpdatePassword {
