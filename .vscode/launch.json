@@ -22,7 +22,18 @@
             "request": "launch",
             "name": "Debug Frontend: Launch Chrome against http://localhost:5173",
             "url": "http://localhost:5173",
-            "webRoot": "${workspaceFolder}/frontend"
+            "webRoot": "${workspaceFolder}/frontend",
+            // "runtimeExecutable": "/usr/bin/google-chrome"
+        },
+    ],
+    "compounds": [
+        {
+            "name": "Debug Fullstack",
+            "configurations": [
+                "Debug FastAPI Project backend: Python Debugger",
+                "Debug Frontend: Launch Chrome against http://localhost:5173"
+            ],
+            "stopAll": true
         },
     ]
 }
