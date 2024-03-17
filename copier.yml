@@ -1,12 +1,16 @@
 project_name:
   type: str
   help: The name of the project, shown to API users (in .env)
-  default: FastAPI Project
+  placeholder: FastAPI Project
+  # Empty default forces an input
+  default:
 
 stack_name:
   type: str
   help: The name of the stack used for Docker Compose labels (no spaces) (in .env)
-  default: fastapi-project
+  validator: >-
+    {% if ' ' in stack_name %}Stack name cannot contain spaces{% endif %}
+  default: "{{ project_name | lower | replace(' ', '-') }}"
 
 secret_key:
   type: str
@@ -14,6 +18,7 @@ secret_key:
     'The secret key for the project, used for security,
     stored in .env, you can generate one with:
     python -c "import secrets; print(secrets.token_urlsafe(32))"'
+  secret: true
   default: changethis
 
 first_superuser:
@@ -24,6 +29,7 @@ first_superuser:
 first_superuser_password:
   type: str
   help: The password of the first superuser (in .env)
+  secret: true
   default: changethis
 
 smtp_host:
@@ -39,6 +45,7 @@ smtp_user:
 smtp_password:
   type: str
   help: The SMTP server password to send emails, you can set it later in .env
+  secret: true
   default: ""
 
 emails_from_email:
@@ -52,6 +59,7 @@ postgres_password:
     'The password for the PostgreSQL database, stored in .env,
     you can generate one with:
     python -c "import secrets; print(secrets.token_urlsafe(32))"'
+  secret: true
   default: changethis
 
 sentry_dsn:
@@ -97,6 +105,3 @@ _exclude:
   - "*.sw?"
 
 _answers_file: .copier/.copier-answers.yml
-
-_tasks:
-  - "python .copier/update_dotenv.py"
