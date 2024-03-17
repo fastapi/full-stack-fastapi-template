@@ -4,8 +4,14 @@
 
 * 📝 Update `README.md`. PR [#716](https://github.com/tiangolo/full-stack-fastapi-template/pull/716) by [@alejsdev](https://github.com/alejsdev).
 
+### Fixes
+
+* 🐛 Fix 403 when the frontend has a directory without an index.html. PR [#1094](https://github.com/tiangolo/full-stack-fastapi-template/pull/1094) by [@tiangolo](https://github.com/tiangolo).
+
 ### Refactors
 
+* 🎨 Replace buttons styling for variants for consistency. PR [#722](https://github.com/tiangolo/full-stack-fastapi-template/pull/722) by [@alejsdev](https://github.com/alejsdev).
+* 🛠️ Improve `modify-openapi-operationids.js`. PR [#720](https://github.com/tiangolo/full-stack-fastapi-template/pull/720) by [@alejsdev](https://github.com/alejsdev).
 * ♻️ Replace pytest-mock with unittest.mock and remove pytest-cov. PR [#717](https://github.com/tiangolo/full-stack-fastapi-template/pull/717) by [@estebanx64](https://github.com/estebanx64).
 * 🛠️ Minor changes in frontend. PR [#715](https://github.com/tiangolo/full-stack-fastapi-template/pull/715) by [@alejsdev](https://github.com/alejsdev).
 * ♻ Update Docker image to prevent errors in M1 Macs. PR [#710](https://github.com/tiangolo/full-stack-fastapi-template/pull/710) by [@dudil](https://github.com/dudil).
@@ -18,6 +24,7 @@
 
 ### Internal
 
+* 🔥 Delete leftover celery file. PR [#727](https://github.com/tiangolo/full-stack-fastapi-template/pull/727) by [@dr-neptune](https://github.com/dr-neptune).
 * ⚙️ Update pre-commit config with Prettier and ESLint. PR [#714](https://github.com/tiangolo/full-stack-fastapi-template/pull/714) by [@alejsdev](https://github.com/alejsdev).
 
 ## 0.6.0
