@@ -8,11 +8,11 @@ import {
   Text,
 } from '@chakra-ui/react'
 import { createFileRoute, redirect } from '@tanstack/react-router'
-import { type SubmitHandler, useForm } from 'react-hook-form'
+import { SubmitHandler, useForm } from 'react-hook-form'
 
 import { LoginService } from '../client'
-import { isLoggedIn } from '../hooks/useAuth'
 import useCustomToast from '../hooks/useCustomToast'
+import { isLoggedIn } from '../hooks/useAuth'
 
 interface FormData {
   email: string
@@ -82,13 +82,7 @@ function RecoverPassword() {
           <FormErrorMessage>{errors.email.message}</FormErrorMessage>
         )}
       </FormControl>
-      <Button
-        bg="ui.main"
-        color="white"
-        _hover={{ opacity: 0.8 }}
-        type="submit"
-        isLoading={isSubmitting}
-      >
+      <Button variant="primary" type="submit" isLoading={isSubmitting}>
         Continue
       </Button>
     </Container>

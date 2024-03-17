@@ -9,10 +9,10 @@ import {
   Text,
 } from '@chakra-ui/react'
 import { createFileRoute, redirect, useNavigate } from '@tanstack/react-router'
-import { type SubmitHandler, useForm } from 'react-hook-form'
+import { SubmitHandler, useForm } from 'react-hook-form'
 import { useMutation } from 'react-query'
 
-import { type ApiError, LoginService, type NewPassword } from '../client'
+import { ApiError, LoginService, NewPassword } from '../client'
 import { isLoggedIn } from '../hooks/useAuth'
 import useCustomToast from '../hooks/useCustomToast'
 
@@ -124,12 +124,7 @@ function ResetPassword() {
           <FormErrorMessage>{errors.confirm_password.message}</FormErrorMessage>
         )}
       </FormControl>
-      <Button
-        bg="ui.main"
-        color="white"
-        _hover={{ opacity: 0.8 }}
-        type="submit"
-      >
+      <Button variant="primary" type="submit">
         Reset Password
       </Button>
     </Container>

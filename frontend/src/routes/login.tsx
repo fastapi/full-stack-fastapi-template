@@ -1,3 +1,4 @@
+import React from 'react'
 import { ViewIcon, ViewOffIcon } from '@chakra-ui/icons'
 import {
   Button,
@@ -18,12 +19,11 @@ import {
   createFileRoute,
   redirect,
 } from '@tanstack/react-router'
-import React from 'react'
-import { type SubmitHandler, useForm } from 'react-hook-form'
+import { SubmitHandler, useForm } from 'react-hook-form'
 
 import Logo from '../assets/images/fastapi-logo.svg'
-import type { ApiError } from '../client'
-import type { Body_login_login_access_token as AccessToken } from '../client/models/Body_login_login_access_token'
+import { ApiError } from '../client'
+import { Body_login_login_access_token as AccessToken } from '../client/models/Body_login_login_access_token'
 import useAuth, { isLoggedIn } from '../hooks/useAuth'
 
 export const Route = createFileRoute('/login')({
@@ -127,13 +127,7 @@ function Login() {
             Forgot password?
           </Link>
         </Center>
-        <Button
-          bg="ui.main"
-          color="white"
-          _hover={{ opacity: 0.8 }}
-          type="submit"
-          isLoading={isSubmitting}
-        >
+        <Button variant="primary" type="submit" isLoading={isSubmitting}>
           Log In
         </Button>
       </Container>

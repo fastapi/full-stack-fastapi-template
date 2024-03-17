@@ -1,3 +1,4 @@
+import React from 'react'
 import {
   Badge,
   Container,
@@ -7,7 +8,6 @@ import {
   Stack,
   useColorMode,
 } from '@chakra-ui/react'
-import type React from 'react'
 
 const Appearance: React.FC = () => {
   const { colorMode, toggleColorMode } = useColorMode()

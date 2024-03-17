@@ -16,7 +16,7 @@ import {
 import { createFileRoute } from '@tanstack/react-router'
 import { useQuery, useQueryClient } from 'react-query'
 
-import { type ApiError, type UserOut, UsersService } from '../../client'
+import { ApiError, UserOut, UsersService } from '../../client'
 import ActionsMenu from '../../components/Common/ActionsMenu'
 import Navbar from '../../components/Common/Navbar'
 import useCustomToast from '../../hooks/useCustomToast'

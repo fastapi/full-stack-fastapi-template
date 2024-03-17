@@ -1,5 +1,5 @@
-import { Outlet, createRootRoute } from '@tanstack/react-router'
 import React, { Suspense } from 'react'
+import { createRootRoute, Outlet } from '@tanstack/react-router'
 
 import NotFound from '../components/Common/NotFound'
 

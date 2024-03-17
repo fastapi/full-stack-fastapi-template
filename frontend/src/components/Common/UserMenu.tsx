@@ -1,3 +1,4 @@
+import React from 'react'
 import {
   Box,
   IconButton,
@@ -6,12 +7,11 @@ import {
   MenuItem,
   MenuList,
 } from '@chakra-ui/react'
-import type React from 'react'
 import { FaUserAstronaut } from 'react-icons/fa'
 import { FiLogOut, FiUser } from 'react-icons/fi'
 
-import { Link } from '@tanstack/react-router'
 import useAuth from '../../hooks/useAuth'
+import { Link } from '@tanstack/react-router'
 
 const UserMenu: React.FC = () => {
   const { logout } = useAuth()

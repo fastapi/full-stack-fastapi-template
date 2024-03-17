@@ -1,10 +1,10 @@
+import React from 'react'
 import { Box, Flex, Icon, Text, useColorModeValue } from '@chakra-ui/react'
-import { Link } from '@tanstack/react-router'
-import type React from 'react'
 import { FiBriefcase, FiHome, FiSettings, FiUsers } from 'react-icons/fi'
+import { Link } from '@tanstack/react-router'
 import { useQueryClient } from 'react-query'
 
-import type { UserOut } from '../../client'
+import { UserOut } from '../../client'
 
 const items = [
   { icon: FiHome, title: 'Dashboard', path: '/' },

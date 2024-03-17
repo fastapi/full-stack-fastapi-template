@@ -10,7 +10,7 @@ import {
 import { createFileRoute } from '@tanstack/react-router'
 import { useQueryClient } from 'react-query'
 
-import type { UserOut } from '../../client'
+import { UserOut } from '../../client'
 import Appearance from '../../components/UserSettings/Appearance'
 import ChangePassword from '../../components/UserSettings/ChangePassword'
 import DeleteAccount from '../../components/UserSettings/DeleteAccount'

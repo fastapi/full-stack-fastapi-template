@@ -1,3 +1,4 @@
+import React from 'react'
 import {
   Button,
   Menu,
@@ -6,14 +7,13 @@ import {
   MenuList,
   useDisclosure,
 } from '@chakra-ui/react'
-import type React from 'react'
 import { BsThreeDotsVertical } from 'react-icons/bs'
 import { FiEdit, FiTrash } from 'react-icons/fi'
 
-import type { ItemOut, UserOut } from '../../client'
 import EditUser from '../Admin/EditUser'
 import EditItem from '../Items/EditItem'
 import Delete from './DeleteAlert'
+import { ItemOut, UserOut } from '../../client'
 
 interface ActionsMenuProps {
   type: string

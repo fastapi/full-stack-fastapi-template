@@ -1,3 +1,4 @@
+import React from 'react'
 import {
   AlertDialog,
   AlertDialogBody,
@@ -7,7 +8,6 @@ import {
   AlertDialogOverlay,
   Button,
 } from '@chakra-ui/react'
-import React from 'react'
 import { useForm } from 'react-hook-form'
 import { useMutation, useQueryClient } from 'react-query'
 
