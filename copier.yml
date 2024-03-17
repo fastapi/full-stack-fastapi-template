@@ -2,8 +2,6 @@ project_name:
   type: str
   help: The name of the project, shown to API users (in .env)
   placeholder: FastAPI Project
-  # Empty default forces an input
-  default:
 
 stack_name:
   type: str
