@@ -23,6 +23,20 @@
 - 🚢 Deployment instructions using Docker Compose, including how to set up a frontend Traefik proxy to handle automatic HTTPS certificates.
 - 🏭 CI (continuous integration) and CD (continuous deployment) based on GitHub Actions.
 
+
+### In previous versions we had Vue as a frontend. Why we switched to React?
+    Project Requirements: The decision to switch frontend frameworks may be driven by changes in project requirements. React might offer specific features, performance improvements, or integrations that better align with the goals of the project.
+
+    Community Support: React has a large and active community with extensive resources, libraries, and tooling available. If the project team anticipates needing robust community support or integration with other libraries, React could be a more favorable choice.
+
+    Developer Familiarity: Sometimes, the decision to switch frameworks is influenced by the development team's expertise and familiarity. If the team is more experienced or comfortable with React, they might opt to use it for consistency and efficiency in development.
+
+    Ecosystem Considerations: React's ecosystem continues to evolve with new tools and libraries emerging regularly. The availability of specific tools or integrations within the React ecosystem might be a factor in the decision-making process.
+
+    Performance and Scalability: React is known for its performance optimizations and scalability. If the project anticipates significant growth or performance requirements, React might be chosen for its ability to handle complex applications efficiently.
+
+
+
 ### Dashboard Login
 
 [![API docs](img/login.png)](https://github.com/tiangolo/full-stack-fastapi-template)
