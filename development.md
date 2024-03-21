@@ -94,199 +94,38 @@ One way to do it could be to add each environment variable to your CI/CD system,
 
 ### Pre-commits and code linting
 
-we are using a tool called pre-commit for code linting https://pre-commit.com/.
+we are using a tool called [pre-commit](https://pre-commit.com/) for code linting and formatting.
 
-Summary taken from oficial website
+When you install it, it runs right before making a commit in git. This way it ensures that the code is consistent and formatted even before it is committed.
 
-Git hook scripts are useful for identifying simple issues before submission to code review. We run our hooks on every commit to automatically point out issues in code such as missing semicolons, trailing whitespace, and debug statements. By pointing these issues out before code review, this allows a code reviewer to focus on the architecture of a change while not wasting time with trivial style nitpicks.
+You can find a file `.pre-commit-config.yaml` with configurations at the root of the project.
 
-You can find `.pre-commit-config.yaml` at the root of the project, where you can see somethink like this.
+#### Install pre-commit to run automatically
 
-```yaml
-# See https://pre-commit.com for more information
-# See https://pre-commit.com/hooks.html for more hooks
-repos:
-  - repo: https://github.com/pre-commit/pre-commit-hooks
-    rev: v4.4.0
-    hooks:
-      - id: check-added-large-files
-      - id: check-toml
-      - id: check-yaml
-        args:
-          - --unsafe
-      - id: end-of-file-fixer
-      - id: trailing-whitespace
-  - repo: https://github.com/charliermarsh/ruff-pre-commit
-    rev: v0.2.2
-    hooks:
-      - id: ruff
-        args:
-          - --fix
-      - id: ruff-format
-  - repo: https://github.com/pre-commit/mirrors-eslint
-    rev: v8.53.0
-    hooks:
-      - id: eslint
-        files: \.[jt]sx?$
-        types: [file]
-        additional_dependencies:
-          - eslint@8.53.0
-          - eslint-plugin-react-hooks@4.6.0
-          - eslint-plugin-react-refresh@0.4.4
-          - "@typescript-eslint/eslint-plugin@6.10.0"
-          - "@typescript-eslint/parser@6.10.0"
-  - repo: https://github.com/pre-commit/mirrors-prettier
-    rev: v3.1.0
-    hooks:
-      - id: prettier
-        files: \.(ts|tsx)$
-        additional_dependencies:
-          - prettier@3.2.5
+`pre-commit` is already part of the dependencies of the project, but you could also install it globally if you prefer to, following [the official pre-commit docs](https://pre-commit.com/).
 
-ci:
-  autofix_commit_msg: 🎨 [pre-commit.ci] Auto format from pre-commit.com hooks
-  autoupdate_commit_msg: ⬆ [pre-commit.ci] pre-commit autoupdate
-```
+After having the `pre-commit` tool installed and available, you need to "install" it in the local repository, so that it runs automatically before each commit.
 
-As you can see we have some hooks that could be familiar for you, like ruff to format python code and eslint/prettier for the front end stuff.
-
-#### Running pre-commit hooks automatically
-
-There is a way to install the hooks, in this way whenever yo do a commit the hooks will be trigger to ensure everything it's ok.
-
-To install the pre-commit hooks it's as simple as run this command
+Using Poetry, you could do it with:
 
 ```bash
 ❯ poetry run pre-commit install
 pre-commit installed at .git/hooks/pre-commit
 ```
 
-Let's suppose we have a python file with some imports unordered like this
-
-```python
-from collections.abc import Generator
-
-import pytest
-from sqlmodel import Session, delete
-from fastapi.testclient import TestClient # <<- this file isn't ordered
-
-from app.core.config import settings
-from app.core.db import engine, init_db
-from app.main import app
-from app.models import Item, User
-from app.tests.utils.user import authentication_token_from_email
-from app.tests.utils.utils import get_superuser_token_headers
-```
-
-So we have this error
-
-Import block is un-sorted or un-formatted Ruff
-
-Despite the code it's ok and will be executed without errors, it is not formatted.
+Now whenever you try to commit, e.g. with:
 
 ```bash
-❯ git status
-On branch develop
-Changes not staged for commit:
-  (use "git add <file>..." to update what will be committed)
-  (use "git restore <file>..." to discard changes in working directory)
-        modified:   app/tests/conftest.py
+git commit
 ```
 
-now I'm going to commit mi changes as usual
+...pre-commit will run and check and format the code you are about to commit, and will ask you to add that code (stage it) with git again before committing.
 
-```bash
-full-stack-fastapi-postgresql/backend on  develop
-❯ git add app/tests/conftest.py
-
-full-stack-fastapi-postgresql/backend on  develop
-❯ git commit -m "Test pre commits hooks"
-[WARNING] Unstaged files detected.
-[INFO] Stashing unstaged files to /home/esteban/.cache/pre-commit/patch1710376375-647837.
-[INFO] Initializing environment for https://github.com/charliermarsh/ruff-pre-commit.
-[INFO] Initializing environment for https://github.com/pre-commit/mirrors-eslint.
-[INFO] Initializing environment for https://github.com/pre-commit/mirrors-eslint:eslint@8.53.0,eslint-plugin-react-hooks@4.6.0,eslint-plugin-react-refresh@0.4.4,@typescript-eslint/eslint-plugin@6.10.0,@typescript-eslint/parser@6.10.0.
-[INFO] Initializing environment for https://github.com/pre-commit/mirrors-prettier.
-[INFO] Initializing environment for https://github.com/pre-commit/mirrors-prettier:prettier@3.2.5.
-[INFO] Installing environment for https://github.com/pre-commit/pre-commit-hooks.
-[INFO] Once installed this environment will be reused.
-[INFO] This may take a few minutes...
-[INFO] Installing environment for https://github.com/charliermarsh/ruff-pre-commit.
-[INFO] Once installed this environment will be reused.
-[INFO] This may take a few minutes...
-[INFO] Installing environment for https://github.com/pre-commit/mirrors-eslint.
-[INFO] Once installed this environment will be reused.
-[INFO] This may take a few minutes...
-[INFO] Installing environment for https://github.com/pre-commit/mirrors-prettier.
-[INFO] Once installed this environment will be reused.
-[INFO] This may take a few minutes...
-check for added large files..............................................Passed
-check toml...........................................(no files to check)Skipped
-check yaml...........................................(no files to check)Skipped
-fix end of files.........................................................Passed
-trim trailing whitespace.................................................Passed
-ruff.....................................................................Failed
-- hook id: ruff
-- files were modified by this hook
-
-Found 1 error (1 fixed, 0 remaining).
-
-ruff-format..............................................................Passed
-eslint...............................................(no files to check)Skipped
-prettier.............................................(no files to check)Skipped
-[INFO] Restored changes from /home/esteban/.cache/pre-commit/patch1710376375-647837.
-```
-
-After I made the commit, the first time you are going to see the messages initializing enviroment and installing, after everything is installed the next time is gonna run faster.
-
-As you can see we got an error with ruff, and ruff applied the formatting. SInce there was an error in the linters it happens the next steps.
-
-1. First, ruff detected unformatted code and then fix it.
-
-2. Your commit isn't save, because the pre-commit hooks fail.
-
-3. Since ruff made changes to fix your code is in stage again and you have to add it and commit it as usual, this time will be save since all the hooks are gonna pass
-
-```bash
-❯ git status
-On branch develop
-Changes to be committed:
-  (use "git restore --staged <file>..." to unstage)
-        modified:   app/tests/conftest.py
-
-Changes not staged for commit:
-  (use "git add <file>..." to update what will be committed)
-  (use "git restore <file>..." to discard changes in working directory)
-        modified:   app/tests/conftest.py
-```
-
-```bash
-full-stack-fastapi-postgresql/backend on  develop
-❯ git add app/tests/conftest.py
-
-full-stack-fastapi-postgresql/backend on  develop
-❯ git commit -m "Test pre commits hooks"
-[WARNING] Unstaged files detected.
-[INFO] Stashing unstaged files to /home/esteban/.cache/pre-commit/patch1710376851-661240.
-check for added large files..............................................Passed
-check toml...........................................(no files to check)Skipped
-check yaml...........................................(no files to check)Skipped
-fix end of files.........................................................Passed
-trim trailing whitespace.................................................Passed
-ruff.....................................................................Passed
-ruff-format..............................................................Passed
-eslint...............................................(no files to check)Skipped
-prettier.............................................(no files to check)Skipped
-[INFO] Restored changes from /home/esteban/.cache/pre-commit/patch1710376851-661240.
-[develop 7eb8d8f] Test pre commits hooks
- 1 file changed, 9 deletions(-)
-```
-
-Yay, everything just passed and our commit was saved!
+Then you can `git add` the modified/fixed files again and now you can commit.
 
 #### Running pre-commit hooks manually
 
-you can also run the pre-commits manually if you want and avoid the hook installation
+you can also run `pre-commit` manually on all the files, you can do it using Poetry with:
 
 ```bash
 ❯ poetry run pre-commit run --all-files
