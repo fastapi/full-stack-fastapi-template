@@ -23,6 +23,15 @@
 - 🚢 Deployment instructions using Docker Compose, including how to set up a frontend Traefik proxy to handle automatic HTTPS certificates.
 - 🏭 CI (continuous integration) and CD (continuous deployment) based on GitHub Actions.
 
+### How to enable discussion
+1. On GitHub.com, navigate to the main page of the repository.
+
+2. Under your repository name, click  Settings.
+
+3. Scroll down to the "Features" section and select Discussions.
+
+4. To disable discussions, under "Features", unselect Discussions.
+
 
 ### In previous versions we had Vue as a frontend. Why we switched to React?
     Project Requirements: The decision to switch frontend frameworks may be driven by changes in project requirements. React might offer specific features, performance improvements, or integrations that better align with the goals of the project.
