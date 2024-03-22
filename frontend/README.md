@@ -59,6 +59,18 @@ If you are developing an API-only app and want to remove the frontend, you can d
 
 * In the `docker-compose.yml` file, remove the whole service / section `frontend`.
 
+* In the `docker-compose.yml` file, add the following labels in the `backend` service
+
+```
+  # Handle domain with and without "www" to redirect to only one
+  # To disable www redirection remove the next line
+  - traefik.http.middlewares.${STACK_NAME?Variable not set}-www-redirect.redirectregex.regex=^http(s)?://www.(${DOMAIN?Variable not set})/(.*)
+  # Redirect a domain with www to non-www
+  # To disable it remove the next line
+  - traefik.http.middlewares.${STACK_NAME?Variable not set}-www-redirect.redirectregex.replacement=http$${1}://${DOMAIN?Variable not set}/$${3}
+
+```
+
 * In the `docker-compose.override.yml` file, remove the whole service / section `frontend`.
 
 Done, you have a frontend-less (api-only) app. 🤓
