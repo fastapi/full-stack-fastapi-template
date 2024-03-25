@@ -6,11 +6,11 @@ You might want to use something different than `localhost` as the domain. For ex
 
 In that case, you have two options: you could use the instructions to modify your system `hosts` file with the instructions below in **Development with a custom IP** or you can just use `localhost.tiangolo.com`, it is set up to point to `localhost` (to the IP `127.0.0.1`) and all its subdomains too. And as it is an actual domain, the browsers will store the cookies you set during development, etc.
 
-If you used the default CORS enabled domains while generating the project, `localhost.tiangolo.com` was configured to be allowed. If you didn't, you will need to add it to the list in the variable `BACKEND_CORS_ORIGINS` in the `.env` file.
+If you opted for the default CORS enabled domains during project generation, `localhost.tiangolo.com` was configured to be allowed. If you didn't, you will need to add it to the list in the variable `BACKEND_CORS_ORIGINS` in the `.env` file.
 
-To configure it in your stack, follow the section **Change the development "domain"** below, using the domain `localhost.tiangolo.com`.
+To configure it in your stack, follow the section **Change the development "domain"** section below, using `localhost.tiangolo.com` as the domain.
 
-After performing those steps you should be able to open: http://localhost.tiangolo.com and it will be served by your stack in `localhost`.
+Once these steps are completed, you should be able to access: http://localhost.tiangolo.com, which will be served by your stack in `localhost`.
 
 Check all the corresponding available URLs in the section at the end.
 

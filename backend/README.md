@@ -45,7 +45,7 @@ If your Docker is not running in `localhost` (the URLs above wouldn't work) you 
 
 ### General workflow
 
-By default, the dependencies are managed with [Poetry](https://python-poetry.org/), go there and install it.
+By default, the dependencies are managed with [Poetry](https://python-poetry.org/), so go there and install it.
 
 From `./backend/` you can install all the dependencies with:
 
@@ -71,9 +71,9 @@ The setup is also already configured so you can run the tests through the VS Cod
 
 ### Docker Compose Override
 
-During development, you can change Docker Compose settings that will only affect the local development environment in the file `docker-compose.override.yml`.
+For development purposes, you have the flexibility to modify Docker Compose settings that will exclusively impact the local development environment. This can be achieved by editing the docker-compose.override.yml file.
 
-The changes to that file only affect the local development environment, not the production environment. So, you can add "temporary" changes that help the development workflow.
+It's important to note that alterations made to this file solely impact the local development environment, leaving the production environment unaffected. Therefore, you can implement "temporary" changes that facilitate the development workflow.
 
 For example, the directory with the backend code is mounted as a Docker "host volume", mapping the code you change live to the directory inside the container. That allows you to test your changes right away, without having to build the Docker image again. It should only be done during development, for production, you should build the Docker image with a recent version of the backend code. But during development, it allows you to iterate very fast.
 
@@ -131,7 +131,7 @@ To test the backend run:
 $ bash ./scripts/test.sh
 ```
 
-The tests run with Pytest, modify and add tests to `./backend/app/tests/`.
+The tests are run with Pytest, modify and add tests to `./backend/app/tests/`.
 
 If you use GitHub Actions the tests will run automatically.
 
