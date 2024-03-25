@@ -163,7 +163,7 @@ Traefik UI: http://localhost:8090
 Development URLs, for local development.
 
 Frontend: http://localhost.tiangolo.com
-![docs.png](img%2Fdocs.png)
+
 Backend: http://localhost.tiangolo.com/api/
 
 Automatic Interactive Docs (Swagger UI): http://localhost.tiangolo.com/docs
