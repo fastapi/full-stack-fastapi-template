@@ -105,7 +105,7 @@ function Login() {
               placeholder="Password"
             />
             <InputRightElement
-              color="gray.400"
+              color="ui.dim"
               _hover={{
                 cursor: "pointer",
               }}
