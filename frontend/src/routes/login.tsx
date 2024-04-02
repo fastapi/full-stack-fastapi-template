@@ -40,8 +40,7 @@ export const Route = createFileRoute("/login")({
 
 function Login() {
   const [show, setShow] = useBoolean()
-  const { login } = useAuth()
-  const [error, setError] = React.useState<string | null>(null)
+  const { loginMutation, error } = useAuth()
   const {
     register,
     handleSubmit,
@@ -56,12 +55,7 @@ function Login() {
   })
 
   const onSubmit: SubmitHandler<AccessToken> = async (data) => {
-    try {
-      await login(data)
-    } catch (err) {
-      const errDetail = (err as ApiError).body.detail
-      setError(errDetail)
-    }
+    loginMutation.mutate(data)
   }
 
   return (
