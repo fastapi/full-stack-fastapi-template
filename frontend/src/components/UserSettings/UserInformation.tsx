@@ -50,23 +50,22 @@ const UserInformation = () => {
     setEditMode(!editMode)
   }
 
-  const updateInfo = async (data: UserUpdateMe) => {
-    await UsersService.updateUserMe({ requestBody: data })
-  }
-
-  const mutation = useMutation(updateInfo, {
-    onSuccess: () => {
-      showToast("Success!", "User updated successfully.", "success")
+  const mutation = useMutation(
+    (data: UserUpdateMe) => UsersService.updateUserMe({ requestBody: data }),
+    {
+      onSuccess: () => {
+        showToast("Success!", "User updated successfully.", "success")
+      },
+      onError: (err: ApiError) => {
+        const errDetail = err.body?.detail
+        showToast("Something went wrong.", `${errDetail}`, "error")
+      },
+      onSettled: () => {
+        queryClient.invalidateQueries("users")
+        queryClient.invalidateQueries("currentUser")
+      },
     },
-    onError: (err: ApiError) => {
-      const errDetail = err.body?.detail
-      showToast("Something went wrong.", `${errDetail}`, "error")
-    },
-    onSettled: () => {
-      queryClient.invalidateQueries("users")
-      queryClient.invalidateQueries("currentUser")
-    },
-  })
+  )
 
   const onSubmit: SubmitHandler<UserUpdateMe> = async (data) => {
     mutation.mutate(data)

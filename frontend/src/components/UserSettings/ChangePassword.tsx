@@ -34,20 +34,20 @@ const ChangePassword = () => {
     criteriaMode: "all",
   })
 
-  const UpdatePassword = async (data: UpdatePassword) => {
-    await UsersService.updatePasswordMe({ requestBody: data })
-  }
-
-  const mutation = useMutation(UpdatePassword, {
-    onSuccess: () => {
-      showToast("Success!", "Password updated.", "success")
-      reset()
+  const mutation = useMutation(
+    (data: UpdatePassword) =>
+      UsersService.updatePasswordMe({ requestBody: data }),
+    {
+      onSuccess: () => {
+        showToast("Success!", "Password updated.", "success")
+        reset()
+      },
+      onError: (err: ApiError) => {
+        const errDetail = err.body?.detail
+        showToast("Something went wrong.", `${errDetail}`, "error")
+      },
     },
-    onError: (err: ApiError) => {
-      const errDetail = err.body?.detail
-      showToast("Something went wrong.", `${errDetail}`, "error")
-    },
-  })
+  )
 
   const onSubmit: SubmitHandler<UpdatePasswordForm> = async (data) => {
     mutation.mutate(data)
