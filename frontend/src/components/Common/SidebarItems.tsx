@@ -25,13 +25,13 @@ const SidebarItems = ({ onClose }: SidebarItemsProps) => {
     ? [...items, { icon: FiUsers, title: "Admin", path: "/admin" }]
     : items
 
-  const listItems = finalItems.map((item) => (
+  const listItems = finalItems.map(({icon, title, path}) => (
     <Flex
       as={Link}
-      to={item.path}
+      to={path}
       w="100%"
       p={2}
-      key={item.title}
+      key={title}
       activeProps={{
         style: {
           background: bgActive,
@@ -41,8 +41,8 @@ const SidebarItems = ({ onClose }: SidebarItemsProps) => {
       color={textColor}
       onClick={onClose}
     >
-      <Icon as={item.icon} alignSelf="center" />
-      <Text ml={2}>{item.title}</Text>
+      <Icon as={icon} alignSelf="center" />
+      <Text ml={2}>{title}</Text>
     </Flex>
   ))
 
