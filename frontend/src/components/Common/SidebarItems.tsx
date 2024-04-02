@@ -25,7 +25,7 @@ const SidebarItems = ({ onClose }: SidebarItemsProps) => {
     ? [...items, { icon: FiUsers, title: "Admin", path: "/admin" }]
     : items
 
-  const listItems = finalItems.map(({icon, title, path}) => (
+  const listItems = finalItems.map(({ icon, title, path }) => (
     <Flex
       as={Link}
       to={path}

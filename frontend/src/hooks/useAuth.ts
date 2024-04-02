@@ -1,7 +1,7 @@
 import { useNavigate } from "@tanstack/react-router"
-import { useMutation, useQuery, useQueryClient } from "react-query"
-
 import { useState } from "react"
+import { useMutation, useQuery } from "react-query"
+
 import {
   type Body_login_login_access_token as AccessToken,
   type ApiError,
@@ -9,7 +9,6 @@ import {
   type UserOut,
   UsersService,
 } from "../client"
-import useCustomToast from "./useCustomToast"
 
 const isLoggedIn = () => {
   return localStorage.getItem("access_token") !== null
