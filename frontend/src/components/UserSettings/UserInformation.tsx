@@ -99,7 +99,7 @@ const UserInformation = () => {
               <Text
                 size="md"
                 py={2}
-                color={!currentUser?.full_name ? "gray.400" : "inherit"}
+                color={!currentUser?.full_name ? "ui.dim" : "inherit"}
               >
                 {currentUser?.full_name || "N/A"}
               </Text>
