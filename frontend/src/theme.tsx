@@ -16,7 +16,7 @@ const theme = extendTheme({
       light: "#FAFAFA",
       dark: "#1A202C",
       darkSlate: "#252D3D",
-      dim: "#CBD5E0"
+      dim: "#A0AEC0"
     },
   },
   components: {
