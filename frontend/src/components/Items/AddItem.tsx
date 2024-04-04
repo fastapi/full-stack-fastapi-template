@@ -53,7 +53,7 @@ const AddItem = ({ isOpen, onClose }: AddItemProps) => {
       showToast("Something went wrong.", `${errDetail}`, "error")
     },
     onSettled: () => {
-      queryClient.invalidateQueries(["items"])
+      queryClient.invalidateQueries({ queryKey: ["items"] })
     },
   })
 

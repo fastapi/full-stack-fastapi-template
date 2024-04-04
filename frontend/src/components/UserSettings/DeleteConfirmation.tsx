@@ -47,7 +47,7 @@ const DeleteConfirmation = ({ isOpen, onClose }: DeleteProps) => {
       showToast("Something went wrong.", `${errDetail}`, "error")
     },
     onSettled: () => {
-      queryClient.invalidateQueries(["currentUser"])
+      queryClient.invalidateQueries({ queryKey: ["currentUser"] })
     },
   })
 

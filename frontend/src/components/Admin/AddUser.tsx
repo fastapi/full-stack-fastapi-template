@@ -66,7 +66,7 @@ const AddUser = ({ isOpen, onClose }: AddUserProps) => {
       showToast("Something went wrong.", `${errDetail}`, "error")
     },
     onSettled: () => {
-      queryClient.invalidateQueries(["users"])
+      queryClient.invalidateQueries({ queryKey: ["users"] })
     },
   })
 

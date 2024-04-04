@@ -55,7 +55,7 @@ const EditItem = ({ item, isOpen, onClose }: EditItemProps) => {
       showToast("Something went wrong.", `${errDetail}`, "error")
     },
     onSettled: () => {
-      queryClient.invalidateQueries(["items"])
+      queryClient.invalidateQueries({ queryKey: ["items"] })
     },
   })
 

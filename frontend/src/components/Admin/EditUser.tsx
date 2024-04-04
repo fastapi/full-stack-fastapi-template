@@ -64,7 +64,7 @@ const EditUser = ({ user, isOpen, onClose }: EditUserProps) => {
       showToast("Something went wrong.", `${errDetail}`, "error")
     },
     onSettled: () => {
-      queryClient.invalidateQueries(["users"])
+      queryClient.invalidateQueries({ queryKey: ["users"] })
     },
   })
 
