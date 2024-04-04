@@ -1,6 +1,6 @@
 import { useNavigate } from "@tanstack/react-router"
 import { useState } from "react"
-import { useMutation, useQuery } from '@tanstack/react-query'
+import { useMutation, useQuery } from "@tanstack/react-query"
 
 import {
   type Body_login_login_access_token as AccessToken,
@@ -17,7 +17,9 @@ const isLoggedIn = () => {
 const useAuth = () => {
   const [error, setError] = useState<string | null>(null)
   const navigate = useNavigate()
-  const { data: user, isLoading } = useQuery<UserOut | null, Error>(['currentUser'], UsersService.readUserMe, {
+  const { data: user, isLoading } = useQuery<UserOut | null, Error>({
+    queryKey: ["currentUser"],
+    queryFn: UsersService.readUserMe,
     enabled: isLoggedIn(),
   })
 
@@ -28,7 +30,7 @@ const useAuth = () => {
     localStorage.setItem("access_token", response.access_token)
   }
 
-  const loginMutation = useMutation( {
+  const loginMutation = useMutation({
     mutationFn: login,
     onSuccess: () => {
       navigate({ to: "/" })
