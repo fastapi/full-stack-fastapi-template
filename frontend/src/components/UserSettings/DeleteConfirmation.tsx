@@ -28,12 +28,12 @@ const DeleteConfirmation = ({ isOpen, onClose }: DeleteProps) => {
     handleSubmit,
     formState: { isSubmitting },
   } = useForm()
-  const currentUser = queryClient.getQueryData<UserOut>("currentUser")
+  const currentUser = queryClient.getQueryData<UserOut>(['currentUser'])
   const { logout } = useAuth()
 
   const mutation = useMutation(
-    (id: number) => UsersService.deleteUser({ userId: id }),
     {
+      mutationFn: (id: number) => UsersService.deleteUser({ userId: id }),
       onSuccess: () => {
         showToast(
           "Success",
@@ -48,7 +48,7 @@ const DeleteConfirmation = ({ isOpen, onClose }: DeleteProps) => {
         showToast("Something went wrong.", `${errDetail}`, "error")
       },
       onSettled: () => {
-        queryClient.invalidateQueries("currentUser")
+        queryClient.invalidateQueries(['currentUser'])
       },
     },
   )

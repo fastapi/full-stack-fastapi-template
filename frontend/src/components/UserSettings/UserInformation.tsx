@@ -51,8 +51,8 @@ const UserInformation = () => {
   }
 
   const mutation = useMutation(
-    (data: UserUpdateMe) => UsersService.updateUserMe({ requestBody: data }),
     {
+      mutationFn: (data: UserUpdateMe) => UsersService.updateUserMe({ requestBody: data }),
       onSuccess: () => {
         showToast("Success!", "User updated successfully.", "success")
       },
@@ -61,8 +61,8 @@ const UserInformation = () => {
         showToast("Something went wrong.", `${errDetail}`, "error")
       },
       onSettled: () => {
-        queryClient.invalidateQueries("users")
-        queryClient.invalidateQueries("currentUser")
+        queryClient.invalidateQueries(['users'])
+        queryClient.invalidateQueries(['currentUser'])
       },
     },
   )

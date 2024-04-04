@@ -53,9 +53,9 @@ const EditUser = ({ user, isOpen, onClose }: EditUserProps) => {
   })
 
   const mutation = useMutation(
-    (data: UserUpdateForm) =>
-      UsersService.updateUser({ userId: user.id, requestBody: data }),
     {
+      mutationFn: (data: UserUpdateForm) =>
+        UsersService.updateUser({ userId: user.id, requestBody: data }),
       onSuccess: () => {
         showToast("Success!", "User updated successfully.", "success")
         onClose()
@@ -65,7 +65,7 @@ const EditUser = ({ user, isOpen, onClose }: EditUserProps) => {
         showToast("Something went wrong.", `${errDetail}`, "error")
       },
       onSettled: () => {
-        queryClient.invalidateQueries("users")
+        queryClient.invalidateQueries(['users'])
       },
     },
   )

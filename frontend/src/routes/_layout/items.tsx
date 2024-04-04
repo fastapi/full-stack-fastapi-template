@@ -30,7 +30,7 @@ function Items() {
     isLoading,
     isError,
     error,
-  } = useQuery("items", () => ItemsService.readItems({}))
+  } = useQuery(['items'], () => ItemsService.readItems({}))
 
   if (isError) {
     const errDetail = (error as any).body?.detail

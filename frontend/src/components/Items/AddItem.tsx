@@ -41,8 +41,8 @@ const AddItem = ({ isOpen, onClose }: AddItemProps) => {
   })
 
   const mutation = useMutation(
-    (data: ItemCreate) => ItemsService.createItem({ requestBody: data }),
     {
+      mutationFn: (data: ItemCreate) => ItemsService.createItem({ requestBody: data }),
       onSuccess: () => {
         showToast("Success!", "Item created successfully.", "success")
         reset()
@@ -53,7 +53,7 @@ const AddItem = ({ isOpen, onClose }: AddItemProps) => {
         showToast("Something went wrong.", `${errDetail}`, "error")
       },
       onSettled: () => {
-        queryClient.invalidateQueries("items")
+        queryClient.invalidateQueries(['items'])
       },
     },
   )

@@ -17,13 +17,9 @@ const isLoggedIn = () => {
 const useAuth = () => {
   const [error, setError] = useState<string | null>(null)
   const navigate = useNavigate()
-  const { data: user, isLoading } = useQuery<UserOut | null, Error>(
-    "currentUser",
-    UsersService.readUserMe,
-    {
-      enabled: isLoggedIn(),
-    },
-  )
+  const { data: user, isLoading } = useQuery<UserOut | null, Error>(['currentUser'], UsersService.readUserMe, {
+    enabled: isLoggedIn(),
+  })
 
   const login = async (data: AccessToken) => {
     const response = await LoginService.loginAccessToken({
@@ -32,7 +28,8 @@ const useAuth = () => {
     localStorage.setItem("access_token", response.access_token)
   }
 
-  const loginMutation = useMutation(login, {
+  const loginMutation = useMutation( {
+    mutationFn: login,
     onSuccess: () => {
       navigate({ to: "/" })
     },

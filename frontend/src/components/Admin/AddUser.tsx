@@ -54,8 +54,8 @@ const AddUser = ({ isOpen, onClose }: AddUserProps) => {
   })
 
   const mutation = useMutation(
-    (data: UserCreate) => UsersService.createUser({ requestBody: data }),
     {
+      mutationFn: (data: UserCreate) => UsersService.createUser({ requestBody: data }),
       onSuccess: () => {
         showToast("Success!", "User created successfully.", "success")
         reset()
@@ -66,7 +66,7 @@ const AddUser = ({ isOpen, onClose }: AddUserProps) => {
         showToast("Something went wrong.", `${errDetail}`, "error")
       },
       onSettled: () => {
-        queryClient.invalidateQueries("users")
+        queryClient.invalidateQueries(['users'])
       },
     },
   )
