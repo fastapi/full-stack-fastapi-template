@@ -99,7 +99,7 @@ def test_get_existing_user_current_user(client: TestClient, db: Session) -> None
 
 
 def test_get_existing_user_permissions_error(
-    client: TestClient, normal_user_token_headers: dict[str, str], db: Session
+    client: TestClient, normal_user_token_headers: dict[str, str]
 ) -> None:
     r = client.get(
         f"{settings.API_V1_STR}/users/999999",
@@ -165,7 +165,7 @@ def test_retrieve_users(
 
 
 def test_update_user_me(
-    client: TestClient, normal_user_token_headers: dict[str, str], db: Session
+    client: TestClient, normal_user_token_headers: dict[str, str]
 ) -> None:
     full_name = "Updated Name"
     email = random_email()
@@ -182,7 +182,7 @@ def test_update_user_me(
 
 
 def test_update_password_me(
-    client: TestClient, superuser_token_headers: dict[str, str], db: Session
+    client: TestClient, superuser_token_headers: dict[str, str]
 ) -> None:
     new_password = random_lower_string()
     data = {
@@ -212,7 +212,7 @@ def test_update_password_me(
 
 
 def test_update_password_me_incorrect_password(
-    client: TestClient, superuser_token_headers: dict[str, str], db: Session
+    client: TestClient, superuser_token_headers: dict[str, str]
 ) -> None:
     new_password = random_lower_string()
     data = {"current_password": new_password, "new_password": new_password}
@@ -245,7 +245,7 @@ def test_update_user_me_email_exists(
 
 
 def test_update_password_me_same_password_error(
-    client: TestClient, superuser_token_headers: dict[str, str], db: Session
+    client: TestClient, superuser_token_headers: dict[str, str]
 ) -> None:
     data = {
         "current_password": settings.FIRST_SUPERUSER_PASSWORD,
@@ -335,7 +335,7 @@ def test_update_user(
 
 
 def test_update_user_not_exists(
-    client: TestClient, superuser_token_headers: dict[str, str], db: Session
+    client: TestClient, superuser_token_headers: dict[str, str]
 ) -> None:
     data = {"full_name": "Updated_full_name"}
     r = client.patch(
@@ -413,7 +413,7 @@ def test_delete_user_current_user(client: TestClient, db: Session) -> None:
 
 
 def test_delete_user_not_found(
-    client: TestClient, superuser_token_headers: dict[str, str], db: Session
+    client: TestClient, superuser_token_headers: dict[str, str]
 ) -> None:
     r = client.delete(
         f"{settings.API_V1_STR}/users/99999999",
