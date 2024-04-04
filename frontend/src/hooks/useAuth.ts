@@ -1,6 +1,6 @@
 import { useNavigate } from "@tanstack/react-router"
 import { useState } from "react"
-import { useMutation, useQuery } from "react-query"
+import { useMutation, useQuery } from '@tanstack/react-query'
 
 import {
   type Body_login_login_access_token as AccessToken,

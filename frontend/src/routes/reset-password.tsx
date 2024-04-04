@@ -10,7 +10,7 @@ import {
 } from "@chakra-ui/react"
 import { createFileRoute, redirect, useNavigate } from "@tanstack/react-router"
 import { type SubmitHandler, useForm } from "react-hook-form"
-import { useMutation } from "react-query"
+import { useMutation } from '@tanstack/react-query'
 
 import { type ApiError, LoginService, type NewPassword } from "../client"
 import { isLoggedIn } from "../hooks/useAuth"

@@ -1,7 +1,7 @@
 import { Box, Flex, Icon, Text, useColorModeValue } from "@chakra-ui/react"
 import { Link } from "@tanstack/react-router"
 import { FiBriefcase, FiHome, FiSettings, FiUsers } from "react-icons/fi"
-import { useQueryClient } from "react-query"
+import { useQueryClient } from '@tanstack/react-query'
 
 import type { UserOut } from "../../client"
 
