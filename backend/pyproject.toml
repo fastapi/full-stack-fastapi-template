@@ -36,18 +36,13 @@ types-python-jose = "^3.3.4.20240106"
 types-passlib = "^1.7.7.20240106"
 coverage = "^7.4.3"
 
-[tool.isort]
-multi_line_output = 3
-include_trailing_comma = true
-force_grid_wrap = 0
-line_length = 88
 [build-system]
 requires = ["poetry>=0.12"]
 build-backend = "poetry.masonry.api"
 
 [tool.mypy]
 strict = true
-exclude = ["venv", "alembic"]
+exclude = ["venv", ".venv", "alembic"]
 
 [tool.ruff]
 target-version = "py310"
@@ -62,6 +57,7 @@ select = [
     "B",  # flake8-bugbear
     "C4",  # flake8-comprehensions
     "UP",  # pyupgrade
+    "ARG001", # unused arguments in functions
 ]
 ignore = [
     "E501",  # line too long, handled by black
