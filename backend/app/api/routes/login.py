@@ -83,7 +83,7 @@ def reset_password(session: SessionDep, body: NewPassword) -> Message:
     user_id = verify_password_reset_token(token=body.token)
     if not user_id:
         raise HTTPException(status_code=400, detail="Invalid token")
-    user = session.get(User, user_id)
+    user = session.get(User, int(user_id))
     if not user:
         raise HTTPException(
             status_code=404,
