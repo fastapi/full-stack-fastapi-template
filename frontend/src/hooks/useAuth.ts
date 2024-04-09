@@ -2,6 +2,7 @@ import { useMutation, useQuery } from "@tanstack/react-query"
 import { useNavigate } from "@tanstack/react-router"
 import { useState } from "react"
 
+import { AxiosError } from "axios"
 import {
   type Body_login_login_access_token as AccessToken,
   type ApiError,
@@ -9,7 +10,6 @@ import {
   type UserPublic,
   UsersService,
 } from "../client"
-import { AxiosError } from "axios"
 
 const isLoggedIn = () => {
   return localStorage.getItem("access_token") !== null
