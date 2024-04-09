@@ -9,6 +9,7 @@ import {
   type UserPublic,
   UsersService,
 } from "../client"
+import { AxiosError } from "axios"
 
 const isLoggedIn = () => {
   return localStorage.getItem("access_token") !== null
@@ -36,7 +37,12 @@ const useAuth = () => {
       navigate({ to: "/" })
     },
     onError: (err: ApiError) => {
-      const errDetail = (err.body as any)?.detail
+      let errDetail = (err.body as any)?.detail
+
+      if (err instanceof AxiosError) {
+        errDetail = err.message
+      }
+
       setError(errDetail)
     },
   })
