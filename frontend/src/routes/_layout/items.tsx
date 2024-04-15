@@ -24,11 +24,30 @@ export const Route = createFileRoute("/_layout/items")({
   component: Items,
 })
 
-function ItemsTable() {
+function ItemsTableBody() {
   const { data: items } = useSuspenseQuery({
     queryKey: ["items"],
     queryFn: () => ItemsService.readItems({}),
   })
+
+  return (
+    <Tbody>
+      {items.data.map((item) => (
+        <Tr key={item.id}>
+          <Td>{item.id}</Td>
+          <Td>{item.title}</Td>
+          <Td color={!item.description ? "ui.dim" : "inherit"}>
+            {item.description || "N/A"}
+          </Td>
+          <Td>
+            <ActionsMenu type={"Item"} value={item} />
+          </Td>
+        </Tr>
+      ))}
+    </Tbody>
+  )
+}
+function ItemsTable() {
   return (
     <TableContainer>
       <Table size={{ base: "sm", md: "md" }}>
@@ -40,20 +59,35 @@ function ItemsTable() {
             <Th>Actions</Th>
           </Tr>
         </Thead>
-        <Tbody>
-          {items.data.map((item) => (
-            <Tr key={item.id}>
-              <Td>{item.id}</Td>
-              <Td>{item.title}</Td>
-              <Td color={!item.description ? "ui.dim" : "inherit"}>
-                {item.description || "N/A"}
-              </Td>
-              <Td>
-                <ActionsMenu type={"Item"} value={item} />
-              </Td>
-            </Tr>
-          ))}
-        </Tbody>
+        <ErrorBoundary
+          fallbackRender={({ error }) => (
+            <Tbody>
+              <Tr>
+                <Td colSpan={4}>Something went wrong: {error.message}</Td>
+              </Tr>
+            </Tbody>
+          )}
+        >
+          <Suspense
+            fallback={
+              <Tbody>
+                {new Array(5).fill(null).map((_, index) => (
+                  <Tr key={index}>
+                    {new Array(4).fill(null).map((_, index) => (
+                      <Td key={index}>
+                        <Flex>
+                          <Skeleton height="20px" width="20px" />
+                        </Flex>
+                      </Td>
+                    ))}
+                  </Tr>
+                ))}
+              </Tbody>
+            }
+          >
+            <ItemsTableBody />
+          </Suspense>
+        </ErrorBoundary>
       </Table>
     </TableContainer>
   )
@@ -66,18 +100,8 @@ function Items() {
         Items Management
       </Heading>
 
-      <ErrorBoundary fallback={<div>Something went wrong</div>}>
-        <Suspense
-          fallback={
-            <Flex py={8} gap={4}>
-              <Skeleton height="40px" width={100} />
-            </Flex>
-          }
-        >
-          <Navbar type={"Item"} />
-          <ItemsTable />
-        </Suspense>
-      </ErrorBoundary>
+      <Navbar type={"Item"} />
+      <ItemsTable />
     </Container>
   )
 }
