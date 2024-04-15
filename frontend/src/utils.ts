@@ -29,14 +29,14 @@ export const confirmPasswordRules = (
 ) => {
   const rules: any = {
     validate: (value: string) => {
-      const password = getValues().password || getValues().new_password;
-      return value === password ? true : "The passwords do not match";
-    }
+      const password = getValues().password || getValues().new_password
+      return value === password ? true : "The passwords do not match"
+    },
   }
 
   if (isRequired) {
-    rules.required = "Password confirmation is required";
+    rules.required = "Password confirmation is required"
   }
 
-  return rules;
+  return rules
 }
