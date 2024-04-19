@@ -1,11 +1,13 @@
 from unittest.mock import patch
 
+import pytest
 from fastapi.testclient import TestClient
-from sqlmodel import Session
+from sqlmodel import Session, select
 
 from app import crud
 from app.core.config import settings
-from app.models import UserCreate
+from app.core.security import verify_password
+from app.models import User, UserCreate
 from app.tests.utils.utils import random_email, random_lower_string
 
 
@@ -167,7 +169,7 @@ def test_retrieve_users(
 
 
 def test_update_user_me(
-    client: TestClient, normal_user_token_headers: dict[str, str]
+    client: TestClient, normal_user_token_headers: dict[str, str], db: Session
 ) -> None:
     full_name = "Updated Name"
     email = random_email()
@@ -182,9 +184,18 @@ def test_update_user_me(
     assert updated_user["email"] == email
     assert updated_user["full_name"] == full_name
 
+    # * db asserts
+    user_query = select(User).where(User.email == email)
+    user_db = db.exec(user_query).first()
+    db.refresh(user_db)
+    if not user_db:
+        pytest.fail("user not found")
+    assert user_db.email == email
+    assert user_db.full_name == full_name
+
 
 def test_update_password_me(
-    client: TestClient, superuser_token_headers: dict[str, str]
+    client: TestClient, superuser_token_headers: dict[str, str], db: Session
 ) -> None:
     new_password = random_lower_string()
     data = {
@@ -200,6 +211,15 @@ def test_update_password_me(
     updated_user = r.json()
     assert updated_user["message"] == "Password updated successfully"
 
+    # * db asserts
+    user_query = select(User).where(User.email == settings.FIRST_SUPERUSER)
+    user_db = db.exec(user_query).first()
+    db.refresh(user_db)
+    if not user_db:
+        pytest.fail("user not found")
+    assert user_db.email == settings.FIRST_SUPERUSER
+    assert verify_password(new_password, user_db.hashed_password)
+
     # Revert to the old password to keep consistency in test
     old_data = {
         "current_password": new_password,
@@ -210,7 +230,10 @@ def test_update_password_me(
         headers=superuser_token_headers,
         json=old_data,
     )
+    db.refresh(user_db)
+
     assert r.status_code == 200
+    assert verify_password(settings.FIRST_SUPERUSER_PASSWORD, user_db.hashed_password)
 
 
 def test_update_password_me_incorrect_password(
@@ -265,7 +288,7 @@ def test_update_password_me_same_password_error(
     )
 
 
-def test_register_user(client: TestClient) -> None:
+def test_register_user(client: TestClient, db: Session) -> None:
     with patch("app.core.config.settings.USERS_OPEN_REGISTRATION", True):
         username = random_email()
         password = random_lower_string()
@@ -279,6 +302,16 @@ def test_register_user(client: TestClient) -> None:
         created_user = r.json()
         assert created_user["email"] == username
         assert created_user["full_name"] == full_name
+
+        # * db asserts
+        user_query = select(User).where(User.email == username)
+        user_db = db.exec(user_query).first()
+        db.refresh(user_db)
+        if not user_db:
+            pytest.fail("user not found")
+        assert user_db.email == username
+        assert user_db.full_name == full_name
+        assert verify_password(password, user_db.hashed_password)
 
 
 def test_register_user_forbidden_error(client: TestClient) -> None:
@@ -333,7 +366,16 @@ def test_update_user(
     )
     assert r.status_code == 200
     updated_user = r.json()
+
     assert updated_user["full_name"] == "Updated_full_name"
+
+    # * db asserts
+    user_query = select(User).where(User.email == username)
+    user_db = db.exec(user_query).first()
+    db.refresh(user_db)
+    if not user_db:
+        pytest.fail("user not found")
+    assert user_db.full_name == "Updated_full_name"
 
 
 def test_update_user_not_exists(
@@ -388,6 +430,11 @@ def test_delete_user_super_user(
     deleted_user = r.json()
     assert deleted_user["message"] == "User deleted successfully"
 
+    # * db asserts
+    user_query = select(User).where(User.id == user_id)
+    user_db = db.execute(user_query).first()
+    assert user_db is None
+
 
 def test_delete_user_current_user(client: TestClient, db: Session) -> None:
     username = random_email()
@@ -412,6 +459,11 @@ def test_delete_user_current_user(client: TestClient, db: Session) -> None:
     assert r.status_code == 200
     deleted_user = r.json()
     assert deleted_user["message"] == "User deleted successfully"
+
+    # * db asserts
+    user_query = select(User).where(User.id == user_id)
+    user_db = db.execute(user_query).first()
+    assert user_db is None
 
 
 def test_delete_user_not_found(
