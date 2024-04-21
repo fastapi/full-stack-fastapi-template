@@ -141,7 +141,7 @@ def test_create_user_by_normal_user(
         headers=normal_user_token_headers,
         json=data,
     )
-    assert r.status_code == 400
+    assert r.status_code == 403
 
 
 def test_retrieve_users(
@@ -395,6 +395,7 @@ def test_delete_user_me(client: TestClient, db: Session) -> None:
     assert r.status_code == 200
     deleted_user = r.json()
     assert deleted_user["message"] == "User deleted successfully"
+    db.commit()
     result = db.get(User, user_id)
     assert result is None
 
