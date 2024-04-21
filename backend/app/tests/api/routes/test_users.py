@@ -376,7 +376,8 @@ def test_delete_user_me(client: TestClient, db: Session) -> None:
     username = random_email()
     password = random_lower_string()
     user_in = UserCreate(email=username, password=password)
-    _ = crud.create_user(session=db, user_create=user_in)
+    user = crud.create_user(session=db, user_create=user_in)
+    user_id = user.id
 
     login_data = {
         "username": username,
