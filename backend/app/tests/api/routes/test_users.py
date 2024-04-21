@@ -395,6 +395,8 @@ def test_delete_user_me(client: TestClient, db: Session) -> None:
     assert r.status_code == 200
     deleted_user = r.json()
     assert deleted_user["message"] == "User deleted successfully"
+    result = db.get(User, user_id)
+    assert result is None
 
 
 def test_delete_user_me_as_superuser(
