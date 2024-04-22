@@ -82,10 +82,8 @@ def test_reset_password(
     assert r.status_code == 200
     assert r.json() == {"message": "Password updated successfully"}
 
-    # * db asserts
     user_query = select(User).where(User.email == settings.FIRST_SUPERUSER)
     user = db.exec(user_query).first()
-    db.refresh(user)
     assert user
     assert verify_password(data["new_password"], user.hashed_password)
 
