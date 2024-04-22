@@ -426,6 +426,8 @@ def test_delete_user_super_user(
     assert r.status_code == 200
     deleted_user = r.json()
     assert deleted_user["message"] == "User deleted successfully"
+    result = db.exec(select(User).where(User.id == user_id)).first()
+    assert result is None
 
 
 def test_delete_user_not_found(
