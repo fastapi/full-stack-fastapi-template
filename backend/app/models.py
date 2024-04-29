@@ -152,7 +152,6 @@ class StoreInventory(SQLModel, table=True):
 # Properties to return via API, id is always required
 class ItemPublic(ItemBase):
     id: int
-    owner_id: int
 
 
 class StoreInventoriesPublic(SQLModel):

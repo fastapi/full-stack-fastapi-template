@@ -60,6 +60,7 @@ const useAuth = () => {
     loginMutation,
     logout,
     user,
+    isAdmin: !!user?.is_superuser,
     isLoading,
     error,
     resetError: () => setError(null),

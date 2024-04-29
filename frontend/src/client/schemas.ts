@@ -86,10 +86,6 @@ export const $ItemPublic = {
 	type: 'number',
 	isRequired: true,
 },
-		owner_id: {
-	type: 'number',
-	isRequired: true,
-},
 	},
 } as const;
 

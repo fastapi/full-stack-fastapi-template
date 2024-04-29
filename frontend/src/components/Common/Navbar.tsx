@@ -5,6 +5,7 @@ import AddUser from "../Admin/AddUser"
 import AddItem from "../Items/AddItem"
 import AddStore from "../Stores/AddStore"
 import AddStoreInventory from "./Inventory/AddInventoryItems"
+import useAuth from "../../hooks/useAuth"
 
 interface NavbarProps {
   type: string
@@ -16,6 +17,7 @@ const Navbar = ({ type }: NavbarProps) => {
   const addStoreModal = useDisclosure()
   const addStoreInventoryModal = useDisclosure()
 
+  const { isAdmin } = useAuth()
 
   const getModal = (type: string) => {
     switch (type) {
@@ -44,14 +46,14 @@ const Navbar = ({ type }: NavbarProps) => {
                     </InputLeftElement>
                     <Input type='text' placeholder='Search' fontSize={{ base: 'sm', md: 'inherit' }} borderRadius='8px' />
                 </InputGroup> */}
-        <Button
+        {isAdmin && <Button
           variant="primary"
           gap={1}
           fontSize={{ base: "sm", md: "inherit" }}
           onClick={() => getModal(type)}
         >
           <Icon as={FaPlus} /> Add {type}
-        </Button>
+        </Button>}
         <AddUser isOpen={addUserModal.isOpen} onClose={addUserModal.onClose} />
         <AddItem isOpen={addItemModal.isOpen} onClose={addItemModal.onClose} />
         <AddStore isOpen={addStoreModal.isOpen} onClose={addStoreModal.onClose} />

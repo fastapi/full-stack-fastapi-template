@@ -7,7 +7,7 @@ import {
   useDisclosure,
 } from "@chakra-ui/react";
 import { BsThreeDotsVertical } from "react-icons/bs";
-import { FiEdit, FiTrash } from "react-icons/fi";
+import { FiEdit, FiShoppingCart, FiTrash } from "react-icons/fi";
 
 import type { ItemPublic, StorePublic, UserPublic } from "../../client";
 import EditUser from "../Admin/EditUser";
@@ -94,18 +94,18 @@ const ActionsMenu = ({ type, value, disabled }: ActionsMenuProps) => {
           {type === "StoreInventory" && (
             <MenuItem
               onClick={purchaseModal.onOpen}
+              icon={<FiShoppingCart fontSize="16px" />}
             >
               Purchase this item
             </MenuItem>
-            
           )}
-                    <MenuItem
+           {type !== "StoreInventory" && (<MenuItem
             onClick={deleteModal.onOpen}
             icon={<FiTrash fontSize="16px" />}
             color="ui.danger"
           >
             Delete {type}
-            </MenuItem>
+          </MenuItem>)}1
         </MenuList>
         {getAction(type)}
         <Delete

@@ -1,4 +1,4 @@
-import { Box, Card, CardBody, Container, Grid, SimpleGrid, Text } from "@chakra-ui/react"
+import { Box, Card, CardBody, Container, Grid, Link, SimpleGrid, Text } from "@chakra-ui/react"
 import { useQueryClient } from "@tanstack/react-query"
 import { createFileRoute } from "@tanstack/react-router"
 
@@ -28,19 +28,14 @@ function Dashboard() {
            Quick Actions 🛠️
           </Text>
           <SimpleGrid spacing={4} templateColumns='repeat(auto-fill, minmax(200px, 1fr))'>
-          <Card  maxW='sm'>
+          <Card  maxW='s'>
             <CardBody>
-              <Text>Purchase Stock</Text>
+              <Link href="/stores" color='teal.500'>Visit Stores and Purchase</Link>
             </CardBody>
           </Card>
           <Card  maxW='sm'>
             <CardBody>
-              <Text>Purchase Stock</Text>
-            </CardBody>
-          </Card>
-          <Card  maxW='sm'>
-            <CardBody>
-              <Text>Purchase Stock</Text>
+            <Link href="/warehouse" color='teal.500'>Visit warehouse</Link>
             </CardBody>
           </Card>
           </SimpleGrid>

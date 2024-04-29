@@ -8,6 +8,7 @@ import {
   Tbody,
   Td,
   Th,
+  Text,
   Thead,
   Tr,
 } from "@chakra-ui/react"
@@ -19,6 +20,7 @@ import { ErrorBoundary } from "react-error-boundary"
 import { ItemsService } from "../../client"
 import ActionsMenu from "../../components/Common/ActionsMenu"
 import Navbar from "../../components/Common/Navbar"
+import useAuth from "../../hooks/useAuth"
 
 export const Route = createFileRoute("/_layout/warehouse")({
   component: Items,
@@ -30,11 +32,12 @@ function ItemsTableBody() {
     queryFn: () => ItemsService.readItems({}),
   })
 
+  const { isAdmin} = useAuth();
+
   return (
     <Tbody>
       {items.data.map((item) => (
         <Tr key={item.id}>
-          <Td>{item.id}</Td>
           <Td>{item.title}</Td>
           <Td color={!item.description ? "ui.dim" : "inherit"}>
             {item.description || "N/A"}
@@ -42,9 +45,9 @@ function ItemsTableBody() {
           <Td>{item.units}</Td>
           <Td>{item.revenue}</Td>
           <Td>{item.cost}</Td>
-          <Td>
+          {isAdmin ? <Td>
             <ActionsMenu type={"Items"} value={item} />
-          </Td>
+          </Td>: null}
         </Tr>
       ))}
     </Tbody>
@@ -56,7 +59,6 @@ function ItemsTable() {
       <Table size={{ base: "sm", md: "md" }}>
         <Thead>
           <Tr>
-            <Th>ID</Th>
             <Th>Title</Th>
             <Th>Description</Th>
             <Th>Units</Th>
@@ -107,6 +109,7 @@ function Items() {
       </Heading>
 
       <Navbar type={"Items"} />
+      <Text fontSize='xs'>Hint: Please use Action to update the quantity or any other fields</Text><br />
       <ItemsTable />
     </Container>
   )
