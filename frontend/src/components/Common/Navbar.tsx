@@ -3,6 +3,8 @@ import { FaPlus } from "react-icons/fa"
 
 import AddUser from "../Admin/AddUser"
 import AddItem from "../Items/AddItem"
+import AddStore from "../Stores/AddStore"
+import AddStoreInventory from "./Inventory/AddInventoryItems"
 
 interface NavbarProps {
   type: string
@@ -11,6 +13,26 @@ interface NavbarProps {
 const Navbar = ({ type }: NavbarProps) => {
   const addUserModal = useDisclosure()
   const addItemModal = useDisclosure()
+  const addStoreModal = useDisclosure()
+  const addStoreInventoryModal = useDisclosure()
+
+
+  const getModal = (type: string) => {
+    switch (type) {
+      case "User":
+        addUserModal.onOpen();
+        break;
+      case "Items":
+        addItemModal.onOpen();
+        break;
+      case "Stores":
+        addStoreModal.onOpen();
+        break;
+      case "Inventory":
+        addStoreInventoryModal.onOpen();
+        break;
+    }
+  };
 
   return (
     <>
@@ -26,12 +48,15 @@ const Navbar = ({ type }: NavbarProps) => {
           variant="primary"
           gap={1}
           fontSize={{ base: "sm", md: "inherit" }}
-          onClick={type === "User" ? addUserModal.onOpen : addItemModal.onOpen}
+          onClick={() => getModal(type)}
         >
           <Icon as={FaPlus} /> Add {type}
         </Button>
         <AddUser isOpen={addUserModal.isOpen} onClose={addUserModal.onClose} />
         <AddItem isOpen={addItemModal.isOpen} onClose={addItemModal.onClose} />
+        <AddStore isOpen={addStoreModal.isOpen} onClose={addStoreModal.onClose} />
+        <AddStoreInventory isOpen={addStoreInventoryModal.isOpen} onClose={addStoreInventoryModal.onClose} />
+     
       </Flex>
     </>
   )

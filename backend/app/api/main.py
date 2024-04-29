@@ -1,6 +1,6 @@
 from fastapi import APIRouter
 
-from app.api.routes import items, login, users, utils
+from app.api.routes import items, login, users, utils, stores
 
 api_router = APIRouter()
 api_router.include_router(login.router, tags=["login"])
