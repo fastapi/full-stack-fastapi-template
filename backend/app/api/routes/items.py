@@ -35,8 +35,7 @@ def read_items(
             .offset(skip)
             .limit(limit)
         )
-        items = session.exec(statement).all()
-
+    items = session.exec(statement).all()
     return ItemsPublic(data=items, count=count)
 
 

@@ -45,6 +45,8 @@ class User(UserBase, table=True):
     id: int | None = Field(default=None, primary_key=True)
     hashed_password: str
     items: list["Item"] = Relationship(back_populates="owner")
+    stores: list["Store"] = Relationship(back_populates="owner")
+    storesInventory: list["StoreInventory"] = Relationship(back_populates="owner")
 
 
 # Properties to return via API, id is always required
@@ -61,17 +63,23 @@ class UsersPublic(SQLModel):
 class ItemBase(SQLModel):
     title: str
     description: str | None = None
-
+    units: int
+    cost: float
+    revenue: float
 
 # Properties to receive on item creation
 class ItemCreate(ItemBase):
     title: str
-
+    units: int
+    cost: float
+    revenue: float
 
 # Properties to receive on item update
 class ItemUpdate(ItemBase):
     title: str | None = None  # type: ignore
-
+    units: int  | None = None  # type: ignore
+    cost: float | None = None  # type: ignore
+    revenue: float  | None = None  # type: ignore
 
 # Database model, database table inferred from class name
 class Item(ItemBase, table=True):
@@ -79,6 +87,66 @@ class Item(ItemBase, table=True):
     title: str
     owner_id: int | None = Field(default=None, foreign_key="user.id", nullable=False)
     owner: User | None = Relationship(back_populates="items")
+    units: int
+
+class WarehouseBase(SQLModel):
+    title: str
+
+class WarehouseInventoryBase(SQLModel):
+    item_id: int
+    quantity: int    
+
+
+class Warehouse(WarehouseBase, table=True):
+    id: int | None = Field(default=None, primary_key=True)
+    title: str
+
+class WarehouseInventory(WarehouseInventoryBase, table=True):
+    id: int | None = Field(default=None, primary_key=True)
+    item_id: int = Field(foreign_key="item.id", nullable=False)
+    quantity: int
+
+class StoreBase(SQLModel):
+    title: str
+
+
+class StoreCreate(StoreBase):
+    title: str
+
+# Properties to receive on store update
+class StoreUpdate(StoreBase):
+    title: str | None = None  # type: ignore
+
+class Store(StoreBase, table=True):
+    id: int | None = Field(default=None, primary_key=True)
+    title: str
+    owner_id: int | None = Field(default=None, foreign_key="user.id", nullable=False)
+    owner: User | None = Relationship(back_populates="stores")
+
+class StoreInventoryBase(SQLModel):
+    id: int | None = Field(default=None, primary_key=True) 
+    store_id: int = Field(foreign_key="store.id", nullable=False)
+    item_id: int = Field(foreign_key="item.id", nullable=False)
+    stock_unit: int
+
+class StoreInventoryCreate(StoreBase):
+    store_id: int = Field(foreign_key="store.id", nullable=False)
+    item_id: int = Field(foreign_key="item.id", nullable=False)
+    stock_unit: int
+
+# Properties to receive on store update
+class StoreInventoryUpdate(SQLModel):
+    store_id: int = Field(foreign_key="store.id", nullable=False)
+    item_id: int = Field(foreign_key="item.id", nullable=False)
+    stock_unit: int
+
+class StoreInventory(SQLModel, table=True):
+    id: int | None = Field(default=None, primary_key=True) 
+    store_id: int = Field(foreign_key="store.id", nullable=False)
+    item_id: int = Field(foreign_key="item.id", nullable=False)
+    owner_id: int | None = Field(default=None, foreign_key="user.id", nullable=False)
+    owner: User | None = Relationship(back_populates="storesInventory")
+    stock_unit: int
 
 
 # Properties to return via API, id is always required
@@ -87,8 +155,16 @@ class ItemPublic(ItemBase):
     owner_id: int
 
 
+class StoreInventoriesPublic(SQLModel):
+    data: list[ItemPublic]
+    count: int
+
 class ItemsPublic(SQLModel):
     data: list[ItemPublic]
+    count: int
+
+class StoresPublic(SQLModel):
+    data: list[Store]
     count: int
 
 

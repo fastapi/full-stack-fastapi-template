@@ -20,16 +20,18 @@ import {
   type ItemPublic,
   type ItemUpdate,
   ItemsService,
+  StorePublic,
+  StoreUpdate,
 } from "../../client"
 import useCustomToast from "../../hooks/useCustomToast"
 
-interface EditItemProps {
-  item: ItemPublic
+interface EditStoreProps {
+  store: StorePublic
   isOpen: boolean
   onClose: () => void
 }
 
-const EditItem = ({ item, isOpen, onClose }: EditItemProps) => {
+const EditStore = ({ store, isOpen, onClose }: EditStoreProps) => {
   const queryClient = useQueryClient()
   const showToast = useCustomToast()
   const {
@@ -37,15 +39,15 @@ const EditItem = ({ item, isOpen, onClose }: EditItemProps) => {
     handleSubmit,
     reset,
     formState: { isSubmitting, errors, isDirty },
-  } = useForm<ItemUpdate>({
+  } = useForm<StoreUpdate>({
     mode: "onBlur",
     criteriaMode: "all",
-    defaultValues: item,
+    defaultValues: store,
   })
 
   const mutation = useMutation({
     mutationFn: (data: ItemUpdate) =>
-      ItemsService.updateItem({ id: item.id, requestBody: data }),
+      ItemsService.updateItem({ id: store.id, requestBody: data }),
     onSuccess: () => {
       showToast("Success!", "Item updated successfully.", "success")
       onClose()
@@ -94,42 +96,21 @@ const EditItem = ({ item, isOpen, onClose }: EditItemProps) => {
                 <FormErrorMessage>{errors.title.message}</FormErrorMessage>
               )}
             </FormControl>
-            <FormControl mt={4}>
-              <FormLabel htmlFor="description">Description</FormLabel>
-              <Input
-                id="description"
-                {...register("description")}
-                placeholder="Description"
+            <Input
+                id="title"
+                {...register("stock_unit", {
+                  required: "Stock Unit is required.",
+                  min: {
+                    value: 0,
+                    message: "Should be non-negative"
+                  }
+                })}
+                placeholder="Title"
                 type="text"
               />
-            </FormControl>
-            <FormControl mt={4}>
-              <FormLabel htmlFor="units">Units</FormLabel>
-              <Input
-                id="units"
-                {...register("units")}
-                placeholder="Units"
-                type="text"
-              />
-            </FormControl>
-            <FormControl mt={4}>
-              <FormLabel htmlFor="revenue">Revenue</FormLabel>
-              <Input
-                id="revenue"
-                {...register("revenue")}
-                placeholder="Revenue"
-                type="text"
-              />
-            </FormControl>
-            <FormControl mt={4}>
-              <FormLabel htmlFor="cost">Cost</FormLabel>
-              <Input
-                id="cost"
-                {...register("cost")}
-                placeholder="Cost"
-                type="text"
-              />
-            </FormControl>
+              {errors.stock_unit && (
+                <FormErrorMessage>{errors.stock_unit.message}</FormErrorMessage>
+              )}
           </ModalBody>
           <ModalFooter gap={3}>
             <Button
@@ -148,4 +129,4 @@ const EditItem = ({ item, isOpen, onClose }: EditItemProps) => {
   )
 }
 
-export default EditItem
+export default EditStore

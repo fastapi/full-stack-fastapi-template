@@ -15,15 +15,15 @@ import {
 import { useMutation, useQueryClient } from "@tanstack/react-query"
 import { type SubmitHandler, useForm } from "react-hook-form"
 
-import { type ApiError, type ItemCreate, ItemsService } from "../../client"
+import { type ApiError, type StoreCreate, StoresService } from "../../client"
 import useCustomToast from "../../hooks/useCustomToast"
 
-interface AddItemProps {
+interface AddStoreProps {
   isOpen: boolean
   onClose: () => void
 }
 
-const AddItem = ({ isOpen, onClose }: AddItemProps) => {
+const AddStore = ({ isOpen, onClose }: AddStoreProps) => {
   const queryClient = useQueryClient()
   const showToast = useCustomToast()
   const {
@@ -31,18 +31,17 @@ const AddItem = ({ isOpen, onClose }: AddItemProps) => {
     handleSubmit,
     reset,
     formState: { errors, isSubmitting },
-  } = useForm<ItemCreate>({
+  } = useForm<StoreCreate>({
     mode: "onBlur",
     criteriaMode: "all",
     defaultValues: {
       title: "",
-      description: "",
     },
   })
 
   const mutation = useMutation({
-    mutationFn: (data: ItemCreate) =>
-      ItemsService.createItem({ requestBody: data }),
+    mutationFn: (data: StoreCreate) =>
+      StoresService.createStore({ requestBody: data }),
     onSuccess: () => {
       showToast("Success!", "Item created successfully.", "success")
       reset()
@@ -57,7 +56,7 @@ const AddItem = ({ isOpen, onClose }: AddItemProps) => {
     },
   })
 
-  const onSubmit: SubmitHandler<ItemCreate> = (data) => {
+  const onSubmit: SubmitHandler<StoreCreate> = (data) => {
     mutation.mutate(data)
   }
 
@@ -71,7 +70,7 @@ const AddItem = ({ isOpen, onClose }: AddItemProps) => {
       >
         <ModalOverlay />
         <ModalContent as="form" onSubmit={handleSubmit(onSubmit)}>
-          <ModalHeader>Add Item to Warehouse</ModalHeader>
+          <ModalHeader>Add Item</ModalHeader>
           <ModalCloseButton />
           <ModalBody pb={6}>
             <FormControl isRequired isInvalid={!!errors.title}>
@@ -88,42 +87,6 @@ const AddItem = ({ isOpen, onClose }: AddItemProps) => {
                 <FormErrorMessage>{errors.title.message}</FormErrorMessage>
               )}
             </FormControl>
-            <FormControl mt={4}>
-              <FormLabel htmlFor="description">Description</FormLabel>
-              <Input
-                id="description"
-                {...register("description")}
-                placeholder="Description"
-                type="text"
-              />
-            </FormControl>
-            <FormControl mt={4}>
-              <FormLabel htmlFor="units">Units</FormLabel>
-              <Input
-                id="units"
-                {...register("units")}
-                placeholder="Units"
-                type="text"
-              />
-            </FormControl>
-            <FormControl mt={4}>
-              <FormLabel htmlFor="cost">Cost</FormLabel>
-              <Input
-                id="cost"
-                {...register("cost")}
-                placeholder="Cost"
-                type="text"
-              />
-            </FormControl>
-            <FormControl mt={4}>
-              <FormLabel htmlFor="revenue">Revenue</FormLabel>
-              <Input
-                id="revenue"
-                {...register("revenue")}
-                placeholder="Revenue"
-                type="text"
-              />
-            </FormControl>
           </ModalBody>
 
           <ModalFooter gap={3}>
@@ -138,4 +101,4 @@ const AddItem = ({ isOpen, onClose }: AddItemProps) => {
   )
 }
 
-export default AddItem
+export default AddStore

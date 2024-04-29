@@ -18,6 +18,9 @@ export type HTTPValidationError = {
 export type ItemCreate = {
 	title: string;
 	description?: string | null;
+	units: string;
+    cost: number;
+    revenue: number;
 };
 
 
@@ -25,6 +28,9 @@ export type ItemCreate = {
 export type ItemPublic = {
 	title: string;
 	description?: string | null;
+	units: string;
+    cost: number;
+    revenue: number;
 	id: number;
 	owner_id: number;
 };
@@ -34,6 +40,9 @@ export type ItemPublic = {
 export type ItemUpdate = {
 	title?: string | null;
 	description?: string | null;
+	units?: string | null;
+    cost?: number | null;
+    revenue?: number | null;
 };
 
 
@@ -43,6 +52,32 @@ export type ItemsPublic = {
 	count: number;
 };
 
+
+
+export type StoreCreate = {
+	title: string;
+};
+
+export type StorePublic = {
+	id: number;
+	title: string;
+};
+
+
+
+export type StoreInventoryUpdate = {
+	item_id: number;
+	stock_unit: number;
+	store_id: number;
+};
+
+
+
+
+export type StoresPublic = {
+	data: Array<StorePublic>;
+	count: number;
+};
 
 
 export type Message = {
