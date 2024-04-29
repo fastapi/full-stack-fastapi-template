@@ -19,8 +19,8 @@ export type ItemCreate = {
 	title: string;
 	description?: string | null;
 	units: string;
-    cost: number;
-    revenue: number;
+	cost: number;
+	revenue: number;
 };
 
 
@@ -29,8 +29,8 @@ export type ItemPublic = {
 	title: string;
 	description?: string | null;
 	units: string;
-    cost: number;
-    revenue: number;
+	cost: number;
+	revenue: number;
 	id: number;
 	owner_id: number;
 };
@@ -41,8 +41,8 @@ export type ItemUpdate = {
 	title?: string | null;
 	description?: string | null;
 	units?: string | null;
-    cost?: number | null;
-    revenue?: number | null;
+	cost?: number | null;
+	revenue?: number | null;
 };
 
 
