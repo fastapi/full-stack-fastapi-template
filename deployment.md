@@ -87,6 +87,13 @@ export DOMAIN=fastapi-project.example.com
 export EMAIL=admin@example.com
 ```
 
+* If you use CloudFlare as DNS provider you have to set your CloudFlare Account Email and the Global API Key from Cloudflare
+
+```bash
+export CF_API_EMAIL=admin@example.com
+export CF_API_KEY=yourcloudflareglobalapikey
+```
+
 **Note**: you need to set a different email, an email `@example.com` won't work.
 
 ### Start the Traefik Docker Compose

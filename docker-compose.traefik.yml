@@ -40,6 +40,9 @@ services:
       - /var/run/docker.sock:/var/run/docker.sock:ro
       # Mount the volume to store the certificates
       - traefik-public-certificates:/certificates
+    environment:
+      - "CF_API_EMAIL=${CF_API_EMAIL?Variable not set}"
+      - "CF_API_KEY=${CF_API_KEY?Variable not set}"
     command:
       # Enable Docker in Traefik, so that it reads labels from Docker services
       - --providers.docker
