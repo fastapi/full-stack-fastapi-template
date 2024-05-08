@@ -67,34 +67,13 @@ Just select "Private" for the visibility of your repo when creating it from the 
 
 ### Update From the Original Template
 
-After cloning the repository, and after doing changes, you might want to get the latest changes from this original template.
+This repo comes with a "Sync Template Updates" action that runs once a day that checks for updates in the template repo and creates a pull request automatically in your repo if anything has updated
 
-- Make sure you added the original repository as a remote, you can check it with:
+- If there are conflicts, you will need to check out the branch locally, or resolve them in the GitHub web interface.
 
-```bash
-git remote -v
+#### For This Action to Work, You Must Allow Actions to Create and Approve PRs
 
-origin    git@github.com:octocat/my-full-stack.git (fetch)
-origin    git@github.com:octocat/my-full-stack.git (push)
-upstream    git@github.com:tiangolo/full-stack-fastapi-template.git (fetch)
-upstream    git@github.com:tiangolo/full-stack-fastapi-template.git (push)
-```
-
-- Pull the latest changes without merging:
-
-```bash
-git pull --no-commit upstream master
-```
-
-This will download the latest changes from this template without committing them, that way you can check everything is right before committing.
-
-- If there are conflicts, solve them in your editor.
-
-- Once you are done, commit the changes:
-
-```bash
-git merge --continue
-```
+![You need to grant GitHub Actions privileges to PRs](img/gh-actions-pr-perms.png)
 
 ### Configure
 

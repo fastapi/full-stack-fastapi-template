@@ -1,4 +1,6 @@
 # File: .github/workflows/template-sync.yml
+name: Sync Template Updates
+
 on:
     # cronjob trigger
   schedule:
