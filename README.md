@@ -69,6 +69,8 @@ Just select "Private" for the visibility of your repo when creating it from the 
 
 This repo comes with a "Sync Template Updates" action that runs once a day that checks for updates in the template repo and creates a pull request automatically in your repo if anything has updated
 
+![Screenshot of an automated template update PR](img/automated-template-update-prs.png)
+
 - If there are conflicts, you will need to check out the branch locally, or resolve them in the GitHub web interface.
 
 #### For This Action to Work, You Must Allow Actions to Create and Approve PRs
