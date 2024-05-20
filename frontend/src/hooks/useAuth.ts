@@ -1,7 +1,8 @@
+import { useMutation, useQuery } from "@tanstack/react-query"
 import { useNavigate } from "@tanstack/react-router"
 import { useState } from "react"
-import { useMutation, useQuery } from "@tanstack/react-query"
 
+import { AxiosError } from "axios"
 import {
   type Body_login_login_access_token as AccessToken,
   type ApiError,
@@ -36,7 +37,16 @@ const useAuth = () => {
       navigate({ to: "/" })
     },
     onError: (err: ApiError) => {
-      const errDetail = (err.body as any)?.detail
+      let errDetail = (err.body as any)?.detail
+
+      if (err instanceof AxiosError) {
+        errDetail = err.message
+      }
+
+      if (Array.isArray(errDetail)) {
+        errDetail = "Something went wrong"
+      }
+
       setError(errDetail)
     },
   })
@@ -52,6 +62,7 @@ const useAuth = () => {
     user,
     isLoading,
     error,
+    resetError: () => setError(null),
   }
 }
 
