@@ -18,6 +18,8 @@
 
 ### Refactors
 
+* ♻️ Refactor redirect labels to simplify removing the frontend. PR [#1208](https://github.com/tiangolo/full-stack-fastapi-template/pull/1208) by [@tiangolo](https://github.com/tiangolo).
+* 🔒️ Refactor migrate from python-jose to PyJWT. PR [#1203](https://github.com/tiangolo/full-stack-fastapi-template/pull/1203) by [@estebanx64](https://github.com/estebanx64).
 * 🔥 Remove duplicated code. PR [#1185](https://github.com/tiangolo/full-stack-fastapi-template/pull/1185) by [@alejsdev](https://github.com/alejsdev).
 * ♻️ Add delete_user_me endpoint and corresponding test cases. PR [#1179](https://github.com/tiangolo/full-stack-fastapi-template/pull/1179) by [@alejsdev](https://github.com/alejsdev).
 * ✅ Update test to add verification database records. PR [#1178](https://github.com/tiangolo/full-stack-fastapi-template/pull/1178) by [@estebanx64](https://github.com/estebanx64).
@@ -51,6 +53,7 @@
 
 ### Upgrades
 
+* ⬆️ Bump jinja2 from 3.1.3 to 3.1.4 in /backend. PR [#1196](https://github.com/tiangolo/full-stack-fastapi-template/pull/1196) by [@dependabot[bot]](https://github.com/apps/dependabot).
 * Bump gunicorn from 21.2.0 to 22.0.0 in /backend. PR [#1176](https://github.com/tiangolo/full-stack-fastapi-template/pull/1176) by [@dependabot[bot]](https://github.com/apps/dependabot).
 * Bump idna from 3.6 to 3.7 in /backend. PR [#1168](https://github.com/tiangolo/full-stack-fastapi-template/pull/1168) by [@dependabot[bot]](https://github.com/apps/dependabot).
 * 🆙 Update React Query to TanStack Query. PR [#1153](https://github.com/tiangolo/full-stack-fastapi-template/pull/1153) by [@patrick91](https://github.com/patrick91).
@@ -59,6 +62,7 @@
 
 ### Docs
 
+* ✏️ Update `README.md`. PR [#1205](https://github.com/tiangolo/full-stack-fastapi-template/pull/1205) by [@Craz1k0ek](https://github.com/Craz1k0ek).
 * ✏️ Fix Adminer URL in `deployment.md`. PR [#1194](https://github.com/tiangolo/full-stack-fastapi-template/pull/1194) by [@PhilippWu](https://github.com/PhilippWu).
 * 📝 Add `Enabling Open User Registration` to backend docs. PR [#1191](https://github.com/tiangolo/full-stack-fastapi-template/pull/1191) by [@alejsdev](https://github.com/alejsdev).
 * 📝 Update release-notes.md. PR [#1164](https://github.com/tiangolo/full-stack-fastapi-template/pull/1164) by [@alejsdev](https://github.com/alejsdev).
