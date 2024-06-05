@@ -31,7 +31,7 @@ const MembersTableBody = () => {
 
   const { data: users } = useSuspenseQuery({
     queryKey: ["users"],
-    queryFn: () => UsersService.readUsers({}),
+    queryFn: () => UsersService.usersReadUsers({}),
   })
 
   return (

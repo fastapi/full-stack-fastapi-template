@@ -39,7 +39,7 @@ function RecoverPassword() {
   const showToast = useCustomToast()
 
   const onSubmit: SubmitHandler<FormData> = async (data) => {
-    await LoginService.recoverPassword({
+    await LoginService.loginRecoverPassword({
       email: data.email,
     })
     showToast(

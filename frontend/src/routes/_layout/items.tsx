@@ -27,7 +27,7 @@ export const Route = createFileRoute("/_layout/items")({
 function ItemsTableBody() {
   const { data: items } = useSuspenseQuery({
     queryKey: ["items"],
-    queryFn: () => ItemsService.readItems({}),
+    queryFn: () => ItemsService.itemsReadItems({}),
   })
 
   return (

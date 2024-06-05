@@ -20,12 +20,12 @@ const useAuth = () => {
   const navigate = useNavigate()
   const { data: user, isLoading } = useQuery<UserPublic | null, Error>({
     queryKey: ["currentUser"],
-    queryFn: UsersService.readUserMe,
+    queryFn: UsersService.usersReadUserMe,
     enabled: isLoggedIn(),
   })
 
   const login = async (data: AccessToken) => {
-    const response = await LoginService.loginAccessToken({
+    const response = await LoginService.loginLoginAccessToken({
       formData: data,
     })
     localStorage.setItem("access_token", response.access_token)
