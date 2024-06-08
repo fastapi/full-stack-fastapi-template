@@ -1,5 +1,5 @@
-from sqlmodel import Field, Relationship, SQLModel, AutoString
 from pydantic import EmailStr
+from sqlmodel import Field, Relationship, SQLModel, AutoString
 
 # Shared properties
 class UserBase(SQLModel):
