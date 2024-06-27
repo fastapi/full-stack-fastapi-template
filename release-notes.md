@@ -4,6 +4,7 @@
 
 ### Features
 
+* ✨ Introduce pagination in items. PR [#1239](https://github.com/tiangolo/full-stack-fastapi-template/pull/1239) by [@patrick91](https://github.com/patrick91).
 * 🗃️ Add max_length validation for database models and input data. PR [#1233](https://github.com/tiangolo/full-stack-fastapi-template/pull/1233) by [@estebanx64](https://github.com/estebanx64).
 * ✨ Add TanStack React Query devtools in dev build. PR [#1217](https://github.com/tiangolo/full-stack-fastapi-template/pull/1217) by [@tomerb](https://github.com/tomerb).
 * ✨ Add support for deploying multiple environments (staging, production) to the same server. PR [#1128](https://github.com/tiangolo/full-stack-fastapi-template/pull/1128) by [@tiangolo](https://github.com/tiangolo).
@@ -19,6 +20,7 @@
 
 ### Refactors
 
+* 🎨 Run biome after OpenAPI client generation. PR [#1226](https://github.com/tiangolo/full-stack-fastapi-template/pull/1226) by [@tomerb](https://github.com/tomerb).
 * ♻️ Update DeleteConfirmation component to use new service. PR [#1224](https://github.com/tiangolo/full-stack-fastapi-template/pull/1224) by [@alejsdev](https://github.com/alejsdev).
 * ♻️ Update client services. PR [#1223](https://github.com/tiangolo/full-stack-fastapi-template/pull/1223) by [@alejsdev](https://github.com/alejsdev).
 * ⚒️ Add minor frontend tweaks. PR [#1210](https://github.com/tiangolo/full-stack-fastapi-template/pull/1210) by [@alejsdev](https://github.com/alejsdev).
@@ -58,6 +60,7 @@
 
 ### Upgrades
 
+* ⬆️ Upgrade Traefik. PR [#1241](https://github.com/tiangolo/full-stack-fastapi-template/pull/1241) by [@tiangolo](https://github.com/tiangolo).
 * ⬆️ Bump requests from 2.31.0 to 2.32.0 in /backend. PR [#1211](https://github.com/tiangolo/full-stack-fastapi-template/pull/1211) by [@dependabot[bot]](https://github.com/apps/dependabot).
 * ⬆️ Bump jinja2 from 3.1.3 to 3.1.4 in /backend. PR [#1196](https://github.com/tiangolo/full-stack-fastapi-template/pull/1196) by [@dependabot[bot]](https://github.com/apps/dependabot).
 * Bump gunicorn from 21.2.0 to 22.0.0 in /backend. PR [#1176](https://github.com/tiangolo/full-stack-fastapi-template/pull/1176) by [@dependabot[bot]](https://github.com/apps/dependabot).
