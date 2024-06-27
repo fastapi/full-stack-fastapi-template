@@ -49,7 +49,7 @@ function RecoverPassword() {
   const mutation = useMutation({
     mutationFn: recoverPassword,
     onSuccess: () => {
-      console.log("success")
+      showToast("Success!", "Password recovery email sent.", "success")
       reset()
     },
     onError: (err: ApiError) => {
