@@ -4,20 +4,27 @@ set -e
 set -x
 
 NO_COVERAGE=0
+MESSAGE="Coverage Report"
 
-# Check for the --no-coverage flag
-for arg in "$@"; do
-    if [ "$arg" == "--no-coverage" ]; then
-        NO_COVERAGE=1
-        shift
-        break
-    fi
+while [[ "$#" -gt 0 ]]; do
+    case $1 in
+        --no-coverage)
+            NO_COVERAGE=1
+            ;;
+        --message=*)
+            MESSAGE="${1#*=}"
+            ;;
+        *)
+            TEST_PATH="$1"
+            ;;
+    esac
+    shift
 done
 
 if [ $NO_COVERAGE -eq 0 ]; then
-    coverage run --source=app -m pytest "$@"
+    coverage run --source=app -m pytest ${TEST_PATH}
     coverage report --show-missing
-    coverage html --title "Coverage Report"
+    coverage html --title "$MESSAGE"
 else
-    pytest "$@"
+    pytest ${TEST_PATH}
 fi
