@@ -138,8 +138,22 @@ Nevertheless, if it doesn't detect a change but a syntax error, it will just sto
 To test the backend run:
 
 ```console
-$ bash ./scripts/test.sh
+$ bash ./scripts/start-test.sh
 ```
+...or inside docker:
+```console
+$ docker compose exec backend bash ./tests-start.sh
+```
+
+To run a specific test:
+```console
+$ bash ./tests-start.sh app/tests/api/routes/test_users.py::test_update_user
+```
+To run a specific test without coverage:
+```console
+$ bash ./tests-start.sh --no-coverage app/tests/api/routes/test_users.py::test_update_user
+```
+
 
 The tests run with Pytest, modify and add tests to `./backend/app/tests/`.
 
