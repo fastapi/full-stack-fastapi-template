@@ -1,4 +1,3 @@
-import React from 'react'
 import {
   Badge,
   Container,
@@ -7,9 +6,9 @@ import {
   RadioGroup,
   Stack,
   useColorMode,
-} from '@chakra-ui/react'
+} from "@chakra-ui/react"
 
-const Appearance: React.FC = () => {
+const Appearance = () => {
   const { colorMode, toggleColorMode } = useColorMode()
 
   return (
@@ -22,13 +21,13 @@ const Appearance: React.FC = () => {
           <Stack>
             {/* TODO: Add system default option */}
             <Radio value="light" colorScheme="teal">
-              Light mode
+              Light Mode
               <Badge ml="1" colorScheme="teal">
                 Default
               </Badge>
             </Radio>
             <Radio value="dark" colorScheme="teal">
-              Dark mode
+              Dark Mode
             </Radio>
           </Stack>
         </RadioGroup>

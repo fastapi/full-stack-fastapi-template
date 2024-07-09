@@ -127,6 +127,8 @@ export DOMAIN=fastapi-project.example.com
 
 You can set several variables, like:
 
+* `PROJECT_NAME`: The name of the project, used in the API for the docs and emails.
+* `STACK_NAME`: The name of the stack used for Docker Compose labels and project name, this should be different for `staging`, `production`, etc. You could use the same domain replacing dots with dashes, e.g. `fastapi-project-example-com` and `staging-fastapi-project-example-com`.
 * `BACKEND_CORS_ORIGINS`: A list of allowed CORS origins separated by commas.
 * `SECRET_KEY`: The secret key for the FastAPI project, used to sign tokens.
 * `FIRST_SUPERUSER`: The email of the first superuser, this superuser will be the one that can create new users.
@@ -142,6 +144,13 @@ You can set several variables, like:
 * `POSTGRES_USER`: The Postgres user, you can leave the default.
 * `POSTGRES_DB`: The database name to use for this application. You can leave the default of `app`.
 * `SENTRY_DSN`: The DSN for Sentry, if you are using it.
+
+## GitHub Actions Environment Variables
+
+There are some environment variables only used by GitHub Actions that you can configure:
+
+* `LATEST_CHANGES`: Used by the GitHub Action [latest-changes](https://github.com/tiangolo/latest-changes) to automatically add release notes based on the PRs merged. It's a personal access token, read the docs for details.
+* `SMOKESHOW_AUTH_KEY`: Used to handle and publish the code coverage using [Smokeshow](https://github.com/samuelcolvin/smokeshow), follow their instructions to create a (free) Smokeshow key.
 
 ### Generate secret keys
 
@@ -247,11 +256,15 @@ The current Github Actions workflows expect these secrets:
 
 * `DOMAIN_PRODUCTION`
 * `DOMAIN_STAGING`
+* `STACK_NAME_PRODUCTION`
+* `STACK_NAME_STAGING`
 * `EMAILS_FROM_EMAIL`
 * `FIRST_SUPERUSER`
 * `FIRST_SUPERUSER_PASSWORD`
 * `POSTGRES_PASSWORD`
 * `SECRET_KEY`
+* `LATEST_CHANGES`
+* `SMOKESHOW_AUTH_KEY`
 
 ## GitHub Action Deployment Workflows
 
@@ -288,4 +301,4 @@ Backend API docs: `https://staging.fastapi-project.example.com/docs`
 
 Backend API base URL: `https://staging.fastapi-project.example.com/api/`
 
-Adminer: `https://staging.adminer.fastapi-project.example.com`
+Adminer: `https://adminer.staging.fastapi-project.example.com`

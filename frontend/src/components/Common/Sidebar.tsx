@@ -1,4 +1,3 @@
-import React from 'react'
 import {
   Box,
   Drawer,
@@ -12,21 +11,21 @@ import {
   Text,
   useColorModeValue,
   useDisclosure,
-} from '@chakra-ui/react'
-import { FiLogOut, FiMenu } from 'react-icons/fi'
-import { useQueryClient } from 'react-query'
+} from "@chakra-ui/react"
+import { useQueryClient } from "@tanstack/react-query"
+import { FiLogOut, FiMenu } from "react-icons/fi"
 
-import Logo from '../../assets/images/fastapi-logo.svg'
-import { UserOut } from '../../client'
-import useAuth from '../../hooks/useAuth'
-import SidebarItems from './SidebarItems'
+import Logo from "/assets/images/fastapi-logo.svg"
+import type { UserPublic } from "../../client"
+import useAuth from "../../hooks/useAuth"
+import SidebarItems from "./SidebarItems"
 
-const Sidebar: React.FC = () => {
+const Sidebar = () => {
   const queryClient = useQueryClient()
-  const bgColor = useColorModeValue('ui.white', 'ui.dark')
-  const textColor = useColorModeValue('ui.dark', 'ui.white')
-  const secBgColor = useColorModeValue('ui.secondary', 'ui.darkSlate')
-  const currentUser = queryClient.getQueryData<UserOut>('currentUser')
+  const bgColor = useColorModeValue("ui.light", "ui.dark")
+  const textColor = useColorModeValue("ui.dark", "ui.light")
+  const secBgColor = useColorModeValue("ui.secondary", "ui.darkSlate")
+  const currentUser = queryClient.getQueryData<UserPublic>(["currentUser"])
   const { isOpen, onOpen, onClose } = useDisclosure()
   const { logout } = useAuth()
 
@@ -39,7 +38,7 @@ const Sidebar: React.FC = () => {
       {/* Mobile */}
       <IconButton
         onClick={onOpen}
-        display={{ base: 'flex', md: 'none' }}
+        display={{ base: "flex", md: "none" }}
         aria-label="Open Menu"
         position="absolute"
         fontSize="20px"
@@ -84,7 +83,7 @@ const Sidebar: React.FC = () => {
         h="100vh"
         position="sticky"
         top="0"
-        display={{ base: 'none', md: 'flex' }}
+        display={{ base: "none", md: "flex" }}
       >
         <Flex
           flexDir="column"

@@ -1,4 +1,3 @@
-import React from 'react'
 import {
   Box,
   IconButton,
@@ -6,14 +5,14 @@ import {
   MenuButton,
   MenuItem,
   MenuList,
-} from '@chakra-ui/react'
-import { FaUserAstronaut } from 'react-icons/fa'
-import { FiLogOut, FiUser } from 'react-icons/fi'
+} from "@chakra-ui/react"
+import { Link } from "@tanstack/react-router"
+import { FaUserAstronaut } from "react-icons/fa"
+import { FiLogOut, FiUser } from "react-icons/fi"
 
-import useAuth from '../../hooks/useAuth'
-import { Link } from '@tanstack/react-router'
+import useAuth from "../../hooks/useAuth"
 
-const UserMenu: React.FC = () => {
+const UserMenu = () => {
   const { logout } = useAuth()
 
   const handleLogout = async () => {
@@ -24,7 +23,7 @@ const UserMenu: React.FC = () => {
     <>
       {/* Desktop */}
       <Box
-        display={{ base: 'none', md: 'block' }}
+        display={{ base: "none", md: "block" }}
         position="fixed"
         top={4}
         right={4}

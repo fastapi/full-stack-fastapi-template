@@ -23,6 +23,7 @@ In that case, you will need to use a fake local domain (`dev.example.com`) and m
 If you have a custom domain like that, you need to add it to the list in the variable `BACKEND_CORS_ORIGINS` in the `.env` file.
 
 * Open your `hosts` file with administrative privileges using a text editor:
+
   * **Note for Windows**: If you are in Windows, open the main Windows menu, search for "notepad", right click on it, and select the option "open as Administrator" or similar. Then click the "File" menu, "Open file", go to the directory `c:\Windows\System32\Drivers\etc\`, select the option to show "All files" instead of only "Text (.txt) files", and open the `hosts` file.
   * **Note for Mac and Linux**: Your `hosts` file is probably located at `/etc/hosts`, you can edit it in a terminal running `sudo nano /etc/hosts`.
 
@@ -91,6 +92,52 @@ Depending on your workflow, you could want to exclude it from Git, for example i
 
 One way to do it could be to add each environment variable to your CI/CD system, and updating the `docker-compose.yml` file to read that specific env var instead of reading the `.env` file.
 
+### Pre-commits and code linting
+
+we are using a tool called [pre-commit](https://pre-commit.com/) for code linting and formatting.
+
+When you install it, it runs right before making a commit in git. This way it ensures that the code is consistent and formatted even before it is committed.
+
+You can find a file `.pre-commit-config.yaml` with configurations at the root of the project.
+
+#### Install pre-commit to run automatically
+
+`pre-commit` is already part of the dependencies of the project, but you could also install it globally if you prefer to, following [the official pre-commit docs](https://pre-commit.com/).
+
+After having the `pre-commit` tool installed and available, you need to "install" it in the local repository, so that it runs automatically before each commit.
+
+Using Poetry, you could do it with:
+
+```bash
+❯ poetry run pre-commit install
+pre-commit installed at .git/hooks/pre-commit
+```
+
+Now whenever you try to commit, e.g. with:
+
+```bash
+git commit
+```
+
+...pre-commit will run and check and format the code you are about to commit, and will ask you to add that code (stage it) with git again before committing.
+
+Then you can `git add` the modified/fixed files again and now you can commit.
+
+#### Running pre-commit hooks manually
+
+you can also run `pre-commit` manually on all the files, you can do it using Poetry with:
+
+```bash
+❯ poetry run pre-commit run --all-files
+check for added large files..............................................Passed
+check toml...............................................................Passed
+check yaml...............................................................Passed
+ruff.....................................................................Passed
+ruff-format..............................................................Passed
+eslint...................................................................Passed
+prettier.................................................................Passed
+```
+
 ## URLs
 
 The production or staging URLs would use these same paths, but with your own domain.
@@ -103,9 +150,9 @@ Frontend: http://localhost
 
 Backend: http://localhost/api/
 
-Automatic Interactive Docs (Swagger UI): https://localhost/docs
+Automatic Interactive Docs (Swagger UI): http://localhost/docs
 
-Automatic Alternative Docs (ReDoc): https://localhost/redoc
+Automatic Alternative Docs (ReDoc): http://localhost/redoc
 
 Adminer: http://localhost:8080
 
@@ -119,9 +166,9 @@ Frontend: http://localhost.tiangolo.com
 
 Backend: http://localhost.tiangolo.com/api/
 
-Automatic Interactive Docs (Swagger UI): https://localhost.tiangolo.com/docs
+Automatic Interactive Docs (Swagger UI): http://localhost.tiangolo.com/docs
 
-Automatic Alternative Docs (ReDoc): https://localhost.tiangolo.com/redoc
+Automatic Alternative Docs (ReDoc): http://localhost.tiangolo.com/redoc
 
 Adminer: http://localhost.tiangolo.com:8080
 
