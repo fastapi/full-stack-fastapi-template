@@ -1,0 +1,69 @@
+<component name="InspectionProjectProfileManager">
+  <profile version="1.0">
+    <option name="myName" value="Project Default" />
+    <inspection_tool class="DuplicatedCode" enabled="true" level="WEAK WARNING" enabled_by_default="true">
+      <Languages>
+        <language minSize="207" name="Python" />
+      </Languages>
+    </inspection_tool>
+    <inspection_tool class="PyPackageRequirementsInspection" enabled="true" level="WARNING" enabled_by_default="true">
+      <option name="ignoredPackages">
+        <value>
+          <list size="36">
+            <item index="0" class="java.lang.String" itemvalue="aiogram" />
+            <item index="1" class="java.lang.String" itemvalue="psycopg2" />
+            <item index="2" class="java.lang.String" itemvalue="opentele" />
+            <item index="3" class="java.lang.String" itemvalue="aiosqlite" />
+            <item index="4" class="java.lang.String" itemvalue="tgcrypto" />
+            <item index="5" class="java.lang.String" itemvalue="sqlalchemy" />
+            <item index="6" class="java.lang.String" itemvalue="asyncpg" />
+            <item index="7" class="java.lang.String" itemvalue="greenlet" />
+            <item index="8" class="java.lang.String" itemvalue="async-timeout" />
+            <item index="9" class="java.lang.String" itemvalue="pyaes" />
+            <item index="10" class="java.lang.String" itemvalue="SQLAlchemy" />
+            <item index="11" class="java.lang.String" itemvalue="setuptools" />
+            <item index="12" class="java.lang.String" itemvalue="requests" />
+            <item index="13" class="java.lang.String" itemvalue="pydantic-core" />
+            <item index="14" class="java.lang.String" itemvalue="redis" />
+            <item index="15" class="java.lang.String" itemvalue="frozenlist" />
+            <item index="16" class="java.lang.String" itemvalue="pip" />
+            <item index="17" class="java.lang.String" itemvalue="certifi" />
+            <item index="18" class="java.lang.String" itemvalue="urllib3" />
+            <item index="19" class="java.lang.String" itemvalue="uvloop" />
+            <item index="20" class="java.lang.String" itemvalue="arq" />
+            <item index="21" class="java.lang.String" itemvalue="pydantic" />
+            <item index="22" class="java.lang.String" itemvalue="wheel" />
+            <item index="23" class="java.lang.String" itemvalue="orjson" />
+            <item index="24" class="java.lang.String" itemvalue="attrs" />
+            <item index="25" class="java.lang.String" itemvalue="hiredis" />
+            <item index="26" class="java.lang.String" itemvalue="PySocks" />
+            <item index="27" class="java.lang.String" itemvalue="pyrogram" />
+            <item index="28" class="java.lang.String" itemvalue="charset-normalizer" />
+            <item index="29" class="java.lang.String" itemvalue="aiohttp" />
+            <item index="30" class="java.lang.String" itemvalue="multidict" />
+            <item index="31" class="java.lang.String" itemvalue="yarl" />
+            <item index="32" class="java.lang.String" itemvalue="aiosignal" />
+            <item index="33" class="java.lang.String" itemvalue="fastapi" />
+            <item index="34" class="java.lang.String" itemvalue="uvicorn" />
+            <item index="35" class="java.lang.String" itemvalue="loguru" />
+          </list>
+        </value>
+      </option>
+    </inspection_tool>
+    <inspection_tool class="PyPep8NamingInspection" enabled="true" level="WEAK WARNING" enabled_by_default="true">
+      <option name="ignoredErrors">
+        <list>
+          <option value="N806" />
+        </list>
+      </option>
+    </inspection_tool>
+    <inspection_tool class="PyTypeCheckerInspection" enabled="false" level="WARNING" enabled_by_default="false" />
+    <inspection_tool class="PyUnresolvedReferencesInspection" enabled="true" level="WARNING" enabled_by_default="true">
+      <option name="ignoredIdentifiers">
+        <list>
+          <option value="flet_core.page.Page.*" />
+        </list>
+      </option>
+    </inspection_tool>
+  </profile>
+</component>
