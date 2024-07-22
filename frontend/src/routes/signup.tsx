@@ -63,14 +63,14 @@ function SignUp() {
     <>
       <Flex flexDir={{ base: "column", md: "row" }} justify="center" h="100vh">
         <Container
-        as="form"
-        onSubmit={handleSubmit(onSubmit)}
-        h="100vh"
-        maxW="sm"
-        alignItems="stretch"
-        justifyContent="center"
-        gap={4}
-        centerContent
+          as="form"
+          onSubmit={handleSubmit(onSubmit)}
+          h="100vh"
+          maxW="sm"
+          alignItems="stretch"
+          justifyContent="center"
+          gap={4}
+          centerContent
         >
           <Image
             src={Logo}

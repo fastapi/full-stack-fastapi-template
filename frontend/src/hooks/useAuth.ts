@@ -8,7 +8,7 @@ import {
   type ApiError,
   LoginService,
   type UserPublic,
-  UserRegister,
+  type UserRegister,
   UsersService,
 } from "../client"
 import useCustomToast from "./useCustomToast"
