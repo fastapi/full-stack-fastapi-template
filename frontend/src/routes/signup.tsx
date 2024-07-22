@@ -15,7 +15,6 @@ import {
   createFileRoute,
   redirect,
 } from "@tanstack/react-router"
-import { useState } from "react"
 import { type SubmitHandler, useForm } from "react-hook-form"
 
 import Logo from "/assets/images/fastapi-logo.svg"
