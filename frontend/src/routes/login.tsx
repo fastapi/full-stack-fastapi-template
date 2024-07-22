@@ -1,7 +1,6 @@
 import { ViewIcon, ViewOffIcon } from "@chakra-ui/icons"
 import {
   Button,
-  Center,
   Container,
   FormControl,
   FormErrorMessage,
@@ -11,7 +10,8 @@ import {
   InputGroup,
   InputRightElement,
   Link,
-  useBoolean,
+  Text,
+  useBoolean
 } from "@chakra-ui/react"
 import {
   Link as RouterLink,
@@ -20,10 +20,10 @@ import {
 } from "@tanstack/react-router"
 import { type SubmitHandler, useForm } from "react-hook-form"
 
-import Logo from "/assets/images/fastapi-logo.svg"
 import type { Body_login_login_access_token as AccessToken } from "../client"
 import useAuth, { isLoggedIn } from "../hooks/useAuth"
 import { emailPattern } from "../utils"
+import Logo from "/assets/images/fastapi-logo.svg"
 
 export const Route = createFileRoute("/login")({
   component: Login,
@@ -126,14 +126,18 @@ function Login() {
           </InputGroup>
           {error && <FormErrorMessage>{error}</FormErrorMessage>}
         </FormControl>
-        <Center>
-          <Link as={RouterLink} to="/recover-password" color="blue.500">
-            Forgot password?
-          </Link>
-        </Center>
+        <Link as={RouterLink} to="/recover-password" color="blue.500">
+          Forgot password?
+        </Link>
         <Button variant="primary" type="submit" isLoading={isSubmitting}>
           Log In
         </Button>
+        <Text>
+          Don't have an account?{" "}
+          <Link as={RouterLink} to="/signup" color="blue.500">
+            Sign up
+          </Link>
+        </Text>
       </Container>
     </>
   )
