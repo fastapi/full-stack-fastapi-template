@@ -1,17 +1,12 @@
 import {
-  Box,
   Button,
   Container,
   Flex,
   FormControl,
   FormErrorMessage,
   FormLabel,
-  Heading,
-  Icon,
   Image,
   Input,
-  InputGroup,
-  InputLeftElement,
   Link,
   Text,
 } from "@chakra-ui/react"
@@ -22,7 +17,6 @@ import {
 } from "@tanstack/react-router"
 import { useState } from "react"
 import { type SubmitHandler, useForm } from "react-hook-form"
-import { FaEnvelope, FaKey, FaUser } from "react-icons/fa"
 
 import Logo from "/assets/images/fastapi-logo.svg"
 import type { UserRegister } from "../client"
@@ -45,7 +39,6 @@ interface UserRegisterForm extends UserRegister {
 }
 
 function SignUp() {
-  const [userEmail, setUserEmail] = useState("")
   const { signUpMutation } = useAuth()
   const {
     register,
@@ -65,21 +58,20 @@ function SignUp() {
 
   const onSubmit: SubmitHandler<UserRegisterForm> = (data) => {
     signUpMutation.mutate(data)
-    setUserEmail(data.email)
   }
 
   return (
     <>
       <Flex flexDir={{ base: "column", md: "row" }} justify="center" h="100vh">
         <Container
-          as="form"
-          onSubmit={handleSubmit(onSubmit)}
-          maxW={{ base: "xs", md: "md" }}
-          flexDir="column"
-          alignItems="stretch"
-          justifyContent="center"
-          centerContent
-          gap={4}
+        as="form"
+        onSubmit={handleSubmit(onSubmit)}
+        h="100vh"
+        maxW="sm"
+        alignItems="stretch"
+        justifyContent="center"
+        gap={4}
+        centerContent
         >
           <Image
             src={Logo}
@@ -93,18 +85,13 @@ function SignUp() {
             <FormLabel htmlFor="full_name" srOnly>
               Full Name
             </FormLabel>
-            <InputGroup>
-              <InputLeftElement pointerEvents="none">
-                <Icon as={FaUser} color="ui.dim" />
-              </InputLeftElement>
-              <Input
-                id="full_name"
-                minLength={3}
-                {...register("full_name")}
-                placeholder="Full Name"
-                type="text"
-              />
-            </InputGroup>
+            <Input
+              id="full_name"
+              minLength={3}
+              {...register("full_name")}
+              placeholder="Full Name"
+              type="text"
+            />
             {errors.full_name && (
               <FormErrorMessage>{errors.full_name.message}</FormErrorMessage>
             )}
@@ -113,19 +100,14 @@ function SignUp() {
             <FormLabel htmlFor="username" srOnly>
               Email
             </FormLabel>
-            <InputGroup>
-              <InputLeftElement pointerEvents="none">
-                <Icon as={FaEnvelope} color="ui.dim" />
-              </InputLeftElement>
-              <Input
-                id="email"
-                {...register("email", {
-                  pattern: emailPattern,
-                })}
-                placeholder="Email"
-                type="email"
-              />
-            </InputGroup>
+            <Input
+              id="email"
+              {...register("email", {
+                pattern: emailPattern,
+              })}
+              placeholder="Email"
+              type="email"
+            />
             {errors.email && (
               <FormErrorMessage>{errors.email.message}</FormErrorMessage>
             )}
@@ -134,17 +116,12 @@ function SignUp() {
             <FormLabel htmlFor="password" srOnly>
               Password
             </FormLabel>
-            <InputGroup>
-              <InputLeftElement pointerEvents="none">
-                <Icon as={FaKey} color="ui.dim" />
-              </InputLeftElement>
-              <Input
-                id="password"
-                {...register("password", passwordRules())}
-                placeholder="Password"
-                type="password"
-              />
-            </InputGroup>
+            <Input
+              id="password"
+              {...register("password", passwordRules())}
+              placeholder="Password"
+              type="password"
+            />
             {errors.password && (
               <FormErrorMessage>{errors.password.message}</FormErrorMessage>
             )}
@@ -157,20 +134,12 @@ function SignUp() {
               Confirm Password
             </FormLabel>
 
-            <InputGroup>
-              <InputLeftElement pointerEvents="none">
-                <Icon as={FaKey} color="ui.dim" />
-              </InputLeftElement>
-              <Input
-                id="confirm_password"
-                {...register(
-                  "confirm_password",
-                  confirmPasswordRules(getValues),
-                )}
-                placeholder="Repeat Password"
-                type="password"
-              />
-            </InputGroup>
+            <Input
+              id="confirm_password"
+              {...register("confirm_password", confirmPasswordRules(getValues))}
+              placeholder="Repeat Password"
+              type="password"
+            />
             {errors.confirm_password && (
               <FormErrorMessage>
                 {errors.confirm_password.message}
