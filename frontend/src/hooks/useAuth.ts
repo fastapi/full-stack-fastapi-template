@@ -33,6 +33,7 @@ const useAuth = () => {
       UsersService.registerUser({ requestBody: data }),
 
     onSuccess: () => {
+      navigate({ to: "/login" })
       showToast("Success!", "User created successfully.", "success")
     },
     onError: (err: ApiError) => {
