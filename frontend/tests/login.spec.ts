@@ -68,7 +68,7 @@ test("Log in with invalid email", async ({ page }) => {
 
 test("Log in with invalid password", async ({ page }) => {
   await page.goto("/login")
-
+  // TODO: Add a random password utility
   await fillForm(page, firstSuperuser, "changethat")
   await page.getByRole("button", { name: "Log In" }).click()
 
