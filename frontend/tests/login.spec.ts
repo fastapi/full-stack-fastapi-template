@@ -1,6 +1,5 @@
 import { type Page, expect, test } from "@playwright/test"
-
-const { FIRST_SUPERUSER, FIRST_SUPERUSER_PASSWORD } = process.env
+import { firstSuperuser, firstSuperuserPassword } from "./config.ts"
 
 test.use({ storageState: { cookies: [], origins: [] } })
 
@@ -48,7 +47,7 @@ test("Forgot Password link is visible", async ({ page }) => {
 test("Log in with valid email and password ", async ({ page }) => {
   await page.goto("/login")
 
-  await fillForm(page, FIRST_SUPERUSER, FIRST_SUPERUSER_PASSWORD)
+  await fillForm(page, firstSuperuser, firstSuperuserPassword)
   await page.getByRole("button", { name: "Log In" }).click()
 
   await page.waitForURL("/")
@@ -61,7 +60,7 @@ test("Log in with valid email and password ", async ({ page }) => {
 test("Log in with invalid email", async ({ page }) => {
   await page.goto("/login")
 
-  await fillForm(page, "invalidemail", FIRST_SUPERUSER_PASSWORD)
+  await fillForm(page, "invalidemail", firstSuperuserPassword)
   await page.getByRole("button", { name: "Log In" }).click()
 
   await expect(page.getByText("Invalid email address")).toBeVisible()
@@ -70,7 +69,7 @@ test("Log in with invalid email", async ({ page }) => {
 test("Log in with invalid password", async ({ page }) => {
   await page.goto("/login")
 
-  await fillForm(page, FIRST_SUPERUSER, "changethat")
+  await fillForm(page, firstSuperuser, "changethat")
   await page.getByRole("button", { name: "Log In" }).click()
 
   await expect(page.getByText("Incorrect email or password")).toBeVisible()
@@ -81,7 +80,7 @@ test("Log in with invalid password", async ({ page }) => {
 test("Successful log out", async ({ page }) => {
   await page.goto("/login")
 
-  await fillForm(page, FIRST_SUPERUSER, FIRST_SUPERUSER_PASSWORD)
+  await fillForm(page, firstSuperuser, firstSuperuserPassword)
   await page.getByRole("button", { name: "Log In" }).click()
 
   await page.waitForURL("/")
@@ -98,7 +97,7 @@ test("Successful log out", async ({ page }) => {
 test("Logged-out user cannot access protected routes", async ({ page }) => {
   await page.goto("/login")
 
-  await fillForm(page, FIRST_SUPERUSER, FIRST_SUPERUSER_PASSWORD)
+  await fillForm(page, firstSuperuser, firstSuperuserPassword)
   await page.getByRole("button", { name: "Log In" }).click()
 
   await page.waitForURL("/")
