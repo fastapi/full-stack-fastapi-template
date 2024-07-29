@@ -43,22 +43,17 @@ export function findLastEmail({
     ),
   )
 
-  const findEmailPromise = new Promise<Email>(async (resolve, reject) => {
-    try {
-      while (true) {
-        const emailData = await findEmail({ request, filter })
+  const checkEmails = async () => {
+    while (true) {
+      const emailData = await findEmail({ request, filter })
 
-        if (emailData) {
-          resolve(emailData)
-          return
-        }
-
-        await new Promise((resolve) => setTimeout(resolve, 100))
+      if (emailData) {
+        return emailData
       }
-    } catch (e) {
-      reject(e)
+      // Wait for 100ms before checking again
+      await new Promise((resolve) => setTimeout(resolve, 100))
     }
-  })
+  }
 
-  return Promise.race([timeoutPromise, findEmailPromise])
+  return Promise.race([timeoutPromise, checkEmails()])
 }
