@@ -1,6 +1,6 @@
 import { expect, test } from "@playwright/test"
 import { randomEmail } from "./utils/random"
-import { logInUser, signUpNewUser } from "./utils/user"
+import { logInUser, logOutUser, signUpNewUser } from "./utils/user"
 
 const tabs = ["My profile", "Password", "Appearance"]
 
@@ -138,4 +138,151 @@ test.describe("Edit user with invalid data", () => {
       page.getByLabel("My profile").getByText(email, { exact: true }),
     ).toBeVisible()
   })
+})
+
+// Change Password
+
+test.describe("Change password successfully", () => {
+  test.use({ storageState: { cookies: [], origins: [] } })
+
+  test("Update password successfully", async ({ page }) => {
+    const fullName = "Test User"
+    const email = randomEmail()
+    const password = "password"
+    const NewPassword = "newPassword"
+
+    // Sign up a new user
+    await signUpNewUser(page, fullName, email, password)
+
+    // Log in the user
+    await logInUser(page, email, password)
+
+    await page.goto("/settings")
+    await page.getByRole("tab", { name: "Password" }).click()
+    await page.getByLabel("Current Password*").fill(password)
+    await page.getByLabel("Set Password*").fill(NewPassword)
+    await page.getByLabel("Confirm Password*").fill(NewPassword)
+    await page.getByRole("button", { name: "Save" }).click()
+    await expect(page.getByText("Password updated successfully.")).toBeVisible()
+
+    await logOutUser(page)
+
+    // Check if the user can log in with the new password
+    await logInUser(page, email, NewPassword)
+  })
+})
+
+test.describe("Change password with invalid data", () => {
+  test.use({ storageState: { cookies: [], origins: [] } })
+
+  test("Update password with weak passwords", async ({ page }) => {
+    const fullName = "Test User"
+    const email = randomEmail()
+    const password = "password"
+    const weakPassword = "weak"
+
+    // Sign up a new user
+    await signUpNewUser(page, fullName, email, password)
+
+    // Log in the user
+    await logInUser(page, email, password)
+
+    await page.goto("/settings")
+    await page.getByRole("tab", { name: "Password" }).click()
+    await page.getByLabel("Current Password*").fill(password)
+    await page.getByLabel("Set Password*").fill(weakPassword)
+    await page.getByLabel("Confirm Password*").fill(weakPassword)
+    await expect(
+      page.getByText("Password must be at least 8 characters"),
+    ).toBeVisible()
+  })
+
+  test("New password and confirmation password do not match", async ({
+    page,
+  }) => {
+    const fullName = "Test User"
+    const email = randomEmail()
+    const password = "password"
+    const newPassword = "newPassword"
+    const confirmPassword = "confirmPassword"
+
+    // Sign up a new user
+    await signUpNewUser(page, fullName, email, password)
+
+    // Log in the user
+    await logInUser(page, email, password)
+
+    await page.goto("/settings")
+    await page.getByRole("tab", { name: "Password" }).click()
+    await page.getByLabel("Current Password*").fill(password)
+    await page.getByLabel("Set Password*").fill(newPassword)
+    await page.getByLabel("Confirm Password*").fill(confirmPassword)
+    await page.getByRole("button", { name: "Save" }).click()
+    await expect(page.getByText("Passwords do not match")).toBeVisible()
+  })
+
+  test("Current password and new password are the same", async ({ page }) => {
+    const fullName = "Test User"
+    const email = randomEmail()
+    const password = "password"
+
+    // Sign up a new user
+    await signUpNewUser(page, fullName, email, password)
+
+    // Log in the user
+    await logInUser(page, email, password)
+
+    await page.goto("/settings")
+    await page.getByRole("tab", { name: "Password" }).click()
+    await page.getByLabel("Current Password*").fill(password)
+    await page.getByLabel("Set Password*").fill(password)
+    await page.getByLabel("Confirm Password*").fill(password)
+    await page.getByRole("button", { name: "Save" }).click()
+    await expect(
+      page.getByText("New password cannot be the same as the current one"),
+    ).toBeVisible()
+  })
+})
+
+// Appearance
+
+test("Appearance tab is visible", async ({ page }) => {
+  await page.goto("/settings")
+  await page.getByRole("tab", { name: "Appearance" }).click()
+  await expect(page.getByLabel("Appearance")).toBeVisible()
+})
+
+test("User can switch from light mode to dark mode", async ({ page }) => {
+  await page.goto("/settings")
+  await page.getByRole("tab", { name: "Appearance" }).click()
+  await page.getByLabel("Appearance").locator("span").nth(3).click()
+  const isDarkMode = await page.evaluate(() =>
+    document.body.classList.contains("chakra-ui-dark"),
+  )
+  expect(isDarkMode).toBe(true)
+})
+
+test("User can switch from dark mode to light mode", async ({ page }) => {
+  await page.goto("/settings")
+  await page.getByRole("tab", { name: "Appearance" }).click()
+  await page.getByLabel("Appearance").locator("span").first().click()
+  const isLightMode = await page.evaluate(() =>
+    document.body.classList.contains("chakra-ui-light"),
+  )
+  expect(isLightMode).toBe(true)
+})
+
+test("Selected mode is preserved across sessions", async ({ page }) => {
+  await page.goto("/settings")
+  await page.goto("/settings")
+  await page.getByRole("tab", { name: "Appearance" }).click()
+  await page.getByLabel("Appearance").locator("span").nth(3).click()
+
+  await logOutUser(page)
+
+  await logInUser(page, "admin@example.com", "changethis")
+  const isDarkMode = await page.evaluate(() =>
+    document.body.classList.contains("chakra-ui-dark"),
+  )
+  expect(isDarkMode).toBe(true)
 })
