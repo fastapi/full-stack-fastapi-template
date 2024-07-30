@@ -1,7 +1,7 @@
 import { expect, test } from "@playwright/test"
+import { firstSuperuser, firstSuperuserPassword } from "./config.ts"
 import { randomEmail } from "./utils/random"
 import { logInUser, logOutUser, signUpNewUser } from "./utils/user"
-import { firstSuperuser, firstSuperuserPassword } from "./config.ts"
 
 const tabs = ["My profile", "Password", "Appearance"]
 
@@ -242,6 +242,34 @@ test.describe("Change password with invalid data", () => {
     await expect(
       page.getByText("New password cannot be the same as the current one"),
     ).toBeVisible()
+  })
+})
+
+// Delete Account
+
+test.describe("Delete account successfully", () => {
+  test.use({ storageState: { cookies: [], origins: [] } })
+
+  test("Delete account successfully", async ({ page }) => {
+    const fullName = "Test User"
+    const email = randomEmail()
+    const password = "password"
+
+    // Sign up a new user
+    await signUpNewUser(page, fullName, email, password)
+
+    // Log in the user
+    await logInUser(page, email, password)
+
+    await page.goto("/settings")
+    await page.getByRole("tab", { name: "Danger zone" }).click()
+    await page.getByRole("button", { name: "Delete" }).click()
+    await expect(page.getByTestId("delete-confirmation-user")).toBeVisible()
+    await page.getByRole("button", { name: "Confirm" }).click()
+    await expect(page.getByText("Your account has been successfully deleted.")).toBeVisible()
+
+    // Check if the user is redirected to the login page
+    await page.goto("/login")
   })
 })
 

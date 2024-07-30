@@ -64,7 +64,11 @@ const DeleteConfirmation = ({ isOpen, onClose }: DeleteProps) => {
         isCentered
       >
         <AlertDialogOverlay>
-          <AlertDialogContent as="form" onSubmit={handleSubmit(onSubmit)}>
+          <AlertDialogContent
+            as="form"
+            onSubmit={handleSubmit(onSubmit)}
+            data-testid="delete-confirmation-user"
+          >
             <AlertDialogHeader>Confirmation Required</AlertDialogHeader>
 
             <AlertDialogBody>
