@@ -1,6 +1,7 @@
 import { expect, test } from "@playwright/test"
 import { randomEmail } from "./utils/random"
 import { logInUser, logOutUser, signUpNewUser } from "./utils/user"
+import { firstSuperuser, firstSuperuserPassword } from "./config.ts"
 
 const tabs = ["My profile", "Password", "Appearance"]
 
@@ -279,7 +280,7 @@ test("Selected mode is preserved across sessions", async ({ page }) => {
 
   await logOutUser(page)
 
-  await logInUser(page, "admin@example.com", "changethis")
+  await logInUser(page, firstSuperuser, firstSuperuserPassword)
   const isDarkMode = await page.evaluate(() =>
     document.body.classList.contains("chakra-ui-dark"),
   )
