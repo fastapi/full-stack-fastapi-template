@@ -274,7 +274,6 @@ test("User can switch from dark mode to light mode", async ({ page }) => {
 
 test("Selected mode is preserved across sessions", async ({ page }) => {
   await page.goto("/settings")
-  await page.goto("/settings")
   await page.getByRole("tab", { name: "Appearance" }).click()
   await page.getByLabel("Appearance").locator("span").nth(3).click()
 
