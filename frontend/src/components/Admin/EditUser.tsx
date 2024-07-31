@@ -60,12 +60,12 @@ const EditUser = ({ user, isOpen, onClose }: EditUserProps) => {
       onClose()
     },
     onError: (err: ApiError) => {
-      const errDetail = (err.body as any)?.detail;
-      let errorMessage = "Something went wrong.";
+      const errDetail = (err.body as any)?.detail
+      let errorMessage = "Something went wrong."
       if (Array.isArray(errDetail) && errDetail.length > 0) {
-        errorMessage = errDetail[0].msg;
+        errorMessage = errDetail[0].msg
       }
-      showToast("Error", errorMessage, "error");
+      showToast("Error", errorMessage, "error")
     },
     onSettled: () => {
       queryClient.invalidateQueries({ queryKey: ["users"] })

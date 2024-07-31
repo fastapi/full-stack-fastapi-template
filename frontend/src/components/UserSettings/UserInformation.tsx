@@ -57,12 +57,12 @@ const UserInformation = () => {
       showToast("Success!", "User updated successfully.", "success")
     },
     onError: (err: ApiError) => {
-      const errDetail = (err.body as any)?.detail;
-      let errorMessage = "Something went wrong.";
+      const errDetail = (err.body as any)?.detail
+      let errorMessage = "Something went wrong."
       if (Array.isArray(errDetail) && errDetail.length > 0) {
-        errorMessage = errDetail[0].msg;
+        errorMessage = errDetail[0].msg
       }
-      showToast("Error", errorMessage, "error");
+      showToast("Error", errorMessage, "error")
     },
     onSettled: () => {
       queryClient.invalidateQueries()
@@ -106,7 +106,8 @@ const UserInformation = () => {
                 size="md"
                 py={2}
                 color={!currentUser?.full_name ? "ui.dim" : "inherit"}
-                isTruncated maxWidth="250px"
+                isTruncated
+                maxWidth="250px"
               >
                 {currentUser?.full_name || "N/A"}
               </Text>
