@@ -67,7 +67,7 @@ function UsersTable() {
     if (hasNextPage) {
       queryClient.prefetchQuery(getUsersQueryOptions({ page: page + 1 }))
     }
-  }, [page, queryClient])
+  }, [page, queryClient, hasNextPage])
 
   return (
     <>

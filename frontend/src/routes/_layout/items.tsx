@@ -64,7 +64,7 @@ function ItemsTable() {
     if (hasNextPage) {
       queryClient.prefetchQuery(getItemsQueryOptions({ page: page + 1 }))
     }
-  }, [page, queryClient])
+  }, [page, queryClient, hasNextPage])
 
   return (
     <>
