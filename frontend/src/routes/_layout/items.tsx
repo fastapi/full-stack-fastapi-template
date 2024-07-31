@@ -10,7 +10,7 @@ import {
   Td,
   Th,
   Thead,
-  Tr
+  Tr,
 } from "@chakra-ui/react"
 import { useQuery, useQueryClient } from "@tanstack/react-query"
 import { createFileRoute, useNavigate } from "@tanstack/react-router"
@@ -80,13 +80,13 @@ function ItemsTable() {
           </Thead>
           {isPending ? (
             <Tbody>
-                <Tr>
-                  {new Array(4).fill(null).map((_, index) => (
-                    <Td key={index}>
-                      <SkeletonText noOfLines={1} paddingBlock="16px" />
-                    </Td>
-                  ))}
-                </Tr>
+              <Tr>
+                {new Array(4).fill(null).map((_, index) => (
+                  <Td key={index}>
+                    <SkeletonText noOfLines={1} paddingBlock="16px" />
+                  </Td>
+                ))}
+              </Tr>
             </Tbody>
           ) : (
             <Tbody>
