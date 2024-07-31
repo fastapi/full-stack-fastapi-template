@@ -56,7 +56,7 @@ test("Log In link is visible", async ({ page }) => {
 test("Sign up with valid name, email, and password", async ({ page }) => {
   const full_name = "Test User"
   const email = randomEmail()
-  const password = "changethis"
+  const password = randomPassword()
 
   await page.goto("/signup")
   await fillForm(page, full_name, email, password, password)
@@ -81,7 +81,7 @@ test("Sign up with invalid email", async ({ page }) => {
 test("Sign up with existing email", async ({ page }) => {
   const full_name = "Test User"
   const email = randomEmail()
-  const password = "changethis"
+  const password = randomPassword()
 
   // Sign up with an email
   await page.goto("/signup")
@@ -118,8 +118,8 @@ test("Sign up with weak password", async ({ page }) => {
 test("Sign up with mismatched passwords", async ({ page }) => {
   const full_name = "Test User"
   const email = randomEmail()
-  const password = "changethis"
-  const password2 = "changethat"
+  const password = randomPassword()
+  const password2 = randomPassword()
 
   await page.goto("/signup")
 
@@ -132,7 +132,7 @@ test("Sign up with mismatched passwords", async ({ page }) => {
 test("Sign up with missing full name", async ({ page }) => {
   const full_name = ""
   const email = randomEmail()
-  const password = "changethis"
+  const password = randomPassword()
 
   await page.goto("/signup")
 
@@ -145,7 +145,7 @@ test("Sign up with missing full name", async ({ page }) => {
 test("Sign up with missing email", async ({ page }) => {
   const full_name = "Test User"
   const email = ""
-  const password = "changethis"
+  const password = randomPassword()
 
   await page.goto("/signup")
 
