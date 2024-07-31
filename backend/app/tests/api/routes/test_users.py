@@ -317,10 +317,7 @@ def test_register_user_already_exists_error(client: TestClient) -> None:
         json=data,
     )
     assert r.status_code == 400
-    assert (
-        r.json()["detail"]
-        == "The user with this email already exists in the system"
-    )
+    assert r.json()["detail"] == "The user with this email already exists in the system"
 
 
 def test_update_user(
