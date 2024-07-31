@@ -4,6 +4,7 @@ import {
   Flex,
   Heading,
   Skeleton,
+  SkeletonText,
   Table,
   TableContainer,
   Tbody,
@@ -80,17 +81,13 @@ function ItemsTable() {
           </Thead>
           {isPending ? (
             <Tbody>
-              {new Array(5).fill(null).map((_, index) => (
-                <Tr key={index}>
+                <Tr>
                   {new Array(4).fill(null).map((_, index) => (
                     <Td key={index}>
-                      <Flex>
-                        <Skeleton height="20px" width="20px" />
-                      </Flex>
+                      <SkeletonText noOfLines={1} paddingBlock="16px" />
                     </Td>
                   ))}
                 </Tr>
-              ))}
             </Tbody>
           ) : (
             <Tbody>
