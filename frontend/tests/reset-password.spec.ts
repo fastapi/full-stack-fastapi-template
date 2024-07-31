@@ -1,6 +1,6 @@
 import { expect, test } from "@playwright/test"
 import { findLastEmail } from "./utils/mailcatcher"
-import { randomEmail } from "./utils/random"
+import { randomEmail, randomPassword } from "./utils/random"
 import { logInUser, signUpNewUser } from "./utils/user"
 
 test.use({ storageState: { cookies: [], origins: [] } })
