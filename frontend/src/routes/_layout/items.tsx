@@ -3,7 +3,6 @@ import {
   Container,
   Flex,
   Heading,
-  Skeleton,
   SkeletonText,
   Table,
   TableContainer,
@@ -11,7 +10,7 @@ import {
   Td,
   Th,
   Thead,
-  Tr,
+  Tr
 } from "@chakra-ui/react"
 import { useQuery, useQueryClient } from "@tanstack/react-query"
 import { createFileRoute, useNavigate } from "@tanstack/react-router"
