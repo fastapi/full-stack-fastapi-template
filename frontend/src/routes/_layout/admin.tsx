@@ -96,7 +96,11 @@ function UsersTable() {
             <Tbody>
               {users?.data.map((user) => (
                 <Tr key={user.id}>
-                  <Td color={!user.full_name ? "ui.dim" : "inherit"}>
+                  <Td
+                    color={!user.full_name ? "ui.dim" : "inherit"}
+                    isTruncated
+                    maxWidth="150px"
+                  >
                     {user.full_name || "N/A"}
                     {currentUser?.id === user.id && (
                       <Badge ml="1" colorScheme="teal">
@@ -104,7 +108,9 @@ function UsersTable() {
                       </Badge>
                     )}
                   </Td>
-                  <Td>{user.email}</Td>
+                  <Td isTruncated maxWidth="150px">
+                    {user.email}
+                  </Td>
                   <Td>{user.is_superuser ? "Superuser" : "User"}</Td>
                   <Td>
                     <Flex gap={2}>
@@ -157,7 +163,7 @@ function Admin() {
         Users Management
       </Heading>
 
-      <Navbar type={"Item"} addModalAs={AddUser} />
+      <Navbar type={"User"} addModalAs={AddUser} />
       <UsersTable />
     </Container>
   )
