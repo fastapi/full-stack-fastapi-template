@@ -93,8 +93,14 @@ function ItemsTable() {
               {items?.data.map((item) => (
                 <Tr key={item.id} opacity={isPlaceholderData ? 0.5 : 1}>
                   <Td>{item.id}</Td>
-                  <Td>{item.title}</Td>
-                  <Td color={!item.description ? "ui.dim" : "inherit"}>
+                  <Td isTruncated maxWidth="150px">
+                    {item.title}
+                  </Td>
+                  <Td
+                    color={!item.description ? "ui.dim" : "inherit"}
+                    isTruncated
+                    maxWidth="150px"
+                  >
                     {item.description || "N/A"}
                   </Td>
                   <Td>
