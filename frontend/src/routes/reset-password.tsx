@@ -66,7 +66,7 @@ function ResetPassword() {
     },
     onError: (err: ApiError) => {
       const errDetail = (err.body as any)?.detail
-      showToast("Something went wrong.", `${errDetail}`, "error")
+      showToast("Something went wrong.", errDetail, "error")
     },
   })
 

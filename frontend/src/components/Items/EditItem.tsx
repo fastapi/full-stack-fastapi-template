@@ -51,8 +51,12 @@ const EditItem = ({ item, isOpen, onClose }: EditItemProps) => {
       onClose()
     },
     onError: (err: ApiError) => {
-      const errDetail = (err.body as any)?.detail
-      showToast("Something went wrong.", `${errDetail}`, "error")
+      const errDetail = (err.body as any)?.detail;
+      let errorMessage = "Something went wrong.";
+      if (Array.isArray(errDetail) && errDetail.length > 0) {
+        errorMessage = errDetail[0].msg;
+      }
+      showToast("Error", errorMessage, "error");
     },
     onSettled: () => {
       queryClient.invalidateQueries({ queryKey: ["items"] })
