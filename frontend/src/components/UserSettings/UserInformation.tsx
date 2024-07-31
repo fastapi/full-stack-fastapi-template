@@ -106,6 +106,7 @@ const UserInformation = () => {
                 size="md"
                 py={2}
                 color={!currentUser?.full_name ? "ui.dim" : "inherit"}
+                isTruncated maxWidth="250px"
               >
                 {currentUser?.full_name || "N/A"}
               </Text>
@@ -127,7 +128,7 @@ const UserInformation = () => {
                 w="auto"
               />
             ) : (
-              <Text size="md" py={2}>
+              <Text size="md" py={2} isTruncated maxWidth="250px">
                 {currentUser?.email}
               </Text>
             )}
