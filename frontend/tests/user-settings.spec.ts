@@ -164,7 +164,7 @@ test.describe("Change password successfully", () => {
     await page.getByLabel("Set Password*").fill(NewPassword)
     await page.getByLabel("Confirm Password*").fill(NewPassword)
     await page.getByRole("button", { name: "Save" }).click()
-    await expect(page.getByText("Password updated successfully.")).toBeVisible()
+    await expect(page.getByText("Password updated successfully")).toBeVisible()
 
     await logOutUser(page)
 
@@ -266,7 +266,9 @@ test.describe("Delete account successfully", () => {
     await page.getByRole("button", { name: "Delete" }).click()
     await expect(page.getByTestId("delete-confirmation-user")).toBeVisible()
     await page.getByRole("button", { name: "Confirm" }).click()
-    await expect(page.getByText("Your account has been successfully deleted.")).toBeVisible()
+    await expect(
+      page.getByText("Your account has been successfully deleted"),
+    ).toBeVisible()
 
     // Check if the user is redirected to the login page
     await page.goto("/login")

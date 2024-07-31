@@ -36,3 +36,59 @@ export async function logOutUser(page: Page) {
   await page.getByRole("menuitem", { name: "Log out" }).click()
   await page.goto("/login")
 }
+
+export async function createNormalUser(
+  page: Page,
+  userEmail: string,
+  userFullName: string,
+  userPassword: string,
+  userIsActive: boolean,
+) {
+  await page.goto("/admin")
+  await page.getByRole("button", { name: "Add User" }).click()
+  await page.getByPlaceholder("Email").fill(userEmail)
+  await page.getByPlaceholder("Full name").fill(userFullName)
+  await page.getByLabel("Set Password*").fill(userPassword)
+  await page.getByLabel("Confirm Password*").fill(userPassword)
+  if (userIsActive) {
+    await page
+      .locator("label")
+      .filter({ hasText: "Is active?" })
+      .locator("span")
+      .first()
+      .click()
+  }
+  await page.getByRole("button", { name: "Save" }).click()
+  await expect(page.getByText("User created successfully.")).toBeVisible()
+}
+
+export async function createSuperUser(
+  page: Page,
+  userEmail: string,
+  userFullName: string,
+  userPassword: string,
+  userIsActive: boolean,
+) {
+  await page.goto("/admin")
+  await page.getByRole("button", { name: "Add User" }).click()
+  await page.getByPlaceholder("Email").fill(userEmail)
+  await page.getByPlaceholder("Full name").fill(userFullName)
+  await page.getByLabel("Set Password*").fill(userPassword)
+  await page.getByLabel("Confirm Password*").fill(userPassword)
+  if (userIsActive) {
+    await page
+      .locator("label")
+      .filter({ hasText: "Is active?" })
+      .locator("span")
+      .first()
+      .click()
+  }
+  await page
+    .locator("label")
+    .filter({ hasText: "Is superuser?" })
+    .locator("span")
+    .first()
+    .click()
+  await page.getByRole("button", { name: "Save" }).click()
+  await expect(page.getByText("User created successfully.")).toBeVisible()
+}
