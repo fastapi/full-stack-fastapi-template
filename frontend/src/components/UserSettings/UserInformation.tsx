@@ -23,7 +23,7 @@ import {
 } from "../../client"
 import useAuth from "../../hooks/useAuth"
 import useCustomToast from "../../hooks/useCustomToast"
-import { emailPattern } from "../../utils"
+import { emailPattern, handleError } from "../../utils"
 
 const UserInformation = () => {
   const queryClient = useQueryClient()
@@ -57,12 +57,7 @@ const UserInformation = () => {
       showToast("Success!", "User updated successfully.", "success")
     },
     onError: (err: ApiError) => {
-      const errDetail = (err.body as any)?.detail
-      let errorMessage = "Something went wrong."
-      if (Array.isArray(errDetail) && errDetail.length > 0) {
-        errorMessage = errDetail[0].msg
-      }
-      showToast("Error", errorMessage, "error")
+      handleError(err, showToast)
     },
     onSettled: () => {
       queryClient.invalidateQueries()

@@ -17,6 +17,7 @@ import { type SubmitHandler, useForm } from "react-hook-form"
 
 import { type ApiError, type ItemCreate, ItemsService } from "../../client"
 import useCustomToast from "../../hooks/useCustomToast"
+import { handleError } from "../../utils"
 
 interface AddItemProps {
   isOpen: boolean
@@ -49,12 +50,7 @@ const AddItem = ({ isOpen, onClose }: AddItemProps) => {
       onClose()
     },
     onError: (err: ApiError) => {
-      const errDetail = (err.body as any)?.detail
-      let errorMessage = "Something went wrong."
-      if (Array.isArray(errDetail) && errDetail.length > 0) {
-        errorMessage = errDetail[0].msg
-      }
-      showToast("Error", errorMessage, "error")
+      handleError(err, showToast)
     },
     onSettled: () => {
       queryClient.invalidateQueries({ queryKey: ["items"] })
