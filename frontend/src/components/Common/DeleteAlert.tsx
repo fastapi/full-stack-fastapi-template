@@ -16,7 +16,7 @@ import useCustomToast from "../../hooks/useCustomToast"
 
 interface DeleteProps {
   type: string
-  id: number
+  id: string
   isOpen: boolean
   onClose: () => void
 }
