@@ -27,6 +27,9 @@
 
 ### Refactors
 
+* ♻️ Tweaks in frontend. PR [#1273](https://github.com/tiangolo/full-stack-fastapi-template/pull/1273) by [@alejsdev](https://github.com/alejsdev).
+* ♻️ Add random password util and refactor tests. PR [#1277](https://github.com/tiangolo/full-stack-fastapi-template/pull/1277) by [@alejsdev](https://github.com/alejsdev).
+* ♻️ Refactor models to use cascade delete relationships . PR [#1276](https://github.com/tiangolo/full-stack-fastapi-template/pull/1276) by [@alejsdev](https://github.com/alejsdev).
 * 🔥 Remove `USERS_OPEN_REGISTRATION` config, make registration enabled by default. PR [#1274](https://github.com/tiangolo/full-stack-fastapi-template/pull/1274) by [@alejsdev](https://github.com/alejsdev).
 * 🔧 Reuse database url from config in alembic setup. PR [#1229](https://github.com/tiangolo/full-stack-fastapi-template/pull/1229) by [@patrick91](https://github.com/patrick91).
 * 🔧 Update Playwright config and tests to use env variables. PR [#1266](https://github.com/tiangolo/full-stack-fastapi-template/pull/1266) by [@alejsdev](https://github.com/alejsdev).
@@ -90,6 +93,7 @@
 
 ### Docs
 
+* 📝 Add End-to-End Testing with Playwright to frontend `README.md`. PR [#1279](https://github.com/tiangolo/full-stack-fastapi-template/pull/1279) by [@alejsdev](https://github.com/alejsdev).
 * 📝 Update release-notes.md. PR [#1220](https://github.com/tiangolo/full-stack-fastapi-template/pull/1220) by [@alejsdev](https://github.com/alejsdev).
 * ✏️ Update `README.md`. PR [#1205](https://github.com/tiangolo/full-stack-fastapi-template/pull/1205) by [@Craz1k0ek](https://github.com/Craz1k0ek).
 * ✏️ Fix Adminer URL in `deployment.md`. PR [#1194](https://github.com/tiangolo/full-stack-fastapi-template/pull/1194) by [@PhilippWu](https://github.com/PhilippWu).
