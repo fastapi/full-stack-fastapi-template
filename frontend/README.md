@@ -144,4 +144,4 @@ docker compose down -v
 
 To update the tests, navigate to the tests directory and modify the existing test files or add new ones as needed.
 
-For more information on writing and running Playwright tests, refer to the official [Playwright documentation](https://playwright.dev/docs/intro)
+For more information on writing and running Playwright tests, refer to the official [Playwright documentation](https://playwright.dev/docs/intro).
