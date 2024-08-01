@@ -49,5 +49,5 @@ export const handleError = (err: ApiError, showToast: any) => {
   if (Array.isArray(errDetail) && errDetail.length > 0) {
     errorMessage = errDetail[0].msg
   }
-  showToast("Something went wrong", errorMessage, "error")
+  showToast("Error", errorMessage, "error")
 }
