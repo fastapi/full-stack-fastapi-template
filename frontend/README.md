@@ -115,3 +115,21 @@ The frontend code is structured as follows:
 * `frontend/src/hooks` - Custom hooks.
 * `frontend/src/routes` - The different routes of the frontend which include the pages.
 * `theme.tsx` - The Chakra UI custom theme.
+
+## End-to-End Testing with Playwright
+
+The frontend includes initial end-to-end tests using Playwright. To run the tests, you need to have the Docker Compose stack running. Then, you can run the tests with the following command:
+
+```bash
+npx playwright test
+```
+
+You can also run your tests in UI mode to see the browser and interact with it running:
+
+```bash
+npx playwright test --ui
+```
+
+To update the tests, navigate to the tests directory and modify the existing test files or add new ones as needed.
+
+For more information on writing and running Playwright tests, refer to the official [Playwright documentation](https://playwright.dev/docs/intro)
