@@ -4,9 +4,13 @@ on:
   push:
     branches:
       - master
+      # TODO: Remove the next line after testing
+      - test/deploy-staging
 
 jobs:
   deploy:
+
+    if: github.repository_owner == 'tiangolo'
     runs-on:
       - self-hosted
       - staging
