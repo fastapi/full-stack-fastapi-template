@@ -10,7 +10,7 @@ on:
 jobs:
   deploy:
 
-    if: github.repository_owner == 'tiangolo'
+    if: github.repository_owner != 'tiangolo'
     runs-on:
       - self-hosted
       - staging
