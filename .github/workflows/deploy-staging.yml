@@ -4,12 +4,10 @@ on:
   push:
     branches:
       - master
-      # TODO: Remove the next line after testing
-      - test/deploy-staging
 
 jobs:
   deploy:
-
+    # Do not deploy in the main repository, only in user projects
     if: github.repository_owner != 'tiangolo'
     runs-on:
       - self-hosted
