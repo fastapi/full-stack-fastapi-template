@@ -2,8 +2,28 @@
 
 ## Latest Changes
 
+### Internal
+
+* 👷 Update issue-manager. PR [#1288](https://github.com/fastapi/full-stack-fastapi-template/pull/1288) by [@tiangolo](https://github.com/tiangolo).
+
+## 0.7.0
+
+Lots of new things! 🎁
+
+* E2E tests with Playwright.
+* Mailcatcher configuration, to develop and test email handling.
+* Pagination.
+* UUIDs for database keys.
+* New user sign up.
+* Support for deploying to multiple environments (staging, prod).
+* Many refactors and improvements.
+* Several dependency upgrades.
+
 ### Features
 
+* ✨ Add User Settings e2e tests. PR [#1271](https://github.com/tiangolo/full-stack-fastapi-template/pull/1271) by [@alejsdev](https://github.com/alejsdev).
+* ✨ Add Reset Password e2e tests. PR [#1270](https://github.com/tiangolo/full-stack-fastapi-template/pull/1270) by [@alejsdev](https://github.com/alejsdev).
+* ✨ Add Sign Up e2e tests. PR [#1268](https://github.com/tiangolo/full-stack-fastapi-template/pull/1268) by [@alejsdev](https://github.com/alejsdev).
 * ✨ Add Sign Up and make `OPEN_USER_REGISTRATION=True` by default. PR [#1265](https://github.com/tiangolo/full-stack-fastapi-template/pull/1265) by [@alejsdev](https://github.com/alejsdev).
 * ✨ Add Login e2e tests. PR [#1264](https://github.com/tiangolo/full-stack-fastapi-template/pull/1264) by [@alejsdev](https://github.com/alejsdev).
 * ✨ Add initial setup for frontend / end-to-end tests with Playwright. PR [#1261](https://github.com/tiangolo/full-stack-fastapi-template/pull/1261) by [@alejsdev](https://github.com/alejsdev).
@@ -24,6 +44,14 @@
 
 ### Refactors
 
+* 🚨 Fix Docker build warning. PR [#1283](https://github.com/tiangolo/full-stack-fastapi-template/pull/1283) by [@erip](https://github.com/erip).
+* ♻️ Regenerate client to use UUID instead of id integers and update frontend. PR [#1281](https://github.com/tiangolo/full-stack-fastapi-template/pull/1281) by [@rehanabdul](https://github.com/rehanabdul).
+* ♻️ Tweaks in frontend. PR [#1273](https://github.com/tiangolo/full-stack-fastapi-template/pull/1273) by [@alejsdev](https://github.com/alejsdev).
+* ♻️ Add random password util and refactor tests. PR [#1277](https://github.com/tiangolo/full-stack-fastapi-template/pull/1277) by [@alejsdev](https://github.com/alejsdev).
+* ♻️ Refactor models to use cascade delete relationships . PR [#1276](https://github.com/tiangolo/full-stack-fastapi-template/pull/1276) by [@alejsdev](https://github.com/alejsdev).
+* 🔥 Remove `USERS_OPEN_REGISTRATION` config, make registration enabled by default. PR [#1274](https://github.com/tiangolo/full-stack-fastapi-template/pull/1274) by [@alejsdev](https://github.com/alejsdev).
+* 🔧 Reuse database url from config in alembic setup. PR [#1229](https://github.com/tiangolo/full-stack-fastapi-template/pull/1229) by [@patrick91](https://github.com/patrick91).
+* 🔧 Update Playwright config and tests to use env variables. PR [#1266](https://github.com/tiangolo/full-stack-fastapi-template/pull/1266) by [@alejsdev](https://github.com/alejsdev).
 * ♻️ Edit refactor db models to use UUID's instead of integer ID's. PR [#1259](https://github.com/tiangolo/full-stack-fastapi-template/pull/1259) by [@estebanx64](https://github.com/estebanx64).
 * ♻️ Update form inputs width. PR [#1263](https://github.com/tiangolo/full-stack-fastapi-template/pull/1263) by [@alejsdev](https://github.com/alejsdev).
 * ♻️ Replace deprecated utcnow() with now(timezone.utc) in utils module. PR [#1247](https://github.com/tiangolo/full-stack-fastapi-template/pull/1247) by [@jalvarezz13](https://github.com/jalvarezz13).
@@ -72,6 +100,7 @@
 
 ### Upgrades
 
+* ⬆️ Update SQLModel to version `>=0.0.21`. PR [#1275](https://github.com/tiangolo/full-stack-fastapi-template/pull/1275) by [@alejsdev](https://github.com/alejsdev).
 * ⬆️ Upgrade Traefik. PR [#1241](https://github.com/tiangolo/full-stack-fastapi-template/pull/1241) by [@tiangolo](https://github.com/tiangolo).
 * ⬆️ Bump requests from 2.31.0 to 2.32.0 in /backend. PR [#1211](https://github.com/tiangolo/full-stack-fastapi-template/pull/1211) by [@dependabot[bot]](https://github.com/apps/dependabot).
 * ⬆️ Bump jinja2 from 3.1.3 to 3.1.4 in /backend. PR [#1196](https://github.com/tiangolo/full-stack-fastapi-template/pull/1196) by [@dependabot[bot]](https://github.com/apps/dependabot).
@@ -83,6 +112,8 @@
 
 ### Docs
 
+* 📝 Update links from tiangolo repo to fastapi org repo. PR [#1285](https://github.com/fastapi/full-stack-fastapi-template/pull/1285) by [@tiangolo](https://github.com/tiangolo).
+* 📝 Add End-to-End Testing with Playwright to frontend `README.md`. PR [#1279](https://github.com/tiangolo/full-stack-fastapi-template/pull/1279) by [@alejsdev](https://github.com/alejsdev).
 * 📝 Update release-notes.md. PR [#1220](https://github.com/tiangolo/full-stack-fastapi-template/pull/1220) by [@alejsdev](https://github.com/alejsdev).
 * ✏️ Update `README.md`. PR [#1205](https://github.com/tiangolo/full-stack-fastapi-template/pull/1205) by [@Craz1k0ek](https://github.com/Craz1k0ek).
 * ✏️ Fix Adminer URL in `deployment.md`. PR [#1194](https://github.com/tiangolo/full-stack-fastapi-template/pull/1194) by [@PhilippWu](https://github.com/PhilippWu).
@@ -99,6 +130,8 @@
 
 ### Internal
 
+* 🔧 Update deploy workflows to exclude the main repository. PR [#1284](https://github.com/tiangolo/full-stack-fastapi-template/pull/1284) by [@alejsdev](https://github.com/alejsdev).
+* 👷 Update issue-manager.yml GitHub Action permissions. PR [#1278](https://github.com/tiangolo/full-stack-fastapi-template/pull/1278) by [@tiangolo](https://github.com/tiangolo).
 * ⬆️ Bump setuptools from 69.1.1 to 70.0.0 in /backend. PR [#1255](https://github.com/tiangolo/full-stack-fastapi-template/pull/1255) by [@dependabot[bot]](https://github.com/apps/dependabot).
 * ⬆️ Bump certifi from 2024.2.2 to 2024.7.4 in /backend. PR [#1250](https://github.com/tiangolo/full-stack-fastapi-template/pull/1250) by [@dependabot[bot]](https://github.com/apps/dependabot).
 * ⬆️ Bump urllib3 from 2.2.1 to 2.2.2 in /backend. PR [#1235](https://github.com/tiangolo/full-stack-fastapi-template/pull/1235) by [@dependabot[bot]](https://github.com/apps/dependabot).
