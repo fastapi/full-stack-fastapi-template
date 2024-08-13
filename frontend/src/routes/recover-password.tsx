@@ -7,13 +7,14 @@ import {
   Input,
   Text,
 } from "@chakra-ui/react"
+import { useMutation } from "@tanstack/react-query"
 import { createFileRoute, redirect } from "@tanstack/react-router"
 import { type SubmitHandler, useForm } from "react-hook-form"
 
-import { LoginService } from "../client"
+import { type ApiError, LoginService } from "../client"
 import { isLoggedIn } from "../hooks/useAuth"
 import useCustomToast from "../hooks/useCustomToast"
-import { emailPattern } from "../utils"
+import { emailPattern, handleError } from "../utils"
 
 interface FormData {
   email: string
@@ -34,19 +35,34 @@ function RecoverPassword() {
   const {
     register,
     handleSubmit,
+    reset,
     formState: { errors, isSubmitting },
   } = useForm<FormData>()
   const showToast = useCustomToast()
 
-  const onSubmit: SubmitHandler<FormData> = async (data) => {
+  const recoverPassword = async (data: FormData) => {
     await LoginService.recoverPassword({
       email: data.email,
     })
-    showToast(
-      "Email sent.",
-      "We sent an email with a link to get back into your account.",
-      "success",
-    )
+  }
+
+  const mutation = useMutation({
+    mutationFn: recoverPassword,
+    onSuccess: () => {
+      showToast(
+        "Email sent.",
+        "We sent an email with a link to get back into your account.",
+        "success",
+      )
+      reset()
+    },
+    onError: (err: ApiError) => {
+      handleError(err, showToast)
+    },
+  })
+
+  const onSubmit: SubmitHandler<FormData> = async (data) => {
+    mutation.mutate(data)
   }
 
   return (
