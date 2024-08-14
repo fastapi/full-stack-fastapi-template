@@ -8,6 +8,8 @@
 
 ### Internal
 
+* 👷 Update GitHub Action labeler dependencies. PR [#1302](https://github.com/fastapi/full-stack-fastapi-template/pull/1302) by [@tiangolo](https://github.com/tiangolo).
+* 👷 Update GitHub Action labeler permissions. PR [#1300](https://github.com/fastapi/full-stack-fastapi-template/pull/1300) by [@tiangolo](https://github.com/tiangolo).
 * 👷 Add GitHub Action label-checker. PR [#1299](https://github.com/fastapi/full-stack-fastapi-template/pull/1299) by [@tiangolo](https://github.com/tiangolo).
 * 👷 Add GitHub Action labeler. PR [#1298](https://github.com/fastapi/full-stack-fastapi-template/pull/1298) by [@tiangolo](https://github.com/tiangolo).
 * 👷 Add GitHub Action add-to-project. PR [#1297](https://github.com/fastapi/full-stack-fastapi-template/pull/1297) by [@tiangolo](https://github.com/tiangolo).
