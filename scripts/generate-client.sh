@@ -5,4 +5,4 @@ node frontend/modify-openapi-operationids.js
 mv openapi.json frontend/
 cd frontend || exit
 npm run generate-client
-npm run lint
+npx biome format --write ./src/client
