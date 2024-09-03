@@ -11,9 +11,10 @@ import { useMutation, useQueryClient } from "@tanstack/react-query"
 import React from "react"
 import { useForm } from "react-hook-form"
 
-import { type ApiError, type UserPublic, UsersService } from "../../client"
+import { type ApiError, UsersService } from "../../client"
 import useAuth from "../../hooks/useAuth"
 import useCustomToast from "../../hooks/useCustomToast"
+import { handleError } from "../../utils"
 
 interface DeleteProps {
   isOpen: boolean
@@ -28,11 +29,10 @@ const DeleteConfirmation = ({ isOpen, onClose }: DeleteProps) => {
     handleSubmit,
     formState: { isSubmitting },
   } = useForm()
-  const currentUser = queryClient.getQueryData<UserPublic>(["currentUser"])
   const { logout } = useAuth()
 
   const mutation = useMutation({
-    mutationFn: (id: number) => UsersService.deleteUser({ userId: id }),
+    mutationFn: () => UsersService.deleteUserMe(),
     onSuccess: () => {
       showToast(
         "Success",
@@ -43,8 +43,7 @@ const DeleteConfirmation = ({ isOpen, onClose }: DeleteProps) => {
       onClose()
     },
     onError: (err: ApiError) => {
-      const errDetail = (err.body as any)?.detail
-      showToast("Something went wrong.", `${errDetail}`, "error")
+      handleError(err, showToast)
     },
     onSettled: () => {
       queryClient.invalidateQueries({ queryKey: ["currentUser"] })
@@ -52,7 +51,7 @@ const DeleteConfirmation = ({ isOpen, onClose }: DeleteProps) => {
   })
 
   const onSubmit = async () => {
-    mutation.mutate(currentUser!.id)
+    mutation.mutate()
   }
 
   return (

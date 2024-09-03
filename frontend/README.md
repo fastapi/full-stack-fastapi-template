@@ -4,7 +4,7 @@ The frontend is built with [Vite](https://vitejs.dev/), [React](https://reactjs.
 
 ## Frontend development
 
-Before you begin, ensure that you have either the Node Version Manager (nvm) or Fast Node Manager (fnm) installed on your system. 
+Before you begin, ensure that you have either the Node Version Manager (nvm) or Fast Node Manager (fnm) installed on your system.
 
 * To install fnm follow the [official fnm guide](https://github.com/Schniz/fnm#installation). If you prefer nvm, you can install it using the [official nvm guide](https://github.com/nvm-sh/nvm#installing-and-updating).
 
@@ -27,7 +27,7 @@ nvm install
 
 ```bash
 # If using fnm
-fnm use 
+fnm use
 
 # If using nvm
 nvm use
@@ -74,6 +74,19 @@ But it would be only to clean them up, leaving them won't really have any effect
 
 ## Generate Client
 
+### Automatically
+
+* Activate the backend virtual environment.
+* From the top level project directory, run the script:
+
+```bash
+./scripts/generate-frontend-client.sh
+```
+
+* Commit the changes.
+
+### Manually
+
 * Start the Docker Compose stack.
 
 * Download the OpenAPI JSON file from `http://localhost/api/v1/openapi.json` and copy it to a new file `openapi.json` at the root of the `frontend` directory.
@@ -115,3 +128,33 @@ The frontend code is structured as follows:
 * `frontend/src/hooks` - Custom hooks.
 * `frontend/src/routes` - The different routes of the frontend which include the pages.
 * `theme.tsx` - The Chakra UI custom theme.
+
+## End-to-End Testing with Playwright
+
+The frontend includes initial end-to-end tests using Playwright. To run the tests, you need to have the Docker Compose stack running. Start the stack with the following command:
+
+```bash
+docker compose up -d
+```
+
+Then, you can run the tests with the following command:
+
+```bash
+npx playwright test
+```
+
+You can also run your tests in UI mode to see the browser and interact with it running:
+
+```bash
+npx playwright test --ui
+```
+
+To stop and remove the Docker Compose stack and clean the data created in tests, use the following command:
+
+```bash
+docker compose down -v
+```
+
+To update the tests, navigate to the tests directory and modify the existing test files or add new ones as needed.
+
+For more information on writing and running Playwright tests, refer to the official [Playwright documentation](https://playwright.dev/docs/intro).
