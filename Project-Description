@@ -1,0 +1,240 @@
+## 1. Scope
+
+### 1.1 In Scope
+- Provide a way for me to manage the incomes and expenses of properties I own either wholly or jointly with a partner.
+- Provide a way for me to see the Key Performance Indicators of any given property or my portfolio as a whole.
+
+### 1.2 Out of Scope
+- Manage tenant experiences (leases, maintenance requests, messaging), or make payments to vendors or receive payments from tenants.
+
+## 2. Functional Requirements
+
+### 2.1 User Authentication and Role Management 🔐
+
+#### User Roles:
+- **👑 Admin**: Full access to all properties and features.
+- **🤝 Partner**: Limited access to properties they are associated with.
+- **👁️ Viewer**: Read-only access for specific users (e.g., accountants).
+
+#### Authentication:
+- 🔒 Secure login system with password management.
+- 🔑 Multi-Factor Authentication (MFA) for enhanced security.
+
+#### Role-Based Access Control (RBAC):
+- 🎯 Users can only access data and features relevant to their role and associated properties.
+
+### 2.2 Property and Partner Management 🏠🤝
+
+#### Property Management:
+- 📝 Ability to add, edit, and remove properties.
+- 📊 Store and manage financial details for each property:
+  - 💵 Loan Amount
+  - 📈 Interest Rate
+  - 📅 Loan Term (in years or months)
+  - 🗓️ Date Acquired
+  - 🏦 Loan Type (fixed-rate, adjustable-rate)
+  - 💰 Down Payment
+  - 💼 Closing Costs
+  - 🛠️ Renovation Costs
+  - 🏗️ Holding Costs
+- 🔄 Automatically update the current market value of the property for equity calculations using external sources (e.g., Zillow, Redfin).
+- 🔗 Link each property to one or more partners.
+
+#### Partner Management:
+- 🧑‍💼 Manage partner details and their associated properties.
+- 📊 Track ownership percentages for accurate income and expense splitting.
+
+### 2.3 Income and Expense Tracking 💸
+
+#### Transaction Management:
+- 💼 Record income and expenses by property.
+- 📝 Input fields: Date, Property, Description, Amount, Category, and Partner (if applicable).
+
+#### Expense Categorization:
+- 🗂️ Define categories for expenses (e.g., maintenance, taxes, utilities).
+- 🔍 Allow filtering of expenses by category.
+
+#### Partner Payments:
+- 💰 Track and manage the split of income and expenses with partners.
+- ✅ Mark whether the partner has reimbursed their share of expenses or received their share of income.
+
+### 2.4 Document Management 📂
+
+#### File Upload:
+- 📎 Attach supporting documents (e.g., invoices, receipts) to each transaction.
+- 🖼️ Supported file types: PDF, JPEG, PNG.
+
+#### Document Retrieval:
+- 🔍 Search and filter documents by property, date, or transaction details.
+- 🏷️ Tag documents with keywords for easier retrieval.
+
+### 2.5 Reporting and Analytics 📊
+
+#### Custom Reports:
+- 📑 Generate reports on income, expenses, and partner payments.
+- 🎛️ Filter reports by date range, property, partner, and expense category.
+
+#### Analytics Dashboard:
+- 📉 Visual representation of income and expenses over time.
+- 📊 Identify trends and patterns in property performance.
+
+#### Export Data:
+- 💾 Export reports in CSV and PDF formats.
+- 🔄 Ability to export transaction data for external analysis.
+
+### 2.6 Notifications and Reminders 🔔
+
+#### Automated Reminders:
+- ⏰ Set reminders for unpaid expenses and unsettled income splits.
+- 📩 Send notifications to relevant partners when an entry is added.
+- ⚠️ Dashboard alerts for pending actions requiring user attention.
+
+### 2.7 Audit Trail 🕵️‍♂️
+
+#### Change Tracking:
+- 📝 Log all changes made to transactions, including who made the changes and when.
+- 🛡️ Track critical user actions such as logins, access attempts, and role changes.
+
+#### Audit Reports:
+- 📜 Generate audit reports showing the history of changes for accountability.
+
+### 2.8 Data Validation and Input Constraints ✅
+
+#### Form Validation:
+- ✔️ Ensure data entered in forms is validated (e.g., date formats, required fields).
+
+#### Database Constraints:
+- 🗄️ Enforce constraints at the database level (e.g., non-null fields, unique constraints).
+
+### 2.9 Backup and Data Recovery 💾
+
+#### Automated Backups:
+- 🕒 Schedule regular backups of the database and stored documents.
+- ☁️ Store backups securely off-site (e.g., cloud storage).
+
+#### Data Recovery:
+- 🔄 Regularly test the backup restoration process.
+- 🛠️ Implement a data recovery plan to minimize disruption in case of data loss.
+
+### 2.10 Testing and Maintenance 🧪🛠️
+
+#### Unit Testing:
+- 🧩 Develop unit tests for individual components of the application.
+
+#### Integration Testing:
+- 🔗 Implement integration tests to ensure that different parts of the system work together seamlessly.
+
+#### Continuous Integration (CI):
+- 🤖 Set up a CI pipeline to automatically run tests on code changes.
+
+#### Ongoing Maintenance:
+- 🔄 Plan for regular updates, bug fixes, and performance optimizations.
+
+### 2.11 Loan Amortization Schedule 📅
+
+#### Amortization Calculation:
+- 🧮 Automatically generate an amortization schedule for each loan.
+- 📝 Display monthly details including principal paid, interest paid, remaining balance, and cumulative payments.
+
+#### Loan Progress:
+- 📆 Display how many months into the loan the property is.
+- 💸 Show the principal portion of the next mortgage payment.
+- 📉 Calculate the remaining loan balance.
+
+### 2.12 Equity Calculation 📈
+
+#### Equity Calculation:
+- 🔢 Calculate property equity as:  
+  **Equity = Current Market Value - Remaining Loan Balance**
+- 🔄 Allow for periodic updates to market value for accurate equity calculation.
+
+### 2.14 Visualization and Reporting 📊
+
+#### Amortization Charts (Per Property):
+- 📈 Visualize loan amortization for each property, including:
+  - Loan balance over time
+  - Cumulative interest paid
+  - Cumulative principal paid
+
+#### Aggregate Amortization Charts:
+- 🌐 Display an aggregate view of loan amortization across all properties:
+  - Total loan balance
+  - Total cumulative interest paid
+  - Total cumulative principal paid
+
+### 2.15 Key Performance Indicators (KPIs) 📊📈
+
+#### Cash-on-Cash Return:
+
+- **Data Points**:
+  - 💵 Total Cash Invested: Include down payment, closing costs, and other initial investments.
+  - 📅 Annual Pre-Tax Cash Flow: Sum of all income minus operating expenses and mortgage payments for the year.
+  
+- **Calculation**:  
+  **CoC Return = (Annual Pre-Tax Cash Flow / Total Cash Invested) * 100**
+
+- **Display**:  
+  Show CoC Return for each property. Provide an aggregate CoC Return for the entire portfolio.
+
+#### Net Monthly Cash Flow:
+
+- **Data Points**:
+  - 💵 Monthly Income: Include rental income and other revenue sources.
+  - 🏦 Monthly Expenses: Include mortgage payment, property taxes, insurance, utilities, maintenance, and other recurring costs.
+  
+- **Calculation**:  
+  **Net Monthly Cash Flow = Monthly Income - Monthly Expenses**
+
+- **Display**:  
+  Show Net Monthly Cash Flow for each property on a monthly basis. Provide an aggregate Net Monthly Cash Flow for the entire portfolio.
+
+## 3. Non-Functional Requirements ⚙️
+
+### 3.1 Scalability 🚀
+
+#### Database Design:
+- 📊 Design a scalable database schema to handle increasing data as more properties and transactions are added.
+
+#### Horizontal Scaling:
+- 🖥️ Ensure the application can scale horizontally by adding more servers to handle increased load.
+
+#### Load Balancing:
+- ⚖️ Implement load balancing to distribute traffic evenly across servers.
+
+### 3.2 Performance Optimization ⚡
+
+#### Database Indexing:
+- 🔍 Index database tables to optimize the speed of queries, especially for large datasets.
+
+#### Caching:
+- 🏎️ Implement caching mechanisms to reduce database load and improve data retrieval times.
+
+### 3.3 Security 🔒
+
+#### Data Encryption:
+- 🛡️ Encrypt sensitive data both at rest and in transit.
+
+#### Access Logs:
+- 📜 Maintain logs of user access and activities to detect and respond to unauthorized access attempts.
+
+#### Security Audits:
+- 🕵️ Conduct regular security audits to identify and mitigate vulnerabilities.
+
+### 3.4 User Interface (UI) and User Experience (UX) 🎨
+
+#### Ease of Use:
+- 🖱️ Design a clean and intuitive user interface, ensuring that even non-technical users can navigate the application easily.
+
+#### Responsive Design:
+- 📱 Ensure the application is responsive and works well on different screen sizes (desktop, tablet, small laptops).
+
+#### Customizable Views:
+- ⚙️ Allow users to customize their dashboard and reports based on their preferences.
+
+## 4. Future Considerations 🔮
+- 🔄 Integration with Accounting Software (Not in current scope but could be considered for future iterations).
+- 📱 Mobile Application (Could be added in future versions if the need arises).
+- 📑 Legal Compliance (Consider adding features to track compliance with real estate laws in future updates).
+
+## 5. Conclusion 🏁
+This requirements document outlines the essential features and considerations for the Real Estate Investment Management Application. The application is designed to be secure, scalable, and user-friendly, providing robust tools for managing property-related finances, partner relationships, and key financial metrics such as Cash-on-Cash Return and Net Monthly Cash Flow. By focusing on these core functionalities, this project aims to provide a solid foundation for efficient real estate investment management.
