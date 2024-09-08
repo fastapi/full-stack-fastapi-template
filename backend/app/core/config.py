@@ -1,3 +1,4 @@
+import os
 import secrets
 import warnings
 from typing import Annotated, Any, Literal
@@ -31,10 +32,11 @@ class Settings(BaseSettings):
     SECRET_KEY: str = secrets.token_urlsafe(32)
     # 60 minutes * 24 hours * 8 days = 8 days
     ACCESS_TOKEN_EXPIRE_MINUTES: int = 60 * 24 * 8
+    REFRESH_TOKEN_EXPIRE_DAYS: int = 60 * 24 * 30
     DOMAIN: str = "localhost"
     ENVIRONMENT: Literal["local", "staging", "production"] = "local"
 
-    @computed_field  # type: ignore[prop-decorator]
+    @computed_field  # type: ignore[misc]
     @property
     def server_host(self) -> str:
         # Use HTTPS for anything other than local development
@@ -51,10 +53,13 @@ class Settings(BaseSettings):
     POSTGRES_SERVER: str
     POSTGRES_PORT: int = 5432
     POSTGRES_USER: str
-    POSTGRES_PASSWORD: str = ""
+    POSTGRES_PASSWORD: str
     POSTGRES_DB: str = ""
+    FRONTEND_SERVER_HOST: str = os.environ.get(
+        "FRONTEND_SERVER_HOST", "http://localhost:3000"
+    )
 
-    @computed_field  # type: ignore[prop-decorator]
+    @computed_field  # type: ignore[misc]
     @property
     def SQLALCHEMY_DATABASE_URI(self) -> PostgresDsn:
         return MultiHostUrl.build(
@@ -66,6 +71,7 @@ class Settings(BaseSettings):
             path=self.POSTGRES_DB,
         )
 
+    RESEND_API_KEY: str | None = "re_V3JiQn9o_3jjEx56FCBePUJ2AjTWEE6y4"
     SMTP_TLS: bool = True
     SMTP_SSL: bool = False
     SMTP_PORT: int = 587
@@ -73,7 +79,9 @@ class Settings(BaseSettings):
     SMTP_USER: str | None = None
     SMTP_PASSWORD: str | None = None
     # TODO: update type to EmailStr when sqlmodel supports it
-    EMAILS_FROM_EMAIL: str | None = None
+    EMAILS_FROM_EMAIL: str | None = "noreply@careertweakrz.com"
+    RESEND_FROM_EMAIL: str = "noreply@careertweakrz.com"
+
     EMAILS_FROM_NAME: str | None = None
 
     @model_validator(mode="after")
@@ -84,16 +92,19 @@ class Settings(BaseSettings):
 
     EMAIL_RESET_TOKEN_EXPIRE_HOURS: int = 48
 
-    @computed_field  # type: ignore[prop-decorator]
+    @computed_field  # type: ignore[misc]
     @property
     def emails_enabled(self) -> bool:
-        return bool(self.SMTP_HOST and self.EMAILS_FROM_EMAIL)
+        if self.RESEND_API_KEY:
+            return True
+        return False
 
     # TODO: update type to EmailStr when sqlmodel supports it
     EMAIL_TEST_USER: str = "test@example.com"
     # TODO: update type to EmailStr when sqlmodel supports it
     FIRST_SUPERUSER: str
     FIRST_SUPERUSER_PASSWORD: str
+    USERS_OPEN_REGISTRATION: bool = True
 
     def _check_default_secret(self, var_name: str, value: str | None) -> None:
         if value == "changethis":
@@ -115,6 +126,10 @@ class Settings(BaseSettings):
         )
 
         return self
+
+    AZURE_BLOB_STORAGE_ACCOUNT_NAME: str | None = None
+    AZURE_BLOB_ACCOUNT_KEY: str | None = None
+    AZURE_BLOB_CONTAINER_NAME: str | None = None
 
 
 settings = Settings()  # type: ignore

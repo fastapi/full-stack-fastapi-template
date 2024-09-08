@@ -22,7 +22,13 @@ def get_db() -> Generator[Session, None, None]:
     with Session(engine) as session:
         yield session
 
-
+def get_db_transaction():
+    db = Session(engine)
+    try:
+        db.begin()  # Explicitly start a new transaction
+        yield db
+    finally:
+        db.close() 
 SessionDep = Annotated[Session, Depends(get_db)]
 TokenDep = Annotated[str, Depends(reusable_oauth2)]
 
@@ -43,6 +49,8 @@ def get_current_user(session: SessionDep, token: TokenDep) -> User:
         raise HTTPException(status_code=404, detail="User not found")
     if not user.is_active:
         raise HTTPException(status_code=400, detail="Inactive user")
+    if not user.email_verified_primary:
+        raise HTTPException(status_code=400, detail="Email not verified")
     return user
 
 

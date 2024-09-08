@@ -1,5 +1,3 @@
-import uuid
-
 from fastapi.testclient import TestClient
 from sqlmodel import Session
 
@@ -36,15 +34,15 @@ def test_read_item(
     content = response.json()
     assert content["title"] == item.title
     assert content["description"] == item.description
-    assert content["id"] == str(item.id)
-    assert content["owner_id"] == str(item.owner_id)
+    assert content["id"] == item.id
+    assert content["owner_id"] == item.owner_id
 
 
 def test_read_item_not_found(
     client: TestClient, superuser_token_headers: dict[str, str]
 ) -> None:
     response = client.get(
-        f"{settings.API_V1_STR}/items/{uuid.uuid4()}",
+        f"{settings.API_V1_STR}/items/999",
         headers=superuser_token_headers,
     )
     assert response.status_code == 404
@@ -93,8 +91,8 @@ def test_update_item(
     content = response.json()
     assert content["title"] == data["title"]
     assert content["description"] == data["description"]
-    assert content["id"] == str(item.id)
-    assert content["owner_id"] == str(item.owner_id)
+    assert content["id"] == item.id
+    assert content["owner_id"] == item.owner_id
 
 
 def test_update_item_not_found(
@@ -102,7 +100,7 @@ def test_update_item_not_found(
 ) -> None:
     data = {"title": "Updated title", "description": "Updated description"}
     response = client.put(
-        f"{settings.API_V1_STR}/items/{uuid.uuid4()}",
+        f"{settings.API_V1_STR}/items/999",
         headers=superuser_token_headers,
         json=data,
     )
@@ -143,7 +141,7 @@ def test_delete_item_not_found(
     client: TestClient, superuser_token_headers: dict[str, str]
 ) -> None:
     response = client.delete(
-        f"{settings.API_V1_STR}/items/{uuid.uuid4()}",
+        f"{settings.API_V1_STR}/items/999",
         headers=superuser_token_headers,
     )
     assert response.status_code == 404

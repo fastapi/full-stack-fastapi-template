@@ -14,20 +14,21 @@ passlib = {extras = ["bcrypt"], version = "^1.7.4"}
 tenacity = "^8.2.3"
 pydantic = ">2.0"
 emails = "^0.6"
-
 gunicorn = "^22.0.0"
 jinja2 = "^3.1.4"
 alembic = "^1.12.1"
 httpx = "^0.25.1"
 psycopg = {extras = ["binary"], version = "^3.1.13"}
-sqlmodel = "^0.0.21"
-# Pin bcrypt until passlib supports the latest
+sqlmodel = "^0.0.16"
 bcrypt = "4.0.1"
 pydantic-settings = "^2.2.1"
 sentry-sdk = {extras = ["fastapi"], version = "^1.40.6"}
 pyjwt = "^2.8.0"
+resend = "^2.3.0"
+fastapi-pagination = "^0.12.26"
+azure-storage-blob = "^12.22.0"
 
-[tool.poetry.group.dev.dependencies]
+[tool.poetry.dev-dependencies]
 pytest = "^7.4.3"
 mypy = "^1.8.0"
 ruff = "^0.2.2"
@@ -66,5 +67,4 @@ ignore = [
 ]
 
 [tool.ruff.lint.pyupgrade]
-# Preserve types, even if a file imports `from __future__ import annotations`.
 keep-runtime-typing = true

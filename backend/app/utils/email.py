@@ -1,13 +1,10 @@
 import logging
 from dataclasses import dataclass
-from datetime import datetime, timedelta, timezone
 from pathlib import Path
 from typing import Any
 
-import emails  # type: ignore
-import jwt
+import resend
 from jinja2 import Template
-from jwt.exceptions import InvalidTokenError
 
 from app.core.config import settings
 
@@ -17,6 +14,7 @@ class EmailData:
     html_content: str
     subject: str
 
+resend.api_key = settings.RESEND_API_KEY
 
 def render_email_template(*, template_name: str, context: dict[str, Any]) -> str:
     template_str = (
@@ -33,22 +31,14 @@ def send_email(
     html_content: str = "",
 ) -> None:
     assert settings.emails_enabled, "no provided configuration for email variables"
-    message = emails.Message(
-        subject=subject,
-        html=html_content,
-        mail_from=(settings.EMAILS_FROM_NAME, settings.EMAILS_FROM_EMAIL),
-    )
-    smtp_options = {"host": settings.SMTP_HOST, "port": settings.SMTP_PORT}
-    if settings.SMTP_TLS:
-        smtp_options["tls"] = True
-    elif settings.SMTP_SSL:
-        smtp_options["ssl"] = True
-    if settings.SMTP_USER:
-        smtp_options["user"] = settings.SMTP_USER
-    if settings.SMTP_PASSWORD:
-        smtp_options["password"] = settings.SMTP_PASSWORD
-    response = message.send(to=email_to, smtp=smtp_options)
-    logging.info(f"send email result: {response}")
+    params: resend.Emails.SendParams = {
+        "from": settings.RESEND_FROM_EMAIL,
+        "to": [email_to],
+        "subject": subject,
+        "html": html_content
+    }
+    email: resend.Email = resend.Emails.send(params)
+    logging.info(f"send email result: {email}")
 
 
 def generate_test_email(email_to: str) -> EmailData:
@@ -61,18 +51,18 @@ def generate_test_email(email_to: str) -> EmailData:
     return EmailData(html_content=html_content, subject=subject)
 
 
-def generate_reset_password_email(email_to: str, email: str, token: str) -> EmailData:
+def generate_reset_password_email(email_to: str, token: str, username: str | None) -> EmailData:
     project_name = settings.PROJECT_NAME
-    subject = f"{project_name} - Password recovery for user {email}"
-    link = f"{settings.server_host}/reset-password?token={token}"
+    subject = f"{project_name} - Password recovery for user {username}"
+    link = f"{settings.FRONTEND_SERVER_HOST}/reset-password?token={token}"
     html_content = render_email_template(
         template_name="reset_password.html",
         context={
             "project_name": settings.PROJECT_NAME,
-            "username": email,
+            "username": username,
             "email": email_to,
             "valid_hours": settings.EMAIL_RESET_TOKEN_EXPIRE_HOURS,
-            "link": link,
+            "reset_link": link,
         },
     )
     return EmailData(html_content=html_content, subject=subject)
@@ -95,23 +85,18 @@ def generate_new_account_email(
     )
     return EmailData(html_content=html_content, subject=subject)
 
-
-def generate_password_reset_token(email: str) -> str:
-    delta = timedelta(hours=settings.EMAIL_RESET_TOKEN_EXPIRE_HOURS)
-    now = datetime.now(timezone.utc)
-    expires = now + delta
-    exp = expires.timestamp()
-    encoded_jwt = jwt.encode(
-        {"exp": exp, "nbf": now, "sub": email},
-        settings.SECRET_KEY,
-        algorithm="HS256",
+def generate_new_account_email_otp(
+    email_to: str, username: str, otp: str
+) -> EmailData:
+    project_name = settings.PROJECT_NAME
+    subject = f"{project_name} - New account for user {username}"
+    html_content = render_email_template(
+        template_name="otp.html",
+        context={
+            "project_name": settings.PROJECT_NAME,
+            "username": username,
+            "email": email_to,
+            "otp": otp,
+        },
     )
-    return encoded_jwt
-
-
-def verify_password_reset_token(token: str) -> str | None:
-    try:
-        decoded_token = jwt.decode(token, settings.SECRET_KEY, algorithms=["HS256"])
-        return str(decoded_token["sub"])
-    except InvalidTokenError:
-        return None
+    return EmailData(html_content=html_content, subject=subject)

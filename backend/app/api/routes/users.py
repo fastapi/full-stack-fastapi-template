@@ -1,31 +1,46 @@
-import uuid
+import logging
 from typing import Any
 
 from fastapi import APIRouter, Depends, HTTPException
-from sqlmodel import col, delete, func, select
+from sqlalchemy.exc import SQLAlchemyError
+from sqlalchemy.orm import Session
+from sqlmodel import func, select
 
 from app import crud
 from app.api.deps import (
     CurrentUser,
     SessionDep,
     get_current_active_superuser,
+    get_db_transaction,
 )
 from app.core.config import settings
-from app.core.security import get_password_hash, verify_password
+from app.core.security import generate_jwt_token, get_password_hash, verify_password
 from app.models import (
-    Item,
+    JobPreferences,
+    JobTitlePreference,
+    JobTypePreference,
     Message,
+    OAuthRegisterPayload,
+    OTPOAuthCreate,
+    Token,
     UpdatePassword,
     User,
     UserCreate,
+    UserOnboarding,
+    UserOnBoardingPayload,
     UserPublic,
     UserRegister,
     UsersPublic,
     UserUpdate,
     UserUpdateMe,
 )
-from app.utils import generate_new_account_email, send_email
+from app.utils import (
+    generate_new_account_email,
+    generate_new_account_email_otp,
+    send_email,
+)
 
+logging.basicConfig(level=logging.INFO)
 router = APIRouter()
 
 
@@ -55,24 +70,35 @@ def create_user(*, session: SessionDep, user_in: UserCreate) -> Any:
     """
     Create new user.
     """
-    user = crud.get_user_by_email(session=session, email=user_in.email)
-    if user:
-        raise HTTPException(
-            status_code=400,
-            detail="The user with this email already exists in the system.",
-        )
+    try:
+        session.begin()
+        user = crud.get_user_by_email(session=session, email=user_in.email)
+        if user:
+            raise HTTPException(
+                status_code=400,
+                detail="The user with this email already exists in the system.",
+            )
 
-    user = crud.create_user(session=session, user_create=user_in)
-    if settings.emails_enabled and user_in.email:
-        email_data = generate_new_account_email(
-            email_to=user_in.email, username=user_in.email, password=user_in.password
-        )
-        send_email(
-            email_to=user_in.email,
-            subject=email_data.subject,
-            html_content=email_data.html_content,
-        )
-    return user
+        user = crud.create_user(session=session, user_create=user_in)
+        if settings.emails_enabled and user_in.email:
+            email_data = generate_new_account_email(
+                email_to=user_in.email, username=user_in.full_name, password=user_in.password
+            )
+            send_email(
+                email_to=user_in.email,
+                subject=email_data.subject,
+                html_content=email_data.html_content,
+            )
+        return user
+    except SQLAlchemyError as e:
+        # Rollback transaction in case of an exception
+        session.rollback()
+        raise HTTPException(status_code=500, detail=str(e))
+    except Exception as e:
+        # Rollback transaction for any other exceptions
+        session.rollback()
+        raise HTTPException(status_code=500, detail=str(e))
+
 
 
 @router.patch("/me", response_model=UserPublic)
@@ -134,7 +160,7 @@ def delete_user_me(session: SessionDep, current_user: CurrentUser) -> Any:
         raise HTTPException(
             status_code=403, detail="Super users are not allowed to delete themselves"
         )
-    statement = delete(Item).where(col(Item.owner_id) == current_user.id)
+    # statement = delete(Item).where(col(Item.owner_id) == current_user.id)
     session.exec(statement)  # type: ignore
     session.delete(current_user)
     session.commit()
@@ -142,24 +168,71 @@ def delete_user_me(session: SessionDep, current_user: CurrentUser) -> Any:
 
 
 @router.post("/signup", response_model=UserPublic)
-def register_user(session: SessionDep, user_in: UserRegister) -> Any:
+def register_user(user_in: UserRegister,db: Session = Depends(get_db_transaction), ) -> Any:
     """
     Create new user without the need to be logged in.
     """
-    user = crud.get_user_by_email(session=session, email=user_in.email)
-    if user:
-        raise HTTPException(
-            status_code=400,
-            detail="The user with this email already exists in the system",
-        )
-    user_create = UserCreate.model_validate(user_in)
-    user = crud.create_user(session=session, user_create=user_create)
-    return user
+    try:
+        # if not settings.USERS_OPEN_REGISTRATION:
+        #     raise HTTPException(
+        #         status_code=403,
+        #         detail="Open user registration is forbidden on this server",
+        #     )
+        user = crud.get_user_by_email(session=db, email=user_in.primary_email)
+        if user:
+            raise HTTPException(
+                status_code=400,
+                detail="The user with this email already exists in the system",
+            )
+        user_create = UserCreate.model_validate(user_in)
+        user = crud.create_user(session=db, user_create=user_create)
+        if settings.emails_enabled and user_in.primary_email:
+            otp_createobj = OTPOAuthCreate(user_id=user.id)
+            otp_obj = crud.create_otp_auth(session=db, otp_auth_data=otp_createobj)
+            email_data = generate_new_account_email_otp(
+                email_to=user.primary_email, username=user.full_name, otp=otp_obj.token
+            )
+            send_email(
+                email_to=user_in.primary_email,
+                subject=email_data.subject,
+                html_content=email_data.html_content,
+            )
+        db.commit()
+        return user
+    except SQLAlchemyError as e:
+        # Rollback transaction in case of an exception
+        db.rollback()
+        raise HTTPException(status_code=500, detail=str(e))
+    except Exception as e:
+        # Rollback transaction for any other exceptions
+        db.rollback()
+        raise HTTPException(status_code=500, detail=str(e))
 
+@router.post("/signup/oauth/google", response_model=Token)
+def register_user_oauth(*, session: SessionDep, user_in:OAuthRegisterPayload) -> Token:
+    """
+    Registers a user using OAuth
+    """
+    try:
+        user = crud.get_user_by_email(session=session, email=user_in.user.primary_email)
+        if user:
+            return generate_jwt_token(user)
+        user_create: User = crud.create_user_given_oauth(session=session, user_in=user_in)
+        return generate_jwt_token(user_create)
+    except SQLAlchemyError as e:
+        # Rollback transaction in case of an exception
+        session.flush()
+        session.rollback()
+        raise HTTPException(status_code=500, detail=str(e))
+    except Exception as e:
+        # Rollback transaction for any other exceptions
+        session.flush()
+        session.rollback()
+        raise HTTPException(status_code=500, detail=str(e)) 
 
 @router.get("/{user_id}", response_model=UserPublic)
 def read_user_by_id(
-    user_id: uuid.UUID, session: SessionDep, current_user: CurrentUser
+    user_id: int, session: SessionDep, current_user: CurrentUser
 ) -> Any:
     """
     Get a specific user by id.
@@ -183,7 +256,7 @@ def read_user_by_id(
 def update_user(
     *,
     session: SessionDep,
-    user_id: uuid.UUID,
+    user_id: int,
     user_in: UserUpdate,
 ) -> Any:
     """
@@ -209,7 +282,7 @@ def update_user(
 
 @router.delete("/{user_id}", dependencies=[Depends(get_current_active_superuser)])
 def delete_user(
-    session: SessionDep, current_user: CurrentUser, user_id: uuid.UUID
+    session: SessionDep, current_user: CurrentUser, user_id: int
 ) -> Message:
     """
     Delete a user.
@@ -221,8 +294,48 @@ def delete_user(
         raise HTTPException(
             status_code=403, detail="Super users are not allowed to delete themselves"
         )
-    statement = delete(Item).where(col(Item.owner_id) == user_id)
+    # statement = delete(Item).where(col(Item.owner_id) == user_id)
     session.exec(statement)  # type: ignore
     session.delete(user)
     session.commit()
     return Message(message="User deleted successfully")
+
+@router.post("/onboarding/")
+def add_user_onboarding(session: SessionDep, current_user: CurrentUser, onboarding_data: UserOnBoardingPayload) -> Message:
+    """
+    Add user onboarding data
+    """
+    try:
+        with session.begin():
+            onboarding = UserOnboarding(
+                user_id = current_user.id,
+                urgency_level = onboarding_data.urgency_level
+            )
+            session.add(onboarding)
+            session.flush()
+            job_preferences = JobPreferences(
+                location= onboarding_data.location,
+                location_coordinates = onboarding_data.location_coordinates,
+                remote_bool = onboarding_data.remote_bool,
+                h1b_bool = onboarding_data.h1b_bool,
+                onboarding_id = onboarding.id
+            )
+            session.add(job_preferences)
+            session.flush()
+            job_title_prefs = [JobTitlePreference(jobtitle_id=title.jobtitle_id, pref_jobs_id=job_preferences.id)
+                                for title in onboarding_data.pref_job_title]
+            job_type_prefs = [JobTypePreference(jobtype_id=_.jobtype_id, pref_jobs_id=job_preferences.id)
+                                for _ in onboarding_data.pref_job_type]
+            session.add_all(job_title_prefs + job_type_prefs)
+            session.commit()
+            current_user.onboarded = True
+            session.add(current_user)
+            session.commit()
+            return Message(message="User onboarding data added successfully")  # type: ignore
+    except Exception as e:
+        session.rollback()
+        raise HTTPException(status_code=400, detail=str(e))
+
+
+
+    
