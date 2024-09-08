@@ -127,7 +127,7 @@ function Login() {
           {error && <FormErrorMessage>{error}</FormErrorMessage>}
         </FormControl>
         <Link as={RouterLink} to="/recover-password" color="blue.500">
-          By TechBleat
+          Powered by TechBleat
         </Link>
         <Link as={RouterLink} to="/recover-password" color="blue.500">
           Forgot password?
