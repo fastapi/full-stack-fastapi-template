@@ -2,7 +2,6 @@
 
 set -e
 set -x
-
-coverage run --source=app -m pytest
-coverage report --show-missing
-coverage html --title "${@-coverage}"
+poetry run coverage run --source=app -m pytest
+poetry run coverage report --show-missing
+poetry run coverage html --title "${@-coverage}"
