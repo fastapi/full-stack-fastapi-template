@@ -146,13 +146,13 @@ The production or staging URLs would use these same paths, but with your own dom
 
 Development URLs, for local development.
 
-Frontend: http://localhost
+Frontend: http://localhost:5173
 
-Backend: http://localhost/api/
+Backend: http://localhost:8000
 
-Automatic Interactive Docs (Swagger UI): http://localhost/docs
+Automatic Interactive Docs (Swagger UI): http://localhost:8000/docs
 
-Automatic Alternative Docs (ReDoc): http://localhost/redoc
+Automatic Alternative Docs (ReDoc): http://localhost:8000/redoc
 
 Adminer: http://localhost:8080
 
@@ -162,13 +162,13 @@ Traefik UI: http://localhost:8090
 
 Development URLs, for local development.
 
-Frontend: http://localhost.tiangolo.com
+Frontend: http://localhost.tiangolo.com:5173
 
-Backend: http://localhost.tiangolo.com/api/
+Backend: http://localhost.tiangolo.com:8000
 
-Automatic Interactive Docs (Swagger UI): http://localhost.tiangolo.com/docs
+Automatic Interactive Docs (Swagger UI): http://localhost.tiangolo.com:8000/docs
 
-Automatic Alternative Docs (ReDoc): http://localhost.tiangolo.com/redoc
+Automatic Alternative Docs (ReDoc): http://localhost.tiangolo.com:8000/redoc
 
 Adminer: http://localhost.tiangolo.com:8080
 
