@@ -3,6 +3,12 @@ services:
   db:
     image: postgres:12
     restart: always
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER} -d ${POSTGRES_DB}"]
+      interval: 10s
+      retries: 5
+      start_period: 30s
+      timeout: 10s
     volumes:
       - app-db-data:/var/lib/postgresql/data/pgdata
     env_file:
@@ -43,7 +49,9 @@ services:
       - traefik-public
       - default
     depends_on:
-      - db
+      db:
+        condition: service_healthy
+        restart: true
     env_file:
       - .env
     environment:
