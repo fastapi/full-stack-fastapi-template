@@ -5,45 +5,13 @@
 * [Docker](https://www.docker.com/).
 * [Poetry](https://python-poetry.org/) for Python package and environment management.
 
-## Local Development
+## Docker Compose
 
-* Start the stack with Docker Compose:
+Start the local development environment with Docker Compose following the guide in [../development.md](../development.md).
 
-```bash
-docker compose up -d
-```
+## Backend Local Development, Additional Details
 
-* Now you can open your browser and interact with these URLs:
-
-Frontend, built with Docker, with routes handled based on the path: http://localhost:5173
-
-Backend, JSON based web API based on OpenAPI: http://localhost:8000
-
-Automatic interactive documentation with Swagger UI (from the OpenAPI backend): http://localhost:8000/docs
-
-Adminer, database web administration: http://localhost:8080
-
-Traefik UI, to see how the routes are being handled by the proxy: http://localhost:8090
-
-**Note**: The first time you start your stack, it might take a minute for it to be ready. While the backend waits for the database to be ready and configures everything. You can check the logs to monitor it.
-
-To check the logs, run:
-
-```bash
-docker compose logs
-```
-
-To check the logs of a specific service, add the name of the service, e.g.:
-
-```bash
-docker compose logs backend
-```
-
-If your Docker is not running in `localhost` (the URLs above wouldn't work) you would need to use the IP or domain where your Docker is running.
-
-## Backend local development, additional details
-
-### General workflow
+### General Workflow
 
 By default, the dependencies are managed with [Poetry](https://python-poetry.org/), go there and install it.
 

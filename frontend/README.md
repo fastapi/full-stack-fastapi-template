@@ -134,7 +134,7 @@ The frontend code is structured as follows:
 The frontend includes initial end-to-end tests using Playwright. To run the tests, you need to have the Docker Compose stack running. Start the stack with the following command:
 
 ```bash
-docker compose up -d
+docker compose up -d --wait backend
 ```
 
 Then, you can run the tests with the following command:
