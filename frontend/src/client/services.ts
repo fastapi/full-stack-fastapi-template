@@ -151,14 +151,14 @@ export type TDataRegisterUser = {
   requestBody: UserRegister
 }
 export type TDataReadUserById = {
-  userId: number
+  userId: string
 }
 export type TDataUpdateUser = {
   requestBody: UserUpdate
-  userId: number
+  userId: string
 }
 export type TDataDeleteUser = {
-  userId: number
+  userId: string
 }
 
 export class UsersService {
@@ -386,6 +386,18 @@ export class UtilsService {
       },
     })
   }
+
+  /**
+   * Health Check
+   * @returns boolean Successful Response
+   * @throws ApiError
+   */
+  public static healthCheck(): CancelablePromise<boolean> {
+    return __request(OpenAPI, {
+      method: "GET",
+      url: "/api/v1/utils/health-check/",
+    })
+  }
 }
 
 export type TDataReadItems = {
@@ -396,14 +408,14 @@ export type TDataCreateItem = {
   requestBody: ItemCreate
 }
 export type TDataReadItem = {
-  id: number
+  id: string
 }
 export type TDataUpdateItem = {
-  id: number
+  id: string
   requestBody: ItemUpdate
 }
 export type TDataDeleteItem = {
-  id: number
+  id: string
 }
 
 export class ItemsService {

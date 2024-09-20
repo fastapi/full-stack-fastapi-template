@@ -1,10 +1,9 @@
-import { z } from "zod"
 import {
   Button,
   Container,
   Flex,
   Heading,
-  Skeleton,
+  SkeletonText,
   Table,
   TableContainer,
   Tbody,
@@ -15,11 +14,13 @@ import {
 } from "@chakra-ui/react"
 import { useQuery, useQueryClient } from "@tanstack/react-query"
 import { createFileRoute, useNavigate } from "@tanstack/react-router"
-
 import { useEffect } from "react"
+import { z } from "zod"
+
 import { ItemsService } from "../../client"
 import ActionsMenu from "../../components/Common/ActionsMenu"
 import Navbar from "../../components/Common/Navbar"
+import AddItem from "../../components/Items/AddItem"
 
 const itemsSearchSchema = z.object({
   page: z.number().catch(1),
@@ -63,7 +64,7 @@ function ItemsTable() {
     if (hasNextPage) {
       queryClient.prefetchQuery(getItemsQueryOptions({ page: page + 1 }))
     }
-  }, [page, queryClient])
+  }, [page, queryClient, hasNextPage])
 
   return (
     <>
@@ -79,25 +80,27 @@ function ItemsTable() {
           </Thead>
           {isPending ? (
             <Tbody>
-              {new Array(5).fill(null).map((_, index) => (
-                <Tr key={index}>
-                  {new Array(4).fill(null).map((_, index) => (
-                    <Td key={index}>
-                      <Flex>
-                        <Skeleton height="20px" width="20px" />
-                      </Flex>
-                    </Td>
-                  ))}
-                </Tr>
-              ))}
+              <Tr>
+                {new Array(4).fill(null).map((_, index) => (
+                  <Td key={index}>
+                    <SkeletonText noOfLines={1} paddingBlock="16px" />
+                  </Td>
+                ))}
+              </Tr>
             </Tbody>
           ) : (
             <Tbody>
               {items?.data.map((item) => (
                 <Tr key={item.id} opacity={isPlaceholderData ? 0.5 : 1}>
                   <Td>{item.id}</Td>
-                  <Td>{item.title}</Td>
-                  <Td color={!item.description ? "ui.dim" : "inherit"}>
+                  <Td isTruncated maxWidth="150px">
+                    {item.title}
+                  </Td>
+                  <Td
+                    color={!item.description ? "ui.dim" : "inherit"}
+                    isTruncated
+                    maxWidth="150px"
+                  >
                     {item.description || "N/A"}
                   </Td>
                   <Td>
@@ -135,7 +138,7 @@ function Items() {
         Items Management
       </Heading>
 
-      <Navbar type={"Item"} />
+      <Navbar type={"Item"} addModalAs={AddItem} />
       <ItemsTable />
     </Container>
   )
