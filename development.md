@@ -152,7 +152,7 @@ Backend: http://localhost/api/
 
 Automatic Interactive Docs (Swagger UI): http://localhost/docs
 
-Automatic Alternative Docs (ReDoc): http://localhost/redoc
+Automatic Alternative Docs (ReDoc): http://localhost/redoc 
 
 Adminer: http://localhost:8080
 

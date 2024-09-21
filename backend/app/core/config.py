@@ -1,7 +1,7 @@
 import secrets
 import warnings
 from typing import Annotated, Any, Literal
-
+import os
 from pydantic import (
     AnyUrl,
     BeforeValidator,
@@ -56,15 +56,8 @@ class Settings(BaseSettings):
 
     @computed_field  # type: ignore[prop-decorator]
     @property
-    def SQLALCHEMY_DATABASE_URI(self) -> PostgresDsn:
-        return MultiHostUrl.build(
-            scheme="postgresql+psycopg",
-            username=self.POSTGRES_USER,
-            password=self.POSTGRES_PASSWORD,
-            host=self.POSTGRES_SERVER,
-            port=self.POSTGRES_PORT,
-            path=self.POSTGRES_DB,
-        )
+    def SQLALCHEMY_DATABASE_URI(self) -> str:
+        return f"postgresql://{self.POSTGRES_USER}:{self.POSTGRES_PASSWORD}@{self.POSTGRES_SERVER}:{self.POSTGRES_PORT}/{self.POSTGRES_DB}"
 
     SMTP_TLS: bool = True
     SMTP_SSL: bool = False
@@ -113,8 +106,10 @@ class Settings(BaseSettings):
         self._check_default_secret(
             "FIRST_SUPERUSER_PASSWORD", self.FIRST_SUPERUSER_PASSWORD
         )
+        print(f"FIRST_SUPERUSER_PASSWORD: {self.FIRST_SUPERUSER_PASSWORD}")
 
         return self
 
-
-settings = Settings()  # type: ignore
+print("About to initialize Settings...")
+settings = Settings()
+print("Settings initialized.")

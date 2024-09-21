@@ -22,7 +22,7 @@ from app.models import SQLModel  # noqa
 from app.core.config import settings # noqa
 
 target_metadata = SQLModel.metadata
-
+print("target_metadata in env:", SQLModel.metadata.tables)
 # other values from the config, defined by the needs of env.py,
 # can be acquired:
 # my_important_option = config.get_main_option("my_important_option")
@@ -78,7 +78,7 @@ def run_migrations_online():
             context.run_migrations()
 
 
-if context.is_offline_mode():
-    run_migrations_offline()
-else:
-    run_migrations_online()
+# if context.is_offline_mode():
+#     run_migrations_offline()
+# else:
+run_migrations_online()
