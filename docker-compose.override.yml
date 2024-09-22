@@ -55,18 +55,6 @@ services:
     ports:
       - "8080:8080"
 
-  prestart:
-    develop:
-      watch:
-        - path: ./backend
-          action: sync
-          target: /app
-          ignore:
-            - ./backend/.venv
-            - .venv
-        - path: ./backend/pyproject.toml
-          action: rebuild
-
   backend:
     restart: "no"
     ports:
