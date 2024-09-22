@@ -1,18 +1,35 @@
 from sqlmodel import SQLModel, Field, Relationship
 from typing import Optional, List
+from pydantic import root_validator, ValidationError
 
+class MenuCategoryBase(SQLModel):
+    qsr_menu_id: Optional[int] = Field(default=None, foreign_key="qsr_menu.id")
+    restaurant_menu_id: Optional[int] = Field(default=None, foreign_key="restaurant_menu.id")
+    nightclub_menu_id: Optional[int] = Field(default=None, foreign_key="nightclub_menu.id")
+    name: str = Field(nullable=False)
 
-class MenuCategory(SQLModel, table=True):
+    @root_validator(pre=True)
+    def check_only_one_menu_id(cls, values):
+        # Convert to a regular dictionary
+        values_dict = dict(values)
+        print("values ", values_dict)
+
+        # Use .get() to safely access values
+        qsr_menu_id = values_dict.get('qsr_menu_id')
+        restaurant_menu_id = values_dict.get('restaurant_menu_id')
+        nightclub_menu_id = values_dict.get('nightclub_menu_id')
+
+        # Count how many of these fields are set (not None)
+        menu_ids = [qsr_menu_id, restaurant_menu_id, nightclub_menu_id]
+        if sum(id is not None for id in menu_ids) != 1:
+            raise ValueError("You must set exactly one of qsr_menu_id, restaurant_menu_id, or nightclub_menu_id.")
+        
+        return values
+    
+class MenuCategory(MenuCategoryBase, table=True):
     __tablename__ = "menu_category"
     id: Optional[int] = Field(default=None, primary_key=True, index=True)
     
-    # Foreign keys for different menus
-    qsr_menu_id: Optional[int] = Field(default=None, foreign_key="qsrmenu.id")
-    restaurant_menu_id: Optional[int] = Field(default=None, foreign_key="restaurantmenu.id")
-    nightclub_menu_id: Optional[int] = Field(default=None, foreign_key="nightclubmenu.id")
-
-    name: str = Field(nullable=False)
-
     # Relationships
     menu_items: List["MenuItem"] = Relationship(back_populates="category")
 

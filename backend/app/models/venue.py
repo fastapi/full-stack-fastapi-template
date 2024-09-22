@@ -1,10 +1,6 @@
 from sqlmodel import SQLModel, Field, Relationship
 from typing import Optional, List, TYPE_CHECKING
 
-# if TYPE_CHECKING:
-#     from .user import UserBusiness
-print("Venue models imported")
-
 class VenueBase(SQLModel):
     name: str = Field(nullable=False)
     address: Optional[str] = Field(default=None)
@@ -27,7 +23,10 @@ class NightclubUserBusinessLink(SQLModel, table=True):
     nightclub_id: int = Field(foreign_key="nightclub.id", primary_key=True)
     user_business_id: int = Field(foreign_key="user_business.id", primary_key=True)
 
-class Nightclub(VenueBase, table=True):
+class NightclubBase(VenueBase):
+    pass
+
+class Nightclub(NightclubBase, table=True):
     __tablename__ = "nightclub"
 
     id: Optional[int] = Field(default=None, primary_key=True, index=True)
@@ -47,7 +46,10 @@ class RestaurantUserBusinessLink(SQLModel, table=True):
     restaurant_id: int = Field(foreign_key="restaurant.id", primary_key=True)
     user_business_id: int = Field(foreign_key="user_business.id", primary_key=True)
 
-class Restaurant(VenueBase, table=True):
+class RestaurantBase(VenueBase):
+    pass
+
+class Restaurant(RestaurantBase, table=True):
     __tablename__ = "restaurant"
 
     id: Optional[int] = Field(default=None, primary_key=True, index=True)
@@ -63,7 +65,10 @@ class QSRUserBusinessLink(SQLModel, table=True):
     qsr_id: int = Field(foreign_key="qsr.id", primary_key=True)
     user_business_id: int = Field(foreign_key="user_business.id", primary_key=True)
 
-class QSR(VenueBase, table=True):
+class QSRBase(VenueBase):
+    pass
+
+class QSR(QSRBase, table=True):
     __tablename__ = "qsr"
 
     id: Optional[int] = Field(default=None, primary_key=True, index=True)
@@ -81,7 +86,10 @@ class FoodcourtUserBusinessLink(SQLModel, table=True):
     foodcourt_id: int = Field(foreign_key="foodcourt.id", primary_key=True)
     user_business_id: int = Field(foreign_key="user_business.id", primary_key=True)
 
-class Foodcourt(VenueBase, table=True):
+class FoodcourtBase(VenueBase):
+    pass
+
+class Foodcourt(FoodcourtBase, table=True):
     __tablename__ = "foodcourt"
 
     id: Optional[int] = Field(default=None, primary_key=True, index=True)

@@ -1,8 +1,8 @@
-"""initial migration
+"""Add column last_name to user model
 
-Revision ID: ca5d4c361c2e
+Revision ID: 36749727673e
 Revises: 
-Create Date: 2024-09-21 06:23:39.920369
+Create Date: 2024-09-22 11:44:15.716637
 
 """
 from alembic import op
@@ -11,7 +11,7 @@ import sqlmodel.sql.sqltypes
 
 
 # revision identifiers, used by Alembic.
-revision = 'ca5d4c361c2e'
+revision = '36749727673e'
 down_revision = None
 branch_labels = None
 depends_on = None
@@ -136,16 +136,16 @@ def upgrade():
     sa.PrimaryKeyConstraint('id')
     )
     op.create_index(op.f('ix_group_id'), 'group', ['id'], unique=False)
-    op.create_table('nightclubmenu',
+    op.create_table('nightclub_menu',
     sa.Column('name', sqlmodel.sql.sqltypes.AutoString(), nullable=False),
     sa.Column('description', sqlmodel.sql.sqltypes.AutoString(), nullable=True),
     sa.Column('menu_type', sqlmodel.sql.sqltypes.AutoString(), nullable=True),
-    sa.Column('id', sa.Integer(), nullable=False),
     sa.Column('nightclub_id', sa.Integer(), nullable=False),
+    sa.Column('id', sa.Integer(), nullable=False),
     sa.ForeignKeyConstraint(['nightclub_id'], ['nightclub.id'], ),
     sa.PrimaryKeyConstraint('id')
     )
-    op.create_index(op.f('ix_nightclubmenu_id'), 'nightclubmenu', ['id'], unique=False)
+    op.create_index(op.f('ix_nightclub_menu_id'), 'nightclub_menu', ['id'], unique=False)
     op.create_table('nightclubuserbusinesslink',
     sa.Column('nightclub_id', sa.Integer(), nullable=False),
     sa.Column('user_business_id', sa.Integer(), nullable=False),
@@ -227,16 +227,16 @@ def upgrade():
     sa.PrimaryKeyConstraint('id')
     )
     op.create_index(op.f('ix_qsr_id'), 'qsr', ['id'], unique=False)
-    op.create_table('restaurantmenu',
+    op.create_table('restaurant_menu',
     sa.Column('name', sqlmodel.sql.sqltypes.AutoString(), nullable=False),
     sa.Column('description', sqlmodel.sql.sqltypes.AutoString(), nullable=True),
     sa.Column('menu_type', sqlmodel.sql.sqltypes.AutoString(), nullable=True),
-    sa.Column('id', sa.Integer(), nullable=False),
     sa.Column('restaurant_id', sa.Integer(), nullable=False),
+    sa.Column('id', sa.Integer(), nullable=False),
     sa.ForeignKeyConstraint(['restaurant_id'], ['restaurant.id'], ),
     sa.PrimaryKeyConstraint('id')
     )
-    op.create_index(op.f('ix_restaurantmenu_id'), 'restaurantmenu', ['id'], unique=False)
+    op.create_index(op.f('ix_restaurant_menu_id'), 'restaurant_menu', ['id'], unique=False)
     op.create_table('restaurantuserbusinesslink',
     sa.Column('restaurant_id', sa.Integer(), nullable=False),
     sa.Column('user_business_id', sa.Integer(), nullable=False),
@@ -305,6 +305,16 @@ def upgrade():
     sa.PrimaryKeyConstraint('id')
     )
     op.create_index(op.f('ix_nightclub_order_id'), 'nightclub_order', ['id'], unique=False)
+    op.create_table('qsr_menu',
+    sa.Column('name', sqlmodel.sql.sqltypes.AutoString(), nullable=False),
+    sa.Column('description', sqlmodel.sql.sqltypes.AutoString(), nullable=True),
+    sa.Column('menu_type', sqlmodel.sql.sqltypes.AutoString(), nullable=True),
+    sa.Column('qsr_id', sa.Integer(), nullable=False),
+    sa.Column('id', sa.Integer(), nullable=False),
+    sa.ForeignKeyConstraint(['qsr_id'], ['qsr.id'], ),
+    sa.PrimaryKeyConstraint('id')
+    )
+    op.create_index(op.f('ix_qsr_menu_id'), 'qsr_menu', ['id'], unique=False)
     op.create_table('qsr_order',
     sa.Column('user_id', sa.Integer(), nullable=True),
     sa.Column('pickup_location_id', sa.Integer(), nullable=True),
@@ -325,16 +335,6 @@ def upgrade():
     sa.PrimaryKeyConstraint('id')
     )
     op.create_index(op.f('ix_qsr_order_id'), 'qsr_order', ['id'], unique=False)
-    op.create_table('qsrmenu',
-    sa.Column('name', sqlmodel.sql.sqltypes.AutoString(), nullable=False),
-    sa.Column('description', sqlmodel.sql.sqltypes.AutoString(), nullable=True),
-    sa.Column('menu_type', sqlmodel.sql.sqltypes.AutoString(), nullable=True),
-    sa.Column('id', sa.Integer(), nullable=False),
-    sa.Column('qsr_id', sa.Integer(), nullable=False),
-    sa.ForeignKeyConstraint(['qsr_id'], ['qsr.id'], ),
-    sa.PrimaryKeyConstraint('id')
-    )
-    op.create_index(op.f('ix_qsrmenu_id'), 'qsrmenu', ['id'], unique=False)
     op.create_table('qsruserbusinesslink',
     sa.Column('qsr_id', sa.Integer(), nullable=False),
     sa.Column('user_business_id', sa.Integer(), nullable=False),
@@ -395,14 +395,14 @@ def upgrade():
     )
     op.create_index(op.f('ix_groupwallettopup_id'), 'groupwallettopup', ['id'], unique=False)
     op.create_table('menu_category',
-    sa.Column('id', sa.Integer(), nullable=False),
     sa.Column('qsr_menu_id', sa.Integer(), nullable=True),
     sa.Column('restaurant_menu_id', sa.Integer(), nullable=True),
     sa.Column('nightclub_menu_id', sa.Integer(), nullable=True),
     sa.Column('name', sqlmodel.sql.sqltypes.AutoString(), nullable=False),
-    sa.ForeignKeyConstraint(['nightclub_menu_id'], ['nightclubmenu.id'], ),
-    sa.ForeignKeyConstraint(['qsr_menu_id'], ['qsrmenu.id'], ),
-    sa.ForeignKeyConstraint(['restaurant_menu_id'], ['restaurantmenu.id'], ),
+    sa.Column('id', sa.Integer(), nullable=False),
+    sa.ForeignKeyConstraint(['nightclub_menu_id'], ['nightclub_menu.id'], ),
+    sa.ForeignKeyConstraint(['qsr_menu_id'], ['qsr_menu.id'], ),
+    sa.ForeignKeyConstraint(['restaurant_menu_id'], ['restaurant_menu.id'], ),
     sa.PrimaryKeyConstraint('id')
     )
     op.create_index(op.f('ix_menu_category_id'), 'menu_category', ['id'], unique=False)
@@ -421,7 +421,6 @@ def upgrade():
     )
     op.create_index(op.f('ix_payment_event_id'), 'payment_event', ['id'], unique=False)
     op.create_table('menu_item',
-    sa.Column('id', sa.Integer(), nullable=False),
     sa.Column('category_id', sa.Integer(), nullable=False),
     sa.Column('name', sqlmodel.sql.sqltypes.AutoString(), nullable=False),
     sa.Column('price', sa.Float(), nullable=False),
@@ -431,6 +430,7 @@ def upgrade():
     sa.Column('ingredients', sqlmodel.sql.sqltypes.AutoString(), nullable=True),
     sa.Column('abv', sa.Float(), nullable=True),
     sa.Column('ibu', sa.Integer(), nullable=True),
+    sa.Column('id', sa.Integer(), nullable=False),
     sa.ForeignKeyConstraint(['category_id'], ['menu_category.id'], ),
     sa.PrimaryKeyConstraint('id')
     )
@@ -470,10 +470,10 @@ def downgrade():
     op.drop_index(op.f('ix_restaurant_order_id'), table_name='restaurant_order')
     op.drop_table('restaurant_order')
     op.drop_table('qsruserbusinesslink')
-    op.drop_index(op.f('ix_qsrmenu_id'), table_name='qsrmenu')
-    op.drop_table('qsrmenu')
     op.drop_index(op.f('ix_qsr_order_id'), table_name='qsr_order')
     op.drop_table('qsr_order')
+    op.drop_index(op.f('ix_qsr_menu_id'), table_name='qsr_menu')
+    op.drop_table('qsr_menu')
     op.drop_index(op.f('ix_nightclub_order_id'), table_name='nightclub_order')
     op.drop_table('nightclub_order')
     op.drop_table('groupmembers')
@@ -482,8 +482,8 @@ def downgrade():
     op.drop_table('event_booking')
     op.drop_table('clubvisit')
     op.drop_table('restaurantuserbusinesslink')
-    op.drop_index(op.f('ix_restaurantmenu_id'), table_name='restaurantmenu')
-    op.drop_table('restaurantmenu')
+    op.drop_index(op.f('ix_restaurant_menu_id'), table_name='restaurant_menu')
+    op.drop_table('restaurant_menu')
     op.drop_index(op.f('ix_qsr_id'), table_name='qsr')
     op.drop_table('qsr')
     op.drop_index(op.f('ix_pickup_location_id'), table_name='pickup_location')
@@ -495,8 +495,8 @@ def downgrade():
     op.drop_index(op.f('ix_payment_source_nightclub_id'), table_name='payment_source_nightclub')
     op.drop_table('payment_source_nightclub')
     op.drop_table('nightclubuserbusinesslink')
-    op.drop_index(op.f('ix_nightclubmenu_id'), table_name='nightclubmenu')
-    op.drop_table('nightclubmenu')
+    op.drop_index(op.f('ix_nightclub_menu_id'), table_name='nightclub_menu')
+    op.drop_table('nightclub_menu')
     op.drop_index(op.f('ix_group_id'), table_name='group')
     op.drop_table('group')
     op.drop_table('foodcourtuserbusinesslink')

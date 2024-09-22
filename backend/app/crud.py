@@ -1,17 +1,6 @@
-from http.client import HTTPException
-import uuid
-from typing import Any
-
-from app.models.venue import QSR, Foodcourt, Nightclub, Restaurant
-# from app.models.user import UserBusiness, UserPublic
-
-from sqlmodel import Session, select
-
-from app.core.security import get_password_hash, verify_password
-
-
-from typing import Type, List
-from sqlmodel import select, Session, SQLModel
+from fastapi import HTTPException
+from sqlmodel import SQLModel, Session, select
+from typing import List, Type
 
 # Generic CRUD function to get all records with pagination
 def get_all_records(
@@ -24,9 +13,12 @@ def get_all_records(
     - **skip**: Number of records to skip
     - **limit**: Number of records to return
     """
-    statement = select(model).offset(skip).limit(limit)
-    result = session.exec(statement)
-    return result.all()
+    try:
+        statement = select(model).offset(skip).limit(limit)
+        result = session.exec(statement)
+        return result.all()
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Error retrieving {model.__name__} records: {str(e)}")
 
 # Function to get a single record by ID
 def get_record_by_id(
@@ -38,11 +30,14 @@ def get_record_by_id(
     - **model**: SQLModel class (e.g., Nightclub, Restaurant, QSR, Foodcourt)
     - **record_id**: ID of the record to retrieve
     """
-    statement = select(model).where(model.id == record_id)
-    result = session.exec(statement).first()
-    if not result:
-        raise ValueError(f"{model.__name__} with ID {record_id} not found.")
-    return result
+    try:
+        statement = select(model).where(model.id == record_id)
+        result = session.exec(statement).first()
+        if not result:
+            raise HTTPException(status_code=404, detail=f"{model.__name__} with ID {record_id} not found.")
+        return result
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Error retrieving {model.__name__} record: {str(e)}")
 
 # Function to create a new record
 def create_record(
@@ -54,11 +49,15 @@ def create_record(
     - **model**: SQLModel class (e.g., Nightclub, Restaurant, QSR, Foodcourt)
     - **obj_in**: Data to create the new record
     """
-    obj = model(**obj_in.dict())
-    session.add(obj)
-    session.commit()
-    session.refresh(obj)
-    return obj
+    try:
+        obj = model(**obj_in.dict())
+        session.add(obj)
+        session.commit()
+        session.refresh(obj)
+        return obj
+    except Exception as e:
+        session.rollback()
+        raise HTTPException(status_code=500, detail=f"Error creating {model.__name__}: {str(e)}")
 
 # Function to update an existing record
 def update_record(
@@ -71,17 +70,54 @@ def update_record(
     - **record_id**: ID of the record to update
     - **obj_in**: Data to update the record
     """
-    obj = get_record_by_id(session, model, record_id)
-    if not obj:
-        raise HTTPException(status_code=404, detail="Record not found")
-    obj_data = obj_in.dict(exclude_unset=True)
-    for field, value in obj_data.items():
-        setattr(obj, field, value)
-    session.add(obj)
-    session.commit()
-    session.refresh(obj)
-    return obj
+    try:
+        obj = get_record_by_id(session, model, record_id)
+        obj_data = obj_in.dict(exclude_unset=True)
+        for field, value in obj_data.items():
+            setattr(obj, field, value)
+        session.add(obj)
+        session.commit()
+        session.refresh(obj)
+        return obj
+    except HTTPException as e:
+        raise e
+    except Exception as e:
+        session.rollback()
+        raise HTTPException(status_code=500, detail=f"Error updating {model.__name__}: {str(e)}")
 
+def patch_record(
+    session: Session, model: Type[SQLModel], record_id: int, obj_in: SQLModel
+) -> SQLModel:
+    """
+    Partially update an existing record.
+    - **session**: Database session
+    - **model**: SQLModel class (e.g., Nightclub, Restaurant, QSR)
+    - **record_id**: ID of the record to update
+    - **obj_in**: Partial data to update the record
+    """
+    try:
+        # Get the existing record from the database
+        obj = get_record_by_id(session, model, record_id)
+
+        # Convert the incoming data, excluding any unset values
+        obj_data = obj_in.dict(exclude_unset=True)
+        
+        # Update the fields on the object
+        for field, value in obj_data.items():
+            setattr(obj, field, value)
+        
+        # Commit the changes
+        session.add(obj)
+        session.commit()
+        session.refresh(obj)
+        
+        return obj
+    except HTTPException as e:
+        raise e
+    except Exception as e:
+        session.rollback()
+        raise HTTPException(status_code=500, detail=f"Error updating {model.__name__}: {str(e)}")
+    
 # Function to delete a record
 def delete_record(
     session: Session, model: Type[SQLModel], record_id: int
@@ -92,46 +128,12 @@ def delete_record(
     - **model**: SQLModel class (e.g., Nightclub, Restaurant, QSR, Foodcourt)
     - **record_id**: ID of the record to delete
     """
-    obj = get_record_by_id(session, model, record_id)
-    session.delete(obj)
-    session.commit()
-
-# Example functions specific to Nightclub, Restaurant, QSR, and Foodcourt
-
-def get_all_nightclubs(
-    session: Session, skip: int = 0, limit: int = 10
-) -> List[SQLModel]:
-    return get_all_records(session, Nightclub, skip, limit)
-
-def get_all_restaurants(
-    session: Session, skip: int = 0, limit: int = 10
-) -> List[SQLModel]:
-    return get_all_records(session, Restaurant, skip, limit)
-
-def get_all_qsrs(
-    session: Session, skip: int = 0, limit: int = 10
-) -> List[SQLModel]:
-    return get_all_records(session, QSR, skip, limit)
-
-def get_all_foodcourts(
-    session: Session, skip: int = 0, limit: int = 10
-) -> List[SQLModel]:
-    return get_all_records(session, Foodcourt, skip, limit)
-
-
-
-# def authenticate(*, session: Session, email: str, password: str) -> User | None:
-#     db_user = get_user_by_email(session=session, email=email)
-#     if not db_user:
-#         return None
-#     if not verify_password(password, db_user.hashed_password):
-#         return None
-#     return db_user
-
-
-# def create_item(*, session: Session, item_in: ItemCreate, owner_id: uuid.UUID) -> Item:
-#     db_item = Item.model_validate(item_in, update={"owner_id": owner_id})
-#     session.add(db_item)
-#     session.commit()
-#     session.refresh(db_item)
-#     return db_item
+    try:
+        obj = get_record_by_id(session, model, record_id)
+        session.delete(obj)
+        session.commit()
+    except HTTPException as e:
+        raise e
+    except Exception as e:
+        session.rollback()
+        raise HTTPException(status_code=500, detail=f"Error deleting {model.__name__} with ID {record_id}: {str(e)}")

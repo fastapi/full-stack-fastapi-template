@@ -6,27 +6,36 @@ class MenuBase(SQLModel):
     description: Optional[str] = Field(default=None)
     menu_type: Optional[str] = Field(default=None)  # Type of menu (e.g., "Food", "Drink")
 
-class QSRMenu(MenuBase, table=True):
-    id: Optional[int] = Field(default=None, primary_key=True, index=True)
+class QSRMenuBase(MenuBase):
     qsr_id: int = Field(foreign_key="qsr.id", nullable=False)
+
+class QSRMenu(QSRMenuBase, table=True):
+    __tablename__= "qsr_menu"
+
+    id: Optional[int] = Field(default=None, primary_key=True, index=True)
 
     # Relationships
     qsr: "QSR" = Relationship(back_populates="menu")
     categories: List["MenuCategory"] = Relationship(back_populates="qsr_menu")
 
-
-class RestaurantMenu(MenuBase, table=True):
-    id: Optional[int] = Field(default=None, primary_key=True, index=True)
+class RestaurantMenuBase(MenuBase):
     restaurant_id: int = Field(foreign_key="restaurant.id", nullable=False)
+
+class RestaurantMenu(RestaurantMenuBase, table=True):
+    __tablename__= "restaurant_menu"
+    id: Optional[int] = Field(default=None, primary_key=True, index=True)
 
     # Relationships
     restaurant: "Restaurant" = Relationship(back_populates="menu")
     categories: List["MenuCategory"] = Relationship(back_populates="restaurant_menu")
 
-
-class NightclubMenu(MenuBase, table=True):
-    id: Optional[int] = Field(default=None, primary_key=True, index=True)
+class NightclubMenuBase(MenuBase):
     nightclub_id: int = Field(foreign_key="nightclub.id", nullable=False)
+
+class NightclubMenu(NightclubMenuBase, table=True):
+    __tablename__= "nightclub_menu"
+
+    id: Optional[int] = Field(default=None, primary_key=True, index=True)
 
     # Relationships
     nightclub: "Nightclub" = Relationship(back_populates="menu")
