@@ -31,9 +31,10 @@ jobs:
       working-directory: frontend
     - run: uv sync
       working-directory: backend
-    - run: bash scripts/generate-client.sh
-      env:
-        PATH: backend/.venv/bin/python:$PATH
+    - run: |
+        uv run cd .. &&
+        bash scripts/generate-client.sh
+      working-directory: backend
     - name: Commit changes
       run: |
         git config --local user.email "github-actions@github.com"
