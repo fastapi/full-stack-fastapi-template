@@ -31,10 +31,9 @@ jobs:
       working-directory: frontend
     - run: uv sync
       working-directory: backend
-    - run: |
-        uv run cd .. &&
-        bash scripts/generate-client.sh
-      working-directory: backend
+    - run: uv bash scripts/generate-client.sh
+      env:
+        VIRTUAL_ENV: backend/.venv
     - name: Commit changes
       run: |
         git config --local user.email "github-actions@github.com"
