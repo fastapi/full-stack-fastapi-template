@@ -31,7 +31,7 @@ jobs:
       working-directory: frontend
     - run: uv sync
       working-directory: backend
-    - run: uv bash scripts/generate-client.sh
+    - run: uv run bash scripts/generate-client.sh
       env:
         VIRTUAL_ENV: backend/.venv
     - name: Commit changes
