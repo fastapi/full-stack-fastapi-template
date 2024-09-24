@@ -10,6 +10,10 @@
 
 ### Refactors
 
+* ♻️ Update settings to use top level `.env` file. PR [#1359](https://github.com/fastapi/full-stack-fastapi-template/pull/1359) by [@tiangolo](https://github.com/tiangolo).
+* ⬆️ Migrate from Poetry to uv. PR [#1356](https://github.com/fastapi/full-stack-fastapi-template/pull/1356) by [@tiangolo](https://github.com/tiangolo).
+* 🔥 Remove logic for development dependencies and Jupyter, it was never documented, and I no longer use that trick. PR [#1355](https://github.com/fastapi/full-stack-fastapi-template/pull/1355) by [@tiangolo](https://github.com/tiangolo).
+* ♻️ Use Docker Compose `watch`. PR [#1354](https://github.com/fastapi/full-stack-fastapi-template/pull/1354) by [@tiangolo](https://github.com/tiangolo).
 * 🔧 Use plain base official Python Docker image. PR [#1351](https://github.com/fastapi/full-stack-fastapi-template/pull/1351) by [@tiangolo](https://github.com/tiangolo).
 * 🚚 Move location of scripts to simplify file structure. PR [#1352](https://github.com/fastapi/full-stack-fastapi-template/pull/1352) by [@tiangolo](https://github.com/tiangolo).
 * ♻️ Refactor prestart (migrations), move that to its own container. PR [#1350](https://github.com/fastapi/full-stack-fastapi-template/pull/1350) by [@tiangolo](https://github.com/tiangolo).
@@ -25,10 +29,16 @@
 
 ### Docs
 
+* 💡 Add comments to Dockerfile with uv references. PR [#1357](https://github.com/fastapi/full-stack-fastapi-template/pull/1357) by [@tiangolo](https://github.com/tiangolo).
 * 📝 Add Email Templates to `backend/README.md`. PR [#1311](https://github.com/fastapi/full-stack-fastapi-template/pull/1311) by [@alejsdev](https://github.com/alejsdev).
 
 ### Internal
 
+* 👷 Update GitHub Actions format. PR [#1363](https://github.com/fastapi/full-stack-fastapi-template/pull/1363) by [@tiangolo](https://github.com/tiangolo).
+* 👷 Use `uv` for Python env to generate client. PR [#1362](https://github.com/fastapi/full-stack-fastapi-template/pull/1362) by [@tiangolo](https://github.com/tiangolo).
+* 👷 Run tests from Python environment (with `uv`), not from Docker container. PR [#1361](https://github.com/fastapi/full-stack-fastapi-template/pull/1361) by [@tiangolo](https://github.com/tiangolo).
+* 🔨 Update `generate-client.sh` script, make it fail on errors, fix generation. PR [#1360](https://github.com/fastapi/full-stack-fastapi-template/pull/1360) by [@tiangolo](https://github.com/tiangolo).
+* 👷 Add GitHub Actions workflow to lint backend apart from tests. PR [#1358](https://github.com/fastapi/full-stack-fastapi-template/pull/1358) by [@tiangolo](https://github.com/tiangolo).
 * 👷 Improve playwright CI job. PR [#1335](https://github.com/fastapi/full-stack-fastapi-template/pull/1335) by [@patrick91](https://github.com/patrick91).
 * 👷 Update `issue-manager.yml`. PR [#1329](https://github.com/fastapi/full-stack-fastapi-template/pull/1329) by [@tiangolo](https://github.com/tiangolo).
 * 💚 Set `include-hidden-files` to `True` when using the `upload-artifact` GH action. PR [#1327](https://github.com/fastapi/full-stack-fastapi-template/pull/1327) by [@svlandeg](https://github.com/svlandeg).
