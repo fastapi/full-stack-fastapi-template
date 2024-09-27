@@ -225,8 +225,15 @@ export const $UserCreate = {
       maxLength: 255,
     },
     is_active: {
-      type: "boolean",
-      default: true,
+      type: "any-of",
+      contains: [
+        {
+          type: "boolean",
+        },
+        {
+          type: "null",
+        },
+      ],
     },
     is_superuser: {
       type: "boolean",
@@ -262,8 +269,15 @@ export const $UserPublic = {
       maxLength: 255,
     },
     is_active: {
-      type: "boolean",
-      default: true,
+      type: "any-of",
+      contains: [
+        {
+          type: "boolean",
+        },
+        {
+          type: "null",
+        },
+      ],
     },
     is_superuser: {
       type: "boolean",
@@ -334,8 +348,15 @@ export const $UserUpdate = {
       ],
     },
     is_active: {
-      type: "boolean",
-      default: true,
+      type: "any-of",
+      contains: [
+        {
+          type: "boolean",
+        },
+        {
+          type: "null",
+        },
+      ],
     },
     is_superuser: {
       type: "boolean",
