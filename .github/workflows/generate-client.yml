@@ -45,15 +45,13 @@ jobs:
         git config --local user.name "github-actions"
         git add frontend/src/client
     # Same repo PRs
-    # TODO: uncomment this
-    # - name: Push changes
-    #   if: ( github.event_name != 'pull_request' || github.secret_source == 'Actions' )
-    #   run: |
-    #     git diff --staged --quiet || git commit -m "✨ Autogenerate frontend client"
-    #     git push
+    - name: Push changes
+      if: ( github.event_name != 'pull_request' || github.secret_source == 'Actions' )
+      run: |
+        git diff --staged --quiet || git commit -m "✨ Autogenerate frontend client"
+        git push
     # Fork PRs
     - name: Check changes
-      # TODO: uncomment this
-      # if: ( github.event_name == 'pull_request' && github.secret_source != 'Actions' )
+      if: ( github.event_name == 'pull_request' && github.secret_source != 'Actions' )
       run: |
         git diff --staged --quiet || (echo "Changes detected in generated client, run scripts/generate-client.sh and commit the changes" && exit 1)
