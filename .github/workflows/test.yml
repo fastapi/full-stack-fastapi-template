@@ -2,12 +2,12 @@ name: Test
 
 on:
   push:
-    branches:
-      - master
-  pull_request:
-    types:
-      - opened
-      - synchronize
+  #   branches:
+  #     - master
+  # pull_request:
+  #   types:
+  #     - opened
+  #     - synchronize
 
 jobs:
 
