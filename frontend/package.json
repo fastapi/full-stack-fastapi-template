@@ -8,7 +8,7 @@
     "build": "tsc && vite build",
     "lint": "biome check --apply-unsafe --no-errors-on-unmatched --files-ignore-unknown=true ./",
     "preview": "vite preview",
-    "generate-client": "openapi-ts --input ./openapi.json --output ./src/client --client axios --exportSchemas true && biome format --write ./src/client"
+    "generate-client": "openapi-ts --input ./openapi.json --output ./src/client --client axios --exportSchemas true"
   },
   "dependencies": {
     "@chakra-ui/icons": "2.1.1",
@@ -18,7 +18,7 @@
     "@tanstack/react-query": "^5.28.14",
     "@tanstack/react-query-devtools": "^5.28.14",
     "@tanstack/react-router": "1.19.1",
-    "axios": "1.6.2",
+    "axios": "1.7.4",
     "form-data": "4.0.0",
     "framer-motion": "10.16.16",
     "react": "^18.2.0",
@@ -30,12 +30,14 @@
   "devDependencies": {
     "@biomejs/biome": "1.6.1",
     "@hey-api/openapi-ts": "^0.34.1",
+    "@playwright/test": "^1.45.2",
     "@tanstack/router-devtools": "1.19.1",
     "@tanstack/router-vite-plugin": "1.19.0",
-    "@types/node": "20.10.5",
+    "@types/node": "^20.10.5",
     "@types/react": "^18.2.37",
     "@types/react-dom": "^18.2.15",
     "@vitejs/plugin-react-swc": "^3.5.0",
+    "dotenv": "^16.4.5",
     "typescript": "^5.2.2",
     "vite": "^5.0.13"
   }
