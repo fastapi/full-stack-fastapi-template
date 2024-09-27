@@ -7,8 +7,8 @@ from sqlmodel import Field, Relationship, SQLModel
 # Shared properties
 class UserBase(SQLModel):
     # TODO: fix this
-    email: EmailStr | float = Field(unique=True, index=True, max_length=255)
-    is_active: bool = True
+    email: EmailStr = Field(unique=True, index=True, max_length=255)
+    is_active: bool | None = None
     is_superuser: bool = False
     full_name: str | None = Field(default=None, max_length=255)
 
