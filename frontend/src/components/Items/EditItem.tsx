@@ -12,8 +12,8 @@ import {
   ModalHeader,
   ModalOverlay,
 } from "@chakra-ui/react"
-import { type SubmitHandler, useForm } from "react-hook-form"
 import { useMutation, useQueryClient } from "@tanstack/react-query"
+import { type SubmitHandler, useForm } from "react-hook-form"
 
 import {
   type ApiError,
@@ -22,6 +22,7 @@ import {
   ItemsService,
 } from "../../client"
 import useCustomToast from "../../hooks/useCustomToast"
+import { handleError } from "../../utils"
 
 interface EditItemProps {
   item: ItemPublic
@@ -51,8 +52,7 @@ const EditItem = ({ item, isOpen, onClose }: EditItemProps) => {
       onClose()
     },
     onError: (err: ApiError) => {
-      const errDetail = (err.body as any)?.detail
-      showToast("Something went wrong.", `${errDetail}`, "error")
+      handleError(err, showToast)
     },
     onSettled: () => {
       queryClient.invalidateQueries({ queryKey: ["items"] })

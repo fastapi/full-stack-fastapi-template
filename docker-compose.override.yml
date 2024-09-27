@@ -1,7 +1,12 @@
 services:
 
+  # Local services are available on their ports, but also available on:
+  # http://api.localhost.tiangolo.com: backend
+  # http://dashboard.localhost.tiangolo.com: frontend
+  # etc. To enable it, update .env, set:
+  # DOMAIN=localhost.tiangolo.com
   proxy:
-    image: traefik:v2.3
+    image: traefik:3.0
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
     ports:
@@ -36,6 +41,9 @@ services:
       # Dummy https-redirect middleware that doesn't really redirect, only to
       # allow running it locally
       - traefik.http.middlewares.https-redirect.contenttype.autodetect=false
+    networks:
+      - traefik-public
+      - default
 
   db:
     restart: "no"
@@ -50,22 +58,48 @@ services:
   backend:
     restart: "no"
     ports:
-      - "8888:8888"
-    volumes:
-      - ./backend/:/app
+      - "8000:8000"
     build:
       context: ./backend
-      args:
-        INSTALL_DEV: ${INSTALL_DEV-true}
     # command: sleep infinity  # Infinite loop to keep container alive doing nothing
-    command: /start-reload.sh
+    command:
+      - fastapi
+      - run
+      - --reload
+      - "app/main.py"
+    develop:
+      watch:
+        - path: ./backend
+          action: sync
+          target: /app
+          ignore:
+            - ./backend/.venv
+            - .venv
+        - path: ./backend/pyproject.toml
+          action: rebuild
+    # TODO: remove once coverage is done locally
+    volumes:
+      - ./backend/htmlcov:/app/htmlcov
+    environment:
+      SMTP_HOST: "mailcatcher"
+      SMTP_PORT: "1025"
+      SMTP_TLS: "false"
+      EMAILS_FROM_EMAIL: "noreply@example.com"
+
+  mailcatcher:
+    image: schickling/mailcatcher
+    ports:
+      - "1080:1080"
+      - "1025:1025"
 
   frontend:
     restart: "no"
+    ports:
+      - "5173:80"
     build:
       context: ./frontend
       args:
-        - VITE_API_URL=http://${DOMAIN?Variable not set}
+        - VITE_API_URL=http://localhost:8000
         - NODE_ENV=development
 
 networks:
