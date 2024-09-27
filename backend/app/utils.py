@@ -9,7 +9,11 @@ import jwt
 from jinja2 import Template
 from jwt.exceptions import InvalidTokenError
 
+from app.core import security
 from app.core.config import settings
+
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger(__name__)
 
 
 @dataclass
@@ -48,7 +52,7 @@ def send_email(
     if settings.SMTP_PASSWORD:
         smtp_options["password"] = settings.SMTP_PASSWORD
     response = message.send(to=email_to, smtp=smtp_options)
-    logging.info(f"send email result: {response}")
+    logger.info(f"send email result: {response}")
 
 
 def generate_test_email(email_to: str) -> EmailData:
@@ -104,14 +108,16 @@ def generate_password_reset_token(email: str) -> str:
     encoded_jwt = jwt.encode(
         {"exp": exp, "nbf": now, "sub": email},
         settings.SECRET_KEY,
-        algorithm="HS256",
+        algorithm=security.ALGORITHM,
     )
     return encoded_jwt
 
 
 def verify_password_reset_token(token: str) -> str | None:
     try:
-        decoded_token = jwt.decode(token, settings.SECRET_KEY, algorithms=["HS256"])
+        decoded_token = jwt.decode(
+            token, settings.SECRET_KEY, algorithms=[security.ALGORITHM]
+        )
         return str(decoded_token["sub"])
     except InvalidTokenError:
         return None
