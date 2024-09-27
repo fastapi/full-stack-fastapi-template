@@ -41,9 +41,9 @@ jobs:
       working-directory: frontend
     - run: docker compose build
     - run: docker compose down -v --remove-orphans
-    - run: docker compose up -d
+    - run: docker compose up -d --wait backend mailcatcher
     - name: Run Playwright tests
-      run: npx playwright test
+      run: npx playwright test --fail-on-flaky-tests --trace=retain-on-failure
       working-directory: frontend
     - run: docker compose down -v --remove-orphans
     - uses: actions/upload-artifact@v4
@@ -52,6 +52,7 @@ jobs:
         name: playwright-report
         path: frontend/playwright-report/
         retention-days: 30
+        include-hidden-files: true
 
   # https://github.com/marketplace/actions/alls-green#why
   e2e-alls-green:  # This job does nothing and is only used for the branch protection
