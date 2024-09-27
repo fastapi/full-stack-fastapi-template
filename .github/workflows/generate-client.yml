@@ -56,4 +56,4 @@ jobs:
       # TODO: uncomment this
       # if: ( github.event_name == 'pull_request' && github.secret_source != 'Actions' )
       run: |
-        git diff --staged --quiet || echo "Changes detected in generated client, run scripts/generate-client.sh and commit the changes" && exit 1
+        git diff --staged --quiet || (echo "Changes detected in generated client, run scripts/generate-client.sh and commit the changes" && exit 1)
