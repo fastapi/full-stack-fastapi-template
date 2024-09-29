@@ -1,3 +1,4 @@
+import uuid
 from sqlmodel import SQLModel, Field, Relationship
 from typing import Optional, List, TYPE_CHECKING
 
@@ -20,8 +21,8 @@ class VenueBase(SQLModel):
     qr_url: Optional[str] = Field(default=None)
 
 class NightclubUserBusinessLink(SQLModel, table=True):
-    nightclub_id: int = Field(foreign_key="nightclub.id", primary_key=True)
-    user_business_id: int = Field(foreign_key="user_business.id", primary_key=True)
+    nightclub_id: uuid.UUID = Field(foreign_key="nightclub.id", primary_key=True)
+    user_business_id: uuid.UUID = Field(foreign_key="user_business.id", primary_key=True)
 
 class NightclubBase(VenueBase):
     pass
@@ -29,7 +30,7 @@ class NightclubBase(VenueBase):
 class Nightclub(NightclubBase, table=True):
     __tablename__ = "nightclub"
 
-    id: Optional[int] = Field(default=None, primary_key=True, index=True)
+    id: Optional[uuid.UUID] = Field(default=None, primary_key=True, index=True)
     # Relationships
     events: List["Event"] = Relationship(back_populates="nightclub")
     club_visits: List["ClubVisit"] = Relationship(back_populates="nightclub")
@@ -43,8 +44,8 @@ class Nightclub(NightclubBase, table=True):
     )
 
 class RestaurantUserBusinessLink(SQLModel, table=True):
-    restaurant_id: int = Field(foreign_key="restaurant.id", primary_key=True)
-    user_business_id: int = Field(foreign_key="user_business.id", primary_key=True)
+    restaurant_id: uuid.UUID = Field(foreign_key="restaurant.id", primary_key=True)
+    user_business_id: uuid.UUID = Field(foreign_key="user_business.id", primary_key=True)
 
 class RestaurantBase(VenueBase):
     pass
@@ -52,7 +53,7 @@ class RestaurantBase(VenueBase):
 class Restaurant(RestaurantBase, table=True):
     __tablename__ = "restaurant"
 
-    id: Optional[int] = Field(default=None, primary_key=True, index=True)
+    id: uuid.UUID = Field(default_factory=uuid.uuid4, primary_key=True, index=True)
     # Relationships
     menu: List["RestaurantMenu"] = Relationship(back_populates="restaurant")
     orders: List["RestaurantOrder"] = Relationship(back_populates="restaurant")
@@ -62,8 +63,8 @@ class Restaurant(RestaurantBase, table=True):
     )
 
 class QSRUserBusinessLink(SQLModel, table=True):
-    qsr_id: int = Field(foreign_key="qsr.id", primary_key=True)
-    user_business_id: int = Field(foreign_key="user_business.id", primary_key=True)
+    qsr_id: uuid.UUID = Field(foreign_key="qsr.id", primary_key=True)
+    user_business_id: uuid.UUID = Field(foreign_key="user_business.id", primary_key=True)
 
 class QSRBase(VenueBase):
     pass
@@ -71,8 +72,8 @@ class QSRBase(VenueBase):
 class QSR(QSRBase, table=True):
     __tablename__ = "qsr"
 
-    id: Optional[int] = Field(default=None, primary_key=True, index=True)
-    foodcourt_id: Optional[int] = Field(default=None, foreign_key="foodcourt.id")
+    id: uuid.UUID = Field(default_factory=uuid.uuid4, primary_key=True, index=True)
+    foodcourt_id: Optional[uuid.UUID] = Field(default=None, foreign_key="foodcourt.id")
     # Relationships
     foodcourt: Optional["Foodcourt"] = Relationship(back_populates="qsrs")
     menu: List["QSRMenu"] = Relationship(back_populates="qsr")
@@ -83,8 +84,8 @@ class QSR(QSRBase, table=True):
     )
 
 class FoodcourtUserBusinessLink(SQLModel, table=True):
-    foodcourt_id: int = Field(foreign_key="foodcourt.id", primary_key=True)
-    user_business_id: int = Field(foreign_key="user_business.id", primary_key=True)
+    foodcourt_id: uuid.UUID = Field(foreign_key="foodcourt.id", primary_key=True)
+    user_business_id: uuid.UUID = Field(foreign_key="user_business.id", primary_key=True)
 
 class FoodcourtBase(VenueBase):
     pass
@@ -92,7 +93,7 @@ class FoodcourtBase(VenueBase):
 class Foodcourt(FoodcourtBase, table=True):
     __tablename__ = "foodcourt"
 
-    id: Optional[int] = Field(default=None, primary_key=True, index=True)
+    id: uuid.UUID = Field(default_factory=uuid.uuid4, primary_key=True, index=True)
     # Relationships
     qsrs: List["QSR"] = Relationship(back_populates="foodcourt")
     managing_users: List["UserBusiness"] = Relationship(

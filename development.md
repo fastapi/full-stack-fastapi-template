@@ -146,10 +146,6 @@ The production or staging URLs would use these same paths, but with your own dom
 
 Development URLs, for local development.
 
-Frontend: http://localhost
-
-Backend: http://localhost/api/
-
 Automatic Interactive Docs (Swagger UI): http://localhost/docs
 
 Automatic Alternative Docs (ReDoc): http://localhost/redoc 
@@ -161,8 +157,6 @@ Traefik UI: http://localhost:8090
 ### Development in localhost with a custom domain URLs
 
 Development URLs, for local development.
-
-Frontend: http://localhost.tiangolo.com
 
 Backend: http://localhost.tiangolo.com/api/
 

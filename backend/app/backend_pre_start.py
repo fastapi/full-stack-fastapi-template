@@ -28,7 +28,6 @@ def init(db_engine: Engine) -> None:
         logger.error(e)
         raise e
 
-
 def main() -> None:
     logger.info("Initializing service")
     init(engine)

@@ -1,14 +1,15 @@
+import uuid
 from sqlmodel import SQLModel, Field, Relationship
 from typing import Optional, List
-from pydantic import root_validator, ValidationError
+from pydantic import model_validator
 
 class MenuCategoryBase(SQLModel):
-    qsr_menu_id: Optional[int] = Field(default=None, foreign_key="qsr_menu.id")
-    restaurant_menu_id: Optional[int] = Field(default=None, foreign_key="restaurant_menu.id")
-    nightclub_menu_id: Optional[int] = Field(default=None, foreign_key="nightclub_menu.id")
+    qsr_menu_id: Optional[uuid.UUID] = Field(default=None, foreign_key="qsr_menu.id")
+    restaurant_menu_id: Optional[uuid.UUID] = Field(default=None, foreign_key="restaurant_menu.id")
+    nightclub_menu_id: Optional[uuid.UUID] = Field(default=None, foreign_key="nightclub_menu.id")
     name: str = Field(nullable=False)
 
-    @root_validator(pre=True)
+    @model_validator(mode="before")
     def check_only_one_menu_id(cls, values):
         # Convert to a regular dictionary
         values_dict = dict(values)
@@ -28,7 +29,7 @@ class MenuCategoryBase(SQLModel):
     
 class MenuCategory(MenuCategoryBase, table=True):
     __tablename__ = "menu_category"
-    id: Optional[int] = Field(default=None, primary_key=True, index=True)
+    id: uuid.UUID = Field(default_factory=uuid.uuid4, primary_key=True, index=True)
     
     # Relationships
     menu_items: List["MenuItem"] = Relationship(back_populates="category")

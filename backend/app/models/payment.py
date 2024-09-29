@@ -1,11 +1,12 @@
+import uuid
 from sqlmodel import SQLModel, Field, Relationship
 from typing import Optional
 from datetime import datetime
 
 class PaymentBase(SQLModel):
-    user_id: int = Field(foreign_key="user_public.id", nullable=False)
+    user_id: uuid.UUID = Field(foreign_key="user_public.id", nullable=False)
     source_type: str = Field(nullable=False)  # Changed to str
-    gateway_transaction_id: Optional[int] = Field(default=None)
+    gateway_transaction_id: Optional[uuid.UUID] = Field(default=None)
     payment_time: datetime = Field(nullable=False)
     amount: float = Field(nullable=False)
     status: str = Field(nullable=False)  # e.g., Paid, Pending, Failed
@@ -13,7 +14,7 @@ class PaymentBase(SQLModel):
 
 class PaymentOrderNightclub(PaymentBase, table=True):
     __tablename__ = "payment_source_nightclub"
-    id: Optional[int] = Field(default=None, primary_key=True, index=True)
+    id: uuid.UUID = Field(default_factory=uuid.uuid4, primary_key=True, index=True)
     retry_count: int = Field(default=0)
     last_attempt_time: Optional[datetime] = Field(default=None)
     order: "NightclubOrder" = Relationship(back_populates="payment", sa_relationship_kwargs={"uselist": False})
@@ -21,7 +22,7 @@ class PaymentOrderNightclub(PaymentBase, table=True):
 
 class PaymentOrderQSR(PaymentBase, table=True):
     __tablename__ = "payment_source_qsr"
-    id: Optional[int] = Field(default=None, primary_key=True, index=True)
+    id: uuid.UUID = Field(default_factory=uuid.uuid4, primary_key=True, index=True)
     retry_count: int = Field(default=0)
     last_attempt_time: Optional[datetime] = Field(default=None)
     order: "QSROrder" = Relationship(back_populates="payment", sa_relationship_kwargs={"uselist": False})
@@ -29,7 +30,7 @@ class PaymentOrderQSR(PaymentBase, table=True):
 
 class PaymentOrderRestaurant(PaymentBase, table=True):
     __tablename__ = "payment_source_restaurant"
-    id: Optional[int] = Field(default=None, primary_key=True, index=True)
+    id: uuid.UUID = Field(default_factory=uuid.uuid4, primary_key=True, index=True)
     retry_count: int = Field(default=0)
     last_attempt_time: Optional[datetime] = Field(default=None)
     order: "RestaurantOrder" = Relationship(back_populates="payment", sa_relationship_kwargs={"uselist": False})
@@ -37,7 +38,7 @@ class PaymentOrderRestaurant(PaymentBase, table=True):
 
 class PaymentEvent(PaymentBase, table=True):
     __tablename__ = "payment_event"
-    id: Optional[int] = Field(default=None, primary_key=True, index=True)
-    event_booking_id: Optional[int] = Field(default=None, foreign_key="event_booking.id")
+    id: uuid.UUID = Field(default_factory=uuid.uuid4, primary_key=True, index=True)
+    event_booking_id: Optional[uuid.UUID] = Field(default=None, foreign_key="event_booking.id")
     event_booking: Optional["EventBooking"] = Relationship(back_populates="payment", sa_relationship_kwargs={"uselist": False})
     user: Optional["UserPublic"] = Relationship(back_populates="event_payments")

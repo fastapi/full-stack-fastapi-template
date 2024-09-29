@@ -1,11 +1,12 @@
+import uuid
 from sqlmodel import SQLModel, Field, Relationship
 from typing import Optional, List
 
 class PickupLocation(SQLModel, table=True):
     __tablename__ = "pickup_location"
 
-    id: Optional[int] = Field(default=None, primary_key=True, index=True)
-    nightclub_id: int = Field(foreign_key="nightclub.id", nullable=False)
+    id: uuid.UUID = Field(default_factory=uuid.uuid4, primary_key=True, index=True)
+    nightclub_id: uuid.UUID = Field(foreign_key="nightclub.id", nullable=False)
     name: str = Field(nullable=False)
     description: Optional[str] = Field(default=None)
 

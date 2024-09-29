@@ -1,3 +1,4 @@
+import uuid
 from sqlmodel import SQLModel, Field, Relationship
 from typing import Optional
 from typing import List
@@ -5,9 +6,9 @@ from typing import List
 # Stag, couple etc
 class EventOffering(SQLModel, table=True):
     __tablename__ = "event_offering"
-    id: Optional[int] = Field(default=None, primary_key=True, index=True)
-    event_id: int = Field(foreign_key="event.id", nullable=False)
-    event_booking_id: int = Field(foreign_key="event_booking.id", nullable=False)
+    id: uuid.UUID = Field(default_factory=uuid.uuid4, primary_key=True, index=True)
+    event_id: uuid.UUID = Field(foreign_key="event.id", nullable=False)
+    event_booking_id: uuid.UUID = Field(foreign_key="event_booking.id", nullable=False)
     offering_type: str = Field(nullable=False)
     description: str = Field(nullable=False)
     price: float = Field(nullable=False)

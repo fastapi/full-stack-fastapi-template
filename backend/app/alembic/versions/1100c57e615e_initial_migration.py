@@ -1,8 +1,8 @@
-"""Add column last_name to user model
+"""Initial migration
 
-Revision ID: 36749727673e
+Revision ID: 1100c57e615e
 Revises: 
-Create Date: 2024-09-22 11:44:15.716637
+Create Date: 2024-09-28 12:41:42.435197
 
 """
 from alembic import op
@@ -11,7 +11,7 @@ import sqlmodel.sql.sqltypes
 
 
 # revision identifiers, used by Alembic.
-revision = '36749727673e'
+revision = '1100c57e615e'
 down_revision = None
 branch_labels = None
 depends_on = None
@@ -36,7 +36,7 @@ def upgrade():
     sa.Column('closing_time', sqlmodel.sql.sqltypes.AutoString(), nullable=True),
     sa.Column('avg_expense_for_two', sa.Float(), nullable=True),
     sa.Column('qr_url', sqlmodel.sql.sqltypes.AutoString(), nullable=True),
-    sa.Column('id', sa.Integer(), nullable=False),
+    sa.Column('id', sa.Uuid(), nullable=False),
     sa.PrimaryKeyConstraint('id')
     )
     op.create_index(op.f('ix_foodcourt_id'), 'foodcourt', ['id'], unique=False)
@@ -57,7 +57,7 @@ def upgrade():
     sa.Column('closing_time', sqlmodel.sql.sqltypes.AutoString(), nullable=True),
     sa.Column('avg_expense_for_two', sa.Float(), nullable=True),
     sa.Column('qr_url', sqlmodel.sql.sqltypes.AutoString(), nullable=True),
-    sa.Column('id', sa.Integer(), nullable=False),
+    sa.Column('id', sa.Uuid(), nullable=False),
     sa.PrimaryKeyConstraint('id')
     )
     op.create_index(op.f('ix_nightclub_id'), 'nightclub', ['id'], unique=False)
@@ -78,17 +78,17 @@ def upgrade():
     sa.Column('closing_time', sqlmodel.sql.sqltypes.AutoString(), nullable=True),
     sa.Column('avg_expense_for_two', sa.Float(), nullable=True),
     sa.Column('qr_url', sqlmodel.sql.sqltypes.AutoString(), nullable=True),
-    sa.Column('id', sa.Integer(), nullable=False),
+    sa.Column('id', sa.Uuid(), nullable=False),
     sa.PrimaryKeyConstraint('id')
     )
     op.create_index(op.f('ix_restaurant_id'), 'restaurant', ['id'], unique=False)
     op.create_table('user_business',
     sa.Column('email', sqlmodel.sql.sqltypes.AutoString(length=255), nullable=True),
-    sa.Column('phone_number', sqlmodel.sql.sqltypes.AutoString(), nullable=True),
+    sa.Column('phone_number', sqlmodel.sql.sqltypes.AutoString(), nullable=False),
     sa.Column('is_active', sa.Boolean(), nullable=False),
     sa.Column('is_superuser', sa.Boolean(), nullable=False),
     sa.Column('full_name', sqlmodel.sql.sqltypes.AutoString(length=255), nullable=True),
-    sa.Column('id', sa.Integer(), nullable=False),
+    sa.Column('id', sa.Uuid(), nullable=False),
     sa.Column('registration_date', sa.DateTime(), nullable=False),
     sa.PrimaryKeyConstraint('id')
     )
@@ -96,7 +96,12 @@ def upgrade():
     op.create_index(op.f('ix_user_business_id'), 'user_business', ['id'], unique=False)
     op.create_index(op.f('ix_user_business_phone_number'), 'user_business', ['phone_number'], unique=True)
     op.create_table('user_public',
-    sa.Column('id', sa.Integer(), nullable=False),
+    sa.Column('email', sqlmodel.sql.sqltypes.AutoString(length=255), nullable=True),
+    sa.Column('phone_number', sqlmodel.sql.sqltypes.AutoString(), nullable=False),
+    sa.Column('is_active', sa.Boolean(), nullable=False),
+    sa.Column('is_superuser', sa.Boolean(), nullable=False),
+    sa.Column('full_name', sqlmodel.sql.sqltypes.AutoString(length=255), nullable=True),
+    sa.Column('id', sa.Uuid(), nullable=False),
     sa.Column('date_of_birth', sa.DateTime(), nullable=True),
     sa.Column('gender', sqlmodel.sql.sqltypes.AutoString(), nullable=True),
     sa.Column('registration_date', sa.DateTime(), nullable=False),
@@ -104,10 +109,12 @@ def upgrade():
     sa.Column('preferences', sqlmodel.sql.sqltypes.AutoString(), nullable=True),
     sa.PrimaryKeyConstraint('id')
     )
+    op.create_index(op.f('ix_user_public_email'), 'user_public', ['email'], unique=True)
     op.create_index(op.f('ix_user_public_id'), 'user_public', ['id'], unique=False)
+    op.create_index(op.f('ix_user_public_phone_number'), 'user_public', ['phone_number'], unique=True)
     op.create_table('event',
-    sa.Column('id', sa.Integer(), nullable=False),
-    sa.Column('nightclub_id', sa.Integer(), nullable=False),
+    sa.Column('id', sa.Uuid(), nullable=False),
+    sa.Column('nightclub_id', sa.Uuid(), nullable=False),
     sa.Column('title', sqlmodel.sql.sqltypes.AutoString(), nullable=False),
     sa.Column('start_time', sa.DateTime(), nullable=False),
     sa.Column('end_time', sa.DateTime(), nullable=False),
@@ -119,17 +126,17 @@ def upgrade():
     )
     op.create_index(op.f('ix_event_id'), 'event', ['id'], unique=False)
     op.create_table('foodcourtuserbusinesslink',
-    sa.Column('foodcourt_id', sa.Integer(), nullable=False),
-    sa.Column('user_business_id', sa.Integer(), nullable=False),
+    sa.Column('foodcourt_id', sa.Uuid(), nullable=False),
+    sa.Column('user_business_id', sa.Uuid(), nullable=False),
     sa.ForeignKeyConstraint(['foodcourt_id'], ['foodcourt.id'], ),
     sa.ForeignKeyConstraint(['user_business_id'], ['user_business.id'], ),
     sa.PrimaryKeyConstraint('foodcourt_id', 'user_business_id')
     )
     op.create_table('group',
-    sa.Column('id', sa.Integer(), nullable=False),
-    sa.Column('nightclub_id', sa.Integer(), nullable=True),
+    sa.Column('id', sa.Uuid(), nullable=False),
+    sa.Column('nightclub_id', sa.Uuid(), nullable=True),
     sa.Column('created_at', sa.DateTime(), nullable=False),
-    sa.Column('admin_user_id', sa.Integer(), nullable=False),
+    sa.Column('admin_user_id', sa.Uuid(), nullable=False),
     sa.Column('table_number', sqlmodel.sql.sqltypes.AutoString(), nullable=True),
     sa.ForeignKeyConstraint(['admin_user_id'], ['user_public.id'], ),
     sa.ForeignKeyConstraint(['nightclub_id'], ['nightclub.id'], ),
@@ -140,27 +147,27 @@ def upgrade():
     sa.Column('name', sqlmodel.sql.sqltypes.AutoString(), nullable=False),
     sa.Column('description', sqlmodel.sql.sqltypes.AutoString(), nullable=True),
     sa.Column('menu_type', sqlmodel.sql.sqltypes.AutoString(), nullable=True),
-    sa.Column('nightclub_id', sa.Integer(), nullable=False),
-    sa.Column('id', sa.Integer(), nullable=False),
+    sa.Column('nightclub_id', sa.Uuid(), nullable=False),
+    sa.Column('id', sa.Uuid(), nullable=False),
     sa.ForeignKeyConstraint(['nightclub_id'], ['nightclub.id'], ),
     sa.PrimaryKeyConstraint('id')
     )
     op.create_index(op.f('ix_nightclub_menu_id'), 'nightclub_menu', ['id'], unique=False)
     op.create_table('nightclubuserbusinesslink',
-    sa.Column('nightclub_id', sa.Integer(), nullable=False),
-    sa.Column('user_business_id', sa.Integer(), nullable=False),
+    sa.Column('nightclub_id', sa.Uuid(), nullable=False),
+    sa.Column('user_business_id', sa.Uuid(), nullable=False),
     sa.ForeignKeyConstraint(['nightclub_id'], ['nightclub.id'], ),
     sa.ForeignKeyConstraint(['user_business_id'], ['user_business.id'], ),
     sa.PrimaryKeyConstraint('nightclub_id', 'user_business_id')
     )
     op.create_table('payment_source_nightclub',
-    sa.Column('user_id', sa.Integer(), nullable=False),
+    sa.Column('user_id', sa.Uuid(), nullable=False),
     sa.Column('source_type', sqlmodel.sql.sqltypes.AutoString(), nullable=False),
-    sa.Column('gateway_transaction_id', sa.Integer(), nullable=True),
+    sa.Column('gateway_transaction_id', sa.Uuid(), nullable=True),
     sa.Column('payment_time', sa.DateTime(), nullable=False),
     sa.Column('amount', sa.Float(), nullable=False),
     sa.Column('status', sqlmodel.sql.sqltypes.AutoString(), nullable=False),
-    sa.Column('id', sa.Integer(), nullable=False),
+    sa.Column('id', sa.Uuid(), nullable=False),
     sa.Column('retry_count', sa.Integer(), nullable=False),
     sa.Column('last_attempt_time', sa.DateTime(), nullable=True),
     sa.ForeignKeyConstraint(['user_id'], ['user_public.id'], ),
@@ -168,13 +175,13 @@ def upgrade():
     )
     op.create_index(op.f('ix_payment_source_nightclub_id'), 'payment_source_nightclub', ['id'], unique=False)
     op.create_table('payment_source_qsr',
-    sa.Column('user_id', sa.Integer(), nullable=False),
+    sa.Column('user_id', sa.Uuid(), nullable=False),
     sa.Column('source_type', sqlmodel.sql.sqltypes.AutoString(), nullable=False),
-    sa.Column('gateway_transaction_id', sa.Integer(), nullable=True),
+    sa.Column('gateway_transaction_id', sa.Uuid(), nullable=True),
     sa.Column('payment_time', sa.DateTime(), nullable=False),
     sa.Column('amount', sa.Float(), nullable=False),
     sa.Column('status', sqlmodel.sql.sqltypes.AutoString(), nullable=False),
-    sa.Column('id', sa.Integer(), nullable=False),
+    sa.Column('id', sa.Uuid(), nullable=False),
     sa.Column('retry_count', sa.Integer(), nullable=False),
     sa.Column('last_attempt_time', sa.DateTime(), nullable=True),
     sa.ForeignKeyConstraint(['user_id'], ['user_public.id'], ),
@@ -182,13 +189,13 @@ def upgrade():
     )
     op.create_index(op.f('ix_payment_source_qsr_id'), 'payment_source_qsr', ['id'], unique=False)
     op.create_table('payment_source_restaurant',
-    sa.Column('user_id', sa.Integer(), nullable=False),
+    sa.Column('user_id', sa.Uuid(), nullable=False),
     sa.Column('source_type', sqlmodel.sql.sqltypes.AutoString(), nullable=False),
-    sa.Column('gateway_transaction_id', sa.Integer(), nullable=True),
+    sa.Column('gateway_transaction_id', sa.Uuid(), nullable=True),
     sa.Column('payment_time', sa.DateTime(), nullable=False),
     sa.Column('amount', sa.Float(), nullable=False),
     sa.Column('status', sqlmodel.sql.sqltypes.AutoString(), nullable=False),
-    sa.Column('id', sa.Integer(), nullable=False),
+    sa.Column('id', sa.Uuid(), nullable=False),
     sa.Column('retry_count', sa.Integer(), nullable=False),
     sa.Column('last_attempt_time', sa.DateTime(), nullable=True),
     sa.ForeignKeyConstraint(['user_id'], ['user_public.id'], ),
@@ -196,8 +203,8 @@ def upgrade():
     )
     op.create_index(op.f('ix_payment_source_restaurant_id'), 'payment_source_restaurant', ['id'], unique=False)
     op.create_table('pickup_location',
-    sa.Column('id', sa.Integer(), nullable=False),
-    sa.Column('nightclub_id', sa.Integer(), nullable=False),
+    sa.Column('id', sa.Uuid(), nullable=False),
+    sa.Column('nightclub_id', sa.Uuid(), nullable=False),
     sa.Column('name', sqlmodel.sql.sqltypes.AutoString(), nullable=False),
     sa.Column('description', sqlmodel.sql.sqltypes.AutoString(), nullable=True),
     sa.ForeignKeyConstraint(['nightclub_id'], ['nightclub.id'], ),
@@ -221,8 +228,8 @@ def upgrade():
     sa.Column('closing_time', sqlmodel.sql.sqltypes.AutoString(), nullable=True),
     sa.Column('avg_expense_for_two', sa.Float(), nullable=True),
     sa.Column('qr_url', sqlmodel.sql.sqltypes.AutoString(), nullable=True),
-    sa.Column('id', sa.Integer(), nullable=False),
-    sa.Column('foodcourt_id', sa.Integer(), nullable=True),
+    sa.Column('id', sa.Uuid(), nullable=False),
+    sa.Column('foodcourt_id', sa.Uuid(), nullable=True),
     sa.ForeignKeyConstraint(['foodcourt_id'], ['foodcourt.id'], ),
     sa.PrimaryKeyConstraint('id')
     )
@@ -231,24 +238,24 @@ def upgrade():
     sa.Column('name', sqlmodel.sql.sqltypes.AutoString(), nullable=False),
     sa.Column('description', sqlmodel.sql.sqltypes.AutoString(), nullable=True),
     sa.Column('menu_type', sqlmodel.sql.sqltypes.AutoString(), nullable=True),
-    sa.Column('restaurant_id', sa.Integer(), nullable=False),
-    sa.Column('id', sa.Integer(), nullable=False),
+    sa.Column('restaurant_id', sa.Uuid(), nullable=False),
+    sa.Column('id', sa.Uuid(), nullable=False),
     sa.ForeignKeyConstraint(['restaurant_id'], ['restaurant.id'], ),
     sa.PrimaryKeyConstraint('id')
     )
     op.create_index(op.f('ix_restaurant_menu_id'), 'restaurant_menu', ['id'], unique=False)
     op.create_table('restaurantuserbusinesslink',
-    sa.Column('restaurant_id', sa.Integer(), nullable=False),
-    sa.Column('user_business_id', sa.Integer(), nullable=False),
+    sa.Column('restaurant_id', sa.Uuid(), nullable=False),
+    sa.Column('user_business_id', sa.Uuid(), nullable=False),
     sa.ForeignKeyConstraint(['restaurant_id'], ['restaurant.id'], ),
     sa.ForeignKeyConstraint(['user_business_id'], ['user_business.id'], ),
     sa.PrimaryKeyConstraint('restaurant_id', 'user_business_id')
     )
     op.create_table('clubvisit',
-    sa.Column('id', sa.Integer(), nullable=False),
-    sa.Column('user_id', sa.Integer(), nullable=False),
-    sa.Column('group_id', sa.Integer(), nullable=True),
-    sa.Column('nightclub_id', sa.Integer(), nullable=False),
+    sa.Column('id', sa.Uuid(), nullable=False),
+    sa.Column('user_id', sa.Uuid(), nullable=False),
+    sa.Column('group_id', sa.Uuid(), nullable=True),
+    sa.Column('nightclub_id', sa.Uuid(), nullable=False),
     sa.Column('entry_time', sa.DateTime(), nullable=False),
     sa.Column('exit_time', sa.DateTime(), nullable=True),
     sa.Column('cover_charge', sa.Float(), nullable=True),
@@ -259,9 +266,9 @@ def upgrade():
     sa.PrimaryKeyConstraint('id')
     )
     op.create_table('event_booking',
-    sa.Column('id', sa.Integer(), nullable=False),
-    sa.Column('user_id', sa.Integer(), nullable=False),
-    sa.Column('event_id', sa.Integer(), nullable=False),
+    sa.Column('id', sa.Uuid(), nullable=False),
+    sa.Column('user_id', sa.Uuid(), nullable=False),
+    sa.Column('event_id', sa.Uuid(), nullable=False),
     sa.Column('booking_time', sa.DateTime(), nullable=False),
     sa.Column('total_amount', sa.Float(), nullable=False),
     sa.Column('status', sqlmodel.sql.sqltypes.AutoString(), nullable=False),
@@ -270,8 +277,8 @@ def upgrade():
     sa.PrimaryKeyConstraint('id')
     )
     op.create_table('group_wallet',
-    sa.Column('id', sa.Integer(), nullable=False),
-    sa.Column('group_id', sa.Integer(), nullable=False),
+    sa.Column('id', sa.Uuid(), nullable=False),
+    sa.Column('group_id', sa.Uuid(), nullable=False),
     sa.Column('balance', sa.Float(), nullable=False),
     sa.ForeignKeyConstraint(['group_id'], ['group.id'], ),
     sa.PrimaryKeyConstraint('id'),
@@ -279,14 +286,14 @@ def upgrade():
     )
     op.create_index(op.f('ix_group_wallet_id'), 'group_wallet', ['id'], unique=False)
     op.create_table('groupmembers',
-    sa.Column('group_id', sa.Integer(), nullable=False),
-    sa.Column('user_id', sa.Integer(), nullable=False),
+    sa.Column('group_id', sa.Uuid(), nullable=False),
+    sa.Column('user_id', sa.Uuid(), nullable=False),
     sa.ForeignKeyConstraint(['group_id'], ['group.id'], ),
     sa.ForeignKeyConstraint(['user_id'], ['user_public.id'], ),
     sa.PrimaryKeyConstraint('group_id', 'user_id')
     )
     op.create_table('nightclub_order',
-    sa.Column('user_id', sa.Integer(), nullable=True),
+    sa.Column('user_id', sa.Uuid(), nullable=False),
     sa.Column('note', sqlmodel.sql.sqltypes.AutoString(), nullable=True),
     sa.Column('order_time', sa.DateTime(), nullable=False),
     sa.Column('total_amount', sa.Float(), nullable=False),
@@ -294,10 +301,10 @@ def upgrade():
     sa.Column('cover_charge_used', sa.Float(), nullable=True),
     sa.Column('status', sqlmodel.sql.sqltypes.AutoString(), nullable=False),
     sa.Column('service_type', sqlmodel.sql.sqltypes.AutoString(), nullable=True),
-    sa.Column('id', sa.Integer(), nullable=False),
-    sa.Column('venue_id', sa.Integer(), nullable=False),
-    sa.Column('payment_id', sa.Integer(), nullable=False),
-    sa.Column('pickup_location_id', sa.Integer(), nullable=False),
+    sa.Column('id', sa.Uuid(), nullable=False),
+    sa.Column('venue_id', sa.Uuid(), nullable=True),
+    sa.Column('payment_id', sa.Uuid(), nullable=True),
+    sa.Column('pickup_location_id', sa.Uuid(), nullable=True),
     sa.ForeignKeyConstraint(['payment_id'], ['payment_source_nightclub.id'], ),
     sa.ForeignKeyConstraint(['pickup_location_id'], ['pickup_location.id'], ),
     sa.ForeignKeyConstraint(['user_id'], ['user_public.id'], ),
@@ -309,15 +316,15 @@ def upgrade():
     sa.Column('name', sqlmodel.sql.sqltypes.AutoString(), nullable=False),
     sa.Column('description', sqlmodel.sql.sqltypes.AutoString(), nullable=True),
     sa.Column('menu_type', sqlmodel.sql.sqltypes.AutoString(), nullable=True),
-    sa.Column('qsr_id', sa.Integer(), nullable=False),
-    sa.Column('id', sa.Integer(), nullable=False),
+    sa.Column('qsr_id', sa.Uuid(), nullable=False),
+    sa.Column('id', sa.Uuid(), nullable=False),
     sa.ForeignKeyConstraint(['qsr_id'], ['qsr.id'], ),
     sa.PrimaryKeyConstraint('id')
     )
     op.create_index(op.f('ix_qsr_menu_id'), 'qsr_menu', ['id'], unique=False)
     op.create_table('qsr_order',
-    sa.Column('user_id', sa.Integer(), nullable=True),
-    sa.Column('pickup_location_id', sa.Integer(), nullable=True),
+    sa.Column('user_id', sa.Uuid(), nullable=False),
+    sa.Column('pickup_location_id', sa.Uuid(), nullable=True),
     sa.Column('note', sqlmodel.sql.sqltypes.AutoString(), nullable=True),
     sa.Column('order_time', sa.DateTime(), nullable=False),
     sa.Column('total_amount', sa.Float(), nullable=False),
@@ -325,9 +332,9 @@ def upgrade():
     sa.Column('cover_charge_used', sa.Float(), nullable=True),
     sa.Column('status', sqlmodel.sql.sqltypes.AutoString(), nullable=False),
     sa.Column('service_type', sqlmodel.sql.sqltypes.AutoString(), nullable=True),
-    sa.Column('id', sa.Integer(), nullable=False),
-    sa.Column('venue_id', sa.Integer(), nullable=False),
-    sa.Column('payment_id', sa.Integer(), nullable=False),
+    sa.Column('id', sa.Uuid(), nullable=False),
+    sa.Column('venue_id', sa.Uuid(), nullable=False),
+    sa.Column('payment_id', sa.Uuid(), nullable=False),
     sa.ForeignKeyConstraint(['payment_id'], ['payment_source_qsr.id'], ),
     sa.ForeignKeyConstraint(['pickup_location_id'], ['pickup_location.id'], ),
     sa.ForeignKeyConstraint(['user_id'], ['user_public.id'], ),
@@ -336,15 +343,15 @@ def upgrade():
     )
     op.create_index(op.f('ix_qsr_order_id'), 'qsr_order', ['id'], unique=False)
     op.create_table('qsruserbusinesslink',
-    sa.Column('qsr_id', sa.Integer(), nullable=False),
-    sa.Column('user_business_id', sa.Integer(), nullable=False),
+    sa.Column('qsr_id', sa.Uuid(), nullable=False),
+    sa.Column('user_business_id', sa.Uuid(), nullable=False),
     sa.ForeignKeyConstraint(['qsr_id'], ['qsr.id'], ),
     sa.ForeignKeyConstraint(['user_business_id'], ['user_business.id'], ),
     sa.PrimaryKeyConstraint('qsr_id', 'user_business_id')
     )
     op.create_table('restaurant_order',
-    sa.Column('user_id', sa.Integer(), nullable=True),
-    sa.Column('pickup_location_id', sa.Integer(), nullable=True),
+    sa.Column('user_id', sa.Uuid(), nullable=False),
+    sa.Column('pickup_location_id', sa.Uuid(), nullable=True),
     sa.Column('note', sqlmodel.sql.sqltypes.AutoString(), nullable=True),
     sa.Column('order_time', sa.DateTime(), nullable=False),
     sa.Column('total_amount', sa.Float(), nullable=False),
@@ -352,9 +359,9 @@ def upgrade():
     sa.Column('cover_charge_used', sa.Float(), nullable=True),
     sa.Column('status', sqlmodel.sql.sqltypes.AutoString(), nullable=False),
     sa.Column('service_type', sqlmodel.sql.sqltypes.AutoString(), nullable=True),
-    sa.Column('id', sa.Integer(), nullable=False),
-    sa.Column('venue_id', sa.Integer(), nullable=False),
-    sa.Column('payment_id', sa.Integer(), nullable=False),
+    sa.Column('id', sa.Uuid(), nullable=False),
+    sa.Column('venue_id', sa.Uuid(), nullable=True),
+    sa.Column('payment_id', sa.Uuid(), nullable=True),
     sa.ForeignKeyConstraint(['payment_id'], ['payment_source_restaurant.id'], ),
     sa.ForeignKeyConstraint(['pickup_location_id'], ['pickup_location.id'], ),
     sa.ForeignKeyConstraint(['user_id'], ['user_public.id'], ),
@@ -363,9 +370,9 @@ def upgrade():
     )
     op.create_index(op.f('ix_restaurant_order_id'), 'restaurant_order', ['id'], unique=False)
     op.create_table('event_offering',
-    sa.Column('id', sa.Integer(), nullable=False),
-    sa.Column('event_id', sa.Integer(), nullable=False),
-    sa.Column('event_booking_id', sa.Integer(), nullable=False),
+    sa.Column('id', sa.Uuid(), nullable=False),
+    sa.Column('event_id', sa.Uuid(), nullable=False),
+    sa.Column('event_booking_id', sa.Uuid(), nullable=False),
     sa.Column('offering_type', sqlmodel.sql.sqltypes.AutoString(), nullable=False),
     sa.Column('description', sqlmodel.sql.sqltypes.AutoString(), nullable=False),
     sa.Column('price', sa.Float(), nullable=False),
@@ -379,15 +386,15 @@ def upgrade():
     )
     op.create_index(op.f('ix_event_offering_id'), 'event_offering', ['id'], unique=False)
     op.create_table('group_nightclub_order_link',
-    sa.Column('group_id', sa.Integer(), nullable=False),
-    sa.Column('nightclub_order_id', sa.Integer(), nullable=False),
+    sa.Column('group_id', sa.Uuid(), nullable=False),
+    sa.Column('nightclub_order_id', sa.Uuid(), nullable=False),
     sa.ForeignKeyConstraint(['group_id'], ['group.id'], ),
     sa.ForeignKeyConstraint(['nightclub_order_id'], ['nightclub_order.id'], ),
     sa.PrimaryKeyConstraint('group_id', 'nightclub_order_id')
     )
     op.create_table('groupwallettopup',
-    sa.Column('id', sa.Integer(), nullable=False),
-    sa.Column('group_wallet_id', sa.Integer(), nullable=False),
+    sa.Column('id', sa.Uuid(), nullable=False),
+    sa.Column('group_wallet_id', sa.Uuid(), nullable=False),
     sa.Column('amount', sa.Float(), nullable=False),
     sa.Column('topup_time', sa.DateTime(), nullable=False),
     sa.ForeignKeyConstraint(['group_wallet_id'], ['group_wallet.id'], ),
@@ -395,11 +402,11 @@ def upgrade():
     )
     op.create_index(op.f('ix_groupwallettopup_id'), 'groupwallettopup', ['id'], unique=False)
     op.create_table('menu_category',
-    sa.Column('qsr_menu_id', sa.Integer(), nullable=True),
-    sa.Column('restaurant_menu_id', sa.Integer(), nullable=True),
-    sa.Column('nightclub_menu_id', sa.Integer(), nullable=True),
+    sa.Column('qsr_menu_id', sa.Uuid(), nullable=True),
+    sa.Column('restaurant_menu_id', sa.Uuid(), nullable=True),
+    sa.Column('nightclub_menu_id', sa.Uuid(), nullable=True),
     sa.Column('name', sqlmodel.sql.sqltypes.AutoString(), nullable=False),
-    sa.Column('id', sa.Integer(), nullable=False),
+    sa.Column('id', sa.Uuid(), nullable=False),
     sa.ForeignKeyConstraint(['nightclub_menu_id'], ['nightclub_menu.id'], ),
     sa.ForeignKeyConstraint(['qsr_menu_id'], ['qsr_menu.id'], ),
     sa.ForeignKeyConstraint(['restaurant_menu_id'], ['restaurant_menu.id'], ),
@@ -407,21 +414,21 @@ def upgrade():
     )
     op.create_index(op.f('ix_menu_category_id'), 'menu_category', ['id'], unique=False)
     op.create_table('payment_event',
-    sa.Column('user_id', sa.Integer(), nullable=False),
+    sa.Column('user_id', sa.Uuid(), nullable=False),
     sa.Column('source_type', sqlmodel.sql.sqltypes.AutoString(), nullable=False),
-    sa.Column('gateway_transaction_id', sa.Integer(), nullable=True),
+    sa.Column('gateway_transaction_id', sa.Uuid(), nullable=True),
     sa.Column('payment_time', sa.DateTime(), nullable=False),
     sa.Column('amount', sa.Float(), nullable=False),
     sa.Column('status', sqlmodel.sql.sqltypes.AutoString(), nullable=False),
-    sa.Column('id', sa.Integer(), nullable=False),
-    sa.Column('event_booking_id', sa.Integer(), nullable=True),
+    sa.Column('id', sa.Uuid(), nullable=False),
+    sa.Column('event_booking_id', sa.Uuid(), nullable=True),
     sa.ForeignKeyConstraint(['event_booking_id'], ['event_booking.id'], ),
     sa.ForeignKeyConstraint(['user_id'], ['user_public.id'], ),
     sa.PrimaryKeyConstraint('id')
     )
     op.create_index(op.f('ix_payment_event_id'), 'payment_event', ['id'], unique=False)
     op.create_table('menu_item',
-    sa.Column('category_id', sa.Integer(), nullable=False),
+    sa.Column('category_id', sa.Uuid(), nullable=False),
     sa.Column('name', sqlmodel.sql.sqltypes.AutoString(), nullable=False),
     sa.Column('price', sa.Float(), nullable=False),
     sa.Column('description', sqlmodel.sql.sqltypes.AutoString(), nullable=True),
@@ -430,17 +437,17 @@ def upgrade():
     sa.Column('ingredients', sqlmodel.sql.sqltypes.AutoString(), nullable=True),
     sa.Column('abv', sa.Float(), nullable=True),
     sa.Column('ibu', sa.Integer(), nullable=True),
-    sa.Column('id', sa.Integer(), nullable=False),
+    sa.Column('id', sa.Uuid(), nullable=False),
     sa.ForeignKeyConstraint(['category_id'], ['menu_category.id'], ),
     sa.PrimaryKeyConstraint('id')
     )
     op.create_index(op.f('ix_menu_item_id'), 'menu_item', ['id'], unique=False)
     op.create_table('orderitem',
-    sa.Column('order_item_id', sa.Integer(), nullable=False),
-    sa.Column('nightclub_order_id', sa.Integer(), nullable=True),
-    sa.Column('restaurant_order_id', sa.Integer(), nullable=True),
-    sa.Column('qsr_order_id', sa.Integer(), nullable=True),
-    sa.Column('item_id', sa.Integer(), nullable=False),
+    sa.Column('order_item_id', sa.Uuid(), nullable=False),
+    sa.Column('nightclub_order_id', sa.Uuid(), nullable=True),
+    sa.Column('restaurant_order_id', sa.Uuid(), nullable=True),
+    sa.Column('qsr_order_id', sa.Uuid(), nullable=True),
+    sa.Column('item_id', sa.Uuid(), nullable=False),
     sa.Column('quantity', sa.Integer(), nullable=False),
     sa.ForeignKeyConstraint(['item_id'], ['menu_item.id'], ),
     sa.ForeignKeyConstraint(['nightclub_order_id'], ['nightclub_order.id'], ),
@@ -502,7 +509,9 @@ def downgrade():
     op.drop_table('foodcourtuserbusinesslink')
     op.drop_index(op.f('ix_event_id'), table_name='event')
     op.drop_table('event')
+    op.drop_index(op.f('ix_user_public_phone_number'), table_name='user_public')
     op.drop_index(op.f('ix_user_public_id'), table_name='user_public')
+    op.drop_index(op.f('ix_user_public_email'), table_name='user_public')
     op.drop_table('user_public')
     op.drop_index(op.f('ix_user_business_phone_number'), table_name='user_business')
     op.drop_index(op.f('ix_user_business_id'), table_name='user_business')

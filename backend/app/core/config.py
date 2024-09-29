@@ -1,16 +1,13 @@
 import secrets
 import warnings
-from typing import Annotated, Any, Literal
-import os
+from typing import Annotated, Any, ClassVar, Literal
 from pydantic import (
     AnyUrl,
     BeforeValidator,
     HttpUrl,
-    PostgresDsn,
     computed_field,
     model_validator,
 )
-from pydantic_core import MultiHostUrl
 from pydantic_settings import BaseSettings, SettingsConfigDict
 from typing_extensions import Self
 
@@ -30,10 +27,15 @@ class Settings(BaseSettings):
     API_V1_STR: str = "/api/v1"
     SECRET_KEY: str = secrets.token_urlsafe(32)
     # 60 minutes * 24 hours * 8 days = 8 days
-    ACCESS_TOKEN_EXPIRE_MINUTES: int = 60 * 24 * 8
+    ACCESS_TOKEN_EXPIRE_MINUTES: int = 60
     DOMAIN: str = "localhost"
     ENVIRONMENT: Literal["local", "staging", "production"] = "local"
 
+    # Add CLIENT_ID and CLIENT_SECRET
+    CLIENT_ID: str
+    CLIENT_SECRET: str
+    REFRESH_TOKEN_EXPIRE_DAYS: ClassVar[int] = 365  # Use ClassVar if it's a constant
+    ALGORITHM: str = "HS256"
     @computed_field  # type: ignore[prop-decorator]
     @property
     def server_host(self) -> str:

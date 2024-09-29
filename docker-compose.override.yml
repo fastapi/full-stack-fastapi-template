@@ -74,14 +74,6 @@ services:
       - "1080:1080"
       - "1025:1025"
 
-  frontend:
-    restart: "no"
-    build:
-      context: ./frontend
-      args:
-        - VITE_API_URL=http://${DOMAIN?Variable not set}
-        - NODE_ENV=development
-
 networks:
   traefik-public:
     # For local dev, don't expect an external Traefik network

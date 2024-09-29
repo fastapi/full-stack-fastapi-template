@@ -1,3 +1,4 @@
+import uuid
 from fastapi import HTTPException
 from sqlmodel import SQLModel, Session, select
 from typing import List, Type
@@ -22,7 +23,7 @@ def get_all_records(
 
 # Function to get a single record by ID
 def get_record_by_id(
-    session: Session, model: Type[SQLModel], record_id: int
+    session: Session, model: Type[SQLModel], record_id: uuid.UUID
 ) -> SQLModel:
     """
     Retrieve a single record by ID.
@@ -61,7 +62,7 @@ def create_record(
 
 # Function to update an existing record
 def update_record(
-    session: Session, model: Type[SQLModel], record_id: int, obj_in: SQLModel
+    session: Session, model: Type[SQLModel], record_id: uuid.UUID, obj_in: SQLModel
 ) -> SQLModel:
     """
     Update an existing record.
@@ -86,7 +87,7 @@ def update_record(
         raise HTTPException(status_code=500, detail=f"Error updating {model.__name__}: {str(e)}")
 
 def patch_record(
-    session: Session, model: Type[SQLModel], record_id: int, obj_in: SQLModel
+    session: Session, model: Type[SQLModel], record_id: uuid.UUID, obj_in: SQLModel
 ) -> SQLModel:
     """
     Partially update an existing record.
@@ -120,7 +121,7 @@ def patch_record(
     
 # Function to delete a record
 def delete_record(
-    session: Session, model: Type[SQLModel], record_id: int
+    session: Session, model: Type[SQLModel], record_id: uuid.UUID
 ) -> None:
     """
     Delete a record by ID.

@@ -1,14 +1,14 @@
 from typing import List
+import uuid
 from fastapi import APIRouter, Query, HTTPException, Depends
-from sqlmodel import Session
 from app.api.deps import SessionDep
 from app.models import UserBusiness, UserPublic
-from app.crud import get_all_records, get_record_by_id, create_record, update_record, delete_record
+from app.crud import get_all_records, get_record_by_id, create_record, update_record, delete_record, patch_record
 
 router = APIRouter()
 
 @router.get("/user-businesses/", response_model=List[UserBusiness])
-def read_user_businesses(
+async def read_user_businesses(
     session: SessionDep,
     skip: int = Query(0, alias="page", ge=0),
     limit: int = Query(10, le=100)
@@ -21,8 +21,8 @@ def read_user_businesses(
     return get_all_records(session, UserBusiness, skip=skip, limit=limit)
 
 @router.get("/user-businesses/{user_business_id}", response_model=UserBusiness)
-def read_user_business(
-    user_business_id: int,
+async def read_user_business(
+    user_business_id: uuid.UUID,
     session: SessionDep
 ):
     """
@@ -32,7 +32,7 @@ def read_user_business(
     return get_record_by_id(session, UserBusiness, user_business_id)
 
 @router.post("/user-businesses/", response_model=UserBusiness)
-def create_user_business(
+async def create_user_business(
     user_business: UserBusiness,
     session: SessionDep
 ):
@@ -43,8 +43,8 @@ def create_user_business(
     return create_record(session, UserBusiness, user_business)
 
 @router.put("/user-businesses/{user_business_id}", response_model=UserBusiness)
-def update_user_business(
-    user_business_id: int,
+async def update_user_business(
+    user_business_id: uuid.UUID,
     user_business: UserBusiness,
     session: SessionDep
 ):
@@ -56,8 +56,8 @@ def update_user_business(
     return update_record(session, UserBusiness, user_business_id, user_business)
 
 @router.delete("/user-businesses/{user_business_id}", response_model=UserBusiness)
-def delete_user_business(
-    user_business_id: int,
+async def delete_user_business(
+    user_business_id: uuid.UUID,
     session: SessionDep
 ):
     """
@@ -68,7 +68,7 @@ def delete_user_business(
     return {"message": f"UserBusiness with ID {user_business_id} has been deleted."}
 
 @router.get("/user-publics/", response_model=List[UserPublic])
-def read_user_publics(
+async def read_user_publics(
     session: SessionDep,
     skip: int = Query(0, alias="page", ge=0),
     limit: int = Query(10, le=100)
@@ -81,8 +81,8 @@ def read_user_publics(
     return get_all_records(session, UserPublic, skip=skip, limit=limit)
 
 @router.get("/user-publics/{user_public_id}", response_model=UserPublic)
-def read_user_public(
-    user_public_id: int,
+async def read_user_public(
+    user_public_id: uuid.UUID,
     session: SessionDep
 ):
     """
@@ -92,7 +92,7 @@ def read_user_public(
     return get_record_by_id(session, UserPublic, user_public_id)
 
 @router.post("/user-publics/", response_model=UserPublic)
-def create_user_public(
+async def create_user_public(
     user_public: UserPublic,
     session: SessionDep
 ):
@@ -103,8 +103,8 @@ def create_user_public(
     return create_record(session, UserPublic, user_public)
 
 @router.put("/user-publics/{user_public_id}", response_model=UserPublic)
-def update_user_public(
-    user_public_id: int,
+async def update_user_public(
+    user_public_id: uuid.UUID,
     user_public: UserPublic,
     session: SessionDep
 ):
@@ -116,8 +116,8 @@ def update_user_public(
     return update_record(session, UserPublic, user_public_id, user_public)
 
 @router.delete("/user-publics/{user_public_id}", response_model=UserPublic)
-def delete_user_public(
-    user_public_id: int,
+async def delete_user_public(
+    user_public_id: uuid.UUID,
     session: SessionDep
 ):
     """

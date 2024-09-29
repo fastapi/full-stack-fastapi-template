@@ -1,3 +1,4 @@
+import uuid
 from sqlmodel import SQLModel, Field, Relationship
 from typing import Optional, List
 from datetime import datetime
@@ -5,9 +6,9 @@ from datetime import datetime
 class EventBooking(SQLModel, table=True):
     __tablename__ = "event_booking"
 
-    id: Optional[int] = Field(default=None, primary_key=True)
-    user_id: int = Field(foreign_key="user_public.id", nullable=False)
-    event_id: int = Field(foreign_key="event.id", nullable=False)
+    id: uuid.UUID = Field(default_factory=uuid.uuid4, primary_key=True)
+    user_id: Optional[uuid.UUID] = Field(foreign_key="user_public.id", nullable=False)
+    event_id: Optional[uuid.UUID] = Field(foreign_key="event.id", nullable=False)
     booking_time: datetime = Field(nullable=False)
     total_amount: float = Field(nullable=False)
     status: str = Field(nullable=False)

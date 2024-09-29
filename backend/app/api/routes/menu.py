@@ -1,3 +1,4 @@
+import uuid
 from app.schema.menu import MenuCategoryRead, MenuItemRead, NightclubMenuCreate, NightclubMenuRead, MenuCategoryCreate, MenuItemCreate, QSRMenuCreate, QSRMenuRead, RestaurantMenuCreate, RestaurantMenuRead
 from app.models.menu import NightclubMenu, QSRMenu, RestaurantMenu
 from app.models.menu_category import MenuCategory
@@ -18,7 +19,7 @@ router = APIRouter()
 
 # Get all menus for a nightclub
 @router.get("/nightclubs/{nightclub_id}/menus/", response_model=List[NightclubMenuRead])
-def read_nightclub_menus(nightclub_id: int, session: SessionDep):
+async def read_nightclub_menus(nightclub_id: uuid.UUID, session: SessionDep):
     """
     Retrieve all menus for a specific nightclub.
     """
@@ -27,7 +28,7 @@ def read_nightclub_menus(nightclub_id: int, session: SessionDep):
 
 # Get a specific menu
 @router.get("/nightclubs/menus/{menu_id}", response_model=NightclubMenuRead)
-def read_nightclub_menu(menu_id: int, session: SessionDep):
+async def read_nightclub_menu(menu_id: uuid.UUID, session: SessionDep):
     """
     Retrieve a specific menu by ID for a nightclub.
     """
@@ -35,7 +36,7 @@ def read_nightclub_menu(menu_id: int, session: SessionDep):
 
 # Create a new menu
 @router.post("/nightclubs/menus/", response_model=NightclubMenuRead)
-def create_nightclub_menu( menu: NightclubMenuCreate, session: SessionDep):
+async def create_nightclub_menu( menu: NightclubMenuCreate, session: SessionDep):
     """
     Create a new menu for a nightclub.
     """
@@ -43,7 +44,7 @@ def create_nightclub_menu( menu: NightclubMenuCreate, session: SessionDep):
 
 # Update a menu
 @router.put("/nightclubs/menus/{menu_id}", response_model=NightclubMenuRead)
-def update_nightclub_menu(menu_id: int, updated_menu: NightclubMenuCreate, session: SessionDep):
+async def update_nightclub_menu(menu_id: uuid.UUID, updated_menu: NightclubMenuCreate, session: SessionDep):
     """
     Update an existing menu for a nightclub.
     """
@@ -51,7 +52,7 @@ def update_nightclub_menu(menu_id: int, updated_menu: NightclubMenuCreate, sessi
 
 # PATCH a menu for partial updates
 @router.patch("/nightclubs/menus/{menu_id}", response_model=NightclubMenuRead)
-def patch_nightclub_menu(menu_id: int, updated_menu: NightclubMenuCreate, session: SessionDep):
+async def patch_nightclub_menu(menu_id: uuid.UUID, updated_menu: NightclubMenuCreate, session: SessionDep):
     """
     Partially update an existing menu for a venue (Nightclub, Restaurant, QSR).
     """
@@ -59,7 +60,7 @@ def patch_nightclub_menu(menu_id: int, updated_menu: NightclubMenuCreate, sessio
 
 # Delete a menu
 @router.delete("/nightclubs/menus/{menu_id}", response_model=None)
-def delete_nightclub_menu(menu_id: int, session: SessionDep):
+async def delete_nightclub_menu(menu_id: uuid.UUID, session: SessionDep):
     """
     Delete a menu by ID for a nightclub.
     """
@@ -67,7 +68,7 @@ def delete_nightclub_menu(menu_id: int, session: SessionDep):
 
 # Get all menus for a qsr
 @router.get("/qsrs/{qsr_id}/menus/", response_model=List[QSRMenuRead])
-def read_qsr_menus(qsr_id: int, session: SessionDep):
+async def read_qsr_menus(qsr_id: uuid.UUID, session: SessionDep):
     """
     Retrieve all menus for a specific qsr.
     """
@@ -76,7 +77,7 @@ def read_qsr_menus(qsr_id: int, session: SessionDep):
 
 # Get a specific menu
 @router.get("/qsrs/menus/{menu_id}", response_model=QSRMenuRead)
-def read_qsr_menu(menu_id: int, session: SessionDep):
+async def read_qsr_menu(menu_id: uuid.UUID, session: SessionDep):
     """
     Retrieve a specific menu by ID for a qsr.
     """
@@ -84,7 +85,7 @@ def read_qsr_menu(menu_id: int, session: SessionDep):
 
 # Create a new menu
 @router.post("/qsrs/menus/", response_model=QSRMenuRead)
-def create_qsr_menu( menu: QSRMenuCreate, session: SessionDep):
+async def create_qsr_menu( menu: QSRMenuCreate, session: SessionDep):
     """
     Create a new menu for a qsr.
     """
@@ -92,7 +93,7 @@ def create_qsr_menu( menu: QSRMenuCreate, session: SessionDep):
 
 # Update a menu
 @router.put("/qsrs/menus/{menu_id}", response_model=QSRMenuRead)
-def update_qsr_menu(menu_id: int, updated_menu: QSRMenuCreate, session: SessionDep):
+async def update_qsr_menu(menu_id: uuid.UUID, updated_menu: QSRMenuCreate, session: SessionDep):
     """
     Update an existing menu for a qsr.
     """
@@ -100,7 +101,7 @@ def update_qsr_menu(menu_id: int, updated_menu: QSRMenuCreate, session: SessionD
 
 # PATCH a menu for partial updates
 @router.patch("/qsrs/menus/{menu_id}", response_model=QSRMenuRead)
-def patch_qsr_menu(menu_id: int, updated_menu: QSRMenuCreate, session: SessionDep):
+async def patch_qsr_menu(menu_id: uuid.UUID, updated_menu: QSRMenuCreate, session: SessionDep):
     """
     Partially update an existing menu for a venue (QSR, Restaurant, QSR).
     """
@@ -108,7 +109,7 @@ def patch_qsr_menu(menu_id: int, updated_menu: QSRMenuCreate, session: SessionDe
 
 # Delete a menu
 @router.delete("/qsrs/menus/{menu_id}", response_model=None)
-def delete_qsr_menu(menu_id: int, session: SessionDep):
+async def delete_qsr_menu(menu_id: uuid.UUID, session: SessionDep):
     """
     Delete a menu by ID for a qsr.
     """
@@ -116,7 +117,7 @@ def delete_qsr_menu(menu_id: int, session: SessionDep):
 
 # Get all menus for a restaurant
 @router.get("/restaurants/{restaurant_id}/menus/", response_model=List[RestaurantMenuRead])
-def read_restaurant_menus(restaurant_id: int, session: SessionDep):
+async def read_restaurant_menus(restaurant_id: uuid.UUID, session: SessionDep):
     """
     Retrieve all menus for a specific restaurant.
     """
@@ -125,7 +126,7 @@ def read_restaurant_menus(restaurant_id: int, session: SessionDep):
 
 # Get a specific menu
 @router.get("/restaurants/menus/{menu_id}", response_model=RestaurantMenuRead)
-def read_restaurant_menu(menu_id: int, session: SessionDep):
+async def read_restaurant_menu(menu_id: uuid.UUID, session: SessionDep):
     """
     Retrieve a specific menu by ID for a restaurant.
     """
@@ -133,7 +134,7 @@ def read_restaurant_menu(menu_id: int, session: SessionDep):
 
 # Create a new menu
 @router.post("/restaurants/menus/", response_model=RestaurantMenuRead)
-def create_restaurant_menu( menu: RestaurantMenuCreate, session: SessionDep):
+async def create_restaurant_menu( menu: RestaurantMenuCreate, session: SessionDep):
     """
     Create a new menu for a restaurant.
     """
@@ -141,7 +142,7 @@ def create_restaurant_menu( menu: RestaurantMenuCreate, session: SessionDep):
 
 # Update a menu
 @router.put("/restaurants/menus/{menu_id}", response_model=RestaurantMenuRead)
-def update_restaurant_menu(menu_id: int, updated_menu: RestaurantMenuCreate, session: SessionDep):
+async def update_restaurant_menu(menu_id: uuid.UUID, updated_menu: RestaurantMenuCreate, session: SessionDep):
     """
     Update an existing menu for a restaurant.
     """
@@ -149,7 +150,7 @@ def update_restaurant_menu(menu_id: int, updated_menu: RestaurantMenuCreate, ses
 
 # PATCH a menu for partial updates
 @router.patch("/restaurants/menus/{menu_id}", response_model=RestaurantMenuRead)
-def patch_restaurant_menu(menu_id: int, updated_menu: RestaurantMenuCreate, session: SessionDep):
+async def patch_restaurant_menu(menu_id: uuid.UUID, updated_menu: RestaurantMenuCreate, session: SessionDep):
     """
     Partially update an existing menu for a venue (Restaurant, Restaurant, QSR).
     """
@@ -157,7 +158,7 @@ def patch_restaurant_menu(menu_id: int, updated_menu: RestaurantMenuCreate, sess
 
 # Delete a menu
 @router.delete("/restaurants/menus/{menu_id}", response_model=None)
-def delete_restaurant_menu(menu_id: int, session: SessionDep):
+async def delete_restaurant_menu(menu_id: uuid.UUID, session: SessionDep):
     """
     Delete a menu by ID for a restaurant.
     """
@@ -167,12 +168,12 @@ def delete_restaurant_menu(menu_id: int, session: SessionDep):
 
 # Create a new category
 @router.post("/nightclubs/menus/categories/", response_model=MenuCategoryRead)
-def create_menu_category(category: MenuCategoryCreate, session: SessionDep):
+async def create_menu_category(category: MenuCategoryCreate, session: SessionDep):
     return create_record(session, MenuCategory, category)
 
 # Update a category
 @router.put("/nightclubs/menus/categories/{category_id}", response_model=MenuCategoryRead)
-def update_menu_category(category_id: int, updated_category: MenuCategoryCreate, session: SessionDep):
+async def update_menu_category(category_id: uuid.UUID, updated_category: MenuCategoryCreate, session: SessionDep):
     """
     Update an existing category for a specific menu.
     """
@@ -180,7 +181,7 @@ def update_menu_category(category_id: int, updated_category: MenuCategoryCreate,
 
 # Delete a category
 @router.delete("/nightclubs/menus/categories/{category_id}", response_model=None)
-def delete_menu_category(category_id: int, session: SessionDep):
+async def delete_menu_category(category_id: uuid.UUID, session: SessionDep):
     """
     Delete a category by ID from a specific menu.
     """
@@ -190,12 +191,12 @@ def delete_menu_category(category_id: int, session: SessionDep):
 
 # Create a new item
 @router.post("/nightclubs/menus/categories/items/", response_model=MenuItemRead)
-def create_menu_item(item: MenuItemCreate, session: SessionDep):
+async def create_menu_item(item: MenuItemCreate, session: SessionDep):
     return create_record(session, MenuItem, item)
 
 # Update an item
 @router.put("/nightclubs/menus/categories/items/{item_id}", response_model=MenuItemRead)
-def update_menu_item(item_id: int, updated_item: MenuItemCreate, session: SessionDep):
+async def update_menu_item(item_id: uuid.UUID, updated_item: MenuItemCreate, session: SessionDep):
     """
     Update an existing item under a specific category of a menu.
     """
@@ -203,7 +204,7 @@ def update_menu_item(item_id: int, updated_item: MenuItemCreate, session: Sessio
 
 # Delete an item
 @router.delete("/nightclubs/menus/categories/items/{item_id}", response_model=None)
-def delete_menu_item(item_id: int, session: SessionDep):
+async def delete_menu_item(item_id: uuid.UUID, session: SessionDep):
     """
     Delete an item by ID from a specific category of a menu.
     """

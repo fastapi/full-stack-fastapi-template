@@ -1,3 +1,4 @@
+import uuid
 from app.models.group import GroupNightclubOrderLink
 from sqlmodel import SQLModel, Field, Relationship
 from typing import Optional, List
@@ -5,8 +6,8 @@ from datetime import datetime
 
 
 class OrderBase(SQLModel):
-    user_id: Optional[int] = Field(default=None, foreign_key="user_public.id")
-    pickup_location_id: Optional[int] = Field(default=None, foreign_key="pickup_location.id")
+    user_id: uuid.UUID = Field(foreign_key="user_public.id")
+    pickup_location_id: Optional[uuid.UUID] = Field(default=None, foreign_key="pickup_location.id")
     note: Optional[str] = Field(nullable=True)
     order_time: datetime = Field(nullable=False)
     total_amount: float = Field(nullable=False)
@@ -18,10 +19,10 @@ class OrderBase(SQLModel):
 class NightclubOrder(OrderBase, table=True):
     __tablename__ = "nightclub_order"
     
-    id: Optional[int] = Field(default=None, primary_key=True, index=True)
-    venue_id: int = Field(default=None, foreign_key="nightclub.id")
-    payment_id: int = Field(default=None, foreign_key="payment_source_nightclub.id")
-    pickup_location_id: int = Field(default=None, foreign_key="pickup_location.id")
+    id: uuid.UUID = Field(default_factory=uuid.uuid4, primary_key=True, index=True)
+    venue_id: Optional[uuid.UUID] = Field(default=None, foreign_key="nightclub.id")
+    payment_id: Optional[uuid.UUID] = Field(default=None, foreign_key="payment_source_nightclub.id")
+    pickup_location_id: Optional[uuid.UUID] = Field(default=None, foreign_key="pickup_location.id")
     # Relationships
     user: Optional["UserPublic"] = Relationship(back_populates="nightclub_orders")
     nightclub: Optional["Nightclub"] = Relationship(back_populates="orders")
@@ -33,9 +34,9 @@ class NightclubOrder(OrderBase, table=True):
 class RestaurantOrder(OrderBase, table=True):
     __tablename__ = "restaurant_order"
 
-    id: Optional[int] = Field(default=None, primary_key=True, index=True)
-    venue_id: int = Field(default=None, foreign_key="restaurant.id")
-    payment_id: int = Field(default=None, foreign_key="payment_source_restaurant.id")
+    id: uuid.UUID = Field(default_factory=uuid.uuid4, primary_key=True, index=True)
+    venue_id: Optional[uuid.UUID] = Field(default=None, foreign_key="restaurant.id")
+    payment_id: Optional[uuid.UUID] = Field(default=None, foreign_key="payment_source_restaurant.id")
 
     # Relationships
     user: Optional["UserPublic"] = Relationship(back_populates="restaurant_orders")
@@ -46,9 +47,9 @@ class RestaurantOrder(OrderBase, table=True):
 class QSROrder(OrderBase, table=True):
     __tablename__ = "qsr_order"
 
-    id: Optional[int] = Field(default=None, primary_key=True, index=True)
-    venue_id: int = Field(default=None, foreign_key="qsr.id")
-    payment_id: int = Field(default=None, foreign_key="payment_source_qsr.id")
+    id: uuid.UUID = Field(default_factory=uuid.uuid4, primary_key=True, index=True)
+    venue_id: uuid.UUID = Field(default=None, foreign_key="qsr.id")
+    payment_id: uuid.UUID = Field(default=None, foreign_key="payment_source_qsr.id")
 
     # Relationships
     user: Optional["UserPublic"] = Relationship(back_populates="qsr_orders")

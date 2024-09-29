@@ -1,8 +1,9 @@
+import uuid
 from sqlmodel import SQLModel, Field, Relationship
 from typing import Optional
 
 class MenuItemBase(SQLModel):
-    category_id: int = Field(foreign_key="menu_category.id", nullable=False)
+    category_id: uuid.UUID = Field(foreign_key="menu_category.id", nullable=False)
     name: str = Field(nullable=False)
     price: float = Field(nullable=False)
     description: Optional[str] = Field(default=None)
@@ -14,7 +15,7 @@ class MenuItemBase(SQLModel):
 
 class MenuItem(MenuItemBase, table=True):
     __tablename__="menu_item"
-    id: Optional[int] = Field(default=None, primary_key=True, index=True)
+    id: uuid.UUID = Field(default_factory=uuid.uuid4, primary_key=True, index=True)
 
     # Relationships
     category: Optional["MenuCategory"] = Relationship(back_populates="menu_items")

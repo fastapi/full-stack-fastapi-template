@@ -1,124 +1,128 @@
-# from datetime import timedelta
-# from typing import Annotated, Any
+from typing import Annotated, Union
+from app.models.auth import RefreshTokenPayload, UserAuthResponse
+from fastapi import APIRouter, Depends, FastAPI, HTTPException
+import OTPLessAuthSDK
+from app.models.user import UserBusiness, UserPublic  # Import your UserPublic model
+from app.api.deps import SessionDep, get_current_user
+from datetime import datetime, timedelta, timezone
+from app.core.security import create_access_token, create_refresh_token, get_jwt_payload  # Adjust the import based on your structure
+from app.core.config import settings
+from app.models.auth import OtplessToken
+from fastapi.datastructures import QueryParams
 
-# from fastapi import APIRouter, Depends, HTTPException
-# from fastapi.responses import HTMLResponse
-# from fastapi.security import OAuth2PasswordRequestForm
-
-# from app import crud
-# from app.api.deps import CurrentUser, SessionDep, get_current_active_superuser
-# from app.core import security
-# from app.core.config import settings
-# from app.core.security import get_password_hash
-# from app.models import Message, NewPassword, Token, UserPublic
-# from app.utils import (
-#     generate_password_reset_token,
-#     generate_reset_password_email,
-#     send_email,
-#     verify_password_reset_token,
-# )
-
-# router = APIRouter()
+router = APIRouter()
 
 
-# @router.post("/login/access-token")
-# def login_access_token(
-#     session: SessionDep, form_data: Annotated[OAuth2PasswordRequestForm, Depends()]
-# ) -> Token:
-#     """
-#     OAuth2 compatible token login, get an access token for future requests
-#     """
-#     user = crud.authenticate(
-#         session=session, email=form_data.username, password=form_data.password
-#     )
-#     if not user:
-#         raise HTTPException(status_code=400, detail="Incorrect email or password")
-#     elif not user.is_active:
-#         raise HTTPException(status_code=400, detail="Inactive user")
-#     access_token_expires = timedelta(minutes=settings.ACCESS_TOKEN_EXPIRE_MINUTES)
-#     return Token(
-#         access_token=security.create_access_token(
-#             user.id, expires_delta=access_token_expires
-#         )
-#     )
+@router.post("/verify_token", response_model=UserAuthResponse)
+async def verify_token(request: OtplessToken, session: SessionDep):
+    try:
+        # Verify the token using OTPLess SDK
+        # Uncomment and implement token verification with OTPLess
+        # user_details = OTPLessAuthSDK.UserDetail.verify_token(
+        #     request.otpless_token,
+        #     settings.CLIENT_ID,
+        #     settings.CLIENT_SECRET
+        # )
 
+        # Simulated user details for demonstration
+        phone_number = "8130181469"  # Replace this with the actual phone number from the SDK response
 
-# @router.post("/login/test-token", response_model=UserPublic)
-# def test_token(current_user: CurrentUser) -> Any:
-#     """
-#     Test access token
-#     """
-#     return current_user
+        # Check for the user by phone number
+        user = session.query(UserPublic).filter(UserPublic.phone_number == phone_number).first()
 
+        if not user:
+            # Create a new user if not found
+            user = UserPublic(
+                phone_number=phone_number,
+                is_active=True,
+                registration_date=datetime.now(timezone.utc),
+            )
+            session.add(user)
+            session.commit()
+            session.refresh(user)
 
-# @router.post("/password-recovery/{email}")
-# def recover_password(email: str, session: SessionDep) -> Message:
-#     """
-#     Password Recovery
-#     """
-#     user = crud.get_user_by_email(session=session, email=email)
+        # Create tokens
+        access_token = create_access_token(subject=str(user.id), expires_delta=timedelta(minutes=30))
+        refresh_token = create_refresh_token(subject=str(user.id))
 
-#     if not user:
-#         raise HTTPException(
-#             status_code=404,
-#             detail="The user with this email does not exist in the system.",
-#         )
-#     password_reset_token = generate_password_reset_token(email=email)
-#     email_data = generate_reset_password_email(
-#         email_to=user.email, email=email, token=password_reset_token
-#     )
-#     send_email(
-#         email_to=user.email,
-#         subject=email_data.subject,
-#         html_content=email_data.html_content,
-#     )
-#     return Message(message="Password recovery email sent")
+        # Store the new refresh token in the user's record
+        user.refresh_token = refresh_token.token
+        session.add(user)  # Add the updated user to the session
+        session.commit()  # Commit the changes to the database
 
+        return UserAuthResponse(
+            access_token=access_token,
+            refresh_token=refresh_token,
+            issued_at=datetime.now(timezone.utc)
+        )
 
-# @router.post("/reset-password/")
-# def reset_password(session: SessionDep, body: NewPassword) -> Message:
-#     """
-#     Reset password
-#     """
-#     email = verify_password_reset_token(token=body.token)
-#     if not email:
-#         raise HTTPException(status_code=400, detail="Invalid token")
-#     user = crud.get_user_by_email(session=session, email=email)
-#     if not user:
-#         raise HTTPException(
-#             status_code=404,
-#             detail="The user with this email does not exist in the system.",
-#         )
-#     elif not user.is_active:
-#         raise HTTPException(status_code=400, detail="Inactive user")
-#     hashed_password = get_password_hash(password=body.new_password)
-#     user.hashed_password = hashed_password
-#     session.add(user)
-#     session.commit()
-#     return Message(message="Password updated successfully")
+    except Exception as e:
+        raise HTTPException(status_code=400, detail=str(e))
+    
 
+@router.post("/refresh_token", response_model=UserAuthResponse)
+async def refresh_token(request: RefreshTokenPayload, session: SessionDep):
+    try:
+        # Decode and validate the refresh token payload
+        payload = get_jwt_payload(request.refresh_token)
 
-# @router.post(
-#     "/password-recovery-html-content/{email}",
-#     dependencies=[Depends(get_current_active_superuser)],
-#     response_class=HTMLResponse,
-# )
-# def recover_password_html_content(email: str, session: SessionDep) -> Any:
-#     """
-#     HTML Content for Password Recovery
-#     """
-#     user = crud.get_user_by_email(session=session, email=email)
+        # Extract the user ID (sub) from the payload
+        user_id = payload.sub
+        
+        # Fetch the user from the database using the user ID
+        user = (
+            session.query(UserPublic)
+            .filter(UserPublic.id == user_id)
+            .first()
+        ) or (
+            session.query(UserBusiness)
+            .filter(UserBusiness.id == user_id)
+            .first()
+        )
+        
+        if not user:
+            raise HTTPException(status_code=404, detail="User not found")
 
-#     if not user:
-#         raise HTTPException(
-#             status_code=404,
-#             detail="The user with this username does not exist in the system.",
-#         )
-#     password_reset_token = generate_password_reset_token(email=email)
-#     email_data = generate_reset_password_email(
-#         email_to=user.email, email=email, token=password_reset_token
-#     )
+        # Verify if the refresh token in the database matches the provided token
+        if user.refresh_token != request.refresh_token:
+            raise HTTPException(status_code=401, detail="Invalid refresh token")
 
-#     return HTMLResponse(
-#         content=email_data.html_content, headers={"subject:": email_data.subject}
-#     )
+        # Check if the token has expired
+        current_time = datetime.now(timezone.utc)
+        if payload.exp and datetime.fromtimestamp(payload.exp, timezone.utc) < current_time:
+            raise HTTPException(status_code=401, detail="Refresh token expired")
+
+        # If valid, generate new tokens
+        new_access_token = create_access_token(subject=user_id, expires_delta=timedelta(minutes=30))
+        new_refresh_token = create_refresh_token(subject=user_id)
+
+        # Update the user's refresh token in the database
+        user.refresh_token = new_refresh_token.token
+        session.add(user)
+        session.commit()
+
+        # Return the new tokens and issue time
+        return UserAuthResponse(
+            access_token=new_access_token,
+            refresh_token=new_refresh_token,
+            issued_at=current_time
+        )
+
+    except Exception as e:
+        raise HTTPException(status_code=400, detail=str(e))
+
+@router.get("/logout")
+async def logout(
+    session: SessionDep,
+    current_user: Annotated[Union[UserPublic, UserBusiness], Depends(get_current_user)]):
+    try:
+        # Invalidate the refresh token by setting it to None or an empty string
+        current_user.refresh_token = None
+        session.add(current_user)
+        session.commit()
+
+        return {"message": "Logout successful, refresh token invalidated"}
+
+    except Exception as e:
+        raise HTTPException(status_code=400, detail=str(e))
+    

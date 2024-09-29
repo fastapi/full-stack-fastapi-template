@@ -1,4 +1,5 @@
 from typing import Optional
+import uuid
 from app.models.venue import FoodcourtBase, NightclubBase, QSRBase, RestaurantBase
 
 class RestaurantRead(RestaurantBase):
@@ -11,7 +12,7 @@ class RestaurantCreate(RestaurantBase):
         from_attributes = True
 
 class NightclubRead(NightclubBase):
-    id: Optional[int]
+    id: Optional[uuid.UUID]
     class Config:
         from_attributes = True
 
@@ -20,7 +21,7 @@ class NightclubCreate(NightclubBase):
         from_attributes = True
 
 class QSRRead(QSRBase):
-    id: Optional[int]
+    id: Optional[uuid.UUID]
     class Config:
         from_attributes = True
 
@@ -30,7 +31,7 @@ class QSRCreate(QSRBase):
 
 
 class FoodcourtRead(FoodcourtBase):
-    id: Optional[int]
+    id: Optional[uuid.UUID]
     class Config:
         from_attributes = True
 
