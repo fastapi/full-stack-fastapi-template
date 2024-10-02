@@ -5,9 +5,7 @@ from sqlmodel import Session, func, select
 from app.models import Item, ItemCreate, ItemUpdate
 
 
-def create_item(
-    *, session: Session, item_in: ItemCreate, owner_id: uuid.UUID
-) -> Item:
+def create_item(*, session: Session, item_in: ItemCreate, owner_id: uuid.UUID) -> Item:
     """
     Create a new item.
 
@@ -94,9 +92,7 @@ def get_items_by_owner(
     Notes:
         This function is not protected and can be called by any authenticated user.
     """
-    statement = (
-        select(Item).where(Item.owner_id == owner_id).offset(skip).limit(limit)
-    )
+    statement = select(Item).where(Item.owner_id == owner_id).offset(skip).limit(limit)
     return list(session.exec(statement).all())
 
 
@@ -139,9 +135,7 @@ def get_item_count_by_owner(*, session: Session, owner_id: uuid.UUID) -> int:
     ).one()
 
 
-def update_item(
-    *, session: Session, db_item: Item, item_in: ItemUpdate
-) -> Item:
+def update_item(*, session: Session, db_item: Item, item_in: ItemUpdate) -> Item:
     """
     Update an item.
 
