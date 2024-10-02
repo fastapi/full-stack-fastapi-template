@@ -163,6 +163,18 @@ export const $ItemsPublic = {
 } as const
 
 export const $Message = {
+  description: `Generic message.
+
+Defines a simple structure for generic messages.
+
+Args:
+    message (str): The content of the message.
+
+Returns:
+    None
+
+Notes:
+    This class can be used for various messaging purposes throughout the application.`,
   properties: {
     message: {
       type: "string",
@@ -172,6 +184,19 @@ export const $Message = {
 } as const
 
 export const $NewPassword = {
+  description: `Class for resetting password.
+
+Defines the structure for a password reset request.
+
+Args:
+    token (str): The token for password reset verification.
+    new_password (str): The new password to set, with length constraints.
+
+Returns:
+    None
+
+Notes:
+    This class is used in the password reset process.`,
   properties: {
     token: {
       type: "string",
@@ -187,6 +212,19 @@ export const $NewPassword = {
 } as const
 
 export const $Token = {
+  description: `JSON payload containing access token.
+
+Defines the structure for an authentication token response.
+
+Args:
+    access_token (str): The access token string.
+    token_type (str): The type of token, defaults to "bearer".
+
+Returns:
+    None
+
+Notes:
+    This class is used in the authentication process to return token information.`,
   properties: {
     access_token: {
       type: "string",
@@ -200,6 +238,7 @@ export const $Token = {
 } as const
 
 export const $UpdatePassword = {
+  description: `Class for updating user password.`,
   properties: {
     current_password: {
       type: "string",
@@ -217,6 +256,7 @@ export const $UpdatePassword = {
 } as const
 
 export const $UserCreate = {
+  description: `Class for creating a new user.`,
   properties: {
     email: {
       type: "string",
@@ -254,6 +294,7 @@ export const $UserCreate = {
 } as const
 
 export const $UserPublic = {
+  description: `Public properties for user.`,
   properties: {
     email: {
       type: "string",
@@ -290,6 +331,7 @@ export const $UserPublic = {
 } as const
 
 export const $UserRegister = {
+  description: `Class for user registration.`,
   properties: {
     email: {
       type: "string",
@@ -319,6 +361,7 @@ export const $UserRegister = {
 } as const
 
 export const $UserUpdate = {
+  description: `Class for updating user information.`,
   properties: {
     email: {
       type: "any-of",
@@ -370,6 +413,7 @@ export const $UserUpdate = {
 } as const
 
 export const $UserUpdateMe = {
+  description: `Class for updating user information.`,
   properties: {
     full_name: {
       type: "any-of",
@@ -400,6 +444,7 @@ export const $UserUpdateMe = {
 } as const
 
 export const $UsersPublic = {
+  description: `Public properties for users.`,
   properties: {
     data: {
       type: "array",
