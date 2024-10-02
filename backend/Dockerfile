@@ -1,7 +1,5 @@
 FROM python:3.10
 
-ENV PYTHONUNBUFFERED=1
-
 WORKDIR /app/
 
 # Install uv
@@ -31,7 +29,7 @@ ENV PYTHONPATH=/app
 
 COPY ./scripts /app/scripts
 
-COPY ./pyproject.toml ./uv.lock ./alembic.ini /app/
+COPY ./pyproject.toml ./uv.lock ./alembic.ini ./pytest.ini ./.coveragerc /app/
 
 COPY ./app /app/app
 
