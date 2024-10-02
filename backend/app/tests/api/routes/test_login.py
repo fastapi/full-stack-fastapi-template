@@ -235,17 +235,21 @@ def test_recovery_password(
         AssertionError: If any of the assertions fail.
     """
 
-    email = settings.FIRST_SUPERUSER
-    # Send POST request to password recovery endpoint
-    r = client.post(
-        f"{settings.API_V1_STR}/password-recovery/{email}",
-        headers=normal_user_token_headers,
-    )
-    # Assert successful response and correct message
-    assert r.status_code == 200
-    assert r.json() == {
-        "message": "Password recovery email sent if the account exists."
-    }
+    with (
+        patch("app.core.config.settings.SMTP_HOST", "smtp.example.com"),
+        patch("app.core.config.settings.SMTP_USER", "admin@example.com"),
+    ):
+        email = settings.FIRST_SUPERUSER
+        # Send POST request to password recovery endpoint
+        r = client.post(
+            f"{settings.API_V1_STR}/password-recovery/{email}",
+            headers=normal_user_token_headers,
+        )
+        # Assert successful response and correct message
+        assert r.status_code == 200
+        assert r.json() == {
+            "message": "Password recovery email sent if the account exists."
+        }
 
 
 @mark.order("last")
