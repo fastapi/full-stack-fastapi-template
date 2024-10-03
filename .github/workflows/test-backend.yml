@@ -3,11 +3,37 @@ name: Test Backend
 on:
   push:
     branches:
-      - master
+      - main
+    paths-ignore:
+      - 'release-notes.md'
+      - development.md
+      - deployment.md
+      - SECURITY.md
+      - README.md
+      - LICENSE
+      - .pre-commit-config.yaml
+      - .gitignore
+      - .gitattributes
+      - img/*
+      - hooks/*
+      - .copier/*
   pull_request:
     types:
       - opened
       - synchronize
+    paths-ignore:
+      - 'release-notes.md'
+      - development.md
+      - deployment.md
+      - SECURITY.md
+      - README.md
+      - LICENSE
+      - .pre-commit-config.yaml
+      - .gitignore
+      - .gitattributes
+      - img/*
+      - hooks/*
+      - .copier/*
 
 jobs:
   test-backend:
