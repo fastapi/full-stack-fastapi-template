@@ -3,7 +3,7 @@ name: Test Backend
 on:
   push:
     branches:
-      - main
+      - master
     paths-ignore:
       - 'release-notes.md'
       - development.md
