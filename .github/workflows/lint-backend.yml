@@ -3,7 +3,7 @@ name: Lint Backend
 on:
   push:
     branches:
-      - main
+      - master
     paths-ignore:
       - 'release-notes.md'
       - renovate.json
