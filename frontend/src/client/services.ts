@@ -37,6 +37,27 @@ export class LoginService {
   /**
    * Login Access Token
    * OAuth2 compatible token login, get an access token for future requests
+   *
+   * This endpoint allows users to obtain an access token for authentication.
+   * It's rate-limited to 5 requests per minute to prevent abuse.
+   *
+   * Args:
+   * request (Request): The incoming request object (required for rate limiting).
+   * response (Response): The outgoing response object (required for rate limiting).
+   * session (SessionDep): The database session dependency.
+   * form_data (OAuth2PasswordRequestForm): The form data containing username and password.
+   *
+   * Returns:
+   * Token: An object containing the access token.
+   *
+   * Raises:
+   * HTTPException:
+   * - 400: If the email or password is incorrect.
+   * - 400: If the user account is inactive.
+   *
+   * Notes:
+   * This function authenticates the user, checks if the account is active,
+   * and then generates and returns an access token with a specified expiration time.
    * @returns Token Successful Response
    * @throws ApiError
    */
@@ -58,6 +79,23 @@ export class LoginService {
   /**
    * Test Token
    * Test access token
+   *
+   * This endpoint allows testing the validity of an access token.
+   * It's protected and can only be accessed with a valid token.
+   *
+   * Args:
+   * current_user (CurrentUser): The current authenticated user, injected by dependency.
+   *
+   * Returns:
+   * Any: The current user's public information.
+   *
+   * Raises:
+   * HTTPException: If the token is invalid or expired (handled by dependency).
+   *
+   * Notes:
+   * This function is useful for verifying that a token is working correctly.
+   * It simply returns the current user's information, which implicitly confirms
+   * that the token is valid and the user is authenticated.
    * @returns UserPublic Successful Response
    * @throws ApiError
    */
@@ -71,6 +109,27 @@ export class LoginService {
   /**
    * Recover Password
    * Password Recovery
+   *
+   * This endpoint initiates the password recovery process for a user.
+   * It's rate-limited to 3 requests per minute to prevent abuse.
+   *
+   * Args:
+   * email (str): The email address of the user requesting password recovery.
+   * session (SessionDep): The database session dependency.
+   * request (Request): The incoming request object (required for rate limiting).
+   * response (Response): The outgoing response object (required for rate limiting).
+   *
+   * Returns:
+   * Message: A message indicating that the password recovery email was sent.
+   *
+   * Raises:
+   * HTTPException:
+   * - 404: If no user is found with the provided email address.
+   *
+   * Notes:
+   * This function checks for the existence of the user, generates a password reset token,
+   * creates a password reset email, and sends it to the user's email address.
+   * It does not confirm or deny the existence of an account to prevent email enumeration.
    * @returns Message Successful Response
    * @throws ApiError
    */
@@ -93,6 +152,29 @@ export class LoginService {
   /**
    * Reset Password
    * Reset password
+   *
+   * This endpoint allows users to reset their password using a valid reset token.
+   * It's rate-limited to 3 requests per minute to prevent abuse.
+   *
+   * Args:
+   * session (SessionDep): The database session dependency.
+   * body (NewPassword): The new password and reset token.
+   * request (Request): The incoming request object (required for rate limiting).
+   * response (Response): The outgoing response object (required for rate limiting).
+   *
+   * Returns:
+   * Message: A message indicating that the password was successfully updated.
+   *
+   * Raises:
+   * HTTPException:
+   * - 400: If the reset token is invalid.
+   * - 404: If no user is found with the email associated with the token.
+   * - 400: If the user account is inactive.
+   *
+   * Notes:
+   * This function verifies the reset token, retrieves the associated user,
+   * checks if the user is active, hashes the new password, and updates it in the database.
+   * It's the final step in the password recovery process.
    * @returns Message Successful Response
    * @throws ApiError
    */
@@ -114,6 +196,26 @@ export class LoginService {
   /**
    * Recover Password Html Content
    * HTML Content for Password Recovery
+   *
+   * This endpoint generates and returns the HTML content for a password recovery email.
+   * It's protected and can only be accessed by active superusers.
+   *
+   * Args:
+   * email (str): The email address of the user for whom to generate the recovery email.
+   * session (SessionDep): The database session dependency.
+   *
+   * Returns:
+   * HTMLResponse: The HTML content of the password reset email, with the subject in the headers.
+   *
+   * Raises:
+   * HTTPException:
+   * - 404: If no user is found with the provided email address.
+   *
+   * Notes:
+   * This function is primarily for testing and debugging purposes. It allows superusers
+   * to view the content of password reset emails without actually sending them.
+   * It generates a password reset token and creates the email content just like
+   * the actual password recovery process.
    * @returns string Successful Response
    * @throws ApiError
    */
@@ -165,6 +267,20 @@ export class UsersService {
   /**
    * Read Users
    * Retrieve users.
+   *
+   * This endpoint allows retrieving a list of users with pagination.
+   * It's protected and can only be accessed by superusers.
+   *
+   * Args:
+   * session (SessionDep): The database session dependency.
+   * skip (int): The number of users to skip (for pagination).
+   * limit (int): The maximum number of users to return.
+   *
+   * Returns:
+   * UsersPublic: An object containing the list of users and the total count.
+   *
+   * Notes:
+   * This endpoint is useful for administrative purposes to view all users in the system.
    * @returns UsersPublic Successful Response
    * @throws ApiError
    */
@@ -188,6 +304,23 @@ export class UsersService {
   /**
    * Create User
    * Create new user.
+   *
+   * This endpoint allows creating a new user in the system.
+   * It's protected and can only be accessed by superusers.
+   *
+   * Args:
+   * session (SessionDep): The database session dependency.
+   * user_in (UserCreate): The user data to be created.
+   *
+   * Returns:
+   * UserPublic: The created user's public information.
+   *
+   * Raises:
+   * HTTPException:
+   * - 400: If a user with the given email already exists.
+   *
+   * Notes:
+   * If email sending is enabled, a new account email will be sent to the user.
    * @returns UserPublic Successful Response
    * @throws ApiError
    */
@@ -209,6 +342,18 @@ export class UsersService {
   /**
    * Read User Me
    * Get current user.
+   *
+   * This endpoint allows users to retrieve their own information.
+   * It's protected and can be accessed by authenticated users.
+   *
+   * Args:
+   * current_user (CurrentUser): The current authenticated user.
+   *
+   * Returns:
+   * UserPublic: The current user's public information.
+   *
+   * Notes:
+   * This endpoint is useful for clients to get the latest user information after login.
    * @returns UserPublic Successful Response
    * @throws ApiError
    */
@@ -222,6 +367,23 @@ export class UsersService {
   /**
    * Delete User Me
    * Delete own user.
+   *
+   * This endpoint allows users to delete their own account.
+   * It's protected and can be accessed by authenticated users.
+   *
+   * Args:
+   * session (SessionDep): The database session dependency.
+   * current_user (CurrentUser): The current authenticated user.
+   *
+   * Returns:
+   * Message: A message confirming the user deletion.
+   *
+   * Raises:
+   * HTTPException:
+   * - 403: If the user is a superuser trying to delete their own account.
+   *
+   * Notes:
+   * Superusers are not allowed to delete their own accounts for security reasons.
    * @returns Message Successful Response
    * @throws ApiError
    */
@@ -235,6 +397,24 @@ export class UsersService {
   /**
    * Update User Me
    * Update own user.
+   *
+   * This endpoint allows users to update their own information.
+   * It's protected and can be accessed by authenticated users.
+   *
+   * Args:
+   * session (SessionDep): The database session dependency.
+   * user_in (UserUpdateMe): The user data to be updated.
+   * current_user (CurrentUser): The current authenticated user.
+   *
+   * Returns:
+   * UserPublic: The updated user's public information.
+   *
+   * Raises:
+   * HTTPException:
+   * - 409: If the new email is already in use by another user.
+   *
+   * Notes:
+   * Users can update their own information, but not their role or superuser status.
    * @returns UserPublic Successful Response
    * @throws ApiError
    */
@@ -256,6 +436,24 @@ export class UsersService {
   /**
    * Update Password Me
    * Update own password.
+   *
+   * This endpoint allows users to update their own password.
+   * It's protected and can be accessed by authenticated users.
+   *
+   * Args:
+   * session (SessionDep): The database session dependency.
+   * body (UpdatePassword): The current and new password data.
+   * current_user (CurrentUser): The current authenticated user.
+   *
+   * Returns:
+   * Message: A message confirming the password update.
+   *
+   * Raises:
+   * HTTPException:
+   * - 400: If the current password is incorrect or if the new password is the same as the current one.
+   *
+   * Notes:
+   * Users must provide their current password for security reasons.
    * @returns Message Successful Response
    * @throws ApiError
    */
@@ -277,6 +475,23 @@ export class UsersService {
   /**
    * Register User
    * Create new user without the need to be logged in.
+   *
+   * This endpoint allows new users to register in the system.
+   * It's public and can be accessed without authentication.
+   *
+   * Args:
+   * session (SessionDep): The database session dependency.
+   * user_in (UserRegister): The user registration data.
+   *
+   * Returns:
+   * UserPublic: The created user's public information.
+   *
+   * Raises:
+   * HTTPException:
+   * - 400: If a user with the given email already exists.
+   *
+   * Notes:
+   * This endpoint is typically used for user sign-up functionality.
    * @returns UserPublic Successful Response
    * @throws ApiError
    */
@@ -298,6 +513,25 @@ export class UsersService {
   /**
    * Read User By Id
    * Get a specific user by id.
+   *
+   * This endpoint allows retrieving a specific user's information by their ID.
+   * It's protected and can be accessed by the user themselves or superusers.
+   *
+   * Args:
+   * user_id (uuid.UUID): The ID of the user to retrieve.
+   * session (SessionDep): The database session dependency.
+   * current_user (CurrentUser): The current authenticated user.
+   *
+   * Returns:
+   * UserPublic: The requested user's public information.
+   *
+   * Raises:
+   * HTTPException:
+   * - 403: If the current user doesn't have enough privileges to access the information.
+   * - 404: If the user with the given ID is not found.
+   *
+   * Notes:
+   * Regular users can only access their own information, while superusers can access any user's information.
    * @returns UserPublic Successful Response
    * @throws ApiError
    */
@@ -320,6 +554,25 @@ export class UsersService {
   /**
    * Update User
    * Update a user.
+   *
+   * This endpoint allows updating a specific user's information.
+   * It's protected and can only be accessed by superusers.
+   *
+   * Args:
+   * session (SessionDep): The database session dependency.
+   * user_id (uuid.UUID): The ID of the user to update.
+   * user_in (UserUpdate): The user data to be updated.
+   *
+   * Returns:
+   * UserPublic: The updated user's public information.
+   *
+   * Raises:
+   * HTTPException:
+   * - 404: If the user with the given ID is not found.
+   * - 409: If the new email is already in use by another user.
+   *
+   * Notes:
+   * This endpoint is typically used for administrative purposes to update any user's information.
    * @returns UserPublic Successful Response
    * @throws ApiError
    */
@@ -344,6 +597,25 @@ export class UsersService {
   /**
    * Delete User
    * Delete a user.
+   *
+   * This endpoint allows deleting a specific user from the system.
+   * It's protected and can only be accessed by superusers.
+   *
+   * Args:
+   * session (SessionDep): The database session dependency.
+   * current_user (CurrentUser): The current authenticated superuser.
+   * user_id (uuid.UUID): The ID of the user to delete.
+   *
+   * Returns:
+   * Message: A message confirming the user deletion.
+   *
+   * Raises:
+   * HTTPException:
+   * - 403: If a superuser tries to delete their own account.
+   * - 404: If the user with the given ID is not found.
+   *
+   * Notes:
+   * Superusers are not allowed to delete their own accounts for security reasons.
    * @returns Message Successful Response
    * @throws ApiError
    */
@@ -370,6 +642,22 @@ export class UtilsService {
   /**
    * Test Email
    * Test emails.
+   *
+   * This endpoint allows sending a test email to a specified address.
+   * It's protected and can only be accessed by active superusers.
+   *
+   * Args:
+   * email_to (EmailStr): The email address to send the test email to.
+   *
+   * Returns:
+   * Message: A message indicating that the test email was sent successfully.
+   *
+   * Raises:
+   * HTTPException: If the user is not an active superuser.
+   *
+   * Notes:
+   * This function is useful for verifying email functionality in the system.
+   * It generates a test email and sends it to the specified address.
    * @returns Message Successful Response
    * @throws ApiError
    */
@@ -389,6 +677,23 @@ export class UtilsService {
 
   /**
    * Health Check
+   * Perform a health check.
+   *
+   * This endpoint returns True, indicating that the API is up and running.
+   * It can be used for monitoring and load balancer checks.
+   *
+   * Args:
+   * None
+   *
+   * Returns:
+   * bool: Always returns True if the API is functioning.
+   *
+   * Raises:
+   * None
+   *
+   * Notes:
+   * This is an asynchronous function that doesn't require any authentication.
+   * It's typically used by monitoring systems to verify the API's availability.
    * @returns boolean Successful Response
    * @throws ApiError
    */

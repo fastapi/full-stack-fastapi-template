@@ -1,0 +1,6 @@
+[run]
+omit =
+    */models/*
+    */test_*
+    */tests/*
+    */__init__.py

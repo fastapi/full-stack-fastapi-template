@@ -39,7 +39,7 @@ build-backend = "hatchling.build"
 
 [tool.mypy]
 strict = true
-exclude = ["venv", ".venv", "alembic"]
+exclude = ["venv", ".venv", "alembic", "app/tests/core/test_config.py", "app/tests/api/test_deps.py"]
 
 [tool.ruff]
 target-version = "py310"

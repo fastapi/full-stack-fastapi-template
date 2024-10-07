@@ -76,16 +76,79 @@ def test_get_user(db: Session) -> None:
     assert jsonable_encoder(user) == jsonable_encoder(user_2)
 
 
-def test_update_user(db: Session) -> None:
+def test_update_user_attributes(db: Session) -> None:
+    """
+    Test updating user attributes.
+
+    This test verifies that the update_user_attributes function correctly updates
+    a user's attributes in the database.
+
+    Args:
+        db: The database session.
+
+    Returns:
+        None
+
+    Raises:
+        AssertionError: If the user attributes are not updated correctly.
+    """
+    # Create a new user
     password = random_lower_string()
     email = random_email()
-    user_in = UserCreate(email=email, password=password, is_superuser=True)
+    user_in = UserCreate(email=email, password=password, is_superuser=False)
     user = crud.create_user(session=db, user_create=user_in)
+
+    # Update user attributes
+    new_email = random_email()
+    user_in_update = UserUpdate(email=new_email, is_superuser=True)
+    updated_user = crud.update_user_attributes(
+        session=db, db_user=user, user_in=user_in_update
+    )
+
+    # Verify the updates
+    assert updated_user.email == new_email
+    assert updated_user.is_superuser is True
+    assert updated_user.id == user.id  # Ensure it's the same user
+
+    # Fetch the user from the database to double-check
+    db.refresh(user)
+    assert user.email == new_email
+    assert user.is_superuser is True
+
+
+def test_update_user_password(db: Session) -> None:
+    """
+    Test updating user password.
+
+    This test verifies that the update_user_password function correctly updates
+    a user's password in the database.
+
+    Args:
+        db: The database session.
+
+    Returns:
+        None
+
+    Raises:
+        AssertionError: If the user password is not updated correctly.
+    """
+    # Create a new user
+    password = random_lower_string()
+    email = random_email()
+    user_in = UserCreate(email=email, password=password)
+    user = crud.create_user(session=db, user_create=user_in)
+
+    # Update user password
     new_password = random_lower_string()
-    user_in_update = UserUpdate(password=new_password, is_superuser=True)
-    if user.id is not None:
-        crud.update_user(session=db, db_user=user, user_in=user_in_update)
-    user_2 = db.get(User, user.id)
-    assert user_2
-    assert user.email == user_2.email
-    assert verify_password(new_password, user_2.hashed_password)
+    updated_user = crud.update_user_password(
+        session=db, db_user=user, new_password=new_password
+    )
+
+    # Verify the password update
+    assert verify_password(new_password, updated_user.hashed_password)
+    assert not verify_password(password, updated_user.hashed_password)
+
+    # Fetch the user from the database to double-check
+    db.refresh(user)
+    assert verify_password(new_password, user.hashed_password)
+    assert not verify_password(password, user.hashed_password)
