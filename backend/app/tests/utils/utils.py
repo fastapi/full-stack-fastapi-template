@@ -1,5 +1,8 @@
 import random
 import string
+from collections.abc import Generator
+from contextlib import contextmanager
+from unittest.mock import patch
 
 from fastapi.testclient import TestClient
 
@@ -24,3 +27,23 @@ def get_superuser_token_headers(client: TestClient) -> dict[str, str]:
     a_token = tokens["access_token"]
     headers = {"Authorization": f"Bearer {a_token}"}
     return headers
+
+
+@contextmanager
+def patch_password_hashing(*modules: str) -> Generator[None, None, None]:
+    """
+    Contextmanager to patch ``pwd_context`` in the given modules.
+    :param modules: list of modules to patch.
+    :return:
+    """
+    patchers = []
+    for module in modules:
+        patcher_p = patch(f"{module}.pwd_context.verify", lambda x, y: x == y)
+        patcher_h = patch(f"{module}.pwd_context.hash", lambda x: x)
+        patcher_p.start()
+        patcher_h.start()
+
+        patchers.extend((patcher_p, patcher_h))
+    yield
+    for patcher in patchers:
+        patcher.stop()
