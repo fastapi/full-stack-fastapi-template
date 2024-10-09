@@ -107,3 +107,22 @@ def delete_item(
     session.delete(item)
     session.commit()
     return Message(message="Item deleted successfully")
+
+
+    
+@router.get("/count", response_model=int)
+def count_items(session: SessionDep, current_user: CurrentUser) -> int:
+    """
+    Get the total count of items.
+    """
+    if current_user.is_superuser:
+        count_statement = select(func.count()).select_from(Item)
+    else:
+        count_statement = (
+            select(func.count())
+            .select_from(Item)
+            .where(Item.owner_id == current_user.id)
+        )
+    
+    count = session.exec(count_statement).one()
+    return count
