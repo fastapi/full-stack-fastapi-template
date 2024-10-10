@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Redirecting...</title>
+    <script>
+        function redirectToAppOrStore(venueId, venueType) {
+            // Define the deep link URLs
+            const deepLinkUrl = `yourapp://${venueType}?id=${venueId}`;
+            const appStoreUrl = "https://apps.apple.com/app/idYOUR_APP_ID"; // Replace with your App Store URL
+            const playStoreUrl = "https://play.google.com/store/apps/details?id=YOUR_APP_PACKAGE"; // Replace with your Play Store URL
+
+            // Check if the user is on iOS or Android
+            const userAgent = navigator.userAgent || navigator.vendor || window.opera;
+
+            // Attempt to open the app with the deep link
+            if (/android/i.test(userAgent)) {
+                window.location = deepLinkUrl;
+                // Redirect to Play Store after 1.5 seconds if the app is not installed
+                setTimeout(() => {
+                    window.location = playStoreUrl;
+                }, 1500);
+            } else if (/iPad|iPhone|iPod/.test(userAgent) && !window.MSStream) {
+                window.location = deepLinkUrl;
+                // Redirect to App Store after 1.5 seconds if the app is not installed
+                setTimeout(() => {
+                    window.location = appStoreUrl;
+                }, 1500);
+            } else {
+                // If not on mobile, redirect to a default page or show a message
+                window.location = "https://yourwebsite.com"; // Replace with your website or default page
+            }
+        }
+
+        // Call the function with the venue_id and venue_type
+        window.onload = function() {
+            const urlParams = new URLSearchParams(window.location.search);
+            const venueId = urlParams.get('id');
+            const venueType = urlParams.get('type');
+            redirectToAppOrStore(venueId, venueType);
+        };
+    </script>
+</head>
+<body>
+    <h1>Redirecting...</h1>
+</body>
+</html>

@@ -50,11 +50,13 @@ async def get_current_user(
     credentials: Annotated[HTTPAuthorizationCredentials, Depends(bearer_scheme)],
     session: SessionDep
 ) -> Union[UserPublic, UserBusiness]:
+    # print('credentials.credentials ', credentials.credentials)
     try:
+        print('credentials.credentials ', credentials.credentials)
         # Verify and decode the token (ensure this is as fast as possible)
         token_data = get_jwt_payload(credentials.credentials)
         user_id = token_data.sub
-
+        print('hhuuuser_id ',    user_id)
         # Query both user types in a single call, using a union if possible
         user = (
             session.query(UserPublic)
@@ -88,10 +90,10 @@ async def get_current_user(
         
 # Dependency to get the business user
 async def get_business_user(
-    credentials: HTTPAuthorizationCredentials = Depends(bearer_scheme), 
-    session: Session = Depends(SessionDep)
+    credentials: Annotated[HTTPAuthorizationCredentials, Depends(bearer_scheme)], 
+    session: SessionDep
 ) -> UserBusiness:
-    current_user = await get_current_user(credentials.credentials, session)
+    current_user = await get_current_user(credentials, session)
     if not isinstance(current_user, UserBusiness):
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,
@@ -101,10 +103,10 @@ async def get_business_user(
 
 # Dependency to get the superuser
 async def get_super_user(
-    credentials: HTTPAuthorizationCredentials = Depends(bearer_scheme), 
-    session: Session = Depends(SessionDep)
-) -> UserPublic:
-    current_user = await get_current_user(credentials, session)
+    credentials: Annotated[HTTPAuthorizationCredentials, Depends(bearer_scheme)], 
+    session: SessionDep
+) -> UserBusiness:
+    current_user = await get_business_user(credentials, session)
     if not current_user.is_superuser:
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,
@@ -114,10 +116,12 @@ async def get_super_user(
 
 # Dependency to get any public user
 async def get_public_user(
-    credentials: HTTPAuthorizationCredentials = Depends(bearer_scheme), 
-    session: Session = Depends(SessionDep)
+    credentials: Annotated[HTTPAuthorizationCredentials, Depends(bearer_scheme)], 
+    session: SessionDep
 ) -> UserPublic:
-    current_user = await get_current_user(credentials.credentials, session)
+    print('credentials.credentials ', credentials.credentials)
+    current_user = await get_current_user(credentials, session)
+    # print('current_user ', current_user)
     if not isinstance(current_user, UserPublic):
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,

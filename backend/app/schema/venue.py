@@ -3,7 +3,7 @@ import uuid
 from app.models.venue import FoodcourtBase, NightclubBase, QSRBase, RestaurantBase
 
 class RestaurantRead(RestaurantBase):
-    id: Optional[int]
+    id: Optional[uuid.UUID]
     class Config:
         from_attributes = True
 

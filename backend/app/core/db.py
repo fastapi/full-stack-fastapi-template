@@ -1,5 +1,5 @@
 from datetime import datetime
-from sqlmodel import Session, create_engine, select
+from sqlmodel import Session, create_engine
 from app.models.user import  UserBusiness
 from app.core.config import settings
 

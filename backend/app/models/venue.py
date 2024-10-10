@@ -1,4 +1,5 @@
 import uuid
+from app.models.qrcode import QRCode
 from sqlmodel import SQLModel, Field, Relationship
 from typing import Optional, List, TYPE_CHECKING
 
@@ -30,7 +31,7 @@ class NightclubBase(VenueBase):
 class Nightclub(NightclubBase, table=True):
     __tablename__ = "nightclub"
 
-    id: Optional[uuid.UUID] = Field(default=None, primary_key=True, index=True)
+    id: Optional[uuid.UUID] = Field(default_factory=uuid.uuid4, primary_key=True, index=True)
     # Relationships
     events: List["Event"] = Relationship(back_populates="nightclub")
     club_visits: List["ClubVisit"] = Relationship(back_populates="nightclub")
@@ -42,6 +43,7 @@ class Nightclub(NightclubBase, table=True):
         back_populates="managed_nightclubs",
         link_model=NightclubUserBusinessLink
     )
+    qr_codes: List[QRCode] = Relationship(back_populates="nightclub")
 
 class RestaurantUserBusinessLink(SQLModel, table=True):
     restaurant_id: uuid.UUID = Field(foreign_key="restaurant.id", primary_key=True)
@@ -61,6 +63,7 @@ class Restaurant(RestaurantBase, table=True):
         back_populates="managed_restaurants",
         link_model=RestaurantUserBusinessLink
     )
+    qr_codes: List[QRCode] = Relationship(back_populates="restaurant")
 
 class QSRUserBusinessLink(SQLModel, table=True):
     qsr_id: uuid.UUID = Field(foreign_key="qsr.id", primary_key=True)
@@ -82,6 +85,7 @@ class QSR(QSRBase, table=True):
         back_populates="managed_qsrs",
         link_model=QSRUserBusinessLink
     )
+    qr_codes: List[QRCode] = Relationship(back_populates="qsr")
 
 class FoodcourtUserBusinessLink(SQLModel, table=True):
     foodcourt_id: uuid.UUID = Field(foreign_key="foodcourt.id", primary_key=True)
@@ -100,3 +104,4 @@ class Foodcourt(FoodcourtBase, table=True):
         back_populates="managed_foodcourts",
         link_model=FoodcourtUserBusinessLink
     )
+    qr_codes: List[QRCode] = Relationship(back_populates="foodcourt")

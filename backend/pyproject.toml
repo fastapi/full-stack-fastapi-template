@@ -34,6 +34,8 @@ redis = "^5.0.8"
 fastapi-users = {extras = ["oauth"], version = "^13.0.0"}
 asyncpg = "^0.29.0"
 otplessauthsdk = "^0.3.3"
+fastapi-admin = "^1.0.4"
+sqladmin = {extras = ["full"], version = "^0.19.0"}
 
 [tool.poetry.group.dev.dependencies]
 pytest = "^7.4.3"

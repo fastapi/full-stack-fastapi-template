@@ -12,7 +12,7 @@ def get_jwt_payload(token: str) -> TokenModel:
     try:
         # Decode the token using the secret key and algorithm
         payload = jwt.decode(token, settings.SECRET_KEY, algorithms=[settings.ALGORITHM])
-
+        print('payload ', payload)
         # Create and return a TokenModel instance with the decoded payload
         return TokenModel(sub=payload.get("sub"), exp=payload.get("exp"))
 
