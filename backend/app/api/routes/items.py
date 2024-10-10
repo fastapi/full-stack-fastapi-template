@@ -41,6 +41,24 @@ def read_items(
     return ItemsPublic(data=items, count=count)
 
 
+@router.get("/count", response_model=int)
+def get_item_count(session: SessionDep, current_user: CurrentUser) -> int:
+    """
+    Devuelve el número de ítems en la base de datos.
+    """
+    if current_user.is_superuser:
+        count_statement = select(func.count()).select_from(Item)
+    else:
+        count_statement = (
+            select(func.count())
+            .select_from(Item)
+            .where(Item.owner_id == current_user.id)
+        )
+    item_count = session.exec(count_statement).one()
+    return item_count
+
+
+
 @router.get("/{id}", response_model=ItemPublic)
 def read_item(session: SessionDep, current_user: CurrentUser, id: uuid.UUID) -> Any:
     """
@@ -107,3 +125,4 @@ def delete_item(
     session.delete(item)
     session.commit()
     return Message(message="Item deleted successfully")
+
