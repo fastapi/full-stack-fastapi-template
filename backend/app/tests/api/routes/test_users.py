@@ -78,7 +78,7 @@ def test_get_existing_user_as_superuser(
 
 def test_get_non_existing_user_as_superuser(
     client: TestClient, superuser_token_headers: dict[str, str]
-):
+) -> None:
     r = client.get(
         f"{settings.API_V1_STR}/users/{uuid.uuid4()}",
         headers=superuser_token_headers,
