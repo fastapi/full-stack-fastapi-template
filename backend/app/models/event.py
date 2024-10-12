@@ -17,3 +17,4 @@ class Event(SQLModel, table=True):
     nightclub: Optional["Nightclub"] = Relationship(back_populates="events")
     offerings: List["EventOffering"] = Relationship(back_populates="event")
     event_bookings: List["EventBooking"] = Relationship(back_populates="event")
+    carousel_posters: Optional[List["CarouselPoster"]] = Relationship(back_populates="event")

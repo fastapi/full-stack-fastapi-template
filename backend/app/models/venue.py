@@ -44,6 +44,7 @@ class Nightclub(NightclubBase, table=True):
         link_model=NightclubUserBusinessLink
     )
     qr_codes: List[QRCode] = Relationship(back_populates="nightclub")
+    carousel_posters: Optional[List["CarouselPoster"]] = Relationship(back_populates="nightclub")
 
 class RestaurantUserBusinessLink(SQLModel, table=True):
     restaurant_id: uuid.UUID = Field(foreign_key="restaurant.id", primary_key=True)
@@ -64,6 +65,7 @@ class Restaurant(RestaurantBase, table=True):
         link_model=RestaurantUserBusinessLink
     )
     qr_codes: List[QRCode] = Relationship(back_populates="restaurant")
+    carousel_posters: Optional[List["CarouselPoster"]] = Relationship(back_populates="restaurant")
 
 class QSRUserBusinessLink(SQLModel, table=True):
     qsr_id: uuid.UUID = Field(foreign_key="qsr.id", primary_key=True)
@@ -86,6 +88,7 @@ class QSR(QSRBase, table=True):
         link_model=QSRUserBusinessLink
     )
     qr_codes: List[QRCode] = Relationship(back_populates="qsr")
+    carousel_posters: Optional[List["CarouselPoster"]] = Relationship(back_populates="qsr")
 
 class FoodcourtUserBusinessLink(SQLModel, table=True):
     foodcourt_id: uuid.UUID = Field(foreign_key="foodcourt.id", primary_key=True)
@@ -105,3 +108,4 @@ class Foodcourt(FoodcourtBase, table=True):
         link_model=FoodcourtUserBusinessLink
     )
     qr_codes: List[QRCode] = Relationship(back_populates="foodcourt")
+    carousel_posters: Optional[List["CarouselPoster"]] = Relationship(back_populates="foodcourt")
