@@ -9,12 +9,26 @@ from app.core.db import engine, init_db
 from app.main import app
 from app.models import Item, User
 from app.tests.utils.user import authentication_token_from_email
-from app.tests.utils.utils import get_superuser_token_headers
+from app.tests.utils.utils import get_superuser_token_headers, patch_password_hashing
+
+
+@pytest.fixture(scope="session")
+def disable_password_hashing() -> Generator[None, None, None]:
+    with patch_password_hashing("app.core.security"):
+        yield
 
 
 @pytest.fixture(scope="session", autouse=True)
-def db() -> Generator[Session, None, None]:
+def db(
+    disable_password_hashing: Generator[None, None, None],  # noqa: ARG001
+) -> Generator[Session, None, None]:
     with Session(engine) as session:
+        # cleanup db to prevent interferences with tests
+        # all existing data will be deleted anyway after the tests run
+        session.execute(delete(User))
+        session.execute(delete(Item))
+        session.commit()
+
         init_db(session)
         yield session
         statement = delete(Item)
