@@ -1,7 +1,7 @@
 import random
 import string
 from collections.abc import Generator
-from contextlib import contextmanager
+from contextlib import ExitStack, contextmanager
 from unittest.mock import patch
 
 from fastapi.testclient import TestClient
@@ -36,14 +36,10 @@ def patch_password_hashing(*modules: str) -> Generator[None, None, None]:
     :param modules: list of modules to patch.
     :return:
     """
-    patchers = []
-    for module in modules:
-        patcher_p = patch(f"{module}.pwd_context.verify", lambda x, y: x == y)
-        patcher_h = patch(f"{module}.pwd_context.hash", lambda x: x)
-        patcher_p.start()
-        patcher_h.start()
-
-        patchers.extend((patcher_p, patcher_h))
-    yield
-    for patcher in patchers:
-        patcher.stop()
+    with ExitStack() as stack:
+        for module in modules:
+            stack.enter_context(
+                patch(f"{module}.pwd_context.verify", lambda x, y: x == y)
+            )
+            stack.enter_context(patch(f"{module}.pwd_context.hash", lambda x: x))
+        yield
