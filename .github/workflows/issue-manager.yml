@@ -39,5 +39,9 @@ jobs:
               "waiting": {
                 "delay": 2628000,
                 "message": "As this PR has been waiting for the original user for a while but seems to be inactive, it's now going to be closed. But if there's anyone interested, feel free to create a new PR."
+              },
+              "invalid": {
+                "delay": 0,
+                "message": "This seems to be invalid and is going to be closed now. If you think this is a mistake, please provide more information."
               }
             }
