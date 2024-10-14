@@ -42,6 +42,6 @@ jobs:
               },
               "invalid": {
                 "delay": 0,
-                "message": "This seems to be invalid and is going to be closed now. If you think this is a mistake, please provide more information."
+                "message": "This was marked as invalid. If this is an error, please provide additional details."
               }
             }
