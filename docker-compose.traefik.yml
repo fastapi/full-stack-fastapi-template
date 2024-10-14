@@ -1,6 +1,6 @@
 services:
   traefik:
-    image: traefik:comte
+    image: traefik:3.1
     ports:
       # Listen on port 80, default for HTTP, necessary to redirect to HTTPS
       - 80:80
