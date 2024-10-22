@@ -48,7 +48,7 @@ services:
   db:
     restart: "no"
     ports:
-      - "5432:5432"
+      - "5433:5433"
 
   adminer:
     restart: "no"
