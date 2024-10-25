@@ -1,211 +1,322 @@
 import uuid
-from app.schema.menu import MenuCategoryRead, MenuItemRead, NightclubMenuCreate, NightclubMenuRead, MenuCategoryCreate, MenuItemCreate, QSRMenuCreate, QSRMenuRead, RestaurantMenuCreate, RestaurantMenuRead
-from app.models.menu import NightclubMenu, QSRMenu, RestaurantMenu
-from app.models.menu_category import MenuCategory
-from app.models.menu_item import MenuItem
-from sqlmodel import select
-from fastapi import APIRouter
+from app.schema.menu import MenuCategoryCreate, MenuCategoryRead, MenuCategoryUpdate, MenuCreate, MenuItemCreate, MenuItemRead, MenuItemUpdate, MenuRead, MenuSubCategoryCreate, MenuSubCategoryRead, MenuSubCategoryUpdate, MenuUpdate
+from app.models.menu import Menu, MenuCategory, MenuItem, MenuSubCategory
+from app.models.venue import Venue
+from sqlmodel import Session,select
+from fastapi import APIRouter, Depends, HTTPException
 from typing import List
 from app.api.deps import SessionDep
 from app.crud import (
     get_record_by_id,
     create_record,
     update_record,
-    patch_record,
     delete_record
 )
-
+from app.api.deps import get_db 
 router = APIRouter()
 
-# Get all menus for a nightclub
-@router.get("/nightclubs/{nightclub_id}/menus/", response_model=List[NightclubMenuRead])
-async def read_nightclub_menus(nightclub_id: uuid.UUID, session: SessionDep):
+# Get all menus of a specific venue
+@router.get("/all/{venue_id}", response_model=List[MenuRead])
+async def read_menus(venue_id: uuid.UUID, db: Session = Depends(get_db)):
     """
-    Retrieve all menus for a specific nightclub.
+    Retrieve all menus for a specific venue.
     """
-    menus = session.exec(select(NightclubMenu).where(NightclubMenu.nightclub_id == nightclub_id)).all()
-    return menus
+    # Query the Menu table for menus associated with the specified venue
+    statement = select(Menu).where(Menu.venue_id == venue_id)
+    menus = db.execute(statement).scalars().all()  # Execute the query
+    
+    if not menus:
+        raise HTTPException(status_code=404, detail="No menus found for this venue.")
+    
+    return [Menu.to_read_schema(menu) for menu in menus]
 
-# Get a specific menu
-@router.get("/nightclubs/menus/{menu_id}", response_model=NightclubMenuRead)
-async def read_nightclub_menu(menu_id: uuid.UUID, session: SessionDep):
+@router.get("/menu/{menu_id}", response_model=MenuRead)
+async def read_menu(menu_id: uuid.UUID, db: Session = Depends(get_db)):
     """
-    Retrieve a specific menu by ID for a nightclub.
+    Retrieve a specific menu by its ID.
     """
-    return get_record_by_id(session, NightclubMenu, menu_id)
+    menu = get_record_by_id(db, Menu, menu_id)
+    print('huhuhuh',menu)
+    ret =  Menu.to_read_schema(menu)
+    return ret
 
-# Create a new menu
-@router.post("/nightclubs/menus/", response_model=NightclubMenuRead)
-async def create_nightclub_menu( menu: NightclubMenuCreate, session: SessionDep):
-    """
-    Create a new menu for a nightclub.
-    """
-    return create_record(session, NightclubMenu, menu)
 
-# Update a menu
-@router.put("/nightclubs/menus/{menu_id}", response_model=NightclubMenuRead)
-async def update_nightclub_menu(menu_id: uuid.UUID, updated_menu: NightclubMenuCreate, session: SessionDep):
+@router.post("/", response_model=MenuRead)
+async def create_menu(menu_create: MenuCreate, db: Session = Depends(get_db)):
     """
-    Update an existing menu for a nightclub.
+    Create a new menu for a specific venue.
     """
-    return update_record(session, NightclubMenu, menu_id, updated_menu)
+    # Check if the venue exists
+    venue = get_record_by_id(db, Venue, menu_create.venue_id)
+    if not venue:
+        raise HTTPException(status_code=404, detail="Venue not found.")
 
-# PATCH a menu for partial updates
-@router.patch("/nightclubs/menus/{menu_id}", response_model=NightclubMenuRead)
-async def patch_nightclub_menu(menu_id: uuid.UUID, updated_menu: NightclubMenuCreate, session: SessionDep):
-    """
-    Partially update an existing menu for a venue (Nightclub, Restaurant, QSR).
-    """
-    return patch_record(session, NightclubMenu, menu_id, updated_menu)
+    try:
+        # Create the Menu object
+        menu_instance = Menu.from_create_schema(menu_create)
 
-# Delete a menu
-@router.delete("/nightclubs/menus/{menu_id}", response_model=None)
-async def delete_nightclub_menu(menu_id: uuid.UUID, session: SessionDep):
-    """
-    Delete a menu by ID for a nightclub.
-    """
-    return delete_record(session, NightclubMenu, menu_id)
+        # Use the create_record helper to save the menu to the database
+        created_menu = create_record(db, menu_instance)
 
-# Get all menus for a qsr
-@router.get("/qsrs/{qsr_id}/menus/", response_model=List[QSRMenuRead])
-async def read_qsr_menus(qsr_id: uuid.UUID, session: SessionDep):
-    """
-    Retrieve all menus for a specific qsr.
-    """
-    menus = session.exec(select(QSRMenu).where(QSRMenu.qsr_id == qsr_id)).all()
-    return menus
+        return Menu.to_read_schema(created_menu)
+    
+    except Exception as e:
+        db.rollback()  # Rollback in case of error
+        raise HTTPException(status_code=400, detail=f"Error creating menu: {str(e)}")
 
-# Get a specific menu
-@router.get("/qsrs/menus/{menu_id}", response_model=QSRMenuRead)
-async def read_qsr_menu(menu_id: uuid.UUID, session: SessionDep):
+@router.patch("/{menu_id}", response_model=MenuRead)
+async def update_menu(
+    menu_id: uuid.UUID, 
+    menu_update: MenuUpdate, 
+    db: Session = Depends(get_db)
+):
     """
-    Retrieve a specific menu by ID for a qsr.
+    Update an existing menu's details using a partial update (PATCH).
+    
+    :param menu_id: The ID of the menu to update.
+    :param menu_update: The fields to update, provided as a Pydantic model.
+    :param db: Active database session.
+    :return: The updated Menu as a response.
     """
-    return get_record_by_id(session, QSRMenu, menu_id)
+    # Retrieve the menu by its ID
+    menu_instance = get_record_by_id(db, Menu, menu_id)
+    
+    if not menu_instance:
+        raise HTTPException(status_code=404, detail="Menu not found.")
+    
+    # Update the menu using the validated fields from MenuUpdate
+    updated_menu = update_record(db, menu_instance, menu_update)
+    
+    return Menu.to_read_schema(updated_menu)
 
-# Create a new menu
-@router.post("/qsrs/menus/", response_model=QSRMenuRead)
-async def create_qsr_menu( menu: QSRMenuCreate, session: SessionDep):
+@router.delete("/{menu_id}", response_model=dict)
+async def delete_menu(menu_id: uuid.UUID, db: Session = Depends(get_db)):
     """
-    Create a new menu for a qsr.
-    """
-    return create_record(session, QSRMenu, menu)
+    Delete a menu by its ID.
 
-# Update a menu
-@router.put("/qsrs/menus/{menu_id}", response_model=QSRMenuRead)
-async def update_qsr_menu(menu_id: uuid.UUID, updated_menu: QSRMenuCreate, session: SessionDep):
+    :param menu_id: The ID of the menu to delete.
+    :param db: Active database session.
+    :return: Confirmation message on successful deletion.
     """
-    Update an existing menu for a qsr.
-    """
-    return update_record(session, QSRMenu, menu_id, updated_menu)
+    menu = get_record_by_id(db, Menu, menu_id)
+    
+    if not menu:
+        raise HTTPException(status_code=404, detail="Menu not found.")
+    
+    delete_record(db, menu)
+    
+    return {"detail": "Menu deleted successfully."}
 
-# PATCH a menu for partial updates
-@router.patch("/qsrs/menus/{menu_id}", response_model=QSRMenuRead)
-async def patch_qsr_menu(menu_id: uuid.UUID, updated_menu: QSRMenuCreate, session: SessionDep):
-    """
-    Partially update an existing menu for a venue (QSR, Restaurant, QSR).
-    """
-    return patch_record(session, QSRMenu, menu_id, updated_menu)
+##############################################################################################################
 
-# Delete a menu
-@router.delete("/qsrs/menus/{menu_id}", response_model=None)
-async def delete_qsr_menu(menu_id: uuid.UUID, session: SessionDep):
+@router.post("/category", response_model=MenuCategoryRead)
+async def create_menu_category(
+    category_create: MenuCategoryCreate, 
+    db: Session = Depends(get_db)
+):
     """
-    Delete a menu by ID for a qsr.
+    Create a new menu category associated with a menu.
+    
+    :param category_create: The details for the new menu category, provided as a Pydantic model.
+    :param db: Active database session.
+    :return: The created MenuCategory as a response.
     """
-    return delete_record(session, QSRMenu, menu_id)
+    # Check if the menu exists
+    menu = get_record_by_id(db, Menu, category_create.menu_id)
+    
+    if not menu:
+        raise HTTPException(status_code=404, detail="Menu not found.")
+    
+    # Create a new MenuCategory instance from the provided data
+    category_instance = MenuCategory.from_create_schema(category_create)
+    
+    # Persist the new category in the database
+    created_category = create_record(db, category_instance)
+    
+    return MenuCategory.to_read_schema(created_category)
 
-# Get all menus for a restaurant
-@router.get("/restaurants/{restaurant_id}/menus/", response_model=List[RestaurantMenuRead])
-async def read_restaurant_menus(restaurant_id: uuid.UUID, session: SessionDep):
+@router.patch("/category/{category_id}", response_model=MenuCategoryRead)
+async def update_menu_category(
+    category_id: uuid.UUID, 
+    category_update: MenuCategoryUpdate, 
+    db: Session = Depends(get_db)
+):
     """
-    Retrieve all menus for a specific restaurant.
+    Update an existing menu category's details using a partial update (PATCH).
+    
+    :param category_id: The ID of the menu category to update.
+    :param category_update: The fields to update, provided as a Pydantic model.
+    :param db: Active database session.
+    :return: The updated MenuCategory as a response.
     """
-    menus = session.exec(select(RestaurantMenu).where(RestaurantMenu.restaurant_id == restaurant_id)).all()
-    return menus
+    # Retrieve the category by its ID
+    category_instance = get_record_by_id(db, MenuCategory, category_id)
+    
+    if not category_instance:
+        raise HTTPException(status_code=404, detail="Menu category not found.")
+    
+    # Update the category using the validated fields from MenuCategoryUpdate
+    updated_category = update_record(db, category_instance, category_update)
+    
+    return MenuCategory.to_read_schema(updated_category)
 
-# Get a specific menu
-@router.get("/restaurants/menus/{menu_id}", response_model=RestaurantMenuRead)
-async def read_restaurant_menu(menu_id: uuid.UUID, session: SessionDep):
+@router.delete("/category/{category_id}", response_model=dict)
+async def delete_category(category_id: uuid.UUID, db: Session = Depends(get_db)):
     """
-    Retrieve a specific menu by ID for a restaurant.
-    """
-    return get_record_by_id(session, RestaurantMenu, menu_id)
+    Delete a menu category by its ID.
 
-# Create a new menu
-@router.post("/restaurants/menus/", response_model=RestaurantMenuRead)
-async def create_restaurant_menu( menu: RestaurantMenuCreate, session: SessionDep):
+    :param category_id: The ID of the category to delete.
+    :param db: Active database session.
+    :return: Confirmation message on successful deletion.
     """
-    Create a new menu for a restaurant.
-    """
-    return create_record(session, RestaurantMenu, menu)
+    category = get_record_by_id(db, MenuCategory, category_id)
+    
+    if not category:
+        raise HTTPException(status_code=404, detail="Category not found.")
+    
+    delete_record(db, category)
+    
+    return {"detail": "Category deleted successfully."}
 
-# Update a menu
-@router.put("/restaurants/menus/{menu_id}", response_model=RestaurantMenuRead)
-async def update_restaurant_menu(menu_id: uuid.UUID, updated_menu: RestaurantMenuCreate, session: SessionDep):
-    """
-    Update an existing menu for a restaurant.
-    """
-    return update_record(session, RestaurantMenu, menu_id, updated_menu)
+##############################################################################################################
 
-# PATCH a menu for partial updates
-@router.patch("/restaurants/menus/{menu_id}", response_model=RestaurantMenuRead)
-async def patch_restaurant_menu(menu_id: uuid.UUID, updated_menu: RestaurantMenuCreate, session: SessionDep):
+@router.post("/subcategory/", response_model=MenuSubCategoryRead)
+async def create_menu_subcategory(
+    subcategory_create: MenuSubCategoryCreate, 
+    db: Session = Depends(get_db)
+):
     """
-    Partially update an existing menu for a venue (Restaurant, Restaurant, QSR).
+    Create a new menu subcategory associated with a category.
+    
+    :param subcategory_create: The details for the new menu subcategory, provided as a Pydantic model.
+    :param db: Active database session.
+    :return: The created MenuSubCategory as a response.
     """
-    return patch_record(session, RestaurantMenu, menu_id, updated_menu)
+    # Check if the category exists
+    category = get_record_by_id(db, MenuCategory, subcategory_create.category_id)
+    
+    if not category:
+        raise HTTPException(status_code=404, detail="Category not found.")
+    
+    # Create a new MenuSubCategory instance from the provided data
+    subcategory_instance = MenuSubCategory.from_create_schema(subcategory_create)
+    
+    # Persist the new subcategory in the database
+    created_subcategory = create_record(db, subcategory_instance)
+    
+    return MenuSubCategory.to_read_schema(created_subcategory)
 
-# Delete a menu
-@router.delete("/restaurants/menus/{menu_id}", response_model=None)
-async def delete_restaurant_menu(menu_id: uuid.UUID, session: SessionDep):
+@router.patch("/subcategory/{subcategory_id}", response_model=MenuSubCategoryRead)
+async def update_menu_subcategory(
+    subcategory_id: uuid.UUID, 
+    subcategory_update: MenuSubCategoryUpdate, 
+    db: Session = Depends(get_db)
+):
     """
-    Delete a menu by ID for a restaurant.
-    """
-    return delete_record(session, RestaurantMenu, menu_id)
+    Update an existing menu subcategory.
 
-# CRUD operations for Menu Categories
+    :param subcategory_id: The unique identifier for the subcategory to update.
+    :param subcategory_update: The details to update, provided as a Pydantic model.
+    :param db: Active database session.
+    :return: The updated MenuSubCategory as a response.
+    """
+    # Check if the subcategory exists
+    subcategory = get_record_by_id(db, MenuSubCategory, subcategory_id)
+    
+    if not subcategory:
+        raise HTTPException(status_code=404, detail="Subcategory not found.")
 
-# Create a new category
-@router.post("/nightclubs/menus/categories/", response_model=MenuCategoryRead)
-async def create_menu_category(category: MenuCategoryCreate, session: SessionDep):
-    return create_record(session, MenuCategory, category)
+    # Update the subcategory with provided data
+    update_data = subcategory_update.dict(exclude_unset=True)  # Exclude unset fields for partial update
+    updated_subcategory = update_record(db, subcategory, update_data)
+    
+    return MenuSubCategory.to_read_schema(updated_subcategory)
 
-# Update a category
-@router.put("/nightclubs/menus/categories/{category_id}", response_model=MenuCategoryRead)
-async def update_menu_category(category_id: uuid.UUID, updated_category: MenuCategoryCreate, session: SessionDep):
+@router.delete("/subcategory/{subcategory_id}", response_model=dict)
+async def delete_subcategory(subcategory_id: uuid.UUID, db: Session = Depends(get_db)):
     """
-    Update an existing category for a specific menu.
-    """
-    return update_record(session, MenuCategory, category_id, updated_category)
+    Delete a menu subcategory by its ID.
 
-# Delete a category
-@router.delete("/nightclubs/menus/categories/{category_id}", response_model=None)
-async def delete_menu_category(category_id: uuid.UUID, session: SessionDep):
+    :param subcategory_id: The ID of the subcategory to delete.
+    :param db: Active database session.
+    :return: Confirmation message on successful deletion.
     """
-    Delete a category by ID from a specific menu.
-    """
-    return delete_record(session, MenuCategory, category_id)
+    subcategory = get_record_by_id(db, MenuSubCategory, subcategory_id)
+    
+    if not subcategory:
+        raise HTTPException(status_code=404, detail="Subcategory not found.")
+    
+    delete_record(db, subcategory)
+    
+    return {"detail": "Subcategory deleted successfully."}
 
-# CRUD operations for Menu Items
+##############################################################################################################
 
-# Create a new item
-@router.post("/nightclubs/menus/categories/items/", response_model=MenuItemRead)
-async def create_menu_item(item: MenuItemCreate, session: SessionDep):
-    return create_record(session, MenuItem, item)
+@router.post("/item/", response_model=MenuItemRead)
+async def create_menu_item(
+    item_create: MenuItemCreate, 
+    db: Session = Depends(get_db)
+):
+    """
+    Create a new menu item associated with a subcategory.
 
-# Update an item
-@router.put("/nightclubs/menus/categories/items/{item_id}", response_model=MenuItemRead)
-async def update_menu_item(item_id: uuid.UUID, updated_item: MenuItemCreate, session: SessionDep):
+    :param item_create: The details for the new menu item, provided as a Pydantic model.
+    :param db: Active database session.
+    :return: The created MenuItem as a response.
     """
-    Update an existing item under a specific category of a menu.
-    """
-    return update_record(session, MenuItem, item_id, updated_item)
+    # Check if the subcategory exists
+    subcategory = get_record_by_id(db, MenuSubCategory, item_create.subcategory_id)
+    
+    if not subcategory:
+        raise HTTPException(status_code=404, detail="Subcategory not found.")
+    
+    # Create a new MenuItem instance from the provided data
+    item_instance = MenuItem.from_create_schema(item_create)
+    
+    # Persist the new item in the database
+    created_item = create_record(db, item_instance)
+    
+    return MenuItem.to_read_schema(created_item)
 
-# Delete an item
-@router.delete("/nightclubs/menus/categories/items/{item_id}", response_model=None)
-async def delete_menu_item(item_id: uuid.UUID, session: SessionDep):
+@router.patch("/item/{item_id}", response_model=MenuItemRead)
+async def update_menu_item(
+    item_id: uuid.UUID, 
+    item_update: MenuItemUpdate, 
+    db: Session = Depends(get_db)
+):
     """
-    Delete an item by ID from a specific category of a menu.
+    Update an existing menu item.
+
+    :param item_id: The unique identifier for the item to update.
+    :param item_update: The details to update, provided as a Pydantic model.
+    :param db: Active database session.
+    :return: The updated MenuItem as a response.
     """
-    return delete_record(session, MenuItem, item_id)
+    # Check if the item exists
+    item = get_record_by_id(db, MenuItem, item_id)
+    
+    if not item:
+        raise HTTPException(status_code=404, detail="Menu item not found.")
+
+    # Update the item with provided data
+    updated_item = update_record(db, item, item_update)
+    
+    return MenuItem.to_read_schema(updated_item)
+
+@router.delete("/item/{item_id}", response_model=dict)
+async def delete_menu_item(item_id: uuid.UUID, db: Session = Depends(get_db)):
+    """
+    Delete a menu item by its ID.
+
+    :param item_id: The ID of the item to delete.
+    :param db: Active database session.
+    :return: Confirmation message on successful deletion.
+    """
+    item = get_record_by_id(db, MenuItem, item_id)
+    
+    if not item:
+        raise HTTPException(status_code=404, detail="Menu item not found.")
+    
+    delete_record(db, item)
+    
+    return {"detail": "Menu item deleted successfully."}

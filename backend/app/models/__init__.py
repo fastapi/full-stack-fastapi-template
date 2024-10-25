@@ -8,9 +8,7 @@ from .event_offering import EventOffering
 from .group import Group
 from .group_wallet import GroupWallet
 from .group_wallet_topup import GroupWalletTopup
-from .menu import RestaurantMenu, NightclubMenu, QSRMenu
-from .menu_category import MenuCategory
-from .menu_item import MenuItem
+from .menu import Menu
 from .order import NightclubOrder, RestaurantOrder, QSROrder
 from .order_item import OrderItem
 from .pickup_location import PickupLocation
@@ -21,8 +19,7 @@ from .payment import  PaymentOrderNightclub, PaymentOrderRestaurant, PaymentOrde
 # Make all models accessible when importing app.models
 __all__ = [
     "SQLModel", "ClubVisit", "Event", "EventBooking", "EventOffering", "Group", "GroupWallet", 
-    "GroupWalletTopup", "RestaurantMenu", "NightclubMenu", "QSRMenu", "MenuCategory", 
-    "MenuItem", "NightclubOrder", "RestaurantOrder", "QSROrder", "OrderItem", 
+    "GroupWalletTopup", "Menu", "NightclubOrder", "RestaurantOrder", "QSROrder", "OrderItem", 
     "PickupLocation", "UserBusiness", "UserPublic", "Nightclub", "QSR", "Restaurant", 
     "Foodcourt", "PaymentOrderNightclub", "PaymentOrderRestaurant", "PaymentOrderQSR", 
     "PaymentEvent"

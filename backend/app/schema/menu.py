@@ -1,52 +1,115 @@
 from typing import List, Optional
 import uuid
-from app.models.menu import NightclubMenuBase, QSRMenuBase, RestaurantMenuBase
-from app.models.menu_item import MenuItemBase
-from app.models.menu_category import MenuCategoryBase
+from app.schema.menu_category import MenuCategoryRead
+from pydantic import BaseModel, Field
 
-class QSRMenuRead(QSRMenuBase):
-    id: Optional[uuid.UUID]
+# Base Schemas
+class MenuRead(BaseModel):
+    menu_id: uuid.UUID  # Unique identifier for the menu
+    name: str  # Name of the menu (could be a restaurant menu or type of menu)
+    description: Optional[str] = None  # Description of the menu
+    categories: Optional[List[MenuCategoryRead]] = None  # Nested list of categories
+    venue_id: uuid.UUID  # Foreign key to the venue
+    menu_type: Optional[str] = None 
+        
+class MenuCreate(BaseModel):
+    name: str  # Name of the menu (could be a restaurant menu or type of menu)
+    description: Optional[str] = None  # Description of the menu
+    venue_id: uuid.UUID  # Foreign key to the venue
+    menu_type: Optional[str] = None   # Type of menu (e.g., "Food", "Drink")
+    class Config:
+        from_attributes = True 
+        
+class MenuUpdate(BaseModel):
+    name: str  # Name of the menu (could be a restaurant menu or type of menu)
+    description: Optional[str] = None  # Description of the menu
+    menu_type: Optional[str] = None   # Type of menu (e.g., "Food", "Drink")
+    class Config:
+       from_attributes = True
+        
+####################################################################################################
+
+class MenuItemCreate(BaseModel):
+    subcategory_id: uuid.UUID
+    name: str 
+    price: float 
+    description: Optional[str] = None
+    image_url: Optional[str] = None    
+    is_veg: Optional[bool] = None 
+    ingredients: Optional[str] = None 
+    abv: Optional[float] = None 
+    ibu: Optional[int] = None 
+    class Config:
+        from_attributes = True
+# Response schema for a menu item
+class MenuItemRead(BaseModel):
+    item_id: uuid.UUID
+    subcategory_id: uuid.UUID
+    name: str 
+    price: float 
+    description: Optional[str] = None
+    image_url: Optional[str] = None    
+    is_veg: Optional[bool] = None 
+    ingredients: Optional[str] = None 
+    abv: Optional[float] = None 
+    ibu: Optional[int] = None 
+    class Config:
+        from_attributes = True
+        
+class MenuItemUpdate(BaseModel):
+    name: Optional[str] = None  # Name can be updated
+    price: Optional[float] = None  # Price can be updated
+    description: Optional[str] = None  # Description is optional and updatable
+    image_url: Optional[str] = None  # Image URL is optional and updatable
+    is_veg: Optional[bool] = None  # Optionally update veg/non-veg status
+    ingredients: Optional[str] = None  # Ingredients list is optional and updatable
+    abv: Optional[float] = None  # Alcohol by volume can be updated
+    ibu: Optional[int] = None  # International Bitterness Units can be updated
+
     class Config:
         from_attributes = True
 
-class QSRMenuCreate(QSRMenuBase):
+#########################################################################################################
+class MenuCategoryRead(BaseModel):
+    category_id: uuid.UUID  # Unique identifier for the category
+    name: str  # Name of the category
+    menu_id : uuid.UUID
+    sub_categories: Optional[List["MenuSubCategoryRead"]] = None  # List of subcategories
+
+class MenuCategoryCreate(BaseModel):
+    name: str  # Name of the category
+    menu_id: uuid.UUID
     class Config:
         from_attributes = True
 
-class RestaurantMenuRead(RestaurantMenuBase):
-    id: Optional[uuid.UUID]
+class MenuCategoryUpdate(BaseModel):
+    name: Optional[str] = None  # Category name can be updated
+    menu_id: Optional[uuid.UUID] = None  # Menu ID can be updated
+
     class Config:
         from_attributes = True
 
-class RestaurantMenuCreate(RestaurantMenuBase):
+#########################################################################################################
+
+class MenuSubCategoryCreate(BaseModel):
+    name: str  # Name of the subcategory
+    is_alcoholic: bool = Field(default=False)
+    category_id: uuid.UUID  # Foreign key to the parent category
     class Config:
         from_attributes = True
 
-class MenuItemRead(MenuItemBase):
-    id: Optional[uuid.UUID]
-    class Config:
-        from_attributes = True
+class MenuSubCategoryRead(BaseModel):
+    subcategory_id: uuid.UUID  # Unique identifier for the subcategory
+    category_id: uuid.UUID
+    is_alcoholic: bool 
+    name: str  # Name of the subcategory
+    menu_items: Optional[List[MenuItemRead]] = []  # List of items under this subcategory
+        
+class MenuSubCategoryUpdate(BaseModel):
+    name: Optional[str] = None  # Optional name for update
+    is_alcoholic: Optional[bool] = None  # Optional field for update
+    category_id: Optional[uuid.UUID] = None  # Optional foreign key to update category
+    menu_items: Optional[List["MenuItemUpdate"]] = []  # Optional list for updating menu items
 
-class MenuCategoryRead(MenuCategoryBase):
-    id: Optional[uuid.UUID]
-    menu_items: List[MenuItemRead] = []
-    class Config:
-        from_attributes = True
-
-class NightclubMenuRead(NightclubMenuBase):
-    id: Optional[uuid.UUID]
-    categories: List[MenuCategoryRead] = []
-    class Config:
-        from_attributes = True
-
-class MenuItemCreate(MenuItemBase):
-    class Config:
-        from_attributes = True
-
-class MenuCategoryCreate(MenuCategoryBase):
-    class Config:
-        from_attributes = True
-
-class NightclubMenuCreate(NightclubMenuBase):
     class Config:
         from_attributes = True

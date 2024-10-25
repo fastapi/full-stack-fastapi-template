@@ -1,8 +1,10 @@
-import datetime
+from datetime import datetime, timezone
+import logging
 import uuid
 from fastapi import HTTPException
+from pydantic import BaseModel
 from sqlmodel import SQLModel, Session, select
-from typing import List, Type
+from typing import List, Optional, Type, TypeVar
 
 # Generic CRUD function to get all records with pagination
 def get_all_records(
@@ -23,91 +25,97 @@ def get_all_records(
         raise HTTPException(status_code=500, detail=f"Error retrieving {model.__name__} records: {str(e)}")
 
 # Function to get a single record by ID
-def get_record_by_id(
-    session: Session, model: Type[SQLModel], record_id: uuid.UUID
-) -> SQLModel:
-    """
-    Retrieve a single record by ID.
-    - **session**: Database session
-    - **model**: SQLModel class (e.g., Nightclub, Restaurant, QSR, Foodcourt)
-    - **record_id**: ID of the record to retrieve
-    """
-    try:
-        statement = select(model).where(model.id == record_id)
-        result = session.execute(statement).scalars().first()
-        if not result:
-            raise HTTPException(status_code=404, detail=f"{model.__name__} with ID {record_id} not found.")
-        return result
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=f"Error retrieving {model.__name__} record: {str(e)}")
+T = TypeVar('T', bound=SQLModel)
 
+def get_record_by_id(db: Session, model: Type[T], record_id: uuid.UUID) -> Optional[T]:
+    """
+    Generic function to retrieve a record by its ID.
+
+    Args:
+        db (Session): The database session.
+        model (Type[T]): The SQLModel class representing the table.
+        record_id (uuid.UUID): The ID of the record to retrieve.
+
+    Returns:
+        Optional[T]: The retrieved record if found, otherwise None.
+
+    Raises:
+        HTTPException: If the record is not found, raises a 404 error.
+    """
+    record = db.get(model, record_id)
+    if not record:
+        raise HTTPException(status_code=404, detail=f"{model.__name__} with ID {record_id} not found.")
+    return record
 # Function to create a new record
 # Create a new record
 def create_record(
-    session: Session, model: Type[SQLModel], obj_in: SQLModel
+    db: Session,
+    instance: SQLModel
 ) -> SQLModel:
     """
-    Create a new record with automatic `created_at` and `updated_at` timestamps.
-    - **session**: Database session
-    - **model**: SQLModel class (e.g., Nightclub, Restaurant, QSR, Foodcourt)
-    - **obj_in**: Data to create the new record
+    Create a new record in the database with automatic timestamp management.
+
+    :param db: The active database session.
+    :param model: The SQLModel class representing the database model.
+    :param instance: An instance of the model to be persisted.
+    :return: The created instance with updated attributes.
     """
-    try:
-        # Prepare the data for creation
-        obj_data = obj_in.model_dump()
-        
-        # Set `created_at` and `updated_at` timestamps
-        obj_data['created_at'] = datetime.utcnow()
-        obj_data['updated_at'] = datetime.utcnow()
-        
-        # Create the new object
-        obj = model(**obj_data)
-        session.add(obj)
-        session.commit()
-        session.refresh(obj)
-        return obj
-    except Exception as e:
-        session.rollback()
-        raise HTTPException(status_code=500, detail=f"Error creating {model.__name__}: {str(e)}")
+    # Current UTC time for timestamping
+    # current_time = datetime.now()
 
+    # # Setting timestamps for the record
+    # instance.created_at = current_time
+    # instance.updated_at = current_time
 
-# Update an existing record
+    # Persisting the new record in the database
+    db.add(instance)
+    db.commit()  # Commit the changes
+    db.refresh(instance)  # Refresh to load any generated attributes
+
+    return instance  # Return the created instance
+
 def update_record(
-    session: Session, model: Type[SQLModel], record_id: uuid.UUID, obj_in: SQLModel
+    db: Session,
+    instance: SQLModel,
+    update_data: BaseModel
 ) -> SQLModel:
     """
-    Update an existing record with automatic `updated_at` timestamp.
-    - **session**: Database session
-    - **model**: SQLModel class (e.g., Nightclub, Restaurant, QSR, Foodcourt)
-    - **record_id**: ID of the record to update
-    - **obj_in**: Data to update the record
+    Update an existing record in the database, applying only the changes provided by a Pydantic model.
+    This approach ensures validation of input data and prevents partial updates with invalid fields.
+
+    :param db: Active database session.
+    :param instance: Existing model instance to be updated.
+    :param update_data: Pydantic model containing the fields to update.
+    :return: The updated model instance with changes committed.
     """
     try:
-        # Retrieve the existing record
-        obj = get_record_by_id(session, model, record_id)
-        
-        # Convert incoming data
-        obj_data = obj_in.model_dump()
-        
-        # Update the fields
-        for field, value in obj_data.items():
-            setattr(obj, field, value)
-        
-        # Set `updated_at` to the current time
-        obj.updated_at = datetime.utcnow()
-        
-        # Commit the changes
-        session.add(obj)
-        session.commit()
-        session.refresh(obj)
-        return obj
-    except HTTPException as e:
-        raise e
+        # Convert the Pydantic model to a dictionary, excluding unset fields
+        update_dict = update_data.dict(exclude_unset=True)
+
+        # Apply updates to only the fields that are set in the update_data Pydantic model
+        for key, value in update_dict.items():
+            if hasattr(instance, key):
+                setattr(instance, key, value)
+            else:
+                raise ValueError(f"Field '{key}' does not exist on the model.")
+
+        # Persist the changes in a single transaction
+        db.add(instance)
+        db.commit()
+        db.refresh(instance)
+
+        return instance
+
+    except ValueError as ve:
+        logging.error(f"Validation error: {ve}")
+        db.rollback()  # Undo any changes in case of failure
+        raise HTTPException(status_code=400, detail=str(ve))
+
     except Exception as e:
-        session.rollback()
-        raise HTTPException(status_code=500, detail=f"Error updating {model.__name__}: {str(e)}")
-
-
+        logging.error(f"Unexpected error during record update: {e}")
+        db.rollback()  # Rollback any transaction in case of failure
+        raise HTTPException(status_code=500, detail="An internal error occurred while updating the record.")
+    
 # Partially update an existing record
 def patch_record(
     session: Session, model: Type[SQLModel], record_id: uuid.UUID, obj_in: SQLModel
@@ -146,21 +154,13 @@ def patch_record(
         raise HTTPException(status_code=500, detail=f"Error updating {model.__name__}: {str(e)}")
     
 # Function to delete a record
-def delete_record(
-    session: Session, model: Type[SQLModel], record_id: uuid.UUID
-) -> None:
+def delete_record(db: Session, instance: SQLModel) -> None:
     """
-    Delete a record by ID.
-    - **session**: Database session
-    - **model**: SQLModel class (e.g., Nightclub, Restaurant, QSR, Foodcourt)
-    - **record_id**: ID of the record to delete
+    Delete a record from the database.
+
+    :param db: The active database session.
+    :param instance: The instance of the model to be deleted.
+    :return: None
     """
-    try:
-        obj = get_record_by_id(session, model, record_id)
-        session.delete(obj)
-        session.commit()
-    except HTTPException as e:
-        raise e
-    except Exception as e:
-        session.rollback()
-        raise HTTPException(status_code=500, detail=f"Error deleting {model.__name__} with ID {record_id}: {str(e)}")
+    db.delete(instance)
+    db.commit()

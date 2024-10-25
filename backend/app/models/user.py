@@ -1,5 +1,5 @@
 from app.models.group import GroupMembers
-from app.models.venue import FoodcourtUserBusinessLink, NightclubUserBusinessLink, QSRUserBusinessLink, RestaurantUserBusinessLink
+from app.models.base_model import BaseTimeModel
 from sqlmodel import SQLModel, Field, Relationship
 from typing import TYPE_CHECKING, Optional, List
 from datetime import datetime
@@ -7,7 +7,7 @@ import uuid
 from pydantic import EmailStr
 
 # Shared properties
-class UserBase(SQLModel):
+class UserBase(BaseTimeModel):
     email: EmailStr = Field(unique=True, nullable=True, index=True, max_length=255)
     phone_number: Optional[str] = Field(unique=True, nullable=False,index=True,default=None)
     is_active: bool = True
@@ -38,26 +38,22 @@ class UserPublic(UserBase, table=True):
     restaurant_payments: List["PaymentOrderRestaurant"] = Relationship(back_populates="user")
     event_payments: List["PaymentEvent"] = Relationship(back_populates="user")
 
+class UserVenueAssociation(SQLModel, table=True):
+    __tablename__ = "user_venue_association"
+    id: uuid.UUID = Field(default_factory=uuid.uuid4, primary_key=True)  # Add a primary key
+    user_business_id: uuid.UUID = Field(foreign_key="user_business.id")
+    venue_id: uuid.UUID = Field(foreign_key="venue.id")
 
+    # Additional fields can be added for tracking roles, timestamps, etc.
+    role: Optional[str] = Field(default=None)  # e.g., 'manager', 'owner'
+
+    user_business: "UserBusiness" = Relationship(back_populates="venue_associations")
+    venue: "Venue" = Relationship(back_populates="user_associations")
 class UserBusiness(UserBase, table=True):
     __tablename__ = "user_business"
     id: uuid.UUID = Field(default_factory=uuid.uuid4, primary_key=True, index=True)
     registration_date: datetime = Field(nullable=False)
 
     # Relationships
-    managed_foodcourts: List["Foodcourt"] = Relationship(
-        back_populates="managing_users",
-        link_model=FoodcourtUserBusinessLink
-    )
-    managed_qsrs: List["QSR"] = Relationship(
-        back_populates="managing_users",
-        link_model=QSRUserBusinessLink
-    )
-    managed_restaurants: List["Restaurant"] = Relationship(
-        back_populates="managing_users",
-        link_model=RestaurantUserBusinessLink
-    )
-    managed_nightclubs: List["Nightclub"] = Relationship(
-        back_populates="managing_users",
-        link_model=NightclubUserBusinessLink
-    )
+    venue_associations: List["UserVenueAssociation"] = Relationship(back_populates="user_business")
+    managed_venues: List["Venue"] = Relationship(back_populates="managing_users", link_model=UserVenueAssociation)

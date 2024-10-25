@@ -1,8 +1,8 @@
-"""added qr_codes to foodcourt
+"""Updated menu and category models
 
-Revision ID: 375a3d9f95aa
-Revises: fe4249d074a6
-Create Date: 2024-10-05 07:58:40.774421
+Revision ID: e2955dcf9b00
+Revises: ea33a3e76248
+Create Date: 2024-10-24 23:47:03.184543
 
 """
 from alembic import op
@@ -11,8 +11,8 @@ import sqlmodel.sql.sqltypes
 
 
 # revision identifiers, used by Alembic.
-revision = '375a3d9f95aa'
-down_revision = 'fe4249d074a6'
+revision = 'e2955dcf9b00'
+down_revision = 'ea33a3e76248'
 branch_labels = None
 depends_on = None
 
