@@ -61,7 +61,6 @@ jobs:
         limit-access-to-actor: true
     - run: docker compose build
     - run: docker compose down -v --remove-orphans
-    # - run: docker compose up -d --wait backend
     - name: Run Playwright tests
       run: docker compose run --rm playwright npx playwright test --fail-on-flaky-tests --trace=retain-on-failure --shard=${{ matrix.shardIndex }}/${{ matrix.shardTotal }}
     - run: docker compose down -v --remove-orphans
