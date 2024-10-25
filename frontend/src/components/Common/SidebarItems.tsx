@@ -27,6 +27,7 @@ const SidebarItems = ({ onClose }: SidebarItemsProps) => {
 
   const listItems = finalItems.map(({ icon, title, path }) => (
     <Flex
+      bg={"#9F70FD"}
       as={Link}
       to={path}
       w="100%"
