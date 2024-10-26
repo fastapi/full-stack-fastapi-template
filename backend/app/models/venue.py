@@ -27,8 +27,7 @@ class Venue(BaseTimeModel, table=True):
     zomato_link: Optional[str] = Field(default=None)
     swiggy_link: Optional[str] = Field(default=None)
     
-    user_associations: List["UserVenueAssociation"] = Relationship(back_populates="venue")
-    managing_users: List["UserBusiness"] = Relationship(back_populates="managed_venues", link_model=UserVenueAssociation)
+    managing_users: List["UserVenueAssociation"] = Relationship(back_populates="venue")
     qr_codes: List["QRCode"] = Relationship(back_populates="venue")
     menu: List["Menu"] = Relationship(back_populates="venue")  
     pickup_locations: List["PickupLocation"] = Relationship(back_populates="venue")

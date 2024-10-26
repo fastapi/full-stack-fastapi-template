@@ -1,33 +1,6 @@
 from typing import List, Optional
 import uuid
-from app.schema.menu_category import MenuCategoryRead
 from pydantic import BaseModel, Field
-
-# Base Schemas
-class MenuRead(BaseModel):
-    menu_id: uuid.UUID  # Unique identifier for the menu
-    name: str  # Name of the menu (could be a restaurant menu or type of menu)
-    description: Optional[str] = None  # Description of the menu
-    categories: Optional[List[MenuCategoryRead]] = None  # Nested list of categories
-    venue_id: uuid.UUID  # Foreign key to the venue
-    menu_type: Optional[str] = None 
-        
-class MenuCreate(BaseModel):
-    name: str  # Name of the menu (could be a restaurant menu or type of menu)
-    description: Optional[str] = None  # Description of the menu
-    venue_id: uuid.UUID  # Foreign key to the venue
-    menu_type: Optional[str] = None   # Type of menu (e.g., "Food", "Drink")
-    class Config:
-        from_attributes = True 
-        
-class MenuUpdate(BaseModel):
-    name: str  # Name of the menu (could be a restaurant menu or type of menu)
-    description: Optional[str] = None  # Description of the menu
-    menu_type: Optional[str] = None   # Type of menu (e.g., "Food", "Drink")
-    class Config:
-       from_attributes = True
-        
-####################################################################################################
 
 class MenuItemCreate(BaseModel):
     subcategory_id: uuid.UUID
@@ -69,25 +42,6 @@ class MenuItemUpdate(BaseModel):
     class Config:
         from_attributes = True
 
-#########################################################################################################
-class MenuCategoryRead(BaseModel):
-    category_id: uuid.UUID  # Unique identifier for the category
-    name: str  # Name of the category
-    menu_id : uuid.UUID
-    sub_categories: Optional[List["MenuSubCategoryRead"]] = None  # List of subcategories
-
-class MenuCategoryCreate(BaseModel):
-    name: str  # Name of the category
-    menu_id: uuid.UUID
-    class Config:
-        from_attributes = True
-
-class MenuCategoryUpdate(BaseModel):
-    name: Optional[str] = None  # Category name can be updated
-    menu_id: Optional[uuid.UUID] = None  # Menu ID can be updated
-
-    class Config:
-        from_attributes = True
 
 #########################################################################################################
 
@@ -113,3 +67,50 @@ class MenuSubCategoryUpdate(BaseModel):
 
     class Config:
         from_attributes = True
+
+#########################################################################################################
+class MenuCategoryRead(BaseModel):
+    category_id: uuid.UUID  # Unique identifier for the category
+    name: str  # Name of the category
+    menu_id : uuid.UUID
+    sub_categories: List[MenuSubCategoryRead] = []  # List of subcategories
+
+class MenuCategoryCreate(BaseModel):
+    name: str  # Name of the category
+    menu_id: uuid.UUID
+    class Config:
+        from_attributes = True
+
+class MenuCategoryUpdate(BaseModel):
+    name: Optional[str] = None  # Category name can be updated
+    menu_id: Optional[uuid.UUID] = None  # Menu ID can be updated
+
+    class Config:
+        from_attributes = True
+    
+#########################################################################################################
+class MenuRead(BaseModel):
+    menu_id: uuid.UUID  # Unique identifier for the menu
+    name: str  # Name of the menu (could be a restaurant menu or type of menu)
+    description: Optional[str] = None  # Description of the menu
+    categories: List[MenuCategoryRead] = []  # Nested list of categories
+    venue_id: uuid.UUID  # Foreign key to the venue
+    menu_type: Optional[str] = None 
+    class Config:
+       from_attributes = True 
+
+class MenuCreate(BaseModel):
+    name: str  # Name of the menu (could be a restaurant menu or type of menu)
+    description: Optional[str] = None  # Description of the menu
+    venue_id: uuid.UUID  # Foreign key to the venue
+    menu_type: Optional[str] = None   # Type of menu (e.g., "Food", "Drink")
+    class Config:
+        from_attributes = True 
+        
+class MenuUpdate(BaseModel):
+    name: str  # Name of the menu (could be a restaurant menu or type of menu)
+    description: Optional[str] = None  # Description of the menu
+    menu_type: Optional[str] = None   # Type of menu (e.g., "Food", "Drink")
+    class Config:
+       from_attributes = True
+        

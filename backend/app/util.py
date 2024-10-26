@@ -1,6 +1,7 @@
 from datetime import datetime, timezone
 import logging
 import uuid
+from app.models.user import UserBusiness, UserVenueAssociation
 from fastapi import HTTPException
 from pydantic import BaseModel
 from sqlmodel import SQLModel, Session, select
@@ -164,3 +165,34 @@ def delete_record(db: Session, instance: SQLModel) -> None:
     """
     db.delete(instance)
     db.commit()
+    
+
+def check_user_permission(db: Session, current_user: UserBusiness, venue_id: uuid.UUID):
+    """
+    Check if the user has permission to manage the specified venue.
+
+    Args:
+        db: Database session.
+        current_user: The current user object.
+        venue_id: The ID of the venue to check permissions for.
+
+    Raises:
+        HTTPException: If the user does not have permission.
+    
+    Returns:
+        UserVenueAssociation: The association record if it exists.
+    """
+    statement = (
+        select(UserVenueAssociation)
+        .where(
+            UserVenueAssociation.user_id == current_user.id,
+            UserVenueAssociation.venue_id == venue_id
+        )
+    )
+
+    user_venue_association = db.execute(statement).scalars().first()
+
+    if user_venue_association is None:
+        raise HTTPException(status_code=403, detail="User does not have permission to manage this venue.")
+
+    return user_venue_association

@@ -3,7 +3,7 @@ import uuid
 from fastapi import APIRouter, Query, HTTPException, Depends
 from app.api.deps import SessionDep, get_business_user, get_current_user, get_public_user, get_super_user
 from app.models import UserBusiness, UserPublic
-from app.crud import get_all_records, get_record_by_id, create_record, update_record, delete_record, patch_record
+from app.util import get_all_records, get_record_by_id, create_record, update_record, delete_record, patch_record
 
 router = APIRouter()
 

@@ -13,7 +13,56 @@ from fastapi.datastructures import QueryParams
 router = APIRouter()
 
 
-@router.post("/verify_token", response_model=UserAuthResponse)
+@router.post("/verify_token/business", response_model=UserAuthResponse)
+async def business_user_google_login(request: OtplessToken, session: SessionDep):
+    try:
+        # Verify the Google token with Google
+        # token_info_url = "https://oauth2.googleapis.com/tokeninfo"
+        # async with httpx.AsyncClient() as client:
+        #     response = await client.get(f"{token_info_url}?id_token={request.google_token}")
+
+        # if response.status_code != 200:
+        #     raise HTTPException(status_code=400, detail="Invalid Google token")
+
+        # # Parse user info
+        # user_info = response.json()
+        # email = user_info.get("email")
+        # user_id = user_info.get("sub")  # Google user ID
+
+        # Check for user by Google ID or email
+        email = request.otpless_token+ "test@gmail.com"   # Replace this with the actual email from the SDK response
+        user = session.query(UserBusiness).filter(UserBusiness.email == email).first()
+
+        if not user:
+            # Create new user if not found
+            user = UserBusiness(
+                email=email,
+                is_active=True,
+                registration_date=datetime.now(timezone.utc),
+            )
+            session.add(user)
+            session.commit()
+            session.refresh(user)
+
+        # Create tokens
+        access_token = create_access_token(subject=str(user.id), expires_delta=timedelta(minutes=30))
+        refresh_token = create_refresh_token(subject=str(user.id))
+
+        # Store refresh token
+        user.refresh_token = refresh_token.token
+        session.add(user)
+        session.commit()
+
+        return UserAuthResponse(
+            access_token=access_token,
+            refresh_token=refresh_token,
+            issued_at=datetime.now(timezone.utc)
+        )
+
+    except Exception as e:
+        raise HTTPException(status_code=400, detail=str(e))
+    
+@router.post("/verify_token/public", response_model=UserAuthResponse)
 async def verify_token(request: OtplessToken, session: SessionDep):
     try:
         # Verify the token using OTPLess SDK

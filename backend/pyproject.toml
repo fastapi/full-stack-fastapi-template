@@ -12,7 +12,7 @@ python-multipart = "0.0.9"
 email-validator = "^2.1.0.post1"
 passlib = {extras = ["bcrypt"], version = "^1.7.4"}
 tenacity = "^8.2.3"
-pydantic = ">2.0"
+pydantic = "^2.9.2"
 emails = "^0.6"
 psycopg2 = "^2.9.6"
 

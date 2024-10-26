@@ -2,22 +2,25 @@ import uuid
 from app.schema.menu import MenuCategoryCreate, MenuCategoryRead, MenuCategoryUpdate, MenuCreate, MenuItemCreate, MenuItemRead, MenuItemUpdate, MenuRead, MenuSubCategoryCreate, MenuSubCategoryRead, MenuSubCategoryUpdate, MenuUpdate
 from app.models.menu import Menu, MenuCategory, MenuItem, MenuSubCategory
 from app.models.venue import Venue
+from app.models.user import UserBusiness, UserPublic, UserVenueAssociation
 from sqlmodel import Session,select
 from fastapi import APIRouter, Depends, HTTPException
 from typing import List
-from app.api.deps import SessionDep
-from app.crud import (
+from app.api.deps import SessionDep, get_current_user
+from app.util import (
     get_record_by_id,
     create_record,
     update_record,
-    delete_record
+    delete_record,
+    check_user_permission
 )
 from app.api.deps import get_db 
 router = APIRouter()
 
 # Get all menus of a specific venue
 @router.get("/all/{venue_id}", response_model=List[MenuRead])
-async def read_menus(venue_id: uuid.UUID, db: Session = Depends(get_db)):
+async def read_menus(venue_id: uuid.UUID, db: Session = Depends(get_db),
+                     current_user: UserPublic = Depends(get_current_user)):
     """
     Retrieve all menus for a specific venue.
     """
@@ -31,18 +34,19 @@ async def read_menus(venue_id: uuid.UUID, db: Session = Depends(get_db)):
     return [Menu.to_read_schema(menu) for menu in menus]
 
 @router.get("/menu/{menu_id}", response_model=MenuRead)
-async def read_menu(menu_id: uuid.UUID, db: Session = Depends(get_db)):
+async def read_menu(menu_id: uuid.UUID, db: Session = Depends(get_db),
+                    current_user: UserPublic = Depends(get_current_user)):
     """
     Retrieve a specific menu by its ID.
     """
     menu = get_record_by_id(db, Menu, menu_id)
-    print('huhuhuh',menu)
     ret =  Menu.to_read_schema(menu)
     return ret
 
 
 @router.post("/", response_model=MenuRead)
-async def create_menu(menu_create: MenuCreate, db: Session = Depends(get_db)):
+async def create_menu(menu_create: MenuCreate, db: Session = Depends(get_db),
+                      current_user: UserBusiness = Depends(get_current_user)):
     """
     Create a new menu for a specific venue.
     """
@@ -50,7 +54,10 @@ async def create_menu(menu_create: MenuCreate, db: Session = Depends(get_db)):
     venue = get_record_by_id(db, Venue, menu_create.venue_id)
     if not venue:
         raise HTTPException(status_code=404, detail="Venue not found.")
-
+    
+    # Check if the user has permission to create a menu for this venue
+    check_user_permission(db, current_user, menu_create.venue_id)
+    
     try:
         # Create the Menu object
         menu_instance = Menu.from_create_schema(menu_create)
@@ -68,7 +75,8 @@ async def create_menu(menu_create: MenuCreate, db: Session = Depends(get_db)):
 async def update_menu(
     menu_id: uuid.UUID, 
     menu_update: MenuUpdate, 
-    db: Session = Depends(get_db)
+    db: Session = Depends(get_db),
+    current_user: UserBusiness = Depends(get_current_user)
 ):
     """
     Update an existing menu's details using a partial update (PATCH).
@@ -80,6 +88,8 @@ async def update_menu(
     """
     # Retrieve the menu by its ID
     menu_instance = get_record_by_id(db, Menu, menu_id)
+    # Check if the user has permission to update a menu for this venue
+    check_user_permission(db, current_user, menu_instance.venue_id)
     
     if not menu_instance:
         raise HTTPException(status_code=404, detail="Menu not found.")
@@ -90,7 +100,8 @@ async def update_menu(
     return Menu.to_read_schema(updated_menu)
 
 @router.delete("/{menu_id}", response_model=dict)
-async def delete_menu(menu_id: uuid.UUID, db: Session = Depends(get_db)):
+async def delete_menu(menu_id: uuid.UUID, db: Session = Depends(get_db),
+                      current_user: UserBusiness = Depends(get_current_user)):
     """
     Delete a menu by its ID.
 
@@ -98,12 +109,14 @@ async def delete_menu(menu_id: uuid.UUID, db: Session = Depends(get_db)):
     :param db: Active database session.
     :return: Confirmation message on successful deletion.
     """
-    menu = get_record_by_id(db, Menu, menu_id)
-    
-    if not menu:
+    menu_instance = get_record_by_id(db, Menu, menu_id)
+    if not menu_instance:
         raise HTTPException(status_code=404, detail="Menu not found.")
-    
-    delete_record(db, menu)
+
+    # Check if the user has permission to delete a menu for this venue
+    check_user_permission(db, current_user, menu_instance.venue_id)
+
+    delete_record(db, menu_instance)
     
     return {"detail": "Menu deleted successfully."}
 
@@ -112,8 +125,8 @@ async def delete_menu(menu_id: uuid.UUID, db: Session = Depends(get_db)):
 @router.post("/category", response_model=MenuCategoryRead)
 async def create_menu_category(
     category_create: MenuCategoryCreate, 
-    db: Session = Depends(get_db)
-):
+    db: Session = Depends(get_db),
+    current_user: UserBusiness = Depends(get_current_user)):
     """
     Create a new menu category associated with a menu.
     
@@ -126,6 +139,8 @@ async def create_menu_category(
     
     if not menu:
         raise HTTPException(status_code=404, detail="Menu not found.")
+    # Check if the user has permission to update a menu for this venue
+    check_user_permission(db, current_user, menu.venue_id)
     
     # Create a new MenuCategory instance from the provided data
     category_instance = MenuCategory.from_create_schema(category_create)
@@ -139,8 +154,9 @@ async def create_menu_category(
 async def update_menu_category(
     category_id: uuid.UUID, 
     category_update: MenuCategoryUpdate, 
-    db: Session = Depends(get_db)
-):
+    db: Session = Depends(get_db),
+    current_user: UserBusiness = Depends(get_current_user)):
+    
     """
     Update an existing menu category's details using a partial update (PATCH).
     
@@ -155,13 +171,16 @@ async def update_menu_category(
     if not category_instance:
         raise HTTPException(status_code=404, detail="Menu category not found.")
     
+    check_user_permission(db, current_user, category_instance.menu.venue_id)
+
     # Update the category using the validated fields from MenuCategoryUpdate
     updated_category = update_record(db, category_instance, category_update)
     
     return MenuCategory.to_read_schema(updated_category)
 
 @router.delete("/category/{category_id}", response_model=dict)
-async def delete_category(category_id: uuid.UUID, db: Session = Depends(get_db)):
+async def delete_category(category_id: uuid.UUID, db: Session = Depends(get_db),
+                          current_user: UserBusiness = Depends(get_current_user)):
     """
     Delete a menu category by its ID.
 
@@ -174,6 +193,8 @@ async def delete_category(category_id: uuid.UUID, db: Session = Depends(get_db))
     if not category:
         raise HTTPException(status_code=404, detail="Category not found.")
     
+    check_user_permission(db, current_user, category.menu.venue_id)
+
     delete_record(db, category)
     
     return {"detail": "Category deleted successfully."}
@@ -183,8 +204,8 @@ async def delete_category(category_id: uuid.UUID, db: Session = Depends(get_db))
 @router.post("/subcategory/", response_model=MenuSubCategoryRead)
 async def create_menu_subcategory(
     subcategory_create: MenuSubCategoryCreate, 
-    db: Session = Depends(get_db)
-):
+    db: Session = Depends(get_db),
+    current_user: UserBusiness = Depends(get_current_user)):
     """
     Create a new menu subcategory associated with a category.
     
@@ -198,6 +219,8 @@ async def create_menu_subcategory(
     if not category:
         raise HTTPException(status_code=404, detail="Category not found.")
     
+    check_user_permission(db, current_user, category.menu.venue_id)
+
     # Create a new MenuSubCategory instance from the provided data
     subcategory_instance = MenuSubCategory.from_create_schema(subcategory_create)
     
@@ -210,8 +233,8 @@ async def create_menu_subcategory(
 async def update_menu_subcategory(
     subcategory_id: uuid.UUID, 
     subcategory_update: MenuSubCategoryUpdate, 
-    db: Session = Depends(get_db)
-):
+    db: Session = Depends(get_db),
+    current_user: UserBusiness = Depends(get_current_user)):
     """
     Update an existing menu subcategory.
 
@@ -226,6 +249,8 @@ async def update_menu_subcategory(
     if not subcategory:
         raise HTTPException(status_code=404, detail="Subcategory not found.")
 
+    check_user_permission(db, current_user, subcategory.category.menu.venue_id)
+    
     # Update the subcategory with provided data
     update_data = subcategory_update.dict(exclude_unset=True)  # Exclude unset fields for partial update
     updated_subcategory = update_record(db, subcategory, update_data)
@@ -233,7 +258,8 @@ async def update_menu_subcategory(
     return MenuSubCategory.to_read_schema(updated_subcategory)
 
 @router.delete("/subcategory/{subcategory_id}", response_model=dict)
-async def delete_subcategory(subcategory_id: uuid.UUID, db: Session = Depends(get_db)):
+async def delete_subcategory(subcategory_id: uuid.UUID, db: Session = Depends(get_db),
+                             current_user: UserBusiness = Depends(get_current_user)):
     """
     Delete a menu subcategory by its ID.
 
@@ -246,6 +272,8 @@ async def delete_subcategory(subcategory_id: uuid.UUID, db: Session = Depends(ge
     if not subcategory:
         raise HTTPException(status_code=404, detail="Subcategory not found.")
     
+    check_user_permission(db, current_user, subcategory.category.menu.venue_id)
+
     delete_record(db, subcategory)
     
     return {"detail": "Subcategory deleted successfully."}
@@ -255,8 +283,8 @@ async def delete_subcategory(subcategory_id: uuid.UUID, db: Session = Depends(ge
 @router.post("/item/", response_model=MenuItemRead)
 async def create_menu_item(
     item_create: MenuItemCreate, 
-    db: Session = Depends(get_db)
-):
+    db: Session = Depends(get_db),
+    current_user: UserBusiness = Depends(get_current_user)):
     """
     Create a new menu item associated with a subcategory.
 
@@ -270,6 +298,8 @@ async def create_menu_item(
     if not subcategory:
         raise HTTPException(status_code=404, detail="Subcategory not found.")
     
+    check_user_permission(db, current_user, subcategory.category.menu.venue_id)
+
     # Create a new MenuItem instance from the provided data
     item_instance = MenuItem.from_create_schema(item_create)
     
@@ -282,8 +312,8 @@ async def create_menu_item(
 async def update_menu_item(
     item_id: uuid.UUID, 
     item_update: MenuItemUpdate, 
-    db: Session = Depends(get_db)
-):
+    db: Session = Depends(get_db),
+    current_user: UserBusiness = Depends(get_current_user)):
     """
     Update an existing menu item.
 
@@ -298,13 +328,16 @@ async def update_menu_item(
     if not item:
         raise HTTPException(status_code=404, detail="Menu item not found.")
 
+    check_user_permission(db, current_user, item.subcategory.category.menu.venue_id)
+
     # Update the item with provided data
     updated_item = update_record(db, item, item_update)
     
     return MenuItem.to_read_schema(updated_item)
 
 @router.delete("/item/{item_id}", response_model=dict)
-async def delete_menu_item(item_id: uuid.UUID, db: Session = Depends(get_db)):
+async def delete_menu_item(item_id: uuid.UUID, db: Session = Depends(get_db),
+                           current_user: UserBusiness = Depends(get_current_user)):
     """
     Delete a menu item by its ID.
 
@@ -316,7 +349,11 @@ async def delete_menu_item(item_id: uuid.UUID, db: Session = Depends(get_db)):
     
     if not item:
         raise HTTPException(status_code=404, detail="Menu item not found.")
-    
+
+    check_user_permission(db, current_user, item.subcategory.category.menu.venue_id)
+
     delete_record(db, item)
     
     return {"detail": "Menu item deleted successfully."}
+
+#########################################################################################################

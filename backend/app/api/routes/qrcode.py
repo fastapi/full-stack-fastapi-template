@@ -10,7 +10,7 @@ from typing import List
 from app.api.deps import SessionDep
 from app.models.qrcode import QRCode  # Ensure you have this import for your model
 from app.schema.qrcode import QRCodeCreate, QRCodeRead  # Ensure you have these imports for your schemas
-from app.crud import (
+from app.util import (
     get_all_records,
     get_record_by_id,
     create_record,

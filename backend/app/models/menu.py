@@ -4,111 +4,6 @@ from pydantic import ValidationError
 from sqlmodel import SQLModel, Field, Relationship
 from typing import List, Optional
 
-class Menu(SQLModel, table=True):
-    __tablename__ = "menu"
-    id: uuid.UUID = Field(default_factory=uuid.uuid4, primary_key=True, index=True)
-    name: str = Field(nullable=False)
-    description: Optional[str] = Field(default=None)
-    menu_type: Optional[str] = Field(default=None)  # Type of menu (e.g., "Food", "Drink")
-    venue_id: uuid.UUID = Field(foreign_key="venue.id", nullable=False)
-
-    # Relationships
-    categories: List["MenuCategory"] = Relationship(back_populates="menu")
-    venue: "Venue" = Relationship(back_populates="menu")
-    
-    @classmethod
-    def from_create_schema(cls, schema: MenuCreate) -> "Menu":
-        return cls(
-            name=schema.name,
-            description=schema.description,
-            menu_type=schema.menu_type,
-            venue_id=schema.venue_id
-        )
-
-    @classmethod
-    def to_read_schema(cls, menu: "Menu") -> MenuRead:
-        for category in menu.categories:
-            print(f"lololo Category: {category}")
-        categories=[MenuCategory.to_read_schema(category) for category in menu.categories]
-        try:
-            ret = MenuRead(
-                menu_id=menu.id,
-                name=menu.name,
-                description=menu.description,
-                menu_type=menu.menu_type,
-                venue_id=menu.venue_id,
-                categories=categories
-            )
-            print(ret)
-        except ValidationError as e:
-            print("Validation Error:", e.json())
-
-class MenuCategory(SQLModel, table=True):
-    __tablename__ = "menu_category"
-    id: uuid.UUID = Field(default_factory=uuid.uuid4, primary_key=True, index=True)
-    menu_id: uuid.UUID = Field(foreign_key="menu.id", nullable=False)
-    name: str = Field(nullable=False)
-
-    # Relationships
-    menu: "Menu" = Relationship(back_populates="categories")
-    sub_categories: List["MenuSubCategory"] = Relationship(back_populates="category")
-
-    @classmethod
-    def from_create_schema(cls, schema: MenuCategoryCreate) -> "MenuCategory":
-        return cls(
-            name=schema.name,
-            menu_id=schema.menu_id
-        )
-
-    @classmethod
-    def to_read_schema(cls, category: "MenuCategory") -> MenuCategoryRead:
-        print("Input Category: %s", category)
-        sub_categories=[
-            MenuSubCategory.to_read_schema(sub) for sub in category.sub_categories or []
-        ]  
-        sub_categories = (
-        [MenuSubCategory.to_read_schema(sub) for sub in category.sub_categories]
-        if category.sub_categories else None
-    )
-        print(f"Category ID: {category.id}, Menu ID: {category.menu_id}, Name: {category.name}, Subcategories: {category.sub_categories}")
-        print("Subcategories: %s", sub_categories)  # Log subcategories
-        return MenuCategoryRead(
-            category_id=category.id,
-            menu_id=category.menu_id,
-            name=category.name,
-            sub_categories=sub_categories
-        )
-
-
-class MenuSubCategory(SQLModel, table=True):
-    __tablename__ = "menu_subcategory"
-    id: uuid.UUID = Field(default_factory=uuid.uuid4, primary_key=True, index=True)
-    category_id: uuid.UUID = Field(foreign_key="menu_category.id", nullable=False)
-    name: str = Field(nullable=False)
-    is_alcoholic: bool = Field(default=False)
-
-    # Relationships
-    category: "MenuCategory" = Relationship(back_populates="sub_categories")
-    menu_items: List["MenuItem"] = Relationship(back_populates="subcategory")
-
-    @classmethod
-    def from_create_schema(cls, schema: "MenuSubCategoryCreate") -> "MenuSubCategory":
-        return cls(
-            name=schema.name,
-            category_id=schema.category_id,
-            is_alcoholic=schema.is_alcoholic  # Include is_alcoholic in the model
-        )
-
-    @classmethod
-    def to_read_schema(cls, subcategory: "MenuSubCategory") -> "MenuSubCategoryRead":
-        return MenuSubCategoryRead(
-            subcategory_id=subcategory.id,
-            name=subcategory.name,
-            is_alcoholic=subcategory.is_alcoholic,  # Include is_alcoholic in the read schema
-            menu_items=[MenuItem.to_read_schema(item) for item in subcategory.menu_items]
-        )
-
-
 class MenuItem(SQLModel, table=True):
     __tablename__ = "menu_item"
     id: uuid.UUID = Field(default_factory=uuid.uuid4, primary_key=True, index=True)
@@ -153,3 +48,98 @@ class MenuItem(SQLModel, table=True):
             abv=item.abv,
             ibu=item.ibu
         )
+
+#########################################################################################################
+
+class MenuSubCategory(SQLModel, table=True):
+    __tablename__ = "menu_subcategory"
+    id: uuid.UUID = Field(default_factory=uuid.uuid4, primary_key=True, index=True)
+    category_id: uuid.UUID = Field(foreign_key="menu_category.id", nullable=False)
+    name: str = Field(nullable=False)
+    is_alcoholic: bool = Field(default=False)
+
+    # Relationships
+    category: "MenuCategory" = Relationship(back_populates="sub_categories")
+    menu_items: List["MenuItem"] = Relationship(back_populates="subcategory")
+
+    @classmethod
+    def from_create_schema(cls, schema: "MenuSubCategoryCreate") -> "MenuSubCategory":
+        return cls(
+            name=schema.name,
+            category_id=schema.category_id,
+            is_alcoholic=schema.is_alcoholic  # Include is_alcoholic in the model
+        )
+
+    @classmethod
+    def to_read_schema(cls, subcategory: "MenuSubCategory") -> MenuSubCategoryRead:
+        return MenuSubCategoryRead(
+            subcategory_id=subcategory.id,
+            category_id=subcategory.category_id,
+            name=subcategory.name,
+            is_alcoholic=subcategory.is_alcoholic,
+            menu_items=[MenuItem.to_read_schema(item) for item in subcategory.menu_items]
+        )
+
+#########################################################################################################
+
+class MenuCategory(SQLModel, table=True):
+    __tablename__ = "menu_category"
+    id: uuid.UUID = Field(default_factory=uuid.uuid4, primary_key=True, index=True)
+    menu_id: uuid.UUID = Field(foreign_key="menu.id", nullable=False)
+    name: str = Field(nullable=False)
+
+    # Relationships
+    menu: "Menu" = Relationship(back_populates="categories")
+    sub_categories: List["MenuSubCategory"] = Relationship(back_populates="category")
+
+    @classmethod
+    def from_create_schema(cls, schema: MenuCategoryCreate) -> "MenuCategory":
+        return cls(
+            name=schema.name,
+            menu_id=schema.menu_id
+        )
+
+    @classmethod
+    def to_read_schema(cls, category: "MenuCategory") -> MenuCategoryRead:
+        return MenuCategoryRead(
+            category_id=category.id,
+            menu_id=category.menu_id,
+            name=category.name,
+            sub_categories=[MenuSubCategory.to_read_schema(subcategory) for subcategory in category.sub_categories]
+        )
+
+#########################################################################################################
+
+class Menu(SQLModel, table=True):
+    __tablename__ = "menu"
+    id: uuid.UUID = Field(default_factory=uuid.uuid4, primary_key=True, index=True)
+    name: str = Field(nullable=False)
+    description: Optional[str] = Field(default=None)
+    menu_type: Optional[str] = Field(default=None)  # Type of menu (e.g., "Food", "Drink")
+    venue_id: uuid.UUID = Field(foreign_key="venue.id", nullable=False)
+
+    # Relationships
+    categories: List["MenuCategory"] = Relationship(back_populates="menu")
+    venue: "Venue" = Relationship(back_populates="menu")
+    
+    @classmethod
+    def from_create_schema(cls, schema: MenuCreate) -> "Menu":
+        return cls(
+            name=schema.name,
+            description=schema.description,
+            menu_type=schema.menu_type,
+            venue_id=schema.venue_id
+        )
+
+    @classmethod
+    def to_read_schema(cls, menu: "Menu") -> MenuRead:
+        return MenuRead(
+            menu_id=menu.id,
+            name=menu.name,
+            description=menu.description,
+            menu_type=menu.menu_type,
+            venue_id=menu.venue_id,
+            categories=[MenuCategory.to_read_schema(category) for category in menu.categories]
+        )
+
+#########################################################################################################

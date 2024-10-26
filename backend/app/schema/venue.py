@@ -100,3 +100,9 @@ class NightclubRead(BaseModel):
     venue: VenueRead
     class Config:
         from_attributes = True
+        
+class VenueListResponse(BaseModel):
+    nightclubs: List[NightclubRead]
+    qsrs: List[QSRRead]   
+    foodcourts: List[FoodcourtRead]
+    restaurants: List[RestaurantRead]
