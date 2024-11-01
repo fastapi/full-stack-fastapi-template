@@ -1,42 +1,50 @@
-from pydantic import BaseModel
-from typing import Optional, List
 import uuid
 from datetime import time
+
+from pydantic import BaseModel
+
 
 # Venue base details (composition)
 class VenueCreate(BaseModel):
     name: str
-    capacity: Optional[int] = None
-    description: Optional[str] = None
-    instagram_handle: Optional[str] = None
-    instagram_token: Optional[str] = None
-    mobile_number: Optional[str] = None
-    email: Optional[str] = None
-    opening_time: Optional[time] = None
-    closing_time: Optional[time] = None
-    avg_expense_for_two: Optional[float] = None
-    zomato_link: Optional[str] = None
-    swiggy_link: Optional[str] = None
-    google_map_link : Optional[str] = None
-    
+    capacity: int | None = None
+    description: str | None = None
+    instagram_handle: str | None = None
+    instagram_token: str | None = None
+    mobile_number: str | None = None
+    email: str | None = None
+    opening_time: time | None = None
+    closing_time: time | None = None
+    avg_expense_for_two: float | None = None
+    zomato_link: str | None = None
+    swiggy_link: str | None = None
+    google_map_link: str | None = None
+
+
 class FoodcourtCreate(BaseModel):
-    total_qsrs: Optional[int] = None
-    seating_capacity: Optional[int] = None
+    total_qsrs: int | None = None
+    seating_capacity: int | None = None
     venue: VenueCreate
-    class Config:
-        from_attributes = True
-class QSRCreate(BaseModel):
-    drive_thru: Optional[bool] = False
-    foodcourt_id: Optional[uuid.UUID] = None
-    venue: VenueCreate
+
     class Config:
         from_attributes = True
 
+
+class QSRCreate(BaseModel):
+    drive_thru: bool | None = False
+    foodcourt_id: uuid.UUID | None = None
+    venue: VenueCreate
+
+    class Config:
+        from_attributes = True
+
+
 # Restaurant Schemas
 class RestaurantCreate(BaseModel):
-    cuisine_type: Optional[str] = None
+    cuisine_type: str | None = None
     venue_id: uuid.UUID
     venue: VenueCreate
+
     class Config:
         from_attributes = True
 
@@ -44,7 +52,7 @@ class RestaurantCreate(BaseModel):
 # Nightclub Schemas
 class NightclubCreate(BaseModel):
     venue: VenueCreate
-    age_limit: Optional[int] = None
+    age_limit: int | None = None
 
     class Config:
         from_attributes = True
@@ -53,56 +61,64 @@ class NightclubCreate(BaseModel):
 class VenueRead(BaseModel):
     id: uuid.UUID
     name: str
-    address: Optional[str]
-    latitude: Optional[float]
-    longitude: Optional[float]
-    capacity: Optional[int]
-    description: Optional[str]
-    google_rating: Optional[float]
-    instagram_handle: Optional[str]
-    google_map_link: Optional[str]
-    mobile_number: Optional[str]
-    email: Optional[str]
-    opening_time: Optional[time]
-    closing_time: Optional[time]
-    avg_expense_for_two: Optional[float]
-    zomato_link: Optional[str]
-    swiggy_link: Optional[str]
+    address: str | None
+    latitude: float | None
+    longitude: float | None
+    capacity: int | None
+    description: str | None
+    google_rating: float | None
+    instagram_handle: str | None
+    google_map_link: str | None
+    mobile_number: str | None
+    email: str | None
+    opening_time: time | None
+    closing_time: time | None
+    avg_expense_for_two: float | None
+    zomato_link: str | None
+    swiggy_link: str | None
+
 
 class FoodcourtRead(BaseModel):
     id: uuid.UUID
-    total_qsrs: Optional[int] = None  # Specific field for foodcourt
-    seating_capacity: Optional[int] = None  # Specific to foodcourts
+    total_qsrs: int | None = None  # Specific field for foodcourt
+    seating_capacity: int | None = None  # Specific to foodcourts
     venue: VenueRead
-    qsrs: List["QSRRead"] = []  # List of QSRs in the foodcourt
+    qsrs: list["QSRRead"] = []  # list of QSRs in the foodcourt
 
     class Config:
         from_attributes = True
+
 
 class QSRRead(BaseModel):
     id: uuid.UUID
     # Add any specific fields for QSR if needed
-    foodcourt_id: Optional[uuid.UUID] = None  # Reference to the associated foodcourt
+    foodcourt_id: uuid.UUID | None = None  # Reference to the associated foodcourt
     venue: VenueRead
+
     class Config:
         from_attributes = True
 
-class RestaurantRead(BaseModel):  
+
+class RestaurantRead(BaseModel):
     id: uuid.UUID
-    cuisine_type: Optional[str] = None
+    cuisine_type: str | None = None
     venue: VenueRead
+
     class Config:
         from_attributes = True
+
 
 class NightclubRead(BaseModel):
     id: uuid.UUID
-    age_limit: Optional[int] = None
+    age_limit: int | None = None
     venue: VenueRead
+
     class Config:
         from_attributes = True
-        
+
+
 class VenueListResponse(BaseModel):
-    nightclubs: List[NightclubRead]
-    qsrs: List[QSRRead]   
-    foodcourts: List[FoodcourtRead]
-    restaurants: List[RestaurantRead]
+    nightclubs: list[NightclubRead]
+    qsrs: list[QSRRead]
+    foodcourts: list[FoodcourtRead]
+    restaurants: list[RestaurantRead]

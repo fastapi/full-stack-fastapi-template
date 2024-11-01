@@ -1,6 +1,5 @@
-from datetime import datetime
 from sqlmodel import Session, create_engine
-from app.models.user import  UserBusiness
+
 from app.core.config import settings
 
 print("SQLALCHEMY_DATABASE_URI : ", str(settings.SQLALCHEMY_DATABASE_URI))
@@ -42,7 +41,7 @@ def init_db() -> None:
         #     session.commit()
         #     print("here4")
         #     session.refresh(user_in)
-            
+
         # Other initial setup tasks can go here
         # Example: Create default Nightclub, Foodcourt, etc.
         # ...

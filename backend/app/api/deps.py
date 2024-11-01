@@ -1,12 +1,16 @@
-from app.models.auth import TokenBlacklist
-from fastapi import Depends, HTTPException, Query, status
+from collections.abc import Generator
+from typing import Annotated
+
+from fastapi import Depends, HTTPException, status
+from fastapi.security import (
+    HTTPAuthorizationCredentials,
+    HTTPBearer,
+)
 from sqlalchemy.orm import Session
-from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer, OAuth2PasswordBearer
-from app.models.user import UserPublic, UserBusiness
-from app.core.security import get_jwt_payload
-from typing import Annotated, Generator, Optional, Union
-from app.core.config import settings
+
 from app.core.db import engine
+from app.core.security import get_jwt_payload
+from app.models.user import UserBusiness, UserPublic
 
 # OAuth2PasswordBearer to extract the token from the request header
 bearer_scheme = HTTPBearer()
@@ -18,38 +22,11 @@ def get_db() -> Generator[Session, None, None]:
 
 SessionDep = Annotated[Session, Depends(get_db)]
 
-# # Check if the token is blacklisted (optional)
-# def is_token_blacklisted(session: Session, user_id: str, provided_token: str) -> bool:
-#     """
-#     Checks if the provided token is blacklisted by comparing it with the one stored in the user record.
-    
-#     Args:
-#         session (Session): SQLAlchemy session to query the database.
-#         user_id (str): The ID of the user.
-#         provided_token (str): The provided refresh token to check.
-        
-#     Returns:
-#         bool: True if the token is blacklisted (invalid), False otherwise.
-#     """
-#     # Fetch the user from the database using the user_id
-#     user = session.query(UserPublic).filter(UserPublic.id == user_id).first()
-
-#     if not user:
-#         raise HTTPException(status_code=404, detail="User not found")
-
-#     # Check if the provided token matches the stored refresh token
-#     if user.refresh_token != provided_token:
-#         # The token does not match, consider it invalid or blacklisted
-#         return True
-
-#     # If the token matches, it's not blacklisted
-#     return False
-
 # Dependency to get the current user
 async def get_current_user(
     credentials: Annotated[HTTPAuthorizationCredentials, Depends(bearer_scheme)],
     session: SessionDep
-) -> Union[UserPublic, UserBusiness]:
+) -> UserPublic | UserBusiness:
     # print('credentials.credentials ', credentials.credentials)
     try:
         print('credentials.credentials ', credentials.credentials)
@@ -87,10 +64,10 @@ async def get_current_user(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail="Could not validate credentials"
         )
-        
+
 # Dependency to get the business user
 async def get_business_user(
-    credentials: Annotated[HTTPAuthorizationCredentials, Depends(bearer_scheme)], 
+    credentials: Annotated[HTTPAuthorizationCredentials, Depends(bearer_scheme)],
     session: SessionDep
 ) -> UserBusiness:
     current_user = await get_current_user(credentials, session)
@@ -103,7 +80,7 @@ async def get_business_user(
 
 # Dependency to get the superuser
 async def get_super_user(
-    credentials: Annotated[HTTPAuthorizationCredentials, Depends(bearer_scheme)], 
+    credentials: Annotated[HTTPAuthorizationCredentials, Depends(bearer_scheme)],
     session: SessionDep
 ) -> UserBusiness:
     current_user = await get_business_user(credentials, session)
@@ -116,7 +93,7 @@ async def get_super_user(
 
 # Dependency to get any public user
 async def get_public_user(
-    credentials: Annotated[HTTPAuthorizationCredentials, Depends(bearer_scheme)], 
+    credentials: Annotated[HTTPAuthorizationCredentials, Depends(bearer_scheme)],
     session: SessionDep
 ) -> UserPublic:
     print('credentials.credentials ', credentials.credentials)

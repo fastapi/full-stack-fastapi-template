@@ -1,16 +1,23 @@
-from typing import Annotated, Union
-from app.models.auth import RefreshTokenPayload, UserAuthResponse
-from fastapi import APIRouter, Depends, FastAPI, HTTPException
-import OTPLessAuthSDK
-from app.models.user import UserBusiness, UserPublic  # Import your UserPublic model
-from app.api.deps import SessionDep, get_current_user
+import hashlib
 from datetime import datetime, timedelta, timezone
-from app.core.security import create_access_token, create_refresh_token, get_jwt_payload  # Adjust the import based on your structure
-from app.core.config import settings
-from app.models.auth import OtplessToken
-from fastapi.datastructures import QueryParams
+from typing import Annotated
+
+from fastapi import APIRouter, Depends, HTTPException
+
+from app.api.deps import SessionDep, get_current_user
+from app.core.security import (  # Adjust the import based on your structure
+    create_access_token,
+    create_refresh_token,
+    get_jwt_payload,
+)
+from app.models.auth import OtplessToken, RefreshTokenPayload, UserAuthResponse
+from app.models.user import UserBusiness, UserPublic  # Import your UserPublic model
 
 router = APIRouter()
+
+
+def generate_number_from_string(s):
+    return int(hashlib.sha256(s.encode()).hexdigest(), 16) % 10 ** 8
 
 
 @router.post("/verify_token/business", response_model=UserAuthResponse)
@@ -37,8 +44,7 @@ async def business_user_google_login(request: OtplessToken, session: SessionDep)
             # Create new user if not found
             user = UserBusiness(
                 email=email,
-                is_active=True,
-                registration_date=datetime.now(timezone.utc),
+                is_active=True
             )
             session.add(user)
             session.commit()
@@ -61,7 +67,7 @@ async def business_user_google_login(request: OtplessToken, session: SessionDep)
 
     except Exception as e:
         raise HTTPException(status_code=400, detail=str(e))
-    
+
 @router.post("/verify_token/public", response_model=UserAuthResponse)
 async def verify_token(request: OtplessToken, session: SessionDep):
     try:
@@ -74,7 +80,8 @@ async def verify_token(request: OtplessToken, session: SessionDep):
         # )
 
         # Simulated user details for demonstration
-        phone_number = "8130181469"  # Replace this with the actual phone number from the SDK response
+        # phone_number = "8130181469"  # Replace this with the actual phone number from the SDK response
+        phone_number = str(generate_number_from_string(request.otpless_token))
 
         # Check for the user by phone number
         user = session.query(UserPublic).filter(UserPublic.phone_number == phone_number).first()
@@ -83,8 +90,7 @@ async def verify_token(request: OtplessToken, session: SessionDep):
             # Create a new user if not found
             user = UserPublic(
                 phone_number=phone_number,
-                is_active=True,
-                registration_date=datetime.now(timezone.utc),
+                is_active=True
             )
             session.add(user)
             session.commit()
@@ -107,7 +113,7 @@ async def verify_token(request: OtplessToken, session: SessionDep):
 
     except Exception as e:
         raise HTTPException(status_code=400, detail=str(e))
-    
+
 
 @router.post("/refresh_token", response_model=UserAuthResponse)
 async def refresh_token(request: RefreshTokenPayload, session: SessionDep):
@@ -117,7 +123,7 @@ async def refresh_token(request: RefreshTokenPayload, session: SessionDep):
 
         # Extract the user ID (sub) from the payload
         user_id = payload.sub
-        
+
         # Fetch the user from the database using the user ID
         user = (
             session.query(UserPublic)
@@ -128,7 +134,7 @@ async def refresh_token(request: RefreshTokenPayload, session: SessionDep):
             .filter(UserBusiness.id == user_id)
             .first()
         )
-        
+
         if not user:
             raise HTTPException(status_code=404, detail="User not found")
 
@@ -163,7 +169,7 @@ async def refresh_token(request: RefreshTokenPayload, session: SessionDep):
 @router.get("/logout")
 async def logout(
     session: SessionDep,
-    current_user: Annotated[Union[UserPublic, UserBusiness], Depends(get_current_user)]):
+    current_user: Annotated[UserPublic | UserBusiness, Depends(get_current_user)]):
     try:
         # Invalidate the refresh token by setting it to None or an empty string
         current_user.refresh_token = None
@@ -174,4 +180,3 @@ async def logout(
 
     except Exception as e:
         raise HTTPException(status_code=400, detail=str(e))
-    

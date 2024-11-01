@@ -39,6 +39,9 @@ sqladmin = {extras = ["full"], version = "^0.19.0"}
 unshortenit = "^0.4.0"
 aiohttp = "^3.10.10"
 bs4 = "^0.0.2"
+selenium = "^4.25.0"
+webdriver-manager = "^4.0.2"
+autoscraper = "^1.1.14"
 
 [tool.poetry.group.dev.dependencies]
 pytest = "^7.4.3"

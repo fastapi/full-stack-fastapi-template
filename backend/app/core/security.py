@@ -1,10 +1,11 @@
+import uuid  # For generating unique token ID
 from datetime import datetime, timedelta, timezone
+
+import jwt
 from fastapi import HTTPException, status
-from jwt.exceptions import InvalidTokenError  # Import the correct exception
+
 from app.core.config import settings
 from app.models.auth import AccessToken, RefreshToken, TokenModel
-import jwt
-import uuid  # For generating unique token ID
 
 ALGORITHM = "HS256"
 
@@ -18,8 +19,6 @@ def get_jwt_payload(token: str) -> TokenModel:
 
     except jwt.ExpiredSignatureError:
         # Handle expired token
-        raise HTTPException(status_code=401, detail="Token has expired")
-    except jwt.ExpiredSignatureError:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail="Token has expired"
@@ -58,7 +57,7 @@ def create_refresh_token(subject: str) -> RefreshToken:
     expire = datetime.now(timezone.utc) + timedelta(days=settings.REFRESH_TOKEN_EXPIRE_DAYS)
     jti = str(uuid.uuid4())
     to_encode = {"sub": str(subject), "exp": expire, "jti": jti}
-    encoded_jwt = jwt.encode(to_encode, settings.SECRET_KEY, algorithm=ALGORITHM)  
+    encoded_jwt = jwt.encode(to_encode, settings.SECRET_KEY, algorithm=ALGORITHM)
 
     # Create an instance of RefreshToken with the encoded JWT and expiration time
     refresh_token = RefreshToken(

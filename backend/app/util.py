@@ -1,34 +1,42 @@
-from datetime import datetime, timezone
 import logging
 import uuid
-from app.models.user import UserBusiness, UserVenueAssociation
+from typing import TypeVar
+
 from fastapi import HTTPException
 from pydantic import BaseModel
-from sqlmodel import SQLModel, Session, select
-from typing import List, Optional, Type, TypeVar
+from sqlmodel import Session, SQLModel, select
+
+from app.models.user import UserBusiness, UserVenueAssociation
 
 # Generic CRUD function to get all records with pagination
+T = TypeVar("T", bound=SQLModel)
+
+
 def get_all_records(
-    session: Session, model: Type[SQLModel], skip: int = 0, limit: int = 10
-) -> List[SQLModel]:
+    session: Session, model: type[T], skip: int = 0, limit: int = 10
+) -> list[SQLModel]:
     """
-    Retrieve a paginated list of records.
+    Retrieve a paginated list of records as schemas.
     - **session**: Database session
     - **model**: SQLModel class (e.g., Nightclub, Restaurant, QSR, Foodcourt)
     - **skip**: Number of records to skip
     - **limit**: Number of records to return
     """
+
     try:
+        # Fetch raw model instances
         statement = select(model).offset(skip).limit(limit)
         result = session.execute(statement).scalars().all()
+
+        # Convert each record to its read schema
         return result
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=f"Error retrieving {model.__name__} records: {str(e)}")
+    except ValueError as ve:
+        # Handle errors (optional, add specific error handling as needed)
+        print(f"Error fetching records: {ve}")
+        return []
 
-# Function to get a single record by ID
-T = TypeVar('T', bound=SQLModel)
 
-def get_record_by_id(db: Session, model: Type[T], record_id: uuid.UUID) -> Optional[T]:
+def get_record_by_id(db: Session, model: type[T], record_id: uuid.UUID) -> T | None:
     """
     Generic function to retrieve a record by its ID.
 
@@ -45,14 +53,15 @@ def get_record_by_id(db: Session, model: Type[T], record_id: uuid.UUID) -> Optio
     """
     record = db.get(model, record_id)
     if not record:
-        raise HTTPException(status_code=404, detail=f"{model.__name__} with ID {record_id} not found.")
+        raise HTTPException(
+            status_code=404, detail=f"{model.__name__} with ID {record_id} not found."
+        )
     return record
+
+
 # Function to create a new record
 # Create a new record
-def create_record(
-    db: Session,
-    instance: SQLModel
-) -> SQLModel:
+def create_record(db: Session, instance: SQLModel) -> SQLModel:
     """
     Create a new record in the database with automatic timestamp management.
 
@@ -75,11 +84,8 @@ def create_record(
 
     return instance  # Return the created instance
 
-def update_record(
-    db: Session,
-    instance: SQLModel,
-    update_data: BaseModel
-) -> SQLModel:
+
+def update_record(db: Session, instance: SQLModel, update_data: BaseModel) -> SQLModel:
     """
     Update an existing record in the database, applying only the changes provided by a Pydantic model.
     This approach ensures validation of input data and prevents partial updates with invalid fields.
@@ -108,52 +114,19 @@ def update_record(
         return instance
 
     except ValueError as ve:
-        logging.error(f"Validation error: {ve}")
+        logging.error("Validation error: %s", ve)
         db.rollback()  # Undo any changes in case of failure
         raise HTTPException(status_code=400, detail=str(ve))
 
     except Exception as e:
-        logging.error(f"Unexpected error during record update: {e}")
+        logging.error("Unexpected error during record update: %s", e)
         db.rollback()  # Rollback any transaction in case of failure
-        raise HTTPException(status_code=500, detail="An internal error occurred while updating the record.")
-    
-# Partially update an existing record
-def patch_record(
-    session: Session, model: Type[SQLModel], record_id: uuid.UUID, obj_in: SQLModel
-) -> SQLModel:
-    """
-    Partially update an existing record with automatic `updated_at` timestamp.
-    - **session**: Database session
-    - **model**: SQLModel class (e.g., Nightclub, Restaurant, QSR)
-    - **record_id**: ID of the record to update
-    - **obj_in**: Partial data to update the record
-    """
-    try:
-        # Get the existing record from the database
-        obj = get_record_by_id(session, model, record_id)
+        raise HTTPException(
+            status_code=500,
+            detail="An internal error occurred while updating the record.",
+        ) from e
 
-        # Convert the incoming data
-        obj_data = obj_in.model_dump()
-        
-        # Update the fields on the object
-        for field, value in obj_data.items():
-            setattr(obj, field, value)
-        
-        # Set `updated_at` to the current time
-        obj.updated_at = datetime.utcnow()
-        
-        # Commit the changes
-        session.add(obj)
-        session.commit()
-        session.refresh(obj)
-        
-        return obj
-    except HTTPException as e:
-        raise e
-    except Exception as e:
-        session.rollback()
-        raise HTTPException(status_code=500, detail=f"Error updating {model.__name__}: {str(e)}")
-    
+
 # Function to delete a record
 def delete_record(db: Session, instance: SQLModel) -> None:
     """
@@ -165,7 +138,7 @@ def delete_record(db: Session, instance: SQLModel) -> None:
     """
     db.delete(instance)
     db.commit()
-    
+
 
 def check_user_permission(db: Session, current_user: UserBusiness, venue_id: uuid.UUID):
     """
@@ -178,21 +151,21 @@ def check_user_permission(db: Session, current_user: UserBusiness, venue_id: uui
 
     Raises:
         HTTPException: If the user does not have permission.
-    
+
     Returns:
         UserVenueAssociation: The association record if it exists.
     """
-    statement = (
-        select(UserVenueAssociation)
-        .where(
-            UserVenueAssociation.user_id == current_user.id,
-            UserVenueAssociation.venue_id == venue_id
-        )
+    statement = select(UserVenueAssociation).where(
+        UserVenueAssociation.user_id == current_user.id,
+        UserVenueAssociation.venue_id == venue_id,
     )
 
     user_venue_association = db.execute(statement).scalars().first()
 
     if user_venue_association is None:
-        raise HTTPException(status_code=403, detail="User does not have permission to manage this venue.")
+        raise HTTPException(
+            status_code=403,
+            detail="User does not have permission to manage this venue.",
+        )
 
     return user_venue_association

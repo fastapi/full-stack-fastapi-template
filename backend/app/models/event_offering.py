@@ -1,7 +1,12 @@
 import uuid
-from sqlmodel import SQLModel, Field, Relationship
-from typing import Optional
-from typing import List
+from typing import TYPE_CHECKING, Optional
+
+from sqlmodel import Field, Relationship, SQLModel
+
+if TYPE_CHECKING:
+    from app.models.event import Event
+    from app.models.event_booking import EventBooking
+
 
 # Stag, couple etc
 class EventOffering(SQLModel, table=True):
@@ -13,10 +18,12 @@ class EventOffering(SQLModel, table=True):
     description: str = Field(nullable=False)
     price: float = Field(nullable=False)
     total_guests_per_pass: int = Field(nullable=False)
-    cover_charge: Optional[float] = Field(nullable=True)
-    additional_charges: Optional[float] = Field(nullable=True)
+    cover_charge: float | None = Field(nullable=True)
+    additional_charges: float | None = Field(nullable=True)
     availability: int = Field(nullable=False)
 
     # Relationships
     event: Optional["Event"] = Relationship(back_populates="offerings")
-    event_booking: Optional["EventBooking"] = Relationship(back_populates="event_offerings")
+    event_booking: Optional["EventBooking"] = Relationship(
+        back_populates="event_offerings"
+    )
