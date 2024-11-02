@@ -62,8 +62,8 @@ class VenueRead(BaseModel):
     id: uuid.UUID
     name: str
     address: str | None
-    latitude: float | None
-    longitude: float | None
+    latitude: float
+    longitude: float
     capacity: int | None
     description: str | None
     google_rating: float | None

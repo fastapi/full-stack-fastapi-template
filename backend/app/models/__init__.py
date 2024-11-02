@@ -1,6 +1,7 @@
 from sqlmodel import SQLModel
 
 # Import all your models here
+from .carousel_poster import CarouselPoster
 from .club_visit import ClubVisit
 from .event import Event
 from .event_booking import EventBooking
@@ -49,6 +50,7 @@ __all__ = [
     "PaymentOrderQSR",
     "PaymentEvent",
     "QRCode",
+    "CarouselPoster",
 ]
 
 

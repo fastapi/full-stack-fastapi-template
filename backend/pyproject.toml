@@ -15,7 +15,7 @@ tenacity = "^8.2.3"
 pydantic = "^2.9.2"
 emails = "^0.6"
 psycopg2 = "^2.9.6"
-
+h3 = "^3.7.7"
 
 gunicorn = "^22.0.0"
 jinja2 = "^3.1.4"

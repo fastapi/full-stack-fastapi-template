@@ -1233,6 +1233,60 @@ files = [
 ]
 
 [[package]]
+name = "h3"
+version = "3.7.7"
+description = "Hierarchical hexagonal geospatial indexing system"
+optional = false
+python-versions = "*"
+files = [
+    {file = "h3-3.7.7-cp310-cp310-macosx_10_9_x86_64.whl", hash = "sha256:951ecc9da0bcd5091670b13636928747bc98bc76891da0fa725524ec017cd9de"},
+    {file = "h3-3.7.7-cp310-cp310-macosx_11_0_arm64.whl", hash = "sha256:26b9dd605541223ef927cc913deccb236cee024b16032f4a3e4387e2791479f2"},
+    {file = "h3-3.7.7-cp310-cp310-manylinux_2_17_aarch64.manylinux2014_aarch64.whl", hash = "sha256:996ebb32dc26dd607af7493149f94ce316117be6f42971f7b33bbd326ec695d2"},
+    {file = "h3-3.7.7-cp310-cp310-manylinux_2_17_x86_64.manylinux2014_x86_64.whl", hash = "sha256:fa2a4aa888cd9476788b874b4e11e178293f5b86e8461c36596bf183c242d417"},
+    {file = "h3-3.7.7-cp310-cp310-musllinux_1_1_x86_64.whl", hash = "sha256:0256e42687470c6f0044ca78fe375fe32a654be8b5a8313b4a68f52f513389c6"},
+    {file = "h3-3.7.7-cp310-cp310-win_amd64.whl", hash = "sha256:a3e2bc125490f900e0513c30480722f129bab1415f23040b6cd3a3f8d5a39336"},
+    {file = "h3-3.7.7-cp311-cp311-macosx_10_9_x86_64.whl", hash = "sha256:7d59018a50cd3b6d0ff0b18a54fdfcbaf2f79c13c831842f54fd2780c4b561ea"},
+    {file = "h3-3.7.7-cp311-cp311-macosx_11_0_arm64.whl", hash = "sha256:9e74526d941c1656fe162cc63b459b61aa83a15e257e9477b1570f26c544b51a"},
+    {file = "h3-3.7.7-cp311-cp311-manylinux_2_17_aarch64.manylinux2014_aarch64.whl", hash = "sha256:7c7398dbab685fcf3fe92f7c4c5901ab258bc66f7fa05fd1da8693375a10a549"},
+    {file = "h3-3.7.7-cp311-cp311-manylinux_2_17_x86_64.manylinux2014_x86_64.whl", hash = "sha256:6d22ea488ab5fe01c94070e9a6b3222916905a4d3f7a9d33cb2298c93fa0ffd3"},
+    {file = "h3-3.7.7-cp311-cp311-musllinux_1_1_x86_64.whl", hash = "sha256:c94836155e8169be393980fc059f06481a14dd1913bd9cba609f6f1e8864c171"},
+    {file = "h3-3.7.7-cp311-cp311-win_amd64.whl", hash = "sha256:836e74313ff55324485cd7e07783bc67df3191ec08a318035d7cd8ee0b0badab"},
+    {file = "h3-3.7.7-cp312-cp312-macosx_10_9_x86_64.whl", hash = "sha256:51c2f63ef5a57e4b18ebc9c0eb56656433e280ec45ab487a514127bb6e7d6a1f"},
+    {file = "h3-3.7.7-cp312-cp312-macosx_11_0_arm64.whl", hash = "sha256:4d6e38dea47c220d9802af8e8bebc806f9f39358aee07b736191ff21e2c9921d"},
+    {file = "h3-3.7.7-cp312-cp312-manylinux_2_17_aarch64.manylinux2014_aarch64.whl", hash = "sha256:e408342e94f558802a97bfcbe1baae2af8b1fd926ad9041d970ff9dbd0502099"},
+    {file = "h3-3.7.7-cp312-cp312-manylinux_2_17_x86_64.manylinux2014_x86_64.whl", hash = "sha256:644c3c84585aa4df62e81bc54fd305c4d6686324731de230b0ddbd7036ed172c"},
+    {file = "h3-3.7.7-cp312-cp312-musllinux_1_1_x86_64.whl", hash = "sha256:bb4a3d5e82d0c89512dc71b4eac17976a29be29da250ba76bc94bc5b9e824f0e"},
+    {file = "h3-3.7.7-cp312-cp312-win_amd64.whl", hash = "sha256:2ccff5f02589e80202597ed0b9f61ebd114e262e7dd0fe88059298602898192f"},
+    {file = "h3-3.7.7-cp36-cp36m-macosx_10_9_x86_64.whl", hash = "sha256:ef2e71b619f984e71c4bd9d128152e2c7e3e788e2d2ec571b32cef1d295ddf38"},
+    {file = "h3-3.7.7-cp36-cp36m-manylinux_2_17_x86_64.manylinux2014_x86_64.whl", hash = "sha256:8cb13f0213ed6da80e739355e5b62cfc81b7b1469af997be3384a6cbc3a1a750"},
+    {file = "h3-3.7.7-cp36-cp36m-musllinux_1_1_x86_64.whl", hash = "sha256:701f72f703d892fb17e66b9fd7b6b2ad125e135b091eb7dd0ec11858b84d84d2"},
+    {file = "h3-3.7.7-cp36-cp36m-win_amd64.whl", hash = "sha256:796622be7cb052690404c0ac03768183e51ae22505ce4a424b4537b2b7609fba"},
+    {file = "h3-3.7.7-cp37-cp37m-macosx_10_9_x86_64.whl", hash = "sha256:bcd88a72d6aa97d0f3b3b87b7bfd9725a8909501e6cb9d0057d5b690b6bb37b0"},
+    {file = "h3-3.7.7-cp37-cp37m-manylinux_2_17_aarch64.manylinux2014_aarch64.whl", hash = "sha256:a7358ba3f91193a2551c4a8d7ad7fd348e567b3a3581c9c161630029dfb23e07"},
+    {file = "h3-3.7.7-cp37-cp37m-manylinux_2_17_x86_64.manylinux2014_x86_64.whl", hash = "sha256:a8f34b204edc2e8f7d99a6db4ed1b5d202b7ea3ec6817d373ec432dee14efe04"},
+    {file = "h3-3.7.7-cp37-cp37m-musllinux_1_1_x86_64.whl", hash = "sha256:2aa0f8ce89b5e694815ee7a5172a782d58f2652267329de7008354b110b53955"},
+    {file = "h3-3.7.7-cp37-cp37m-win_amd64.whl", hash = "sha256:4c851baa1c2d4f29b01157ce2a4cdb1f3879fff5c36ff7861dad1526963a17a7"},
+    {file = "h3-3.7.7-cp38-cp38-macosx_10_9_x86_64.whl", hash = "sha256:6f3a9da5472820b0a4add342f96fe52f65fbb8f46984383885738517b38af69e"},
+    {file = "h3-3.7.7-cp38-cp38-macosx_11_0_arm64.whl", hash = "sha256:1c57da776a3c1a01e2986b1f6a31d497ee0be8fcdbaaf9b23bb90f5a90eb8f0b"},
+    {file = "h3-3.7.7-cp38-cp38-manylinux_2_17_aarch64.manylinux2014_aarch64.whl", hash = "sha256:7a5c0c0ddd9c57694ecc3b9ba99cbef2842882f8943d6edc676a365e139dbc6d"},
+    {file = "h3-3.7.7-cp38-cp38-manylinux_2_17_x86_64.manylinux2014_x86_64.whl", hash = "sha256:0c1b5a0a652719b645387231bf6d7d4dd85150e4440a4ce72a804a10e86592ae"},
+    {file = "h3-3.7.7-cp38-cp38-musllinux_1_1_x86_64.whl", hash = "sha256:64f76dc827fef94e9f43f95a1daea2e11f2ad2e8c55deac072f3d59bd62412d4"},
+    {file = "h3-3.7.7-cp38-cp38-win_amd64.whl", hash = "sha256:c993a36120d7f5607f24ba9e39caf715eaf9cd9d44f5d5660fd85e3f4e0c6bf7"},
+    {file = "h3-3.7.7-cp39-cp39-macosx_10_9_x86_64.whl", hash = "sha256:eb154d2af699870b888e10476e327c895078009d2d2a6ef2d053d7dcf0e2c270"},
+    {file = "h3-3.7.7-cp39-cp39-macosx_11_0_arm64.whl", hash = "sha256:c96ad74e246bb7638d413efa8199dd4c58ee929424a4dcaadb16365195f77f87"},
+    {file = "h3-3.7.7-cp39-cp39-manylinux_2_17_aarch64.manylinux2014_aarch64.whl", hash = "sha256:52901f14f8b6e2c82075fd52c0e70176b868f621d47b5dc93f468c510e963722"},
+    {file = "h3-3.7.7-cp39-cp39-manylinux_2_17_x86_64.manylinux2014_x86_64.whl", hash = "sha256:fa9d82a0fcc647e7bab36ab2e7a7392d141edc95d113ccf972e0fb7b0ddf80a0"},
+    {file = "h3-3.7.7-cp39-cp39-musllinux_1_1_x86_64.whl", hash = "sha256:9f4417d09acb36f0452346052f576923d6e4334bff3459f217d6278d40397424"},
+    {file = "h3-3.7.7-cp39-cp39-win_amd64.whl", hash = "sha256:7ae774cd43b057f68dc10c99e4522fa40ed6b32ab90b2df0025595ffa15e77a0"},
+    {file = "h3-3.7.7.tar.gz", hash = "sha256:33d141c3cef0725a881771fd8cb80c06a0db84a6e4ca5c647ce095ae07c61e94"},
+]
+
+[package.extras]
+all = ["flake8", "numpy", "pylint", "pytest", "pytest-cov"]
+numpy = ["numpy"]
+test = ["flake8", "pylint", "pytest", "pytest-cov"]
+
+[[package]]
 name = "hiredis"
 version = "3.0.0"
 description = "Python wrapper for hiredis"
@@ -2953,7 +3007,7 @@ files = [
 [[package]]
 name = "sortedcontainers"
 version = "2.4.0"
-description = "Sorted Containers -- Sorted list, Sorted Dict, Sorted Set"
+description = "Sorted Containers -- Sorted List, Sorted Dict, Sorted Set"
 optional = false
 python-versions = "*"
 files = [
@@ -3689,4 +3743,4 @@ propcache = ">=0.2.0"
 [metadata]
 lock-version = "2.0"
 python-versions = "^3.10"
-content-hash = "b4928f406ec773720ee75b07d0f5b824a7e93d20dba0e6366c779efc02c87848"
+content-hash = "d337d313741d3aa3b36d4dd7d2761cdc6165ff5b0ce547bf479e9fc76aac03d4"

@@ -7,6 +7,7 @@ from sqlmodel import Field, Relationship
 from app.models.base_model import BaseTimeModel
 
 if TYPE_CHECKING:
+    from app.models.carousel_poster import CarouselPoster
     from app.models.club_visit import ClubVisit
     from app.models.event import Event
     from app.models.group import Group
@@ -15,6 +16,7 @@ if TYPE_CHECKING:
     from app.models.pickup_location import PickupLocation
     from app.models.qrcode import QRCode
     from app.models.user import UserVenueAssociation
+
 from app.schema.venue import (
     FoodcourtCreate,
     FoodcourtRead,
@@ -36,8 +38,8 @@ class Venue(BaseTimeModel, table=True):
     )  # Missing id field
     name: str = Field(nullable=False, index=True)
     address: str | None = Field(default=None)
-    latitude: float | None = Field(default=None)
-    longitude: float | None = Field(default=None)
+    latitude: float  = Field(default=0)
+    longitude: float  = Field(default=0)
     capacity: int | None = Field(default=None)
     description: str | None = Field(default=None)
     google_rating: float | None = Field(default=None)
@@ -56,12 +58,14 @@ class Venue(BaseTimeModel, table=True):
     qrcode: list["QRCode"] = Relationship(back_populates="venue")
     menu: list["Menu"] = Relationship(back_populates="venue")
     pickup_locations: list["PickupLocation"] = Relationship(back_populates="venue")
+    carousel_posters: list["CarouselPoster"] | None = Relationship(back_populates="venue")
 
     # Back-references for specific venue types
     foodcourt: Optional["Foodcourt"] = Relationship(back_populates="venue")
     qsr: Optional["QSR"] = Relationship(back_populates="venue")
     restaurant: Optional["Restaurant"] = Relationship(back_populates="venue")
     nightclub: Optional["Nightclub"] = Relationship(back_populates="venue")
+    events: list["Event"] = Relationship(back_populates="venue")
 
     @classmethod
     def from_create_schema(cls, venue_create: VenueCreate) -> "Venue":
@@ -206,7 +210,6 @@ class Nightclub(BaseTimeModel, table=True):
     venue_id: uuid.UUID = Field(foreign_key="venue.id", nullable=False, index=True)
     age_limit: int | None = Field(default=None)
     # Relationships
-    events: list["Event"] = Relationship(back_populates="nightclub")
     club_visits: list["ClubVisit"] = Relationship(back_populates="nightclub")
     orders: list["NightclubOrder"] = Relationship(back_populates="nightclub")
     group: list["Group"] = Relationship(back_populates="nightclubs")

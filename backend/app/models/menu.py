@@ -1,7 +1,9 @@
 import uuid
 from typing import TYPE_CHECKING, Optional
 
-from sqlmodel import Field, Relationship, SQLModel
+from sqlmodel import Field, Relationship
+
+from app.models.base_model import BaseTimeModel
 
 if TYPE_CHECKING:
     from app.models.venue import Venue
@@ -18,7 +20,7 @@ from app.schema.menu import (
 )
 
 
-class MenuItem(SQLModel, table=True):
+class MenuItem(BaseTimeModel, table=True):
     __tablename__ = "menu_item"
     id: uuid.UUID = Field(default_factory=uuid.uuid4, primary_key=True, index=True)
     subcategory_id: uuid.UUID = Field(foreign_key="menu_subcategory.id", nullable=False)
@@ -67,7 +69,7 @@ class MenuItem(SQLModel, table=True):
 #########################################################################################################
 
 
-class MenuSubCategory(SQLModel, table=True):
+class MenuSubCategory(BaseTimeModel, table=True):
     __tablename__ = "menu_subcategory"
     id: uuid.UUID = Field(default_factory=uuid.uuid4, primary_key=True, index=True)
     category_id: uuid.UUID = Field(foreign_key="menu_category.id", nullable=False)
@@ -100,7 +102,7 @@ class MenuSubCategory(SQLModel, table=True):
 #########################################################################################################
 
 
-class MenuCategory(SQLModel, table=True):
+class MenuCategory(BaseTimeModel, table=True):
     __tablename__ = "menu_category"
     id: uuid.UUID = Field(default_factory=uuid.uuid4, primary_key=True, index=True)
     menu_id: uuid.UUID = Field(foreign_key="menu.id", nullable=False)
@@ -129,7 +131,7 @@ class MenuCategory(SQLModel, table=True):
 #########################################################################################################
 
 
-class Menu(SQLModel, table=True):
+class Menu(BaseTimeModel, table=True):
     __tablename__ = "menu"
     id: uuid.UUID = Field(default_factory=uuid.uuid4, primary_key=True, index=True)
     name: str = Field(nullable=False)
@@ -150,7 +152,6 @@ class Menu(SQLModel, table=True):
             venue_id=schema.venue_id,
         )
 
-    @classmethod
     def to_read_schema(self) -> MenuRead:
         return MenuRead(
             menu_id=self.id,
