@@ -56,6 +56,10 @@ class Settings(BaseSettings):
     POSTGRES_USER: str
     POSTGRES_PASSWORD: str = ""
     POSTGRES_DB: str = ""
+    GOOGLE_API_KEY: str
+    GOOGLE_REVERSE_GEOCODE_URL: str
+    GOOGLE_PLACES_URL: str
+    GOOGLE_PLACE_DETAILS_URL: str
 
     @computed_field  # type: ignore[prop-decorator]
     @property
