@@ -19,7 +19,9 @@ def user_authentication_headers(
     return headers
 
 
-def create_user(db: Session, *, email: str = None, password: str = None) -> User:
+def create_user(
+    db: Session, *, email: str | None = None, password: str | None = None
+) -> User:
     if email is None:
         email = random_email()
     if password is None:

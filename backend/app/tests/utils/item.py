@@ -6,7 +6,7 @@ from app.tests.utils.user import create_random_user
 from app.tests.utils.utils import random_lower_string
 
 
-def create_random_item(db: Session, user: User = None) -> Item:
+def create_random_item(db: Session, user: User | None = None) -> Item:
     if user is None:
         user = create_random_user(db)
     owner_id = user.id

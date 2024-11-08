@@ -105,7 +105,7 @@ def test_reset_password(
 
 
 def test_reset_password_no_such_user_email(
-    client: TestClient, superuser_token_headers: dict[str, str], db: Session
+    client: TestClient, superuser_token_headers: dict[str, str]
 ) -> None:
     token = generate_password_reset_token(email="bad@email.com")
     data = {"new_password": "changethis", "token": token}
