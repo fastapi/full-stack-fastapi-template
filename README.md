@@ -212,6 +212,12 @@ The input variables, with their default values (some auto generated) are:
 - `postgres_password`: (default: `"changethis"`) The password for the PostgreSQL database, stored in .env, you can generate one with the method above.
 - `sentry_dsn`: (default: "") The DSN for Sentry, if you are using it, you can set it later in .env.
 
+## Development
+
+General development docs: [development.md](./development.md).
+
+This includes using Docker Compose, custom local domains, `.env` configurations, etc.
+
 ## Backend Development
 
 Backend docs: [backend/README.md](./backend/README.md).
@@ -223,12 +229,6 @@ Frontend docs: [frontend/README.md](./frontend/README.md).
 ## Deployment
 
 Deployment docs: [deployment.md](./deployment.md).
-
-## Development
-
-General development docs: [development.md](./development.md).
-
-This includes using Docker Compose, custom local domains, `.env` configurations, etc.
 
 ## Release Notes
 
