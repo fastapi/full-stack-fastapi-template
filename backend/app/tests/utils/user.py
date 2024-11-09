@@ -19,6 +19,18 @@ def user_authentication_headers(
     return headers
 
 
+def create_user(
+    db: Session, *, email: str | None = None, password: str | None = None
+) -> User:
+    if email is None:
+        email = random_email()
+    if password is None:
+        password = random_lower_string()
+    user_in = UserCreate(email=email, password=password)
+    user = crud.create_user(session=db, user_create=user_in)
+    return user
+
+
 def create_random_user(db: Session) -> User:
     email = random_email()
     password = random_lower_string()

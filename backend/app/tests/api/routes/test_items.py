@@ -4,6 +4,7 @@ from fastapi.testclient import TestClient
 from sqlmodel import Session
 
 from app.core.config import settings
+from app.models import User
 from app.tests.utils.item import create_random_item
 
 
@@ -73,6 +74,22 @@ def test_read_items(
     response = client.get(
         f"{settings.API_V1_STR}/items/",
         headers=superuser_token_headers,
+    )
+    assert response.status_code == 200
+    content = response.json()
+    assert len(content["data"]) >= 2
+
+
+def test_read_items_by_normal_user(
+    client: TestClient, normal_user_token_headers: dict[str, str], db: Session
+) -> None:
+    r = client.get(f"{settings.API_V1_STR}/users/me", headers=normal_user_token_headers)
+    user = User(**r.json())
+    create_random_item(db, user)
+    create_random_item(db, user)
+    response = client.get(
+        f"{settings.API_V1_STR}/items/",
+        headers=normal_user_token_headers,
     )
     assert response.status_code == 200
     content = response.json()

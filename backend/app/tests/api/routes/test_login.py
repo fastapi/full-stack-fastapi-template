@@ -5,7 +5,9 @@ from sqlmodel import Session, select
 
 from app.core.config import settings
 from app.core.security import verify_password
-from app.models import User
+from app.crud import update_user
+from app.models import User, UserUpdate
+from app.tests.utils.user import create_user
 from app.utils import generate_password_reset_token
 
 
@@ -19,6 +21,20 @@ def test_get_access_token(client: TestClient) -> None:
     assert r.status_code == 200
     assert "access_token" in tokens
     assert tokens["access_token"]
+
+
+def test_get_access_token_inactive_user(client: TestClient, db: Session) -> None:
+    password = "secretpassword"
+    user = create_user(db, password=password)
+    update_user(session=db, db_user=user, user_in=UserUpdate(is_active=False))
+
+    login_data = {
+        "username": user.email,
+        "password": password,
+    }
+    r = client.post(f"{settings.API_V1_STR}/login/access-token", data=login_data)
+    assert r.status_code == 400
+    assert r.json() == {"detail": "Inactive user"}
 
 
 def test_get_access_token_incorrect_password(client: TestClient) -> None:
@@ -86,6 +102,39 @@ def test_reset_password(
     user = db.exec(user_query).first()
     assert user
     assert verify_password(data["new_password"], user.hashed_password)
+
+
+def test_reset_password_no_such_user_email(
+    client: TestClient, superuser_token_headers: dict[str, str]
+) -> None:
+    token = generate_password_reset_token(email="bad@email.com")
+    data = {"new_password": "changethis", "token": token}
+    r = client.post(
+        f"{settings.API_V1_STR}/reset-password/",
+        headers=superuser_token_headers,
+        json=data,
+    )
+    assert r.status_code == 404
+    assert r.json() == {
+        "detail": "The user with this email does not exist in the system."
+    }
+
+
+def test_reset_password_inactive_user(
+    client: TestClient, superuser_token_headers: dict[str, str], db: Session
+) -> None:
+    email = "demo@email.com"
+    user = create_user(db, email=email)
+    update_user(session=db, db_user=user, user_in=UserUpdate(is_active=False))
+    token = generate_password_reset_token(email=email)
+    data = {"new_password": "changethis", "token": token}
+    r = client.post(
+        f"{settings.API_V1_STR}/reset-password/",
+        headers=superuser_token_headers,
+        json=data,
+    )
+    assert r.status_code == 400
+    assert r.json() == {"detail": "Inactive user"}
 
 
 def test_reset_password_invalid_token(
