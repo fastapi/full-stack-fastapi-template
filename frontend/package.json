@@ -23,9 +23,12 @@
     "framer-motion": "10.16.16",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
+    "react-dropzone": "^14.2.3",
     "react-error-boundary": "^4.0.13",
     "react-hook-form": "7.49.3",
-    "react-icons": "5.0.1"
+    "react-icons": "5.0.1",
+    "react-leaflet": "^4.2.1",
+    "leaflet": "^1.9.4"
   },
   "devDependencies": {
     "@biomejs/biome": "1.6.1",
@@ -39,6 +42,7 @@
     "@vitejs/plugin-react-swc": "^3.5.0",
     "dotenv": "^16.4.5",
     "typescript": "^5.2.2",
-    "vite": "^5.0.13"
+    "vite": "^5.0.13",
+    "@types/leaflet": "^1.9.3"
   }
 }

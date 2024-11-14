@@ -1,6 +1,6 @@
 services:
   db:
-    image: postgres:12
+    image: postgis/postgis:12-3.1
     restart: always
     volumes:
       - app-db-data:/var/lib/postgresql/data/pgdata

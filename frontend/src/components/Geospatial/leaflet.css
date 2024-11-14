@@ -1,0 +1,15 @@
+/* leaflet.css */
+.leaflet-container {
+  height: 100%;
+  width: 100%;
+  position: relative;
+  z-index: 0;
+}
+
+/* Ensure the map section fills the container's available space */
+.map-section {
+  flex: 1;
+  height: 100%;
+  overflow: hidden;
+  position: relative;
+}

@@ -462,6 +462,24 @@ testing = ["covdefaults (>=2.3)", "coverage (>=7.3.2)", "diff-cover (>=8.0.1)", 
 typing = ["typing-extensions (>=4.8)"]
 
 [[package]]
+name = "geoalchemy2"
+version = "0.15.2"
+description = "Using SQLAlchemy with Spatial Databases"
+optional = false
+python-versions = ">=3.7"
+files = [
+    {file = "GeoAlchemy2-0.15.2-py3-none-any.whl", hash = "sha256:546455dc39f5bcdfc5b871e57d3f7546c8a6f798eb364c474200f488ace6fd32"},
+    {file = "geoalchemy2-0.15.2.tar.gz", hash = "sha256:3af0272db927373e74ee3b064cdc9464ba08defdb945c51745db1b841482f5dc"},
+]
+
+[package.dependencies]
+packaging = "*"
+SQLAlchemy = ">=1.4"
+
+[package.extras]
+shapely = ["Shapely (>=1.7)"]
+
+[[package]]
 name = "greenlet"
 version = "3.0.3"
 description = "Lightweight in-process concurrent programming"
@@ -2081,4 +2099,4 @@ files = [
 [metadata]
 lock-version = "2.0"
 python-versions = "^3.10"
-content-hash = "7ec220bee66b5bc207f9a8b2f4ca9100da0213bb9d0a407b51cac3dc8201e97c"
+content-hash = "1f03ecea4f81784139fa92435abac0cebcb6c54f0b995618ad09f93f53d1cc45"
