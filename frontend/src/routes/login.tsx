@@ -38,7 +38,7 @@ export const Route = createFileRoute("/login")({
 
 function Login() {
   const [show, setShow] = useBoolean()
-  const { loginMutation, error, resetError } = useAuth()
+  const { loginMutation, errorSetter, resetError } = useAuth()
   const {
     register,
     handleSubmit,
@@ -84,7 +84,7 @@ function Login() {
           alignSelf="center"
           mb={4}
         />
-        <FormControl id="username" isInvalid={!!errors.username || !!error}>
+        <FormControl id="username" isInvalid={!!errors.username || !!errorSetter}>
           <Input
             id="username"
             {...register("username", {
@@ -99,7 +99,7 @@ function Login() {
             <FormErrorMessage>{errors.username.message}</FormErrorMessage>
           )}
         </FormControl>
-        <FormControl id="password" isInvalid={!!error}>
+        <FormControl id="password" isInvalid={!!errorSetter}>
           <InputGroup>
             <Input
               {...register("password", {
@@ -124,7 +124,7 @@ function Login() {
               </Icon>
             </InputRightElement>
           </InputGroup>
-          {error && <FormErrorMessage>{error}</FormErrorMessage>}
+          {errorSetter && <FormErrorMessage>{errorSetter}</FormErrorMessage>}
         </FormControl>
         <Link as={RouterLink} to="/recover-password" color="blue.500">
           Forgot password?

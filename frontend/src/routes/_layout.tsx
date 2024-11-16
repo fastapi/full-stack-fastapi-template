@@ -1,3 +1,5 @@
+import { useEffect } from 'react'
+
 import { Flex, Spinner } from "@chakra-ui/react"
 import { Outlet, createFileRoute, redirect } from "@tanstack/react-router"
 
@@ -17,7 +19,13 @@ export const Route = createFileRoute("/_layout")({
 })
 
 function Layout() {
-  const { isLoading } = useAuth()
+  const { isLoading, error, errorUpdateCount, logout } = useAuth()
+  useEffect(() => {
+    if (errorUpdateCount && error?.message === "Forbidden") {
+      console.log("____Unauth____logout");
+      logout();
+    }
+  }, [errorUpdateCount, error, logout]);
 
   return (
     <Flex maxW="large" h="auto" position="relative">
