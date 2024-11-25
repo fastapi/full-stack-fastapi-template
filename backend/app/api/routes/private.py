@@ -13,7 +13,7 @@ from app.models import (
 router = APIRouter(tags=["private"])
 
 
-class UserCreate(BaseModel):
+class PrivateUserCreate(BaseModel):
     email: str
     password: str
     full_name: str
@@ -21,7 +21,7 @@ class UserCreate(BaseModel):
 
 
 @router.post("/users/", response_model=UserPublic)
-def create_user(user_in: UserCreate, session: SessionDep) -> Any:
+def create_user(user_in: PrivateUserCreate, session: SessionDep) -> Any:
     """
     Create a new user.
     """
