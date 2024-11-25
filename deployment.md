@@ -1,5 +1,7 @@
 # FastAPI Project - Deployment
 
+[中文](./README.CN.md)
+
 You can deploy the project using Docker Compose to a remote server.
 
 This project expects you to have a Traefik proxy handling communication to the outside world and HTTPS certificates.

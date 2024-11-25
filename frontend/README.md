@@ -1,5 +1,7 @@
 # FastAPI Project - Frontend
 
+[中文](./README.CN.md)
+
 The frontend is built with [Vite](https://vitejs.dev/), [React](https://reactjs.org/), [TypeScript](https://www.typescriptlang.org/), [TanStack Query](https://tanstack.com/query), [TanStack Router](https://tanstack.com/router) and [Chakra UI](https://chakra-ui.com/).
 
 ## Frontend development

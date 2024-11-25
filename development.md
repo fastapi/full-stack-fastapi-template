@@ -1,5 +1,7 @@
 # FastAPI Project - Development
 
+[中文](./README.CN.md)
+
 ## Docker Compose
 
 * Start the local stack with Docker Compose:

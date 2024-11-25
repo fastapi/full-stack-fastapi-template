@@ -1,5 +1,7 @@
 # FastAPI Project - Backend
 
+[中文](./README.CN.md)
+
 ## Requirements
 
 * [Docker](https://www.docker.com/).
