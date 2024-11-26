@@ -120,3 +120,4 @@ class Settings(BaseSettings):
 
 
 settings = Settings()  # type: ignore
+

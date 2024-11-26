@@ -40,6 +40,7 @@ jobs:
       env:
         VIRTUAL_ENV: backend/.venv
         ENVIRONMENT: production
+        SECRET_KEY: just-for-generating-client
     - name: Add changes to git
       run: |
         git config --local user.email "github-actions@github.com"
