@@ -69,6 +69,7 @@ jobs:
     - run: uv run bash scripts/generate-client.sh
       env:
         VIRTUAL_ENV: backend/.venv
+        ENVIRONMENT: local
     - run: npm ci
       working-directory: frontend
     - run: docker compose build
