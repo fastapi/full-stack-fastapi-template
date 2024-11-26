@@ -66,12 +66,11 @@ jobs:
         enable-cache: true
     - run: uv sync
       working-directory: backend
+    - run: npm ci
+      working-directory: frontend
     - run: uv run bash scripts/generate-client.sh
       env:
         VIRTUAL_ENV: backend/.venv
-        ENVIRONMENT: local
-    - run: npm ci
-      working-directory: frontend
     - run: docker compose build
     - run: docker compose down -v --remove-orphans
     - name: Run Playwright tests
