@@ -70,7 +70,7 @@ jobs:
       env:
         VIRTUAL_ENV: backend/.venv
     - run: npm ci
-        working-directory: frontend
+      working-directory: frontend
     - run: docker compose build
     - run: docker compose down -v --remove-orphans
     - name: Run Playwright tests
