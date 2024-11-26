@@ -39,6 +39,7 @@ jobs:
     - run: uv run bash scripts/generate-client.sh
       env:
         VIRTUAL_ENV: backend/.venv
+        ENVIRONMENT: production
     - name: Add changes to git
       run: |
         git config --local user.email "github-actions@github.com"
