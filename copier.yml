@@ -46,10 +46,10 @@ emails_from_email:
   help: The email account to send emails from, you can set it later in .env
   default: info@example.com
 
-postgres_password:
+mysql_password:
   type: str
   help: |
-    'The password for the PostgreSQL database, stored in .env,
+    'The password for the MySQL database, stored in .env,
     you can generate one with:
     python -c "import secrets; print(secrets.token_urlsafe(32))"'
   default: changethis

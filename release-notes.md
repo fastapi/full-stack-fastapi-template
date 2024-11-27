@@ -31,6 +31,12 @@
 * 👷 Tweak generate client to error out if there are errors. PR [#1377](https://github.com/fastapi/full-stack-fastapi-template/pull/1377) by [@tiangolo](https://github.com/tiangolo).
 * 👷 Generate and commit client only on same repo PRs, on forks, show the error. PR [#1376](https://github.com/fastapi/full-stack-fastapi-template/pull/1376) by [@tiangolo](https://github.com/tiangolo).
 
+## 0.7.1-mysql
+
+### Highlights
+
+* Migrate from PostgreSQL 12 to MySQL 8.
+
 ## 0.7.1
 
 ### Highlights
