@@ -21,5 +21,6 @@
     "noFallthroughCasesInSwitch": true
   },
   "include": ["src/**/*.ts", "tests/**/*.ts", "playwright.config.ts"],
+  "exclude": ["tests/utils/privateApi.ts"],
   "references": [{ "path": "./tsconfig.node.json" }]
 }
