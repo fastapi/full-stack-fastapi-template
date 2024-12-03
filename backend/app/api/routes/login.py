@@ -1,22 +1,18 @@
 from datetime import timedelta
 from typing import Annotated, Any
 
-from fastapi import APIRouter, Depends, HTTPException
-from fastapi.responses import HTMLResponse
-from fastapi.security import OAuth2PasswordRequestForm
-
 from app import crud
 from app.api.deps import CurrentUser, SessionDep, get_current_active_superuser
 from app.core import security
 from app.core.config import settings
 from app.core.security import get_password_hash
 from app.models import Message, NewPassword, Token, UserPublic
-from app.utils import (
-    generate_password_reset_token,
-    generate_reset_password_email,
-    send_email,
-    verify_password_reset_token,
-)
+from app.utils import (generate_password_reset_token,
+                       generate_reset_password_email, send_email,
+                       verify_password_reset_token)
+from fastapi import APIRouter, Depends, HTTPException
+from fastapi.responses import HTMLResponse
+from fastapi.security import OAuth2PasswordRequestForm
 
 router = APIRouter(tags=["login"])
 
@@ -86,15 +82,16 @@ def reset_password(session: SessionDep, body: NewPassword) -> Message:
     user = crud.get_user_by_email(session=session, email=email)
     if not user:
         raise HTTPException(
-            status_code=404,
-            detail="The user with this email does not exist in the system.",
+            status_code=404, detail="The user with this email does not exist."
         )
-    elif not user.is_active:
+    if not user.is_active:
         raise HTTPException(status_code=400, detail="Inactive user")
-    hashed_password = get_password_hash(password=body.new_password)
-    user.hashed_password = hashed_password
-    session.add(user)
-    session.commit()
+
+    crud.update_user(
+        session=session,
+        db_user=user,
+        user_in={"password": body.new_password},
+    )
     return Message(message="Password updated successfully")
 
 
