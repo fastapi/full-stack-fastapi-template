@@ -112,3 +112,27 @@ class TokenPayload(SQLModel):
 class NewPassword(SQLModel):
     token: str
     new_password: str = Field(min_length=8, max_length=40)
+
+class TodoBase(SQLModel):
+    title: str = Field(min_length=1, max_length=255)
+    desc: str | None = Field(default=None, max_length=255)
+
+# Table Todo
+class Todo(TodoBase, table=True):
+    id: uuid.UUID = Field(default_factory=uuid.uuid4, primary_key=True)
+    title: str = Field(max_length=255)
+    desc: str | None = Field(default=None, max_length=255)
+    user_id: uuid.UUID = Field(
+        foreign_key="user.id", nullable=False, ondelete="CASCADE"
+    )
+    status: str = Field(max_length=20)
+
+# Table SubTodo
+class SubTodo(TodoBase, table=True):
+    id: uuid.UUID = Field(default_factory=uuid.uuid4, primary_key=True)
+    title: str = Field(max_length=255)
+    desc: str | None = Field(default=None, max_length=255)
+    todo_id: uuid.UUID = Field(
+        foreign_key="todo.id", nullable=False, ondelete="CASCADE"
+    )
+    status: str = Field(max_length=20)
