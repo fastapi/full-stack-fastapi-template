@@ -131,7 +131,7 @@ class Todo(TodoBase, table=True):
     owner_id: uuid.UUID = Field(
         foreign_key="user.id", nullable=False, ondelete="CASCADE"
     )
-    status: str = Field(max_length=255)
+    status: str = Field(default="in_progress", max_length=255)
     owner: User | None = Relationship(back_populates="todos")
     subtodos: list["SubTodo"] = Relationship(back_populates="todo")
 
@@ -142,12 +142,12 @@ class TodoCreate(TodoBase):
 class TodoUpdate(TodoBase):
     title: str | None = Field(default=None, min_length=1, max_length=255)  # type: ignore
     desc: str | None = Field(default=None, max_length=255)
-    status: str = Field(max_length=255)
+    status: str | None = Field(default=None, max_length=255)
 
 class TodoPublic(TodoBase):
     id: uuid.UUID
     owner_id: uuid.UUID
-    status: StatusEnum
+    status: str
 
 class TodosPublic(SQLModel):
     data: list[TodoPublic]
@@ -158,27 +158,28 @@ class SubTodoBase(SQLModel):
     title: str = Field(min_length=1, max_length=255)
     desc: str = Field(max_length=255)
 
+
 class SubTodo(SubTodoBase, table=True):
     id: uuid.UUID = Field(default_factory=uuid.uuid4, primary_key=True)
     todo_id: uuid.UUID = Field(
         foreign_key="todo.id", nullable=False, ondelete="CASCADE"
     )
-    status: str = Field(max_length=255)
+    status: str = Field(default="in_progress", max_length=255)
     todo: Todo | None = Relationship(back_populates="subtodos")
 
 class SubTodoCreate(SubTodoBase):
-    pass
+    todo_id: uuid.UUID
 
 # Properties to receive on item update
 class SubTodoUpdate(SubTodoBase):
     title: str | None = Field(default=None, min_length=1, max_length=255)  # type: ignore
     desc: str | None = Field(default=None, max_length=255)
-    status: StatusEnum | None = Field(default=None)
+    status: str | None = Field(default=None, max_length=255)
     
 class SubTodoPublic(SubTodoBase):
     id: uuid.UUID
     todo_id: uuid.UUID
-    status: StatusEnum  
+    status: str
 
 class SubTodosPublic(SQLModel):
     data: list[SubTodoPublic]
