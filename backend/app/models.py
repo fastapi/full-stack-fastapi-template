@@ -1,4 +1,5 @@
 import uuid
+from enum import Enum
 
 from pydantic import EmailStr
 from sqlmodel import Field, Relationship, SQLModel
@@ -44,6 +45,7 @@ class User(UserBase, table=True):
     id: uuid.UUID = Field(default_factory=uuid.uuid4, primary_key=True)
     hashed_password: str
     items: list["Item"] = Relationship(back_populates="owner", cascade_delete=True)
+    todos: list["Todo"] = Relationship(back_populates="owner", cascade_delete=True)
 
 
 # Properties to return via API, id is always required
@@ -113,26 +115,71 @@ class NewPassword(SQLModel):
     token: str
     new_password: str = Field(min_length=8, max_length=40)
 
+# Shared properties
+class StatusEnum(str, Enum):
+    pending = "pending"
+    completed = "completed"
+    in_progress = "in_progress"
+    
 class TodoBase(SQLModel):
     title: str = Field(min_length=1, max_length=255)
-    desc: str | None = Field(default=None, max_length=255)
+    desc: str = Field(max_length=255)
 
 # Table Todo
 class Todo(TodoBase, table=True):
     id: uuid.UUID = Field(default_factory=uuid.uuid4, primary_key=True)
-    title: str = Field(max_length=255)
-    desc: str | None = Field(default=None, max_length=255)
-    user_id: uuid.UUID = Field(
+    owner_id: uuid.UUID = Field(
         foreign_key="user.id", nullable=False, ondelete="CASCADE"
     )
-    status: str = Field(max_length=20)
+    status: str = Field(max_length=255)
+    owner: User | None = Relationship(back_populates="todos")
+    subtodos: list["SubTodo"] = Relationship(back_populates="todo")
+
+class TodoCreate(TodoBase):
+    pass
+
+# Properties to receive on item update
+class TodoUpdate(TodoBase):
+    title: str | None = Field(default=None, min_length=1, max_length=255)  # type: ignore
+    desc: str | None = Field(default=None, max_length=255)
+    status: str = Field(max_length=255)
+
+class TodoPublic(TodoBase):
+    id: uuid.UUID
+    owner_id: uuid.UUID
+    status: StatusEnum
+
+class TodosPublic(SQLModel):
+    data: list[TodoPublic]
+    count: int
 
 # Table SubTodo
-class SubTodo(TodoBase, table=True):
+class SubTodoBase(SQLModel):
+    title: str = Field(min_length=1, max_length=255)
+    desc: str = Field(max_length=255)
+
+class SubTodo(SubTodoBase, table=True):
     id: uuid.UUID = Field(default_factory=uuid.uuid4, primary_key=True)
-    title: str = Field(max_length=255)
-    desc: str | None = Field(default=None, max_length=255)
     todo_id: uuid.UUID = Field(
         foreign_key="todo.id", nullable=False, ondelete="CASCADE"
     )
-    status: str = Field(max_length=20)
+    status: str = Field(max_length=255)
+    todo: Todo | None = Relationship(back_populates="subtodos")
+
+class SubTodoCreate(SubTodoBase):
+    pass
+
+# Properties to receive on item update
+class SubTodoUpdate(SubTodoBase):
+    title: str | None = Field(default=None, min_length=1, max_length=255)  # type: ignore
+    desc: str | None = Field(default=None, max_length=255)
+    status: StatusEnum | None = Field(default=None)
+    
+class SubTodoPublic(SubTodoBase):
+    id: uuid.UUID
+    todo_id: uuid.UUID
+    status: StatusEnum  
+
+class SubTodosPublic(SQLModel):
+    data: list[SubTodoPublic]
+    count: int
