@@ -4,16 +4,16 @@ import type { CancelablePromise } from "./core/CancelablePromise"
 import { OpenAPI } from "./core/OpenAPI"
 import { request as __request } from "./core/request"
 import type {
-  ItemsReadItemsData,
-  ItemsReadItemsResponse,
-  ItemsCreateItemData,
-  ItemsCreateItemResponse,
-  ItemsReadItemData,
-  ItemsReadItemResponse,
-  ItemsUpdateItemData,
-  ItemsUpdateItemResponse,
-  ItemsDeleteItemData,
-  ItemsDeleteItemResponse,
+  TodosReadTodosData,
+  TodosReadTodosResponse,
+  TodosCreateTodoData,
+  TodosCreateTodoResponse,
+  TodosReadTodoData,
+  TodosReadTodoResponse,
+  TodosUpdateTodoData,
+  TodosUpdateTodoResponse,
+  TodosDeleteTodoData,
+  TodosDeleteTodoResponse,
   LoginLoginAccessTokenData,
   LoginLoginAccessTokenResponse,
   LoginTestTokenResponse,
@@ -46,9 +46,9 @@ import type {
   UtilsHealthCheckResponse,
 } from "./types.gen"
 
-export class ItemsService {
+export class TodosService {
   /**
-   * Read Items
+   * Read Todos
    * Retrieve items.
    * @param data The data for the request.
    * @param data.skip
@@ -56,12 +56,12 @@ export class ItemsService {
    * @returns ItemsPublic Successful Response
    * @throws ApiError
    */
-  public static readItems(
-    data: ItemsReadItemsData = {},
-  ): CancelablePromise<ItemsReadItemsResponse> {
+  public static readTodos(
+    data: TodosReadTodosData = {},
+  ): CancelablePromise<TodosReadTodosResponse> {
     return __request(OpenAPI, {
       method: "GET",
-      url: "/api/v1/items/",
+      url: "/api/v1/todos/",
       query: {
         skip: data.skip,
         limit: data.limit,
@@ -73,19 +73,19 @@ export class ItemsService {
   }
 
   /**
-   * Create Item
-   * Create new item.
+   * Create Todo
+   * Create new todo.
    * @param data The data for the request.
    * @param data.requestBody
-   * @returns ItemPublic Successful Response
+   * @returns TodoPublic Successful Response
    * @throws ApiError
    */
-  public static createItem(
-    data: ItemsCreateItemData,
-  ): CancelablePromise<ItemsCreateItemResponse> {
+  public static createTodo(
+    data: TodosCreateTodoData,
+  ): CancelablePromise<TodosCreateTodoResponse> {
     return __request(OpenAPI, {
       method: "POST",
-      url: "/api/v1/items/",
+      url: "/api/v1/todos/",
       body: data.requestBody,
       mediaType: "application/json",
       errors: {
@@ -95,19 +95,19 @@ export class ItemsService {
   }
 
   /**
-   * Read Item
-   * Get item by ID.
+   * Read Todo
+   * Get todo by ID.
    * @param data The data for the request.
    * @param data.id
-   * @returns ItemPublic Successful Response
+   * @returns TodoPublic Successful Response
    * @throws ApiError
    */
   public static readItem(
-    data: ItemsReadItemData,
-  ): CancelablePromise<ItemsReadItemResponse> {
+    data: TodosReadTodoData,
+  ): CancelablePromise<TodosReadTodoResponse> {
     return __request(OpenAPI, {
       method: "GET",
-      url: "/api/v1/items/{id}",
+      url: "/api/v1/todos/{id}",
       path: {
         id: data.id,
       },
@@ -118,20 +118,20 @@ export class ItemsService {
   }
 
   /**
-   * Update Item
-   * Update an item.
+   * Update Todo
+   * Update an todo.
    * @param data The data for the request.
    * @param data.id
    * @param data.requestBody
-   * @returns ItemPublic Successful Response
+   * @returns TodoPublic Successful Response
    * @throws ApiError
    */
-  public static updateItem(
-    data: ItemsUpdateItemData,
-  ): CancelablePromise<ItemsUpdateItemResponse> {
+  public static updateTodo(
+    data: TodosUpdateTodoData,
+  ): CancelablePromise<TodosUpdateTodoResponse> {
     return __request(OpenAPI, {
       method: "PUT",
-      url: "/api/v1/items/{id}",
+      url: "/api/v1/todos/{id}",
       path: {
         id: data.id,
       },
@@ -144,19 +144,19 @@ export class ItemsService {
   }
 
   /**
-   * Delete Item
-   * Delete an item.
+   * Delete Todo
+  * Delete an todo.
    * @param data The data for the request.
    * @param data.id
    * @returns Message Successful Response
    * @throws ApiError
    */
-  public static deleteItem(
-    data: ItemsDeleteItemData,
-  ): CancelablePromise<ItemsDeleteItemResponse> {
+  public static deleteTodo(
+    data: TodosDeleteTodoData,
+  ): CancelablePromise<TodosDeleteTodoResponse> {
     return __request(OpenAPI, {
       method: "DELETE",
-      url: "/api/v1/items/{id}",
+      url: "/api/v1/todos/{id}",
       path: {
         id: data.id,
       },

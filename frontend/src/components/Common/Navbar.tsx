@@ -8,7 +8,7 @@ interface NavbarProps {
   addModalAs: ComponentType | ElementType
 }
 
-const Navbar = ({ type, addModalAs }: NavbarProps) => {
+const Navbar = ({ addModalAs }: NavbarProps) => {
   const addModal = useDisclosure()
 
   const AddModal = addModalAs
@@ -28,7 +28,7 @@ const Navbar = ({ type, addModalAs }: NavbarProps) => {
           fontSize={{ base: "sm", md: "inherit" }}
           onClick={addModal.onOpen}
         >
-          <Icon as={FaPlus} /> Add {type}
+          <Icon as={FaPlus} /> Add Task
         </Button>
         <AddModal isOpen={addModal.isOpen} onClose={addModal.onClose} />
       </Flex>

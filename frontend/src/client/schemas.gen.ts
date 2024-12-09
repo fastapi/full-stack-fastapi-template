@@ -69,7 +69,7 @@ export const HTTPValidationErrorSchema = {
   title: "HTTPValidationError",
 } as const
 
-export const ItemCreateSchema = {
+export const TodoCreateSchema = {
   properties: {
     title: {
       type: "string",
@@ -77,25 +77,24 @@ export const ItemCreateSchema = {
       minLength: 1,
       title: "Title",
     },
-    description: {
-      anyOf: [
-        {
-          type: "string",
-          maxLength: 255,
-        },
-        {
-          type: "null",
-        },
-      ],
+    desc: {
+      type: ["string", "null"], // Sửa lại từ description => desc để đồng bộ backend
+      maxLength: 255,
       title: "Description",
+    },
+    status: {
+      type: "string",
+      enum: ["pending", "completed", "in_progress"], // Thêm trạng thái status
+      default: "in_progress",
+      title: "Status",
     },
   },
   type: "object",
   required: ["title"],
-  title: "ItemCreate",
+  title: "TodoCreate",
 } as const
 
-export const ItemPublicSchema = {
+export const TodoPublicSchema = {
   properties: {
     title: {
       type: "string",
@@ -103,16 +102,9 @@ export const ItemPublicSchema = {
       minLength: 1,
       title: "Title",
     },
-    description: {
-      anyOf: [
-        {
-          type: "string",
-          maxLength: 255,
-        },
-        {
-          type: "null",
-        },
-      ],
+    desc: {
+      type: ["string", "null"],
+      maxLength: 255,
       title: "Description",
     },
     id: {
@@ -125,13 +117,19 @@ export const ItemPublicSchema = {
       format: "uuid",
       title: "Owner Id",
     },
+    status: {
+      type: "string",
+      enum: ["pending", "completed", "in_progress"],
+      default: "in_progress",
+      title: "Status",
+    },
   },
   type: "object",
   required: ["title", "id", "owner_id"],
-  title: "ItemPublic",
+  title: "TodoPublic",
 } as const
 
-export const ItemUpdateSchema = {
+export const TodoUpdateSchema = {
   properties: {
     title: {
       anyOf: [
@@ -146,28 +144,26 @@ export const ItemUpdateSchema = {
       ],
       title: "Title",
     },
-    description: {
-      anyOf: [
-        {
-          type: "string",
-          maxLength: 255,
-        },
-        {
-          type: "null",
-        },
-      ],
+    desc: {
+      type: ["string", "null"],
+      maxLength: 255,
       title: "Description",
+    },
+    status: {
+      type: ["string", "null"],
+      enum: ["pending", "completed", "in_progress"],
+      title: "Status",
     },
   },
   type: "object",
-  title: "ItemUpdate",
+  title: "TodoUpdate",
 } as const
 
-export const ItemsPublicSchema = {
+export const TodosPublicSchema = {
   properties: {
     data: {
       items: {
-        $ref: "#/components/schemas/ItemPublic",
+        $ref: "#/components/schemas/TodoPublic",
       },
       type: "array",
       title: "Data",
@@ -179,7 +175,7 @@ export const ItemsPublicSchema = {
   },
   type: "object",
   required: ["data", "count"],
-  title: "ItemsPublic",
+  title: "TodosPublic",
 } as const
 
 export const MessageSchema = {
