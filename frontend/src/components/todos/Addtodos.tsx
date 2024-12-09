@@ -15,7 +15,7 @@ import {
 import { useMutation, useQueryClient } from "@tanstack/react-query"
 import { type SubmitHandler, useForm } from "react-hook-form"
 
-import { type ApiError, type ItemCreate, ItemsService } from "../../client"
+import { type ApiError, type TodoCreate, TodosService } from "../../client"
 import useCustomToast from "../../hooks/useCustomToast"
 import { handleError } from "../../utils"
 
@@ -32,20 +32,20 @@ const AddItem = ({ isOpen, onClose }: AddItemProps) => {
     handleSubmit,
     reset,
     formState: { errors, isSubmitting },
-  } = useForm<ItemCreate>({
+  } = useForm<TodoCreate>({
     mode: "onBlur",
     criteriaMode: "all",
     defaultValues: {
       title: "",
-      description: "",
+      desc: "",
     },
   })
 
   const mutation = useMutation({
-    mutationFn: (data: ItemCreate) =>
-      ItemsService.createItem({ requestBody: data }),
+    mutationFn: (data: TodoCreate) =>
+      TodosService.createTodo({ requestBody: data }),
     onSuccess: () => {
-      showToast("Success!", "Item created successfully.", "success")
+      showToast("Success!", "Task created successfully.", "success")
       reset()
       onClose()
     },
@@ -53,11 +53,11 @@ const AddItem = ({ isOpen, onClose }: AddItemProps) => {
       handleError(err, showToast)
     },
     onSettled: () => {
-      queryClient.invalidateQueries({ queryKey: ["items"] })
+      queryClient.invalidateQueries({ queryKey: ["todos"] })
     },
   })
 
-  const onSubmit: SubmitHandler<ItemCreate> = (data) => {
+  const onSubmit: SubmitHandler<TodoCreate> = (data) => {
     mutation.mutate(data)
   }
 
@@ -71,7 +71,7 @@ const AddItem = ({ isOpen, onClose }: AddItemProps) => {
       >
         <ModalOverlay />
         <ModalContent as="form" onSubmit={handleSubmit(onSubmit)}>
-          <ModalHeader>Add Item</ModalHeader>
+          <ModalHeader>Add Task</ModalHeader>
           <ModalCloseButton />
           <ModalBody pb={6}>
             <FormControl isRequired isInvalid={!!errors.title}>
@@ -89,10 +89,10 @@ const AddItem = ({ isOpen, onClose }: AddItemProps) => {
               )}
             </FormControl>
             <FormControl mt={4}>
-              <FormLabel htmlFor="description">Description</FormLabel>
+              <FormLabel htmlFor="desc">Description</FormLabel>
               <Input
-                id="description"
-                {...register("description")}
+                id="desc"
+                {...register("desc")}
                 placeholder="Description"
                 type="text"
               />

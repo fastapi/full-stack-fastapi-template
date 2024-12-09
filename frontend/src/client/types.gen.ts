@@ -13,26 +13,28 @@ export type HTTPValidationError = {
   detail?: Array<ValidationError>
 }
 
-export type ItemCreate = {
+export type TodoCreate = {
   title: string
-  description?: string | null
+  desc?: string | null
 }
 
-export type ItemPublic = {
+export type TodoPublic = {
   title: string
-  description?: string | null
+  desc?: string | null
   id: string
   owner_id: string
+  status: 'pending' | 'completed' | 'in_progress'
 }
 
-export type ItemsPublic = {
-  data: Array<ItemPublic>
+export type TodosPublic = {
+  data: Array<TodoPublic>
   count: number
 }
 
-export type ItemUpdate = {
+export type TodoUpdate = {
   title?: string | null
-  description?: string | null
+  desc?: string | null
+  status?: 'pending' | 'completed' | 'in_progress' | null
 }
 
 export type Message = {
@@ -100,37 +102,37 @@ export type ValidationError = {
   type: string
 }
 
-export type ItemsReadItemsData = {
+export type TodosReadTodosData = {
   limit?: number
   skip?: number
 }
 
-export type ItemsReadItemsResponse = ItemsPublic
+export type TodosReadTodosResponse = TodosPublic
 
-export type ItemsCreateItemData = {
-  requestBody: ItemCreate
+export type TodosCreateTodoData = {
+  requestBody: TodoCreate
 }
 
-export type ItemsCreateItemResponse = ItemPublic
+export type TodosCreateTodoResponse = TodoPublic
 
-export type ItemsReadItemData = {
+export type TodosReadTodoData = {
   id: string
 }
 
-export type ItemsReadItemResponse = ItemPublic
+export type TodosReadTodoResponse = TodoPublic
 
-export type ItemsUpdateItemData = {
+export type TodosUpdateTodoData = {
   id: string
-  requestBody: ItemUpdate
+  requestBody: TodoUpdate
 }
 
-export type ItemsUpdateItemResponse = ItemPublic
+export type TodosUpdateTodoResponse = TodoPublic
 
-export type ItemsDeleteItemData = {
+export type TodosDeleteTodoData = {
   id: string
 }
 
-export type ItemsDeleteItemResponse = Message
+export type TodosDeleteTodoResponse = Message
 
 export type LoginLoginAccessTokenData = {
   formData: Body_login_login_access_token

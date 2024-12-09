@@ -6,23 +6,27 @@ import {
   MenuList,
   useDisclosure,
 } from "@chakra-ui/react"
-import { BsThreeDotsVertical } from "react-icons/bs"
-import { FiEdit, FiTrash } from "react-icons/fi"
+import {  BsThreeDotsVertical } from "react-icons/bs"
+import {FiEdit, FiPlus, FiTrash } from "react-icons/fi"
 
-import type { ItemPublic, UserPublic } from "../../client"
+import type { TodoPublic, UserPublic } from "../../client"
 import EditUser from "../Admin/EditUser"
-import EditItem from "../Items/EditItem"
+import Edittodos from "../todos/Edittodos"
 import Delete from "./DeleteAlert"
 
 interface ActionsMenuProps {
   type: string
-  value: ItemPublic | UserPublic
+  value: TodoPublic | UserPublic
   disabled?: boolean
 }
 
 const ActionsMenu = ({ type, value, disabled }: ActionsMenuProps) => {
   const editUserModal = useDisclosure()
   const deleteModal = useDisclosure()
+  const addSubtask = () => {
+    console.log("add subtask")
+  }
+
 
   return (
     <>
@@ -41,6 +45,12 @@ const ActionsMenu = ({ type, value, disabled }: ActionsMenuProps) => {
             Edit {type}
           </MenuItem>
           <MenuItem
+            onClick={addSubtask}
+            icon={<FiPlus fontSize="16px" />}
+          >
+            Add Subtask
+          </MenuItem>
+          <MenuItem
             onClick={deleteModal.onOpen}
             icon={<FiTrash fontSize="16px" />}
             color="ui.danger"
@@ -55,8 +65,8 @@ const ActionsMenu = ({ type, value, disabled }: ActionsMenuProps) => {
             onClose={editUserModal.onClose}
           />
         ) : (
-          <EditItem
-            item={value as ItemPublic}
+          <Edittodos
+            todo={value as TodoPublic}
             isOpen={editUserModal.isOpen}
             onClose={editUserModal.onClose}
           />
