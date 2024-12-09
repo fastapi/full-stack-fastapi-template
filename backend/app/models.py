@@ -1,3 +1,4 @@
+from datetime import datetime
 import uuid
 from enum import Enum
 
@@ -124,6 +125,8 @@ class StatusEnum(str, Enum):
 class TodoBase(SQLModel):
     title: str = Field(min_length=1, max_length=255)
     desc: str = Field(max_length=255)
+    created_at: datetime | None = Field(default_factory=datetime.now, nullable=True)
+    updated_at: datetime | None = Field(default_factory=datetime.now, nullable=True)
 
 # Table Todo
 class Todo(TodoBase, table=True):
@@ -157,7 +160,8 @@ class TodosPublic(SQLModel):
 class SubTodoBase(SQLModel):
     title: str = Field(min_length=1, max_length=255)
     desc: str = Field(max_length=255)
-
+    created_at: datetime | None = Field(default_factory=datetime.now, nullable=True)
+    updated_at: datetime | None = Field(default_factory=datetime.now, nullable=True)
 
 class SubTodo(SubTodoBase, table=True):
     id: uuid.UUID = Field(default_factory=uuid.uuid4, primary_key=True)
