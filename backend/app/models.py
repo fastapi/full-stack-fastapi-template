@@ -158,6 +158,7 @@ class SubTodoBase(SQLModel):
     title: str = Field(min_length=1, max_length=255)
     desc: str = Field(max_length=255)
 
+
 class SubTodo(SubTodoBase, table=True):
     id: uuid.UUID = Field(default_factory=uuid.uuid4, primary_key=True)
     todo_id: uuid.UUID = Field(
@@ -167,7 +168,7 @@ class SubTodo(SubTodoBase, table=True):
     todo: Todo | None = Relationship(back_populates="subtodos")
 
 class SubTodoCreate(SubTodoBase):
-    pass
+    todo_id: uuid.UUID
 
 # Properties to receive on item update
 class SubTodoUpdate(SubTodoBase):

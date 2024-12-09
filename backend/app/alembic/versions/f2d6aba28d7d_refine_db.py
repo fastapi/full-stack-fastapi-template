@@ -1,8 +1,8 @@
-"""update todo and subtodo table
+"""refine db
 
-Revision ID: 9245f5673cb7
+Revision ID: f2d6aba28d7d
 Revises: 80580dd7587b
-Create Date: 2024-12-06 10:53:59.113398
+Create Date: 2024-12-06 14:59:08.495370
 
 """
 from alembic import op
@@ -11,7 +11,7 @@ import sqlmodel.sql.sqltypes
 
 
 # revision identifiers, used by Alembic.
-revision = '9245f5673cb7'
+revision = 'f2d6aba28d7d'
 down_revision = '80580dd7587b'
 branch_labels = None
 depends_on = None
