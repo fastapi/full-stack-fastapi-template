@@ -89,3 +89,27 @@ def test_update_user(db: Session) -> None:
     assert user_2
     assert user.email == user_2.email
     assert verify_password(new_password, user_2.hashed_password)
+
+
+def test_get_user_by_email(db: Session) -> None:
+    password = random_lower_string()
+    email = random_email()
+    user_in = UserCreate(email=email, password=password, is_superuser=True)
+    crud.create_user(session=db, user_create=user_in)
+    user = crud.get_user_by_email(session=db, email=email)
+    assert user
+    user_2 = db.get(User, user.id)
+    assert user_2
+    assert user.email == user_2.email
+
+
+def test_get_user_by_email_case_insesetive(db: Session) -> None:
+    password = random_lower_string()
+    email = random_email().lower()
+    user_in = UserCreate(email=email, password=password, is_superuser=True)
+    crud.create_user(session=db, user_create=user_in)
+    user = crud.get_user_by_email(session=db, email=email.upper())
+    assert user
+    user_2 = db.get(User, user.id)
+    assert user_2
+    assert user.email == user_2.email
