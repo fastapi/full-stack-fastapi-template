@@ -19,6 +19,7 @@ import {
   type ApiError,
   type ItemPublic,
   type ItemUpdate,
+  type ItemsUpdateItemResponse,
   ItemsService,
 } from "../../client"
 import useCustomToast from "../../hooks/useCustomToast"
@@ -47,8 +48,9 @@ const EditItem = ({ item, isOpen, onClose }: EditItemProps) => {
   const mutation = useMutation({
     mutationFn: (data: ItemUpdate) =>
       ItemsService.updateItem({ id: item.id, requestBody: data }),
-    onSuccess: () => {
+    onSuccess: (data: ItemsUpdateItemResponse) => {
       showToast("Success!", "Item updated successfully.", "success")
+      reset(data)
       onClose()
     },
     onError: (err: ApiError) => {
