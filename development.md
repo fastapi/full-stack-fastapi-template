@@ -194,9 +194,9 @@ Frontend: http://dashboard.localhost.tiangolo.com
 
 Backend: http://api.localhost.tiangolo.com
 
-Automatic Interactive Docs (Swagger UI): http://api.localhost.tiangolo.comdocs
+Automatic Interactive Docs (Swagger UI): http://api.localhost.tiangolo.com/docs
 
-Automatic Alternative Docs (ReDoc): http://api.localhost.tiangolo.comredoc
+Automatic Alternative Docs (ReDoc): http://api.localhost.tiangolo.com/redoc
 
 Adminer: http://localhost.tiangolo.com:8080
 
