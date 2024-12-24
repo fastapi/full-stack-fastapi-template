@@ -1,7 +1,5 @@
 import {
-  Button,
   Container,
-  Flex,
   Heading,
   SkeletonText,
   Table,
@@ -21,6 +19,7 @@ import { ItemsService } from "../../client"
 import ActionsMenu from "../../components/Common/ActionsMenu"
 import Navbar from "../../components/Common/Navbar"
 import AddItem from "../../components/Items/AddItem"
+import { PaginationFooter } from "../../components/Common/PaginationFooter.tsx"
 
 const itemsSearchSchema = z.object({
   page: z.number().catch(1),
@@ -46,7 +45,7 @@ function ItemsTable() {
   const { page } = Route.useSearch()
   const navigate = useNavigate({ from: Route.fullPath })
   const setPage = (page: number) =>
-    navigate({ search: (prev) => ({ ...prev, page }) })
+    navigate({ search: (prev: {[key: string]: string}) => ({ ...prev, page }) })
 
   const {
     data: items,
@@ -112,21 +111,12 @@ function ItemsTable() {
           )}
         </Table>
       </TableContainer>
-      <Flex
-        gap={4}
-        alignItems="center"
-        mt={4}
-        direction="row"
-        justifyContent="flex-end"
-      >
-        <Button onClick={() => setPage(page - 1)} isDisabled={!hasPreviousPage}>
-          Previous
-        </Button>
-        <span>Page {page}</span>
-        <Button isDisabled={!hasNextPage} onClick={() => setPage(page + 1)}>
-          Next
-        </Button>
-      </Flex>
+      <PaginationFooter
+        page={page}
+        onChangePage={setPage}
+        hasNextPage={hasNextPage}
+        hasPreviousPage={hasPreviousPage}
+      />
     </>
   )
 }

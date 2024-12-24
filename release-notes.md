@@ -2,6 +2,45 @@
 
 ## Latest Changes
 
+### Features
+
+* ✨ Add private, local only, API for usage in E2E tests. PR [#1429](https://github.com/fastapi/full-stack-fastapi-template/pull/1429) by [@patrick91](https://github.com/patrick91).
+* ✨ Migrate to latest openapi-ts. PR [#1430](https://github.com/fastapi/full-stack-fastapi-template/pull/1430) by [@patrick91](https://github.com/patrick91).
+
+### Refactors
+
+* 🎨 Move `prefix` and `tags` to routers. PR [#1439](https://github.com/fastapi/full-stack-fastapi-template/pull/1439) by [@patrick91](https://github.com/patrick91).
+* ♻️ Remove modify id script in favor of openapi-ts config. PR [#1434](https://github.com/fastapi/full-stack-fastapi-template/pull/1434) by [@patrick91](https://github.com/patrick91).
+* 👷 Improve Playwright CI speed: sharding (paralel runs), run in Docker to use cache, use env vars. PR [#1405](https://github.com/fastapi/full-stack-fastapi-template/pull/1405) by [@tiangolo](https://github.com/tiangolo).
+* ♻️ Add PaginationFooter component. PR [#1381](https://github.com/fastapi/full-stack-fastapi-template/pull/1381) by [@saltie2193](https://github.com/saltie2193).
+* ♻️ Refactored code to use encryption algorithm name from settings for consistency. PR [#1160](https://github.com/fastapi/full-stack-fastapi-template/pull/1160) by [@sameeramin](https://github.com/sameeramin).
+* 🔊 Enable logging for email utils by default. PR [#1374](https://github.com/fastapi/full-stack-fastapi-template/pull/1374) by [@ihmily](https://github.com/ihmily).
+* 🔧 Add `ENV PYTHONUNBUFFERED=1` to log output directly to Docker. PR [#1378](https://github.com/fastapi/full-stack-fastapi-template/pull/1378) by [@tiangolo](https://github.com/tiangolo).
+* 💡 Remove unnecessary comment. PR [#1260](https://github.com/fastapi/full-stack-fastapi-template/pull/1260) by [@sebhani](https://github.com/sebhani).
+
+### Docs
+
+* 📝 Update `frontend/README.md` to also remove Playwright when removing Frontend. PR [#1452](https://github.com/fastapi/full-stack-fastapi-template/pull/1452) by [@youben11](https://github.com/youben11).
+* 📝 Update `deployment.md`, instructions to install GitHub Runner in non-root VMs. PR [#1412](https://github.com/fastapi/full-stack-fastapi-template/pull/1412) by [@tiangolo](https://github.com/tiangolo).
+* 📝 Add MailCatcher to `development.md`. PR [#1387](https://github.com/fastapi/full-stack-fastapi-template/pull/1387) by [@tobiase](https://github.com/tobiase).
+
+### Internal
+
+* ⬆ Bump astral-sh/setup-uv from 4 to 5. PR [#1453](https://github.com/fastapi/full-stack-fastapi-template/pull/1453) by [@dependabot[bot]](https://github.com/apps/dependabot).
+* ⬆ Bump astral-sh/setup-uv from 3 to 4. PR [#1433](https://github.com/fastapi/full-stack-fastapi-template/pull/1433) by [@dependabot[bot]](https://github.com/apps/dependabot).
+* ⬆ Bump tiangolo/latest-changes from 0.3.1 to 0.3.2. PR [#1418](https://github.com/fastapi/full-stack-fastapi-template/pull/1418) by [@dependabot[bot]](https://github.com/apps/dependabot).
+* 👷 Update issue manager workflow. PR [#1398](https://github.com/fastapi/full-stack-fastapi-template/pull/1398) by [@alejsdev](https://github.com/alejsdev).
+* 👷 Fix smokeshow, checkout files on CI. PR [#1395](https://github.com/fastapi/full-stack-fastapi-template/pull/1395) by [@tiangolo](https://github.com/tiangolo).
+* 👷 Update `labeler.yml`. PR [#1388](https://github.com/fastapi/full-stack-fastapi-template/pull/1388) by [@tiangolo](https://github.com/tiangolo).
+* 🔧 Add .auth playwright folder to `.gitignore`. PR [#1383](https://github.com/fastapi/full-stack-fastapi-template/pull/1383) by [@justin-p](https://github.com/justin-p).
+* ⬆️ Bump rollup from 4.6.1 to 4.22.5 in /frontend. PR [#1379](https://github.com/fastapi/full-stack-fastapi-template/pull/1379) by [@dependabot[bot]](https://github.com/apps/dependabot).
+* ⬆ Bump astral-sh/setup-uv from 2 to 3. PR [#1364](https://github.com/fastapi/full-stack-fastapi-template/pull/1364) by [@dependabot[bot]](https://github.com/apps/dependabot).
+*  👷 Update pre-commit end-of-file-fixer hook to exclude email-templates. PR [#1296](https://github.com/fastapi/full-stack-fastapi-template/pull/1296) by [@goabonga](https://github.com/goabonga).
+* ⬆ Bump tiangolo/issue-manager from 0.5.0 to 0.5.1. PR [#1332](https://github.com/fastapi/full-stack-fastapi-template/pull/1332) by [@dependabot[bot]](https://github.com/apps/dependabot).
+* 🔧 Run task by the same Python environment used to run Copier. PR [#1157](https://github.com/fastapi/full-stack-fastapi-template/pull/1157) by [@waketzheng](https://github.com/waketzheng).
+* 👷 Tweak generate client to error out if there are errors. PR [#1377](https://github.com/fastapi/full-stack-fastapi-template/pull/1377) by [@tiangolo](https://github.com/tiangolo).
+* 👷 Generate and commit client only on same repo PRs, on forks, show the error. PR [#1376](https://github.com/fastapi/full-stack-fastapi-template/pull/1376) by [@tiangolo](https://github.com/tiangolo).
+
 ## 0.7.1
 
 ### Highlights
