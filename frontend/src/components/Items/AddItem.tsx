@@ -1,32 +1,32 @@
 import {
-  Button,
-  FormControl,
-  FormErrorMessage,
-  FormLabel,
-  Input,
-  Modal,
-  ModalBody,
-  ModalCloseButton,
-  ModalContent,
-  ModalFooter,
-  ModalHeader,
-  ModalOverlay,
-} from "@chakra-ui/react"
+  DialogBackdrop,
+  DialogBody,
+  DialogCloseTrigger,
+  DialogContent,
+  DialogFooter,
+  DialogHeader,
+  DialogRoot,
+  DialogTitle,
+} from "@/components/ui/dialog"
+import { Field } from "@/components/ui/field"
+import { Input } from "@chakra-ui/react"
+
+import { Button } from "@/components/ui/button"
 import { useMutation, useQueryClient } from "@tanstack/react-query"
 import { type SubmitHandler, useForm } from "react-hook-form"
 
-import { type ApiError, type ItemCreate, ItemsService } from "../../client"
-import useCustomToast from "../../hooks/useCustomToast"
-import { handleError } from "../../utils"
+import { type ApiError, type ItemCreate, ItemsService } from "@/client"
+import useCustomToast from "@/hooks/useCustomToast"
+import { handleError } from "@/utils"
 
 interface AddItemProps {
-  isOpen: boolean
+  open: boolean
   onClose: () => void
 }
 
-const AddItem = ({ isOpen, onClose }: AddItemProps) => {
+const AddItem = ({ open, onClose }: AddItemProps) => {
   const queryClient = useQueryClient()
-  const showToast = useCustomToast()
+  const { showSuccessToast } = useCustomToast()
   const {
     register,
     handleSubmit,
@@ -45,12 +45,12 @@ const AddItem = ({ isOpen, onClose }: AddItemProps) => {
     mutationFn: (data: ItemCreate) =>
       ItemsService.createItem({ requestBody: data }),
     onSuccess: () => {
-      showToast("Success!", "Item created successfully.", "success")
+      showSuccessToast("Item created successfully.")
       reset()
       onClose()
     },
     onError: (err: ApiError) => {
-      handleError(err, showToast)
+      handleError(err)
     },
     onSettled: () => {
       queryClient.invalidateQueries({ queryKey: ["items"] })
@@ -63,50 +63,49 @@ const AddItem = ({ isOpen, onClose }: AddItemProps) => {
 
   return (
     <>
-      <Modal
-        isOpen={isOpen}
-        onClose={onClose}
+      <DialogRoot
+        open={open}
+        onExitComplete={onClose}
         size={{ base: "sm", md: "md" }}
-        isCentered
       >
-        <ModalOverlay />
-        <ModalContent as="form" onSubmit={handleSubmit(onSubmit)}>
-          <ModalHeader>Add Item</ModalHeader>
-          <ModalCloseButton />
-          <ModalBody pb={6}>
-            <FormControl isRequired isInvalid={!!errors.title}>
-              <FormLabel htmlFor="title">Title</FormLabel>
+        <DialogBackdrop />
+        <DialogContent as="form" onSubmit={handleSubmit(onSubmit)}>
+          <DialogHeader>
+            <DialogTitle>Add Item</DialogTitle>
+            <DialogCloseTrigger />
+          </DialogHeader>
+          <DialogBody pb={6}>
+            <Field
+              label="Title"
+              required
+              invalid={!!errors.title}
+              errorText={errors.title?.message}
+            >
               <Input
-                id="title"
                 {...register("title", {
                   required: "Title is required.",
                 })}
                 placeholder="Title"
                 type="text"
               />
-              {errors.title && (
-                <FormErrorMessage>{errors.title.message}</FormErrorMessage>
-              )}
-            </FormControl>
-            <FormControl mt={4}>
-              <FormLabel htmlFor="description">Description</FormLabel>
+            </Field>
+            <Field label="Description" mt={4}>
               <Input
-                id="description"
                 {...register("description")}
                 placeholder="Description"
                 type="text"
               />
-            </FormControl>
-          </ModalBody>
+            </Field>
+          </DialogBody>
 
-          <ModalFooter gap={3}>
-            <Button variant="primary" type="submit" isLoading={isSubmitting}>
+          <DialogFooter gap={3}>
+            <Button colorPalette="blue" type="submit" loading={isSubmitting}>
               Save
             </Button>
             <Button onClick={onClose}>Cancel</Button>
-          </ModalFooter>
-        </ModalContent>
-      </Modal>
+          </DialogFooter>
+        </DialogContent>
+      </DialogRoot>
     </>
   )
 }

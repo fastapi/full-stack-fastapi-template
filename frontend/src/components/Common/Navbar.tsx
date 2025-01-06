@@ -1,36 +1,33 @@
-import type { ComponentType, ElementType } from "react"
+import { Flex, Image } from "@chakra-ui/react"
+import Logo from "/assets/images/fastapi-logo.svg"
 
-import { Button, Flex, Icon, useDisclosure } from "@chakra-ui/react"
-import { FaPlus } from "react-icons/fa"
+import { RouterLink } from "../ui/router-link"
+import { SidebarMobile } from "./Sidebar"
+import UserMenu from "./UserMenu"
 
-interface NavbarProps {
-  type: string
-  addModalAs: ComponentType | ElementType
-}
+export const NAVBAR_HEIGHT = 12
 
-const Navbar = ({ type, addModalAs }: NavbarProps) => {
-  const addModal = useDisclosure()
-
-  const AddModal = addModalAs
+const Navbar = () => {
   return (
     <>
-      <Flex py={8} gap={4}>
-        {/* TODO: Complete search functionality */}
-        {/* <InputGroup w={{ base: '100%', md: 'auto' }}>
-                    <InputLeftElement pointerEvents='none'>
-                        <Icon as={FaSearch} color='ui.dim' />
-                    </InputLeftElement>
-                    <Input type='text' placeholder='Search' fontSize={{ base: 'sm', md: 'inherit' }} borderRadius='8px' />
-                </InputGroup> */}
-        <Button
-          variant="primary"
-          gap={1}
-          fontSize={{ base: "sm", md: "inherit" }}
-          onClick={addModal.onOpen}
-        >
-          <Icon as={FaPlus} /> Add {type}
-        </Button>
-        <AddModal isOpen={addModal.isOpen} onClose={addModal.onClose} />
+      <Flex
+        position="fixed"
+        top={0}
+        left={0}
+        height={NAVBAR_HEIGHT}
+        width="100%"
+        alignItems="center"
+        bg="white"
+        zIndex={100}
+        boxShadow="md"
+      >
+        <SidebarMobile />
+        <RouterLink to={"/"} asChild>
+          <Image src={Logo} alt="logo" h="100%" p={3} />
+        </RouterLink>
+        <Flex justifyContent="end" flex={1}>
+          <UserMenu />
+        </Flex>
       </Flex>
     </>
   )

@@ -1,20 +1,12 @@
-import {
-  Container,
-  Heading,
-  Tab,
-  TabList,
-  TabPanel,
-  TabPanels,
-  Tabs,
-} from "@chakra-ui/react"
+import { Container, Heading, Tabs } from "@chakra-ui/react"
 import { useQueryClient } from "@tanstack/react-query"
 import { createFileRoute } from "@tanstack/react-router"
 
-import type { UserPublic } from "../../client"
-import Appearance from "../../components/UserSettings/Appearance"
-import ChangePassword from "../../components/UserSettings/ChangePassword"
-import DeleteAccount from "../../components/UserSettings/DeleteAccount"
-import UserInformation from "../../components/UserSettings/UserInformation"
+import type { UserPublic } from "@/client"
+import Appearance from "@/components/UserSettings/Appearance"
+import ChangePassword from "@/components/UserSettings/ChangePassword"
+import DeleteAccount from "@/components/UserSettings/DeleteAccount"
+import UserInformation from "@/components/UserSettings/UserInformation"
 
 const tabsConfig = [
   { title: "My profile", component: UserInformation },
@@ -36,23 +28,23 @@ function UserSettings() {
 
   return (
     <Container maxW="full">
-      <Heading size="lg" textAlign={{ base: "center", md: "left" }} py={12}>
+      <Heading size="lg" textAlign={{ base: "center", md: "left" }}>
         User Settings
       </Heading>
-      <Tabs variant="enclosed">
-        <TabList>
+      <Tabs.Root color="enclosed" defaultValue={finalTabs[0].title}>
+        <Tabs.List>
           {finalTabs.map((tab, index) => (
-            <Tab key={index}>{tab.title}</Tab>
+            <Tabs.Trigger key={index} value={tab.title}>
+              {tab.title}
+            </Tabs.Trigger>
           ))}
-        </TabList>
-        <TabPanels>
-          {finalTabs.map((tab, index) => (
-            <TabPanel key={index}>
-              <tab.component />
-            </TabPanel>
-          ))}
-        </TabPanels>
-      </Tabs>
+        </Tabs.List>
+        {finalTabs.map((tab, index) => (
+          <Tabs.Content key={index} value={tab.title}>
+            <tab.component />
+          </Tabs.Content>
+        ))}
+      </Tabs.Root>
     </Container>
   )
 }

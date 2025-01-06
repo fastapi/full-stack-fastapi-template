@@ -21,11 +21,11 @@ const DeleteAccount = () => {
           Permanently delete your data and everything associated with your
           account.
         </Text>
-        <Button variant="danger" mt={4} onClick={confirmationModal.onOpen}>
+        <Button colorPalette="red" mt={4} onClick={confirmationModal.onOpen}>
           Delete
         </Button>
         <DeleteConfirmation
-          isOpen={confirmationModal.isOpen}
+          open={confirmationModal.open}
           onClose={confirmationModal.onClose}
         />
       </Container>

@@ -1,12 +1,6 @@
-import {
-  Button,
-  Container,
-  FormControl,
-  FormErrorMessage,
-  Heading,
-  Input,
-  Text,
-} from "@chakra-ui/react"
+import { Button } from "@/components/ui/button"
+import { Field } from "@/components/ui/field"
+import { Container, Heading, Input, Text } from "@chakra-ui/react"
 import { useMutation } from "@tanstack/react-query"
 import { createFileRoute, redirect } from "@tanstack/react-router"
 import { type SubmitHandler, useForm } from "react-hook-form"
@@ -38,7 +32,7 @@ function RecoverPassword() {
     reset,
     formState: { errors, isSubmitting },
   } = useForm<FormData>()
-  const showToast = useCustomToast()
+  const { showToast } = useCustomToast()
 
   const recoverPassword = async (data: FormData) => {
     await LoginService.recoverPassword({
@@ -57,7 +51,7 @@ function RecoverPassword() {
       reset()
     },
     onError: (err: ApiError) => {
-      handleError(err, showToast)
+      handleError(err)
     },
   })
 
@@ -76,15 +70,14 @@ function RecoverPassword() {
       gap={4}
       centerContent
     >
-      <Heading size="xl" color="ui.main" textAlign="center" mb={2}>
+      <Heading size="xl" textAlign="center" mb={2}>
         Password Recovery
       </Heading>
-      <Text align="center">
+      <Text>
         A password recovery email will be sent to the registered account.
       </Text>
-      <FormControl isInvalid={!!errors.email}>
+      <Field invalid={!!errors.email} errorText={errors.email?.message}>
         <Input
-          id="email"
           {...register("email", {
             required: "Email is required",
             pattern: emailPattern,
@@ -92,11 +85,8 @@ function RecoverPassword() {
           placeholder="Email"
           type="email"
         />
-        {errors.email && (
-          <FormErrorMessage>{errors.email.message}</FormErrorMessage>
-        )}
-      </FormControl>
-      <Button variant="primary" type="submit" isLoading={isSubmitting}>
+      </Field>
+      <Button colorPalette="blue" type="submit" loading={isSubmitting}>
         Continue
       </Button>
     </Container>

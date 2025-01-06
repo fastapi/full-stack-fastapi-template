@@ -1,29 +1,27 @@
+import { Button } from "@/components/ui/button"
+import { Checkbox } from "@/components/ui/checkbox"
 import {
-  Button,
-  Checkbox,
-  Flex,
-  FormControl,
-  FormErrorMessage,
-  FormLabel,
-  Input,
-  Modal,
-  ModalBody,
-  ModalCloseButton,
-  ModalContent,
-  ModalFooter,
-  ModalHeader,
-  ModalOverlay,
-} from "@chakra-ui/react"
+  DialogBackdrop,
+  DialogBody,
+  DialogCloseTrigger,
+  DialogContent,
+  DialogFooter,
+  DialogHeader,
+  DialogRoot,
+  DialogTitle,
+} from "@/components/ui/dialog"
+import { Field } from "@/components/ui/field"
+import { Flex, Input } from "@chakra-ui/react"
 import { useMutation, useQueryClient } from "@tanstack/react-query"
-import { type SubmitHandler, useForm } from "react-hook-form"
+import { Controller, type SubmitHandler, useForm } from "react-hook-form"
 
-import { type UserCreate, UsersService } from "../../client"
-import type { ApiError } from "../../client/core/ApiError"
-import useCustomToast from "../../hooks/useCustomToast"
-import { emailPattern, handleError } from "../../utils"
+import { type UserCreate, UsersService } from "@/client"
+import type { ApiError } from "@/client/core/ApiError"
+import useCustomToast from "@/hooks/useCustomToast"
+import { emailPattern, handleError } from "@/utils"
 
 interface AddUserProps {
-  isOpen: boolean
+  open: boolean
   onClose: () => void
 }
 
@@ -31,11 +29,12 @@ interface UserCreateForm extends UserCreate {
   confirm_password: string
 }
 
-const AddUser = ({ isOpen, onClose }: AddUserProps) => {
+const AddUser = ({ open, onClose }: AddUserProps) => {
   const queryClient = useQueryClient()
-  const showToast = useCustomToast()
+  const { showSuccessToast } = useCustomToast()
   const {
     register,
+    control,
     handleSubmit,
     reset,
     getValues,
@@ -57,12 +56,12 @@ const AddUser = ({ isOpen, onClose }: AddUserProps) => {
     mutationFn: (data: UserCreate) =>
       UsersService.createUser({ requestBody: data }),
     onSuccess: () => {
-      showToast("Success!", "User created successfully.", "success")
+      showSuccessToast("User created successfully.")
       reset()
       onClose()
     },
     onError: (err: ApiError) => {
-      handleError(err, showToast)
+      handleError(err)
     },
     onSettled: () => {
       queryClient.invalidateQueries({ queryKey: ["users"] })
@@ -75,21 +74,26 @@ const AddUser = ({ isOpen, onClose }: AddUserProps) => {
 
   return (
     <>
-      <Modal
-        isOpen={isOpen}
-        onClose={onClose}
+      <DialogRoot
+        open={open}
+        onExitComplete={onClose}
         size={{ base: "sm", md: "md" }}
-        isCentered
+        role="alertdialog"
       >
-        <ModalOverlay />
-        <ModalContent as="form" onSubmit={handleSubmit(onSubmit)}>
-          <ModalHeader>Add User</ModalHeader>
-          <ModalCloseButton />
-          <ModalBody pb={6}>
-            <FormControl isRequired isInvalid={!!errors.email}>
-              <FormLabel htmlFor="email">Email</FormLabel>
+        <DialogBackdrop />
+        <DialogContent as="form" onSubmit={handleSubmit(onSubmit)}>
+          <DialogHeader>
+            <DialogTitle>Add User</DialogTitle>
+            <DialogCloseTrigger />
+          </DialogHeader>
+          <DialogBody pb={6}>
+            <Field
+              required
+              label="Email"
+              invalid={!!errors.email}
+              errorText={errors.email?.message}
+            >
               <Input
-                id="email"
                 {...register("email", {
                   required: "Email is required",
                   pattern: emailPattern,
@@ -97,26 +101,27 @@ const AddUser = ({ isOpen, onClose }: AddUserProps) => {
                 placeholder="Email"
                 type="email"
               />
-              {errors.email && (
-                <FormErrorMessage>{errors.email.message}</FormErrorMessage>
-              )}
-            </FormControl>
-            <FormControl mt={4} isInvalid={!!errors.full_name}>
-              <FormLabel htmlFor="name">Full name</FormLabel>
+            </Field>
+            <Field
+              mt={4}
+              label="Full name"
+              invalid={!!errors.full_name}
+              errorText={errors.full_name?.message}
+            >
               <Input
-                id="name"
                 {...register("full_name")}
                 placeholder="Full name"
                 type="text"
               />
-              {errors.full_name && (
-                <FormErrorMessage>{errors.full_name.message}</FormErrorMessage>
-              )}
-            </FormControl>
-            <FormControl mt={4} isRequired isInvalid={!!errors.password}>
-              <FormLabel htmlFor="password">Set Password</FormLabel>
+            </Field>
+            <Field
+              mt={4}
+              label="Set Password"
+              required
+              invalid={!!errors.password}
+              errorText={errors.password?.message}
+            >
               <Input
-                id="password"
                 {...register("password", {
                   required: "Password is required",
                   minLength: {
@@ -127,18 +132,15 @@ const AddUser = ({ isOpen, onClose }: AddUserProps) => {
                 placeholder="Password"
                 type="password"
               />
-              {errors.password && (
-                <FormErrorMessage>{errors.password.message}</FormErrorMessage>
-              )}
-            </FormControl>
-            <FormControl
+            </Field>
+            <Field
               mt={4}
-              isRequired
-              isInvalid={!!errors.confirm_password}
+              required
+              label="Confirm Password"
+              invalid={!!errors.confirm_password}
+              errorText={errors.confirm_password?.message}
             >
-              <FormLabel htmlFor="confirm_password">Confirm Password</FormLabel>
               <Input
-                id="confirm_password"
                 {...register("confirm_password", {
                   required: "Please confirm your password",
                   validate: (value) =>
@@ -148,33 +150,54 @@ const AddUser = ({ isOpen, onClose }: AddUserProps) => {
                 placeholder="Password"
                 type="password"
               />
-              {errors.confirm_password && (
-                <FormErrorMessage>
-                  {errors.confirm_password.message}
-                </FormErrorMessage>
-              )}
-            </FormControl>
+            </Field>
             <Flex mt={4}>
-              <FormControl>
-                <Checkbox {...register("is_superuser")} colorScheme="teal">
-                  Is superuser?
-                </Checkbox>
-              </FormControl>
-              <FormControl>
-                <Checkbox {...register("is_active")} colorScheme="teal">
-                  Is active?
-                </Checkbox>
-              </FormControl>
+              <Controller
+                control={control}
+                name="is_superuser"
+                render={({ field }) => (
+                  <Field
+                    disabled={field.disabled}
+                    invalid={!!errors.is_superuser}
+                    errorText={errors.is_superuser?.message}
+                  >
+                    <Checkbox
+                      checked={field.value}
+                      onCheckedChange={({ checked }) => field.onChange(checked)}
+                    >
+                      Is superuser?
+                    </Checkbox>
+                  </Field>
+                )}
+              />
+              <Controller
+                control={control}
+                name="is_active"
+                render={({ field }) => (
+                  <Field
+                    disabled={field.disabled}
+                    invalid={!!errors.is_active}
+                    errorText={errors.is_active?.message}
+                  >
+                    <Checkbox
+                      checked={field.value}
+                      onCheckedChange={({ checked }) => field.onChange(checked)}
+                    >
+                      Is active?
+                    </Checkbox>
+                  </Field>
+                )}
+              />
             </Flex>
-          </ModalBody>
-          <ModalFooter gap={3}>
-            <Button variant="primary" type="submit" isLoading={isSubmitting}>
+          </DialogBody>
+          <DialogFooter gap={3}>
+            <Button colorPalette="blue" type="submit" loading={isSubmitting}>
               Save
             </Button>
             <Button onClick={onClose}>Cancel</Button>
-          </ModalFooter>
-        </ModalContent>
-      </Modal>
+          </DialogFooter>
+        </DialogContent>
+      </DialogRoot>
     </>
   )
 }

@@ -1,0 +1,9 @@
+{
+  "recommendations": [
+    "ms-azuretools.vscode-docker",
+    "ms-python.python",
+    "charliermarsh.ruff",
+    "biomejs.biome",
+    "ms-playwright.playwright"
+  ]
+}

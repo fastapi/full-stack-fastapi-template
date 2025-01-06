@@ -2,9 +2,12 @@ import sentry_sdk
 from fastapi import FastAPI
 from fastapi.routing import APIRoute
 from starlette.middleware.cors import CORSMiddleware
+from starlette_context.middleware import RawContextMiddleware
 
 from app.api.main import api_router
 from app.core.config import settings
+from app.core.exceptions import exception_handler
+from app.middleware import DBSessionMiddleware
 
 
 def custom_generate_unique_id(route: APIRoute) -> str:
@@ -29,5 +32,18 @@ if settings.all_cors_origins:
         allow_methods=["*"],
         allow_headers=["*"],
     )
+
+app.add_middleware(DBSessionMiddleware, excluded_paths=["/api/v1/utils/"])
+
+app.add_middleware(
+    RawContextMiddleware,
+    plugins=[
+        # RequestIdPlugin(),
+        # CorrelationIdPlugin(),
+    ],
+)
+
+
+app.add_exception_handler(Exception, exception_handler)
 
 app.include_router(api_router, prefix=settings.API_V1_STR)

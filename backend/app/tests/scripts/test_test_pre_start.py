@@ -1,33 +1,22 @@
+from collections.abc import Generator
 from unittest.mock import MagicMock, patch
 
-from sqlmodel import select
+import pytest
 
-from app.tests_pre_start import init, logger
+from app.core.db import engine
+from app.tests_pre_start import init
 
 
-def test_init_successful_connection() -> None:
-    engine_mock = MagicMock()
+class TestTestPreStart:
+    @pytest.fixture
+    @staticmethod
+    def mock_session() -> Generator[MagicMock, None, None]:
+        with patch("app.tests_pre_start.Session") as MockSession:
+            mock_session = MagicMock()
+            MockSession.return_value.__enter__.return_value = mock_session
+            mock_session.exec.return_value = True
+            yield mock_session
 
-    session_mock = MagicMock()
-    exec_mock = MagicMock(return_value=True)
-    session_mock.configure_mock(**{"exec.return_value": exec_mock})
-
-    with (
-        patch("sqlmodel.Session", return_value=session_mock),
-        patch.object(logger, "info"),
-        patch.object(logger, "error"),
-        patch.object(logger, "warn"),
-    ):
-        try:
-            init(engine_mock)
-            connection_successful = True
-        except Exception:
-            connection_successful = False
-
-        assert (
-            connection_successful
-        ), "The database connection should be successful and not raise an exception."
-
-        assert session_mock.exec.called_once_with(
-            select(1)
-        ), "The session should execute a select statement once."
+    def test_init_function(self, mock_session: MagicMock) -> None:
+        init(engine)
+        mock_session.exec.assert_called_once()

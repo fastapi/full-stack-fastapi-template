@@ -1,36 +1,38 @@
-import { Button, Flex } from "@chakra-ui/react"
+import {
+  PaginationItems,
+  PaginationNextTrigger,
+  PaginationPrevTrigger,
+  PaginationRoot,
+} from "@/components/ui/pagination"
+import { Flex, HStack } from "@chakra-ui/react"
 
 type PaginationFooterProps = {
-  hasNextPage?: boolean
-  hasPreviousPage?: boolean
-  onChangePage: (newPage: number) => void
   page: number
+  pageSize: number
+  count: number
+  setPage: (page: number) => void
 }
 
 export function PaginationFooter({
-  hasNextPage,
-  hasPreviousPage,
-  onChangePage,
   page,
+  count,
+  pageSize,
+  setPage,
 }: PaginationFooterProps) {
   return (
-    <Flex
-      gap={4}
-      alignItems="center"
-      mt={4}
-      direction="row"
-      justifyContent="flex-end"
-    >
-      <Button
-        onClick={() => onChangePage(page - 1)}
-        isDisabled={!hasPreviousPage || page <= 1}
+    <Flex mt={4} justifyContent="flex-end">
+      <PaginationRoot
+        page={page}
+        count={count}
+        pageSize={pageSize}
+        onPageChange={(e) => setPage(e.page)}
       >
-        Previous
-      </Button>
-      <span>Page {page}</span>
-      <Button isDisabled={!hasNextPage} onClick={() => onChangePage(page + 1)}>
-        Next
-      </Button>
+        <HStack>
+          <PaginationPrevTrigger />
+          <PaginationItems />
+          <PaginationNextTrigger />
+        </HStack>
+      </PaginationRoot>
     </Flex>
   )
 }

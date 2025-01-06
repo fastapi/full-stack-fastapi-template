@@ -10,7 +10,6 @@ on:
       - synchronize
 
 jobs:
-
   test-docker-compose:
     runs-on: ubuntu-latest
     steps:

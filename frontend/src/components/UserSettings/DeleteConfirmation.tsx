@@ -1,30 +1,30 @@
+import { Button } from "@/components/ui/button"
 import {
-  AlertDialog,
-  AlertDialogBody,
-  AlertDialogContent,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogOverlay,
-  Button,
-} from "@chakra-ui/react"
+  DialogBackdrop,
+  DialogBody,
+  DialogCloseTrigger,
+  DialogContent,
+  DialogFooter,
+  DialogHeader,
+  DialogRoot,
+  DialogTitle,
+} from "@/components/ui/dialog"
 import { useMutation, useQueryClient } from "@tanstack/react-query"
-import React from "react"
 import { useForm } from "react-hook-form"
 
-import { type ApiError, UsersService } from "../../client"
-import useAuth from "../../hooks/useAuth"
-import useCustomToast from "../../hooks/useCustomToast"
-import { handleError } from "../../utils"
+import { type ApiError, UsersService } from "@/client"
+import useAuth from "@/hooks/useAuth"
+import useCustomToast from "@/hooks/useCustomToast"
+import { handleError } from "@/utils"
 
 interface DeleteProps {
-  isOpen: boolean
+  open: boolean
   onClose: () => void
 }
 
-const DeleteConfirmation = ({ isOpen, onClose }: DeleteProps) => {
+const DeleteConfirmation = ({ open, onClose }: DeleteProps) => {
   const queryClient = useQueryClient()
-  const showToast = useCustomToast()
-  const cancelRef = React.useRef<HTMLButtonElement | null>(null)
+  const { showSuccessToast } = useCustomToast()
   const {
     handleSubmit,
     formState: { isSubmitting },
@@ -34,16 +34,12 @@ const DeleteConfirmation = ({ isOpen, onClose }: DeleteProps) => {
   const mutation = useMutation({
     mutationFn: () => UsersService.deleteUserMe(),
     onSuccess: () => {
-      showToast(
-        "Success",
-        "Your account has been successfully deleted.",
-        "success",
-      )
+      showSuccessToast("Your account has been successfully deleted.")
       logout()
       onClose()
     },
     onError: (err: ApiError) => {
-      handleError(err, showToast)
+      handleError(err)
     },
     onSettled: () => {
       queryClient.invalidateQueries({ queryKey: ["currentUser"] })
@@ -56,39 +52,34 @@ const DeleteConfirmation = ({ isOpen, onClose }: DeleteProps) => {
 
   return (
     <>
-      <AlertDialog
-        isOpen={isOpen}
-        onClose={onClose}
-        leastDestructiveRef={cancelRef}
+      <DialogRoot
+        open={open}
+        onExitComplete={onClose}
         size={{ base: "sm", md: "md" }}
-        isCentered
+        role="alertdialog"
       >
-        <AlertDialogOverlay>
-          <AlertDialogContent as="form" onSubmit={handleSubmit(onSubmit)}>
-            <AlertDialogHeader>Confirmation Required</AlertDialogHeader>
+        <DialogBackdrop />
+        <DialogContent as="form" onSubmit={handleSubmit(onSubmit)}>
+          <DialogHeader>
+            <DialogTitle>Confirmation Required</DialogTitle>
+            <DialogCloseTrigger />
+          </DialogHeader>
+          <DialogBody>
+            All your account data will be <strong>permanently deleted.</strong>{" "}
+            If you are sure, please click <strong>"Confirm"</strong> to proceed.
+            This action cannot be undone.
+          </DialogBody>
 
-            <AlertDialogBody>
-              All your account data will be{" "}
-              <strong>permanently deleted.</strong> If you are sure, please
-              click <strong>"Confirm"</strong> to proceed. This action cannot be
-              undone.
-            </AlertDialogBody>
-
-            <AlertDialogFooter gap={3}>
-              <Button variant="danger" type="submit" isLoading={isSubmitting}>
-                Confirm
-              </Button>
-              <Button
-                ref={cancelRef}
-                onClick={onClose}
-                isDisabled={isSubmitting}
-              >
-                Cancel
-              </Button>
-            </AlertDialogFooter>
-          </AlertDialogContent>
-        </AlertDialogOverlay>
-      </AlertDialog>
+          <DialogFooter gap={3}>
+            <Button colorPalette="red" type="submit" loading={isSubmitting}>
+              Confirm
+            </Button>
+            <Button onClick={onClose} disabled={isSubmitting}>
+              Cancel
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </DialogRoot>
     </>
   )
 }

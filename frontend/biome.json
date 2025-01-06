@@ -7,6 +7,7 @@
     "ignore": [
       "node_modules",
       "src/routeTree.gen.ts",
+      "src/client/**/*",
       "playwright.config.ts",
       "playwright-report"
     ]

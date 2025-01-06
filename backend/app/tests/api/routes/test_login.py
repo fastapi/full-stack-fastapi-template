@@ -6,6 +6,10 @@ from sqlmodel import Session, select
 from app.core.config import settings
 from app.core.security import verify_password
 from app.models import User
+from app.tests.utils.user import (
+    get_authentication_token_from_email,
+)
+from app.tests.utils.utils import random_lower_string
 from app.utils import generate_password_reset_token
 
 
@@ -69,23 +73,26 @@ def test_recovery_password_user_not_exits(
     assert r.status_code == 404
 
 
-def test_reset_password(
-    client: TestClient, superuser_token_headers: dict[str, str], db: Session
-) -> None:
-    token = generate_password_reset_token(email=settings.FIRST_SUPERUSER)
-    data = {"new_password": "changethis", "token": token}
+def test_reset_password(client: TestClient, session: Session, user: User) -> None:
+    user_token_headers = get_authentication_token_from_email(
+        client=client, email=user.email, session=session
+    )
+    pw_reset_token = generate_password_reset_token(email=user.email)
+    new_password = random_lower_string()
+    data = {"new_password": new_password, "token": pw_reset_token}
     r = client.post(
         f"{settings.API_V1_STR}/reset-password/",
-        headers=superuser_token_headers,
+        headers=user_token_headers,
         json=data,
     )
     assert r.status_code == 200
     assert r.json() == {"message": "Password updated successfully"}
 
-    user_query = select(User).where(User.email == settings.FIRST_SUPERUSER)
-    user = db.exec(user_query).first()
-    assert user
-    assert verify_password(data["new_password"], user.hashed_password)
+    session.refresh(user)  # clear cache
+    user_query = select(User).where(User.email == user.email)
+    result = session.exec(user_query).first()
+    assert result
+    assert verify_password(new_password, result.hashed_password)
 
 
 def test_reset_password_invalid_token(

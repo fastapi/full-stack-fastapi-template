@@ -20,7 +20,7 @@ const isLoggedIn = () => {
 const useAuth = () => {
   const [error, setError] = useState<string | null>(null)
   const navigate = useNavigate()
-  const showToast = useCustomToast()
+  const { showToast, showErrorToast } = useCustomToast()
   const queryClient = useQueryClient()
   const { data: user, isLoading } = useQuery<UserPublic | null, Error>({
     queryKey: ["currentUser"],
@@ -47,7 +47,7 @@ const useAuth = () => {
         errDetail = err.message
       }
 
-      showToast("Something went wrong.", errDetail, "error")
+      showErrorToast(errDetail)
     },
     onSettled: () => {
       queryClient.invalidateQueries({ queryKey: ["users"] })

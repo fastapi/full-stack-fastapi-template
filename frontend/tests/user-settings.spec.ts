@@ -1,8 +1,8 @@
 import { expect, test } from "@playwright/test"
 import { firstSuperuser, firstSuperuserPassword } from "./config.ts"
+import { createUser } from "./utils/privateApi.ts"
 import { randomEmail, randomPassword } from "./utils/random"
 import { logInUser, logOutUser } from "./utils/user"
-import { createUser } from "./utils/privateApi.ts"
 
 const tabs = ["My profile", "Password", "Appearance"]
 
@@ -241,33 +241,33 @@ test("Appearance tab is visible", async ({ page }) => {
 test("User can switch from light mode to dark mode", async ({ page }) => {
   await page.goto("/settings")
   await page.getByRole("tab", { name: "Appearance" }).click()
-  await page.getByLabel("Appearance").locator("span").nth(3).click()
-  const isDarkMode = await page.evaluate(() =>
-    document.body.classList.contains("chakra-ui-dark"),
-  )
-  expect(isDarkMode).toBe(true)
+  await page.getByLabel("Appearance").locator("label").nth(2).click()
+  const colorScheme = await page
+    .locator("html")
+    .evaluate((el) => el.style.colorScheme)
+  expect(colorScheme).toBe("dark")
 })
 
 test("User can switch from dark mode to light mode", async ({ page }) => {
   await page.goto("/settings")
   await page.getByRole("tab", { name: "Appearance" }).click()
-  await page.getByLabel("Appearance").locator("span").first().click()
-  const isLightMode = await page.evaluate(() =>
-    document.body.classList.contains("chakra-ui-light"),
-  )
-  expect(isLightMode).toBe(true)
+  await page.getByLabel("Appearance").locator("label").nth(1).click()
+  const colorScheme = await page
+    .locator("html")
+    .evaluate((el) => el.style.colorScheme)
+  expect(colorScheme).toBe("light")
 })
 
 test("Selected mode is preserved across sessions", async ({ page }) => {
   await page.goto("/settings")
   await page.getByRole("tab", { name: "Appearance" }).click()
-  await page.getByLabel("Appearance").locator("span").nth(3).click()
+  await page.getByLabel("Appearance").locator("label").nth(2).click()
 
   await logOutUser(page)
 
   await logInUser(page, firstSuperuser, firstSuperuserPassword)
-  const isDarkMode = await page.evaluate(() =>
-    document.body.classList.contains("chakra-ui-dark"),
-  )
-  expect(isDarkMode).toBe(true)
+  const colorScheme = await page
+    .locator("html")
+    .evaluate((el) => el.style.colorScheme)
+  expect(colorScheme).toBe("dark")
 })

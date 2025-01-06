@@ -1,16 +1,16 @@
 import {
-  Box,
-  IconButton,
-  Menu,
-  MenuButton,
+  MenuContent,
   MenuItem,
-  MenuList,
-} from "@chakra-ui/react"
-import { Link } from "@tanstack/react-router"
+  MenuRoot,
+  MenuTrigger,
+} from "@/components/ui/menu"
+import { Box, IconButton } from "@chakra-ui/react"
+
+import { Link as RouteLink } from "@tanstack/react-router"
 import { FaUserAstronaut } from "react-icons/fa"
 import { FiLogOut, FiUser } from "react-icons/fi"
 
-import useAuth from "../../hooks/useAuth"
+import useAuth from "@/hooks/useAuth"
 
 const UserMenu = () => {
   const { logout } = useAuth()
@@ -21,36 +21,36 @@ const UserMenu = () => {
 
   return (
     <>
-      {/* Desktop */}
-      <Box
-        display={{ base: "none", md: "block" }}
-        position="fixed"
-        top={4}
-        right={4}
-      >
-        <Menu>
-          <MenuButton
-            as={IconButton}
-            aria-label="Options"
-            icon={<FaUserAstronaut color="white" fontSize="18px" />}
-            bg="ui.main"
-            isRound
-            data-testid="user-menu"
-          />
-          <MenuList>
-            <MenuItem icon={<FiUser fontSize="18px" />} as={Link} to="settings">
-              My profile
+      <Box>
+        <MenuRoot>
+          <MenuTrigger asChild>
+            <IconButton
+              m={2}
+              aria-label="Options"
+              rounded="full"
+              data-testid="user-menu"
+            >
+              <FaUserAstronaut color="white" fontSize="18px" />
+            </IconButton>
+          </MenuTrigger>
+          <MenuContent>
+            <MenuItem value="profile" asChild>
+              <RouteLink to="/settings">
+                <FiUser fontSize="18px" />
+                <Box flex="1">My profile</Box>
+              </RouteLink>
             </MenuItem>
             <MenuItem
-              icon={<FiLogOut fontSize="18px" />}
+              value="logout"
               onClick={handleLogout}
-              color="ui.danger"
+              colorPalette="red"
               fontWeight="bold"
             >
-              Log out
+              <FiLogOut fontSize="18px" />
+              <Box flex="1">Log out</Box>
             </MenuItem>
-          </MenuList>
-        </Menu>
+          </MenuContent>
+        </MenuRoot>
       </Box>
     </>
   )

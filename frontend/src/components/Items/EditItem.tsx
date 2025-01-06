@@ -1,17 +1,20 @@
+import { Input } from "@chakra-ui/react"
+
+import { Field } from "@/components/ui/field"
+
 import {
-  Button,
-  FormControl,
-  FormErrorMessage,
-  FormLabel,
-  Input,
-  Modal,
-  ModalBody,
-  ModalCloseButton,
-  ModalContent,
-  ModalFooter,
-  ModalHeader,
-  ModalOverlay,
-} from "@chakra-ui/react"
+  DialogBackdrop,
+  DialogBody,
+  DialogCloseTrigger,
+  DialogContent,
+  DialogFooter,
+  DialogHeader,
+  DialogRoot,
+  DialogTitle,
+} from "@/components/ui/dialog"
+
+import { Button } from "@/components/ui/button"
+
 import { useMutation, useQueryClient } from "@tanstack/react-query"
 import { type SubmitHandler, useForm } from "react-hook-form"
 
@@ -20,19 +23,19 @@ import {
   type ItemPublic,
   type ItemUpdate,
   ItemsService,
-} from "../../client"
-import useCustomToast from "../../hooks/useCustomToast"
-import { handleError } from "../../utils"
+} from "@/client"
+import useCustomToast from "@/hooks/useCustomToast"
+import { handleError } from "@/utils"
 
 interface EditItemProps {
   item: ItemPublic
-  isOpen: boolean
+  open: boolean
   onClose: () => void
 }
 
-const EditItem = ({ item, isOpen, onClose }: EditItemProps) => {
+const EditItem = ({ item, open, onClose }: EditItemProps) => {
   const queryClient = useQueryClient()
-  const showToast = useCustomToast()
+  const { showSuccessToast } = useCustomToast()
   const {
     register,
     handleSubmit,
@@ -48,11 +51,11 @@ const EditItem = ({ item, isOpen, onClose }: EditItemProps) => {
     mutationFn: (data: ItemUpdate) =>
       ItemsService.updateItem({ id: item.id, requestBody: data }),
     onSuccess: () => {
-      showToast("Success!", "Item updated successfully.", "success")
+      showSuccessToast("Item updated successfully.")
       onClose()
     },
     onError: (err: ApiError) => {
-      handleError(err, showToast)
+      handleError(err)
     },
     onSettled: () => {
       queryClient.invalidateQueries({ queryKey: ["items"] })
@@ -70,53 +73,51 @@ const EditItem = ({ item, isOpen, onClose }: EditItemProps) => {
 
   return (
     <>
-      <Modal
-        isOpen={isOpen}
-        onClose={onClose}
+      <DialogRoot
+        open={open}
+        onExitComplete={onClose}
         size={{ base: "sm", md: "md" }}
-        isCentered
       >
-        <ModalOverlay />
-        <ModalContent as="form" onSubmit={handleSubmit(onSubmit)}>
-          <ModalHeader>Edit Item</ModalHeader>
-          <ModalCloseButton />
-          <ModalBody pb={6}>
-            <FormControl isInvalid={!!errors.title}>
-              <FormLabel htmlFor="title">Title</FormLabel>
+        <DialogBackdrop />
+        <DialogContent as="form" onSubmit={handleSubmit(onSubmit)}>
+          <DialogHeader>
+            <DialogTitle>Edit Item</DialogTitle>
+            <DialogCloseTrigger />
+          </DialogHeader>
+          <DialogBody pb={6}>
+            <Field
+              label="Title"
+              invalid={!!errors.title}
+              errorText={errors.title?.message}
+            >
               <Input
-                id="title"
                 {...register("title", {
                   required: "Title is required",
                 })}
                 type="text"
               />
-              {errors.title && (
-                <FormErrorMessage>{errors.title.message}</FormErrorMessage>
-              )}
-            </FormControl>
-            <FormControl mt={4}>
-              <FormLabel htmlFor="description">Description</FormLabel>
+            </Field>
+            <Field label="Description" mt={4}>
               <Input
-                id="description"
                 {...register("description")}
                 placeholder="Description"
                 type="text"
               />
-            </FormControl>
-          </ModalBody>
-          <ModalFooter gap={3}>
+            </Field>
+          </DialogBody>
+          <DialogFooter gap={3}>
             <Button
-              variant="primary"
+              colorPalette="blue"
               type="submit"
-              isLoading={isSubmitting}
-              isDisabled={!isDirty}
+              loading={isSubmitting}
+              disabled={!isDirty}
             >
               Save
             </Button>
             <Button onClick={onCancel}>Cancel</Button>
-          </ModalFooter>
-        </ModalContent>
-      </Modal>
+          </DialogFooter>
+        </DialogContent>
+      </DialogRoot>
     </>
   )
 }

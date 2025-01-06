@@ -1,5 +1,5 @@
+import { RouterLink } from "@/components/ui/router-link"
 import { Button, Container, Text } from "@chakra-ui/react"
-import { Link } from "@tanstack/react-router"
 
 const NotFound = () => {
   return (
@@ -12,27 +12,16 @@ const NotFound = () => {
         maxW="sm"
         centerContent
       >
-        <Text
-          fontSize="8xl"
-          color="ui.main"
-          fontWeight="bold"
-          lineHeight="1"
-          mb={4}
-        >
+        <Text fontSize="8xl" fontWeight="bold" lineHeight="1" mb={4}>
           404
         </Text>
         <Text fontSize="md">Oops!</Text>
         <Text fontSize="md">Page not found.</Text>
-        <Button
-          as={Link}
-          to="/"
-          color="ui.main"
-          borderColor="ui.main"
-          variant="outline"
-          mt={4}
-        >
-          Go back
-        </Button>
+        <RouterLink to="/" asChild>
+          <Button variant="outline" mt={4}>
+            Go back
+          </Button>
+        </RouterLink>
       </Container>
     </>
   )

@@ -1,32 +1,26 @@
 import {
-  Box,
-  Drawer,
+  DrawerBackdrop,
   DrawerBody,
-  DrawerCloseButton,
+  DrawerCloseTrigger,
   DrawerContent,
-  DrawerOverlay,
-  Flex,
-  IconButton,
-  Image,
-  Text,
-  useColorModeValue,
-  useDisclosure,
-} from "@chakra-ui/react"
+  DrawerRoot,
+  DrawerTrigger,
+} from "@/components/ui/drawer"
+import { Box, Flex, Image, Text, useDisclosure } from "@chakra-ui/react"
 import { useQueryClient } from "@tanstack/react-query"
 import { FiLogOut, FiMenu } from "react-icons/fi"
 
+import type { UserPublic } from "@/client"
+import useAuth from "@/hooks/useAuth"
 import Logo from "/assets/images/fastapi-logo.svg"
-import type { UserPublic } from "../../client"
-import useAuth from "../../hooks/useAuth"
+import { Button } from "../ui/button"
+import { NAVBAR_HEIGHT } from "./Navbar"
 import SidebarItems from "./SidebarItems"
 
-const Sidebar = () => {
+export const SidebarMobile = () => {
   const queryClient = useQueryClient()
-  const bgColor = useColorModeValue("ui.light", "ui.dark")
-  const textColor = useColorModeValue("ui.dark", "ui.light")
-  const secBgColor = useColorModeValue("ui.secondary", "ui.darkSlate")
   const currentUser = queryClient.getQueryData<UserPublic>(["currentUser"])
-  const { isOpen, onOpen, onClose } = useDisclosure()
+  const { open, onClose, onToggle } = useDisclosure()
   const { logout } = useAuth()
 
   const handleLogout = async () => {
@@ -36,19 +30,15 @@ const Sidebar = () => {
   return (
     <>
       {/* Mobile */}
-      <IconButton
-        onClick={onOpen}
-        display={{ base: "flex", md: "none" }}
-        aria-label="Open Menu"
-        position="absolute"
-        fontSize="20px"
-        m={4}
-        icon={<FiMenu />}
-      />
-      <Drawer isOpen={isOpen} placement="left" onClose={onClose}>
-        <DrawerOverlay />
-        <DrawerContent maxW="250px">
-          <DrawerCloseButton />
+      <DrawerRoot open={open} placement="start" onOpenChange={onToggle}>
+        <DrawerBackdrop />
+        <DrawerTrigger asChild display={{ base: "flex", md: "none" }}>
+          <Button aria-label="Open Menu" variant="ghost" fontSize="20px" m={2}>
+            <FiMenu />
+          </Button>
+        </DrawerTrigger>
+        <DrawerContent maxW="250px" display={{ base: "flex", md: "none" }}>
+          <DrawerCloseTrigger />
           <DrawerBody py={8}>
             <Flex flexDir="column" justify="space-between">
               <Box>
@@ -58,7 +48,7 @@ const Sidebar = () => {
                   as="button"
                   onClick={handleLogout}
                   p={2}
-                  color="ui.danger"
+                  colorPalette="red"
                   fontWeight="bold"
                   alignItems="center"
                 >
@@ -67,43 +57,42 @@ const Sidebar = () => {
                 </Flex>
               </Box>
               {currentUser?.email && (
-                <Text color={textColor} noOfLines={2} fontSize="sm" p={2}>
+                <Text lineClamp={2} fontSize="sm" p={2}>
                   Logged in as: {currentUser.email}
                 </Text>
               )}
             </Flex>
           </DrawerBody>
         </DrawerContent>
-      </Drawer>
+      </DrawerRoot>
+    </>
+  )
+}
 
-      {/* Desktop */}
+export const SidebarDesktop = () => {
+  const queryClient = useQueryClient()
+  const currentUser = queryClient.getQueryData<UserPublic>(["currentUser"])
+
+  return (
+    <>
       <Box
-        bg={bgColor}
-        p={3}
         h="100vh"
         position="sticky"
-        top="0"
+        top={0}
         display={{ base: "none", md: "flex" }}
       >
         <Flex
           flexDir="column"
           justify="space-between"
-          bg={secBgColor}
+          mt={NAVBAR_HEIGHT}
           p={4}
           borderRadius={12}
         >
           <Box>
-            <Image src={Logo} alt="Logo" w="180px" maxW="2xs" p={6} />
             <SidebarItems />
           </Box>
           {currentUser?.email && (
-            <Text
-              color={textColor}
-              noOfLines={2}
-              fontSize="sm"
-              p={2}
-              maxW="180px"
-            >
+            <Text lineClamp={2} fontSize="sm" p={2} maxW="180px">
               Logged in as: {currentUser.email}
             </Text>
           )}
@@ -112,5 +101,3 @@ const Sidebar = () => {
     </>
   )
 }
-
-export default Sidebar

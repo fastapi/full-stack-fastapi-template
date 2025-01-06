@@ -49,6 +49,10 @@ services:
     restart: "no"
     ports:
       - "5432:5432"
+    volumes:
+      - ./db/pg-init-scripts:/docker-entrypoint-initdb.d
+    environment:
+      - POSTGRES_TEST_DB=${POSTGRES_TEST_DB?Variable not set}
 
   adminer:
     restart: "no"

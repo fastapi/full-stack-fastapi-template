@@ -13,6 +13,7 @@ Before you begin, ensure that you have either the Node Version Manager (nvm) or 
 ```bash
 cd frontend
 ```
+
 * If the Node.js version specified in the `.nvmrc` file isn't installed on your system, you can install it using the appropriate command:
 
 ```bash
@@ -45,7 +46,7 @@ npm install
 npm run dev
 ```
 
-* Then open your browser at http://localhost:5173/.
+* Then open your browser at <http://localhost:5173/>.
 
 Notice that this live server is not running inside Docker, it's for local development, and that is the recommended workflow. Once you are happy with your frontend, you can build the frontend Docker image and start it, to test it in a production-like environment. But building the image at every change will not be as productive as running the local development server with live reload.
 
@@ -134,7 +135,7 @@ The frontend code is structured as follows:
 The frontend includes initial end-to-end tests using Playwright. To run the tests, you need to have the Docker Compose stack running. Start the stack with the following command:
 
 ```bash
-docker compose up -d --wait backend
+docker compose up -d --wait backend mailcatcher
 ```
 
 Then, you can run the tests with the following command:

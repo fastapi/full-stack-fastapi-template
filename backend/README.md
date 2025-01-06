@@ -16,13 +16,13 @@ By default, the dependencies are managed with [uv](https://docs.astral.sh/uv/), 
 From `./backend/` you can install all the dependencies with:
 
 ```console
-$ uv sync
+uv sync
 ```
 
 Then you can activate the virtual environment with:
 
 ```console
-$ source .venv/bin/activate
+source .venv/bin/activate
 ```
 
 Make sure your editor is using the correct Python virtual environment, with the interpreter at `backend/.venv/bin/python`.
@@ -35,6 +35,12 @@ There are already configurations in place to run the backend through the VS Code
 
 The setup is also already configured so you can run the tests through the VS Code Python tests tab.
 
+Copy the `.vscode/settings.example.json` for convenience:
+
+```console
+cp .vscode/settings.example.json .vscode/settings.json
+```
+
 ## Docker Compose Override
 
 During development, you can change Docker Compose settings that will only affect the local development environment in the file `docker-compose.override.yml`.
@@ -46,7 +52,7 @@ For example, the directory with the backend code is synchronized in the Docker c
 There is also a command override that runs `fastapi run --reload` instead of the default `fastapi run`. It starts a single server process (instead of multiple, as would be for production) and reloads the process whenever the code changes. Have in mind that if you have a syntax error and save the Python file, it will break and exit, and the container will stop. After that, you can restart the container by fixing the error and running again:
 
 ```console
-$ docker compose watch
+docker compose watch
 ```
 
 There is also a commented out `command` override, you can uncomment it and comment the default one. It makes the backend container run a process that does "nothing", but keeps the container alive. That allows you to get inside your running container and execute commands inside, for example a Python interpreter to test installed dependencies, or start the development server that reloads when it detects changes.
@@ -54,13 +60,13 @@ There is also a commented out `command` override, you can uncomment it and comme
 To get inside the container with a `bash` session you can start the stack with:
 
 ```console
-$ docker compose watch
+docker compose watch
 ```
 
 and then in another terminal, `exec` inside the running container:
 
 ```console
-$ docker compose exec backend bash
+docker compose exec backend bash
 ```
 
 You should see an output like:
@@ -74,7 +80,7 @@ that means that you are in a `bash` session inside your container, as a `root` u
 There you can use the `fastapi run --reload` command to run the debug live reloading server.
 
 ```console
-$ fastapi run --reload app/main.py
+fastapi run --reload app/main.py
 ```
 
 ...it will look like:
@@ -94,7 +100,7 @@ Nevertheless, if it doesn't detect a change but a syntax error, it will just sto
 To test the backend run:
 
 ```console
-$ bash ./scripts/test.sh
+bash ./scripts/test.sh
 ```
 
 The tests run with Pytest, modify and add tests to `./backend/app/tests/`.
@@ -130,7 +136,7 @@ Make sure you create a "revision" of your models and that you "upgrade" your dat
 * Start an interactive session in the backend container:
 
 ```console
-$ docker compose exec backend bash
+docker compose exec backend bash
 ```
 
 * Alembic is already configured to import your SQLModel models from `./backend/app/models.py`.
@@ -138,7 +144,7 @@ $ docker compose exec backend bash
 * After changing a model (for example, adding a column), inside the container, create a revision, e.g.:
 
 ```console
-$ alembic revision --autogenerate -m "Add column last_name to User model"
+alembic revision --autogenerate -m "Add column last_name to User model"
 ```
 
 * Commit to the git repository the files generated in the alembic directory.
@@ -146,7 +152,7 @@ $ alembic revision --autogenerate -m "Add column last_name to User model"
 * After creating the revision, run the migration in the database (this is what will actually change the database):
 
 ```console
-$ alembic upgrade head
+alembic upgrade head
 ```
 
 If you don't want to use migrations at all, uncomment the lines in the file at `./backend/app/core/db.py` that end in:
@@ -158,7 +164,7 @@ SQLModel.metadata.create_all(engine)
 and comment the line in the file `scripts/prestart.sh` that contains:
 
 ```console
-$ alembic upgrade head
+alembic upgrade head
 ```
 
 If you don't want to start with the default models and want to remove them / modify them, from the beginning, without having any previous revision, you can remove the revision files (`.py` Python files) under `./backend/app/alembic/versions/`. And then create a first migration as described above.

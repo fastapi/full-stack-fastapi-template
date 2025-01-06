@@ -1,25 +1,14 @@
-import { ViewIcon, ViewOffIcon } from "@chakra-ui/icons"
-import {
-  Button,
-  Container,
-  FormControl,
-  FormErrorMessage,
-  Icon,
-  Image,
-  Input,
-  InputGroup,
-  InputRightElement,
-  Link,
-  Text,
-  useBoolean,
-} from "@chakra-ui/react"
-import {
-  Link as RouterLink,
-  createFileRoute,
-  redirect,
-} from "@tanstack/react-router"
+import { Button } from "@/components/ui/button"
+import { Field } from "@/components/ui/field"
+import { ReactIcon } from "@/components/ui/icon"
+import { InputGroup } from "@/components/ui/input-group"
+import { RouterLink } from "@/components/ui/router-link"
+import { Container, Image, Input, Text } from "@chakra-ui/react"
+import { createFileRoute, redirect } from "@tanstack/react-router"
 import { type SubmitHandler, useForm } from "react-hook-form"
 
+import { FaEye, FaEyeSlash } from "react-icons/fa"
+import { useBoolean } from "usehooks-ts"
 import Logo from "/assets/images/fastapi-logo.svg"
 import type { Body_login_login_access_token as AccessToken } from "../client"
 import useAuth, { isLoggedIn } from "../hooks/useAuth"
@@ -37,7 +26,7 @@ export const Route = createFileRoute("/login")({
 })
 
 function Login() {
-  const [show, setShow] = useBoolean()
+  const { value: show, toggle } = useBoolean()
   const { loginMutation, error, resetError } = useAuth()
   const {
     register,
@@ -84,9 +73,11 @@ function Login() {
           alignSelf="center"
           mb={4}
         />
-        <FormControl id="username" isInvalid={!!errors.username || !!error}>
+        <Field
+          invalid={!!errors.username || !!error}
+          errorText={errors.username?.message}
+        >
           <Input
-            id="username"
             {...register("username", {
               required: "Username is required",
               pattern: emailPattern,
@@ -95,12 +86,19 @@ function Login() {
             type="email"
             required
           />
-          {errors.username && (
-            <FormErrorMessage>{errors.username.message}</FormErrorMessage>
-          )}
-        </FormControl>
-        <FormControl id="password" isInvalid={!!error}>
-          <InputGroup>
+        </Field>
+        <Field invalid={!!error} errorText={error}>
+          <InputGroup
+            width="100%"
+            endElement={
+              <ReactIcon
+                icon={show ? FaEyeSlash : FaEye}
+                cursor="pointer"
+                onClick={toggle}
+                aria-label={show ? "Hide password" : "Show password"}
+              />
+            }
+          >
             <Input
               {...register("password", {
                 required: "Password is required",
@@ -109,34 +107,19 @@ function Login() {
               placeholder="Password"
               required
             />
-            <InputRightElement
-              color="ui.dim"
-              _hover={{
-                cursor: "pointer",
-              }}
-            >
-              <Icon
-                as={show ? ViewOffIcon : ViewIcon}
-                onClick={setShow.toggle}
-                aria-label={show ? "Hide password" : "Show password"}
-              >
-                {show ? <ViewOffIcon /> : <ViewIcon />}
-              </Icon>
-            </InputRightElement>
           </InputGroup>
-          {error && <FormErrorMessage>{error}</FormErrorMessage>}
-        </FormControl>
-        <Link as={RouterLink} to="/recover-password" color="blue.500">
+        </Field>
+        <RouterLink to="/recover-password" color="blue.500">
           Forgot password?
-        </Link>
-        <Button variant="primary" type="submit" isLoading={isSubmitting}>
+        </RouterLink>
+        <Button colorPalette="blue" type="submit" loading={isSubmitting}>
           Log In
         </Button>
         <Text>
           Don't have an account?{" "}
-          <Link as={RouterLink} to="/signup" color="blue.500">
+          <RouterLink to="/signup" color="blue.500">
             Sign up
-          </Link>
+          </RouterLink>
         </Text>
       </Container>
     </>

@@ -1,5 +1,5 @@
 import { defineConfig, devices } from '@playwright/test';
-import 'dotenv/config'
+import 'dotenv/config';
 
 /**
  * Read environment variables from file.
@@ -28,6 +28,12 @@ export default defineConfig({
 
     /* Collect trace when retrying the failed test. See https://playwright.dev/docs/trace-viewer */
     trace: 'on-first-retry',
+
+    /* Add header to all HTTP requests. */
+    extraHTTPHeaders: {
+      /* Allows backend to switch to a test database for e2e tests. */
+      'X-Test-Environment': 'Playwright',
+    },
   },
 
   /* Configure projects for major browsers */

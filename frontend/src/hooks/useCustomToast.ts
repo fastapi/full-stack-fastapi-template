@@ -1,23 +1,28 @@
-import { useToast } from "@chakra-ui/react"
-import { useCallback } from "react"
+import { toaster } from "@/components/ui/toaster"
 
 const useCustomToast = () => {
-  const toast = useToast()
+  const showToast = (
+    title: string,
+    description: string,
+    type: "success" | "error",
+  ) => {
+    toaster.create({
+      title,
+      description,
+      type,
+      meta: { closable: true },
+    })
+  }
 
-  const showToast = useCallback(
-    (title: string, description: string, status: "success" | "error") => {
-      toast({
-        title,
-        description,
-        status,
-        isClosable: true,
-        position: "bottom-right",
-      })
-    },
-    [toast],
-  )
+  const showErrorToast = (description: string) => {
+    showToast("An error occured", description, "error")
+  }
 
-  return showToast
+  const showSuccessToast = (description: string) => {
+    showToast("Success!", description, "success")
+  }
+
+  return { showToast, showSuccessToast, showErrorToast }
 }
 
 export default useCustomToast
