@@ -4,9 +4,11 @@ WORKDIR /app
 
 COPY package*.json /app/
 
-RUN npm install
+RUN corepack enable
 
-RUN npx -y playwright install --with-deps
+RUN pnpm install
+
+RUN pnpm dlx playwright install --with-deps
 
 COPY ./ /app/
 

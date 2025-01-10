@@ -8,5 +8,5 @@ python -c "import app.main; import json; print(json.dumps(app.main.app.openapi()
 cd ..
 mv openapi.json frontend/
 cd frontend
-npm run generate-client
-npx biome format --write ./src/client
+pnpm run generate-client
+pnpm exec biome format --write ./src/client
