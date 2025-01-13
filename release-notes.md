@@ -7,6 +7,10 @@
 * ✨ Add private, local only, API for usage in E2E tests. PR [#1429](https://github.com/fastapi/full-stack-fastapi-template/pull/1429) by [@patrick91](https://github.com/patrick91).
 * ✨ Migrate to latest openapi-ts. PR [#1430](https://github.com/fastapi/full-stack-fastapi-template/pull/1430) by [@patrick91](https://github.com/patrick91).
 
+### Fixes
+
+* 🧑‍🔧 Replace correct value for 'htmlFor'. PR [#1456](https://github.com/fastapi/full-stack-fastapi-template/pull/1456) by [@wesenbergg](https://github.com/wesenbergg).
+
 ### Refactors
 
 * 🎨 Move `prefix` and `tags` to routers. PR [#1439](https://github.com/fastapi/full-stack-fastapi-template/pull/1439) by [@patrick91](https://github.com/patrick91).
@@ -17,6 +21,10 @@
 * 🔊 Enable logging for email utils by default. PR [#1374](https://github.com/fastapi/full-stack-fastapi-template/pull/1374) by [@ihmily](https://github.com/ihmily).
 * 🔧 Add `ENV PYTHONUNBUFFERED=1` to log output directly to Docker. PR [#1378](https://github.com/fastapi/full-stack-fastapi-template/pull/1378) by [@tiangolo](https://github.com/tiangolo).
 * 💡 Remove unnecessary comment. PR [#1260](https://github.com/fastapi/full-stack-fastapi-template/pull/1260) by [@sebhani](https://github.com/sebhani).
+
+### Upgrades
+
+* ⬆️ Update Dockerfile to use uv version 0.5.11. PR [#1454](https://github.com/fastapi/full-stack-fastapi-template/pull/1454) by [@alejsdev](https://github.com/alejsdev).
 
 ### Docs
 
