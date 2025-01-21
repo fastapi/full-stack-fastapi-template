@@ -25,8 +25,5 @@ def init_db() -> None:
                 is_superuser=True,
             )
             user = crud.create_user(session=session, user_create=user_in)
-            print("======================"*10)
-            print(f"{user=}")
-            print("======================"*10)
 
     print("Database initialized successfully!")
