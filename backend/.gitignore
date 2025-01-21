@@ -6,3 +6,5 @@ app.egg-info
 htmlcov
 .cache
 .venv
+backend/data/*.db
+.env
