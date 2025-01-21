@@ -6,17 +6,13 @@ from app.models import User, UserCreate
 from app import crud
 
 
-# print(settings.SQLALCHEMY_DATABASE_URI)
 engine = create_engine(str(settings.SQLALCHEMY_DATABASE_URI),  connect_args={"check_same_thread": False}, echo=True)
 
 
 def init_db() -> None:
-
-    # Ensure all tables exist
     SQLModel.metadata.create_all(engine)
 
     with Session(engine) as session:
-        # Check if superuser exists
         user: User | None = session.exec(select(User).where(User.email == settings.FIRST_SUPERUSER)).first()
         if not user:
             user_in = UserCreate(
