@@ -1,10 +1,11 @@
 import uuid
 from typing import Any
+from uuid import UUID
 
 from sqlmodel import Session, select
 
 from app.core.security import get_password_hash, verify_password
-from app.models import Item, ItemCreate, User, UserCreate, UserUpdate
+from app.models import Item, ItemCreate, User, UserCreate, UserUpdate, Meeting, MeetingCreate, MeetingUpdate
 
 
 def create_user(*, session: Session, user_create: UserCreate) -> User:
@@ -52,3 +53,43 @@ def create_item(*, session: Session, item_in: ItemCreate, owner_id: uuid.UUID) -
     session.commit()
     session.refresh(db_item)
     return db_item
+
+
+def create_meeting(*, session: Session, meeting_in: MeetingCreate) -> Meeting:
+    db_obj = Meeting.model_validate(meeting_in)
+    session.add(db_obj)
+    session.commit()
+    session.refresh(db_obj)
+    return db_obj
+
+
+def get_meeting(*, session: Session, meeting_id: UUID) -> Meeting | None:
+    return session.get(Meeting, meeting_id)
+
+
+def get_meetings(
+    *, session: Session, skip: int = 0, limit: int = 100
+) -> tuple[list[Meeting], int]:
+    statement = select(Meeting).offset(skip).limit(limit)
+    meetings = session.exec(statement).all()
+    total = session.query(Meeting).count()
+    return meetings, total
+
+
+def update_meeting(
+    *, session: Session, db_obj: Meeting, obj_in: MeetingUpdate
+) -> Meeting:
+    update_data = obj_in.model_dump(exclude_unset=True)
+    db_obj.sqlmodel_update(update_data)
+    session.add(db_obj)
+    session.commit()
+    session.refresh(db_obj)
+    return db_obj
+
+
+def delete_meeting(*, session: Session, meeting_id: UUID) -> Meeting | None:
+    meeting = session.get(Meeting, meeting_id)
+    if meeting:
+        session.delete(meeting)
+        session.commit()
+    return meeting
