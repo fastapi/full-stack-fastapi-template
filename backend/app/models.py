@@ -1,7 +1,8 @@
 import uuid
 
-from pydantic import EmailStr
+from pydantic import EmailStr, HttpUrl
 from sqlmodel import Field, Relationship, SQLModel
+from datetime import datetime
 
 
 # Shared properties
@@ -112,3 +113,54 @@ class TokenPayload(SQLModel):
 class NewPassword(SQLModel):
     token: str
     new_password: str = Field(min_length=8, max_length=40)
+
+# TreadEd specific models
+## Database models
+class Path(SQLModel, table=True):
+    id: uuid.UUID = Field(default_factory=uuid.uuid4, primary_key=True)
+    creator_id: uuid.UUID = Field(foreign_key="user.id", nullable=False)
+    title: str = Field(max_length=255)
+    path_summary: str | None = Field(default=None, max_length=255)
+    created_at: datetime = Field(default_factory=datetime.utcnow)
+    updated_at: datetime = Field(default_factory=datetime.utcnow)
+    steps: list["Step"] = Relationship(back_populates="path", cascade_delete=True)
+
+class YoutubeExposition(SQLModel):
+    url: HttpUrl
+    start_time: int | None = Field(default=None, ge=0)
+    end_time: int | None = Field(default=None, ge=0)
+
+class Step(SQLModel, table=True):
+    id: int = Field(default=None, primary_key=True)
+    path_id: uuid.UUID = Field(foreign_key="path.id", nullable=False)
+    number: int = Field(ge=0)
+    validation_scope: int | None = None
+    role_prompt: dict | None = Field(default=None)
+    validation_prompt: dict | None = Field(default=None)
+    exposition: YoutubeExposition | None = Field(default=None)
+    path: Path = Relationship(back_populates="steps")
+
+# API Models
+class PathCreate(SQLModel):
+    title: str
+    path_summary: str | None = None
+    steps: list[StepCreate]  # Make steps required for path creation
+
+class PathResponse(SQLModel):
+    id: uuid.UUID
+    title: str
+    path_summary: str | None
+    steps: list[StepResponse]  # Always include steps with path
+
+class StepCreate(SQLModel):
+    number: int
+    role_prompt: dict | None = None
+    validation_prompt: dict | None = Field(default=None)
+    exposition: YoutubeExposition | None = None
+
+class StepResponse(SQLModel):
+    id: int
+    number: int
+    role_prompt: dict | None = None
+    validation_prompt: dict | None = Field(default=None)
+    exposition: YoutubeExposition | None = None
