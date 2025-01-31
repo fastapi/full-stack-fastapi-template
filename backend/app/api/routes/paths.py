@@ -2,17 +2,18 @@ import uuid
 from typing import Any
 from datetime import datetime
 
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, HTTPException
 from sqlmodel import Session, select, func
 
 from app.api.deps import CurrentUser, SessionDep
 from app.models import (
-    Path, Step, PathCreate, PathResponse, StepCreate, User
+    Path, Step, PathCreate, PathPublic, PathInList, PathsPublic,
+    utc_now
 )
 
 router = APIRouter(prefix="/paths", tags=["paths"])
 
-@router.get("/", response_model=list[PathResponse])
+@router.get("/", response_model=PathsPublic)
 async def list_paths(
     session: SessionDep,
     current_user: CurrentUser,
@@ -20,17 +21,39 @@ async def list_paths(
     limit: int = 100,
 ) -> Any:
     """
-    Retrieve paths with their steps.
+    Retrieve paths without loading steps.
     """
-    paths = session.exec(
+    # Get total count
+    count_statement = (
+        select(func.count())
+        .select_from(Path)
+        .where(Path.creator_id == current_user.id)
+    )
+    count = session.exec(count_statement).one()
+
+    # Get paths without loading steps
+    statement = (
         select(Path)
         .where(Path.creator_id == current_user.id)
         .offset(skip)
         .limit(limit)
-    ).all()
-    return paths
+    )
+    paths = session.exec(statement).all()
+    
+    # Convert to PathInList responses
+    path_responses = [
+        PathInList(
+            id=path.id,
+            title=path.title,
+            path_summary=path.path_summary,
+            created_at=path.created_at,
+        )
+        for path in paths
+    ]
+    
+    return PathsPublic(data=path_responses, count=count)
 
-@router.get("/{path_id}", response_model=PathResponse)
+@router.get("/{path_id}", response_model=PathPublic)
 async def get_path(
     *,
     session: SessionDep,
@@ -40,14 +63,20 @@ async def get_path(
     """
     Get path by ID with all its steps.
     """
-    path = session.get(Path, path_id)
+    # Use select to explicitly join with steps
+    statement = (
+        select(Path)
+        .where(Path.id == path_id)
+        .where(Path.creator_id == current_user.id)
+    )
+    path = session.exec(statement).first()
+    
     if not path:
         raise HTTPException(status_code=404, detail="Path not found")
-    if path.creator_id != current_user.id:
-        raise HTTPException(status_code=403, detail="Not enough permissions")
+
     return path
 
-@router.post("/", response_model=PathResponse)
+@router.post("/", response_model=PathPublic)
 async def create_path(
     *,
     session: SessionDep,
@@ -67,12 +96,17 @@ async def create_path(
 
     # Create steps with proper ordering
     for step_data in path_in.steps:
+        # Convert YoutubeExposition to JSON if present
+        exposition_json = None
+        if step_data.exposition:
+            exposition_json = step_data.exposition.model_dump_json()
+
         step = Step(
             path_id=path.id,
             number=step_data.number,
             role_prompt=step_data.role_prompt,
             validation_prompt=step_data.validation_prompt,
-            exposition=step_data.exposition,
+            exposition_json=exposition_json,
         )
         session.add(step)
     
@@ -80,7 +114,7 @@ async def create_path(
     session.refresh(path)
     return path
 
-@router.put("/{path_id}", response_model=PathResponse)
+@router.put("/{path_id}", response_model=PathPublic)
 async def update_path(
     *,
     session: SessionDep,
@@ -97,26 +131,31 @@ async def update_path(
     if path.creator_id != current_user.id:
         raise HTTPException(status_code=403, detail="Not enough permissions")
 
-    # Update path attributes
+    # Update path fields
     path.title = path_in.title
     path.path_summary = path_in.path_summary
-    path.updated_at = datetime.utcnow()
+    path.updated_at = utc_now()
 
-    # Replace all steps
-    session.query(Step).filter(Step.path_id == path_id).delete()
+    # Delete existing steps
+    for step in path.steps:
+        session.delete(step)
     
     # Create new steps
     for step_data in path_in.steps:
+        # Convert YoutubeExposition to JSON if present
+        exposition_json = None
+        if step_data.exposition:
+            exposition_json = step_data.exposition.model_dump_json()
+
         step = Step(
-            path_id=path_id,
+            path_id=path.id,
             number=step_data.number,
             role_prompt=step_data.role_prompt,
             validation_prompt=step_data.validation_prompt,
-            exposition=step_data.exposition,
+            exposition_json=exposition_json,
         )
         session.add(step)
 
-    session.add(path)
     session.commit()
     session.refresh(path)
     return path
@@ -127,7 +166,7 @@ async def delete_path(
     session: SessionDep,
     current_user: CurrentUser,
     path_id: uuid.UUID,
-) -> dict:
+) -> Any:
     """
     Delete a path and all its steps.
     """
@@ -136,7 +175,7 @@ async def delete_path(
         raise HTTPException(status_code=404, detail="Path not found")
     if path.creator_id != current_user.id:
         raise HTTPException(status_code=403, detail="Not enough permissions")
-    
-    session.delete(path)
+
+    session.delete(path)  # This will cascade delete steps due to relationship
     session.commit()
     return {"message": "Path deleted successfully"}
