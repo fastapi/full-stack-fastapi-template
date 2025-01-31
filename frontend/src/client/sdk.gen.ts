@@ -218,11 +218,11 @@ export class LoginService {
 export class PathsService {
     /**
      * List Paths
-     * Retrieve paths with their steps.
+     * Retrieve paths without loading steps.
      * @param data The data for the request.
      * @param data.skip
      * @param data.limit
-     * @returns PathResponse Successful Response
+     * @returns PathsPublic Successful Response
      * @throws ApiError
      */
     public static listPaths(data: PathsListPathsData = {}): CancelablePromise<PathsListPathsResponse> {
@@ -244,7 +244,7 @@ export class PathsService {
      * Create a new path with its steps.
      * @param data The data for the request.
      * @param data.requestBody
-     * @returns PathResponse Successful Response
+     * @returns PathPublic Successful Response
      * @throws ApiError
      */
     public static createPath(data: PathsCreatePathData): CancelablePromise<PathsCreatePathResponse> {
@@ -264,7 +264,7 @@ export class PathsService {
      * Get path by ID with all its steps.
      * @param data The data for the request.
      * @param data.pathId
-     * @returns PathResponse Successful Response
+     * @returns PathPublic Successful Response
      * @throws ApiError
      */
     public static getPath(data: PathsGetPathData): CancelablePromise<PathsGetPathResponse> {
@@ -286,7 +286,7 @@ export class PathsService {
      * @param data The data for the request.
      * @param data.pathId
      * @param data.requestBody
-     * @returns PathResponse Successful Response
+     * @returns PathPublic Successful Response
      * @throws ApiError
      */
     public static updatePath(data: PathsUpdatePathData): CancelablePromise<PathsUpdatePathResponse> {

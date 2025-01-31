@@ -50,11 +50,23 @@ export type PathCreate = {
     steps: Array<StepCreate>;
 };
 
-export type PathResponse = {
+export type PathInList = {
     id: string;
     title: string;
     path_summary: (string | null);
-    steps: Array<StepResponse>;
+    created_at: string;
+};
+
+export type PathPublic = {
+    id: string;
+    title: string;
+    path_summary: (string | null);
+    steps: Array<StepPublic>;
+};
+
+export type PathsPublic = {
+    data: Array<PathInList>;
+    count: number;
 };
 
 export type PrivateUserCreate = {
@@ -71,7 +83,7 @@ export type StepCreate = {
     exposition?: (YoutubeExposition | null);
 };
 
-export type StepResponse = {
+export type StepPublic = {
     id: number;
     number: number;
     role_prompt?: (string | null);
@@ -204,34 +216,32 @@ export type PathsListPathsData = {
     skip?: number;
 };
 
-export type PathsListPathsResponse = (Array<PathResponse>);
+export type PathsListPathsResponse = (PathsPublic);
 
 export type PathsCreatePathData = {
     requestBody: PathCreate;
 };
 
-export type PathsCreatePathResponse = (PathResponse);
+export type PathsCreatePathResponse = (PathPublic);
 
 export type PathsGetPathData = {
     pathId: string;
 };
 
-export type PathsGetPathResponse = (PathResponse);
+export type PathsGetPathResponse = (PathPublic);
 
 export type PathsUpdatePathData = {
     pathId: string;
     requestBody: PathCreate;
 };
 
-export type PathsUpdatePathResponse = (PathResponse);
+export type PathsUpdatePathResponse = (PathPublic);
 
 export type PathsDeletePathData = {
     pathId: string;
 };
 
-export type PathsDeletePathResponse = ({
-    [key: string]: unknown;
-});
+export type PathsDeletePathResponse = (unknown);
 
 export type PrivateCreateUserData = {
     requestBody: PrivateUserCreate;

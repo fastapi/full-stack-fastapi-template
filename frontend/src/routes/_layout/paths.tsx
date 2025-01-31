@@ -1,4 +1,3 @@
-import React from "react"
 import {
   Container,
   Heading,
@@ -47,7 +46,7 @@ function PathsTable() {
   const setPage = (page: number) =>
     navigate({ 
       to: "/paths",
-      search: (prev) => ({ ...prev, page }) 
+      search: (prev: {[key: string]: string}) => ({ ...prev, page }) 
     })
 
   const {
@@ -76,14 +75,13 @@ function PathsTable() {
             <Tr>
               <Th>Title</Th>
               <Th>Summary</Th>
-              <Th>Steps</Th>
               <Th>Actions</Th>
             </Tr>
           </Thead>
           {isPending ? (
             <Tbody>
               <Tr>
-                {new Array(4).fill(null).map((_, index) => (
+                {new Array(3).fill(null).map((_, index) => (
                   <Td key={index}>
                     <SkeletonText noOfLines={1} paddingBlock="16px" />
                   </Td>
@@ -104,7 +102,6 @@ function PathsTable() {
                   >
                     {path.path_summary || "N/A"}
                   </Td>
-                  <Td>{path.steps?.length || 0}</Td>
                   <Td>
                     <ActionsMenu
                       type="Path"
