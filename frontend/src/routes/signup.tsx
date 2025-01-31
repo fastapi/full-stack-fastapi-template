@@ -147,12 +147,12 @@ function SignUp() {
             )}
           </FormControl>
           <Button variant="primary" type="submit" isLoading={isSubmitting}>
-            Sign Up
+            Выйти
           </Button>
           <Text>
             Already have an account?{" "}
             <Link as={RouterLink} to="/login" color="blue.500">
-              Log In
+              Вход
             </Link>
           </Text>
         </Container>
