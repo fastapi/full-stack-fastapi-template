@@ -1,7 +1,7 @@
 """add path and step models
 
 Revision ID: ea8d60701d49
-Revises: 1a31ce608336
+Revises: e2412789c190
 Create Date: 2025-01-31 17:08:00.000000
 
 """
@@ -14,7 +14,7 @@ import sqlmodel
 
 # revision identifiers, used by Alembic.
 revision: str = 'ea8d60701d49'
-down_revision: Union[str, None] = '1a31ce608336'
+down_revision: Union[str, None] = 'e2412789c190'
 branch_labels: Union[str, Sequence[str], None] = None
 depends_on: Union[str, Sequence[str], None] = None
 
