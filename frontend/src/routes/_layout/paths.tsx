@@ -17,6 +17,7 @@ import { z } from "zod"
 
 import { PathsService } from "../../client"
 import ActionsMenu from "../../components/Common/ActionsMenu"
+import AddPathButton from "../../components/Paths/AddPathButton"
 import Navbar from "../../components/Common/Navbar"
 import { PaginationFooter } from "../../components/Common/PaginationFooter"
 
@@ -106,8 +107,6 @@ function PathsTable() {
                     <ActionsMenu
                       type="Path"
                       value={path}
-                      onEdit={() => navigate({ to: `/paths/${path.id}/edit` })}
-                      onView={() => navigate({ to: `/paths/${path.id}` })}
                     />
                   </Td>
                 </Tr>
@@ -133,7 +132,7 @@ function Paths() {
         Learning Paths
       </Heading>
 
-      <Navbar type="Path" addModalAs={() => null} />
+      <Navbar type="Path" addModalAs={AddPathButton} />
       <PathsTable />
     </Container>
   )
