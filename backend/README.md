@@ -3,6 +3,7 @@
 ## Requirements
 
 * [Docker](https://www.docker.com/).
+* [docker compose >= 2.20] to use the [`watch` command](https://docs.docker.com/compose/how-tos/file-watch/).
 * [uv](https://docs.astral.sh/uv/) for Python package and environment management.
 
 ## Docker Compose
