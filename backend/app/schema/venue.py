@@ -42,7 +42,6 @@ class QSRCreate(BaseModel):
 # Restaurant Schemas
 class RestaurantCreate(BaseModel):
     cuisine_type: str | None = None
-    venue_id: uuid.UUID
     venue: VenueCreate
 
     class Config:
