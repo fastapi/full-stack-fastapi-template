@@ -16,10 +16,10 @@ import { useEffect } from "react"
 import { z } from "zod"
 
 import { PathsService } from "../../client"
-import ActionsMenu from "../../components/Common/ActionsMenu"
 import AddPathButton from "../../components/Paths/AddPathButton"
 import Navbar from "../../components/Common/Navbar"
 import { PaginationFooter } from "../../components/Common/PaginationFooter"
+import PathActionButtons from '../../components/Paths/PathActionButtons';
 
 const pathsSearchSchema = z.object({
   page: z.number().catch(1),
@@ -76,7 +76,7 @@ function PathsTable() {
             <Tr>
               <Th>Title</Th>
               <Th>Summary</Th>
-              <Th>Actions</Th>
+              <Th width="1"></Th>
             </Tr>
           </Thead>
           {isPending ? (
@@ -103,11 +103,8 @@ function PathsTable() {
                   >
                     {path.path_summary || "N/A"}
                   </Td>
-                  <Td>
-                    <ActionsMenu
-                      type="Path"
-                      value={path}
-                    />
+                  <Td textAlign="right">
+                    <PathActionButtons pathId={path.id} />
                   </Td>
                 </Tr>
               ))}

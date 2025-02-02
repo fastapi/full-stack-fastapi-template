@@ -8,7 +8,7 @@ const paramsSchema = z.object({
   pathId: z.string(),
 })
 
-export const Route = createFileRoute("/paths/$pathId")({
+export const Route = createFileRoute("/paths/$pathId/")({
   component: ViewPath,
   validateParams: (params) => paramsSchema.parse(params),
 })

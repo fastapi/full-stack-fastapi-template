@@ -11,7 +11,7 @@ import { useMutation, useQueryClient } from "@tanstack/react-query"
 import React from "react"
 import { useForm } from "react-hook-form"
 
-import { ItemsService, UsersService } from "../../client"
+import { ItemsService, UsersService, PathsService } from "../../client"
 import useCustomToast from "../../hooks/useCustomToast"
 
 interface DeleteProps {
@@ -35,38 +35,43 @@ const Delete = ({ type, id, isOpen, onClose }: DeleteProps) => {
       await ItemsService.deleteItem({ id: id })
     } else if (type === "User") {
       await UsersService.deleteUser({ userId: id })
+    } else if (type === "Path") {
+      await PathsService.deletePath({ pathId: id })
     } else {
       throw new Error(`Unexpected type: ${type}`)
     }
   }
 
   const mutation = useMutation({
-    mutationFn: deleteEntity,
+    mutationFn: () => deleteEntity(id),
     onSuccess: () => {
       showToast(
         "Success",
         `The ${type.toLowerCase()} was deleted successfully.`,
         "success",
       )
+      // Invalidate the correct query based on type
+      if (type === "Path") {
+        queryClient.invalidateQueries({ queryKey: ["paths"] })
+      } else if (type === "Item") {
+        queryClient.invalidateQueries({ queryKey: ["items"] })
+      } else if (type === "User") {
+        queryClient.invalidateQueries({ queryKey: ["users"] })
+      }
       onClose()
     },
     onError: () => {
       showToast(
-        "An error occurred.",
+        "An error occurred",
         `An error occurred while deleting the ${type.toLowerCase()}.`,
         "error",
       )
     },
-    onSettled: () => {
-      queryClient.invalidateQueries({
-        queryKey: [type === "Item" ? "items" : "users"],
-      })
-    },
   })
 
-  const onSubmit = async () => {
-    mutation.mutate(id)
-  }
+  const onSubmit = handleSubmit(() => {
+    mutation.mutate()
+  })
 
   return (
     <>
@@ -78,7 +83,7 @@ const Delete = ({ type, id, isOpen, onClose }: DeleteProps) => {
         isCentered
       >
         <AlertDialogOverlay>
-          <AlertDialogContent as="form" onSubmit={handleSubmit(onSubmit)}>
+          <AlertDialogContent as="form" onSubmit={onSubmit}>
             <AlertDialogHeader>Delete {type}</AlertDialogHeader>
 
             <AlertDialogBody>

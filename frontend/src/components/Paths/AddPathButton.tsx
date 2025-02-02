@@ -1,18 +1,18 @@
+import { Button, Icon } from "@chakra-ui/react"
 import { useNavigate } from "@tanstack/react-router"
+import { FaPlus } from "react-icons/fa"
 
-interface AddPathButtonProps {
-  isOpen: boolean
-  onClose: () => void
-}
-
-export default function AddPathButton({ isOpen, onClose }: AddPathButtonProps) {
+export default function AddPathButton() {
   const navigate = useNavigate()
 
-  // Redirect to create page when "opened"
-  if (isOpen) {
-    navigate({ to: "/paths/create" })
-    onClose()
-  }
-
-  return null
+  return (
+    <Button
+      variant="primary"
+      gap={1}
+      fontSize={{ base: "sm", md: "inherit" }}
+      onClick={() => navigate({ to: "/paths/create" })}
+    >
+      <Icon as={FaPlus} /> Add Path
+    </Button>
+  )
 }

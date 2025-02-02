@@ -3,7 +3,7 @@ import { createFileRoute } from "@tanstack/react-router"
 import React from "react"
 import { z } from "zod"
 
-export const Route = createFileRoute("/paths/create")({
+export const Route = createFileRoute("/paths/create/")({
   component: CreatePath,
   validateSearch: () => ({}),
 })

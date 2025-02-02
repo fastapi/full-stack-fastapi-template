@@ -16,11 +16,13 @@ import { Route as ResetPasswordImport } from './routes/reset-password'
 import { Route as RecoverPasswordImport } from './routes/recover-password'
 import { Route as LoginImport } from './routes/login'
 import { Route as LayoutImport } from './routes/_layout'
-import { Route as LayoutPathsImport } from './routes/_layout/paths'
 import { Route as LayoutIndexImport } from './routes/_layout/index'
 import { Route as LayoutSettingsImport } from './routes/_layout/settings'
+import { Route as LayoutPathsImport } from './routes/_layout/paths'
 import { Route as LayoutItemsImport } from './routes/_layout/items'
 import { Route as LayoutAdminImport } from './routes/_layout/admin'
+import { Route as PathsCreateIndexImport } from './routes/paths/create/index'
+import { Route as PathsPathIdIndexImport } from './routes/paths/$pathId/index'
 
 // Create/Update Routes
 
@@ -49,11 +51,6 @@ const LayoutRoute = LayoutImport.update({
   getParentRoute: () => rootRoute,
 } as any)
 
-const LayoutPathsRoute = LayoutPathsImport.update({
-  path: '/paths',
-  getParentRoute: () => LayoutRoute,
-} as any)
-
 const LayoutIndexRoute = LayoutIndexImport.update({
   path: '/',
   getParentRoute: () => LayoutRoute,
@@ -61,6 +58,11 @@ const LayoutIndexRoute = LayoutIndexImport.update({
 
 const LayoutSettingsRoute = LayoutSettingsImport.update({
   path: '/settings',
+  getParentRoute: () => LayoutRoute,
+} as any)
+
+const LayoutPathsRoute = LayoutPathsImport.update({
+  path: '/paths',
   getParentRoute: () => LayoutRoute,
 } as any)
 
@@ -72,6 +74,16 @@ const LayoutItemsRoute = LayoutItemsImport.update({
 const LayoutAdminRoute = LayoutAdminImport.update({
   path: '/admin',
   getParentRoute: () => LayoutRoute,
+} as any)
+
+const PathsCreateIndexRoute = PathsCreateIndexImport.update({
+  path: '/paths/create/',
+  getParentRoute: () => rootRoute,
+} as any)
+
+const PathsPathIdIndexRoute = PathsPathIdIndexImport.update({
+  path: '/paths/$pathId/',
+  getParentRoute: () => rootRoute,
 } as any)
 
 // Populate the FileRoutesByPath interface
@@ -106,6 +118,10 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof LayoutItemsImport
       parentRoute: typeof LayoutImport
     }
+    '/_layout/paths': {
+      preLoaderRoute: typeof LayoutPathsImport
+      parentRoute: typeof LayoutImport
+    }
     '/_layout/settings': {
       preLoaderRoute: typeof LayoutSettingsImport
       parentRoute: typeof LayoutImport
@@ -114,9 +130,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof LayoutIndexImport
       parentRoute: typeof LayoutImport
     }
-    '/_layout/paths': {
-      preLoaderRoute: typeof LayoutPathsImport
-      parentRoute: typeof LayoutImport
+    '/paths/$pathId/': {
+      preLoaderRoute: typeof PathsPathIdIndexImport
+      parentRoute: typeof rootRoute
+    }
+    '/paths/create/': {
+      preLoaderRoute: typeof PathsCreateIndexImport
+      parentRoute: typeof rootRoute
     }
   }
 }
@@ -127,14 +147,16 @@ export const routeTree = rootRoute.addChildren([
   LayoutRoute.addChildren([
     LayoutAdminRoute,
     LayoutItemsRoute,
+    LayoutPathsRoute,
     LayoutSettingsRoute,
     LayoutIndexRoute,
-    LayoutPathsRoute,
   ]),
   LoginRoute,
   RecoverPasswordRoute,
   ResetPasswordRoute,
   SignupRoute,
+  PathsPathIdIndexRoute,
+  PathsCreateIndexRoute,
 ])
 
 /* prettier-ignore-end */

@@ -14,6 +14,8 @@ import EditUser from "../Admin/EditUser"
 import EditItem from "../Items/EditItem"
 import Delete from "./DeleteAlert"
 
+import { useNavigate } from "@tanstack/react-router"
+
 interface ActionsMenuProps {
   type: string
   value: ItemPublic | UserPublic | PathInList
@@ -22,7 +24,20 @@ interface ActionsMenuProps {
 
 const ActionsMenu = ({ type, value, disabled }: ActionsMenuProps) => {
   const editUserModal = useDisclosure()
+  const editItemModal = useDisclosure()
   const deleteModal = useDisclosure()
+  const navigate = useNavigate()
+
+  const handleEdit = () => {
+    if (type === "Path") {
+      const path = value as PathInList
+      navigate({ to: `/paths/${path.id}` })  // Match the route in /routes/paths/$pathId/index.tsx
+    } else if (type === "Item") {
+      editItemModal.onOpen()
+    } else if (type === "User") {
+      editUserModal.onOpen()
+    }
+  }
 
   return (
     <>
@@ -35,7 +50,11 @@ const ActionsMenu = ({ type, value, disabled }: ActionsMenuProps) => {
         />
         <MenuList>
           <MenuItem
-            onClick={editUserModal.onOpen}
+            onClick={() => {
+              console.log('Edit clicked, type:', type)
+              console.log('Edit clicked, value:', value)
+              handleEdit()
+            }}
             icon={<FiEdit fontSize="16px" />}
           >
             Edit {type}
@@ -48,17 +67,18 @@ const ActionsMenu = ({ type, value, disabled }: ActionsMenuProps) => {
             Delete {type}
           </MenuItem>
         </MenuList>
-        {type === "User" ? (
+        {type === "User" && (
           <EditUser
             user={value as UserPublic}
             isOpen={editUserModal.isOpen}
             onClose={editUserModal.onClose}
           />
-        ) : (
+        )}
+        {type === "Item" && (
           <EditItem
             item={value as ItemPublic}
-            isOpen={editUserModal.isOpen}
-            onClose={editUserModal.onClose}
+            isOpen={editItemModal.isOpen}
+            onClose={editItemModal.onClose}
           />
         )}
         <Delete
