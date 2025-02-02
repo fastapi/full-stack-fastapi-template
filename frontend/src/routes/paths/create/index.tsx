@@ -22,29 +22,45 @@ import { AddIcon, DeleteIcon, ViewIcon } from "@chakra-ui/icons"
 import { YouTubePlayer } from "../../../components/Common/YouTubePlayer"
 import { extractVideoId } from "../../../utils/youtube"
 import { VideoRangeSlider } from "../../../components/Common/VideoRangeSlider"
+import { PathCreate, StepCreate, PathsService } from "../../../client"
 
 const stepSchema = z.object({
-  id: z.number(),
-  title: z.string().min(1, "Title is required"),
+  rolePrompt: z.string().optional(),
+  validationPrompt: z.string().optional(),
   content: z.object({
     type: z.enum(["video", "text", "none"]),
     source: z.string(),
     segment: z.object({
-      start: z.number().min(0),
-      end: z.number().min(0),
-    }).optional(),
-  }),
-  rolePrompt: z.string().min(1, "Role prompt is required"),
-  validationPrompt: z.string().min(1, "Validation prompt is required"),
+      start: z.number(),
+      end: z.number()
+    })
+  })
 })
 
-const createPathSchema = z.object({
+const formSchema = z.object({
   title: z.string().min(1, "Title is required"),
-  path_summary: z.string().min(1, "Summary is required"),
-  steps: z.array(stepSchema),
+  pathSummary: z.string().optional(),
+  steps: z.array(stepSchema)
 })
 
-type CreatePathInput = z.infer<typeof createPathSchema>
+type FormData = z.infer<typeof formSchema>
+
+const transformFormToApi = (formData: FormData): PathCreate => {
+  return {
+    title: formData.title,
+    path_summary: formData.pathSummary,
+    steps: formData.steps.map((step, index): StepCreate => ({
+      number: index + 1,
+      role_prompt: step.rolePrompt,
+      validation_prompt: step.validationPrompt,
+      exposition: step.content.type === "video" ? {
+        url: step.content.source,
+        start_time: step.content.segment.start,
+        end_time: step.content.segment.end
+      } : null
+    }))
+  }
+}
 
 export const Route = createFileRoute("/paths/create/")({
   component: CreatePath,
@@ -58,11 +74,11 @@ function CreatePath() {
     setValue,
     watch,
     formState: { errors, isSubmitting },
-  } = useForm<CreatePathInput>({
-    resolver: zodResolver(createPathSchema),
+  } = useForm<FormData>({
+    resolver: zodResolver(formSchema),
     defaultValues: {
       title: "",
-      path_summary: "",
+      pathSummary: "",
       steps: [],
     },
   })
@@ -71,8 +87,8 @@ function CreatePath() {
 
   const addStep = () => {
     const newStep = {
-      id: Date.now(),
-      title: "",
+      rolePrompt: "",
+      validationPrompt: "",
       content: {
         type: "none" as const,
         source: "",
@@ -81,8 +97,6 @@ function CreatePath() {
           end: 0,
         },
       },
-      rolePrompt: "",
-      validationPrompt: "",
     }
     setValue("steps", [...steps, newStep])
   }
@@ -90,18 +104,23 @@ function CreatePath() {
   const removeStep = (stepId: number) => {
     setValue(
       "steps",
-      steps.filter((step) => step.id !== stepId)
+      steps.filter((step, index) => index !== stepId)
     )
   }
 
   const [videoDurations, setVideoDurations] = useState<Record<number, number>>({})
 
-  const onSubmit = async (data: CreatePathInput) => {
+  const onSubmit = async (data: FormData) => {
+    console.log('Form submitted with data:', data)
     try {
-      // TODO: Implement path creation
-      console.log("Form data:", data)
+      const apiData = transformFormToApi(data)
+      console.log('Transformed API data:', apiData)
+      const response = await PathsService.createPath({ requestBody: apiData })
+      
+      // Success - we'll add redirect later
+      console.log('Path created successfully')
     } catch (error) {
-      console.error("Error creating path:", error)
+      console.error('Error creating path:', error)
     }
   }
 
@@ -127,15 +146,15 @@ function CreatePath() {
                   </FormErrorMessage>
                 </FormControl>
 
-                <FormControl isInvalid={!!errors.path_summary}>
+                <FormControl isInvalid={!!errors.pathSummary}>
                   <FormLabel>Summary</FormLabel>
                   <Textarea
-                    {...register("path_summary")}
+                    {...register("pathSummary")}
                     placeholder="Enter path summary"
                     rows={3}
                   />
                   <FormErrorMessage>
-                    {errors.path_summary?.message}
+                    {errors.pathSummary?.message}
                   </FormErrorMessage>
                 </FormControl>
               </VStack>
@@ -150,7 +169,7 @@ function CreatePath() {
               <VStack spacing={4} align="stretch">
                 {steps.map((step, index) => (
                   <Box
-                    key={step.id}
+                    key={index}
                     p={4}
                     borderWidth={1}
                     borderRadius="md"
@@ -170,25 +189,12 @@ function CreatePath() {
                           aria-label="Remove step"
                           variant="ghost"
                           size="sm"
-                          onClick={() => removeStep(step.id)}
+                          onClick={() => removeStep(index)}
                         />
                       </HStack>
                     </HStack>
 
                     <VStack spacing={4} align="stretch">
-                      <FormControl
-                        isInvalid={!!errors.steps?.[index]?.title}
-                      >
-                        <FormLabel>Title</FormLabel>
-                        <Input
-                          {...register(`steps.${index}.title`)}
-                          placeholder="Enter step title"
-                        />
-                        <FormErrorMessage>
-                          {errors.steps?.[index]?.title?.message}
-                        </FormErrorMessage>
-                      </FormControl>
-
                       {/* Exposition Section */}
                       <Box>
                         <FormLabel>Exposition</FormLabel>
