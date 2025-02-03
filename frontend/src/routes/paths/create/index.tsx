@@ -23,6 +23,8 @@ import { YouTubePlayer } from "../../../components/Common/YouTubePlayer"
 import { extractVideoId } from "../../../utils/youtube"
 import { VideoRangeSlider } from "../../../components/Common/VideoRangeSlider"
 import { PathCreate, StepCreate, PathsService } from "../../../client"
+import useCustomToast from "../../../hooks/useCustomToast"
+import { useNavigate } from "@tanstack/react-router"
 
 const stepSchema = z.object({
   rolePrompt: z.string().optional(),
@@ -68,6 +70,8 @@ export const Route = createFileRoute("/paths/create/")({
 })
 
 function CreatePath() {
+  const showToast = useCustomToast()
+  const navigate = useNavigate()
   const {
     register,
     handleSubmit,
@@ -104,7 +108,7 @@ function CreatePath() {
   const removeStep = (stepId: number) => {
     setValue(
       "steps",
-      steps.filter((step, index) => index !== stepId)
+      steps.filter((_, index) => index !== stepId)
     )
   }
 
@@ -115,12 +119,21 @@ function CreatePath() {
     try {
       const apiData = transformFormToApi(data)
       console.log('Transformed API data:', apiData)
-      const response = await PathsService.createPath({ requestBody: apiData })
+      await PathsService.createPath({ requestBody: apiData })
       
-      // Success - we'll add redirect later
-      console.log('Path created successfully')
+      showToast(
+        "Success",
+        "Learning path created successfully",
+        "success"
+      )
+      navigate({ to: "/paths" })
     } catch (error) {
       console.error('Error creating path:', error)
+      showToast(
+        "Error",
+        "Failed to create learning path",
+        "error"
+      )
     }
   }
 
@@ -167,7 +180,7 @@ function CreatePath() {
               <Heading size="md" mb={4}>Steps</Heading>
 
               <VStack spacing={4} align="stretch">
-                {steps.map((step, index) => (
+                {steps.map((_, index) => (
                   <Box
                     key={index}
                     p={4}
