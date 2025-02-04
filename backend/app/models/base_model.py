@@ -18,10 +18,10 @@ class BaseTimeModel(SQLModel, ABC):
     """
 
     created_at: datetime | None = Field(
-        default_factory=lambda: datetime.now(timezone.utc), nullable=False
+        default_factory=lambda: datetime.now(timezone.utc), nullable=True
     )
     updated_at: datetime | None = Field(
-        default_factory=lambda: datetime.now(timezone.utc), nullable=False
+        default_factory=lambda: datetime.now(timezone.utc), nullable=True
     )
 
     @abstractmethod
