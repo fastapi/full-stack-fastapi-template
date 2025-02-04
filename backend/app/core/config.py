@@ -78,6 +78,17 @@ class Settings(BaseSettings):
     EMAILS_FROM_EMAIL: str | None = None
     EMAILS_FROM_NAME: str | None = None
 
+    # LLM API Configuration
+    ANTHROPIC_API_KEY: str
+    ANTHROPIC_MODEL: str = "claude-3-5-haiku-20241022"
+    
+    OPENAI_API_KEY: str
+    OPENAI_MODEL: str = "gpt-4o-mini-2024-07-18"
+    
+    # Common LLM settings
+    MAX_TOKENS: int = 4096
+    TEMPERATURE: float = 0.7
+
     @model_validator(mode="after")
     def _set_default_emails_from(self) -> Self:
         if not self.EMAILS_FROM_NAME:

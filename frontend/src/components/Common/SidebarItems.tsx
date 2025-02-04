@@ -1,14 +1,16 @@
 import { Box, Flex, Icon, Text, useColorModeValue } from "@chakra-ui/react"
 import { useQueryClient } from "@tanstack/react-query"
 import { Link } from "@tanstack/react-router"
-import { FiBriefcase, FiGitBranch, FiHome, FiSettings, FiUsers } from "react-icons/fi"
+import { FiHome, FiBriefcase, FiMap, FiSettings, FiUsers } from "react-icons/fi"
+import { FaRegLightbulb } from "react-icons/fa6"
 
 import type { UserPublic } from "../../client"
 
 const items = [
   { icon: FiHome, title: "Dashboard", path: "/" },
   { icon: FiBriefcase, title: "Items", path: "/items" },
-  { icon: FiGitBranch, title: "Learning Paths", path: "/paths" },
+  { icon: FiMap, title: "Create", path: "/paths" },
+  { icon: FaRegLightbulb, title: "Learn", path: "/learn" },
   { icon: FiSettings, title: "User Settings", path: "/settings" },
 ]
 
@@ -26,31 +28,29 @@ const SidebarItems = ({ onClose }: SidebarItemsProps) => {
     ? [...items, { icon: FiUsers, title: "Admin", path: "/admin" }]
     : items
 
-  const listItems = finalItems.map(({ icon, title, path }) => (
-    <Flex
-      as={Link}
-      to={path}
-      w="100%"
-      p={2}
-      key={title}
-      activeProps={{
-        style: {
-          background: bgActive,
-          borderRadius: "12px",
-        },
-      }}
-      color={textColor}
-      onClick={onClose}
-    >
-      <Icon as={icon} alignSelf="center" />
-      <Text ml={2}>{title}</Text>
-    </Flex>
-  ))
-
   return (
-    <>
-      <Box>{listItems}</Box>
-    </>
+    <Box>
+      {finalItems.map(({ icon, title, path }) => (
+        <Flex
+          key={path}
+          as={Link}
+          to={path}
+          align="center"
+          gap={3}
+          p={3}
+          borderRadius="md"
+          color={textColor}
+          _hover={{
+            textDecoration: "none",
+            bg: bgActive,
+          }}
+          onClick={onClose}
+        >
+          <Icon as={icon} boxSize={5} />
+          <Text>{title}</Text>
+        </Flex>
+      ))}
+    </Box>
   )
 }
 
