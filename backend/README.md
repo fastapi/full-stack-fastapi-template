@@ -95,24 +95,104 @@ and then `exec` inside the running container:
 $ docker compose exec backend bash
 ```
 
-You should see an output like:
-
-```console
-root@7f2607af31c3:/app#
-```
-
 that means that you are in a `bash` session inside your container, as a `root` user, under the `/app` directory, this directory has another directory called "app" inside, that's where your code lives inside the container: `/app/app`.
-
-
 
 ### Migrations
 
-As during local development your app directory is mounted as a volume inside the container, you can also run the migrations with `alembic` commands inside the container and the migration code will be in your app directory (instead of being only inside the container). So you can add it to your git repository.
+Make sure you create a "revision" of your models and upgrade your database with that revision every time you change them. This updates your database schema to reflect model changes and prevents application errors.
 
-Make sure you create a "revision" of your models and that you "upgrade" your database with that revision every time you change them. As this is what will update the tables in your database. Otherwise, your application will have errors.
+#### Steps to Perform Migration
+
+1. **Start an Interactive Session:**  
+   Open a shell inside the backend container:
+   ```bash
+   docker compose exec backend bash
+   ```
+
+2. **Generate a New Migration Revision:**  
+   Automatically create a new migration based on your model changes:
+   ```bash
+   alembic revision --autogenerate -m "Describe your schema changes"
+   ```
+
+3. **Review the Migration Script:**  
+   Check the generated migration file in the migrations directory to confirm the changes. Modify the migration file if necessary.
+
+4. **Apply the Migration:**  
+   Run the migration to update your database schema:
+   ```bash
+   alembic upgrade head
+   ```
+
+5. **Verify the Update:**  
+   Ensure that your database reflects the changes by reviewing logs or using a database client.
 
 * Start an interactive session in the backend container:
 
-```console
-$ docker compose exec backend bash
-```
+## Additional Backend Documentation
+
+### Project Structure
+
+- **app/**
+  - **api/**: Contains the RESTful API endpoint definitions using FastAPI. Each module here relates to a specific resource by:
+    - Defining route paths for HTTP methods (GET, POST, PUT, DELETE).
+    - Validating input data using Pydantic models.
+    - Handling exceptions and returning standardized JSON responses compliant with OpenAPI.
+  - **models.py**: Contains the SQLModel-based database models that define:
+    - The table schema including columns, data types, and constraints.
+    - Relationships between tables along with validation rules and default values.
+    **Note:** Always generate a new Alembic migration and upgrade your database after modifying this file.
+  - **crud.py**: Implements a set of CRUD functions that abstract database interactions, including:
+    - Creating and inserting new records.
+    - Fetching single or multiple records.
+    - Updating records with new data.
+    - Deleting records with robust error handling.
+- **Docker Setup**
+  - `docker-compose.yml` & `docker-compose.override.yml`: Used to start the entire stack for development. The volume mappings allow live reloading of code changes.
+  - `.dockerignore`: Lists files and directories that are not needed during the Docker build process.
+- **Version Control**
+  - `.gitignore`: Ensures that generated files (like caches, virtual environments, etc.) are not committed to version control.
+
+### Development Workflow
+
+- **Dependency management:** Uses [Poetry](https://python-poetry.org/) to handle dependencies and virtual environments.
+- **Running the application:** Start the services with:
+  ```bash
+  docker compose up -d
+  ```
+  Then, for local development and debugging, you can attach to the backend container using:
+  ```bash
+  docker compose exec backend bash
+  ```
+- **Migrations:** Use Alembic for database schema migrations. Always update your migration scripts when modifying models.
+- **Debugging & Testing:** Leverage the VS Code configurations to set breakpoints and run tests directly from the editor.
+
+### Extending the Application
+
+- **Adding New APIs:** When creating new endpoints, add a new module under the `app/api/` directory. Each endpoint should:
+    - Define RESTful routes implementing the required CRUD functionalities.
+    - Use dependency injection to handle authentication and request validation.
+    - Return structured responses according to OpenAPI standards.
+- **Modifying Data Models:** When altering `app/models.py`:
+    - Update table schemas, add or modify columns, and adjust relationships.
+    - Create and apply a corresponding Alembic migration to keep the database schema synchronized.
+
+This section is intended to serve as a high-level guide for both new and experienced developers on understanding and extending the backend of this FastAPI project.
+
+## Modules Overview
+
+### Schema
+
+The `app/schema/` directory contains Pydantic models that are responsible for:
+ - **Data Structure Definition:** Outlining the data formats used for API requests and responses.
+ - **Validation & Serialization:** Enforcing business logic and ensuring that incoming and outgoing data adhere to expected formats. For example, custom validators (such as in `carousel_poster.py`) ensure that specific business rules are followed.
+ - **ORM Integration:** Converting ORM objects into serializable formats using the `from_attributes = True` configuration.
+
+### Core
+
+The `app/core/` directory includes essential modules that form the backbone of the application:
+ - **config.py:** Manages application configuration and environment variables using Pydantic's BaseSettings. It also constructs derived settings (like the SQLAlchemy database URI and server host).
+ - **db.py:** Initializes and provides access to the database engine and sessions, ensuring smooth database connectivity and supporting operations like database initialization.
+ - **security.py:** Implements security measures such as JWT-based token creation and validation, ensuring secure API operations.
+
+These modules together ensure a modular, secure, and maintainable backend system.
