@@ -1,15 +1,16 @@
 import { Box, Flex, Icon, Text, useColorModeValue } from "@chakra-ui/react"
 import { useQueryClient } from "@tanstack/react-query"
 import { Link } from "@tanstack/react-router"
-import { FiHome, FiBriefcase, FiMap, FiSettings, FiUsers } from "react-icons/fi"
+import { FiHome, FiBriefcase, FiSettings, FiUsers } from "react-icons/fi"
 import { FaRegLightbulb } from "react-icons/fa6"
+import { RiTreasureMapLine } from "react-icons/ri"
 
 import type { UserPublic } from "../../client"
 
 const items = [
   { icon: FiHome, title: "Dashboard", path: "/" },
   { icon: FiBriefcase, title: "Items", path: "/items" },
-  { icon: FiMap, title: "Create", path: "/paths" },
+  { icon: RiTreasureMapLine, title: "Create", path: "/paths" },
   { icon: FaRegLightbulb, title: "Learn", path: "/learn" },
   { icon: FiSettings, title: "User Settings", path: "/settings" },
 ]

@@ -5,7 +5,7 @@ import {
   Button,
   Icon,
 } from "@chakra-ui/react"
-import { createFileRoute, Link } from "@tanstack/react-router"
+import { createFileRoute, Outlet, Link } from "@tanstack/react-router"
 import { FaRegLightbulb } from "react-icons/fa6"
 import { z } from "zod"
 import { type ReactNode } from "react"
@@ -31,6 +31,7 @@ function Learn(): ReactNode {
           <Icon as={FaRegLightbulb} /> Start Chat
         </Button>
       </Flex>
+      <Outlet />
     </Container>
   )
 }
