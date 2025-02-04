@@ -1,7 +1,6 @@
 import { Container, Heading } from "@chakra-ui/react"
 import { createFileRoute } from "@tanstack/react-router"
 import { z } from "zod"
-import React from "react"
 
 // Define route params schema
 const paramsSchema = z.object({
@@ -10,7 +9,9 @@ const paramsSchema = z.object({
 
 export const Route = createFileRoute("/paths/$pathId/")({
   component: ViewPath,
-  validateParams: (params) => paramsSchema.parse(params),
+  beforeLoad: ({ params }) => {
+    return paramsSchema.parse(params)
+  },
 })
 
 function ViewPath() {
