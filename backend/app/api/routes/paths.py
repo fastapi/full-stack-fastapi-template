@@ -8,7 +8,7 @@ from sqlmodel import Session, select, func
 from app.api.deps import CurrentUser, SessionDep
 from app.models import (
     Path, Step, PathCreate, PathPublic, PathInList, PathsPublic,
-    utc_now
+    utc_now, YoutubeExposition, StepPublic
 )
 
 router = APIRouter(prefix="/paths", tags=["paths"])
@@ -74,7 +74,21 @@ async def get_path(
     if not path:
         raise HTTPException(status_code=404, detail="Path not found")
 
-    return path
+    # Convert each step's exposition_json to exposition
+    steps = []
+    for step in path.steps:
+        step_dict = step.model_dump()
+        if step.exposition_json:
+            step_dict["exposition"] = YoutubeExposition.model_validate_json(step.exposition_json)
+        steps.append(StepPublic.model_validate(step_dict))
+    
+    # Return PathPublic with converted steps
+    return PathPublic(
+        id=path.id,
+        title=path.title,
+        path_summary=path.path_summary,
+        steps=steps
+    )
 
 @router.post("/", response_model=PathPublic)
 async def create_path(

@@ -29,14 +29,32 @@ import { useNavigate } from "@tanstack/react-router"
 const stepSchema = z.object({
   rolePrompt: z.string().optional(),
   validationPrompt: z.string().optional(),
-  content: z.object({
-    type: z.enum(["video", "text", "none"]),
-    source: z.string(),
-    segment: z.object({
-      start: z.number(),
-      end: z.number()
+  content: z.discriminatedUnion('type', [
+    z.object({
+      type: z.literal('video'),
+      source: z.string(),  // Required for video
+      segment: z.object({
+        start: z.number(),
+        end: z.number()
+      })
+    }),
+    z.object({
+      type: z.literal('text'),
+      source: z.string().optional(),
+      segment: z.object({
+        start: z.number(),
+        end: z.number()
+      })
+    }),
+    z.object({
+      type: z.literal('none'),
+      source: z.string().optional(),
+      segment: z.object({
+        start: z.number(),
+        end: z.number()
+      })
     })
-  })
+  ])
 })
 
 const formSchema = z.object({
@@ -70,8 +88,8 @@ export const Route = createFileRoute("/paths/create/")({
 })
 
 function CreatePath() {
-  const showToast = useCustomToast()
   const navigate = useNavigate()
+  const toast = useCustomToast()
   const {
     register,
     handleSubmit,
@@ -121,7 +139,7 @@ function CreatePath() {
       console.log('Transformed API data:', apiData)
       await PathsService.createPath({ requestBody: apiData })
       
-      showToast(
+      toast(
         "Success",
         "Learning path created successfully",
         "success"
@@ -129,7 +147,7 @@ function CreatePath() {
       navigate({ to: "/paths" })
     } catch (error) {
       console.error('Error creating path:', error)
-      showToast(
+      toast(
         "Error",
         "Failed to create learning path",
         "error"
@@ -138,10 +156,12 @@ function CreatePath() {
   }
 
   return (
-    <Container maxW="container.xl">
-      <VStack spacing={8} align="stretch">
-        <Heading>Create New Path</Heading>
+    <Container maxW="full">
+      <Heading size="lg" textAlign={{ base: "center", md: "left" }} pt={12}>
+        Create Learning Path
+      </Heading>
 
+      <Box py={8}>
         <form onSubmit={handleSubmit(onSubmit)}>
           <VStack spacing={8} align="stretch">
             {/* Path Information */}
@@ -214,8 +234,7 @@ function CreatePath() {
                         <HStack spacing={2}>
                           <Button
                             size="sm"
-                            variant={watch(`steps.${index}.content.type`) === "none" ? "solid" : "outline"}
-                            colorScheme="blue"
+                            variant={watch(`steps.${index}.content.type`) === "none" ? "primary" : "outline"}
                             onClick={() => {
                               setValue(`steps.${index}.content.type`, "none")
                               setValue(`steps.${index}.content.source`, "")
@@ -225,8 +244,7 @@ function CreatePath() {
                           </Button>
                           <Button
                             size="sm"
-                            variant={watch(`steps.${index}.content.type`) === "video" ? "solid" : "outline"}
-                            colorScheme="blue"
+                            variant={watch(`steps.${index}.content.type`) === "video" ? "primary" : "outline"}
                             onClick={() => {
                               setValue(`steps.${index}.content.type`, "video")
                               setValue(`steps.${index}.content.source`, "")
@@ -236,8 +254,7 @@ function CreatePath() {
                           </Button>
                           <Button
                             size="sm"
-                            variant={watch(`steps.${index}.content.type`) === "text" ? "solid" : "outline"}
-                            colorScheme="blue"
+                            variant={watch(`steps.${index}.content.type`) === "text" ? "primary" : "outline"}
                             onClick={() => {
                               setValue(`steps.${index}.content.type`, "text")
                               setValue(`steps.${index}.content.source`, "")
@@ -346,8 +363,7 @@ function CreatePath() {
                 <Button
                   leftIcon={<AddIcon />}
                   onClick={addStep}
-                  colorScheme="blue"
-                  variant="outline"
+                  variant="primary"
                   alignSelf="center"
                   mt={2}
                 >
@@ -358,7 +374,7 @@ function CreatePath() {
 
             <Button
               type="submit"
-              colorScheme="blue"
+              variant="primary"
               isLoading={isSubmitting}
               alignSelf="flex-start"
             >
@@ -366,7 +382,7 @@ function CreatePath() {
             </Button>
           </VStack>
         </form>
-      </VStack>
+      </Box>
     </Container>
   )
 }

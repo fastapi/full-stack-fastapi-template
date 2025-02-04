@@ -133,32 +133,30 @@ class YoutubeExposition(SQLModel):
     start_time: int | None = Field(default=None, ge=0)
     end_time: int | None = Field(default=None, ge=0)
 
-class Step(SQLModel, table=True):
-    id: int = Field(default=None, primary_key=True)
-    path_id: uuid.UUID = Field(foreign_key="path.id", nullable=False)
+# Base model with shared fields
+class StepBase(SQLModel):
     number: int = Field(ge=0)
     role_prompt: str | None = Field(default=None)
     validation_prompt: str | None = Field(default=None)
+
+# Database model, database table inferred from class name
+class Step(StepBase, table=True):
+    id: int = Field(default=None, primary_key=True)
+    path_id: uuid.UUID = Field(foreign_key="path.id", nullable=False)
     exposition_json: str | None = Field(default=None)
     path: Path = Relationship(back_populates="steps")
 
 # API Models
-class StepCreate(SQLModel):
-    number: int
-    role_prompt: str | None = Field(default=None)
-    validation_prompt: str | None = Field(default=None)
+class StepCreate(StepBase):
     exposition: YoutubeExposition | None = None
 
-class StepUpdate(SQLModel):
+class StepUpdate(StepBase):
     role_prompt: str | None = None
     validation_prompt: str | None = None
     exposition: YoutubeExposition | None = None
 
-class StepPublic(SQLModel):
+class StepPublic(StepBase):
     id: int
-    number: int
-    role_prompt: str | None = Field(default=None)
-    validation_prompt: str | None = Field(default=None)
     exposition: YoutubeExposition | None = None
 
 class StepInList(SQLModel):

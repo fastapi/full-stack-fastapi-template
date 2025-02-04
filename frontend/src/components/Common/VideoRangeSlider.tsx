@@ -35,9 +35,10 @@ export function VideoRangeSlider({
         step={1}
         value={[start, end]}
         onChange={([newStart, newEnd]) => onChange(newStart, newEnd)}
+        colorScheme="teal"
       >
         <RangeSliderTrack>
-          <RangeSliderFilledTrack />
+          <RangeSliderFilledTrack bg="teal.600" />
         </RangeSliderTrack>
         <RangeSliderThumb index={0}>
           <Box

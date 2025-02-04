@@ -24,6 +24,7 @@
     "form-data": "4.0.0",
     "framer-motion": "10.16.16",
     "react": "^18.2.0",
+    "react-devtools": "^6.1.0",
     "react-dom": "^18.2.0",
     "react-error-boundary": "^4.0.13",
     "react-hook-form": "^7.49.3",
