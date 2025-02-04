@@ -17,8 +17,6 @@ docker compose up -d
 
 Frontend, built with Docker, with routes handled based on the path: http://localhost
 
-Backend, JSON based web API based on OpenAPI: http://localhost/api/
-
 Automatic interactive documentation with Swagger UI (from the OpenAPI backend): http://localhost/docs
 
 Adminer, database web administration: http://localhost:8080
@@ -105,55 +103,7 @@ root@7f2607af31c3:/app#
 
 that means that you are in a `bash` session inside your container, as a `root` user, under the `/app` directory, this directory has another directory called "app" inside, that's where your code lives inside the container: `/app/app`.
 
-There you can use the script `/start-reload.sh` to run the debug live reloading server. You can run that script from inside the container with:
 
-```console
-$ bash /start-reload.sh
-```
-
-...it will look like:
-
-```console
-root@7f2607af31c3:/app# bash /start-reload.sh
-```
-
-and then hit enter. That runs the live reloading server that auto reloads when it detects code changes.
-
-Nevertheless, if it doesn't detect a change but a syntax error, it will just stop with an error. But as the container is still alive and you are in a Bash session, you can quickly restart it after fixing the error, running the same command ("up arrow" and "Enter").
-
-...this previous detail is what makes it useful to have the container alive doing nothing and then, in a Bash session, make it run the live reload server.
-
-### Backend tests
-
-To test the backend run:
-
-```console
-$ bash ./scripts/test.sh
-```
-
-The tests run with Pytest, modify and add tests to `./backend/app/tests/`.
-
-If you use GitHub Actions the tests will run automatically.
-
-#### Test running stack
-
-If your stack is already up and you just want to run the tests, you can use:
-
-```bash
-docker compose exec backend bash /app/tests-start.sh
-```
-
-That `/app/tests-start.sh` script just calls `pytest` after making sure that the rest of the stack is running. If you need to pass extra arguments to `pytest`, you can pass them to that command and they will be forwarded.
-
-For example, to stop on first error:
-
-```bash
-docker compose exec backend bash /app/tests-start.sh -x
-```
-
-#### Test Coverage
-
-When the tests are run, a file `htmlcov/index.html` is generated, you can open it in your browser to see the coverage of the tests.
 
 ### Migrations
 
@@ -166,41 +116,3 @@ Make sure you create a "revision" of your models and that you "upgrade" your dat
 ```console
 $ docker compose exec backend bash
 ```
-
-* Alembic is already configured to import your SQLModel models from `./backend/app/models.py`.
-
-* After changing a model (for example, adding a column), inside the container, create a revision, e.g.:
-
-```console
-$ alembic revision --autogenerate -m "Add column last_name to User model"
-```
-
-* Commit to the git repository the files generated in the alembic directory.
-
-* After creating the revision, run the migration in the database (this is what will actually change the database):
-
-```console
-$ alembic upgrade head
-```
-
-If you don't want to use migrations at all, uncomment the lines in the file at `./backend/app/core/db.py` that end in:
-
-```python
-SQLModel.metadata.create_all(engine)
-```
-
-and comment the line in the file `prestart.sh` that contains:
-
-```console
-$ alembic upgrade head
-```
-
-If you don't want to start with the default models and want to remove them / modify them, from the beginning, without having any previous revision, you can remove the revision files (`.py` Python files) under `./backend/app/alembic/versions/`. And then create a first migration as described above.
-
-## Email Templates
-
-The email templates are in `./backend/app/email-templates/`. Here, there are two directories: `build` and `src`. The `src` directory contains the source files that are used to build the final email templates. The `build` directory contains the final email templates that are used by the application.
-
-Before continuing, ensure you have the [MJML extension](https://marketplace.visualstudio.com/items?itemName=attilabuti.vscode-mjml) installed in your VS Code.
-
-Once you have the MJML extension installed, you can create a new email template in the `src` directory. After creating the new email template and with the `.mjml` file open in your editor, open the command palette with `Ctrl+Shift+P` and search for `MJML: Export to HTML`. This will convert the `.mjml` file to a `.html` file and now you can save it in the build directory.
