@@ -29,13 +29,13 @@ jobs:
       - name: Migrate DB
         run: uv run bash scripts/prestart.sh
         working-directory: backend
-      # - name: Run tests
-      #   run: uv run bash scripts/tests-start.sh "Coverage for ${{ github.sha }}"
-      #   working-directory: backend
-      # - run: docker compose down -v --remove-orphans
-      # - name: Store coverage files
-      #   uses: actions/upload-artifact@v4
-      #   with:
-      #     name: coverage-html
-      #     path: backend/htmlcov
-      #     include-hidden-files: true
+      - name: Run tests
+        run: uv run bash scripts/tests-start.sh "Coverage for ${{ github.sha }}"
+        working-directory: backend
+      - run: docker compose down -v --remove-orphans
+      - name: Store coverage files
+        uses: actions/upload-artifact@v4
+        with:
+          name: coverage-html
+          path: backend/htmlcov
+          include-hidden-files: true
