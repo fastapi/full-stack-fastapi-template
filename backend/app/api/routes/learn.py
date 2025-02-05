@@ -1,5 +1,6 @@
 from typing import Literal
 from fastapi import APIRouter, Depends, HTTPException
+from fastapi.responses import StreamingResponse
 from pydantic import BaseModel
 from app.api import deps
 from app.core.ai_client import ChatManager, AnthropicClient, OpenAIClient
@@ -65,6 +66,29 @@ async def chat_general(
     )
     
     return ChatResponse(message=response)
+
+@router.post("/learn/chat/stream")
+async def chat_stream(
+    request: ChatRequest,
+    current_user = Depends(deps.get_current_user),
+):
+    """Streaming chat endpoint."""
+    chat_key = f"{current_user.id}_general"
+    if chat_key not in active_chats:
+        active_chats[chat_key] = ChatManager(client=request.model)
+    
+    return StreamingResponse(
+        active_chats[chat_key].stream_message(
+            request.message,
+            system=request.system_prompt
+        ),
+        media_type='text/event-stream',
+        headers={
+            'Cache-Control': 'no-cache',
+            'Connection': 'keep-alive',
+            'X-Accel-Buffering': 'no'  # Disable buffering in nginx
+        }
+    )
 
 @router.post("/learn/{path_id}", response_model=ChatResponse)
 async def chat(
