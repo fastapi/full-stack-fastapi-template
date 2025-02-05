@@ -25,7 +25,7 @@ jobs:
           version: "0.4.15"
           enable-cache: true
       - run: docker compose down -v --remove-orphans
-      - run: docker compose up -d db mailcatcher
+      - run: docker compose up -d db
       - name: Migrate DB
         run: uv run bash scripts/prestart.sh
         working-directory: backend
