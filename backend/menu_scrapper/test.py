@@ -5,7 +5,7 @@ import logging
 from fastapi import FastAPI, HTTPException
 from pydantic import BaseModel, HttpUrl
 from typing import Dict, Any
-
+    
 # Configure logging
 logging.basicConfig(
     level=logging.DEBUG,
