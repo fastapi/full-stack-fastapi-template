@@ -5,6 +5,7 @@ from pydantic import BaseModel
 from app.api import deps
 from app.core.ai_client import ChatManager, AnthropicClient, OpenAIClient
 from app.core.config import settings
+import json
 
 router = APIRouter(prefix="/learn", tags=["learn"])
 
@@ -133,16 +134,39 @@ async def chat_stream(
     The stream will emit events in the format:
     data: {"type": "content", "content": "partial message..."}
     """
-    chat_key = f"{current_user.id}_general"
-    if chat_key not in active_chats:
-        active_chats[chat_key] = ChatManager(client=request.model)
-    
+    async def generate():
+        try:
+            chat_key = f"{current_user.id}_general"
+            if chat_key not in active_chats:
+                active_chats[chat_key] = ChatManager(client=request.model)
+            
+            print("Starting stream generation...")
+            async for chunk in active_chats[chat_key].stream_message(
+                request.message,
+                system=request.system_prompt
+            ):
+                print(f"Yielding chunk: {chunk}")
+                yield f"data: {json.dumps({'type': 'content', 'content': chunk})}\n\n"
+            
+            # Add explicit done event
+            print("Stream complete, sending done event")
+            yield f"data: {json.dumps({'type': 'done'})}\n\n"
+            
+        except Exception as e:
+            print(f"Error in stream: {str(e)}")
+            yield f"data: {json.dumps({'type': 'error', 'content': str(e)})}\n\n"
+            yield f"data: {json.dumps({'type': 'done'})}\n\n"
+        finally:
+            # Ensure proper cleanup
+            print("Cleaning up stream connection")
+            
     return StreamingResponse(
-        active_chats[chat_key].stream_message(
-            request.message,
-            system=request.system_prompt
-        ),
-        media_type='text/event-stream'
+        generate(),
+        media_type='text/event-stream',
+        headers={
+            'Cache-Control': 'no-cache',
+            'Connection': 'keep-alive',
+        }
     )
 
 @router.post("/{path_id}/chat/stream",

@@ -10,7 +10,7 @@ import {
 import { createFileRoute } from "@tanstack/react-router"
 import { useState, useRef, useEffect } from "react"
 import { FiSend } from "react-icons/fi"
-import { createChatStream, StreamingError } from '@/client/streamingClient'
+import { createChatStream } from '../../../client/streamingClient'
 
 interface ChatMessage {
   id: string
@@ -44,7 +44,19 @@ export const Route = createFileRoute("/_authenticated/learn/chat")({
   component: ChatRoute
 })
 
+// Add this at the top level, outside the component
+console.log('Chat module loaded');
+
 function ChatRoute() {
+  // Add useEffect for component mount
+  useEffect(() => {
+    console.log('ChatRoute mounted');
+    
+    // Log the imported function
+    console.log('createChatStream available:', !!createChatStream);
+  }, []);
+
+  console.log('Chat component loaded');
   const [messages, setMessages] = useState<ChatMessage[]>([])
   const [currentMessage, setCurrentMessage] = useState("")
   const [isLoading, setIsLoading] = useState(false)
@@ -61,7 +73,8 @@ function ChatRoute() {
   }, [messages])
 
   const handleSendMessage = async (e: React.FormEvent) => {
-    e.preventDefault()
+    e.preventDefault();
+    
     if (!currentMessage.trim() || isLoading) return
 
     const userMessage: ChatMessage = {
@@ -99,14 +112,18 @@ function ChatRoute() {
         );
       }
     } catch (error) {
-      console.error('Error:', error);
-      setMessages(prev => 
-        prev.map(msg => 
-          msg.id === assistantMessage.id 
-            ? { ...msg, content: "Sorry, there was an error processing your request." }
-            : msg
-        )
-      );
+      console.debug('Stream ended:', error);
+      // Only show error if we haven't received any content
+      const currentMsg = messages.find(msg => msg.id === assistantMessage.id);
+      if (!currentMsg?.content.trim()) {
+        setMessages(prev => 
+          prev.map(msg => 
+            msg.id === assistantMessage.id 
+              ? { ...msg, content: "Sorry, there was an error processing your request." }
+              : msg
+          )
+        );
+      }
     } finally {
       setIsLoading(false);
     }

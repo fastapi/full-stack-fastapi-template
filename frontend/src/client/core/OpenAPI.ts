@@ -25,7 +25,7 @@ export class Interceptors<T> {
 }
 
 export type OpenAPIConfig = {
-	BASE: string;
+    BASE: string;
 	CREDENTIALS: 'include' | 'omit' | 'same-origin';
 	ENCODE_PATH?: ((path: string) => string) | undefined;
 	HEADERS?: Headers | Resolver<Headers> | undefined;
