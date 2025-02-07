@@ -106,9 +106,3 @@ class ChatManager:
         self.add_message("user", content)
         async for chunk in self.client.chat_stream(self.history, system):
             yield chunk
-        # Add the complete message to history after streaming
-        if self.history[-1]["role"] == "user":
-            last_chunk = None
-            async for chunk in self.client.chat_stream(self.history, system):
-                last_chunk = chunk
-            self.add_message("assistant", last_chunk)  # Add the last chunk as the complete response

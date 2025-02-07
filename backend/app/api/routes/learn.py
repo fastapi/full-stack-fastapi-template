@@ -6,12 +6,13 @@ from app.api import deps
 from app.core.ai_client import ChatManager, AnthropicClient, OpenAIClient
 from app.core.config import settings
 
-router = APIRouter(tags=["learn"])
+router = APIRouter(prefix="/learn", tags=["learn"])
 
 # Store chat managers in memory for now
 active_chats: dict[str, ChatManager] = {}
 
 class ChatRequest(BaseModel):
+    """Request model for chat streaming endpoint."""
     message: str
     system_prompt: str | None = None
     model: Literal["anthropic", "openai"] = "anthropic"
@@ -26,7 +27,30 @@ class TestResponse(BaseModel):
     openai_model: str
     test_message: str | None = None
 
-@router.get("/learn/test", response_model=TestResponse)
+class ChatStreamResponse(BaseModel):
+    """Response model for individual stream messages."""
+    type: Literal["content"]
+    content: str
+
+class ChatMessageResponse(BaseModel):
+    """Response model for non-streaming chat messages."""
+    message: str
+
+class ChatStreamRequest(BaseModel):
+    """Request model for chat streaming endpoint."""
+    message: str
+    system_prompt: str | None = None
+    model: Literal["anthropic", "openai"] = "anthropic"
+    
+    class Config:
+        schema_extra = {
+            'example': {
+                'message': 'Write a haiku about coding',
+                'model': 'anthropic'
+            }
+        }
+
+@router.get("/test", response_model=TestResponse)
 async def test_configuration():
     """Test the LLM configuration and basic functionality."""
     response = TestResponse(
@@ -50,12 +74,14 @@ async def test_configuration():
     
     return response
 
-@router.post("/learn/chat", response_model=ChatResponse)
+@router.post("/chat", response_model=ChatMessageResponse)
 async def chat_general(
     request: ChatRequest,
     current_user = Depends(deps.get_current_user),
 ):
-    """General purpose chat endpoint without path context."""
+    """
+    Send a message to the AI and get a response.
+    """
     chat_key = f"{current_user.id}_general"
     if chat_key not in active_chats:
         active_chats[chat_key] = ChatManager(client=request.model)
@@ -65,14 +91,48 @@ async def chat_general(
         system=request.system_prompt
     )
     
-    return ChatResponse(message=response)
+    return ChatMessageResponse(message=response)
 
-@router.post("/learn/chat/stream")
+@router.post("/chat/stream",
+    response_class=StreamingResponse,
+    openapi_extra={
+        'responses': {
+            '200': {
+                'description': 'Streaming response',
+                'headers': {
+                    'Transfer-Encoding': {
+                        'schema': {
+                            'type': 'string',
+                            'enum': ['chunked']
+                        }
+                    }
+                },
+                'content': {
+                    'text/event-stream': {
+                        'schema': {
+                            'type': 'object',
+                            'properties': {
+                                'type': {'type': 'string', 'enum': ['content']},
+                                'content': {'type': 'string'}
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+)
 async def chat_stream(
-    request: ChatRequest,
+    request: ChatStreamRequest,
     current_user = Depends(deps.get_current_user),
-):
-    """Streaming chat endpoint."""
+) -> StreamingResponse:
+    """
+    Send a message to the AI and get a streaming response.
+    Returns a StreamingResponse with Server-Sent Events containing partial messages.
+
+    The stream will emit events in the format:
+    data: {"type": "content", "content": "partial message..."}
+    """
     chat_key = f"{current_user.id}_general"
     if chat_key not in active_chats:
         active_chats[chat_key] = ChatManager(client=request.model)
@@ -82,28 +142,46 @@ async def chat_stream(
             request.message,
             system=request.system_prompt
         ),
-        media_type='text/event-stream',
-        headers={
-            'Cache-Control': 'no-cache',
-            'Connection': 'keep-alive',
-            'X-Accel-Buffering': 'no'  # Disable buffering in nginx
-        }
+        media_type='text/event-stream'
     )
 
-@router.post("/learn/{path_id}", response_model=ChatResponse)
-async def chat(
+@router.post("/{path_id}/chat/stream",
+    openapi_extra={
+        'responses': {
+            '200': {
+                'description': 'Streaming response',
+                'content': {
+                    'text/event-stream': {
+                        'schema': {
+                            'type': 'object',
+                            'properties': {
+                                'type': {'type': 'string', 'enum': ['content']},
+                                'content': {'type': 'string'}
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+)
+async def path_chat_stream(
     path_id: str,
     request: ChatRequest,
     current_user = Depends(deps.get_current_user),
-):
-    """Path-specific chat endpoint that maintains conversation context for each path."""
+) -> StreamingResponse:
+    """
+    Path-specific chat endpoint that maintains conversation context for each path.
+    Returns a StreamingResponse with Server-Sent Events containing partial messages.
+    """
     chat_key = f"{current_user.id}_{path_id}"
     if chat_key not in active_chats:
         active_chats[chat_key] = ChatManager(client=request.model)
     
-    response = await active_chats[chat_key].send_message(
-        request.message,
-        system=request.system_prompt
+    return StreamingResponse(
+        active_chats[chat_key].stream_message(
+            request.message,
+            system=request.system_prompt
+        ),
+        media_type='text/event-stream'
     )
-    
-    return ChatResponse(message=response)

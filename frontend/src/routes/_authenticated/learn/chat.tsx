@@ -10,6 +10,7 @@ import {
 import { createFileRoute } from "@tanstack/react-router"
 import { useState, useRef, useEffect } from "react"
 import { FiSend } from "react-icons/fi"
+import { createChatStream, StreamingError } from '@/client/streamingClient'
 
 interface ChatMessage {
   id: string
@@ -81,68 +82,33 @@ function ChatRoute() {
     setMessages(prev => [...prev, assistantMessage])
 
     try {
-      const response = await fetch('/api/v1/learn/chat/stream', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Accept': 'text/event-stream',
-          'Authorization': `Bearer ${localStorage.getItem('access_token')}`,
-        },
-        body: JSON.stringify({
-          message: currentMessage,
-          model: "anthropic"
-        })
-      })
+      let streamedContent = "";
+      const stream = createChatStream({
+        message: currentMessage,
+        model: "anthropic"
+      });
 
-      if (!response.ok) {
-        const errorData = await response.json()
-        throw new Error(`HTTP error! status: ${response.status}, message: ${errorData.detail || 'Unknown error'}`)
-      }
-
-      const reader = response.body?.getReader()
-      if (!reader) throw new Error('No reader available')
-
-      let streamedContent = ""
-      const decoder = new TextDecoder()
-      
-      while (true) {
-        const {done, value} = await reader.read()
-        if (done) break
-        
-        const chunk = decoder.decode(value)
-        const lines = chunk.split('\n')
-        
-        for (const line of lines) {
-          if (line.startsWith('data: ')) {
-            try {
-              const data = JSON.parse(line.slice(6))
-              if (data.type === 'content' && data.content) {
-                streamedContent += data.content
-                setMessages(prev => 
-                  prev.map(msg => 
-                    msg.id === assistantMessage.id 
-                      ? { ...msg, content: streamedContent }
-                      : msg
-                  )
-                )
-              }
-            } catch (e) {
-              console.error('Error parsing SSE data:', e)
-            }
-          }
-        }
+      for await (const content of stream) {
+        streamedContent += content;
+        setMessages(prev => 
+          prev.map(msg => 
+            msg.id === assistantMessage.id 
+              ? { ...msg, content: streamedContent }
+              : msg
+          )
+        );
       }
     } catch (error) {
-      console.error('Error:', error)
+      console.error('Error:', error);
       setMessages(prev => 
         prev.map(msg => 
           msg.id === assistantMessage.id 
             ? { ...msg, content: "Sorry, there was an error processing your request." }
             : msg
         )
-      )
+      );
     } finally {
-      setIsLoading(false)
+      setIsLoading(false);
     }
   }
 
