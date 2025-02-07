@@ -5,7 +5,7 @@ import Sidebar from "../components/Common/Sidebar"
 import UserMenu from "../components/Common/UserMenu"
 import useAuth, { isLoggedIn } from "../hooks/useAuth"
 
-export const Route = createFileRoute("/_layout")({
+export const Route = createFileRoute("/_authenticated")({
   component: Layout,
   beforeLoad: async () => {
     if (!isLoggedIn()) {

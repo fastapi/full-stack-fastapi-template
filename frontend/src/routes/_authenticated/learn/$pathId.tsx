@@ -1,4 +1,4 @@
-import React, { useState, KeyboardEvent, ChangeEvent } from "react"
+import { useState } from "react"
 import {
   Box,
   Container,
@@ -18,10 +18,10 @@ interface Message {
   content: string
 }
 
-export const Route = createFileRoute("/learn/$pathId")({
+export const Route = createFileRoute("/_authenticated/learn/$pathId")({
   component: Learn,
-  validateParams: (params) => ({
-    pathId: z.string().parse(params.pathId),
+  parseParams: (rawParams: Record<string, string>) => ({
+    pathId: z.string().parse(rawParams.pathId),
   }),
 })
 
@@ -106,10 +106,10 @@ function Learn() {
         <Flex>
           <Input
             value={input}
-            onChange={(e: ChangeEvent<HTMLInputElement>) => setInput(e.target.value)}
+            onChange={(e) => setInput(e.target.value)}
             placeholder="Type your message..."
             mr={2}
-            onKeyPress={(e: KeyboardEvent<HTMLInputElement>) => {
+            onKeyPress={(e) => {
               if (e.key === "Enter") {
                 handleSubmit()
               }

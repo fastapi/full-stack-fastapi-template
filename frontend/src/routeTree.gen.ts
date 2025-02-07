@@ -15,14 +15,17 @@ import { Route as SignupImport } from './routes/signup'
 import { Route as ResetPasswordImport } from './routes/reset-password'
 import { Route as RecoverPasswordImport } from './routes/recover-password'
 import { Route as LoginImport } from './routes/login'
-import { Route as LayoutImport } from './routes/_layout'
-import { Route as LayoutIndexImport } from './routes/_layout/index'
-import { Route as LayoutSettingsImport } from './routes/_layout/settings'
-import { Route as LayoutPathsImport } from './routes/_layout/paths'
-import { Route as LayoutItemsImport } from './routes/_layout/items'
-import { Route as LayoutAdminImport } from './routes/_layout/admin'
-import { Route as PathsCreateIndexImport } from './routes/paths/create/index'
-import { Route as PathsPathIdIndexImport } from './routes/paths/$pathId/index'
+import { Route as AuthenticatedImport } from './routes/_authenticated'
+import { Route as AuthenticatedIndexImport } from './routes/_authenticated/index'
+import { Route as AuthenticatedSettingsImport } from './routes/_authenticated/settings'
+import { Route as AuthenticatedItemsImport } from './routes/_authenticated/items'
+import { Route as AuthenticatedAdminImport } from './routes/_authenticated/admin'
+import { Route as AuthenticatedPathsIndexImport } from './routes/_authenticated/paths/index'
+import { Route as AuthenticatedLearnIndexImport } from './routes/_authenticated/learn/index'
+import { Route as AuthenticatedPathsCreateImport } from './routes/_authenticated/paths/create'
+import { Route as AuthenticatedPathsPathIdImport } from './routes/_authenticated/paths/$pathId'
+import { Route as AuthenticatedLearnChatImport } from './routes/_authenticated/learn/chat'
+import { Route as AuthenticatedLearnPathIdImport } from './routes/_authenticated/learn/$pathId'
 
 // Create/Update Routes
 
@@ -46,52 +49,67 @@ const LoginRoute = LoginImport.update({
   getParentRoute: () => rootRoute,
 } as any)
 
-const LayoutRoute = LayoutImport.update({
-  id: '/_layout',
+const AuthenticatedRoute = AuthenticatedImport.update({
+  id: '/_authenticated',
   getParentRoute: () => rootRoute,
 } as any)
 
-const LayoutIndexRoute = LayoutIndexImport.update({
+const AuthenticatedIndexRoute = AuthenticatedIndexImport.update({
   path: '/',
-  getParentRoute: () => LayoutRoute,
+  getParentRoute: () => AuthenticatedRoute,
 } as any)
 
-const LayoutSettingsRoute = LayoutSettingsImport.update({
+const AuthenticatedSettingsRoute = AuthenticatedSettingsImport.update({
   path: '/settings',
-  getParentRoute: () => LayoutRoute,
+  getParentRoute: () => AuthenticatedRoute,
 } as any)
 
-const LayoutPathsRoute = LayoutPathsImport.update({
-  path: '/paths',
-  getParentRoute: () => LayoutRoute,
-} as any)
-
-const LayoutItemsRoute = LayoutItemsImport.update({
+const AuthenticatedItemsRoute = AuthenticatedItemsImport.update({
   path: '/items',
-  getParentRoute: () => LayoutRoute,
+  getParentRoute: () => AuthenticatedRoute,
 } as any)
 
-const LayoutAdminRoute = LayoutAdminImport.update({
+const AuthenticatedAdminRoute = AuthenticatedAdminImport.update({
   path: '/admin',
-  getParentRoute: () => LayoutRoute,
+  getParentRoute: () => AuthenticatedRoute,
 } as any)
 
-const PathsCreateIndexRoute = PathsCreateIndexImport.update({
-  path: '/paths/create/',
-  getParentRoute: () => rootRoute,
+const AuthenticatedPathsIndexRoute = AuthenticatedPathsIndexImport.update({
+  path: '/paths/',
+  getParentRoute: () => AuthenticatedRoute,
 } as any)
 
-const PathsPathIdIndexRoute = PathsPathIdIndexImport.update({
-  path: '/paths/$pathId/',
-  getParentRoute: () => rootRoute,
+const AuthenticatedLearnIndexRoute = AuthenticatedLearnIndexImport.update({
+  path: '/learn/',
+  getParentRoute: () => AuthenticatedRoute,
+} as any)
+
+const AuthenticatedPathsCreateRoute = AuthenticatedPathsCreateImport.update({
+  path: '/paths/create',
+  getParentRoute: () => AuthenticatedRoute,
+} as any)
+
+const AuthenticatedPathsPathIdRoute = AuthenticatedPathsPathIdImport.update({
+  path: '/paths/$pathId',
+  getParentRoute: () => AuthenticatedRoute,
+} as any)
+
+const AuthenticatedLearnChatRoute = AuthenticatedLearnChatImport.update({
+  path: '/learn/chat',
+  getParentRoute: () => AuthenticatedRoute,
+} as any)
+
+const AuthenticatedLearnPathIdRoute = AuthenticatedLearnPathIdImport.update({
+  path: '/learn/$pathId',
+  getParentRoute: () => AuthenticatedRoute,
 } as any)
 
 // Populate the FileRoutesByPath interface
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
-    '/_layout': {
-      preLoaderRoute: typeof LayoutImport
+    '/_authenticated': {
+      preLoaderRoute: typeof AuthenticatedImport
       parentRoute: typeof rootRoute
     }
     '/login': {
@@ -110,33 +128,45 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof SignupImport
       parentRoute: typeof rootRoute
     }
-    '/_layout/admin': {
-      preLoaderRoute: typeof LayoutAdminImport
-      parentRoute: typeof LayoutImport
+    '/_authenticated/admin': {
+      preLoaderRoute: typeof AuthenticatedAdminImport
+      parentRoute: typeof AuthenticatedImport
     }
-    '/_layout/items': {
-      preLoaderRoute: typeof LayoutItemsImport
-      parentRoute: typeof LayoutImport
+    '/_authenticated/items': {
+      preLoaderRoute: typeof AuthenticatedItemsImport
+      parentRoute: typeof AuthenticatedImport
     }
-    '/_layout/paths': {
-      preLoaderRoute: typeof LayoutPathsImport
-      parentRoute: typeof LayoutImport
+    '/_authenticated/settings': {
+      preLoaderRoute: typeof AuthenticatedSettingsImport
+      parentRoute: typeof AuthenticatedImport
     }
-    '/_layout/settings': {
-      preLoaderRoute: typeof LayoutSettingsImport
-      parentRoute: typeof LayoutImport
+    '/_authenticated/': {
+      preLoaderRoute: typeof AuthenticatedIndexImport
+      parentRoute: typeof AuthenticatedImport
     }
-    '/_layout/': {
-      preLoaderRoute: typeof LayoutIndexImport
-      parentRoute: typeof LayoutImport
+    '/_authenticated/learn/$pathId': {
+      preLoaderRoute: typeof AuthenticatedLearnPathIdImport
+      parentRoute: typeof AuthenticatedImport
     }
-    '/paths/$pathId/': {
-      preLoaderRoute: typeof PathsPathIdIndexImport
-      parentRoute: typeof rootRoute
+    '/_authenticated/learn/chat': {
+      preLoaderRoute: typeof AuthenticatedLearnChatImport
+      parentRoute: typeof AuthenticatedImport
     }
-    '/paths/create/': {
-      preLoaderRoute: typeof PathsCreateIndexImport
-      parentRoute: typeof rootRoute
+    '/_authenticated/paths/$pathId': {
+      preLoaderRoute: typeof AuthenticatedPathsPathIdImport
+      parentRoute: typeof AuthenticatedImport
+    }
+    '/_authenticated/paths/create': {
+      preLoaderRoute: typeof AuthenticatedPathsCreateImport
+      parentRoute: typeof AuthenticatedImport
+    }
+    '/_authenticated/learn/': {
+      preLoaderRoute: typeof AuthenticatedLearnIndexImport
+      parentRoute: typeof AuthenticatedImport
+    }
+    '/_authenticated/paths/': {
+      preLoaderRoute: typeof AuthenticatedPathsIndexImport
+      parentRoute: typeof AuthenticatedImport
     }
   }
 }
@@ -144,19 +174,22 @@ declare module '@tanstack/react-router' {
 // Create and export the route tree
 
 export const routeTree = rootRoute.addChildren([
-  LayoutRoute.addChildren([
-    LayoutAdminRoute,
-    LayoutItemsRoute,
-    LayoutPathsRoute,
-    LayoutSettingsRoute,
-    LayoutIndexRoute,
+  AuthenticatedRoute.addChildren([
+    AuthenticatedAdminRoute,
+    AuthenticatedItemsRoute,
+    AuthenticatedSettingsRoute,
+    AuthenticatedIndexRoute,
+    AuthenticatedLearnPathIdRoute,
+    AuthenticatedLearnChatRoute,
+    AuthenticatedPathsPathIdRoute,
+    AuthenticatedPathsCreateRoute,
+    AuthenticatedLearnIndexRoute,
+    AuthenticatedPathsIndexRoute,
   ]),
   LoginRoute,
   RecoverPasswordRoute,
   ResetPasswordRoute,
   SignupRoute,
-  PathsPathIdIndexRoute,
-  PathsCreateIndexRoute,
 ])
 
 /* prettier-ignore-end */

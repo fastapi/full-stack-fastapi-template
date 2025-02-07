@@ -1,6 +1,5 @@
 import {
   Box,
-  Container,
   Flex,
   Textarea,
   Button,
@@ -40,7 +39,7 @@ const ChatMessage = ({ message }: { message: ChatMessage }) => {
   )
 }
 
-export const Route = createFileRoute('/learn/_layout/chat')({
+export const Route = createFileRoute("/_authenticated/learn/chat")({
   component: ChatRoute
 })
 

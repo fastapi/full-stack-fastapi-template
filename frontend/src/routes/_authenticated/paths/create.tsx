@@ -12,10 +12,8 @@ import {
   Input,
   Textarea,
   VStack,
-  SkeletonText,
 } from "@chakra-ui/react"
-import { createFileRoute, useNavigate } from "@tanstack/react-router"
-import { useQuery } from "@tanstack/react-query"
+import { createFileRoute } from "@tanstack/react-router"
 import { useForm } from "react-hook-form"
 import { useState } from "react"
 import { z } from "zod"
@@ -26,6 +24,7 @@ import { extractVideoId } from "../../../utils/youtube"
 import { VideoRangeSlider } from "../../../components/Common/VideoRangeSlider"
 import { PathCreate, StepCreate, PathsService } from "../../../client"
 import useCustomToast from "../../../hooks/useCustomToast"
+import { useNavigate } from "@tanstack/react-router"
 
 const stepSchema = z.object({
   rolePrompt: z.string().optional(),
@@ -83,26 +82,14 @@ const transformFormToApi = (formData: FormData): PathCreate => {
   }
 }
 
-export const Route = createFileRoute("/paths/$pathId/")({
-  component: EditPath,
+export const Route = createFileRoute("/_authenticated/paths/create")({
+  component: CreatePath,
+  validateSearch: () => ({}),
 })
 
-function EditPath() {
-  const { pathId } = Route.useParams()
+function CreatePath() {
   const navigate = useNavigate()
   const toast = useCustomToast()
-  const [videoDurations, setVideoDurations] = useState<Record<number, number>>({})
-  
-  const { data: currentPath, isLoading } = useQuery({
-    queryKey: ["path", pathId],
-    queryFn: () => PathsService.getPath({ pathId }).then(data => {
-      console.log('=== API Response ===', data);
-      return data;
-    }),
-  })
-
-  console.log('=== Current Path ===', currentPath);
-
   const {
     register,
     handleSubmit,
@@ -111,41 +98,14 @@ function EditPath() {
     formState: { errors, isSubmitting },
   } = useForm<FormData>({
     resolver: zodResolver(formSchema),
-    values: currentPath ? {
-      title: currentPath.title,
-      pathSummary: currentPath.path_summary ?? "",
-      steps: currentPath.steps.map(step => {
-        // Check if exposition exists and has the expected shape
-        const hasExposition = step.exposition !== null && 
-                            typeof step.exposition === 'object' &&
-                            'url' in step.exposition;
-        console.log('=== Step Data ===', {
-          step,
-          hasExposition,
-          exposition: step.exposition
-        });
-        return {
-          rolePrompt: step.role_prompt ?? "",
-          validationPrompt: step.validation_prompt ?? "",
-          content: hasExposition && step.exposition ? {
-            type: "video" as const,
-            source: step.exposition.url,
-            segment: {
-              start: step.exposition.start_time ?? 0,
-              end: step.exposition.end_time ?? 0
-            }
-          } : {
-            type: "none" as const,
-            source: "",
-            segment: { start: 0, end: 0 }
-          }
-        }
-      })
-    } : undefined
+    defaultValues: {
+      title: "",
+      pathSummary: "",
+      steps: [],
+    },
   })
 
   const steps = watch("steps") || []
-  console.log('=== Form Values ===', { steps });
 
   const addStep = () => {
     const newStep = {
@@ -158,7 +118,7 @@ function EditPath() {
           start: 0,
           end: 0,
         },
-      }
+      },
     }
     setValue("steps", [...steps, newStep])
   }
@@ -170,51 +130,35 @@ function EditPath() {
     )
   }
 
-  const getStepContentType = (index: number) => {
-    return watch(`steps.${index}.content.type`) as "video" | "text" | "none"
-  }
+  const [videoDurations, setVideoDurations] = useState<Record<number, number>>({})
 
   const onSubmit = async (data: FormData) => {
     console.log('Form submitted with data:', data)
     try {
       const apiData = transformFormToApi(data)
       console.log('Transformed API data:', apiData)
-      await PathsService.updatePath({ 
-        pathId,
-        requestBody: apiData
-      })
+      await PathsService.createPath({ requestBody: apiData })
       
       toast(
         "Success",
-        "Learning path updated successfully",
+        "Learning path created successfully",
         "success"
       )
       navigate({ to: "/paths" })
     } catch (error) {
-      console.error('Error updating path:', error)
+      console.error('Error creating path:', error)
       toast(
         "Error",
-        "Failed to update learning path",
+        "Failed to create learning path",
         "error"
       )
     }
   }
 
-  if (isLoading) {
-    return (
-      <Container maxW="container.xl">
-        <VStack spacing={8} align="stretch">
-          <SkeletonText noOfLines={1} skeletonHeight="40px" />
-          <SkeletonText noOfLines={4} spacing="4" />
-        </VStack>
-      </Container>
-    )
-  }
-
   return (
     <Container maxW="full">
       <Heading size="lg" textAlign={{ base: "center", md: "left" }} pt={12}>
-        Edit Learning Path
+        Create Learning Path
       </Heading>
 
       <Box py={8}>
@@ -290,7 +234,7 @@ function EditPath() {
                         <HStack spacing={2}>
                           <Button
                             size="sm"
-                            variant={getStepContentType(index) === "none" ? "primary" : "outline"}
+                            variant={watch(`steps.${index}.content.type`) === "none" ? "primary" : "outline"}
                             onClick={() => {
                               setValue(`steps.${index}.content.type`, "none")
                               setValue(`steps.${index}.content.source`, "")
@@ -300,20 +244,17 @@ function EditPath() {
                           </Button>
                           <Button
                             size="sm"
-                            variant={getStepContentType(index) === "video" ? "primary" : "outline"}
+                            variant={watch(`steps.${index}.content.type`) === "video" ? "primary" : "outline"}
                             onClick={() => {
                               setValue(`steps.${index}.content.type`, "video")
-                              // Only clear source if we're not already in video mode
-                              if (getStepContentType(index) !== "video") {
-                                setValue(`steps.${index}.content.source`, "")
-                              }
+                              setValue(`steps.${index}.content.source`, "")
                             }}
                           >
                             Video
                           </Button>
                           <Button
                             size="sm"
-                            variant={getStepContentType(index) === "text" ? "primary" : "outline"}
+                            variant={watch(`steps.${index}.content.type`) === "text" ? "primary" : "outline"}
                             onClick={() => {
                               setValue(`steps.${index}.content.type`, "text")
                               setValue(`steps.${index}.content.source`, "")
@@ -325,7 +266,7 @@ function EditPath() {
                       </Box>
 
                       {/* Conditional Content Input */}
-                      {getStepContentType(index) === "video" && (
+                      {watch(`steps.${index}.content.type`) === "video" && (
                         <VStack spacing={2} mt={4} align="stretch">
                           <FormControl>
                             <FormLabel>YouTube URL</FormLabel>
@@ -379,7 +320,7 @@ function EditPath() {
                         </VStack>
                       )}
 
-                      {getStepContentType(index) === "text" && (
+                      {watch(`steps.${index}.content.type`) === "text" && (
                         <FormControl mt={4}>
                           <FormLabel>Expositional Text</FormLabel>
                           <Textarea
@@ -389,7 +330,6 @@ function EditPath() {
                           />
                         </FormControl>
                       )}
-
                       <FormControl
                         isInvalid={!!errors.steps?.[index]?.rolePrompt}
                       >
@@ -424,7 +364,6 @@ function EditPath() {
                   leftIcon={<AddIcon />}
                   onClick={addStep}
                   variant="primary"
-                  size="md"
                   alignSelf="center"
                   mt={2}
                 >
@@ -439,7 +378,7 @@ function EditPath() {
               isLoading={isSubmitting}
               alignSelf="flex-start"
             >
-              Update Path
+              Create Path
             </Button>
           </VStack>
         </form>

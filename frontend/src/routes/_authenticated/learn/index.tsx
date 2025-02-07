@@ -12,7 +12,7 @@ import { type ReactNode } from "react"
 
 const learnSearchSchema = z.object({})
 
-export const Route = createFileRoute('/_layout/learn')({
+export const Route = createFileRoute("/_authenticated/learn/")({
   component: Learn,
   validateSearch: (search) => learnSearchSchema.parse(search),
 })
