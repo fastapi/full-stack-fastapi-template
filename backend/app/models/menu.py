@@ -85,10 +85,9 @@ class MenuSubCategory(BaseTimeModel, table=True):
         return cls(
             name=schema.name,
             category_id=schema.category_id,
-            is_alcoholic=schema.is_alcoholic,  # Include is_alcoholic in the model
+            is_alcoholic=schema.is_alcoholic,
         )
 
-    @classmethod
     def to_read_schema(self) -> MenuSubCategoryRead:
         return MenuSubCategoryRead(
             subcategory_id=self.id,
@@ -116,8 +115,7 @@ class MenuCategory(BaseTimeModel, table=True):
     def from_create_schema(cls, schema: MenuCategoryCreate) -> "MenuCategory":
         return cls(name=schema.name, menu_id=schema.menu_id)
 
-    @classmethod
-    def to_read_schema(cls, self) -> MenuCategoryRead:
+    def to_read_schema(self) -> MenuCategoryRead:
         return MenuCategoryRead(
             category_id=self.id,
             menu_id=self.menu_id,
