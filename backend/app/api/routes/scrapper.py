@@ -5,11 +5,19 @@ import json
 import requests
 from bs4 import BeautifulSoup
 import logging
+from datetime import datetime, time
 from app.api.deps import SessionDep, get_business_user
 from app.models.user import UserBusiness, UserVenueAssociation
 from app.models.venue import Venue, Restaurant
-from app.models.menu import Menu, MenuCategory, MenuItem
+from app.models.menu import Menu, MenuCategory, MenuSubCategory, MenuItem
 from app.util import create_record
+from app.schema.venue import RestaurantCreate, VenueCreate
+from app.schema.menu import (
+    MenuCreate, 
+    MenuCategoryCreate, 
+    MenuSubCategoryCreate,
+    MenuItemCreate
+)
 
 logging.basicConfig(
     level=logging.DEBUG,
@@ -22,21 +30,14 @@ router = APIRouter()
 class ZomatoUrl(BaseModel):
     url: HttpUrl
 
-def parse_price(price_str: str) -> float:
-    """Convert price string to float, handling variations"""
+def parse_time(time_str: str) -> time:
+    """Convert time string to time object"""
     try:
-        cleaned_price = price_str.replace('₹', '').replace(',', '').strip()
-        return float(cleaned_price)
-    except (ValueError, AttributeError):
-        return 0.0
-
-def handle_price_variations(price_data: dict) -> tuple[float, str]:
-    """Handle half/full price variations"""
-    if isinstance(price_data, dict) and ('half' in price_data or 'full' in price_data):
-        description = f"Half: ₹{price_data.get('half', 0)}, Full: ₹{price_data.get('full', 0)}"
-        price = price_data.get('full', price_data.get('half', 0))
-        return parse_price(price), description
-    return parse_price(price_data), ""
+        # Assuming format like "9am – 11:15pm"
+        opening_time = time_str.split('–')[0].strip()
+        return datetime.strptime(opening_time, '%I%p').time()
+    except:
+        return None
 
 def extract_menu_data(json_data: dict) -> dict:
     try:
@@ -51,9 +52,13 @@ def extract_menu_data(json_data: dict) -> dict:
             return {}
             
         res_info = restaurant_details[restaurant_id].get('sections', {})
-        
-        # Restaurant Info
         basic_info = res_info.get('SECTION_BASIC_INFO', {})
+
+        # Extract timing
+        timing_desc = basic_info.get('timing', {}).get('timing_desc', '')
+        opening_time = parse_time(timing_desc) if timing_desc else None
+
+        # Restaurant Info
         restaurant_info = {
             'restaurant_id': basic_info.get('res_id'),
             'name': basic_info.get('name'),
@@ -68,9 +73,11 @@ def extract_menu_data(json_data: dict) -> dict:
                 'url': basic_info.get('resUrl')
             },
             'timing': {
-                'description': basic_info.get('timing', {}).get('timing_desc'),
+                'description': timing_desc,
+                'opening_time': opening_time,
                 'hours': basic_info.get('timing', {}).get('customised_timings', {}).get('opening_hours', [])
-            }
+            },
+            'avg_cost_for_two': basic_info.get('costText', {}).get('text', '0').replace('₹', '').replace(',', '').strip()
         }
         
         # Menu Items
@@ -84,19 +91,19 @@ def extract_menu_data(json_data: dict) -> dict:
             }
             
             for item in category.get('items', []):
-                price, price_description = handle_price_variations(item.get('price', 0))
-                description = item.get('description', '')
-                if price_description:
-                    description = f"{description}\n{price_description}" if description else price_description
-                
+                price_str = str(item.get('price', '0')).replace('₹', '').replace(',', '').strip()
+                try:
+                    price = float(price_str)
+                except ValueError:
+                    price = 0.0
+                    
                 menu_item = {
                     'id': str(item.get('id')),
                     'name': item.get('name'),
-                    'description': description,
+                    'description': item.get('description', ''),
                     'price': price,
                     'image_url': item.get('imageUrl', ''),
                     'is_veg': item.get('isVeg', True),
-                    'spice_level': item.get('spiceLevel', 'None')
                 }
                 category_items['items'].append(menu_item)
             
@@ -112,56 +119,7 @@ def extract_menu_data(json_data: dict) -> dict:
         logger.error(f"Error extracting menu data: {str(e)}")
         return {}
 
-def fetch_zomato_data(url: str) -> str:
-    headers = {
-        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36',
-        'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8',
-        'Accept-Language': 'en-US,en;q=0.5',
-        'Connection': 'keep-alive',
-    }
-    
-    try:
-        logger.info(f"Fetching data from URL: {url}")
-        response = requests.get(url, headers=headers)
-        response.raise_for_status()
-        return response.text
-    except Exception as e:
-        logger.error(f"Error fetching data: {str(e)}")
-        raise
-
-def parse_zomato_page(html_content: str) -> dict:
-    try:
-        logger.debug("Starting page parsing...")
-        soup = BeautifulSoup(html_content, 'html.parser')
-        
-        scripts = soup.find_all('script')
-        target_script = None
-        
-        for script in scripts:
-            if script.string and 'window.__PRELOADED_STATE__' in script.string:
-                target_script = script
-                break
-        
-        if not target_script:
-            raise ValueError("Could not find PRELOADED_STATE in page")
-        
-        json_str = target_script.string.split('window.__PRELOADED_STATE__ = JSON.parse(')[1]
-        json_str = json_str.split(');')[0].strip()
-        
-        json_str = json_str.strip('"')
-        json_str = json_str.replace('\\"', '"')
-        json_str = json_str.replace('\\\\', '\\')
-        json_str = json_str.replace('\\n', '')
-        
-        return json.loads(json_str)
-        
-    except Exception as e:
-        logger.error(f"Error parsing page: {str(e)}")
-        raise
-
-@router.get("/")
-async def get_scrapper_info():
-    return {"message": "Welcome to Zomato Menu Scraper"}
+# ... keep your existing fetch_zomato_data and parse_zomato_page functions ...
 
 @router.post("/menu")
 async def scrape_and_create_menu(
@@ -170,12 +128,6 @@ async def scrape_and_create_menu(
     current_user: UserBusiness = Depends(get_business_user)
 ):
     try:
-        if "zomato.com" not in str(request.url):
-            raise HTTPException(
-                status_code=400,
-                detail="Invalid URL. Please provide a valid Zomato restaurant URL"
-            )
-
         # 1. Scrape data
         html_content = fetch_zomato_data(str(request.url))
         json_data = parse_zomato_page(html_content)
@@ -187,69 +139,83 @@ async def scrape_and_create_menu(
                 detail="Failed to extract menu data from Zomato"
             )
 
-        # 2. Create venue
-        venue_data = {
-            "name": scraped_data["restaurant_info"]["name"],
-            "address": scraped_data["restaurant_info"]["location"]["locality"],
-            "contact": "",  # Add if available
-            "cuisines": scraped_data["restaurant_info"]["cuisines"],
-            "rating": scraped_data["restaurant_info"]["rating"]["aggregate_rating"],
-            "timing": scraped_data["restaurant_info"]["timing"]["description"]
-        }
-        
-        # Create Venue instance
-        venue_instance = Venue.from_create_schema(venue_data)
+        # 2. Create Restaurant with Venue
+        venue_data = VenueCreate(
+            name=scraped_data['restaurant_info']['name'],
+            description=f"Restaurant imported from Zomato",
+            mobile_number=None,  # Add if available in scraped data
+            email=None,  # Add if available
+            opening_time=scraped_data['restaurant_info']['timing']['opening_time'],
+            avg_expense_for_two=float(scraped_data['restaurant_info']['avg_cost_for_two']),
+            zomato_link=str(request.url)
+        )
+
+        restaurant_data = RestaurantCreate(
+            venue=venue_data,
+            cuisine_type=scraped_data['restaurant_info']['cuisines']
+        )
+
+        # Create venue and restaurant
+        venue_instance = Venue.from_create_schema(restaurant_data.venue)
         create_record(session, venue_instance)
         
-        # Create Restaurant instance
-        restaurant_instance = Restaurant.from_create_schema(venue_instance.id, venue_data)
+        restaurant_instance = Restaurant.from_create_schema(venue_instance.id, restaurant_data)
         create_record(session, restaurant_instance)
         
-        # Create user-venue association
+        # Create association
         association = UserVenueAssociation(
             user_id=current_user.id,
             venue_id=venue_instance.id
         )
         create_record(session, association)
 
-        # 3. Create main menu
-        menu_data = {
-            "name": f"{scraped_data['restaurant_info']['name']} Menu",
-            "description": f"Menu imported from Zomato",
-            "venue_id": venue_instance.id,
-            "is_active": True
-        }
-        menu_instance = Menu(**menu_data)
+        # 3. Create Menu
+        menu_data = MenuCreate(
+            name=f"{scraped_data['restaurant_info']['name']} Menu",
+            description="Imported from Zomato",
+            venue_id=venue_instance.id,
+            menu_type="Food"
+        )
+        menu_instance = Menu(**menu_data.dict())
         create_record(session, menu_instance)
 
-        # 4. Create categories and items
-        for category in scraped_data["menu"]:
-            category_data = {
-                "name": category["category"],
-                "description": f"Category for {category['category']}",
-                "menu_id": menu_instance.id
-            }
-            category_instance = MenuCategory(**category_data)
+        # 4. Create Categories, Subcategories, and Items
+        for category in scraped_data['menu']:
+            # Create Category
+            category_data = MenuCategoryCreate(
+                name=category['category'],
+                menu_id=menu_instance.id
+            )
+            category_instance = MenuCategory(**category_data.dict())
             create_record(session, category_instance)
 
-            for item in category["items"]:
-                item_data = {
-                    "name": item["name"],
-                    "description": item["description"],
-                    "price": float(item["price"]),
-                    "category_id": category_instance.id,
-                    "is_available": True,
-                    "is_vegetarian": item["is_veg"],
-                    "image_url": item["image_url"] if item["image_url"] else None
-                }
-                item_instance = MenuItem(**item_data)
+            # Create default subcategory for each category
+            subcategory_data = MenuSubCategoryCreate(
+                name=f"{category['category']} Items",
+                category_id=category_instance.id,
+                is_alcoholic=False  # Default value
+            )
+            subcategory_instance = MenuSubCategory(**subcategory_data.dict())
+            create_record(session, subcategory_instance)
+
+            # Create items under subcategory
+            for item in category['items']:
+                item_data = MenuItemCreate(
+                    name=item['name'],
+                    description=item['description'],
+                    price=float(item['price']),
+                    subcategory_id=subcategory_instance.id,
+                    is_veg=item['is_veg'],
+                    image_url=item['image_url'] if item['image_url'] else None
+                )
+                item_instance = MenuItem(**item_data.dict())
                 create_record(session, item_instance)
 
         return {
             "message": "Menu successfully created",
-            "venue_id": venue_instance.id,
-            "menu_id": menu_instance.id,
-            "restaurant_name": scraped_data["restaurant_info"]["name"]
+            "venue_id": str(venue_instance.id),
+            "menu_id": str(menu_instance.id),
+            "restaurant_name": scraped_data['restaurant_info']['name']
         }
 
     except Exception as e:
