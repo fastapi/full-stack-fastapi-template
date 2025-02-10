@@ -4,6 +4,7 @@ import { firstSuperuser, firstSuperuserPassword } from "./config.ts"
 const authFile = "playwright/.auth/user.json"
 
 setup("authenticate", async ({ page }) => {
+  console.log("firstSuperuser", firstSuperuser, firstSuperuserPassword)
   await page.goto("/login")
   await page.getByPlaceholder("Email").fill(firstSuperuser)
   await page.getByPlaceholder("Password").fill(firstSuperuserPassword)

@@ -84,6 +84,8 @@ services:
       SMTP_HOST: "mailcatcher"
       SMTP_PORT: "1025"
       SMTP_TLS: "false"
+      SMTP_USER: ""
+      SMTP_PASSWORD: ""
       EMAILS_FROM_EMAIL: "noreply@example.com"
 
   mailcatcher:
@@ -113,14 +115,14 @@ services:
     depends_on:
       - backend
       - mailcatcher
-    env_file:
-      - .env
     environment:
       - VITE_API_URL=http://backend:8000
       - MAILCATCHER_HOST=http://mailcatcher:1080
       # For the reports when run locally
       - PLAYWRIGHT_HTML_HOST=0.0.0.0
       - CI=${CI}
+      - FIRST_SUPERUSER=${FIRST_SUPERUSER}
+      - FIRST_SUPERUSER_PASSWORD=${FIRST_SUPERUSER_PASSWORD}
     volumes:
       - ./frontend/blob-report:/app/blob-report
       - ./frontend/test-results:/app/test-results
