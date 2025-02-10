@@ -1,7 +1,9 @@
 # Full Stack FastAPI Template
 
-<a href="https://github.com/fastapi/full-stack-fastapi-template/actions?query=workflow%3ATest" target="_blank"><img src="https://github.com/fastapi/full-stack-fastapi-template/workflows/Test/badge.svg" alt="Test"></a>
-<a href="https://coverage-badge.samuelcolvin.workers.dev/redirect/fastapi/full-stack-fastapi-template" target="_blank"><img src="https://coverage-badge.samuelcolvin.workers.dev/fastapi/full-stack-fastapi-template.svg" alt="Coverage"></a>
+## Disclaimer
+
+
+This project is a fork from [https://github.com/fastapi/full-stack-fastapi-template](https://github.com/fastapi/full-stack-fastapi-template) but customized with my own stack of technologies. It is not intended to be used as a template for everyone, but feel free to cherry-pick any features that interest you.
 
 ## Technology Stack and Features
 
