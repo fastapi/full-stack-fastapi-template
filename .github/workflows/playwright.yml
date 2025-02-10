@@ -41,6 +41,8 @@ jobs:
     if: ${{ needs.changes.outputs.changed == 'true' }}
     timeout-minutes: 60
     runs-on: ubuntu-latest
+    env:
+      ENVIRONMENT: local
     strategy:
       matrix:
         shardIndex: [1, 2, 3, 4]
@@ -48,6 +50,12 @@ jobs:
       fail-fast: false
     steps:
     - uses: actions/checkout@v4
+    - name: Install 1Password CLI
+      uses: 1password/install-cli-action@v1
+    - name: Load secrets from 1Password
+      uses: 1password/load-secrets-action/configure@v2
+      with:
+        service-account-token: ${{ secrets.OP_SERVICE_ACCOUNT_TOKEN }}
     - uses: actions/setup-node@v4
       with:
         node-version: lts/*
@@ -68,13 +76,13 @@ jobs:
       working-directory: backend
     - run: npm ci
       working-directory: frontend
-    - run: uv run bash scripts/generate-client.sh
+    - run: op run --env-file=".env" -- uv run bash scripts/generate-client.sh
       env:
         VIRTUAL_ENV: backend/.venv
-    - run: docker compose build
+    - run: op run --env-file=".env" -- docker compose build
     - run: docker compose down -v --remove-orphans
     - name: Run Playwright tests
-      run: docker compose run --rm playwright npx playwright test --fail-on-flaky-tests --trace=retain-on-failure --shard=${{ matrix.shardIndex }}/${{ matrix.shardTotal }}
+      run: op run --env-file=".env" -- docker compose run --rm playwright npx playwright test --fail-on-flaky-tests --trace=retain-on-failure --shard=${{ matrix.shardIndex }}/${{ matrix.shardTotal }}
     - run: docker compose down -v --remove-orphans
     - name: Upload blob report to GitHub Actions Artifacts
       if: ${{ !cancelled() }}
