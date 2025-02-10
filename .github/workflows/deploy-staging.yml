@@ -14,19 +14,13 @@ jobs:
       - staging
     env:
       ENVIRONMENT: staging
-      DOMAIN: ${{ secrets.DOMAIN_STAGING }}
-      STACK_NAME: ${{ secrets.STACK_NAME_STAGING }}
-      SECRET_KEY: ${{ secrets.SECRET_KEY }}
-      FIRST_SUPERUSER: ${{ secrets.FIRST_SUPERUSER }}
-      FIRST_SUPERUSER_PASSWORD: ${{ secrets.FIRST_SUPERUSER_PASSWORD }}
-      SMTP_HOST: ${{ secrets.SMTP_HOST }}
-      SMTP_USER: ${{ secrets.SMTP_USER }}
-      SMTP_PASSWORD: ${{ secrets.SMTP_PASSWORD }}
-      EMAILS_FROM_EMAIL: ${{ secrets.EMAILS_FROM_EMAIL }}
-      POSTGRES_PASSWORD: ${{ secrets.POSTGRES_PASSWORD }}
-      SENTRY_DSN: ${{ secrets.SENTRY_DSN }}
+      PROJECT_NAME: my-full-stack-fastapi-template-staging
     steps:
       - name: Checkout
         uses: actions/checkout@v4
-      - run: docker compose -f docker-compose.yml --project-name ${{ secrets.STACK_NAME_STAGING }} build
-      - run: docker compose -f docker-compose.yml --project-name ${{ secrets.STACK_NAME_STAGING }} up -d
+      - name: Load secrets from 1Password
+        uses: 1password/load-secrets-action/configure@v2
+        with:
+          service-account-token: ${{ secrets.OP_SERVICE_ACCOUNT_TOKEN }}
+      - run: op run --env-file=".env" -- docker compose -f docker-compose.yml --project-name ${{ env.PROJECT_NAME }} build
+      - run: op run --env-file=".env" -- docker compose -f docker-compose.yml --project-name ${{ env.PROJECT_NAME }} up -d
