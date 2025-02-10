@@ -12,9 +12,17 @@ on:
 jobs:
   test-backend:
     runs-on: ubuntu-latest
+    env:
+      ENVIRONMENT: local
     steps:
       - name: Checkout
         uses: actions/checkout@v4
+      - name: Install 1Password CLI
+        uses: 1password/install-cli-action@v1
+      - name: Load secrets from 1Password
+        uses: 1password/load-secrets-action/configure@v2
+        with:
+          service-account-token: ${{ secrets.OP_SERVICE_ACCOUNT_TOKEN }}
       - name: Set up Python
         uses: actions/setup-python@v5
         with:
@@ -25,12 +33,12 @@ jobs:
           version: "0.4.15"
           enable-cache: true
       - run: docker compose down -v --remove-orphans
-      - run: docker compose up -d db mailcatcher
+      - run: op run --no-masking --env-file="./.env" -- docker compose up -d db mailcatcher
       - name: Migrate DB
-        run: uv run bash scripts/prestart.sh
+        run: op run --no-masking --env-file="../.env" -- uv run bash scripts/prestart.sh
         working-directory: backend
       - name: Run tests
-        run: uv run bash scripts/tests-start.sh "Coverage for ${{ github.sha }}"
+        run: op run --no-masking --env-file="../.env" -- uv run bash scripts/tests-start.sh "Coverage for ${{ github.sha }}"
         working-directory: backend
       - run: docker compose down -v --remove-orphans
       - name: Store coverage files

@@ -11,8 +11,6 @@ services:
       timeout: 10s
     volumes:
       - app-db-data:/var/lib/postgresql/data/pgdata
-    env_file:
-      - .env
     environment:
       - PGDATA=/var/lib/postgresql/data/pgdata
       - POSTGRES_PASSWORD=${POSTGRES_PASSWORD?Variable not set}
@@ -54,9 +52,8 @@ services:
         condition: service_healthy
         restart: true
     command: bash scripts/prestart.sh
-    env_file:
-      - .env
     environment:
+      - PROJECT_NAME=${PROJECT_NAME}
       - DOMAIN=${DOMAIN}
       - FRONTEND_HOST=${FRONTEND_HOST?Variable not set}
       - ENVIRONMENT=${ENVIRONMENT}
@@ -87,9 +84,8 @@ services:
         restart: true
       prestart:
         condition: service_completed_successfully
-    env_file:
-      - .env
     environment:
+      - PROJECT_NAME=${PROJECT_NAME}
       - DOMAIN=${DOMAIN}
       - FRONTEND_HOST=${FRONTEND_HOST?Variable not set}
       - ENVIRONMENT=${ENVIRONMENT}
