@@ -130,4 +130,109 @@ def extract_menu_data(json_data: dict) -> dict:
         logger.error(f"Error extracting menu data: {str(e)}")
         raise
 
-async def create_restaurant(client: httpx.AsyncClient, restaurant_data:
+async def create_restaurant(client: httpx.AsyncClient, restaurant_data: RestaurantCreate):
+    response = await client.post("/venue/restaurants/", json=restaurant_data.dict())
+    response.raise_for_status()
+    return response.json()["id"]
+
+async def create_menu(client: httpx.AsyncClient, menu_data: MenuCreate):
+    response = await client.post("/menu/", json=menu_data.dict())
+    response.raise_for_status()
+    return response.json()["menu_id"]
+
+async def create_category(client: httpx.AsyncClient, category_data: MenuCategoryCreate):
+    response = await client.post("/menu/category/", json=category_data.dict())
+    response.raise_for_status()
+    return response.json()["category_id"]
+
+async def create_subcategory(client: httpx.AsyncClient, subcategory_data: MenuSubCategoryCreate):
+    response = await client.post("/menu/subcategory/", json=subcategory_data.dict())
+    response.raise_for_status()
+    return response.json()["subcategory_id"]
+
+async def create_menu_item(client: httpx.AsyncClient, item_data: MenuItemCreate):
+    response = await client.post("/menu/item/", json=item_data.dict())
+    response.raise_for_status()
+
+@router.post("/menu")
+async def scrape_and_create_menu(
+    request: ZomatoUrl,
+    session: SessionDep,
+    current_user: UserBusiness = Depends(get_business_user)
+):
+    try:
+        # 1. Scrape data
+        html_content = fetch_zomato_data(str(request.url))
+        json_data = parse_zomato_page(html_content)
+        scraped_data = extract_menu_data(json_data)
+
+        async with httpx.AsyncClient() as client:
+            # 2. Create Restaurant
+            venue_data = VenueCreate(
+                name=scraped_data['restaurant_info']['name'],
+                description="Restaurant imported from Zomato",
+                opening_time=scraped_data['restaurant_info']['timing']['opening_time'],
+                avg_expense_for_two=float(scraped_data['restaurant_info']['avg_cost_for_two']),
+                zomato_link=str(request.url)
+            )
+
+            restaurant_data = RestaurantCreate(
+                venue=venue_data,
+                cuisine_type=scraped_data['restaurant_info']['cuisines']
+            )
+
+            venue_id = await create_restaurant(client, restaurant_data)
+            logger.info(f"Created restaurant with venue_id: {venue_id}")
+
+            # 3. Create Menu
+            menu_data = MenuCreate(
+                name=f"{scraped_data['restaurant_info']['name']} Menu",
+                description="Imported from Zomato",
+                venue_id=venue_id,
+                menu_type="Food"
+            )
+            menu_id = await create_menu(client, menu_data)
+            logger.info(f"Created menu with menu_id: {menu_id}")
+
+            # 4. Create Categories, Subcategories, and Items sequentially
+            for category in scraped_data['menu']:
+                # Create Category
+                category_data = MenuCategoryCreate(
+                    name=category['category'],
+                    menu_id=menu_id
+                )
+                category_id = await create_category(client, category_data)
+                logger.info(f"Created category: {category['category']}")
+
+                # Create default subcategory
+                subcategory_data = MenuSubCategoryCreate(
+                    name=f"{category['category']} Items",
+                    category_id=category_id,
+                    is_alcoholic=False
+                )
+                subcategory_id = await create_subcategory(client, subcategory_data)
+                logger.info(f"Created subcategory for {category['category']}")
+
+                # Create items one by one
+                for item in category['items']:
+                    item_data = MenuItemCreate(
+                        name=item['name'],
+                        description=item['description'],
+                        price=float(item['price']),
+                        subcategory_id=subcategory_id,
+                        is_veg=item['is_veg'],
+                        image_url=item.get('image_url')
+                    )
+                    await create_menu_item(client, item_data)
+                    logger.info(f"Created item: {item['name']}")
+
+            return {
+                "message": "Menu successfully created",
+                "venue_id": str(venue_id),
+                "menu_id": str(menu_id),
+                "restaurant_name": scraped_data['restaurant_info']['name']
+            }
+
+    except Exception as e:
+        logger.error(f"Menu creation failed: {str(e)}")
+        raise HTTPException(status_code=500, detail=f"Failed to create menu: {str(e)}")
