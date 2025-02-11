@@ -1,9 +1,9 @@
 from typing import Any
+
 from sqlmodel import Session
 
+from app.core.security import verify_password
 from app.model.users import User, UserCreate, UserUpdate, UserUpdateMe
-from app.core.security import verify_password, get_password_hash
-from app.model.items import Item
 
 
 class UserService:
@@ -32,13 +32,12 @@ class UserService:
                 raise ValueError("User with this email already exists")
         
         # Convert UserUpdateMe to UserUpdate since model expects UserUpdate
-        update_data = UserUpdate(
-            email=user_in.email,
-            full_name=user_in.full_name
-        )
+        update_data = UserUpdate(email=user_in.email, full_name=user_in.full_name)
         return User.update(self.session, current_user, update_data)
 
-    def update_password(self, current_user: User, current_password: str, new_password: str) -> None:
+    def update_password(
+        self, current_user: User, current_password: str, new_password: str
+    ) -> None:
         if not verify_password(current_password, current_user.hashed_password):
             raise ValueError("Incorrect password")
         if current_password == new_password:
@@ -48,7 +47,9 @@ class UserService:
         update_data = UserUpdate(password=new_password)
         User.update(self.session, current_user, update_data)
 
-    def delete_user(self, user_id: str, current_user_id: str, is_superuser: bool) -> None:
+    def delete_user(
+        self, user_id: str, current_user_id: str, is_superuser: bool
+    ) -> None:
         user = self.get_user_by_id(user_id)
         if not user:
             raise ValueError("User not found")

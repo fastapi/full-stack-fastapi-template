@@ -2,29 +2,25 @@ import uuid
 from typing import Any
 
 from fastapi import APIRouter, Depends, HTTPException
-from sqlmodel import col, delete, func, select
 
-from app.service.user_service import UserService
 from app.api.deps import (
     CurrentUser,
     SessionDep,
     get_current_active_superuser,
 )
 from app.core.config import settings
-from app.core.security import get_password_hash, verify_password
-from app.models import Message
-from app.utils import generate_new_account_email, send_email
 from app.model.users import (
     UpdatePassword,
-    User,
     UserCreate,
     UserPublic,
     UserRegister,
+    UsersPublic,
     UserUpdate,
     UserUpdateMe,
-    UsersPublic,
 )
-from app.model.items import Item
+from app.models import Message
+from app.service.user_service import UserService
+from app.utils import generate_new_account_email, send_email
 
 router = APIRouter(prefix="/users", tags=["users"])
 
@@ -95,13 +91,12 @@ def update_password_me(
     user_service = UserService(session)
     try:
         user_service.update_password(
-            current_user,
-            body.current_password,
-            body.new_password
+            current_user, body.current_password, body.new_password
         )
         return Message(message="Password updated successfully")
     except ValueError as e:
         raise HTTPException(status_code=400, detail=str(e))
+
 
 @router.get("/me", response_model=UserPublic)
 def read_user_me(current_user: CurrentUser) -> Any:
@@ -116,13 +111,10 @@ def delete_user_me(session: SessionDep, current_user: CurrentUser) -> Any:
     """
     Delete own user.
     """
-
     user_service = UserService(session)
     try:
         user_service.delete_user(
-            str(current_user.id),
-            str(current_user.id),
-            current_user.is_superuser
+            str(current_user.id), str(current_user.id), current_user.is_superuser
         )
         return Message(message="User deleted successfully")
     except ValueError as e:
@@ -201,9 +193,7 @@ def delete_user(
     user_service = UserService(session)
     try:
         user_service.delete_user(
-            str(user_id),
-            str(current_user.id),
-            current_user.is_superuser
+            str(user_id), str(current_user.id), current_user.is_superuser
         )
         return Message(message="User deleted successfully")
     except ValueError as e:

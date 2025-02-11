@@ -1,8 +1,8 @@
 import uuid
 from typing import Any
 
-from sqlmodel import Session
 from fastapi import HTTPException
+from sqlmodel import Session
 
 from app.model.items import Item, ItemCreate, ItemUpdate
 from app.models import Message
@@ -22,10 +22,13 @@ class ItemService:
             owner_id=owner_id,
             is_superuser=is_superuser,
             skip=skip,
-            limit=limit
+            limit=limit,
         )
 
-    def read_item(self, item_id: uuid.UUID, owner_id: uuid.UUID, is_superuser: bool) -> Any:
+
+    def read_item(
+        self, item_id: uuid.UUID, owner_id: uuid.UUID, is_superuser: bool
+    ) -> Any:
         item = Item.get_by_id(self.session, item_id)
         if not item:
             raise HTTPException(status_code=404, detail="Item not found")
@@ -34,7 +37,11 @@ class ItemService:
         return item
 
     def update_item(
-        self, item_id: uuid.UUID, item_in: ItemUpdate, owner_id: uuid.UUID, is_superuser: bool
+        self,
+        item_id: uuid.UUID,
+        item_in: ItemUpdate,
+        owner_id: uuid.UUID,
+        is_superuser: bool,
     ) -> Any:
         item = Item.get_by_id(self.session, item_id)
         if not item:
@@ -43,7 +50,9 @@ class ItemService:
             raise HTTPException(status_code=400, detail="Not enough permissions")
         return Item.update(self.session, item, item_in)
 
-    def delete_item(self, item_id: uuid.UUID, owner_id: uuid.UUID, is_superuser: bool) -> Message:
+    def delete_item(
+        self, item_id: uuid.UUID, owner_id: uuid.UUID, is_superuser: bool
+    ) -> Message:
         item = Item.get_by_id(self.session, item_id)
         if not item:
             raise HTTPException(status_code=404, detail="Item not found")

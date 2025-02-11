@@ -1,10 +1,11 @@
 import uuid
-from typing import Any, Optional
+from typing import Any
 
 from pydantic import EmailStr
-from sqlmodel import Field, Relationship, SQLModel, Session, select, func
+from sqlmodel import Field, Relationship, Session, SQLModel, func, select
 
-from app.core.security import get_password_hash, verify_password
+from app.core.security import get_password_hash
+from app.model.items import Item
 
 
 class UserBase(SQLModel):
@@ -42,12 +43,13 @@ class UpdatePassword(SQLModel):
 class User(UserBase, table=True):
     id: uuid.UUID = Field(default_factory=uuid.uuid4, primary_key=True)
     hashed_password: str
-    items: list["Item"] = Relationship(back_populates="owner", cascade_delete=True)  # type: ignore
+    items: list["Item"] = Relationship(back_populates="owner", cascade_delete=True)  
 
     @classmethod
     def create(cls, session: Session, user_create: UserCreate) -> "User":
         db_obj = cls.model_validate(
-            user_create, update={"hashed_password": get_password_hash(user_create.password)}
+            user_create,
+            update={"hashed_password": get_password_hash(user_create.password)},
         )
         session.add(db_obj)
         session.commit()
