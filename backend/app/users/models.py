@@ -1,11 +1,11 @@
 import uuid
 from typing import TYPE_CHECKING
 
-if TYPE_CHECKING:
-    from app.items.models import Item
-
 from pydantic import EmailStr
 from sqlmodel import Field, Relationship, SQLModel
+
+if TYPE_CHECKING:
+    from app.items.models import Item
 
 
 # Shared properties
