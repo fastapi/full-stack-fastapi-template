@@ -4,8 +4,9 @@ from typing import Any
 from fastapi import APIRouter, HTTPException
 from sqlmodel import func, select
 
-from app.api.deps import CurrentUser, SessionDep
-from app.models import Item, ItemCreate, ItemPublic, ItemsPublic, ItemUpdate, Message
+from app.items.models import Item, ItemCreate, ItemPublic, ItemsPublic, ItemUpdate
+from app.models import Message
+from app.users.dependencies import CurrentUser, SessionDep
 
 router = APIRouter(prefix="/items", tags=["items"])
 

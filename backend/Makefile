@@ -10,4 +10,7 @@ test:
 lint:
 	uv run bash scripts/lint.sh
 
-.PHONY: test lint
+format:
+	uv run bash scripts/format.sh
+
+.PHONY: test lint format
