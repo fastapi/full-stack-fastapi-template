@@ -1,12 +1,13 @@
 import uuid
 from typing import Any
 
-from fastapi import APIRouter, HTTPException
-from sqlmodel import func, select
+from fastapi import APIRouter
+
 
 from app.api.deps import CurrentUser, SessionDep
-from app.models import TokenPayload
-from app.model.users import User
+from app.model.items import ItemCreate, ItemPublic, ItemsPublic, ItemUpdate
+from app.model.users import Message
+from app.service.item_service import ItemService
 
 router = APIRouter(prefix="/items", tags=["items"])
 
@@ -18,28 +19,14 @@ def read_items(
     """
     Retrieve items.
     """
-
-    if current_user.is_superuser:
-        count_statement = select(func.count()).select_from(Item)
-        count = session.exec(count_statement).one()
-        statement = select(Item).offset(skip).limit(limit)
-        items = session.exec(statement).all()
-    else:
-        count_statement = (
-            select(func.count())
-            .select_from(Item)
-            .where(Item.owner_id == current_user.id)
-        )
-        count = session.exec(count_statement).one()
-        statement = (
-            select(Item)
-            .where(Item.owner_id == current_user.id)
-            .offset(skip)
-            .limit(limit)
-        )
-        items = session.exec(statement).all()
-
-    return ItemsPublic(data=items, count=count)
+    item_service = ItemService(session)
+    result = item_service.read_items(
+        owner_id=current_user.id,
+        is_superuser=current_user.is_superuser,
+        skip=skip,
+        limit=limit,
+    )
+    return ItemsPublic(data=result["data"], count=result["count"])
 
 
 @router.get("/{id}", response_model=ItemPublic)
@@ -47,13 +34,10 @@ def read_item(session: SessionDep, current_user: CurrentUser, id: uuid.UUID) -> 
     """
     Get item by ID.
     """
-    item = session.get(Item, id)
-    if not item:
-        raise HTTPException(status_code=404, detail="Item not found")
-    if not current_user.is_superuser and (item.owner_id != current_user.id):
-        raise HTTPException(status_code=400, detail="Not enough permissions")
-    return item
-
+    item_service = ItemService(session)
+    return item_service.read_item(
+        item_id=id, owner_id=current_user.id, is_superuser=current_user.is_superuser
+    )
 
 @router.post("/", response_model=ItemPublic)
 def create_item(
@@ -62,11 +46,8 @@ def create_item(
     """
     Create new item.
     """
-    item = Item.model_validate(item_in, update={"owner_id": current_user.id})
-    session.add(item)
-    session.commit()
-    session.refresh(item)
-    return item
+    item_service = ItemService(session)
+    return item_service.create_item(item_in, current_user.id)
 
 
 @router.put("/{id}", response_model=ItemPublic)
@@ -80,17 +61,13 @@ def update_item(
     """
     Update an item.
     """
-    item = session.get(Item, id)
-    if not item:
-        raise HTTPException(status_code=404, detail="Item not found")
-    if not current_user.is_superuser and (item.owner_id != current_user.id):
-        raise HTTPException(status_code=400, detail="Not enough permissions")
-    update_dict = item_in.model_dump(exclude_unset=True)
-    item.sqlmodel_update(update_dict)
-    session.add(item)
-    session.commit()
-    session.refresh(item)
-    return item
+    item_service = ItemService(session)
+    return item_service.update_item(
+        item_id=id,
+        item_in=item_in,
+        owner_id=current_user.id,
+        is_superuser=current_user.is_superuser,
+    )
 
 
 @router.delete("/{id}")
@@ -100,11 +77,7 @@ def delete_item(
     """
     Delete an item.
     """
-    item = session.get(Item, id)
-    if not item:
-        raise HTTPException(status_code=404, detail="Item not found")
-    if not current_user.is_superuser and (item.owner_id != current_user.id):
-        raise HTTPException(status_code=400, detail="Not enough permissions")
-    session.delete(item)
-    session.commit()
-    return Message(message="Item deleted successfully")
+    item_service = ItemService(session)
+    item_service.delete_item(
+        item_id=id, owner_id=current_user.id, is_superuser=current_user.is_superuser
+    )

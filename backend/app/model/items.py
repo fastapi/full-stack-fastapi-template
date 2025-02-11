@@ -1,8 +1,7 @@
 import uuid
 from typing import Any
 
-from sqlmodel import Field, Relationship, SQLModel, Session, select, func
-from fastapi import HTTPException
+from sqlmodel import Field, Relationship, Session, SQLModel, func, select
 
 from app.model.users import User
 
@@ -33,7 +32,9 @@ class Item(ItemBase, table=True):
     owner: User | None = Relationship(back_populates="items")
 
     @classmethod
-    def create(cls, session: Session, item_in: ItemCreate, owner_id: uuid.UUID) -> "Item":
+    def create(
+        cls, session: Session, item_in: ItemCreate, owner_id: uuid.UUID
+    ) -> "Item":
         db_item = cls.model_validate(item_in, update={"owner_id": owner_id})
         session.add(db_item)
         session.commit()
@@ -42,7 +43,12 @@ class Item(ItemBase, table=True):
     
     @classmethod
     def get_items(
-        cls, session: Session, owner_id: uuid.UUID, is_superuser: bool, skip: int = 0, limit: int = 100
+        cls,
+        session: Session,
+        owner_id: uuid.UUID,
+        is_superuser: bool,
+        skip: int = 0,
+        limit: int = 100,
     ) -> Any:
         if is_superuser:
             count_statement = select(func.count()).select_from(cls)
@@ -51,16 +57,11 @@ class Item(ItemBase, table=True):
             items = session.exec(statement).all()
         else:
             count_statement = (
-                select(func.count())
-                .select_from(cls)
-                .where(cls.owner_id == owner_id)
+                select(func.count()).select_from(cls).where(cls.owner_id == owner_id)
             )
             count = session.exec(count_statement).one()
             statement = (
-                select(cls)
-                .where(cls.owner_id == owner_id)
-                .offset(skip)
-                .limit(limit)
+                select(cls).where(cls.owner_id == owner_id).offset(skip).limit(limit)
             )
             items = session.exec(statement).all()
         return {"data": items, "count": count}
