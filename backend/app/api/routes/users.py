@@ -9,7 +9,9 @@ from app.api.deps import (
     get_current_active_superuser,
 )
 from app.core.config import settings
-from backend.app.model.user_model import (
+from app.service.user_service import UserService
+from app.models import (
+    Message,
     UpdatePassword,
     UserCreate,
     UserPublic,
@@ -18,8 +20,6 @@ from backend.app.model.user_model import (
     UserUpdate,
     UserUpdateMe,
 )
-from app.models import Message
-from app.service.user_service import UserService
 from app.utils import generate_new_account_email, send_email
 
 router = APIRouter(prefix="/users", tags=["users"])

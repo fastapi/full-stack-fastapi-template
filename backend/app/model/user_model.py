@@ -13,7 +13,7 @@ class UserModel:
         self.session = session
 
     def create(cls, user_create: UserCreate) -> "User":
-        db_obj = cls.model_validate(
+        db_obj = User.model_validate(
             user_create,
             update={"hashed_password": get_password_hash(user_create.password)},
         )
