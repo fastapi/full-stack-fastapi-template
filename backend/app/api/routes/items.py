@@ -5,8 +5,8 @@ from fastapi import APIRouter
 
 
 from app.api.deps import CurrentUser, SessionDep
-from app.model.items import ItemCreate, ItemPublic, ItemsPublic, ItemUpdate
-from app.model.users import Message
+from backend.app.model.items_model import ItemCreate, ItemPublic, ItemsPublic, ItemUpdate
+from backend.app.model.user_model import Message
 from app.service.item_service import ItemService
 
 router = APIRouter(prefix="/items", tags=["items"])

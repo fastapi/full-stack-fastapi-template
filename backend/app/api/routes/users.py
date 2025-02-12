@@ -9,7 +9,7 @@ from app.api.deps import (
     get_current_active_superuser,
 )
 from app.core.config import settings
-from app.model.users import (
+from backend.app.model.user_model import (
     UpdatePassword,
     UserCreate,
     UserPublic,

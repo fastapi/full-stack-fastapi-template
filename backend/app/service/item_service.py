@@ -4,7 +4,7 @@ from typing import Any
 from fastapi import HTTPException
 from sqlmodel import Session
 
-from app.model.items import Item, ItemCreate, ItemUpdate
+from backend.app.model.items_model import Item, ItemCreate, ItemUpdate
 from app.models import Message
 
 class ItemService:

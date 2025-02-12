@@ -7,8 +7,8 @@ from sqlmodel import Session, delete
 from app.core.config import settings
 from app.core.db import engine, init_db
 from app.main import app
-from app.model.items import Item
-from app.model.users import User
+from backend.app.model.items_model import Item
+from backend.app.model.user_model import User
 from app.tests.utils.user import authentication_token_from_email
 from app.tests.utils.utils import get_superuser_token_headers
 
