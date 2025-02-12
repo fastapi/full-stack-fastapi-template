@@ -1,5 +1,8 @@
-FROM python:3.10
+FROM python:3.12-slim
 
+# ensures that Python's output is sent directly to the console or log stream without buffering.
+# This makes logs appear in real-time, which is essential for debugging and monitoring applications
+# running in Docker containers.
 ENV PYTHONUNBUFFERED=1
 
 WORKDIR /app/
@@ -40,4 +43,4 @@ COPY ./app /app/app
 RUN --mount=type=cache,target=/root/.cache/uv \
     uv sync
 
-CMD ["fastapi", "run", "--workers", "4", "app/main.py"]
+ENTRYPOINT scripts/entrypoint.sh
