@@ -4,50 +4,56 @@ from typing import Any
 from sqlalchemy import func
 from sqlmodel import Session, select
 
-from app.core.security import get_password_hash
-from app.models import Item, ItemCreate, ItemUpdate
+from app.models import ItemCreate, ItemUpdate
 
 
-class ItemModel:
+class Item:
     def __init__(self, session: Session):
         self.session = session
 
-    def create(self, item_create: ItemCreate, owner_id: uuid.UUID) -> Item:
-        db_obj = Item.model_validate(
-            item_create,
-            update={"owner_id": owner_id},
-        )
-        self.session.add(db_obj)
-        self.session.commit()
-        self.session.refresh(db_obj)
-        return db_obj
-
-    def update(self, db_item: Item, item_in: ItemUpdate) -> Item:
-        item_data = item_in.model_dump(exclude_unset=True)
-        db_item.sqlmodel_update(item_data)
-        self.session.add(db_item)
-        self.session.commit()
-        self.session.refresh(db_item)
+    def create(cls, item_in: ItemCreate, owner_id: uuid.UUID) -> "Item":
+        db_item = Item.model_validate(item_in, update={"owner_id": owner_id})
+        cls.session.add(db_item)
+        cls.session.commit()
+        cls.session.refresh(db_item)
         return db_item
 
-    def get_by_id(self, item_id: str) -> "Item | None":
-        statement = select(Item).where(Item.id == uuid.UUID(item_id))
-        return self.session.exec(statement).first()
-
-    def get_items(self, skip: int = 0, limit: int = 100, owner_id: uuid.UUID | None = None) -> dict:
-        query = select(Item)
-        if owner_id:
-            query = query.where(Item.owner_id == owner_id)
-            
-        count_statement = select(func.count()).select_from(query.subquery())
-        count = self.session.exec(count_statement).one()
-        
-        query = query.offset(skip).limit(limit)
-        items = self.session.exec(query).all()
+    def get_items(
+        cls,
+        owner_id: uuid.UUID,
+        is_superuser: bool,
+        skip: int = 0,
+        limit: int = 100,
+    ) -> Any:
+        if is_superuser:
+            count_statement = select(func.count()).select_from(Item)
+            count = cls.session.exec(count_statement).one()
+            statement = select(Item).offset(skip).limit(limit)
+            items = cls.session.exec(statement).all()
+        else:
+            count_statement = (
+                select(func.count()).select_from(Item).where(Item.owner_id == owner_id)
+            )
+            count = cls.session.exec(count_statement).one()
+            statement = (
+                select(Item).where(Item.owner_id == owner_id).offset(skip).limit(limit)
+            )
+            items = cls.session.exec(statement).all()
         return {"data": items, "count": count}
 
-    def delete_item(self, item_id: str) -> None:
-        item = self.get_by_id(item_id)
+    def get_by_id(cls, item_id: uuid.UUID) -> "Item | None":
+        return cls.session.get(Item, item_id)
+
+    def update(cls, item: "Item", item_in: ItemUpdate) -> "Item":
+        update_dict = item_in.model_dump(exclude_unset=True)
+        item.sqlmodel_update(update_dict)
+        cls.session.add(item)
+        cls.session.commit()
+        cls.session.refresh(item)
+        return item
+
+    def delete(cls, item_id: uuid.UUID) -> None:
+        item = cls.session.get(Item, item_id)
         if item:
-            self.session.delete(item)
-            self.session.commit()
+            cls.session.delete(item)
+            cls.session.commit()
