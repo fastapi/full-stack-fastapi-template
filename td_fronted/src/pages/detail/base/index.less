@@ -1,0 +1,28 @@
+.t-descriptions {
+    span {
+        overflow: hidden;
+        white-space: nowrap;
+        text-overflow: ellipsis;
+        margin-left: var(--td-comp-margin-xxl);
+    }
+
+    i {
+        display: inline-block;
+        width: 8px;
+        height: 8px;
+        border-radius: var(--td-radius-circle);
+        background: var(--td-success-color);
+    }
+
+    .inProgress {
+        color: var(--td-success-color);
+    }
+
+    .pdf {
+        color: var(--td-brand-color);
+
+        &:hover {
+            cursor: pointer;
+        }
+    }
+}

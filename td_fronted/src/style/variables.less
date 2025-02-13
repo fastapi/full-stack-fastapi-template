@@ -1,0 +1,26 @@
+/** 公共前缀 */
+@starter-prefix: tdesign-starter;
+
+// 颜色、尺寸、阴影、圆角、字体 variables 请参考 https://tdesign.tencent.com/starter/docs/vue/design-token
+// 响应式断点
+@screen-sm: 768px;
+@screen-md: 992px;
+@screen-lg: 1200px;
+@screen-xl: 1400px;
+
+@screen-sm-min: @screen-sm;
+@screen-md-min: @screen-md;
+@screen-lg-min: @screen-lg;
+@screen-xl-min: @screen-xl;
+
+@screen-sm-max: calc(@screen-md-min - 1px);
+@screen-md-max: calc(@screen-lg-min - 1px);
+@screen-lg-max: calc(@screen-xl-min - 1px);
+
+// 动画
+@anim-time-fn-easing: cubic-bezier(0.38, 0, 0.24, 1);
+@anim-time-fn-ease-out: cubic-bezier(0, 0, 0.15, 1);
+@anim-time-fn-ease-in: cubic-bezier(0.82, 0, 1, 0.9);
+@anim-duration-base: 0.2s;
+@anim-duration-moderate: 0.24s;
+@anim-duration-slow: 0.28s;

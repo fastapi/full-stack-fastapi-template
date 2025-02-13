@@ -1,0 +1,32 @@
+<svg width="200" height="140" viewBox="0 0 200 140" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <g mask="url(#mask0_17_619)">
+    <path d="M30 62H118V122H30V62Z" fill="#97A3B7" />
+    <g filter="url(#filter0_f_17_619)">
+      <rect x="12" y="84" width="80" height="60" fill="#E3E6EB" />
+    </g>
+    <g filter="url(#filter1_f_17_619)">
+      <rect x="80" y="54" width="80" height="60" fill="#E3E6EB" />
+    </g>
+    <rect x="46" y="105" width="32" height="2" fill="white" />
+    <rect x="46" y="98" width="32" height="2" fill="white" />
+    <rect x="46" y="88" width="16" height="2" fill="white" />
+  </g>
+  <path opacity="0.9" d="M63 20H151V30H63V20Z" fill="currentcolor" />
+  <mask id="mask1_17_619" style="mask-type:alpha" maskUnits="userSpaceOnUse" x="63" y="30" width="88" height="50">
+    <path d="M63 30H151V80H63V30Z" fill="currentcolor" />
+  </mask>
+  <g mask="url(#mask1_17_619)">
+    <path d="M63 30H151V80H63V30Z" fill="currentcolor" />
+    <g opacity="0.3" filter="url(#filter2_f_17_619)">
+      <path d="M30 62H118V122H30V62Z" fill="#97A3B7" />
+    </g>
+  </g>
+  <path fill-rule="evenodd" clip-rule="evenodd"
+    d="M95.6863 40.8577L105.964 51.1345C106.295 51.0466 106.642 50.9998 107 50.9998C109.213 50.9998 111 52.7865 111 54.9998C111 55.3574 110.953 55.7038 110.866 56.0333L121.142 66.3135L118.314 69.1419L113.716 64.5448C111.653 65.423 109.384 65.9089 107 65.9089C99.7273 65.9089 93.5164 61.3853 91 54.9998C92.1785 52.0093 94.1673 49.4271 96.6961 47.5268L92.8579 43.6861L95.6863 40.8577ZM99 54.9998C99 59.4158 102.584 62.9998 107 62.9998C108.483 62.9998 109.872 62.5957 111.063 61.8917L108.034 58.8657C107.704 58.9532 107.358 58.9998 107 58.9998C104.787 58.9998 103 57.2131 103 54.9998C103 54.6423 103.047 54.2958 103.134 53.9663L100.107 50.9389C99.4037 52.1295 99 53.5178 99 54.9998ZM107 44.0907C114.273 44.0907 120.484 48.6143 123 54.9998C122.071 57.3574 120.638 59.4612 118.834 61.1773L114.729 57.0717C114.906 56.4108 115 55.7162 115 54.9998C115 50.5838 111.416 46.9998 107 46.9998C106.284 46.9998 105.589 47.0941 104.928 47.2711L102.378 44.7205C103.848 44.3101 105.398 44.0907 107 44.0907Z"
+    fill="white" />
+  <rect x="68" y="24" width="2" height="2" fill="white" />
+  <rect x="74" y="24" width="2" height="2" fill="white" />
+  <rect x="80" y="24" width="66" height="2" fill="white" />
+  <path d="M157 53.9998L181.249 95.9998H132.751L157 53.9998Z" fill="white" stroke="black" />
+  <path d="M157 88.9998L157 70.9998" stroke="black" />
+</svg>
