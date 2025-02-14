@@ -1,5 +1,4 @@
 services:
-
   db:
     image: postgres:12
     restart: always
@@ -158,6 +157,36 @@ services:
 
       # Enable redirection for HTTP and HTTPS
       - traefik.http.routers.${STACK_NAME?Variable not set}-frontend-http.middlewares=https-redirect
+  next:
+    image: '${DOCKER_IMAGE_FRONTEND?Variable not set}-next:${TAG-latest}'
+    restart: always
+    networks:
+      - traefik-public
+      - default
+    build:
+      context: ./next
+      args:
+        - VITE_API_URL=https://api.${DOMAIN?Variable not set}
+        - NODE_ENV=production
+    ports:
+      - "3000:3000"
+    labels:
+      - traefik.enable=true
+      - traefik.docker.network=traefik-public
+      - traefik.constraint-label=traefik-public
+
+      - traefik.http.services.${STACK_NAME?Variable not set}-next-frontend.loadbalancer.server.port=3000
+
+      - traefik.http.routers.${STACK_NAME?Variable not set}-next-frontend-http.rule=Host(`${DOMAIN?Variable not set}`)
+      - traefik.http.routers.${STACK_NAME?Variable not set}-next-frontend-http.entrypoints=http
+
+      - traefik.http.routers.${STACK_NAME?Variable not set}-next-frontend-https.rule=Host(`${DOMAIN?Variable not set}`)
+      - traefik.http.routers.${STACK_NAME?Variable not set}-next-frontend-https.entrypoints=https
+      - traefik.http.routers.${STACK_NAME?Variable not set}-next-frontend-https.tls=true
+      - traefik.http.routers.${STACK_NAME?Variable not set}-next-frontend-https.tls.certresolver=le
+
+      # Enable redirection for HTTP and HTTPS
+      - traefik.http.routers.${STACK_NAME?Variable not set}-next-frontend-http.middlewares=https-redirect
 volumes:
   app-db-data:
 
