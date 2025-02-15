@@ -1,5 +1,4 @@
 services:
-
   # Local services are available on their ports, but also available on:
   # http://api.localhost.tiangolo.com: backend
   # http://dashboard.localhost.tiangolo.com: frontend
@@ -94,13 +93,30 @@ services:
 
   frontend:
     restart: "no"
+    # For development -> "5173:5173"
+    # For production -> "5173:80"
     ports:
-      - "5173:80"
+      - "5173:5173"
     build:
       context: ./frontend
+      # development: use the local Vite server (npm run dev)
+      # production-nginx: use the Nginx server (npm run build)
+      target: development
       args:
         - VITE_API_URL=http://localhost:8000
         - NODE_ENV=development
+    command: npm run dev
+    develop:
+      watch:
+        - path: ./frontend
+          action: sync
+          target: /app
+          ignore:
+            - ./frontend/node_modules
+            - node_modules
+    # volumes:
+    #   - ./frontend:/app
+    #   - /app/node_modules
 
   playwright:
     build:
