@@ -14,7 +14,7 @@ export const system = createSystem(defaultConfig, {
     ".main-link": {
       color: "ui.main",
       fontWeight: "bold",
-    }
+    },
   },
   theme: {
     tokens: {

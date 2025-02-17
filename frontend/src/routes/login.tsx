@@ -97,12 +97,17 @@ function Login() {
           placeholder="Password"
           errors={errors}
         />
-        <RouterLink to="/recover-password" className="main-link">Forgot Password?</RouterLink>
+        <RouterLink to="/recover-password" className="main-link">
+          Forgot Password?
+        </RouterLink>
         <Button variant="solid" type="submit" loading={isSubmitting} size="md">
           Log In
         </Button>
         <Text>
-          Don't have an account? <RouterLink to="/signup" className="main-link">Sign Up</RouterLink>
+          Don't have an account?{" "}
+          <RouterLink to="/signup" className="main-link">
+            Sign Up
+          </RouterLink>
         </Text>
       </Container>
     </>

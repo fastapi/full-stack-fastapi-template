@@ -6,7 +6,7 @@ import { z } from "zod"
 import { type UserPublic, UsersService } from "../../client"
 import AddUser from "../../components/Admin/AddUser"
 import { UserActionsMenu } from "../../components/Common/UserActionsMenu"
-import PendingUsers from '../../components/Pending/PendingUsers'
+import PendingUsers from "../../components/Pending/PendingUsers"
 import {
   PaginationItems,
   PaginationNextTrigger,
@@ -55,7 +55,6 @@ function UsersTable() {
   if (isLoading) {
     return <PendingUsers />
   }
-
 
   return (
     <>
