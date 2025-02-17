@@ -1,26 +1,26 @@
+import { Box, Flex, IconButton, Text } from "@chakra-ui/react"
+import { useQueryClient } from "@tanstack/react-query"
+import { useState } from "react"
+import { FaBars } from "react-icons/fa"
+
+import { FiLogOut } from "react-icons/fi"
+import type { UserPublic } from "../../client"
+import useAuth from "../../hooks/useAuth"
 import {
-  Box,
   DrawerBackdrop,
   DrawerBody,
   DrawerCloseTrigger,
   DrawerContent,
   DrawerRoot,
   DrawerTrigger,
-  Flex,
-  IconButton,
-  Text,
-} from "@chakra-ui/react"
-import { useQueryClient } from "@tanstack/react-query"
-
-import { FaBars, FaSignOutAlt } from "react-icons/fa"
-import type { UserPublic } from "../../client"
-import useAuth from "../../hooks/useAuth"
+} from "../ui/drawer"
 import SidebarItems from "./SidebarItems"
 
 const Sidebar = () => {
   const queryClient = useQueryClient()
   const currentUser = queryClient.getQueryData<UserPublic>(["currentUser"])
   const { logout } = useAuth()
+  const [open, setOpen] = useState(false)
 
   const handleLogout = async () => {
     logout()
@@ -29,7 +29,11 @@ const Sidebar = () => {
   return (
     <>
       {/* Mobile */}
-      <DrawerRoot size="sm" placement="start">
+      <DrawerRoot
+        placement="start"
+        open={open}
+        onOpenChange={(e) => setOpen(e.open)}
+      >
         <DrawerBackdrop />
         <DrawerTrigger asChild>
           <IconButton
@@ -38,7 +42,7 @@ const Sidebar = () => {
             display={{ base: "flex", md: "none" }}
             aria-label="Open Menu"
             position="absolute"
-            fontSize="20px"
+            zIndex="100"
             m={4}
           >
             <FaBars />
@@ -58,7 +62,7 @@ const Sidebar = () => {
                   px={4}
                   py={2}
                 >
-                  <FaSignOutAlt />
+                  <FiLogOut />
                   <Text>Log Out</Text>
                 </Flex>
               </Box>
@@ -79,7 +83,7 @@ const Sidebar = () => {
         display={{ base: "none", md: "flex" }}
         position="sticky"
         bg="bg.subtle"
-        top="0"
+        top={0}
         minW="280px"
         h="100vh"
         p={4}

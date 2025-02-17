@@ -85,29 +85,29 @@ function ItemsTable() {
       <Table.Root size={{ base: "sm", md: "md" }}>
         <Table.Header>
           <Table.Row>
-            <Table.ColumnHeader w="100px">ID</Table.ColumnHeader>
-            <Table.ColumnHeader w="300px">Title</Table.ColumnHeader>
-            <Table.ColumnHeader w="300px">Description</Table.ColumnHeader>
-            <Table.ColumnHeader w="100px">Actions</Table.ColumnHeader>
+            <Table.ColumnHeader w="30%">ID</Table.ColumnHeader>
+            <Table.ColumnHeader w="30%">Title</Table.ColumnHeader>
+            <Table.ColumnHeader w="30%">Description</Table.ColumnHeader>
+            <Table.ColumnHeader w="10%">Actions</Table.ColumnHeader>
           </Table.Row>
         </Table.Header>
         <Table.Body>
           {items?.map((item) => (
             <Table.Row key={item.id} opacity={isPlaceholderData ? 0.5 : 1}>
-              <Table.Cell truncate maxW="100px">
+              <Table.Cell truncate maxW="30%">
                 {item.id}
               </Table.Cell>
-              <Table.Cell truncate maxW="300px">
+              <Table.Cell truncate maxW="30%">
                 {item.title}
               </Table.Cell>
               <Table.Cell
                 color={!item.description ? "gray" : "inherit"}
                 truncate
-                maxW="300px"
+                maxW="30%"
               >
                 {item.description || "N/A"}
               </Table.Cell>
-              <Table.Cell width="100px">
+              <Table.Cell width="10%">
                 <ItemActionsMenu item={item} />
               </Table.Cell>
             </Table.Row>
@@ -134,7 +134,7 @@ function ItemsTable() {
 function Items() {
   return (
     <Container maxW="full">
-      <Heading size="lg" textAlign={{ base: "center", md: "left" }} pt={12}>
+      <Heading size="lg" pt={12}>
         Items Management
       </Heading>
       <AddItem />
