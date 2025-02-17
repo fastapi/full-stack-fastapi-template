@@ -122,7 +122,7 @@ function SignUp() {
             Sign Up
           </Button>
           <Text>
-            Already have an account? <RouterLink to="/login">Log In</RouterLink>
+            Already have an account? <RouterLink to="/login" className="main-link">Log In</RouterLink>
           </Text>
         </Container>
       </Flex>

@@ -11,22 +11,16 @@ export const system = createSystem(defaultConfig, {
       margin: 0,
       padding: 0,
     },
+    ".main-link": {
+      color: "ui.main",
+      fontWeight: "bold",
+    }
   },
   theme: {
     tokens: {
       colors: {
         ui: {
-          // Brand colors
           main: { value: "#009688" },
-          secondary: { value: "#EDF2F7" },
-          // Neutral colors
-          light: { value: "#FAFAFA" },
-          dark: { value: "#1A202C" },
-          darkSlate: { value: "#252D3D" },
-          dim: { value: "#A0AEC0" },
-          // Feedback colors
-          success: { value: "#48BB78" },
-          danger: { value: "#E53E3E" },
         },
       },
     },
