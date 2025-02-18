@@ -16,4 +16,8 @@ playwright:
 	cd frontend; \
 	op run --env-file="../.env" -- npx playwright test --fail-on-flaky-tests --trace=retain-on-failure;
 
-.PHONY: watch up build playwright
+generate-client:
+	op run --env-file=".env" -- ./scripts/generate-client.sh
+
+
+.PHONY: watch up build playwright generate-client

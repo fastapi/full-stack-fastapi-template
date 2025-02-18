@@ -167,6 +167,7 @@ services:
       context: ./next
       args:
         - VITE_API_URL=https://api.${DOMAIN?Variable not set}
+        - AUTH_SECRET=${NEXT_AUTH_SECRET?Variable not set}
         - NODE_ENV=production
     ports:
       - "3000:3000"
