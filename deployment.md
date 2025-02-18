@@ -12,7 +12,7 @@ But you have to configure a couple things first. 🤓
 
 * Have a remote server ready and available.
 * Configure the DNS records of your domain to point to the IP of the server you just created.
-* Configure a wildcard subdomain for your domain, so that you can have multiple subdomains for different services, e.g. `*.fastapi-project.example.com`. This will be useful for accessing different components, like `traefik.fastapi-project.example.com`, `adminer.fastapi-project.example.com`, etc. And also for `staging`, like `staging.fastapi-project.example.com`, `staging.adminer.fastapi-project.example.com`, etc.
+* Configure a wildcard subdomain for your domain, so that you can have multiple subdomains for different services, e.g. `*.fastapi-project.example.com`. This will be useful for accessing different components, like `dashboard.fastapi-project.example.com`, `api.fastapi-project.example.com`, `traefik.fastapi-project.example.com`, `adminer.fastapi-project.example.com`, etc. And also for `staging`, like `dashboard.staging.fastapi-project.example.com`, `adminer.staging..fastapi-project.example.com`, etc.
 * Install and configure [Docker](https://docs.docker.com/engine/install/) on the remote server (Docker Engine, not Docker Desktop).
 
 ## Public Traefik
@@ -183,22 +183,22 @@ There are already two environments configured, `staging` and `production`. 🚀
 
 ### Install GitHub Actions Runner
 
-* On your remote server, if you are running as the `root` user, create a user for your GitHub Actions:
+* On your remote server, create a user for your GitHub Actions:
 
 ```bash
-adduser github
+sudo adduser github
 ```
 
 * Add Docker permissions to the `github` user:
 
 ```bash
-usermod -aG docker github
+sudo usermod -aG docker github
 ```
 
 * Temporarily switch to the `github` user:
 
 ```bash
-su - github
+sudo su - github
 ```
 
 * Go to the `github` user's home directory:
@@ -219,9 +219,15 @@ To make sure it runs on startup and continues running, you can install it as a s
 exit
 ```
 
-After you do it, you would be on the `root` user again. And you will be on the previous directory, belonging to the `root` user.
+After you do it, you will be on the previous user again. And you will be on the previous directory, belonging to that user.
 
-* Go to the `actions-runner` directory inside of the `github` user's home directory:
+Before being able to go the `github` user directory, you need to become the `root` user (you might already be):
+
+```bash
+sudo su
+```
+
+* As the `root` user, go to the `actions-runner` directory inside of the `github` user's home directory:
 
 ```bash
 cd /home/github/actions-runner
@@ -284,20 +290,20 @@ Traefik UI: `https://traefik.fastapi-project.example.com`
 
 ### Production
 
-Frontend: `https://fastapi-project.example.com`
+Frontend: `https://dashboard.fastapi-project.example.com`
 
-Backend API docs: `https://fastapi-project.example.com/docs`
+Backend API docs: `https://api.fastapi-project.example.com/docs`
 
-Backend API base URL: `https://fastapi-project.example.com/api/`
+Backend API base URL: `https://api.fastapi-project.example.com`
 
 Adminer: `https://adminer.fastapi-project.example.com`
 
 ### Staging
 
-Frontend: `https://staging.fastapi-project.example.com`
+Frontend: `https://dashboard.staging.fastapi-project.example.com`
 
-Backend API docs: `https://staging.fastapi-project.example.com/docs`
+Backend API docs: `https://api.staging.fastapi-project.example.com/docs`
 
-Backend API base URL: `https://staging.fastapi-project.example.com/api/`
+Backend API base URL: `https://api.staging.fastapi-project.example.com`
 
 Adminer: `https://adminer.staging.fastapi-project.example.com`

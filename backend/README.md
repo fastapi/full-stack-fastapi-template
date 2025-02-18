@@ -3,84 +3,50 @@
 ## Requirements
 
 * [Docker](https://www.docker.com/).
-* [Poetry](https://python-poetry.org/) for Python package and environment management.
+* [uv](https://docs.astral.sh/uv/) for Python package and environment management.
 
-## Local Development
+## Docker Compose
 
-* Start the stack with Docker Compose:
+Start the local development environment with Docker Compose following the guide in [../development.md](../development.md).
 
-```bash
-docker compose up -d
-```
+## General Workflow
 
-* Now you can open your browser and interact with these URLs:
-
-Frontend, built with Docker, with routes handled based on the path: http://localhost
-
-Backend, JSON based web API based on OpenAPI: http://localhost/api/
-
-Automatic interactive documentation with Swagger UI (from the OpenAPI backend): http://localhost/docs
-
-Adminer, database web administration: http://localhost:8080
-
-Traefik UI, to see how the routes are being handled by the proxy: http://localhost:8090
-
-**Note**: The first time you start your stack, it might take a minute for it to be ready. While the backend waits for the database to be ready and configures everything. You can check the logs to monitor it.
-
-To check the logs, run:
-
-```bash
-docker compose logs
-```
-
-To check the logs of a specific service, add the name of the service, e.g.:
-
-```bash
-docker compose logs backend
-```
-
-If your Docker is not running in `localhost` (the URLs above wouldn't work) you would need to use the IP or domain where your Docker is running.
-
-## Backend local development, additional details
-
-### General workflow
-
-By default, the dependencies are managed with [Poetry](https://python-poetry.org/), go there and install it.
+By default, the dependencies are managed with [uv](https://docs.astral.sh/uv/), go there and install it.
 
 From `./backend/` you can install all the dependencies with:
 
 ```console
-$ poetry install
+$ uv sync
 ```
 
-Then you can start a shell session with the new environment with:
+Then you can activate the virtual environment with:
 
 ```console
-$ poetry shell
+$ source .venv/bin/activate
 ```
 
-Make sure your editor is using the correct Python virtual environment.
+Make sure your editor is using the correct Python virtual environment, with the interpreter at `backend/.venv/bin/python`.
 
 Modify or add SQLModel models for data and SQL tables in `./backend/app/models.py`, API endpoints in `./backend/app/api/`, CRUD (Create, Read, Update, Delete) utils in `./backend/app/crud.py`.
 
-### VS Code
+## VS Code
 
 There are already configurations in place to run the backend through the VS Code debugger, so that you can use breakpoints, pause and explore variables, etc.
 
 The setup is also already configured so you can run the tests through the VS Code Python tests tab.
 
-### Docker Compose Override
+## Docker Compose Override
 
 During development, you can change Docker Compose settings that will only affect the local development environment in the file `docker-compose.override.yml`.
 
 The changes to that file only affect the local development environment, not the production environment. So, you can add "temporary" changes that help the development workflow.
 
-For example, the directory with the backend code is mounted as a Docker "host volume", mapping the code you change live to the directory inside the container. That allows you to test your changes right away, without having to build the Docker image again. It should only be done during development, for production, you should build the Docker image with a recent version of the backend code. But during development, it allows you to iterate very fast.
+For example, the directory with the backend code is synchronized in the Docker container, copying the code you change live to the directory inside the container. That allows you to test your changes right away, without having to build the Docker image again. It should only be done during development, for production, you should build the Docker image with a recent version of the backend code. But during development, it allows you to iterate very fast.
 
-There is also a command override that runs `/start-reload.sh` (included in the base image) instead of the default `/start.sh` (also included in the base image). It starts a single server process (instead of multiple, as would be for production) and reloads the process whenever the code changes. Have in mind that if you have a syntax error and save the Python file, it will break and exit, and the container will stop. After that, you can restart the container by fixing the error and running again:
+There is also a command override that runs `fastapi run --reload` instead of the default `fastapi run`. It starts a single server process (instead of multiple, as would be for production) and reloads the process whenever the code changes. Have in mind that if you have a syntax error and save the Python file, it will break and exit, and the container will stop. After that, you can restart the container by fixing the error and running again:
 
 ```console
-$ docker compose up -d
+$ docker compose watch
 ```
 
 There is also a commented out `command` override, you can uncomment it and comment the default one. It makes the backend container run a process that does "nothing", but keeps the container alive. That allows you to get inside your running container and execute commands inside, for example a Python interpreter to test installed dependencies, or start the development server that reloads when it detects changes.
@@ -88,10 +54,10 @@ There is also a commented out `command` override, you can uncomment it and comme
 To get inside the container with a `bash` session you can start the stack with:
 
 ```console
-$ docker compose up -d
+$ docker compose watch
 ```
 
-and then `exec` inside the running container:
+and then in another terminal, `exec` inside the running container:
 
 ```console
 $ docker compose exec backend bash
@@ -105,16 +71,16 @@ root@7f2607af31c3:/app#
 
 that means that you are in a `bash` session inside your container, as a `root` user, under the `/app` directory, this directory has another directory called "app" inside, that's where your code lives inside the container: `/app/app`.
 
-There you can use the script `/start-reload.sh` to run the debug live reloading server. You can run that script from inside the container with:
+There you can use the `fastapi run --reload` command to run the debug live reloading server.
 
 ```console
-$ bash /start-reload.sh
+$ fastapi run --reload app/main.py
 ```
 
 ...it will look like:
 
 ```console
-root@7f2607af31c3:/app# bash /start-reload.sh
+root@7f2607af31c3:/app# fastapi run --reload app/main.py
 ```
 
 and then hit enter. That runs the live reloading server that auto reloads when it detects code changes.
@@ -123,7 +89,7 @@ Nevertheless, if it doesn't detect a change but a syntax error, it will just sto
 
 ...this previous detail is what makes it useful to have the container alive doing nothing and then, in a Bash session, make it run the live reload server.
 
-### Backend tests
+## Backend tests
 
 To test the backend run:
 
@@ -135,27 +101,27 @@ The tests run with Pytest, modify and add tests to `./backend/app/tests/`.
 
 If you use GitHub Actions the tests will run automatically.
 
-#### Test running stack
+### Test running stack
 
 If your stack is already up and you just want to run the tests, you can use:
 
 ```bash
-docker compose exec backend bash /app/tests-start.sh
+docker compose exec backend bash scripts/tests-start.sh
 ```
 
-That `/app/tests-start.sh` script just calls `pytest` after making sure that the rest of the stack is running. If you need to pass extra arguments to `pytest`, you can pass them to that command and they will be forwarded.
+That `/app/scripts/tests-start.sh` script just calls `pytest` after making sure that the rest of the stack is running. If you need to pass extra arguments to `pytest`, you can pass them to that command and they will be forwarded.
 
 For example, to stop on first error:
 
 ```bash
-docker compose exec backend bash /app/tests-start.sh -x
+docker compose exec backend bash scripts/tests-start.sh -x
 ```
 
-#### Test Coverage
+### Test Coverage
 
 When the tests are run, a file `htmlcov/index.html` is generated, you can open it in your browser to see the coverage of the tests.
 
-### Migrations
+## Migrations
 
 As during local development your app directory is mounted as a volume inside the container, you can also run the migrations with `alembic` commands inside the container and the migration code will be in your app directory (instead of being only inside the container). So you can add it to your git repository.
 
@@ -189,7 +155,7 @@ If you don't want to use migrations at all, uncomment the lines in the file at `
 SQLModel.metadata.create_all(engine)
 ```
 
-and comment the line in the file `prestart.sh` that contains:
+and comment the line in the file `scripts/prestart.sh` that contains:
 
 ```console
 $ alembic upgrade head

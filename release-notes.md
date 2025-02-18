@@ -2,18 +2,108 @@
 
 ## Latest Changes
 
-* 👷 Do not sync labels as it overrides manually added labels. PR [#1307](https://github.com/fastapi/full-stack-fastapi-template/pull/1307) by [@tiangolo](https://github.com/tiangolo).
+### Features
+
+* 🛂 Migrate to Chakra UI v3 . PR [#1496](https://github.com/fastapi/full-stack-fastapi-template/pull/1496) by [@alejsdev](https://github.com/alejsdev).
+* ✨ Add private, local only, API for usage in E2E tests. PR [#1429](https://github.com/fastapi/full-stack-fastapi-template/pull/1429) by [@patrick91](https://github.com/patrick91).
+* ✨ Migrate to latest openapi-ts. PR [#1430](https://github.com/fastapi/full-stack-fastapi-template/pull/1430) by [@patrick91](https://github.com/patrick91).
+
+### Fixes
+
+* 🧑‍🔧 Replace correct value for 'htmlFor'. PR [#1456](https://github.com/fastapi/full-stack-fastapi-template/pull/1456) by [@wesenbergg](https://github.com/wesenbergg).
 
 ### Refactors
 
-* ♻️ Remove duplicate information in the ItemCreate model. PR [#1287](https://github.com/fastapi/full-stack-fastapi-template/pull/1287) by [@jjaakko](https://github.com/jjaakko).
+* ♻️ Remove redundant item deletion code leveraging cascade delete. PR [#1481](https://github.com/fastapi/full-stack-fastapi-template/pull/1481) by [@nauanbek](https://github.com/nauanbek).
+* ✏️ Fix a couple of spelling mistakes. PR [#1485](https://github.com/fastapi/full-stack-fastapi-template/pull/1485) by [@rjmunro](https://github.com/rjmunro).
+* 🎨 Move `prefix` and `tags` to routers. PR [#1439](https://github.com/fastapi/full-stack-fastapi-template/pull/1439) by [@patrick91](https://github.com/patrick91).
+* ♻️ Remove modify id script in favor of openapi-ts config. PR [#1434](https://github.com/fastapi/full-stack-fastapi-template/pull/1434) by [@patrick91](https://github.com/patrick91).
+* 👷 Improve Playwright CI speed: sharding (parallel runs), run in Docker to use cache, use env vars. PR [#1405](https://github.com/fastapi/full-stack-fastapi-template/pull/1405) by [@tiangolo](https://github.com/tiangolo).
+* ♻️ Add PaginationFooter component. PR [#1381](https://github.com/fastapi/full-stack-fastapi-template/pull/1381) by [@saltie2193](https://github.com/saltie2193).
+* ♻️ Refactored code to use encryption algorithm name from settings for consistency. PR [#1160](https://github.com/fastapi/full-stack-fastapi-template/pull/1160) by [@sameeramin](https://github.com/sameeramin).
+* 🔊 Enable logging for email utils by default. PR [#1374](https://github.com/fastapi/full-stack-fastapi-template/pull/1374) by [@ihmily](https://github.com/ihmily).
+* 🔧 Add `ENV PYTHONUNBUFFERED=1` to log output directly to Docker. PR [#1378](https://github.com/fastapi/full-stack-fastapi-template/pull/1378) by [@tiangolo](https://github.com/tiangolo).
+* 💡 Remove unnecessary comment. PR [#1260](https://github.com/fastapi/full-stack-fastapi-template/pull/1260) by [@sebhani](https://github.com/sebhani).
+
+### Upgrades
+
+* ⬆️ Update Dockerfile to use uv version 0.5.11. PR [#1454](https://github.com/fastapi/full-stack-fastapi-template/pull/1454) by [@alejsdev](https://github.com/alejsdev).
 
 ### Docs
 
+* 📝 Removing deprecated manual client SDK step. PR [#1494](https://github.com/fastapi/full-stack-fastapi-template/pull/1494) by [@chandy](https://github.com/chandy).
+* 📝 Update Frontend README.md. PR [#1462](https://github.com/fastapi/full-stack-fastapi-template/pull/1462) by [@getmarkus](https://github.com/getmarkus).
+* 📝 Update `frontend/README.md` to also remove Playwright when removing Frontend. PR [#1452](https://github.com/fastapi/full-stack-fastapi-template/pull/1452) by [@youben11](https://github.com/youben11).
+* 📝 Update `deployment.md`, instructions to install GitHub Runner in non-root VMs. PR [#1412](https://github.com/fastapi/full-stack-fastapi-template/pull/1412) by [@tiangolo](https://github.com/tiangolo).
+* 📝 Add MailCatcher to `development.md`. PR [#1387](https://github.com/fastapi/full-stack-fastapi-template/pull/1387) by [@tobiase](https://github.com/tobiase).
+
+### Internal
+
+* 🔧 Configure path alias for cleaner imports. PR [#1497](https://github.com/fastapi/full-stack-fastapi-template/pull/1497) by [@alejsdev](https://github.com/alejsdev).
+* Bump vite from 5.0.13 to 5.4.14 in /frontend. PR [#1469](https://github.com/fastapi/full-stack-fastapi-template/pull/1469) by [@dependabot[bot]](https://github.com/apps/dependabot).
+* ⬆ Bump astral-sh/setup-uv from 4 to 5. PR [#1453](https://github.com/fastapi/full-stack-fastapi-template/pull/1453) by [@dependabot[bot]](https://github.com/apps/dependabot).
+* ⬆ Bump astral-sh/setup-uv from 3 to 4. PR [#1433](https://github.com/fastapi/full-stack-fastapi-template/pull/1433) by [@dependabot[bot]](https://github.com/apps/dependabot).
+* ⬆ Bump tiangolo/latest-changes from 0.3.1 to 0.3.2. PR [#1418](https://github.com/fastapi/full-stack-fastapi-template/pull/1418) by [@dependabot[bot]](https://github.com/apps/dependabot).
+* 👷 Update issue manager workflow. PR [#1398](https://github.com/fastapi/full-stack-fastapi-template/pull/1398) by [@alejsdev](https://github.com/alejsdev).
+* 👷 Fix smokeshow, checkout files on CI. PR [#1395](https://github.com/fastapi/full-stack-fastapi-template/pull/1395) by [@tiangolo](https://github.com/tiangolo).
+* 👷 Update `labeler.yml`. PR [#1388](https://github.com/fastapi/full-stack-fastapi-template/pull/1388) by [@tiangolo](https://github.com/tiangolo).
+* 🔧 Add .auth playwright folder to `.gitignore`. PR [#1383](https://github.com/fastapi/full-stack-fastapi-template/pull/1383) by [@justin-p](https://github.com/justin-p).
+* ⬆️ Bump rollup from 4.6.1 to 4.22.5 in /frontend. PR [#1379](https://github.com/fastapi/full-stack-fastapi-template/pull/1379) by [@dependabot[bot]](https://github.com/apps/dependabot).
+* ⬆ Bump astral-sh/setup-uv from 2 to 3. PR [#1364](https://github.com/fastapi/full-stack-fastapi-template/pull/1364) by [@dependabot[bot]](https://github.com/apps/dependabot).
+*  👷 Update pre-commit end-of-file-fixer hook to exclude email-templates. PR [#1296](https://github.com/fastapi/full-stack-fastapi-template/pull/1296) by [@goabonga](https://github.com/goabonga).
+* ⬆ Bump tiangolo/issue-manager from 0.5.0 to 0.5.1. PR [#1332](https://github.com/fastapi/full-stack-fastapi-template/pull/1332) by [@dependabot[bot]](https://github.com/apps/dependabot).
+* 🔧 Run task by the same Python environment used to run Copier. PR [#1157](https://github.com/fastapi/full-stack-fastapi-template/pull/1157) by [@waketzheng](https://github.com/waketzheng).
+* 👷 Tweak generate client to error out if there are errors. PR [#1377](https://github.com/fastapi/full-stack-fastapi-template/pull/1377) by [@tiangolo](https://github.com/tiangolo).
+* 👷 Generate and commit client only on same repo PRs, on forks, show the error. PR [#1376](https://github.com/fastapi/full-stack-fastapi-template/pull/1376) by [@tiangolo](https://github.com/tiangolo).
+
+## 0.7.1
+
+### Highlights
+
+* Migrate from Poetry to [`uv`](https://github.com/astral-sh/uv).
+* Simplifications and improvements for Docker Compose files, Traefik Dockerfiles.
+* Make the API use its own domain `api.example.com` and the frontend use `dashboard.example.com`. This would make it easier to deploy them separately if you needed that.
+* The backend and frontend on Docker Compose now listen on the same port as the local development servers, this way you can stop the Docker Compose services and run the local development servers without changing the frontend configuration.
+
+### Features
+
+* 🩺 Add DB healthcheck. PR [#1342](https://github.com/fastapi/full-stack-fastapi-template/pull/1342) by [@tiangolo](https://github.com/tiangolo).
+
+### Refactors
+
+* ♻️ Update settings to use top level `.env` file. PR [#1359](https://github.com/fastapi/full-stack-fastapi-template/pull/1359) by [@tiangolo](https://github.com/tiangolo).
+* ⬆️ Migrate from Poetry to uv. PR [#1356](https://github.com/fastapi/full-stack-fastapi-template/pull/1356) by [@tiangolo](https://github.com/tiangolo).
+* 🔥 Remove logic for development dependencies and Jupyter, it was never documented, and I no longer use that trick. PR [#1355](https://github.com/fastapi/full-stack-fastapi-template/pull/1355) by [@tiangolo](https://github.com/tiangolo).
+* ♻️ Use Docker Compose `watch`. PR [#1354](https://github.com/fastapi/full-stack-fastapi-template/pull/1354) by [@tiangolo](https://github.com/tiangolo).
+* 🔧 Use plain base official Python Docker image. PR [#1351](https://github.com/fastapi/full-stack-fastapi-template/pull/1351) by [@tiangolo](https://github.com/tiangolo).
+* 🚚 Move location of scripts to simplify file structure. PR [#1352](https://github.com/fastapi/full-stack-fastapi-template/pull/1352) by [@tiangolo](https://github.com/tiangolo).
+* ♻️ Refactor prestart (migrations), move that to its own container. PR [#1350](https://github.com/fastapi/full-stack-fastapi-template/pull/1350) by [@tiangolo](https://github.com/tiangolo).
+* ♻️ Include `FRONTEND_HOST` in CORS origins by default. PR [#1348](https://github.com/fastapi/full-stack-fastapi-template/pull/1348) by [@tiangolo](https://github.com/tiangolo).
+* ♻️ Simplify domains with `api.example.com` for API and `dashboard.example.com` for frontend, improve local development with `localhost`. PR [#1344](https://github.com/fastapi/full-stack-fastapi-template/pull/1344) by [@tiangolo](https://github.com/tiangolo).
+* 🔥 Simplify Traefik, remove www-redirects that add complexity. PR [#1343](https://github.com/fastapi/full-stack-fastapi-template/pull/1343) by [@tiangolo](https://github.com/tiangolo).
+* 🔥 Enable support for Arm Docker images in Mac, remove old patch. PR [#1341](https://github.com/fastapi/full-stack-fastapi-template/pull/1341) by [@tiangolo](https://github.com/tiangolo).
+* ♻️ Remove duplicate information in the ItemCreate model. PR [#1287](https://github.com/fastapi/full-stack-fastapi-template/pull/1287) by [@jjaakko](https://github.com/jjaakko).
+
+### Upgrades
+
+* ⬆️ Upgrade FastAPI. PR [#1349](https://github.com/fastapi/full-stack-fastapi-template/pull/1349) by [@tiangolo](https://github.com/tiangolo).
+
+### Docs
+
+* 💡 Add comments to Dockerfile with uv references. PR [#1357](https://github.com/fastapi/full-stack-fastapi-template/pull/1357) by [@tiangolo](https://github.com/tiangolo).
 * 📝 Add Email Templates to `backend/README.md`. PR [#1311](https://github.com/fastapi/full-stack-fastapi-template/pull/1311) by [@alejsdev](https://github.com/alejsdev).
 
 ### Internal
 
+* 👷 Do not sync labels as it overrides manually added labels. PR [#1307](https://github.com/fastapi/full-stack-fastapi-template/pull/1307) by [@tiangolo](https://github.com/tiangolo).
+* 👷 Use uv cache on GitHub Actions. PR [#1366](https://github.com/fastapi/full-stack-fastapi-template/pull/1366) by [@tiangolo](https://github.com/tiangolo).
+* 👷 Update GitHub Actions format. PR [#1363](https://github.com/fastapi/full-stack-fastapi-template/pull/1363) by [@tiangolo](https://github.com/tiangolo).
+* 👷 Use `uv` for Python env to generate client. PR [#1362](https://github.com/fastapi/full-stack-fastapi-template/pull/1362) by [@tiangolo](https://github.com/tiangolo).
+* 👷 Run tests from Python environment (with `uv`), not from Docker container. PR [#1361](https://github.com/fastapi/full-stack-fastapi-template/pull/1361) by [@tiangolo](https://github.com/tiangolo).
+* 🔨 Update `generate-client.sh` script, make it fail on errors, fix generation. PR [#1360](https://github.com/fastapi/full-stack-fastapi-template/pull/1360) by [@tiangolo](https://github.com/tiangolo).
+* 👷 Add GitHub Actions workflow to lint backend apart from tests. PR [#1358](https://github.com/fastapi/full-stack-fastapi-template/pull/1358) by [@tiangolo](https://github.com/tiangolo).
+* 👷 Improve playwright CI job. PR [#1335](https://github.com/fastapi/full-stack-fastapi-template/pull/1335) by [@patrick91](https://github.com/patrick91).
+* 👷 Update `issue-manager.yml`. PR [#1329](https://github.com/fastapi/full-stack-fastapi-template/pull/1329) by [@tiangolo](https://github.com/tiangolo).
 * 💚 Set `include-hidden-files` to `True` when using the `upload-artifact` GH action. PR [#1327](https://github.com/fastapi/full-stack-fastapi-template/pull/1327) by [@svlandeg](https://github.com/svlandeg).
 * 👷🏻 Auto-generate frontend client . PR [#1320](https://github.com/fastapi/full-stack-fastapi-template/pull/1320) by [@alejsdev](https://github.com/alejsdev).
 * 🐛 Fix in `.github/labeler.yml`. PR [#1322](https://github.com/fastapi/full-stack-fastapi-template/pull/1322) by [@alejsdev](https://github.com/alejsdev).

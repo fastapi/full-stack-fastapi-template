@@ -1,0 +1,28 @@
+name: Lint Backend
+
+on:
+  push:
+    branches:
+      - master
+  pull_request:
+    types:
+      - opened
+      - synchronize
+
+jobs:
+  lint-backend:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.10"
+      - name: Install uv
+        uses: astral-sh/setup-uv@v5
+        with:
+          version: "0.4.15"
+          enable-cache: true
+      - run: uv run bash scripts/lint.sh
+        working-directory: backend

@@ -59,7 +59,7 @@ If you are developing an API-only app and want to remove the frontend, you can d
 
 * In the `docker-compose.yml` file, remove the whole service / section `frontend`.
 
-* In the `docker-compose.override.yml` file, remove the whole service / section `frontend`.
+* In the `docker-compose.override.yml` file, remove the whole service / section `frontend` and `playwright`.
 
 Done, you have a frontend-less (api-only) app. 🤓
 
@@ -80,7 +80,7 @@ But it would be only to clean them up, leaving them won't really have any effect
 * From the top level project directory, run the script:
 
 ```bash
-./scripts/generate-frontend-client.sh
+./scripts/generate-client.sh
 ```
 
 * Commit the changes.
@@ -90,12 +90,6 @@ But it would be only to clean them up, leaving them won't really have any effect
 * Start the Docker Compose stack.
 
 * Download the OpenAPI JSON file from `http://localhost/api/v1/openapi.json` and copy it to a new file `openapi.json` at the root of the `frontend` directory.
-
-* To simplify the names in the generated frontend client code, modify the `openapi.json` file by running the following script:
-
-```bash
-node modify-openapi-operationids.js
-```
 
 * To generate the frontend client, run:
 
@@ -112,7 +106,7 @@ Notice that everytime the backend changes (changing the OpenAPI schema), you sho
 If you want to use a remote API, you can set the environment variable `VITE_API_URL` to the URL of the remote API. For example, you can set it in the `frontend/.env` file:
 
 ```env
-VITE_API_URL=https://my-remote-api.example.com
+VITE_API_URL=https://api.my-domain.example.com
 ```
 
 Then, when you run the frontend, it will use that URL as the base URL for the API.
@@ -134,7 +128,7 @@ The frontend code is structured as follows:
 The frontend includes initial end-to-end tests using Playwright. To run the tests, you need to have the Docker Compose stack running. Start the stack with the following command:
 
 ```bash
-docker compose up -d
+docker compose up -d --wait backend
 ```
 
 Then, you can run the tests with the following command:
