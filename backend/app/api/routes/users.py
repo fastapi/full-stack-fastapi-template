@@ -74,7 +74,7 @@ def create_user(
             email_to=user_in.email,
             subject=email_data.subject,
             html_content=email_data.html_content,
-         )
+        )
     return user
 
 
