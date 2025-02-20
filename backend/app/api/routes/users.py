@@ -1,7 +1,7 @@
 import uuid
 from typing import Any
 
-from fastapi import APIRouter, Depends, HTTPException, BackgroundTasks
+from fastapi import APIRouter, BackgroundTasks, Depends, HTTPException
 from sqlmodel import col, delete, func, select
 
 from app import crud
@@ -57,7 +57,6 @@ def create_user(
     """
     Create new user.
     """
-    
     user = crud.get_user_by_email(session=session, email=user_in.email)
     if user:
         raise HTTPException(
