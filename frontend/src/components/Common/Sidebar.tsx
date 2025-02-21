@@ -22,10 +22,6 @@ const Sidebar = () => {
   const { logout } = useAuth()
   const [open, setOpen] = useState(false)
 
-  const handleLogout = async () => {
-    logout()
-  }
-
   return (
     <>
       {/* Mobile */}
@@ -48,7 +44,7 @@ const Sidebar = () => {
             <FaBars />
           </IconButton>
         </DrawerTrigger>
-        <DrawerContent maxW="280px">
+        <DrawerContent maxW="xs">
           <DrawerCloseTrigger />
           <DrawerBody>
             <Flex flexDir="column" justify="space-between">
@@ -56,7 +52,9 @@ const Sidebar = () => {
                 <SidebarItems />
                 <Flex
                   as="button"
-                  onClick={handleLogout}
+                  onClick={() => {
+                    logout()
+                  }}
                   alignItems="center"
                   gap={4}
                   px={4}
@@ -84,7 +82,7 @@ const Sidebar = () => {
         position="sticky"
         bg="bg.subtle"
         top={0}
-        minW="280px"
+        minW="xs"
         h="100vh"
         p={4}
       >

@@ -76,7 +76,7 @@ const UserInformation = () => {
           User Information
         </Heading>
         <Box
-          w={{ sm: "full", md: "50%" }}
+          w={{ sm: "full", md: "sm" }}
           as="form"
           onSubmit={handleSubmit(onSubmit)}
         >
@@ -86,7 +86,6 @@ const UserInformation = () => {
                 {...register("full_name", { maxLength: 30 })}
                 type="text"
                 size="md"
-                w="auto"
               />
             ) : (
               <Text
@@ -94,7 +93,6 @@ const UserInformation = () => {
                 py={2}
                 color={!currentUser?.full_name ? "gray" : "inherit"}
                 truncate
-                maxWidth="250px"
               >
                 {currentUser?.full_name || "N/A"}
               </Text>
@@ -114,10 +112,9 @@ const UserInformation = () => {
                 })}
                 type="email"
                 size="md"
-                w="auto"
               />
             ) : (
-              <Text fontSize="md" py={2} truncate maxWidth="250px">
+              <Text fontSize="md" py={2} truncate>
                 {currentUser?.email}
               </Text>
             )}
