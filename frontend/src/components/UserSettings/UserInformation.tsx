@@ -93,6 +93,7 @@ const UserInformation = () => {
                 py={2}
                 color={!currentUser?.full_name ? "gray" : "inherit"}
                 truncate
+                maxW="sm"
               >
                 {currentUser?.full_name || "N/A"}
               </Text>
@@ -114,7 +115,7 @@ const UserInformation = () => {
                 size="md"
               />
             ) : (
-              <Text fontSize="md" py={2} truncate>
+              <Text fontSize="md" py={2} truncate maxW="sm">
                 {currentUser?.email}
               </Text>
             )}
