@@ -65,7 +65,7 @@ const Sidebar = () => {
                 </Flex>
               </Box>
               {currentUser?.email && (
-                <Text fontSize="sm" p={2}>
+                <Text fontSize="sm" p={2} truncate maxW="sm">
                   Logged in as: {currentUser.email}
                 </Text>
               )}
