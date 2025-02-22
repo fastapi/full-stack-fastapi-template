@@ -1,16 +1,26 @@
+import re
 import uuid
 
-from datetime import datetime
+from pydantic import field_validator
 from sqlmodel import Field, Relationship, SQLModel
 
 from .patients import Patient
 
+mime_type_pattern = re.compile(r'^[a-zA-Z0-9]+/[a-zA-Z0-9\-.+]+$')
+
 # Shared properties
 class AttachmentBase(SQLModel):
-    name: str = Field(min_length=1, max_length=255)
-    dob: datetime | None = Field(default=None, max_length=255)
-    contact_info: str | None = Field(default=None, max_length=255)
-    medical_history: str | None = Field(default=None, max_length=255)
+    file_name: str = Field(min_length=1, max_length=None)
+    mime_type: str | None = Field(default=None, max_length=255)
+
+    @field_validator("mime_type")
+    @classmethod
+    def validate_mime_type(cls, v):
+        if v is None:
+            return v
+        if not mime_type_pattern.match(v):
+            raise ValueError("Invalid MIME type format")
+        return v
 
 # Properties to receive on attachment creation
 class AttachmentCreate(AttachmentBase):
@@ -18,7 +28,7 @@ class AttachmentCreate(AttachmentBase):
 
 # Properties to receive on attachment update
 class AttachmentUpdate(AttachmentBase):
-    name: str | None = Field(default=None, min_length=1, max_length=255) # type: ignore
+    pass
 
 # Database model, database table inferred from class name
 class Attachment(AttachmentBase, table=True):

@@ -10,9 +10,9 @@ if TYPE_CHECKING:
 # Shared properties
 class PatientBase(SQLModel):
     name: str = Field(min_length=1, max_length=255)
-    dob: datetime | None = Field(default=None, max_length=255)
+    dob: datetime | None = Field(default=None)
     contact_info: str | None = Field(default=None, max_length=255)
-    medical_history: str | None = Field(default=None, max_length=255)
+    medical_history: str | None = Field(default=None, max_length=None)
 
 # Properties to receive on patient creation
 class PatientCreate(PatientBase):
