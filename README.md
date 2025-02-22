@@ -54,77 +54,29 @@
 
 ## How To Use It
 
-You can **just fork or clone** this repository and use it as is.
+Click the "Use this template" button in the top right corner, and select "Create a new repository"
+
+![Click the "use this template" button](img/use-this-template.png)
 
 ✨ It just works. ✨
 
 ### How to Use a Private Repository
 
-If you want to have a private repository, GitHub won't allow you to simply fork it as it doesn't allow changing the visibility of forks.
+Just select "Private" for the visibility of your repo when creating it from the template.
 
-But you can do the following:
-
-- Create a new GitHub repo, for example `my-full-stack`.
-- Clone this repository manually, set the name with the name of the project you want to use, for example `my-full-stack`:
-
-```bash
-git clone git@github.com:fastapi/full-stack-fastapi-template.git my-full-stack
-```
-
-- Enter into the new directory:
-
-```bash
-cd my-full-stack
-```
-
-- Set the new origin to your new repository, copy it from the GitHub interface, for example:
-
-```bash
-git remote set-url origin git@github.com:octocat/my-full-stack.git
-```
-
-- Add this repo as another "remote" to allow you to get updates later:
-
-```bash
-git remote add upstream git@github.com:fastapi/full-stack-fastapi-template.git
-```
-
-- Push the code to your new repository:
-
-```bash
-git push -u origin master
-```
+![Creating a private Repo is easy](img/create-private-repo.png)
 
 ### Update From the Original Template
 
-After cloning the repository, and after doing changes, you might want to get the latest changes from this original template.
+This repo comes with a "Sync Template Updates" action that runs once a day that checks for updates in the template repo and creates a pull request automatically in your repo if anything has updated
 
-- Make sure you added the original repository as a remote, you can check it with:
+![Screenshot of an automated template update PR](img/automated-template-update-prs.png)
 
-```bash
-git remote -v
+- If there are conflicts, you will need to check out the branch locally, or resolve them in the GitHub web interface.
 
-origin    git@github.com:octocat/my-full-stack.git (fetch)
-origin    git@github.com:octocat/my-full-stack.git (push)
-upstream    git@github.com:fastapi/full-stack-fastapi-template.git (fetch)
-upstream    git@github.com:fastapi/full-stack-fastapi-template.git (push)
-```
+#### For This Action to Work, You Must Allow Actions to Create and Approve PRs
 
-- Pull the latest changes without merging:
-
-```bash
-git pull --no-commit upstream master
-```
-
-This will download the latest changes from this template without committing them, that way you can check everything is right before committing.
-
-- If there are conflicts, solve them in your editor.
-
-- Once you are done, commit the changes:
-
-```bash
-git merge --continue
-```
+![You need to grant GitHub Actions privileges to PRs](img/gh-actions-pr-perms.png)
 
 ### Configure
 
@@ -235,5 +187,6 @@ This includes using Docker Compose, custom local domains, `.env` configurations,
 Check the file [release-notes.md](./release-notes.md).
 
 ## License
+
 
 The Full Stack FastAPI Template is licensed under the terms of the MIT license.
