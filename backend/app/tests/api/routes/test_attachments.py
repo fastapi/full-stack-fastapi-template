@@ -23,8 +23,8 @@ def test_create_attachment(
     db.refresh(patient)
 
     data = {
-        "filename": "test.pdf",
-        "content_type": "application/pdf",
+        "file_name": "test.pdf",
+        "mime_type": "application/pdf",
         "description": "Test attachment",
         "patient_id": str(patient.id)
     }
@@ -35,8 +35,8 @@ def test_create_attachment(
     )
     assert response.status_code == 200
     content = response.json()
-    assert content["filename"] == data["filename"]
-    assert content["content_type"] == data["content_type"]
+    assert content["file_name"] == data["file_name"]
+    assert content["mime_type"] == data["mime_type"]
     assert "id" in content
 
 def test_read_attachment(
@@ -54,8 +54,8 @@ def test_read_attachment(
 
     # Create test attachment
     attachment = Attachment(
-        filename="test.pdf",
-        content_type="application/pdf",
+        file_name="test.pdf",
+        mime_type="application/pdf",
         description="Test attachment",
         patient_id=patient.id
     )
@@ -69,7 +69,7 @@ def test_read_attachment(
     )
     assert response.status_code == 200
     content = response.json()
-    assert content["filename"] == attachment.filename
+    assert content["file_name"] == attachment.file_name
     assert content["id"] == str(attachment.id)
 
 def test_read_attachments(
@@ -87,13 +87,13 @@ def test_read_attachments(
 
     # Create test attachments
     attachment1 = Attachment(
-        filename="test1.pdf",
-        content_type="application/pdf",
+        file_name="test1.pdf",
+        mime_type="application/pdf",
         patient_id=patient.id
     )
     attachment2 = Attachment(
-        filename="test2.pdf",
-        content_type="application/pdf",
+        file_name="test2.pdf",
+        mime_type="application/pdf",
         patient_id=patient.id
     )
     db.add(attachment1)
@@ -124,15 +124,15 @@ def test_update_attachment(
 
     # Create test attachment
     attachment = Attachment(
-        filename="test.pdf",
-        content_type="application/pdf",
+        file_name="test.pdf",
+        mime_type="application/pdf",
         patient_id=patient.id
     )
     db.add(attachment)
     db.commit()
     db.refresh(attachment)
 
-    data = {"filename": "updated.pdf"}
+    data = {"file_name": "updated.pdf"}
     response = client.put(
         f"/api/v1/attachments/{attachment.id}",
         headers=superuser_token_headers,
@@ -140,7 +140,7 @@ def test_update_attachment(
     )
     assert response.status_code == 200
     content = response.json()
-    assert content["filename"] == data["filename"]
+    assert content["file_name"] == data["file_name"]
     assert content["id"] == str(attachment.id)
 
 def test_delete_attachment(
@@ -158,8 +158,8 @@ def test_delete_attachment(
 
     # Create test attachment
     attachment = Attachment(
-        filename="test.pdf",
-        content_type="application/pdf",
+        file_name="test.pdf",
+        mime_type="application/pdf",
         patient_id=patient.id
     )
     db.add(attachment)

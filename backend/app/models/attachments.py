@@ -24,7 +24,7 @@ class AttachmentBase(SQLModel):
 
 # Properties to receive on attachment creation
 class AttachmentCreate(AttachmentBase):
-    pass
+    patient_id: uuid.UUID = Field(nullable=False)
 
 # Properties to receive on attachment update
 class AttachmentUpdate(AttachmentBase):
