@@ -3,15 +3,13 @@ import uuid
 from typing import Dict
 
 import pytest
-from httpx import AsyncClient
+from fastapi.testclient import TestClient
 from sqlmodel import Session
 
 from app.models.patients import Patient
 
-pytestmark = pytest.mark.asyncio
-
-async def test_create_patient(
-    client: AsyncClient, superuser_token_headers: Dict[str, str]
+def test_create_patient(
+    client: TestClient, superuser_token_headers: Dict[str, str]
 ) -> None:
     data = {
         "name": "Test Patient",
@@ -19,7 +17,7 @@ async def test_create_patient(
         "contact_info": "test@example.com",
         "medical_history": "No significant history"
     }
-    response = await client.post(
+    response = client.post(
         "/api/v1/patients/",
         headers=superuser_token_headers,
         json=data,
@@ -30,8 +28,8 @@ async def test_create_patient(
     assert content["contact_info"] == data["contact_info"]
     assert "id" in content
 
-async def test_read_patient(
-    client: AsyncClient, superuser_token_headers: Dict[str, str], db: Session
+def test_read_patient(
+    client: TestClient, superuser_token_headers: Dict[str, str], db: Session
 ) -> None:
     patient = Patient(
         name="Test Patient",
@@ -43,7 +41,7 @@ async def test_read_patient(
     db.commit()
     db.refresh(patient)
     
-    response = await client.get(
+    response = client.get(
         f"/api/v1/patients/{patient.id}",
         headers=superuser_token_headers,
     )
@@ -52,8 +50,8 @@ async def test_read_patient(
     assert content["name"] == patient.name
     assert content["id"] == str(patient.id)
 
-async def test_read_patients(
-    client: AsyncClient, superuser_token_headers: Dict[str, str], db: Session
+def test_read_patients(
+    client: TestClient, superuser_token_headers: Dict[str, str], db: Session
 ) -> None:
     patient1 = Patient(
         name="Test Patient 1",
@@ -69,7 +67,7 @@ async def test_read_patients(
     db.add(patient2)
     db.commit()
 
-    response = await client.get(
+    response = client.get(
         "/api/v1/patients/",
         headers=superuser_token_headers,
     )
@@ -78,8 +76,8 @@ async def test_read_patients(
     assert content["count"] >= 2
     assert len(content["data"]) >= 2
 
-async def test_update_patient(
-    client: AsyncClient, superuser_token_headers: Dict[str, str], db: Session
+def test_update_patient(
+    client: TestClient, superuser_token_headers: Dict[str, str], db: Session
 ) -> None:
     patient = Patient(
         name="Test Patient",
@@ -91,7 +89,7 @@ async def test_update_patient(
     db.refresh(patient)
 
     data = {"name": "Updated Patient Name"}
-    response = await client.put(
+    response = client.put(
         f"/api/v1/patients/{patient.id}",
         headers=superuser_token_headers,
         json=data,
@@ -101,8 +99,8 @@ async def test_update_patient(
     assert content["name"] == data["name"]
     assert content["id"] == str(patient.id)
 
-async def test_delete_patient(
-    client: AsyncClient, superuser_token_headers: Dict[str, str], db: Session
+def test_delete_patient(
+    client: TestClient, superuser_token_headers: Dict[str, str], db: Session
 ) -> None:
     patient = Patient(
         name="Test Patient",
@@ -113,23 +111,23 @@ async def test_delete_patient(
     db.commit()
     db.refresh(patient)
 
-    response = await client.delete(
+    response = client.delete(
         f"/api/v1/patients/{patient.id}",
         headers=superuser_token_headers,
     )
     assert response.status_code == 200
     
     # Verify patient was deleted
-    response = await client.get(
+    response = client.get(
         f"/api/v1/patients/{patient.id}",
         headers=superuser_token_headers,
     )
     assert response.status_code == 404
 
-async def test_patient_not_found(
-    client: AsyncClient, superuser_token_headers: Dict[str, str]
+def test_patient_not_found(
+    client: TestClient, superuser_token_headers: Dict[str, str]
 ) -> None:
-    response = await client.get(
+    response = client.get(
         f"/api/v1/patients/{uuid.uuid4()}",
         headers=superuser_token_headers,
     )
