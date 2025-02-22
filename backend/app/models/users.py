@@ -1,9 +1,11 @@
 import uuid
 
+from typing import TYPE_CHECKING
 from pydantic import EmailStr
 from sqlmodel import Field, Relationship, SQLModel
 
-from .items import Item
+if TYPE_CHECKING:
+    from .items import Item
 
 # Shared properties
 class UserBase(SQLModel):
@@ -55,9 +57,6 @@ class UserPublic(UserBase):
 class UsersPublic(SQLModel):
     data: list[UserPublic]
     count: int
-
-
-
 
 # Generic message
 class Message(SQLModel):
