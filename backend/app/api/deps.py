@@ -57,10 +57,10 @@ def get_current_active_superuser(current_user: CurrentUser) -> User:
         )
     return current_user
 
-# dependency for AWS SDK boto3 session
-aws_session = boto3.Session(
+
+# shared AWS SDK boto3 session
+s3_client = boto3.Session(
     aws_access_key_id=settings.AWS_ACCESS_KEY_ID,
     aws_secret_access_key=settings.AWS_SECRET_ACCESS_KEY,
     region_name=settings.AWS_REGION,
-)
-AwsDep = Annotated[boto3.Session, Depends(lambda: aws_session)]
+).client('s3')

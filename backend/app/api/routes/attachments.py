@@ -1,13 +1,14 @@
-import uuid
+import logging
 from typing import Any
+import uuid
 
 import boto3
 from fastapi import APIRouter, HTTPException
 from fastapi.responses import RedirectResponse
 from sqlmodel import func, select
 
-from app.api.deps import AwsDep, CurrentUser, SessionDep
-from app.core.config import Settings
+from app.api.deps import CurrentUser, SessionDep, s3_client
+from app.core.config import settings
 from app.models.attachments import (
     Attachment,
     AttachmentCreate,
@@ -17,6 +18,8 @@ from app.models.attachments import (
     AttachmentUpdate,
 )
 from app.models import Message
+
+logger = logging.getLogger(__name__)
 
 router = APIRouter(prefix="/attachments", tags=["attachments"])
 
@@ -36,7 +39,7 @@ def read_attachments(
     return AttachmentsPublic(data=attachments, count=count)
 
 @router.get("/{id}/content")
-def read_attachment_content(session: SessionDep, aws_client: AwsDep, current_user: CurrentUser, id: uuid.UUID) -> Any:
+def read_attachment_content(session: SessionDep, current_user: CurrentUser, id: uuid.UUID) -> Any:
     """
     Get attachment content by ID.
     """
@@ -45,16 +48,17 @@ def read_attachment_content(session: SessionDep, aws_client: AwsDep, current_use
         raise HTTPException(status_code=404, detail="Attachment not found")
 
     try:
-        presigned_url = aws_client.generate_presigned_url(
+        presigned_url = s3_client.generate_presigned_url(
             "get_object",
             Params={
-                "Bucket": Settings.AWS_S3_ATTACHMENTS_BUCKET,
+                "Bucket": settings.AWS_S3_ATTACHMENTS_BUCKET,
                 "Key": attachment.storage_path,
                 "ContentDisposition": f"attachment; filename={attachment.file_name}",
             },
             ExpiresIn=3600,
         )
     except Exception as e:
+        logger.exception(e)
         raise HTTPException(status_code=500, detail="Could not generate presigned URL")
 
     return RedirectResponse(status_code=302, url=presigned_url)
@@ -73,7 +77,7 @@ def read_attachment(session: SessionDep, current_user: CurrentUser, id: uuid.UUI
 
 @router.post("/", response_model=AttachmentCreatePublic)
 def create_attachment(
-    *, session: SessionDep, aws_client: AwsDep, current_user: CurrentUser, attachment_in: AttachmentCreate
+    *, session: SessionDep, current_user: CurrentUser, attachment_in: AttachmentCreate
 ) -> Any:
     """
     Create a new attachment.
@@ -84,19 +88,21 @@ def create_attachment(
     session.refresh(attachment)
 
     try:
-        presigned_upload_url = aws_client.generate_presigned_url(
+        presigned_upload_url = s3_client.generate_presigned_url(
             "put_object",
             Params={
-                "Bucket": Settings.AWS_S3_ATTACHMENTS_BUCKET,
+                "Bucket": settings.AWS_S3_ATTACHMENTS_BUCKET,
                 "Key": attachment.storage_path,
                 "ContentDisposition": f"attachment; filename={attachment.file_name}",
             },
             ExpiresIn=3600,
         )
     except Exception as e:
+        logger.exception(e)
         raise HTTPException(status_code=500, detail="Could not generate presigned URL")
 
-    resmodel = AttachmentCreatePublic.model_validate(attachment)
-    resmodel.upload_url = presigned_upload_url
+    resmodel = AttachmentCreatePublic.model_validate(
+        attachment, update={"upload_url": presigned_upload_url}
+    )
 
     return resmodel

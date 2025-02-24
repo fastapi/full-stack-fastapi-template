@@ -37,7 +37,7 @@ def test_create_attachment(
     content = response.json()
     assert content["file_name"] == data["file_name"]
     assert content["mime_type"] == data["mime_type"]
-    assert content["upload_url"] is not None
+    assert content["upload_url"].startswith("https://")
     assert "id" in content
 
 def test_read_attachment_details(
