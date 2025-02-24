@@ -1,6 +1,7 @@
 from datetime import datetime
 import uuid
 from typing import Dict
+from unittest.mock import patch
 
 import pytest
 from fastapi.testclient import TestClient
@@ -114,7 +115,7 @@ def test_list_attachments(
 
 
 def test_read_attachment_content(
-    client: TestClient, superuser_token_headers: Dict[str, str], db: Session, mocker
+    client: TestClient, superuser_token_headers: Dict[str, str], db: Session,
 ) -> None:
     # Create test patient
     patient = Patient(
@@ -139,16 +140,12 @@ def test_read_attachment_content(
 
     # Mock the S3 presigned URL generation
     mock_url = "https://example.com/presigned-url"
-    mocker.patch(
-        "app.api.deps.s3_client.generate_presigned_url",
-        return_value=mock_url
-    )
-
-    response = client.get(
-        f"/api/v1/attachments/{attachment.id}/content",
-        headers=superuser_token_headers,
-        follow_redirects=False
-    )
+    with patch("app.api.deps.s3_client.generate_presigned_url", return_value=mock_url):
+        response = client.get(
+            f"/api/v1/attachments/{attachment.id}/content",
+            headers=superuser_token_headers,
+            follow_redirects=False
+        )
     
     assert response.status_code == 302  # Redirect status code
     assert response.headers["location"] == mock_url
