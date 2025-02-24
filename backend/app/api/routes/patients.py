@@ -1,7 +1,8 @@
-import uuid
 from typing import Any
+import uuid
 
 from fastapi import APIRouter, HTTPException
+from sqlalchemy.dialects.postgresql.ext import to_tsquery
 from sqlmodel import func, select
 
 from app.api.deps import CurrentUser, SessionDep
@@ -19,14 +20,24 @@ router = APIRouter(prefix="/patients", tags=["patients"])
 
 @router.get("/", response_model=PatientsPublic)
 def read_patients(
-    session: SessionDep, current_user: CurrentUser, skip: int = 0, limit: int = 100
+    session: SessionDep,
+    current_user: CurrentUser,
+    skip: int = 0,
+    limit: int = 100,
+    history_text: str = None,
 ) -> Any:
     """
     Retrieve patients.
     """
-    count_statement = select(func.count()).select_from(Patient)
+
+    # assemble filters array from query parameters
+    filters = []
+    if history_text:
+        filters.append(Patient.medical_history.op("@@")(to_tsquery(history_text)))
+
+    count_statement = select(func.count()).select_from(Patient).filter(*filters)
     count = session.exec(count_statement).one()
-    statement = select(Patient).offset(skip).limit(limit)
+    statement = select(Patient).filter(*filters).offset(skip).limit(limit)
     patients = session.exec(statement).all()
 
     return PatientsPublic(data=patients, count=count)

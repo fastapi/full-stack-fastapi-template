@@ -84,19 +84,19 @@ def test_read_patients_history_search(
         name="Test Patient 1",
         dob=datetime(2000, 1, 1),
         contact_info="test1@example.com",
-        medical_history="Patient has a history of asthma"
+        medical_history="Patient has a fulltext history of asthma"
     )
     patient2 = Patient(
         name="Test Patient 2",
         dob=datetime(2000, 1, 2),
         contact_info="test2@example.com",
-        medical_history="Patient has a history of diabetes"
+        medical_history="Patient has a fulltext history of diabetes"
     )
     patient3 = Patient(
         name="Test Patient 3",
         dob=datetime(2000, 1, 3),
         contact_info="test3@example.com",
-        medical_history="No significant medical history"
+        medical_history="No significant fulltext medical history"
     )
     db.add(patient1)
     db.add(patient2)
@@ -115,7 +115,7 @@ def test_read_patients_history_search(
 
     # Test searching for patients with any history
     response = client.get(
-        "/api/v1/patients/?history_text=history",
+        "/api/v1/patients/?history_text=fulltext",
         headers=superuser_token_headers,
     )
     assert response.status_code == 200
