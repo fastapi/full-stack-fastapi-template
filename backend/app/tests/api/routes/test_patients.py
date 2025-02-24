@@ -122,6 +122,115 @@ def test_read_patients_history_search(
     content = response.json()
     assert content["count"] == 3
 
+def test_read_patients_name_exact(
+    client: TestClient, superuser_token_headers: Dict[str, str], db: Session
+) -> None:
+    # Create test patients with different names
+    patient1 = Patient(
+        name="John Smith",
+        dob=datetime(2000, 1, 1),
+        contact_info="john@example.com"
+    )
+    patient2 = Patient(
+        name="John Doe",
+        dob=datetime(2000, 1, 2),
+        contact_info="doe@example.com"
+    )
+    db.add(patient1)
+    db.add(patient2)
+    db.commit()
+
+    # Test exact name match
+    response = client.get(
+        "/api/v1/patients/?name_exact=John Smith",
+        headers=superuser_token_headers,
+    )
+    assert response.status_code == 200
+    content = response.json()
+    assert content["count"] == 1
+    assert content["data"][0]["name"] == "John Smith"
+
+def test_read_patients_name_text(
+    client: TestClient, superuser_token_headers: Dict[str, str], db: Session
+) -> None:
+    # Create test patients with different names
+    patient1 = Patient(
+        name="John Smith",
+        dob=datetime(2000, 1, 1),
+        contact_info="john@example.com"
+    )
+    patient2 = Patient(
+        name="John Doe",
+        dob=datetime(2000, 1, 2),
+        contact_info="doe@example.com"
+    )
+    patient3 = Patient(
+        name="Jane Wilson",
+        dob=datetime(2000, 1, 3),
+        contact_info="jane@example.com"
+    )
+    db.add(patient1)
+    db.add(patient2)
+    db.add(patient3)
+    db.commit()
+
+    # Test full text search on name
+    response = client.get(
+        "/api/v1/patients/?name_text=John",
+        headers=superuser_token_headers,
+    )
+    assert response.status_code == 200
+    content = response.json()
+    assert content["count"] == 2
+    assert all("John" in patient["name"] for patient in content["data"])
+
+def test_read_patients_attachment_filter(
+    client: TestClient, superuser_token_headers: Dict[str, str], db: Session
+) -> None:
+    from app.models.attachments import Attachment
+
+    # Create test patients with different attachments
+    patient1 = Patient(
+        name="Test Patient 1",
+        dob=datetime(2000, 1, 1),
+        contact_info="test1@example.com"
+    )
+    patient2 = Patient(
+        name="Test Patient 2",
+        dob=datetime(2000, 1, 2),
+        contact_info="test2@example.com"
+    )
+    db.add(patient1)
+    db.add(patient2)
+    db.commit()
+    db.refresh(patient1)
+    db.refresh(patient2)
+
+    # Add different types of attachments
+    attachment1 = Attachment(
+        file_name="test1.pdf",
+        mime_type="application/pdf",
+        patient_id=patient1.id
+    )
+    attachment2 = Attachment(
+        file_name="test.jpg",
+        mime_type="image/jpeg",
+        patient_id=patient2.id
+    )
+    db.add(attachment1)
+    db.add(attachment2)
+    db.commit()
+
+    # Test filtering by attachment MIME type
+    response = client.get(
+        "/api/v1/patients/?has_attachment_mime_type=application/pdf",
+        headers=superuser_token_headers,
+    )
+    assert response.status_code == 200
+    content = response.json()
+    assert content["count"] == 1
+    assert content["data"][0]["id"] == str(patient1.id)
+
 def test_update_patient(
     client: TestClient, superuser_token_headers: Dict[str, str], db: Session
 ) -> None:
