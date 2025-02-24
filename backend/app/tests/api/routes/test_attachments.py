@@ -113,6 +113,46 @@ def test_list_attachments(
     assert len(content["data"]) >= 2
 
 
+def test_read_attachment_content(
+    client: TestClient, superuser_token_headers: Dict[str, str], db: Session, mocker
+) -> None:
+    # Create test patient
+    patient = Patient(
+        name="Test Patient",
+        dob=datetime(2000, 1, 1),
+        contact_info="test@example.com"
+    )
+    db.add(patient)
+    db.commit()
+    db.refresh(patient)
+
+    # Create test attachment
+    attachment = Attachment(
+        file_name="test.pdf",
+        mime_type="application/pdf",
+        storage_path="test/path/test.pdf",
+        patient_id=patient.id
+    )
+    db.add(attachment)
+    db.commit()
+    db.refresh(attachment)
+
+    # Mock the S3 presigned URL generation
+    mock_url = "https://example.com/presigned-url"
+    mocker.patch(
+        "app.api.deps.s3_client.generate_presigned_url",
+        return_value=mock_url
+    )
+
+    response = client.get(
+        f"/api/v1/attachments/{attachment.id}/content",
+        headers=superuser_token_headers,
+        follow_redirects=False
+    )
+    
+    assert response.status_code == 302  # Redirect status code
+    assert response.headers["location"] == mock_url
+
 def test_attachment_not_found(
     client: TestClient, superuser_token_headers: Dict[str, str]
 ) -> None:
