@@ -1,16 +1,18 @@
 """Add storage_path to Attachment model
 
-Revision ID: 2025_02_23_storage_path
-Revises: 2025_02_23_gin_idx
-Create Date: 2025-02-23 11:00:00.000000
+Revision ID: e62dc93fe967
+Revises: 60300545fecf
+Create Date: 2025-02-23 19:56:35.403358
 
 """
 from alembic import op
 import sqlalchemy as sa
+import sqlmodel.sql.sqltypes
+
 
 # revision identifiers, used by Alembic.
-revision = '2025_02_23_storage_path'
-down_revision = '2025_02_23_gin_idx'
+revision = 'e62dc93fe967'
+down_revision = '60300545fecf'
 branch_labels = None
 depends_on = None
 

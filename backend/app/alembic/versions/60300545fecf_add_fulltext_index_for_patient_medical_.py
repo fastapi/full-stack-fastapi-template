@@ -1,15 +1,18 @@
-"""Add GIN index on patient medical_history
+"""add fulltext index for patient.medical_history
 
-Revision ID: 2025_02_23_gin_idx
-Revises: 
-Create Date: 2025-02-23 10:00:00.000000
+Revision ID: 60300545fecf
+Revises: 9e47d43a4b8a
+Create Date: 2025-02-23 19:56:05.494933
 
 """
 from alembic import op
+import sqlalchemy as sa
+import sqlmodel.sql.sqltypes
+
 
 # revision identifiers, used by Alembic.
-revision = '2025_02_23_gin_idx'
-down_revision = None
+revision = '60300545fecf'
+down_revision = '9e47d43a4b8a'
 branch_labels = None
 depends_on = None
 
