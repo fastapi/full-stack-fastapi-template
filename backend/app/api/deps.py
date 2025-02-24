@@ -1,6 +1,7 @@
 from collections.abc import Generator
 from typing import Annotated
 
+import boto3
 import jwt
 from fastapi import Depends, HTTPException, status
 from fastapi.security import OAuth2PasswordBearer
@@ -55,3 +56,11 @@ def get_current_active_superuser(current_user: CurrentUser) -> User:
             status_code=403, detail="The user doesn't have enough privileges"
         )
     return current_user
+
+# dependency for AWS SDK boto3 session
+aws_session = boto3.Session(
+    aws_access_key_id=settings.AWS_ACCESS_KEY_ID,
+    aws_secret_access_key=settings.AWS_SECRET_ACCESS_KEY,
+    region_name=settings.AWS_REGION,
+)
+AwsDep = Annotated[boto3.Session, Depends(lambda: aws_session)]

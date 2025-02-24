@@ -107,6 +107,10 @@ services:
       - POSTGRES_USER=${POSTGRES_USER?Variable not set}
       - POSTGRES_PASSWORD=${POSTGRES_PASSWORD?Variable not set}
       - SENTRY_DSN=${SENTRY_DSN}
+      - AWS_ACCESS_KEY_ID=${AWS_ACCESS_KEY_ID?Variable not set}
+      - AWS_SECRET_ACCESS_KEY=${AWS_SECRET_ACCESS_KEY?Variable not set}
+      - AWS_REGION=${AWS_REGION?Variable not set}
+      - AWS_S3_ATTACHMENTS_BUCKET=${AWS_S3_ATTACHMENTS_BUCKET?Variable not set}
 
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:8000/api/v1/utils/health-check/"]
