@@ -76,6 +76,52 @@ def test_read_patients(
     assert content["count"] >= 2
     assert len(content["data"]) >= 2
 
+def test_read_patients_history_search(
+    client: TestClient, superuser_token_headers: Dict[str, str], db: Session
+) -> None:
+    # Create test patients with different medical histories
+    patient1 = Patient(
+        name="Test Patient 1",
+        dob=datetime(2000, 1, 1),
+        contact_info="test1@example.com",
+        medical_history="Patient has a history of asthma"
+    )
+    patient2 = Patient(
+        name="Test Patient 2",
+        dob=datetime(2000, 1, 2),
+        contact_info="test2@example.com",
+        medical_history="Patient has a history of diabetes"
+    )
+    patient3 = Patient(
+        name="Test Patient 3",
+        dob=datetime(2000, 1, 3),
+        contact_info="test3@example.com",
+        medical_history="No significant medical history"
+    )
+    db.add(patient1)
+    db.add(patient2)
+    db.add(patient3)
+    db.commit()
+
+    # Test searching for patients with asthma
+    response = client.get(
+        "/api/v1/patients/?history_text=asthma",
+        headers=superuser_token_headers,
+    )
+    assert response.status_code == 200
+    content = response.json()
+    assert content["count"] == 1
+    assert content["data"][0]["medical_history"] == patient1.medical_history
+
+    # Test searching for patients with any history
+    response = client.get(
+        "/api/v1/patients/?history_text=history",
+        headers=superuser_token_headers,
+    )
+    assert response.status_code == 200
+    content = response.json()
+    assert content["count"] == 3
+
 def test_update_patient(
     client: TestClient, superuser_token_headers: Dict[str, str], db: Session
 ) -> None:
