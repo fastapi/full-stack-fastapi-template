@@ -25,6 +25,7 @@ def test_create_attachment(
     data = {
         "file_name": "test.pdf",
         "mime_type": "application/pdf",
+        "storage_path": "patients/attachments/test.pdf",
         "description": "Test attachment",
         "patient_id": str(patient.id)
     }
@@ -56,6 +57,7 @@ def test_read_attachment(
     attachment = Attachment(
         file_name="test.pdf",
         mime_type="application/pdf",
+        storage_path="patients/attachments/test.pdf",
         description="Test attachment",
         patient_id=patient.id
     )
@@ -89,11 +91,13 @@ def test_read_attachments(
     attachment1 = Attachment(
         file_name="test1.pdf",
         mime_type="application/pdf",
+        storage_path="patients/attachments/test1.pdf",
         patient_id=patient.id
     )
     attachment2 = Attachment(
         file_name="test2.pdf",
         mime_type="application/pdf",
+        storage_path="patients/attachments/test2.pdf",
         patient_id=patient.id
     )
     db.add(attachment1)
@@ -126,6 +130,7 @@ def test_update_attachment(
     attachment = Attachment(
         file_name="test.pdf",
         mime_type="application/pdf",
+        storage_path="patients/attachments/test.pdf",
         patient_id=patient.id
     )
     db.add(attachment)
@@ -160,6 +165,7 @@ def test_delete_attachment(
     attachment = Attachment(
         file_name="test.pdf",
         mime_type="application/pdf",
+        storage_path="patients/attachments/test.pdf",
         patient_id=patient.id
     )
     db.add(attachment)
