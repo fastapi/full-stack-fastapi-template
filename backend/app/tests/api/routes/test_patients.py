@@ -127,12 +127,12 @@ def test_read_patients_name_exact(
 ) -> None:
     # Create test patients with different names
     patient1 = Patient(
-        name="John Smith",
+        name="Bob Smith",
         dob=datetime(2000, 1, 1),
-        contact_info="john@example.com"
+        contact_info="bob@example.com"
     )
     patient2 = Patient(
-        name="John Doe",
+        name="Bob Doe",
         dob=datetime(2000, 1, 2),
         contact_info="doe@example.com"
     )
@@ -142,13 +142,13 @@ def test_read_patients_name_exact(
 
     # Test exact name match
     response = client.get(
-        "/api/v1/patients/?name_exact=John Smith",
+        "/api/v1/patients/?name_exact=Bob Smith",
         headers=superuser_token_headers,
     )
     assert response.status_code == 200
     content = response.json()
     assert content["count"] == 1
-    assert content["data"][0]["name"] == "John Smith"
+    assert content["data"][0]["name"] == "Bob Smith"
 
 def test_read_patients_name_text(
     client: TestClient, superuser_token_headers: Dict[str, str], db: Session
@@ -208,13 +208,13 @@ def test_read_patients_attachment_filter(
 
     # Add different types of attachments
     attachment1 = Attachment(
-        file_name="test1.pdf",
-        mime_type="application/pdf",
+        file_name="test1.bam",
+        mime_type="application/x-bam",
         patient_id=patient1.id
     )
     attachment2 = Attachment(
-        file_name="test.jpg",
-        mime_type="image/jpeg",
+        file_name="test.cram",
+        mime_type="application/x-cram",
         patient_id=patient2.id
     )
     db.add(attachment1)
@@ -223,7 +223,7 @@ def test_read_patients_attachment_filter(
 
     # Test filtering by attachment MIME type
     response = client.get(
-        "/api/v1/patients/?has_attachment_mime_type=application/pdf",
+        "/api/v1/patients/?has_attachment_mime_type=application/x-bam",
         headers=superuser_token_headers,
     )
     assert response.status_code == 200

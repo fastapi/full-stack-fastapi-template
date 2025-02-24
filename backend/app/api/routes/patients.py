@@ -13,6 +13,7 @@ from app.models.patients import (
     PatientsPublic,
     PatientUpdate,
 )
+from app.models.attachments import Attachment
 from app.models import Message
 
 router = APIRouter(prefix="/patients", tags=["patients"])
@@ -24,7 +25,10 @@ def read_patients(
     current_user: CurrentUser,
     skip: int = 0,
     limit: int = 100,
-    history_text: str = None,
+    history_text: str = None, # full text search for medical history
+    name_exact: str = None, # exact match for name
+    name_text: str = None, # full text search for name
+    has_attachment_mime_type: str = None, # filter by attachment MIME type
 ) -> Any:
     """
     Retrieve patients.
@@ -34,6 +38,12 @@ def read_patients(
     filters = []
     if history_text:
         filters.append(Patient.medical_history.op("@@")(to_tsquery(history_text)))
+    if name_exact:
+        filters.append(Patient.name == name_exact)
+    if name_text:
+        filters.append(Patient.name.op("@@")(to_tsquery(name_text)))
+    if has_attachment_mime_type:
+        filters.append(Patient.attachments.any(Attachment.mime_type == has_attachment_mime_type))
 
     count_statement = select(func.count()).select_from(Patient).filter(*filters)
     count = session.exec(count_statement).one()
