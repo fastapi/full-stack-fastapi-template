@@ -38,9 +38,19 @@ class Attachment(AttachmentBase, table=True):
     )
     patient: Patient | None = Relationship(back_populates="attachments")
 
+    # get the blob storage path, which is assembled from the patient
+    # id and the attachment ID
+    @property
+    def storage_path(self):
+        return f"patients/{self.patient_id}/attachments/{self.id}"
+
 # Properties to return via API, id is always required
 class AttachmentPublic(AttachmentBase):
     id: uuid.UUID
+    patient_id: uuid.UUID = Field(nullable=False)
+
+class AttachmentCreatePublic(AttachmentPublic):
+    upload_url: str = Field(nullable=False) # presigned URL for uploading to blob storage
 
 class AttachmentsPublic(SQLModel):
     data: list[AttachmentPublic]
