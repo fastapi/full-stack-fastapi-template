@@ -1,7 +1,8 @@
-
 from typing import TYPE_CHECKING
 from datetime import datetime
-from sqlmodel import Field, Relationship, SQLModel
+
+from sqlmodel import Field, Relationship, SQLModel, create_engine, Session, select
+from sqlalchemy import Index
 import uuid
 
 if TYPE_CHECKING:
@@ -26,6 +27,16 @@ class PatientUpdate(PatientBase):
 class Patient(PatientBase, table=True):
     id: uuid.UUID = Field(default_factory=uuid.uuid4, primary_key=True)
     attachments: list["Attachment"] = Relationship(back_populates="patient", cascade_delete=True)
+
+    __table_args__ = (
+        # define a fulltext index on medical_history
+        Index(
+            'ix_patient_medical_history_gin',
+            'medical_history',
+            postgresql_using='gin',
+            postgresql_ops={'medical_history': 'gin_trgm_ops'}
+        ),
+    )
 
 # Properties to return via API, id is always required
 class PatientPublic(PatientBase):

@@ -210,13 +210,11 @@ def test_read_patients_attachment_filter(
     attachment1 = Attachment(
         file_name="test1.bam",
         mime_type="application/x-bam",
-        storage_path="patients/attachments/test1.bam",
         patient_id=patient1.id
     )
     attachment2 = Attachment(
         file_name="test.cram",
         mime_type="application/x-cram",
-        storage_path="patients/attachments/test.cram",
         patient_id=patient2.id
     )
     db.add(attachment1)

@@ -18,17 +18,16 @@ depends_on = None
 
 
 def upgrade() -> None:
-    # Create GIN index on medical_history column
-    op.execute("""
-        CREATE EXTENSION IF NOT EXISTS pg_trgm;
-        CREATE INDEX IF NOT EXISTS ix_patient_medical_history_gin 
-        ON patient 
-        USING GIN (medical_history gin_trgm_ops);
-    """)
-
+    op.execute("CREATE EXTENSION IF NOT EXISTS pg_trgm;")
+    op.create_index(
+        'ix_patient_medical_history_gin',
+        'patient',
+        ['medical_history'],
+        unique=False,
+        postgresql_using='gin',
+        postgresql_ops={'medical_history': 'gin_trgm_ops'}
+    )
 
 def downgrade() -> None:
-    # Drop the GIN index
-    op.execute("""
-        DROP INDEX IF EXISTS ix_patient_medical_history_gin;
-    """)
+    op.drop_index('ix_patient_medical_history_gin', table_name='patient')
+
