@@ -1,9 +1,9 @@
 import uuid
-
+from typing import Optional
 from pydantic import EmailStr
-from sqlmodel import Field, Relationship, SQLModel
-
-
+from sqlmodel import Field, Relationship, SQLModel, Column, TIMESTAMP, text, DATE
+from datetime import datetime
+import enum
 # Shared properties
 class UserBase(SQLModel):
     email: EmailStr = Field(unique=True, index=True, max_length=255)
@@ -44,7 +44,7 @@ class User(UserBase, table=True):
     id: uuid.UUID = Field(default_factory=uuid.uuid4, primary_key=True)
     hashed_password: str
     items: list["Item"] = Relationship(back_populates="owner", cascade_delete=True)
-
+    Patients: list["Patient"] = Relationship(back_populates="owner", cascade_delete=True)
 
 # Properties to return via API, id is always required
 class UserPublic(UserBase):
@@ -112,3 +112,61 @@ class TokenPayload(SQLModel):
 class NewPassword(SQLModel):
     token: str
     new_password: str = Field(min_length=8, max_length=40)
+
+
+################################################################################
+##                                 Start Here!                                ##
+################################################################################
+
+# Shared properties
+class PatientBase(SQLModel):
+    full_name: str = Field(min_length=1, max_length=255)
+    description: str | None = Field(default=None, max_length=255)
+    email: EmailStr = Field(max_length=55)
+    phone_number: str = Field(max_length=20)
+    height: float = Field(max_length=20)
+    weight: float = Field(max_length=20)
+    gender: int = Field(max_length=20)
+    birth_date: Optional[datetime] = Field(sa_column=Column(
+        TIMESTAMP(timezone=True),
+        nullable=False, 
+    ))
+ 
+
+
+# Properties to receive on item creation
+class PatientCreate(PatientBase):
+    pass
+
+
+# Properties to receive on item update
+class PatientUpdate(PatientBase):
+    full_name: str | None = Field(default=None, min_length=1, max_length=255)  # type: ignore
+    description: str | None = Field(default=None, max_length=255)
+    email: EmailStr | None = Field(max_length=55)
+    phone_number: str | None  = Field(max_length=20)
+    height: float | None = Field(max_length=20)
+    weight: float | None = Field(max_length=20)
+    gender: int | None = Field(max_length=20)
+
+# Database model, database table inferred from class name
+class Patient(PatientBase, table=True):
+    id: uuid.UUID = Field(default_factory=uuid.uuid4, primary_key=True)
+    owner_id: uuid.UUID = Field(
+        foreign_key="user.id", nullable=False, ondelete="CASCADE"
+    )
+    owner: User | None = Relationship(back_populates="Patients")
+    created_datetime: Optional[datetime] = Field(sa_column=Column(
+        TIMESTAMP(timezone=True),
+        nullable=False,
+        server_default=text("CURRENT_TIMESTAMP"),
+    ))
+
+# Properties to return via API, id is always required
+class PatientPublic(PatientBase):
+    pass
+
+
+class PatientsPublic(SQLModel):
+    data: list[PatientPublic]
+    count: int
