@@ -1,14 +1,52 @@
 <!DOCTYPE html>
 <html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <link rel="icon" type="image/svg+xml" href="/vite.svg" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Full Stack FastAPI Project</title>
-    <link rel="icon" type="image/x-icon" href="/assets/images/favicon.png" />
-  </head>
-  <body>
-    <div id="root"></div>
-    <script type="module" src="./src/main.tsx"></script>
-  </body>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Employee Timesheet Dashboard</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        .chart-container {
+            margin-bottom: 20px;
+        }
+        .table-responsive {
+            overflow-x: auto;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1 class="mt-4 mb-4">Employee Timesheet Dashboard</h1>
+
+        <div class="chart-container">
+            <canvas id="totalEmployeesChart"></canvas>
+        </div>
+
+        <div class="chart-container">
+            <canvas id="ptsStatusByManagerChart"></canvas>
+            <div id="ptsStatusByManagerTable" class="table-responsive" style="display: none;"></div>
+        </div>
+
+        <div class="chart-container">
+            <canvas id="ptsStatusOverviewChart"></canvas>
+            <div id="ptsStatusOverviewTable" class="table-responsive" style="display: none;"></div>
+        </div>
+
+        <div class="chart-container">
+            <canvas id="ptsStatusTrendChart"></canvas>
+            <div id="ptsStatusTrendTable" class="table-responsive" style="display: none;"></div>
+        </div>
+
+        <div class="chart-container">
+            <canvas id="resourceTypeBreakdownChart"></canvas>
+            <div id="resourceTypeBreakdownTable" class="table-responsive" style="display: none;"></div>
+        </div>
+
+
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="script.js"></script>
+</body>
 </html>
