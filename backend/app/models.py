@@ -1,8 +1,11 @@
 import uuid
 from typing import Optional
-from pydantic import EmailStr
+from pydantic import BaseModel, EmailStr
+from pydantic import Field as F
 from sqlmodel import Field, Relationship, SQLModel, Column, TIMESTAMP, text, DATE
 from datetime import datetime
+from sqlalchemy import JSON
+from sqlalchemy import Column as Col
 import enum
 # Shared properties
 class UserBase(SQLModel):
@@ -161,6 +164,8 @@ class Patient(PatientBase, table=True):
         nullable=False,
         server_default=text("CURRENT_TIMESTAMP"),
     ))
+    menus: list["Menu"] = Relationship(back_populates="owner", cascade_delete=True)
+
 
 # Properties to return via API, id is always required
 class PatientPublic(PatientBase):
@@ -170,3 +175,61 @@ class PatientPublic(PatientBase):
 class PatientsPublic(SQLModel):
     data: list[PatientPublic]
     count: int
+
+class Menu_B(BaseModel):
+    def __init__(self):
+        self.data: dict = F(default=self.menu_builder())
+
+    def menu_builder(self):
+        days = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday" , "Sunday"]
+        mills = ["breakfast",  "mid-morning", "lunch","mid-afternoon" , "dinner"]
+        new_menu = {}
+        for day in days:
+            new_menu.update({day:{mill:{} for mill in mills}})
+        self.data = new_menu 
+        return self.data
+
+# Shared properties
+class MenuBase(SQLModel,Menu_B):
+    title: str = Field(min_length=1, max_length=255)
+    description: str | None = Field(default=None, max_length=255)
+    data: dict = Field(sa_column=Col(JSON), default_factory=dict)
+    current: bool = Field()
+
+
+# Properties to receive on item creation
+class MenuCreate(MenuBase):
+    pass
+
+
+# Properties to receive on item update
+class MenuUpdate(MenuBase):
+    title: str | None = Field(default=None, min_length=1, max_length=255)  # type: ignore
+    description: str | None = Field(default=None, max_length=255)
+    data: dict = Field(sa_column=Column(JSON), default_factory=dict)
+    current: bool = Field()
+
+# Database model, database table inferred from class name
+class Menu(MenuBase, table=True):
+    id: uuid.UUID = Field(default_factory=uuid.uuid4, primary_key=True)
+    title: str = Field(max_length=255)
+    created_datetime: Optional[datetime] = Field(sa_column=Column(
+        TIMESTAMP(timezone=True),
+        nullable=False,
+        server_default=text("CURRENT_TIMESTAMP"),
+    ))
+    owner_id: uuid.UUID = Field(
+        foreign_key="patient.id", nullable=False, ondelete="CASCADE"
+    )
+    owner: Patient | None = Relationship(back_populates="menus")
+
+
+# Properties to return via API, id is always required
+class MenuPublic(MenuBase):
+    pass
+
+
+class MenusPublic(SQLModel):
+    data: list[MenuPublic]
+    count: int
+
