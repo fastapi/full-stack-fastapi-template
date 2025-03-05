@@ -4,7 +4,7 @@ from typing import Any
 from sqlmodel import Session, select
 
 from app.core.security import get_password_hash, verify_password
-from app.models import Item, ItemCreate, User, UserCreate, UserUpdate
+from app.models import Item, ItemCreate, User, UserCreate, UserUpdate, Patient, PatientCreate, MenuCreate, MenuUpdate, Menu
 
 
 def create_user(*, session: Session, user_create: UserCreate) -> User:
@@ -52,3 +52,67 @@ def create_item(*, session: Session, item_in: ItemCreate, owner_id: uuid.UUID) -
     session.commit()
     session.refresh(db_item)
     return db_item
+
+
+
+
+def create_patient(*, session: Session,patient_in: PatientCreate, owner_id: uuid.UUID) -> Patient:
+    db_obj = Patient.model_validate(patient_in, update={"owner_id": owner_id})
+
+    session.add(db_obj)
+    session.commit()
+    session.refresh(db_obj)
+    return db_obj
+
+def update_patient_password(*, session: Session,db_patient: Patient, user_in: UserUpdate) -> Any:
+    patient_data = user_in.model_dump(exclude_unset=True)
+    extra_data = {}
+    if "password" in patient_data:
+        password = patient_data["password"]
+        hashed_password = get_password_hash(password)
+        extra_data["hashed_password"] = hashed_password
+    db_patient.sqlmodel_update(patient_data, update=extra_data)
+    session.add(db_patient)
+    session.commit()
+    session.refresh(db_patient)
+    return db_patient
+
+
+
+
+def update_patient_info(*, session: Session,db_patient: Patient, patient_in: UserUpdate) -> Any:
+    patient_data = patient_in.model_dump(exclude_unset=True)
+    extra_data = {}
+    if "password" in patient_data:
+        password = patient_data["password"]
+        hashed_password = get_password_hash(password)
+        extra_data["hashed_password"] = hashed_password
+    db_patient.sqlmodel_update(patient_data, update=extra_data)
+    session.add(db_patient)
+    session.commit()
+    session.refresh(db_patient)
+    return db_patient
+
+
+
+def get_patient_by_email(*, session: Session, email: str) -> User | None:
+    statement = select(Patient).where(Patient.email == email)
+    session_patient = session.exec(statement).first()
+    return session_patient
+
+def create_menu(*, session: Session,menu_create: MenuCreate) -> Menu:
+    db_obj = Menu.model_validate(
+        menu_create
+    )
+    session.add(db_obj)
+    session.commit()
+    session.refresh(db_obj)
+    return db_obj
+
+
+
+
+
+
+
+
