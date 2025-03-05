@@ -139,7 +139,13 @@ class PatientBase(SQLModel):
 
 # Properties to receive on item creation
 class PatientCreate(PatientBase):
-    pass
+    password: str = Field(min_length=8, max_length=40)
+
+
+class PatientRegister(SQLModel):
+    email: EmailStr = Field(max_length=255)
+    password: str = Field(min_length=8, max_length=40)
+    full_name: str = Field(default=None, max_length=255)
 
 
 # Properties to receive on item update
