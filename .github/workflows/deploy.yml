@@ -1,0 +1,12 @@
+name: Dummy Action
+
+on:
+  workflow_dispatch:
+
+jobs:
+  dummy_job:
+    runs-on: ubuntu-latest
+    environment: production
+    steps:
+      - name: Dummy Step
+        run: echo "This is a dummy action running in the production environment."
