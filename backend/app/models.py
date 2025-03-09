@@ -2,6 +2,7 @@ import uuid
 
 from pydantic import EmailStr
 from sqlmodel import Field, Relationship, SQLModel
+from typing import Optional
 
 
 # Shared properties
@@ -112,3 +113,45 @@ class TokenPayload(SQLModel):
 class NewPassword(SQLModel):
     token: str
     new_password: str = Field(min_length=8, max_length=40)
+
+# Shared properties for posts
+class PostBase(SQLModel):
+    content: str = Field(min_length=1, max_length=2000)
+    image1_url: Optional[str] = None
+    image2_url: Optional[str] = None
+    image3_url: Optional[str] = None
+
+
+# Properties to receive via API on creation
+class PostCreate(PostBase):
+    pass
+
+
+# Properties to receive via API on update
+class PostUpdate(SQLModel):
+    content: Optional[str] = None
+    image1_url: Optional[str] = None
+    image2_url: Optional[str] = None
+    image3_url: Optional[str] = None
+
+
+# Database model, infers the `posts` table
+class Post(PostBase, table=True):
+    id: uuid.UUID = Field(default_factory=uuid.uuid4, primary_key=True)
+    user_id: uuid.UUID = Field(foreign_key="user.id", nullable=False, ondelete="CASCADE")
+    user: Optional["User"] = Relationship(back_populates="posts")
+
+
+# Properties to return via API
+class PostPublic(PostBase):
+    id: uuid.UUID
+    user_id: uuid.UUID
+
+
+class PostsPublic(SQLModel):
+    data: list[PostPublic]
+    count: int
+
+
+# Add the relationship to the User model
+User.posts = Relationship(back_populates="user", sa_relationship_kwargs={"cascade": "all, delete"})
