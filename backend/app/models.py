@@ -45,6 +45,7 @@ class User(UserBase, table=True):
     id: uuid.UUID = Field(default_factory=uuid.uuid4, primary_key=True)
     hashed_password: str
     items: list["Item"] = Relationship(back_populates="owner", cascade_delete=True)
+    posts: list["Post"] = Relationship(back_populates="owner", cascade_delete=True)
 
 
 # Properties to return via API, id is always required
@@ -139,8 +140,7 @@ class PostUpdate(SQLModel):
 class Post(PostBase, table=True):
     id: uuid.UUID = Field(default_factory=uuid.uuid4, primary_key=True)
     user_id: uuid.UUID = Field(foreign_key="user.id", nullable=False, ondelete="CASCADE")
-    user: Optional["User"] = Relationship(back_populates="posts")
-
+    owner: User | None = Relationship(back_populates="posts")
 
 # Properties to return via API
 class PostPublic(PostBase):
