@@ -5,31 +5,29 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
-    "build": "tsc && vite build",
+    "build": "tsc -p tsconfig.build.json && vite build",
     "lint": "biome check --apply-unsafe --no-errors-on-unmatched --files-ignore-unknown=true ./",
     "preview": "vite preview",
-    "generate-client": "openapi-ts --input ./openapi.json --output ./src/client --client axios --exportSchemas true"
+    "generate-client": "openapi-ts"
   },
   "dependencies": {
-    "@chakra-ui/icons": "2.1.1",
-    "@chakra-ui/react": "2.8.2",
-    "@emotion/react": "11.11.3",
-    "@emotion/styled": "11.11.0",
+    "@chakra-ui/react": "^3.8.0",
+    "@emotion/react": "^11.14.0",
     "@tanstack/react-query": "^5.28.14",
     "@tanstack/react-query-devtools": "^5.28.14",
     "@tanstack/react-router": "1.19.1",
     "axios": "1.7.4",
     "form-data": "4.0.0",
-    "framer-motion": "10.16.16",
+    "next-themes": "^0.4.4",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
     "react-error-boundary": "^4.0.13",
     "react-hook-form": "7.49.3",
-    "react-icons": "5.0.1"
+    "react-icons": "^5.4.0"
   },
   "devDependencies": {
     "@biomejs/biome": "1.6.1",
-    "@hey-api/openapi-ts": "^0.34.1",
+    "@hey-api/openapi-ts": "^0.57.0",
     "@playwright/test": "^1.45.2",
     "@tanstack/router-devtools": "1.19.1",
     "@tanstack/router-vite-plugin": "1.19.0",
@@ -39,6 +37,6 @@
     "@vitejs/plugin-react-swc": "^3.5.0",
     "dotenv": "^16.4.5",
     "typescript": "^5.2.2",
-    "vite": "^5.0.13"
+    "vite": "^5.4.14"
   }
 }
