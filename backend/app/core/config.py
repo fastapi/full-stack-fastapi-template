@@ -51,6 +51,8 @@ class Settings(BaseSettings):
 
     PROJECT_NAME: str
     SENTRY_DSN: HttpUrl | None = None
+
+    # PostgreSQL settings
     POSTGRES_SERVER: str
     POSTGRES_PORT: int = 5432
     POSTGRES_USER: str
@@ -68,6 +70,43 @@ class Settings(BaseSettings):
             port=self.POSTGRES_PORT,
             path=self.POSTGRES_DB,
         )
+
+    # MongoDB settings
+    MONGODB_SERVER: str = "localhost"
+    MONGODB_PORT: int = 27017
+    MONGODB_USER: str = ""
+    MONGODB_PASSWORD: str = ""
+    MONGODB_DATABASE: str = "political_analysis"
+    
+    @computed_field  # type: ignore[prop-decorator]
+    @property
+    def MONGODB_URL(self) -> str:
+        if self.MONGODB_USER and self.MONGODB_PASSWORD:
+            return f"mongodb://{self.MONGODB_USER}:{self.MONGODB_PASSWORD}@{self.MONGODB_SERVER}:{self.MONGODB_PORT}"
+        return f"mongodb://{self.MONGODB_SERVER}:{self.MONGODB_PORT}"
+
+    # Redis settings
+    REDIS_SERVER: str = "localhost"
+    REDIS_PORT: int = 6379
+    REDIS_DB: int = 0
+    REDIS_PASSWORD: str = ""
+    
+    @computed_field  # type: ignore[prop-decorator]
+    @property
+    def REDIS_URL(self) -> str:
+        if self.REDIS_PASSWORD:
+            return f"redis://:{self.REDIS_PASSWORD}@{self.REDIS_SERVER}:{self.REDIS_PORT}/{self.REDIS_DB}"
+        return f"redis://{self.REDIS_SERVER}:{self.REDIS_PORT}/{self.REDIS_DB}"
+
+    # Celery settings
+    CELERY_BROKER_URL: str | None = None
+    
+    @computed_field  # type: ignore[prop-decorator]
+    @property
+    def CELERY_BROKER(self) -> str:
+        if self.CELERY_BROKER_URL:
+            return self.CELERY_BROKER_URL
+        return self.REDIS_URL
 
     SMTP_TLS: bool = True
     SMTP_SSL: bool = False
@@ -113,6 +152,11 @@ class Settings(BaseSettings):
         self._check_default_secret(
             "FIRST_SUPERUSER_PASSWORD", self.FIRST_SUPERUSER_PASSWORD
         )
+        # Add checks for MongoDB and Redis passwords if they're set
+        if self.MONGODB_PASSWORD:
+            self._check_default_secret("MONGODB_PASSWORD", self.MONGODB_PASSWORD)
+        if self.REDIS_PASSWORD:
+            self._check_default_secret("REDIS_PASSWORD", self.REDIS_PASSWORD)
 
         return self
 

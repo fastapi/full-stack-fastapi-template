@@ -50,6 +50,49 @@ services:
     ports:
       - "5432:5432"
 
+  mongodb:
+    image: mongo:6
+    restart: "no"
+    ports:
+      - "27017:27017"
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: ${MONGO_USER:-mongo}
+      MONGO_INITDB_ROOT_PASSWORD: ${MONGO_PASSWORD:-mongo}
+      MONGO_INITDB_DATABASE: ${MONGODB_DATABASE:-political_analysis}
+    volumes:
+      - mongodb_data:/data/db
+    healthcheck:
+      test: echo 'db.runCommand("ping").ok' | mongosh localhost:27017/test --quiet
+      interval: 10s
+      timeout: 10s
+      retries: 5
+
+  redis:
+    image: redis:7-alpine
+    restart: "no"
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    healthcheck:
+      test: [ "CMD", "redis-cli", "ping" ]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  mongo-express:
+    image: mongo-express
+    restart: "no"
+    ports:
+      - "8081:8081"
+    environment:
+      ME_CONFIG_MONGODB_ADMINUSERNAME: ${MONGO_USER:-mongo}
+      ME_CONFIG_MONGODB_ADMINPASSWORD: ${MONGO_PASSWORD:-mongo}
+      ME_CONFIG_MONGODB_URL: mongodb://${MONGO_USER:-mongo}:${MONGO_PASSWORD:-mongo}@mongodb:27017/
+    depends_on:
+      mongodb:
+        condition: service_healthy
+
   adminer:
     restart: "no"
     ports:
@@ -85,6 +128,56 @@ services:
       SMTP_PORT: "1025"
       SMTP_TLS: "false"
       EMAILS_FROM_EMAIL: "noreply@example.com"
+      MONGODB_SERVER: "mongodb"
+      MONGODB_PORT: "27017"
+      MONGODB_USER: ${MONGO_USER:-mongo}
+      MONGODB_PASSWORD: ${MONGO_PASSWORD:-mongo}
+      MONGODB_DATABASE: ${MONGODB_DATABASE:-political_analysis}
+      REDIS_SERVER: "redis"
+      REDIS_PORT: "6379"
+    depends_on:
+      mongodb:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+
+  celery-worker:
+    build:
+      context: ./backend
+    restart: "no"
+    command: celery -A app.tasks.celery_app worker --loglevel=info
+    volumes:
+      - ./backend:/app
+    environment:
+      MONGODB_SERVER: "mongodb"
+      MONGODB_PORT: "27017"
+      MONGODB_USER: ${MONGO_USER:-mongo}
+      MONGODB_PASSWORD: ${MONGO_PASSWORD:-mongo}
+      MONGODB_DATABASE: ${MONGODB_DATABASE:-political_analysis}
+      REDIS_SERVER: "redis"
+      REDIS_PORT: "6379"
+    depends_on:
+      - backend
+      - redis
+      - mongodb
+
+  celery-flower:
+    build:
+      context: ./backend
+    restart: "no"
+    command: celery -A app.tasks.celery_app flower --port=5555
+    ports:
+      - "5555:5555"
+    environment:
+      MONGODB_SERVER: "mongodb"
+      MONGODB_PORT: "27017"
+      MONGODB_USER: ${MONGO_USER:-mongo}
+      MONGODB_PASSWORD: ${MONGO_PASSWORD:-mongo}
+      MONGODB_DATABASE: ${MONGODB_DATABASE:-political_analysis}
+      REDIS_SERVER: "redis"
+      REDIS_PORT: "6379"
+    depends_on:
+      - celery-worker
 
   mailcatcher:
     image: schickling/mailcatcher
@@ -131,3 +224,7 @@ networks:
   traefik-public:
     # For local dev, don't expect an external Traefik network
     external: false
+
+volumes:
+  mongodb_data:
+  redis_data:
