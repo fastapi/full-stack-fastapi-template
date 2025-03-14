@@ -1,6 +1,6 @@
 ---
 description: General description of the backend used in the repository. Use this to have more context on the /backend structure.
-globs: backend, *.py
+globs: backend/*, *.py
 alwaysApply: false
 ---
 # FastAPI Backend Template - Overview

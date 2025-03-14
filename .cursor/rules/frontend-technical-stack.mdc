@@ -1,0 +1,123 @@
+---
+description: Technical Stack Specification for the frontend.
+globs: frontend/*
+alwaysApply: false
+---
+# Technical Stack Specification - Frontend
+
+## 1. Core Technologies
+
+| Technology | Version | Purpose |
+|------------|---------|---------|
+| React | 18.2.0 | UI library for building component-based user interfaces |
+| TypeScript | 5.2.2 | Static type checking for JavaScript |
+| Vite | 5.4.14 | Modern frontend build tool and development server |
+
+## 2. UI Framework and Styling
+
+| Technology | Version | Purpose |
+|------------|---------|---------|
+| Chakra UI | 3.8.0 | Component library providing accessible UI components |
+| @emotion/react | 11.14.0 | CSS-in-JS library used by Chakra UI |
+| react-icons | 5.4.0 | Icon library with support for multiple icon sets |
+
+## 3. Data Fetching and State Management
+
+| Technology | Version | Purpose |
+|------------|---------|---------|
+| TanStack Query | 5.28.14 | Data fetching, caching, and state management |
+| TanStack Query DevTools | 5.28.14 | Development tools for React Query |
+| Axios | 1.7.4 | HTTP client for API requests |
+
+## 4. Routing and Navigation
+
+| Technology | Version | Purpose |
+|------------|---------|---------|
+| TanStack Router | 1.19.1 | Type-safe routing library |
+| TanStack Router DevTools | 1.19.1 | Development tools for TanStack Router |
+
+## 5. Form Handling
+
+| Technology | Version | Purpose |
+|------------|---------|---------|
+| React Hook Form | 7.49.3 | Form state management and validation |
+
+## 6. API Integration
+
+| Technology | Version | Purpose |
+|------------|---------|---------|
+| @hey-api/openapi-ts | 0.57.0 | OpenAPI client generator |
+| form-data | 4.0.0 | Library to create form data for API requests |
+
+## 7. Testing
+
+| Technology | Version | Purpose |
+|------------|---------|---------|
+| Playwright | 1.45.2 | End-to-end testing framework |
+
+## 8. Code Quality and Development Tools
+
+| Technology | Version | Purpose |
+|------------|---------|---------|
+| Biome | 1.6.1 | JavaScript linter and formatter |
+| next-themes | 0.4.4 | Theme management utility |
+| react-error-boundary | 4.0.13 | Error handling for React components |
+| dotenv | 16.4.5 | Environment variable management |
+
+## 9. Build and Deployment
+
+| Technology | Version | Purpose |
+|------------|---------|---------|
+| Docker | Latest | Containerization for consistent environments |
+| Nginx | 1.x | Web server for serving static assets in production |
+
+## 10. Development Environment
+
+| Requirement | Details |
+|-------------|---------|
+| Node.js Version | 20.x (specified in .nvmrc) |
+| Package Manager | npm |
+| Environment Variables | VITE_API_URL for API endpoint configuration |
+
+## 11. Project Structure
+
+```
+frontend/
+├── src/
+│   ├── assets/          # Static assets
+│   ├── client/          # Auto-generated OpenAPI client
+│   ├── components/      # Reusable React components
+│   ├── hooks/           # Custom React hooks
+│   ├── routes/          # Application routes and pages
+├── public/              # Static files served directly
+├── tests/               # End-to-end tests with Playwright
+```
+
+## 12. API Integration Workflow
+
+1. Backend API is defined using FastAPI and OpenAPI
+2. OpenAPI schema is exported from the backend as openapi.json
+3. Frontend client is generated using @hey-api/openapi-ts
+4. Generated client provides type-safe interfaces for API calls
+5. TanStack Query is used to manage API call state and caching
+
+## 13. Development Workflow
+
+1. Local development uses Vite's development server
+2. API requests are directed to the backend server (configurable via VITE_API_URL)
+3. Code quality is enforced using Biome
+4. End-to-end testing is performed with Playwright
+
+## 14. Deployment Strategy
+
+1. Production builds are created using Vite's build process
+2. Docker multi-stage build optimizes the container size
+3. Nginx serves the static files in production
+4. Configuration can be modified via environment variables
+
+## 15. Testing Strategy
+
+1. End-to-end testing with Playwright
+2. Test files are located in the /tests directory
+3. Authentication state is preserved between tests
+4. Tests can be run in UI mode or headless mode
