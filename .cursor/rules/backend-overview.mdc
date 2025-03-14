@@ -3,84 +3,100 @@ description: General description of the backend used in the repository. Use this
 globs: backend, *.py
 alwaysApply: false
 ---
-# Cursor Rules for FastAPI Backend Project
+# FastAPI Backend Template - Overview
 
-## Project Overview
-This is a FastAPI backend project structured with SQLModel for database models, JWT authentication, and a modular architecture. The project uses PostgreSQL for data storage, uv for package management, and follows a clear separation of concerns.
+## Project Architecture
 
-## Key Technologies
-- **FastAPI**: Web framework for building APIs
-- **SQLModel**: ORM for working with SQL databases 
-- **PostgreSQL**: Database backend
-- **JWT**: For authentication
-- **uv**: For Python package and environment management
-- **Alembic**: For database migrations
-- **Docker**: For containerization
+This backend template follows a clean architecture pattern with clear separation of concerns:
 
-## Project Structure Rules
+- **API Layer**: FastAPI routes and endpoints
+- **Service Layer**: Business logic implementation
+- **Repository Layer**: Data access patterns
+- **Model Layer**: Database models using SQLModel
+- **Schema Layer**: API request/response schemas
 
-### Core Components
-- **/app/core/**: Contains core configuration and utilities
-  - **config.py**: Centralized configuration using Pydantic settings
-  - **security.py**: Authentication and security functions
-  - **db.py**: Database engine and initialization
+## Key Components
 
-### Models
-- **/app/models.py**: All data models are defined using SQLModel
-  - Models use UUID fields as primary keys 
-  - Relationships are defined with cascading delete behavior
-  - Models include clear separation between base, public, and internal models
+### Core Structure
+- **/app/core/**: Core configurations and utilities
+  - **config.py**: Environment-based configuration
+  - **security.py**: JWT authentication and password handling
+  - **errors.py**: Centralized error handling
 
-### API Structure
-- **/app/api/**: API route definitions and dependencies
-  - **/api/routes/**: Organized by resource (users, items, login, etc.)
-  - **/api/deps.py**: Dependency injection for routes
-
-### Authentication
-- JWT-based authentication is implemented
-- Access tokens expire after configurable time (8 days default)
-- Password recovery flow is supported
+### API Layer
+- **/app/api/**: API routes and dependencies
+  - **/api/api_v1/**: Version 1 API endpoints
+  - **/api/deps.py**: Dependency injection functions
+  - **/api/main.py**: API router configuration
 
 ### Database
-- Models are managed via Alembic migrations
-- UUIDs are used for all IDs (migrated from integers)
-- String fields have explicit max lengths
+- **/app/db/**: Database models and connection management
+  - **/db/models/**: SQLModel definitions for PostgreSQL 
+  - **/db/session.py**: Database session management
 
-### Environment
-- Environment variables are loaded from .env file
-- Development vs production environment settings
-- CORS settings for frontend communication
+### Business Logic
+- **/app/services/**: Service layer for business logic
+  - **/services/repositories/**: Repository pattern implementation
+  - **service modules**: Domain-specific service functions
 
-### Email Templates
-- Located in **/app/email-templates/**
-- Built from MJML source files to HTML
+### API Schemas
+- **/app/schemas/**: Pydantic models for API validation
+  - **common.py**: Shared response models and utilities
+  - **user.py, item.py, etc.**: Domain-specific schemas
 
-## Development Rules
+## Key Features
 
-### Code Patterns
-- Use type annotations throughout
-- Follow REST principles for API endpoints
-- Use dependency injection via FastAPI
-- Use SQLModel for database operations 
-- Handle errors with proper HTTP status codes
+### Repository Pattern
+- Generic base repository for standardized CRUD operations
+- Type-safe repositories with domain-specific logic
+- Clean separation between database operations and business logic
 
-### Testing
-- Tests are in **/app/tests/**
-- Tests use pytest fixtures for database and client
-- Mock external services in tests
+### Standardized Responses
+- All API endpoints use the `StandardResponse` wrapper 
+- Consistent format: `{"data": Any, "success": bool, "message": str}`
+- Standardized error responses with the `ErrorResponse` model
 
-### Docker Setup
-- Use Docker Compose for local development
-- FastAPI run with live reloading during development
-- PostgreSQL database runs in a container
-
-## API Response Standards
-- Consistent response objects for collections (with count and data fields)
-- Use of standard message response objects
-- Proper error handling with appropriate status codes
-
-## Security Practices
+### Authentication
+- JWT-based authentication with secure token handling
+- Role-based access control
 - Password hashing with bcrypt
-- JWT token-based authentication
-- Environment-specific secrets management
-- CORS configuration for frontend access
+
+### PostgreSQL with SQLModel
+- Modern ORM combining SQLAlchemy and Pydantic
+- UUID primary keys for all models
+- Relationship management with cascade delete
+
+## Routing Structure
+
+- API versioning via path prefixes (`/api/v1/...`)
+- Resource-based routing following RESTful conventions
+- Clear endpoint naming and documentation
+
+## Response Format
+
+All API endpoints follow a consistent response format:
+
+```json
+{
+  "data": { ... },  // The actual response data
+  "success": true,  // Boolean indicating success/failure
+  "message": "Operation completed successfully"  // Human-readable message
+}
+```
+
+For errors:
+
+```json
+{
+  "success": false,
+  "error": "Error message",
+  "details": { ... }  // Optional detailed error information
+}
+```
+
+## Development Standards
+
+- Comprehensive type annotations throughout
+- Clear docstrings on public functions and classes
+- Consistent error handling
+- Centralized dependency management with uv
