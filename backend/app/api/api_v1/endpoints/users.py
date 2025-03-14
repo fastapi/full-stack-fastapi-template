@@ -16,6 +16,7 @@ from app.db.models.user import User
 from app.db.models.item import Item
 from app.schemas import (
     Message,
+    StandardResponse,
     UpdatePassword,
     UserCreate,
     UserPublic,
@@ -33,7 +34,7 @@ router = APIRouter(prefix="/users", tags=["users"])
 @router.get(
     "/",
     dependencies=[Depends(get_current_active_superuser)],
-    response_model=UsersPublic,
+    response_model=StandardResponse[UsersPublic],
 )
 def read_users(session: SessionDep, skip: int = 0, limit: int = 100) -> Any:
     """
@@ -46,11 +47,16 @@ def read_users(session: SessionDep, skip: int = 0, limit: int = 100) -> Any:
     statement = select(User).offset(skip).limit(limit)
     users = session.exec(statement).all()
 
-    return UsersPublic(data=users, count=count)
+    return StandardResponse(
+        data=UsersPublic(data=users, count=count),
+        message="Users retrieved successfully"
+    )
 
 
 @router.post(
-    "/", dependencies=[Depends(get_current_active_superuser)], response_model=UserPublic
+    "/", 
+    dependencies=[Depends(get_current_active_superuser)], 
+    response_model=StandardResponse[UserPublic]
 )
 def create_user(*, session: SessionDep, user_in: UserCreate) -> Any:
     """
@@ -73,10 +79,13 @@ def create_user(*, session: SessionDep, user_in: UserCreate) -> Any:
             subject=email_data.subject,
             html_content=email_data.html_content,
         )
-    return user
+    return StandardResponse(
+        data=user,
+        message="User created successfully"
+    )
 
 
-@router.patch("/me", response_model=UserPublic)
+@router.patch("/me", response_model=StandardResponse[UserPublic])
 def update_user_me(
     *, session: SessionDep, user_in: UserUpdateMe, current_user: CurrentUser
 ) -> Any:
@@ -95,10 +104,13 @@ def update_user_me(
     session.add(current_user)
     session.commit()
     session.refresh(current_user)
-    return current_user
+    return StandardResponse(
+        data=current_user,
+        message="User updated successfully"
+    )
 
 
-@router.patch("/me/password", response_model=Message)
+@router.patch("/me/password", response_model=StandardResponse[Message])
 def update_password_me(
     *, session: SessionDep, body: UpdatePassword, current_user: CurrentUser
 ) -> Any:
@@ -115,18 +127,24 @@ def update_password_me(
     current_user.hashed_password = hashed_password
     session.add(current_user)
     session.commit()
-    return Message(message="Password updated successfully")
+    return StandardResponse(
+        data=Message(message="Password updated successfully"),
+        message="Password updated successfully"
+    )
 
 
-@router.get("/me", response_model=UserPublic)
+@router.get("/me", response_model=StandardResponse[UserPublic])
 def read_user_me(current_user: CurrentUser) -> Any:
     """
     Get current user.
     """
-    return current_user
+    return StandardResponse(
+        data=current_user,
+        message="User profile retrieved successfully"
+    )
 
 
-@router.delete("/me", response_model=Message)
+@router.delete("/me", response_model=StandardResponse[Message])
 def delete_user_me(session: SessionDep, current_user: CurrentUser) -> Any:
     """
     Delete own user.
@@ -137,10 +155,13 @@ def delete_user_me(session: SessionDep, current_user: CurrentUser) -> Any:
         )
     session.delete(current_user)
     session.commit()
-    return Message(message="User deleted successfully")
+    return StandardResponse(
+        data=Message(message="User deleted successfully"),
+        message="User account has been deleted"
+    )
 
 
-@router.post("/signup", response_model=UserPublic)
+@router.post("/signup", response_model=StandardResponse[UserPublic])
 def register_user(session: SessionDep, user_in: UserRegister) -> Any:
     """
     Create new user without the need to be logged in.
@@ -153,10 +174,13 @@ def register_user(session: SessionDep, user_in: UserRegister) -> Any:
         )
     user_create = UserCreate.model_validate(user_in)
     user = user_service.create_user(session=session, user_create=user_create)
-    return user
+    return StandardResponse(
+        data=user,
+        message="User registered successfully"
+    )
 
 
-@router.get("/{user_id}", response_model=UserPublic)
+@router.get("/{user_id}", response_model=StandardResponse[UserPublic])
 def read_user_by_id(
     user_id: uuid.UUID, session: SessionDep, current_user: CurrentUser
 ) -> Any:
@@ -165,19 +189,25 @@ def read_user_by_id(
     """
     user = session.get(User, user_id)
     if user == current_user:
-        return user
+        return StandardResponse(
+            data=user,
+            message="User retrieved successfully"
+        )
     if not current_user.is_superuser:
         raise HTTPException(
             status_code=403,
             detail="The user doesn't have enough privileges",
         )
-    return user
+    return StandardResponse(
+        data=user,
+        message="User retrieved successfully"
+    )
 
 
 @router.patch(
     "/{user_id}",
     dependencies=[Depends(get_current_active_superuser)],
-    response_model=UserPublic,
+    response_model=StandardResponse[UserPublic],
 )
 def update_user(
     *,
@@ -203,13 +233,18 @@ def update_user(
             )
 
     db_user = user_service.update_user(session=session, db_user=db_user, user_in=user_in)
-    return db_user
+    return StandardResponse(
+        data=db_user,
+        message="User updated successfully"
+    )
 
 
-@router.delete("/{user_id}", dependencies=[Depends(get_current_active_superuser)])
+@router.delete("/{user_id}", 
+               dependencies=[Depends(get_current_active_superuser)],
+               response_model=StandardResponse[Message])
 def delete_user(
     session: SessionDep, current_user: CurrentUser, user_id: uuid.UUID
-) -> Message:
+) -> Any:
     """
     Delete a user.
     """
@@ -224,4 +259,7 @@ def delete_user(
     session.exec(statement)  # type: ignore
     session.delete(user)
     session.commit()
-    return Message(message="User deleted successfully") 
+    return StandardResponse(
+        data=Message(message="User deleted successfully"),
+        message="User has been deleted"
+    ) 

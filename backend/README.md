@@ -1,6 +1,6 @@
-# Political Social Media Analysis Platform - Backend
+# FastAPI Backend Template
 
-This is the backend for the Political Social Media Analysis Platform, built with FastAPI, SQLModel, MongoDB, Redis, and Celery.
+This is a modern backend template built with FastAPI, SQLModel, PostgreSQL, and JWT authentication.
 
 ## Project Structure
 
@@ -11,31 +11,22 @@ backend/
 │   │   ├── api_v1/           # API v1 routes
 │   │   │   ├── endpoints/    # API endpoints
 │   │   │   └── api.py        # API router
-│   │   ├── deps.py           # Dependency injection
-│   │   └── main.py           # API router configuration
+│   │   └── deps.py           # Dependency injection
 │   ├── core/                 # Core functionality
 │   │   ├── config.py         # Application configuration
 │   │   ├── security.py       # Authentication and security
 │   │   └── errors.py         # Error handling
 │   ├── db/                   # Database models and connections
-│   │   ├── models/           # SQLModel models for PostgreSQL
+│   │   ├── models/           # SQLModel models
 │   │   │   ├── user.py
 │   │   │   └── item.py
-│   │   ├── schemas/          # MongoDB schemas
-│   │   │   ├── social_post.py
-│   │   │   └── political_entity.py
-│   │   ├── session.py        # Database session management
-│   │   └── init_db.py        # Database initialization
-│   ├── schemas/              # API schemas
+│   │   └── session.py        # Database session management
+│   ├── schemas/              # API schemas (Pydantic models)
 │   │   ├── user.py
 │   │   ├── item.py
-│   │   └── common.py
-│   ├── services/             # Business logic
-│   │   ├── user.py
-│   │   └── analysis.py
-│   ├── tasks/                # Celery tasks
-│   │   ├── celery_app.py     # Celery configuration
-│   │   └── worker.py         # Background tasks
+│   │   └── common.py         # Shared schema definitions
+│   ├── services/             # Business logic services
+│   │   └── user.py           # User service
 │   └── main.py               # FastAPI application entry point
 ├── tests/                    # Tests
 ├── Dockerfile                # Docker configuration
@@ -47,44 +38,57 @@ backend/
 
 - **FastAPI**: Modern, fast web framework for building APIs
 - **SQLModel**: SQL databases in Python, designed for simplicity, compatibility, and robustness
-- **MongoDB**: NoSQL database for storing social media data
-- **Redis**: In-memory data structure store for caching and message broker
-- **Celery**: Distributed task queue for background processing
 - **JWT Authentication**: Secure authentication with JWT tokens
 - **Dependency Injection**: Clean, modular code with FastAPI's dependency injection
 - **Environment Variables**: Configuration via environment variables
 - **Docker**: Containerized development and deployment
+- **UUID Primary Keys**: All database models use UUIDs as primary keys
 
 ## Database Structure
 
-The application uses two databases:
+The application uses **PostgreSQL** with SQLModel ORM for:
+- User accounts and authentication
+- Application data storage
+- Relationship management
 
-1. **PostgreSQL** (with SQLModel ORM)
-   - User accounts and authentication
-   - Application data
+### UUID Migration Notes
 
-2. **MongoDB**
-   - Social media posts
-   - Political entities
-   - Analytics data
+As of July 2024, the project has migrated from using integer IDs to UUIDs for all database models. This change improves:
+- Security (IDs are not sequential or predictable)
+- Distributed system compatibility
+- Data privacy
 
 ## Getting Started
 
 ### Prerequisites
 
 - Docker and Docker Compose
+- Python 3.10+
+- uv (for dependency management)
 
-### Running the Application
+### Development Setup
 
 1. Clone the repository
 2. Create a `.env` file from the example:
    ```bash
    cp .env.example .env
    ```
-3. Start the development environment:
+3. Install dependencies using uv:
    ```bash
-   docker-compose up -d
+   uv venv
+   source .venv/bin/activate
+   uv pip sync
    ```
+4. Start the development server:
+   ```bash
+   uvicorn app.main:app --reload
+   ```
+
+### Running with Docker
+
+```bash
+docker-compose up -d
+```
 
 ### API Documentation
 
@@ -93,21 +97,11 @@ Once the application is running, you can access the API documentation at:
 - Swagger UI: http://localhost:8000/docs
 - ReDoc: http://localhost:8000/redoc
 
-## Background Tasks
-
-The application uses Celery for background tasks:
-
-- Social media scraping
-- Data analysis
-- Report generation
-
-You can monitor Celery tasks using Flower at http://localhost:5555
-
 ## Development
 
 ### Adding New Models
 
-1. Create a new model in `app/db/models/` for SQL models or `app/db/schemas/` for MongoDB schemas
+1. Create a new model in `app/db/models/`
 2. Create corresponding API schemas in `app/schemas/`
 3. Create service functions in `app/services/`
 4. Create API endpoints in `app/api/api_v1/endpoints/`
@@ -115,13 +109,21 @@ You can monitor Celery tasks using Flower at http://localhost:5555
 ### Running Tests
 
 ```bash
-docker-compose exec backend pytest
+pytest
 ```
 
 ### Code Formatting and Linting
 
 ```bash
-docker-compose exec backend ruff check .
-docker-compose exec backend black .
-docker-compose exec backend mypy .
+ruff check .
+ruff format .
+mypy .
 ```
+
+## Dependency Management with uv
+
+This project uses [uv](https://github.com/astral-sh/uv) for dependency management:
+
+- `uv venv` - Create a virtual environment
+- `uv pip sync` - Install dependencies from uv.lock
+- `uv pip add <package>` - Add a new dependency

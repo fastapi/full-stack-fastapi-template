@@ -6,6 +6,11 @@ from sqlmodel import Session, select
 from app.core.security import get_password_hash, verify_password
 from app.db.models.user import User
 from app.schemas.user import UserCreate, UserUpdate
+from app.services.repositories.user import UserRepository
+
+
+# Create a singleton instance of the repository
+user_repository = UserRepository()
 
 
 def create_user(*, session: Session, user_create: UserCreate) -> User:
@@ -19,13 +24,7 @@ def create_user(*, session: Session, user_create: UserCreate) -> User:
     Returns:
         Created user
     """
-    db_obj = User.model_validate(
-        user_create, update={"hashed_password": get_password_hash(user_create.password)}
-    )
-    session.add(db_obj)
-    session.commit()
-    session.refresh(db_obj)
-    return db_obj
+    return user_repository.create(session=session, obj_in=user_create)
 
 
 def update_user(*, session: Session, db_user: User, user_in: UserUpdate) -> User:
@@ -40,17 +39,7 @@ def update_user(*, session: Session, db_user: User, user_in: UserUpdate) -> User
     Returns:
         Updated user
     """
-    user_data = user_in.model_dump(exclude_unset=True)
-    extra_data = {}
-    if "password" in user_data:
-        password = user_data["password"]
-        hashed_password = get_password_hash(password)
-        extra_data["hashed_password"] = hashed_password
-    db_user.sqlmodel_update(user_data, update=extra_data)
-    session.add(db_user)
-    session.commit()
-    session.refresh(db_user)
-    return db_user
+    return user_repository.update(session=session, db_obj=db_user, obj_in=user_in)
 
 
 def get_user_by_email(*, session: Session, email: str) -> Optional[User]:
@@ -64,9 +53,7 @@ def get_user_by_email(*, session: Session, email: str) -> Optional[User]:
     Returns:
         User if found, None otherwise
     """
-    statement = select(User).where(User.email == email)
-    session_user = session.exec(statement).first()
-    return session_user
+    return user_repository.get_by_email(session=session, email=email)
 
 
 def authenticate(*, session: Session, email: str, password: str) -> Optional[User]:
@@ -81,12 +68,7 @@ def authenticate(*, session: Session, email: str, password: str) -> Optional[Use
     Returns:
         User if authentication succeeded, None otherwise
     """
-    user = get_user_by_email(session=session, email=email)
-    if not user:
-        return None
-    if not verify_password(password, user.hashed_password):
-        return None
-    return user
+    return user_repository.authenticate(session=session, email=email, password=password)
 
 
 def get_user_by_id(*, session: Session, user_id: uuid.UUID) -> Optional[User]:
@@ -100,9 +82,7 @@ def get_user_by_id(*, session: Session, user_id: uuid.UUID) -> Optional[User]:
     Returns:
         User if found, None otherwise
     """
-    statement = select(User).where(User.id == user_id)
-    session_user = session.exec(statement).first()
-    return session_user
+    return user_repository.get(session=session, id=user_id)
 
 
 def get_users(*, session: Session, skip: int = 0, limit: int = 100) -> list[User]:
@@ -117,5 +97,14 @@ def get_users(*, session: Session, skip: int = 0, limit: int = 100) -> list[User
     Returns:
         List of users
     """
-    statement = select(User).offset(skip).limit(limit)
-    return list(session.exec(statement).all()) 
+    return user_repository.get_multi(session=session, skip=skip, limit=limit)
+
+
+def is_active(user: User) -> bool:
+    """Check if a user is active."""
+    return user.is_active
+
+
+def is_superuser(user: User) -> bool:
+    """Check if a user is a superuser."""
+    return user.is_superuser 

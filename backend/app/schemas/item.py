@@ -1,11 +1,10 @@
 import uuid
 
-from pydantic import Field
-from sqlmodel import SQLModel
+from pydantic import BaseModel, Field
 
 
 # Shared properties
-class ItemBase(SQLModel):
+class ItemBase(BaseModel):
     """Base Item schema with common attributes."""
     title: str = Field(min_length=1, max_length=255)
     description: str | None = Field(default=None, max_length=255)
@@ -30,7 +29,7 @@ class ItemPublic(ItemBase):
     owner_id: uuid.UUID
 
 
-class ItemsPublic(SQLModel):
+class ItemsPublic(BaseModel):
     """Schema for returning a list of items."""
     data: list[ItemPublic]
     count: int 
