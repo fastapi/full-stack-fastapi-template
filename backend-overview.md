@@ -1,0 +1,97 @@
+# FastAPI Backend Template - Overview
+
+## Project Architecture
+
+This backend template follows a clean architecture pattern with clear separation of concerns:
+
+- **API Layer**: FastAPI routes and endpoints
+- **Service Layer**: Business logic implementation
+- **Repository Layer**: Data access patterns
+- **Model Layer**: Database models using SQLModel
+- **Schema Layer**: API request/response schemas
+
+## Key Components
+
+### Core Structure
+- **/app/core/**: Core configurations and utilities
+  - **config.py**: Environment-based configuration
+  - **security.py**: JWT authentication and password handling
+  - **errors.py**: Centralized error handling
+
+### API Layer
+- **/app/api/**: API routes and dependencies
+  - **/api/api_v1/**: Version 1 API endpoints
+  - **/api/deps.py**: Dependency injection functions
+  - **/api/main.py**: API router configuration
+
+### Database
+- **/app/db/**: Database models and connection management
+  - **/db/models/**: SQLModel definitions for PostgreSQL 
+  - **/db/session.py**: Database session management
+
+### Business Logic
+- **/app/services/**: Service layer for business logic
+  - **/services/repositories/**: Repository pattern implementation
+  - **service modules**: Domain-specific service functions
+
+### API Schemas
+- **/app/schemas/**: Pydantic models for API validation
+  - **common.py**: Shared response models and utilities
+  - **user.py, item.py, etc.**: Domain-specific schemas
+
+## Key Features
+
+### Repository Pattern
+- Generic base repository for standardized CRUD operations
+- Type-safe repositories with domain-specific logic
+- Clean separation between database operations and business logic
+
+### Standardized Responses
+- All API endpoints use the `StandardResponse` wrapper 
+- Consistent format: `{"data": Any, "success": bool, "message": str}`
+- Standardized error responses with the `ErrorResponse` model
+
+### Authentication
+- JWT-based authentication with secure token handling
+- Role-based access control
+- Password hashing with bcrypt
+
+### PostgreSQL with SQLModel
+- Modern ORM combining SQLAlchemy and Pydantic
+- UUID primary keys for all models
+- Relationship management with cascade delete
+
+## Routing Structure
+
+- API versioning via path prefixes (`/api/v1/...`)
+- Resource-based routing following RESTful conventions
+- Clear endpoint naming and documentation
+
+## Response Format
+
+All API endpoints follow a consistent response format:
+
+```json
+{
+  "data": { ... },  // The actual response data
+  "success": true,  // Boolean indicating success/failure
+  "message": "Operation completed successfully"  // Human-readable message
+}
+```
+
+For errors:
+
+```json
+{
+  "success": false,
+  "error": "Error message",
+  "details": { ... }  // Optional detailed error information
+}
+```
+
+## Development Standards
+
+- Comprehensive type annotations throughout
+- Clear docstrings on public functions and classes
+- Consistent error handling
+- Centralized dependency management with uv 
