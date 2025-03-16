@@ -1,0 +1,205 @@
+---
+description: Hybrid Database Architecture Specification for the Political Social Media Analysis Platform.
+globs: backend/db/*
+alwaysApply: false
+---
+# Hybrid Database Architecture
+
+## 1. Database Technologies
+
+| Component | Technology | Version | Purpose |
+|-----------|------------|---------|---------|
+| Relational Database | PostgreSQL | 13+ | Entity data and relationships |
+| Document Database | MongoDB | 6.0+ | Social media content and engagement |
+| In-memory Database | Redis | 7.0+ | Caching and real-time operations |
+| Vector Database | Pinecone | Latest | Semantic similarity analysis |
+
+## 2. Relational Database Design
+
+### 2.1 Primary Technology
+
+PostgreSQL with SQLModel ORM integration
+
+### 2.2 Key Design Decisions
+
+- **UUID Primary Keys**: All entities use UUID primary keys for security and distributed system compatibility
+- **Relationship Management**: Proper foreign key constraints with cascade delete
+- **String Field Constraints**: Appropriate length limits on all VARCHAR fields
+- **Migration Strategy**: Alembic for version-controlled schema changes
+
+### 2.3 Domain Models
+
+```python
+class PoliticalEntity(SQLModel, table=True):
+    id: UUID = Field(default_factory=uuid4, primary_key=True)
+    name: str = Field(index=True)
+    entity_type: str  # politician, party, organization
+    platforms: List["SocialMediaAccount"] = Relationship(back_populates="entity")
+    relationships: List["EntityRelationship"] = Relationship(back_populates="source_entity")
+
+class SocialMediaAccount(SQLModel, table=True):
+    id: UUID = Field(default_factory=uuid4, primary_key=True)
+    platform: str  # twitter, facebook, instagram, etc.
+    platform_id: str = Field(index=True)  # platform-specific identifier
+    handle: str
+    entity_id: UUID = Field(foreign_key="politicalentity.id")
+    entity: PoliticalEntity = Relationship(back_populates="platforms")
+
+class EntityRelationship(SQLModel, table=True):
+    id: UUID = Field(default_factory=uuid4, primary_key=True)
+    source_entity_id: UUID = Field(foreign_key="politicalentity.id")
+    target_entity_id: UUID = Field(foreign_key="politicalentity.id")
+    relationship_type: str  # ally, opponent, neutral
+    strength: float  # normalized relationship strength
+    last_updated: datetime = Field(default_factory=datetime.utcnow)
+    source_entity: PoliticalEntity = Relationship(back_populates="relationships")
+```
+
+## 3. Document Database Design
+
+### 3.1 Primary Technology
+
+MongoDB for flexible document storage and querying
+
+### 3.2 Key Collections
+
+- **posts**: Social media posts from tracked accounts
+- **comments**: User comments on tracked posts
+- **metrics**: Aggregated engagement statistics
+- **topics**: Topic analysis results and trends
+
+### 3.3 Schema Patterns
+
+**Post Document Example:**
+```javascript
+{
+  "_id": ObjectId,
+  "platform_id": String,  // Original ID from the platform
+  "platform": String,     // twitter, facebook, etc.
+  "account_id": String,   // Reference to PostgreSQL SocialMediaAccount.id
+  "content_type": String, // post, story, video, etc.
+  "content": {
+    "text": String,
+    "media": Array,       // URLs to media content
+    "links": Array        // External links
+  },
+  "metadata": {
+    "created_at": Date,
+    "location": Object,
+    "language": String,
+    "client": String
+  },
+  "engagement": {
+    "likes": Number,
+    "shares": Number,
+    "comments": Number,
+    "engagement_rate": Number
+  },
+  "analysis": {
+    "sentiment_score": Number,
+    "topics": Array,
+    "entities_mentioned": Array,
+    "key_phrases": Array,
+    "emotional_tone": String
+  },
+  "vector_id": String     // Reference to vector database entry
+}
+```
+
+### 3.4 Indexing Strategy
+
+- Compound index on `platform` and `account_id`
+- Compound index on `metadata.created_at` and `account_id`
+- Text index on `content.text` for content search
+- Single field indexes on `engagement` metrics
+
+## 4. In-memory Database Design
+
+### 4.1 Primary Technology
+
+Redis for caching, real-time metrics and messaging
+
+### 4.2 Key Data Structures
+
+- **Hash maps**: Entity and post metrics (`entity:{id}:metrics`)
+- **Sorted sets**: Trending topics and influencers (`trending:topics:{timeframe}`)
+- **Lists**: Recent activity streams (`activity:entity:{id}`)
+- **Pub/Sub channels**: Real-time alerts and notifications
+
+### 4.3 Caching Strategy
+
+- Time-based expiration for volatile metrics
+- LRU eviction policy for cached data
+- Write-through cache for critical metrics
+
+## 5. Vector Database Design
+
+### 5.1 Primary Technology
+
+Pinecone or similar vector database for semantic similarity analysis
+
+### 5.2 Embedding Strategy
+
+- Text embeddings using sentence-transformers
+- 1536-dimension vectors for high-fidelity similarity
+- Namespaces separated by content type
+- Metadata filtering for efficient queries
+
+### 5.3 Vector Schema
+
+```javascript
+{
+  "id": String,           // Unique identifier
+  "values": Array,        // Embedding vector
+  "metadata": {
+    "content_type": String, // post, comment
+    "source_id": String,    // MongoDB ID of source content
+    "entity_id": String,    // PostgreSQL ID of political entity
+    "platform": String,
+    "created_at": Date,
+    "topics": Array,
+    "sentiment_score": Number
+  }
+}
+```
+
+## 6. Cross-Database Integration
+
+### 6.1 Reference Patterns
+
+- PostgreSQL → MongoDB: UUID references stored as strings
+- MongoDB → Vector DB: Document IDs linked to vector entries
+- All DBs → Redis: Consistent key format for entity references
+
+### 6.2 Synchronization Strategy
+
+- PostgreSQL as the source of truth for entity data
+- MongoDB change streams for data propagation
+- Redis as intermediary for real-time updates
+- Periodic reconciliation for data consistency
+
+### 6.3 Transaction Management
+
+- Two-phase commit for critical cross-database operations
+- Eventual consistency model for non-critical updates
+- Compensating transactions for error recovery
+
+## 7. Performance Optimization
+
+### 7.1 Query Optimization
+
+- Materialized views for frequent analytical queries
+- Denormalization of frequently accessed data
+- Query result caching with Redis
+
+### 7.2 Sharding Strategy
+
+- MongoDB sharded by entity and time period
+- Vector database partitioned by content domains
+- Redis cluster for horizontal scaling
+
+### 7.3 Connection Pooling
+
+- Optimized connection pools for each database
+- Connection reuse across related operations
+- Graceful handling of connection failures

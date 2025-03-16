@@ -3,15 +3,16 @@ description: Technical Stack Specification for the /backend.
 globs: backend/*
 alwaysApply: false
 ---
-# Technical Stack Specification - FastAPI Backend Template
-
 ## 1. Technology Stack Overview
 
 | Component | Technology | Version | Purpose |
 |-----------|------------|---------|---------|
 | Framework | FastAPI | 0.114.2+ | Web API framework |
 | ORM | SQLModel | 0.0.21+ | Database ORM |
-| Database | PostgreSQL | 13+ | Relational database |
+| Primary Database | PostgreSQL | 13+ | Relational database |
+| Document Database | MongoDB | 6.0+ | Social media content storage |
+| In-memory Database | Redis | 7.0+ | Caching and real-time operations |
+| Vector Database | Pinecone | Latest | Semantic content analysis |
 | Authentication | JWT | 2.8.0+ | User authentication |
 | Password Hashing | Passlib + Bcrypt | 1.7.4+ | Secure password storage |
 | Dependency Management | uv | 0.5.11+ | Package management |
@@ -22,6 +23,10 @@ alwaysApply: false
 | Testing | pytest | 7.4.3+ | Unit and integration testing |
 | Linting | ruff | 0.2.2+ | Code quality |
 | Type Checking | mypy | 1.8.0+ | Static type checking |
+| Task Queue | Celery | 5.3.0+ | Asynchronous task processing |
+| Message Broker | RabbitMQ | 3.12+ | Task distribution |
+| Stream Processing | Apache Kafka | 3.4+ | Real-time data streaming |
+| NLP Processing | spaCy + Transformers | 3.6+ / 4.28+ | Content analysis |
 
 ## 2. Architecture
 
@@ -63,26 +68,58 @@ Client Request → API Layer → Service Layer → Repository Layer → Database
 ├── schemas/                  # Pydantic models for API
 ├── services/                 # Business logic
 │   └── repositories/         # Data access layer
+├── tasks/                    # Celery tasks for background processing
+│   ├── scraping/             # Social media scraping tasks
+│   ├── analysis/             # Content analysis tasks
+│   └── notifications/        # Alert and notification tasks
+├── processing/               # Data processing components
+│   ├── models/               # ML model wrappers
+│   ├── streams/              # Kafka stream processors
+│   └── embeddings/           # Vector embedding generators
+├── worker.py                 # Celery worker configuration
 └── main.py                   # Application entry point
 ```
 
 ## 3. Database Design
 
-### 3.1 Database Technology
+### 3.1 Hybrid Database Technology
 
-PostgreSQL with SQLModel ORM (SQLAlchemy + Pydantic integration)
+The application employs a hybrid database architecture to address the diverse data requirements of political social media analysis:
 
-### 3.2 Key Design Decisions
+| Component | Technology | Version | Purpose |
+|-----------|------------|---------|---------|
+| Relational Database | PostgreSQL | 13+ | Entity data and relationships |
+| Document Database | MongoDB | 6.0+ | Social media content and engagement |
+| In-memory Database | Redis | 7.0+ | Caching and real-time operations |
+| Vector Database | Pinecone | Latest | Semantic similarity analysis |
+
+Refer to `database-architecture.mdc` for detailed implementation specifications.
+
+### 3.2 Primary Domain Models
+
+- **User**: Authentication and user profile data
+- **PoliticalEntity**: Political figures, organizations, and campaigns
+- **SocialMediaAccount**: Platform account connections 
+- **EntityRelationship**: Relationships between political entities
+
+### 3.3 Key Design Decisions
 
 - **UUID Primary Keys**: All entities use UUID primary keys for security and distributed system compatibility
+- **Cross-database References**: Consistent reference patterns between databases
 - **Relationship Management**: Proper foreign key constraints with cascade delete
 - **String Field Constraints**: Appropriate length limits on all VARCHAR fields
 - **Migration Strategy**: Alembic for version-controlled schema changes
 
-### 3.3 Primary Domain Models
+### 3.4 Additional Dependencies
 
-- **User**: Authentication and user profile data
-- **Item**: Example resource with owner relationship to User
+| Dependency | Version | Purpose |
+|------------|---------|---------|
+| motor | 3.2.0+ | Async MongoDB driver |
+| redis | 4.6.0+ | Redis client |
+| pinecone-client | 2.2.1+ | Pinecone Vector DB client |
+| pymongo | 4.5.0+ | MongoDB client |
+
+Refer to `data-processing-architecture.mdc` for details on processing pipelines and analysis components.
 
 ## 4. API Design
 
