@@ -1,6 +1,6 @@
 from sqlmodel import Session, select
 
-from app import crud
+from app.services.repositories import user as user_repository
 from app.core.config import settings
 from app.db.models.user import User
 from app.schemas.user import UserCreate
@@ -29,7 +29,7 @@ def init_db(session: Session) -> None:
             password=settings.FIRST_SUPERUSER_PASSWORD,
             is_superuser=True,
         )
-        user = crud.create_user(session=session, user_create=user_in)
+        user = user_repository.create_user(session=session, user_create=user_in)
 
 
 async def init_mongodb() -> None:

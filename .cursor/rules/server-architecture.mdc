@@ -1,0 +1,350 @@
+---
+description: Server architectur of the project.
+globs: 
+alwaysApply: false
+---
+## 1. System Overview
+
+The Political Social Media Analysis Platform follows a modern, containerized microservices architecture designed for scalability, resilience, and maintainable development. This document outlines the overall system architecture, deployment strategy, and service interaction patterns.
+
+```
+┌───────────────────────┐     ┌───────────────────────┐
+│                       │     │                       │
+│  Frontend (React/TS)  │◄────┤  Backend (FastAPI)    │
+│                       │     │                       │
+└───────────────────────┘     └───────────┬───────────┘
+                                          │
+                                          ▼
+┌───────────────────────┐     ┌───────────────────────┐
+│  Database Layer       │     │  Task Processing      │
+│                       │     │                       │
+│  ┌─────────────────┐  │     │  ┌─────────────────┐  │
+│  │  PostgreSQL     │  │     │  │  Celery Worker  │  │
+│  │  (Relational)   │  │     │  │  (Tasks)        │  │
+│  └─────────────────┘  │     │  └─────────────────┘  │
+│                       │     │                       │
+│  ┌─────────────────┐  │     │  ┌─────────────────┐  │
+│  │  MongoDB        │  │     │  │  Celery Beat    │  │
+│  │  (Document)     │  │     │  │  (Scheduling)   │  │
+│  └─────────────────┘  │     │  └─────────────────┘  │
+│                       │     │                       │
+│  ┌─────────────────┐  │     │  ┌─────────────────┐  │
+│  │  Redis          │  │     │  │  RabbitMQ       │  │
+│  │  (Cache)        │  │     │  │  (Message Queue)│  │
+│  └─────────────────┘  │     │  └─────────────────┘  │
+│                       │     │                       │
+│  ┌─────────────────┐  │     │  ┌─────────────────┐  │
+│  │  Pinecone       │  │     │  │  Kafka          │  │
+│  │  (Vector)       │  │     │  │  (Streaming)    │  │
+│  └─────────────────┘  │     │  └─────────────────┘  │
+│                       │     │                       │
+└───────────────────────┘     └───────────────────────┘
+```
+
+## 2. Containerization Strategy
+
+### 2.1 Docker Compose Architecture
+
+The system uses Docker Compose for container orchestration with a dual-file approach:
+
+| File | Purpose | Usage |
+|------|---------|-------|
+| `docker-compose.yml` | Production-ready base configuration | Primary service definitions |
+| `docker-compose.override.yml` | Development environment customizations | Automatically merged during development |
+
+### 2.2 Service Organization
+
+Services are organized into logical groups:
+
+1. **Frontend Services**
+   - React frontend application
+
+2. **Backend Services**
+   - FastAPI application
+   - Prestart initialization service
+
+3. **Database Services**
+   - PostgreSQL (relational data)
+   - MongoDB (document data)
+   - Redis (caching and real-time operations)
+   - Pinecone (vector embeddings)
+
+4. **Message Processing**
+   - RabbitMQ (message broker)
+   - Celery Worker (task execution)
+   - Celery Beat (task scheduling)
+
+5. **Stream Processing**
+   - Kafka (event streaming)
+   - Zookeeper (Kafka coordination)
+
+6. **Development Tools**
+   - Adminer (PostgreSQL management)
+   - MongoDB Express (MongoDB management)
+   - Traefik Proxy (API gateway)
+   - Mailcatcher (email testing)
+   - Celery Flower (task monitoring)
+
+### 2.3 Development vs. Production
+
+| Aspect | Development | Production |
+|--------|------------|------------|
+| Restart Policy | `restart: "no"` | `restart: always` |
+| Port Exposure | Ports exposed to host | Only necessary ports exposed |
+| Volume Mounts | Source code mounted | Built artifacts only |
+| Network Configuration | Local networks | External Traefik network |
+| Health Checks | Simple checks | Comprehensive checks with retries |
+| Environment | Development settings | Production settings |
+| Logging | Verbose logging | Production logging levels |
+
+## 3. Network Architecture
+
+### 3.1 Network Configuration
+
+```
+┌─────────────────────────────────────────────────────────────┐
+│                      traefik-public                          │
+│                                                             │
+│  ┌─────────┐   ┌─────────┐   ┌─────────┐   ┌─────────┐      │
+│  │ Traefik │   │ Frontend│   │ Backend │   │ Adminer │      │
+│  └─────────┘   └─────────┘   └─────────┘   └─────────┘      │
+│                                                             │
+└─────────────────────────────────────────────────────────────┘
+
+┌─────────────────────────────────────────────────────────────┐
+│                        default                              │
+│                                                             │
+│  ┌─────────┐   ┌─────────┐   ┌─────────┐   ┌─────────┐      │
+│  │PostgreSQL│   │ MongoDB │   │  Redis  │   │RabbitMQ │      │
+│  └─────────┘   └─────────┘   └─────────┘   └─────────┘      │
+│                                                             │
+│  ┌─────────┐   ┌─────────┐   ┌─────────┐   ┌─────────┐      │
+│  │  Kafka  │   │Zookeeper│   │ Celery  │   │ Celery  │      │
+│  │         │   │         │   │ Worker  │   │  Beat   │      │
+│  └─────────┘   └─────────┘   └─────────┘   └─────────┘      │
+│                                                             │
+└─────────────────────────────────────────────────────────────┘
+```
+
+### 3.2 Traefik Integration
+
+- **Production**: Uses external Traefik network with proper TLS termination
+- **Development**: Includes local Traefik instance with insecure dashboard
+- Routing follows pattern: `{service}.{domain}` → appropriate container
+
+### 3.3 HTTPS Configuration
+
+- Automatic TLS certificate issuance via Let's Encrypt
+- HTTP to HTTPS redirection enforced
+- Custom middleware for security headers
+
+## 4. Data Architecture
+
+### 4.1 Hybrid Database Strategy
+
+The system employs a polyglot persistence approach using specialized databases:
+
+| Database | Purpose | Data Types |
+|----------|---------|------------|
+| PostgreSQL | Relational data, user accounts, structured entities | Users, political entities, relationships, configuration |
+| MongoDB | Document storage, social media content | Posts, comments, media items, engagement metrics |
+| Redis | Caching, real-time operations, task management | Session data, counters, leaderboards, task queues |
+| Pinecone | Vector embeddings for semantic search | Text embeddings, similarity models |
+
+### 4.2 Data Flow Patterns
+
+```
+┌─────────────┐     ┌─────────────┐     ┌─────────────┐
+│             │     │             │     │             │
+│ API Request │────►│ FastAPI     │────►│ PostgreSQL  │
+│             │     │ Handler     │     │             │
+└─────────────┘     └──────┬──────┘     └─────────────┘
+                           │
+                           ▼
+┌─────────────┐     ┌─────────────┐     ┌─────────────┐
+│             │     │             │     │             │
+│ Celery Task │◄────┤ Task Queue  │◄────┤ RabbitMQ    │
+│             │     │             │     │             │
+└──────┬──────┘     └─────────────┘     └─────────────┘
+       │
+       ▼
+┌─────────────┐     ┌─────────────┐     ┌─────────────┐
+│             │     │             │     │             │
+│ MongoDB     │     │ Redis Cache │     │ Pinecone    │
+│ Storage     │     │             │     │ Vectors     │
+│             │     │             │     │             │
+└─────────────┘     └─────────────┘     └─────────────┘
+```
+
+### 4.3 Data Persistence
+
+- Volume mapping for all databases to ensure data persistence
+- Standardized volume naming: `{service-name}_data`
+- Consistent backup solutions for each database type
+
+## 5. Task Processing Architecture
+
+### 5.1 Celery Integration
+
+```
+┌─────────────┐     ┌─────────────┐     ┌─────────────┐
+│             │     │             │     │             │
+│ FastAPI     │────►│ RabbitMQ    │────►│ Celery      │
+│ Backend     │     │ Broker      │     │ Worker      │
+│             │     │             │     │             │
+└─────────────┘     └─────────────┘     └─────────────┘
+       ▲                                        │
+       │                                        │
+       │           ┌─────────────┐             │
+       │           │             │             │
+       └───────────┤ Redis       │◄────────────┘
+                   │ Results     │
+                   │             │
+                   └─────────────┘
+
+┌─────────────┐     ┌─────────────┐
+│             │     │             │
+│ Celery Beat │────►│ Task        │
+│ Scheduler   │     │ Schedule    │
+│             │     │             │
+└─────────────┘     └─────────────┘
+```
+
+### 5.2 Task Types
+
+- **Data Collection Tasks**: Social media scraping, data acquisition
+- **Analysis Tasks**: Content analysis, sentiment scoring, entity extraction
+- **Reporting Tasks**: Report generation, alert/notification creation
+- **Maintenance Tasks**: Database cleanup, analytics generation
+
+### 5.3 Kafka Stream Processing
+
+- Event-driven architecture for real-time data streams
+- Topic-based segregation of event types
+- Consumer groups for scalable processing
+
+## 6. Security Architecture
+
+### 6.1 Authentication and Authorization
+
+- JWT-based authentication with appropriate expiration
+- Role-based access control (RBAC)
+- OAuth2 password flow with secure password hashing
+
+### 6.2 Network Security
+
+- Traefik as edge gateway with TLS termination
+- Internal network isolation
+- Minimal port exposure
+
+### 6.3 Secret Management
+
+- Environment variable-based secret injection
+- No hardcoded credentials
+- Support for container secrets in production
+
+## 7. Deployment Strategy
+
+### 7.1 Development Workflow
+
+```
+Local Development → CI/CD Pipeline → Staging → Production
+```
+
+- **Local**: Docker Compose with override file
+- **CI/CD**: Automated testing and container building
+- **Staging**: Production-like environment for validation
+- **Production**: Optimized for performance and security
+
+### 7.2 Scaling Strategy
+
+- Horizontal scaling of stateless services
+- Vertical scaling of database services
+- Load balancing through Traefik
+
+## 8. Monitoring and Observability
+
+### 8.1 Logging
+
+- Structured logging format
+- Log aggregation across services
+- Sentry integration for error tracking
+
+### 8.2 Metrics
+
+- Health check endpoints for all services
+- Prometheus-compatible metrics endpoints
+- Celery Flower for task monitoring
+
+## 9. Resilience Features
+
+### 9.1 Health Checks
+
+- Database connectivity checks
+- API endpoint checks
+- Appropriate retry policies
+
+### 9.2 Failover Strategy
+
+- Restart policies for critical services
+- Connection retry logic
+- Graceful degradation when components are unavailable
+
+## 10. Development Environment
+
+### 10.1 Local Setup
+
+- Simple startup with `docker-compose up`
+- Hot-reloading for backend and frontend
+- Development admin interfaces for all databases
+
+### 10.2 Testing
+
+- Environment-specific testing configuration
+- Integration tests with in-memory databases
+- E2E testing with Playwright
+
+## 11. Future Considerations
+
+### 11.1 Kubernetes Migration Path
+
+- Current Docker Compose structure designed for easy K8s migration
+- Service definitions align with Kubernetes patterns
+- Volume definitions compatible with persistent volume claims
+
+### 11.2 Service Mesh Integration
+
+- Prepared for Istio or Linkerd integration
+- Service-to-service communication patterns established
+- Observability foundations in place
+
+## Appendix A: Environment Variables
+
+| Variable | Purpose | Example |
+|----------|---------|---------|
+| `DOMAIN` | Base domain for all services | `example.com` |
+| `POSTGRES_*` | PostgreSQL configuration | `POSTGRES_USER=postgres` |
+| `MONGO_*` | MongoDB configuration | `MONGO_USER=mongo` |
+| `RABBITMQ_*` | RabbitMQ configuration | `RABBITMQ_USER=guest` |
+| `REDIS_*` | Redis configuration | `REDIS_PORT=6379` |
+| `SECRET_KEY` | Application encryption key | `supersecretkey` |
+| `SENTRY_DSN` | Sentry error tracking | `https://...` |
+
+## Appendix B: Network Ports
+
+| Service | Port | Purpose |
+|---------|------|---------|
+| Traefik | 80, 443 | HTTP/HTTPS |
+| PostgreSQL | 5432 | Database access |
+| MongoDB | 27017 | Database access |
+| Redis | 6379 | Cache access |
+| RabbitMQ | 5672, 15672 | AMQP and management |
+| Kafka | 9092 | Stream processing |
+| FastAPI | 8000 | API access |
+| Frontend | 5173 | Web UI (development) |
+
+## Appendix C: Related Documentation
+
+- `backend-technical-stack.mdc` - Backend technology details
+- `database-architecture.mdc` - Detailed database design
+- `data-processing-architecture.mdc` - Data processing pipeline details

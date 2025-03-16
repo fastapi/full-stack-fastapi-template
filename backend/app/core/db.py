@@ -1,8 +1,11 @@
 from sqlmodel import Session, create_engine, select
 
-from app import crud
+# Updated import to match new architecture
+from app.services.repositories import user as user_repository
 from app.core.config import settings
-from app.models import User, UserCreate
+# Updated model imports
+from app.db.models.user import User
+from app.schemas.user import UserCreate
 
 engine = create_engine(str(settings.SQLALCHEMY_DATABASE_URI))
 
@@ -30,4 +33,5 @@ def init_db(session: Session) -> None:
             password=settings.FIRST_SUPERUSER_PASSWORD,
             is_superuser=True,
         )
-        user = crud.create_user(session=session, user_create=user_in)
+        # Updated to use the new repository pattern
+        user = user_repository.create_user(session=session, user_create=user_in)

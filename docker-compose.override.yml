@@ -80,6 +80,50 @@ services:
       timeout: 5s
       retries: 5
 
+  rabbitmq:
+    image: rabbitmq:3.12-management
+    restart: "no"
+    ports:
+      - "5672:5672" # AMQP port
+      - "15672:15672" # Management UI
+    environment:
+      - RABBITMQ_DEFAULT_USER=${RABBITMQ_USER:-guest}
+      - RABBITMQ_DEFAULT_PASS=${RABBITMQ_PASSWORD:-guest}
+    volumes:
+      - rabbitmq_data:/var/lib/rabbitmq
+    healthcheck:
+      test: [ "CMD", "rabbitmq-diagnostics", "check_port_connectivity" ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  zookeeper:
+    image: bitnami/zookeeper:latest
+    restart: "no"
+    ports:
+      - "2181:2181"
+    environment:
+      - ALLOW_ANONYMOUS_LOGIN=yes
+    volumes:
+      - zookeeper_data:/bitnami/zookeeper
+
+  kafka:
+    image: bitnami/kafka:3.4
+    restart: "no"
+    ports:
+      - "9092:9092"
+    environment:
+      - KAFKA_CFG_ZOOKEEPER_CONNECT=zookeeper:2181
+      - ALLOW_PLAINTEXT_LISTENER=yes
+      - KAFKA_CFG_LISTENER_SECURITY_PROTOCOL_MAP=CLIENT:PLAINTEXT,EXTERNAL:PLAINTEXT
+      - KAFKA_CFG_LISTENERS=CLIENT://:9093,EXTERNAL://:9092
+      - KAFKA_CFG_ADVERTISED_LISTENERS=CLIENT://kafka:9093,EXTERNAL://localhost:9092
+      - KAFKA_CFG_INTER_BROKER_LISTENER_NAME=CLIENT
+    volumes:
+      - kafka_data:/bitnami/kafka
+    depends_on:
+      - zookeeper
+
   mongo-express:
     image: mongo-express
     restart: "no"
@@ -156,10 +200,37 @@ services:
       MONGODB_DATABASE: ${MONGODB_DATABASE:-political_analysis}
       REDIS_SERVER: "redis"
       REDIS_PORT: "6379"
+      RABBITMQ_SERVER: "rabbitmq"
+      RABBITMQ_USER: ${RABBITMQ_USER:-guest}
+      RABBITMQ_PASSWORD: ${RABBITMQ_PASSWORD:-guest}
+      KAFKA_BOOTSTRAP_SERVERS: "kafka:9093,localhost:9092"
     depends_on:
       - backend
       - redis
       - mongodb
+      - rabbitmq
+
+  celery-beat:
+    build:
+      context: ./backend
+    restart: "no"
+    command: celery -A app.tasks.celery_app beat --loglevel=info
+    volumes:
+      - ./backend:/app
+    environment:
+      MONGODB_SERVER: "mongodb"
+      MONGODB_PORT: "27017"
+      MONGODB_USER: ${MONGO_USER:-mongo}
+      MONGODB_PASSWORD: ${MONGO_PASSWORD:-mongo}
+      MONGODB_DATABASE: ${MONGODB_DATABASE:-political_analysis}
+      REDIS_SERVER: "redis"
+      REDIS_PORT: "6379"
+      RABBITMQ_SERVER: "rabbitmq"
+      RABBITMQ_USER: ${RABBITMQ_USER:-guest}
+      RABBITMQ_PASSWORD: ${RABBITMQ_PASSWORD:-guest}
+      KAFKA_BOOTSTRAP_SERVERS: "kafka:9093,localhost:9092"
+    depends_on:
+      - celery-worker
 
   celery-flower:
     build:
@@ -176,6 +247,9 @@ services:
       MONGODB_DATABASE: ${MONGODB_DATABASE:-political_analysis}
       REDIS_SERVER: "redis"
       REDIS_PORT: "6379"
+      RABBITMQ_SERVER: "rabbitmq"
+      RABBITMQ_USER: ${RABBITMQ_USER:-guest}
+      RABBITMQ_PASSWORD: ${RABBITMQ_PASSWORD:-guest}
     depends_on:
       - celery-worker
 
@@ -228,3 +302,6 @@ networks:
 volumes:
   mongodb_data:
   redis_data:
+  rabbitmq_data:
+  zookeeper_data:
+  kafka_data:
