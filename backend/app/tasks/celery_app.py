@@ -1,11 +1,23 @@
 from celery import Celery
+import os
 
 from app.core.config import settings
 
+# Get Redis connection details from environment variables
+redis_server = os.environ.get("REDIS_SERVER", "localhost")
+redis_port = os.environ.get("REDIS_PORT", "6379")
+redis_url = f"redis://{redis_server}:{redis_port}/0"
+
+# Get RabbitMQ connection details from environment variables
+rabbitmq_user = os.environ.get("RABBITMQ_USER", "guest")
+rabbitmq_password = os.environ.get("RABBITMQ_PASSWORD", "guest")
+rabbitmq_server = os.environ.get("RABBITMQ_SERVER", "localhost")
+broker_url = f"amqp://{rabbitmq_user}:{rabbitmq_password}@{rabbitmq_server}:5672//"
+
 celery_app = Celery(
     "worker",
-    broker=settings.CELERY_BROKER,
-    backend=settings.CELERY_BROKER,
+    broker=broker_url,
+    backend=redis_url,
 )
 
 # Configure Celery

@@ -188,6 +188,7 @@ services:
   celery-worker:
     build:
       context: ./backend
+      dockerfile: Dockerfile.celery
     restart: "no"
     command: celery -A app.tasks.celery_app worker --loglevel=info
     volumes:
@@ -204,6 +205,7 @@ services:
       RABBITMQ_USER: ${RABBITMQ_USER:-guest}
       RABBITMQ_PASSWORD: ${RABBITMQ_PASSWORD:-guest}
       KAFKA_BOOTSTRAP_SERVERS: "kafka:9093,localhost:9092"
+      CELERY_BROKER: "amqp://${RABBITMQ_USER:-guest}:${RABBITMQ_PASSWORD:-guest}@rabbitmq:5672//"
     depends_on:
       - backend
       - redis
@@ -213,6 +215,7 @@ services:
   celery-beat:
     build:
       context: ./backend
+      dockerfile: Dockerfile.celery
     restart: "no"
     command: celery -A app.tasks.celery_app beat --loglevel=info
     volumes:
@@ -229,14 +232,16 @@ services:
       RABBITMQ_USER: ${RABBITMQ_USER:-guest}
       RABBITMQ_PASSWORD: ${RABBITMQ_PASSWORD:-guest}
       KAFKA_BOOTSTRAP_SERVERS: "kafka:9093,localhost:9092"
+      CELERY_BROKER: "amqp://${RABBITMQ_USER:-guest}:${RABBITMQ_PASSWORD:-guest}@rabbitmq:5672//"
     depends_on:
       - celery-worker
 
   celery-flower:
     build:
       context: ./backend
+      dockerfile: Dockerfile.celery
     restart: "no"
-    command: celery -A app.tasks.celery_app flower --port=5555
+    command: celery flower --broker=amqp://${RABBITMQ_USER:-guest}:${RABBITMQ_PASSWORD:-guest}@rabbitmq:5672// --port=5555
     ports:
       - "5555:5555"
     environment:
@@ -250,6 +255,15 @@ services:
       RABBITMQ_SERVER: "rabbitmq"
       RABBITMQ_USER: ${RABBITMQ_USER:-guest}
       RABBITMQ_PASSWORD: ${RABBITMQ_PASSWORD:-guest}
+      CELERY_BROKER: "amqp://${RABBITMQ_USER:-guest}:${RABBITMQ_PASSWORD:-guest}@rabbitmq:5672//"
+      PROJECT_NAME: "Political Social Media Analysis Platform"
+      POSTGRES_SERVER: "db"
+      POSTGRES_PORT: "5432"
+      POSTGRES_DB: "app"
+      POSTGRES_USER: "postgres"
+      POSTGRES_PASSWORD: "changethis"
+      FIRST_SUPERUSER: "admin@example.com"
+      FIRST_SUPERUSER_PASSWORD: "password"
     depends_on:
       - celery-worker
 
