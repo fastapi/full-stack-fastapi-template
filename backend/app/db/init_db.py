@@ -1,27 +1,23 @@
-from sqlmodel import Session, create_engine, select
+from sqlmodel import Session, select
 
-# Updated import to match new architecture
 from app.services.repositories import user as user_repository
 from app.core.config import settings
-# Updated model imports
 from app.db.models.user import User
 from app.schemas.user import UserCreate
 
-engine = create_engine(str(settings.SQLALCHEMY_DATABASE_URI))
-
-
-# make sure all SQLModel models are imported (app.models) before initializing DB
-# otherwise, SQLModel might fail to initialize relationships properly
-# for more details: https://github.com/fastapi/full-stack-fastapi-template/issues/28
-
 
 def init_db(session: Session) -> None:
+    """
+    Initialize the database with initial data.
+    
+    This function is called when the application starts.
+    It creates a superuser if it doesn't exist yet.
+    """
     # Tables should be created with Alembic migrations
     # But if you don't want to use migrations, create
     # the tables un-commenting the next lines
     # from sqlmodel import SQLModel
-
-    # This works because the models are already imported and registered from app.models
+    # from app.db.session import engine
     # SQLModel.metadata.create_all(engine)
 
     user = session.exec(
@@ -33,5 +29,15 @@ def init_db(session: Session) -> None:
             password=settings.FIRST_SUPERUSER_PASSWORD,
             is_superuser=True,
         )
-        # Updated to use the new repository pattern
         user = user_repository.create_user(session=session, user_create=user_in)
+
+
+async def init_mongodb() -> None:
+    """
+    Initialize MongoDB with any required initial data or indexes.
+    
+    This function is called when the application starts.
+    It sets up indexes and any initial data required for MongoDB collections.
+    """
+    # This will be implemented as needed when MongoDB collections are defined
+    pass 

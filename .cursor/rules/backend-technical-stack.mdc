@@ -1,0 +1,230 @@
+---
+description: Technical Stack Specification for the /backend.
+globs: backend/*
+alwaysApply: false
+---
+## 1. Technology Stack Overview
+
+| Component | Technology | Version | Purpose |
+|-----------|------------|---------|---------|
+| Framework | FastAPI | 0.114.2+ | Web API framework |
+| ORM | SQLModel | 0.0.21+ | Database ORM |
+| Primary Database | PostgreSQL | 13+ | Relational database |
+| Document Database | MongoDB | 6.0+ | Social media content storage |
+| In-memory Database | Redis | 7.0+ | Caching and real-time operations |
+| Vector Database | Pinecone | Latest | Semantic content analysis |
+| Authentication | JWT | 2.8.0+ | User authentication |
+| Password Hashing | Passlib + Bcrypt | 1.7.4+ | Secure password storage |
+| Dependency Management | uv | 0.5.11+ | Package management |
+| Migrations | Alembic | 1.12.1+ | Database schema migrations |
+| API Documentation | OpenAPI/Swagger | Built-in | API documentation |
+| Error Tracking | Sentry | 1.40.6+ | Error reporting |
+| Email Delivery | emails | 0.6+ | Email notifications |
+| Testing | pytest | 7.4.3+ | Unit and integration testing |
+| Linting | ruff | 0.2.2+ | Code quality |
+| Type Checking | mypy | 1.8.0+ | Static type checking |
+| Task Queue | Celery | 5.3.0+ | Asynchronous task processing |
+| Message Broker | RabbitMQ | 3.12+ | Task distribution |
+| Stream Processing | Apache Kafka | 3.4+ | Real-time data streaming |
+| NLP Processing | spaCy + Transformers | 3.6+ / 4.28+ | Content analysis |
+
+## 2. Architecture
+
+### 2.1 Architectural Pattern
+
+The application follows a clean architecture pattern with clear separation of concerns:
+
+```
+Client Request → API Layer → Service Layer → Repository Layer → Database
+                                          ↑
+                                     Schema Layer
+```
+
+### 2.2 Key Components
+
+- **API Layer**: Handles HTTP requests/responses, input validation, and routing
+- **Service Layer**: Contains business logic and orchestrates repositories
+- **Repository Layer**: Provides data access patterns and database operations
+- **Schema Layer**: Defines data contracts for API input/output
+- **Model Layer**: Defines database models and relationships
+
+### 2.3 Directory Structure
+
+```
+/app
+├── api/                      # API endpoints and routing
+│   ├── api_v1/               # API version 1
+│   │   ├── endpoints/        # Resource endpoints
+│   │   └── api.py            # Router configuration
+│   ├── deps.py               # Dependency injection
+│   └── main.py               # Main router
+├── core/                     # Core components
+│   ├── config.py             # Environment configuration
+│   ├── security.py           # Authentication
+│   └── errors.py             # Error handling
+├── db/                       # Database configuration
+│   ├── models/               # SQLModel definitions
+│   └── session.py            # Database session management
+├── schemas/                  # Pydantic models for API
+├── services/                 # Business logic
+│   └── repositories/         # Data access layer
+├── tasks/                    # Celery tasks for background processing
+│   ├── scraping/             # Social media scraping tasks
+│   ├── analysis/             # Content analysis tasks
+│   └── notifications/        # Alert and notification tasks
+├── processing/               # Data processing components
+│   ├── models/               # ML model wrappers
+│   ├── streams/              # Kafka stream processors
+│   └── embeddings/           # Vector embedding generators
+├── worker.py                 # Celery worker configuration
+└── main.py                   # Application entry point
+```
+
+## 3. Database Design
+
+### 3.1 Hybrid Database Technology
+
+The application employs a hybrid database architecture to address the diverse data requirements of political social media analysis:
+
+| Component | Technology | Version | Purpose |
+|-----------|------------|---------|---------|
+| Relational Database | PostgreSQL | 13+ | Entity data and relationships |
+| Document Database | MongoDB | 6.0+ | Social media content and engagement |
+| In-memory Database | Redis | 7.0+ | Caching and real-time operations |
+| Vector Database | Pinecone | Latest | Semantic similarity analysis |
+
+Refer to `database-architecture.mdc` for detailed implementation specifications.
+
+### 3.2 Primary Domain Models
+
+- **User**: Authentication and user profile data
+- **PoliticalEntity**: Political figures, organizations, and campaigns
+- **SocialMediaAccount**: Platform account connections 
+- **EntityRelationship**: Relationships between political entities
+
+### 3.3 Key Design Decisions
+
+- **UUID Primary Keys**: All entities use UUID primary keys for security and distributed system compatibility
+- **Cross-database References**: Consistent reference patterns between databases
+- **Relationship Management**: Proper foreign key constraints with cascade delete
+- **String Field Constraints**: Appropriate length limits on all VARCHAR fields
+- **Migration Strategy**: Alembic for version-controlled schema changes
+
+### 3.4 Additional Dependencies
+
+| Dependency | Version | Purpose |
+|------------|---------|---------|
+| motor | 3.2.0+ | Async MongoDB driver |
+| redis | 4.6.0+ | Redis client |
+| pinecone-client | 2.2.1+ | Pinecone Vector DB client |
+| pymongo | 4.5.0+ | MongoDB client |
+
+Refer to `data-processing-architecture.mdc` for details on processing pipelines and analysis components.
+
+## 4. API Design
+
+### 4.1 API Structure
+
+- RESTful API design principles
+- Resource-based URL structure
+- Version prefixing (`/api/v1/...`)
+- OpenAPI documentation
+
+### 4.2 Response Format
+
+All API responses follow a standardized format:
+
+```json
+{
+  "data": { ... },          // Actual response payload
+  "success": true,          // Success indicator
+  "message": "Description"  // Human-readable message
+}
+```
+
+Error responses:
+
+```json
+{
+  "success": false,
+  "error": "Error message",
+  "details": { ... }        // Additional error details
+}
+```
+
+### 4.3 Authentication
+
+- JWT token-based authentication
+- OAuth2 password flow with Bearer token
+- Role-based access control (standard user vs superuser)
+
+## 5. Performance Considerations
+
+### 5.1 Database Optimization
+
+- Efficient query patterns via repositories
+- Appropriate indexing of frequently queried fields
+- Pagination for list endpoints
+
+### 5.2 API Performance
+
+- Async/await support for I/O bound operations
+- Connection pooling for database operations
+- Request validation at the edge
+
+## 6. Security Features
+
+### 6.1 Authentication & Authorization
+
+- Password hashing with bcrypt
+- JWT with appropriate expiration
+- Principle of least privilege in endpoint permissions
+
+### 6.2 Data Protection
+
+- Input validation using Pydantic
+- CORS protection
+- Email-based password recovery flow
+
+## 7. Development Workflow
+
+### 7.1 Environment Setup
+
+- Containerized development with Docker
+- Environment-specific configuration
+- Virtual environment management with uv
+
+### 7.2 Quality Assurance
+
+- Type checking with mypy
+- Linting with ruff
+- Automated testing with pytest
+- Pre-commit hooks
+
+## 8. Deployment Strategy
+
+### 8.1 Containerization
+
+- Docker-based deployment
+- Multi-stage build for optimized image size
+- Environment variable configuration
+
+### 8.2 Monitoring
+
+- Sentry integration for error tracking
+- Health check endpoints
+- Structured logging
+
+## 9. Scalability Considerations
+
+### 9.1 Horizontal Scaling
+
+- Stateless API design
+- Database connection pooling
+- External state management
+
+### 9.2 Future Extensibility
+
+- Modular service architecture
+- Clear separation of concerns
+- Version-prefixed API endpoints

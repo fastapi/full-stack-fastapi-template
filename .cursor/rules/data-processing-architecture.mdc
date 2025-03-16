@@ -1,0 +1,333 @@
+---
+description: Data Processing Architecture Specification for the Political Social Media Analysis Platform.
+globs: backend/tasks/*, backend/processing/*
+alwaysApply: false
+---
+# Data Processing Architecture
+
+## 1. Technology Stack Overview
+
+| Component | Technology | Version | Purpose |
+|-----------|------------|---------|---------|
+| Task Queue | Celery | 5.3.0+ | Asynchronous task processing |
+| Message Broker | RabbitMQ | 3.12+ | Task distribution and messaging |
+| Stream Processing | Apache Kafka | 3.4+ | Real-time event streaming |
+| Text Processing | spaCy | 3.6+ | NLP and entity recognition |
+| Sentiment Analysis | Transformers | 4.28+ | Content sentiment detection |
+| Vector Embeddings | sentence-transformers | 2.2.2+ | Text embedding generation |
+| Machine Learning | scikit-learn | 1.2+ | Classification and regression |
+| Full-Text Search | MongoDB Atlas Search | N/A | Content search capabilities |
+
+## 2. Processing Pipeline Components
+
+### 2.1 Data Collection Components
+
+- **Platform-specific scrapers**: Modular adapters for each social media platform
+- **Rate limiters**: Respects platform API constraints
+- **Scheduled collection**: Configurable intervals for data collection
+- **Content processors**: Standardizes data from different platforms
+
+### 2.2 Analysis Components
+
+- **Sentiment analyzer**: Determines content sentiment
+- **Topic modeler**: Identifies content themes and categories
+- **Entity recognizer**: Detects mentions of political entities
+- **Vector embedder**: Generates semantic representations
+- **Relationship mapper**: Builds entity relationship graphs
+
+### 2.3 Real-time Components
+
+- **Stream processors**: Kafka consumers for real-time analysis
+- **Alert generators**: Triggers based on configurable thresholds
+- **Metric calculators**: Real-time engagement statistics
+- **Notification services**: Delivery of critical alerts
+
+## 3. Task Distribution
+
+### 3.1 Task Queue Design
+
+Celery task queues with priority-based routing:
+
+| Queue Name | Priority | Purpose |
+|------------|----------|---------|
+| scraping | High | Content collection from social platforms |
+| analysis | Medium | Content processing and analysis |
+| embeddings | Low | Vector embedding generation |
+| alerts | Critical | Real-time notification processing |
+| reports | Low | Scheduled report generation |
+
+### 3.2 Task Implementation Pattern
+
+```python
+@app.task(queue="analysis", rate_limit="100/m")
+def analyze_sentiment(post_id: str, text: str):
+    """
+    Analyze the sentiment of a social media post.
+    
+    Args:
+        post_id: The MongoDB ID of the post
+        text: The text content to analyze
+        
+    Returns:
+        Dict containing sentiment scores and emotional classification
+    """
+    # Sentiment analysis implementation
+    sentiment_score = sentiment_model.predict(text)
+    
+    # Update the post in MongoDB with sentiment results
+    mongodb.posts.update_one(
+        {"_id": ObjectId(post_id)},
+        {"$set": {"analysis.sentiment_score": sentiment_score}}
+    )
+    
+    # Return result for potential chaining
+    return {
+        "post_id": post_id,
+        "sentiment_score": sentiment_score
+    }
+```
+
+## 4. Stream Processing Design
+
+### 4.1 Kafka Topic Design
+
+| Topic | Purpose | Retention | Partitioning |
+|-------|---------|-----------|--------------|
+| social-media-raw | Raw content from platforms | 7 days | By platform and entity |
+| entity-mentions | Mentions of tracked entities | 30 days | By mentioned entity |
+| sentiment-changes | Significant sentiment shifts | 30 days | By entity |
+| engagement-metrics | Real-time engagement updates | 2 days | By entity |
+
+### 4.2 Stream Processing Pattern
+
+```python
+def process_sentiment_stream():
+    """
+    Process the sentiment stream to detect significant changes.
+    """
+    consumer = KafkaConsumer(
+        'social-media-raw',
+        bootstrap_servers='kafka:9092',
+        group_id='sentiment-analyzer',
+        auto_offset_reset='latest'
+    )
+    
+    for message in consumer:
+        # Decode message
+        post = json.loads(message.value)
+        
+        # Calculate sentiment
+        sentiment = analyze_content(post['content']['text'])
+        
+        # Check for significant changes
+        if is_significant_change(post, sentiment):
+            # Publish to sentiment-changes topic
+            publish_sentiment_change(post, sentiment)
+            
+            # Generate alert if needed
+            if requires_alert(post, sentiment):
+                generate_alert(post, sentiment)
+```
+
+## 5. Machine Learning Implementation
+
+### 5.1 Model Management
+
+- **Model Registry**: Central repository for trained models
+- **Versioning**: Tracking model versions and performance
+- **A/B Testing**: Framework for evaluating model improvements
+- **Automated Retraining**: Scheduled model updates
+
+### 5.2 Core Models
+
+| Model | Purpose | Architecture | Training Data |
+|-------|---------|--------------|--------------|
+| Sentiment Analyzer | Content sentiment scoring | Fine-tuned transformer | Labeled political content |
+| Topic Classifier | Content categorization | Multi-label classification | Domain-specific corpus |
+| Entity Relationship | Relationship scoring | Graph neural network | Historical interaction data |
+| Audience Segmenter | User clustering | Unsupervised model | Engagement patterns |
+| Performance Predictor | Engagement prediction | Gradient boosting | Historical post performance |
+
+### 5.3 Vector Embedding Process
+
+```python
+@app.task(queue="embeddings")
+def generate_embedding(content_id: str, content_type: str, text: str):
+    """
+    Generate vector embedding for text content.
+    
+    Args:
+        content_id: MongoDB ID of the content
+        content_type: Type of content (post, comment)
+        text: Text to embed
+        
+    Returns:
+        ID of the created vector entry
+    """
+    # Generate embedding
+    embedding = embedding_model.encode(text)
+    
+    # Get metadata from MongoDB
+    if content_type == "post":
+        content = mongodb.posts.find_one({"_id": ObjectId(content_id)})
+    else:
+        content = mongodb.comments.find_one({"_id": ObjectId(content_id)})
+    
+    # Create metadata for vector DB
+    metadata = {
+        "content_type": content_type,
+        "source_id": str(content["_id"]),
+        "entity_id": content.get("account_id"),
+        "platform": content["platform"],
+        "created_at": content["metadata"]["created_at"],
+        "topics": content.get("analysis", {}).get("topics", []),
+        "sentiment_score": content.get("analysis", {}).get("sentiment_score")
+    }
+    
+    # Store in vector database
+    vector_id = vector_client.upsert(
+        vectors=[embedding.tolist()],
+        metadata=metadata,
+        namespace="social_content"
+    )
+    
+    # Update reference in MongoDB
+    collection = mongodb.posts if content_type == "post" else mongodb.comments
+    collection.update_one(
+        {"_id": ObjectId(content_id)},
+        {"$set": {"vector_id": vector_id}}
+    )
+    
+    return vector_id
+```
+
+## 6. Search Implementation
+
+### 6.1 MongoDB Atlas Search Configuration
+
+```javascript
+// Search index configuration
+{
+  "mappings": {
+    "dynamic": false,
+    "fields": {
+      "content.text": {
+        "type": "string",
+        "analyzer": "lucene.standard",
+        "searchAnalyzer": "lucene.standard"
+      },
+      "metadata.location.country": {
+        "type": "string"
+      },
+      "metadata.language": {
+        "type": "string"
+      },
+      "analysis.topics": {
+        "type": "string"
+      },
+      "analysis.entities_mentioned": {
+        "type": "string"
+      }
+    }
+  }
+}
+```
+
+### 6.2 Search Implementation
+
+```python
+async def search_content(query: str, filters: dict = None):
+    """
+    Search social media content using MongoDB Atlas Search.
+    
+    Args:
+        query: Text query to search for
+        filters: Optional filters to apply (topics, entities, etc.)
+        
+    Returns:
+        List of matching documents
+    """
+    search_pipeline = [
+        {
+            "$search": {
+                "index": "social_content",
+                "text": {
+                    "query": query,
+                    "path": "content.text"
+                }
+            }
+        }
+    ]
+    
+    # Add filters if provided
+    if filters:
+        search_pipeline.append({"$match": filters})
+    
+    # Add projection to limit fields returned
+    search_pipeline.append({
+        "$project": {
+            "_id": 1,
+            "content": 1,
+            "metadata": 1,
+            "analysis": 1,
+            "score": {"$meta": "searchScore"}
+        }
+    })
+    
+    # Execute search
+    results = await mongodb.posts.aggregate(search_pipeline).to_list(length=50)
+    return results
+```
+
+## 7. Performance Considerations
+
+### 7.1 Resource Allocation
+
+| Component | CPU Allocation | Memory Allocation | Scaling Trigger |
+|-----------|---------------|-------------------|-----------------|
+| Scraping Workers | Medium | Low | Queue depth > 1000 tasks |
+| Analysis Workers | High | High | Queue depth > 500 tasks |
+| Vector Workers | High | Medium | Queue depth > 200 tasks |
+| Stream Processors | Medium | High | Consumer lag > 1000 messages |
+
+### 7.2 Processing Patterns
+
+- **Real-time processing**: Critical alerts, high-priority entity updates
+- **Near real-time processing**: Sentiment analysis, engagement metrics
+- **Batch processing**: Vector embedding, relationship analysis, historical trends
+
+### 7.3 Rate Limiting
+
+- Platform-specific API rate limits
+- Resource-based rate limits for compute-intensive tasks
+- Prioritization of critical entity monitoring
+
+## 8. Monitoring and Observability
+
+### 8.1 Key Metrics
+
+- Task processing rates and success/failure ratios
+- Model inference latency and throughput
+- Stream processing lag and throughput
+- Database operation latency
+- Queue depths and processing backlogs
+
+### 8.2 Implementation Strategy
+
+- Structured logging with correlation IDs
+- Error tracking with Sentry integration
+- Performance monitoring with Prometheus
+- Worker monitoring with Flower for Celery
+- Custom health check endpoints for services
+
+## 9. Additional Dependencies
+
+| Dependency | Version | Purpose |
+|------------|---------|---------|
+| celery | 5.3.0+ | Task queue library |
+| kafka-python | 2.0.2+ | Kafka client |
+| spacy | 3.6.0+ | Natural language processing |
+| transformers | 4.28.0+ | Machine learning models |
+| scikit-learn | 1.2.0+ | Classical machine learning tools |
+| torch | 2.0.0+ | Deep learning framework |
+| sentence-transformers | 2.2.2+ | Text embedding generation |

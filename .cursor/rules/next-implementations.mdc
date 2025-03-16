@@ -1,0 +1,111 @@
+---
+description: Next Implementations
+globs: 
+alwaysApply: false
+---
+# Concise Implementation Plan for Hybrid Database Architecture
+
+## Phase 1: Environment and Dependency Setup
+
+1. **Update requirements.txt**
+   - Add MongoDB drivers: `motor`, `pymongo`
+   - Add Redis client: `redis`
+   - Add Pinecone: `pinecone-client`
+   - Add task processing: `celery`, `kafka-python`
+   - Add ML/NLP: `spacy`, `transformers`, `sentence-transformers`
+
+2. **Update Docker environment**
+   - Modify Dockerfile to install dependencies
+   - Add services to docker-compose:
+     - MongoDB, Redis, RabbitMQ, Kafka
+     - Worker service for Celery tasks
+
+3. **Create configuration**
+   - Update `config.py` with connection settings for all databases
+   - Create connection utilities for MongoDB and Redis
+
+## Phase 2: Database Models Implementation
+
+1. **PostgreSQL Models**
+   - Create `PoliticalEntity`, `SocialMediaAccount`, `EntityRelationship`
+   - Set up UUID primary keys and relationships
+   - Create Pydantic schemas for API
+
+2. **MongoDB Documents**
+   - Define schemas for social media posts and comments
+   - Set up indexing strategy
+   - Create initialization script
+
+3. **Redis Data Structures**
+   - Define key patterns for metrics, trending data, and activity streams
+   - Create cache invalidation strategy
+
+## Phase 3: Repository Layer Implementation
+
+1. **Implement PostgreSQL Repositories**
+   - `PoliticalEntityRepository` with CRUD operations
+   - `EntityRelationshipRepository` for relationship management
+
+2. **Implement MongoDB Repositories**
+   - `PostRepository` for social media content
+   - `CommentRepository` for user comments
+   - Implement cross-database reference patterns
+
+3. **Implement Redis Service**
+   - Methods for caching frequent data
+   - Real-time counters and metrics
+   - Activity streams and trending topic tracking
+
+4. **Implement Vector Database Service**
+   - Connect to Pinecone
+   - Vector embedding generation
+   - Similarity search functionality
+
+## Phase 4: Task Processing Implementation
+
+1. **Set up Celery**
+   - Configure worker and task queues
+   - Set up task routing based on priority
+
+2. **Create Core Tasks**
+   - Data collection tasks (platform-specific scrapers)
+   - Content analysis tasks (sentiment, topic modeling)
+   - Embedding generation tasks
+   - Alert generation tasks
+
+3. **Implement Kafka Stream Processors**
+   - Stream processors for real-time monitoring
+   - Topic configuration for entity mentions, sentiment changes
+   - Consumer implementation for alerts
+
+## Phase 5: Integration and Testing
+
+1. **Build Cross-Database Services**
+   - Social media monitoring service
+   - Entity relationship analysis service
+   - Content similarity service
+
+2. **Create Test Data and Fixtures**
+   - Test data for each database
+   - Integration test scenarios
+   - Performance benchmarks
+
+3. **Implement API Endpoints**
+   - Entity management endpoints
+   - Content search and analysis endpoints
+   - Analytics dashboard endpoints
+
+## Implementation Order
+
+1. Start with basic PostgreSQL models and repositories
+2. Add MongoDB integration for posts and comments
+3. Implement Redis for caching and real-time features
+4. Add vector database functionality for semantic analysis
+5. Set up Celery and Kafka for processing pipelines
+
+## Testing Strategy
+
+- Unit test each repository layer individually
+- Integration tests for cross-database operations
+- Load testing for performance-critical components
+- End-to-end tests for complete workflows

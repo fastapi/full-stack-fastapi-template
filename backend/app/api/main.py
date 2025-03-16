@@ -1,14 +1,12 @@
 from fastapi import APIRouter
 
-from app.api.routes import items, login, private, users, utils
+from app.api.api_v1.api import api_router as api_v1_router
 from app.core.config import settings
 
+# Main API router that includes version-specific routers
 api_router = APIRouter()
-api_router.include_router(login.router)
-api_router.include_router(users.router)
-api_router.include_router(utils.router)
-api_router.include_router(items.router)
 
+# Include the v1 API router without an additional prefix
+# The /v1 prefix is handled in app.main.py with settings.API_V1_STR
+api_router.include_router(api_v1_router)
 
-if settings.ENVIRONMENT == "local":
-    api_router.include_router(private.router)

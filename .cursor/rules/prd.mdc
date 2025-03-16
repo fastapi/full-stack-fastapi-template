@@ -1,0 +1,316 @@
+---
+description: PRD for the actual repository.
+globs: 
+alwaysApply: false
+---
+# Product Requirements Document
+# Political Social Media Analysis Platform
+
+## Document History
+| Version | Date | Author | Description |
+|---------|------|--------|-------------|
+| 1.0 | March 12, 2025 | | Initial PRD |
+
+## Overview
+The Political Social Media Analysis Platform is a comprehensive application designed to scrape, analyze, and derive insights from political figures' social media presence. The platform collects posts and audience engagement data across multiple social media platforms, analyzes sentiment and relationships between political entities, and provides actionable intelligence for strategic communication planning.
+
+## Business Objectives
+- Provide comprehensive social media intelligence for political campaigns and figures
+- Enable data-driven decision making for future content and messaging strategies
+- Track and analyze relationships between political entities (opponents and allies)
+- Identify audience sentiment patterns to optimize communication strategies
+- Deliver actionable insights to improve engagement and messaging effectiveness
+
+## Target Users
+- Political campaign managers
+- Political communications directors
+- Policy advisors
+- Political analysts
+- Public relations specialists
+
+## User Stories
+
+### As a Campaign Manager
+- I want to track all social media activity of our political figure across platforms
+- I want to understand audience sentiment towards specific policy messages
+- I want to compare our engagement metrics against political opponents
+- I need to identify trending topics our audience cares about
+
+### As a Communications Director
+- I want to see which messaging themes resonate most with our audience
+- I need to identify potential PR issues before they escalate
+- I want to track the effectiveness of our response to opponent messaging
+- I need insights on optimal posting times and content formats
+
+### As a Political Analyst
+- I want to map relationships between political figures based on social interactions
+- I need to track evolving narratives on specific policy issues
+- I want to identify influential supporters and detractors
+- I need to analyze regional variations in audience response
+
+## Core Features
+
+### 1. Multi-Platform Data Collection
+#### Description
+Automated scraping system to collect posts, comments, and engagement metrics from multiple social media platforms.
+
+#### Requirements
+- Support for Instagram, Facebook, TikTok, and Twitter/X
+- Collection of posts, videos, comments, reactions, and shares
+- Media content archiving (images, videos)
+- Metadata extraction (posting time, location tags, mentioned accounts)
+- Historical data backfilling capability
+
+#### Acceptance Criteria
+- Successfully collects 99.5%+ of public posts from tracked accounts
+- Captures all public comments on monitored posts
+- Updates data at configurable intervals (minimum hourly)
+- Maintains collection despite platform UI changes
+- Properly handles rate limits and access restrictions
+
+### 2. Political Entity Relationship Mapping
+#### Description
+System to track, visualize, and analyze relationships between political figures based on mentions, interactions, and content similarity.
+
+#### Requirements
+- Define relationship types (ally, opponent, neutral, evolving)
+- Track direct mentions and indirect references
+- Quantify relationship strength through interaction frequency
+- Visualize network graphs of political relationships
+- Track relationship changes over time
+
+#### Acceptance Criteria
+- Accurately identifies relationships between tracked entities
+- Updates relationship status based on new interactions
+- Provides filterable visualization of relationship networks
+- Generates alerts for significant relationship changes
+- Supports manual relationship tagging to supplement automated analysis
+
+### 3. Sentiment Analysis Engine
+#### Description
+Advanced NLP system to analyze audience sentiment in comments and reactions to political content.
+
+#### Requirements
+- Comment-level sentiment scoring (positive, negative, neutral)
+- Emotion classification (anger, support, confusion, etc.)
+- Aggregated sentiment metrics by post, topic, and time period
+- Automated detection of sentiment shifts
+- Topic-specific sentiment breakdowns
+
+#### Acceptance Criteria
+- Sentiment classification with 85%+ accuracy compared to human analysts
+- Real-time processing of new comments
+- Identification of sentiment trends and anomalies
+- Language support for Spanish as primary language, with English as secondary
+- Ability to filter toxic or irrelevant comments
+
+### 4. Topic Modeling & Issue Tracking
+#### Description
+System to identify, categorize, and track discussion topics across social media content.
+
+#### Requirements
+- Automatic topic extraction from posts and comments
+- Classification of content by policy areas
+- Tracking topic evolution over time
+- Identification of emerging issues
+- Comparison of topic engagement across platforms
+
+#### Acceptance Criteria
+- Correctly categorizes 90%+ of content into relevant topics
+- Identifies trending topics within 1 hour of emergence
+- Tracks topic sentiment independently
+- Correlates topics across different political entities
+- Supports manual topic tagging and categorization
+
+### 5. Analysis Dashboard & Reporting
+#### Description
+Comprehensive visualization interface providing actionable insights from collected data.
+
+#### Requirements
+- Overview dashboard with key performance metrics
+- Entity-specific profile dashboards
+- Comparative analysis tools
+- Customizable report generation
+- Data export functionality
+- Alert configuration for critical metrics
+
+#### Acceptance Criteria
+- Displays real-time and historical data
+- Supports filtering by date range, platform, and entity
+- Generates scheduled reports in PDF and Excel formats
+- Allows bookmark saving of specific analysis views
+- Maintains responsive performance with large datasets
+
+## Enhanced Features
+
+### 6. Real-time Monitoring
+#### Description
+Alert system for tracking sudden changes in sentiment or mentions by influential accounts.
+
+#### Requirements
+- Configurable alert thresholds for sentiment changes
+- Notification system for mentions by high-influence accounts
+- Real-time monitoring dashboard
+- Trend detection algorithms to identify viral potential
+- Integration with external notification channels (email, SMS, app)
+
+#### Acceptance Criteria
+- Detects significant sentiment shifts within 15 minutes
+- Correctly identifies high-importance mentions with 95%+ accuracy
+- Delivers alerts through configured channels within 5 minutes
+- Provides context with each alert
+- Supports alert customization by user role
+
+### 7. Campaign Effectiveness Metrics
+#### Description
+Advanced analytics to measure message resonance, audience growth, and predict content performance.
+
+#### Requirements
+- Message resonance scoring across demographics
+- Audience growth attribution models
+- Content performance prediction
+- A/B testing framework for message variations
+- Conversion tracking (from awareness to engagement)
+
+#### Acceptance Criteria
+- Provides quantifiable metrics for message effectiveness
+- Tracks audience growth correlated with specific content strategies
+- Predicts post performance with 80%+ accuracy
+- Generates actionable recommendations for content optimization
+- Supports campaign-level grouping and analysis
+
+### 8. Competitive Intelligence
+#### Description
+Tools to analyze and compare messaging strategies and effectiveness across political entities.
+
+#### Requirements
+- Share of voice measurement across platforms
+- Narrative comparison between entities
+- Messaging gap analysis
+- Audience overlap identification
+- Response timing analysis
+
+#### Acceptance Criteria
+- Accurately measures relative visibility of tracked entities
+- Identifies messaging similarities and differences
+- Highlights underserved topics with audience interest
+- Tracks narrative evolution compared to competitors
+- Provides actionable competitive positioning insights
+
+### 9. Historical Context
+#### Description
+Timeline views and analysis tools to track messaging evolution and effectiveness over time.
+
+#### Requirements
+- Timeline visualization of messaging
+- Crisis response effectiveness tracking
+- Message consistency analysis
+- Before/after analysis for major events
+- Historical trend comparison
+
+#### Acceptance Criteria
+- Displays comprehensive messaging history
+- Allows comparison of multiple time periods
+- Quantifies messaging consistency and evolution
+- Identifies correlations between events and messaging changes
+- Supports annotation of significant events
+
+### 10. Geographic Insights
+#### Description
+Tools to analyze regional variations in audience response and engagement.
+
+#### Requirements
+- Regional sentiment mapping
+- Demographic response analysis
+- Location-based messaging effectiveness
+- Geographic hot spots for specific topics
+- Regional influence tracking
+
+#### Acceptance Criteria
+- Maps engagement and sentiment to geographic regions
+- Identifies regional variations in message effectiveness
+- Provides insights for location-targeted messaging
+- Tracks regional influence of political entities
+- Supports filtering and comparison by region
+
+## Technical Requirements
+
+### Infrastructure
+- Cloud-based deployment with scalability for traffic spikes
+- Containerized architecture for consistent deployment
+- Fault-tolerant design with redundancy for critical components
+- Automated backup and disaster recovery
+
+### Security
+- End-to-end encryption for all data
+- Role-based access control
+- Audit logging for all system actions
+- Secure API authentication
+- Regular security assessments
+
+### Performance
+- Dashboard loading time < 3 seconds
+- Data collection processing capacity of 10,000+ posts/hour
+- Analysis processing of 100,000+ comments/hour
+- Support for 100+ concurrent users
+- 99.9% system uptime
+
+### Integration
+- API access for external system integration
+- Export formats: CSV, Excel, JSON
+- Webhook support for real-time data sharing
+- Email integration for reports and alerts
+- Calendar integration for scheduling
+
+## Implementation Timeline
+
+### Phase 1: Foundation (Months 1-3)
+- Core data collection infrastructure
+- Basic data storage and processing
+- Initial entity and relationship models
+- Simple dashboard with basic metrics
+
+### Phase 2: Analysis Capabilities (Months 4-6)
+- Sentiment analysis engine
+- Topic modeling implementation
+- Enhanced dashboard visualizations
+- Basic reporting functionality
+
+### Phase 3: Advanced Features (Months 7-9)
+- Relationship mapping visualization
+- Campaign effectiveness metrics
+- Competitive intelligence tools
+- Alert system implementation
+
+### Phase 4: Refinement (Months 10-12)
+- Geographic insights
+- Historical context tools
+- Performance optimization
+- Enhanced reporting
+
+## Success Metrics
+- System consistently captures >99% of relevant social media activity
+- Sentiment analysis achieves >85% accuracy against human review
+- Users report >50% reduction in time spent on manual social media analysis
+- Platform identifies emerging issues 24+ hours before traditional methods
+- Strategic recommendations achieve measurable improvement in engagement metrics
+
+## Assumptions & Constraints
+- Public APIs or scraping capabilities remain available for target platforms
+- Legal compliance with platform terms of service is maintained
+- Processing capacity scales with data volume growth
+- User adoption requires minimal training (<2 hours)
+- System maintains compliance with relevant data privacy regulations
+
+## Open Questions
+- How will the system handle platform API changes or limitations?
+- What is the strategy for platforms that actively prevent scraping?
+- How will we validate sentiment analysis accuracy?
+- What is the approach for expanding language support beyond Spanish and English?
+- How will we determine relationship classifications initially?
+
+## Appendix
+- Glossary of Terms
+- User Persona Details
+- Competitive Analysis
+- Technical Architecture Diagrams

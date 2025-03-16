@@ -4,7 +4,7 @@ services:
     image: postgres:12
     restart: always
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER} -d ${POSTGRES_DB}"]
+      test: [ "CMD-SHELL", "pg_isready -U ${POSTGRES_USER} -d ${POSTGRES_DB}" ]
       interval: 10s
       retries: 5
       start_period: 30s
@@ -18,6 +18,107 @@ services:
       - POSTGRES_PASSWORD=${POSTGRES_PASSWORD?Variable not set}
       - POSTGRES_USER=${POSTGRES_USER?Variable not set}
       - POSTGRES_DB=${POSTGRES_DB?Variable not set}
+
+  # MongoDB service for document data
+  mongodb:
+    image: mongo:6.0
+    restart: always
+    networks:
+      - traefik-public
+      - default
+    ports:
+      - "27017:27017"
+    environment:
+      - MONGO_INITDB_ROOT_USERNAME=${MONGO_USER:-mongouser}
+      - MONGO_INITDB_ROOT_PASSWORD=${MONGO_PASSWORD:-mongopassword}
+      - MONGO_INITDB_DATABASE=${MONGO_DB:-socialmediadb}
+    volumes:
+      - mongodb-data:/data/db
+    healthcheck:
+      test: echo 'db.runCommand("ping").ok' | mongosh --quiet
+      interval: 10s
+      timeout: 10s
+      retries: 5
+      start_period: 40s
+
+  # Redis service for caching and real-time operations
+  redis:
+    image: redis:7.0
+    restart: always
+    networks:
+      - traefik-public
+      - default
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis-data:/data
+    command: redis-server --appendonly yes
+    healthcheck:
+      test: [ "CMD", "redis-cli", "ping" ]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  # RabbitMQ service for message broker
+  rabbitmq:
+    image: rabbitmq:3.12-management
+    restart: always
+    networks:
+      - traefik-public
+      - default
+    ports:
+      - "5672:5672" # AMQP port
+      - "15672:15672" # Management UI
+    environment:
+      - RABBITMQ_DEFAULT_USER=${RABBITMQ_USER:-rabbitmquser}
+      - RABBITMQ_DEFAULT_PASS=${RABBITMQ_PASSWORD:-rabbitmqpassword}
+    volumes:
+      - rabbitmq-data:/var/lib/rabbitmq
+    healthcheck:
+      test: [ "CMD", "rabbitmq-diagnostics", "check_port_connectivity" ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 40s
+
+  # Kafka service with Zookeeper for stream processing
+  zookeeper:
+    image: bitnami/zookeeper:latest
+    restart: always
+    networks:
+      - traefik-public
+      - default
+    ports:
+      - "2181:2181"
+    environment:
+      - ALLOW_ANONYMOUS_LOGIN=yes
+    volumes:
+      - zookeeper-data:/bitnami/zookeeper
+
+  kafka:
+    image: bitnami/kafka:3.4
+    restart: always
+    networks:
+      - traefik-public
+      - default
+    ports:
+      - "9092:9092"
+    environment:
+      - KAFKA_BROKER_ID=1
+      - KAFKA_CFG_LISTENERS=PLAINTEXT://:9092
+      - KAFKA_CFG_ADVERTISED_LISTENERS=PLAINTEXT://kafka:9092
+      - KAFKA_CFG_ZOOKEEPER_CONNECT=zookeeper:2181
+      - ALLOW_PLAINTEXT_LISTENER=yes
+    volumes:
+      - kafka-data:/bitnami/kafka
+    depends_on:
+      - zookeeper
+    healthcheck:
+      test: [ "CMD-SHELL", "kafka-topics.sh --bootstrap-server 127.0.0.1:9092 --list" ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 40s
 
   adminer:
     image: adminer
@@ -74,6 +175,16 @@ services:
       - POSTGRES_USER=${POSTGRES_USER?Variable not set}
       - POSTGRES_PASSWORD=${POSTGRES_PASSWORD?Variable not set}
       - SENTRY_DSN=${SENTRY_DSN}
+      - MONGO_SERVER=mongodb
+      - MONGO_USER=${MONGO_USER:-mongouser}
+      - MONGO_PASSWORD=${MONGO_PASSWORD:-mongopassword}
+      - MONGO_DB=${MONGO_DB:-socialmediadb}
+      - REDIS_SERVER=redis
+      - REDIS_PORT=6379
+      - RABBITMQ_SERVER=rabbitmq
+      - RABBITMQ_USER=${RABBITMQ_USER:-rabbitmquser}
+      - RABBITMQ_PASSWORD=${RABBITMQ_PASSWORD:-rabbitmqpassword}
+      - KAFKA_BOOTSTRAP_SERVERS=kafka:9092
 
   backend:
     image: '${DOCKER_IMAGE_BACKEND?Variable not set}:${TAG-latest}'
@@ -83,6 +194,15 @@ services:
       - default
     depends_on:
       db:
+        condition: service_healthy
+        restart: true
+      mongodb:
+        condition: service_healthy
+        restart: true
+      redis:
+        condition: service_healthy
+        restart: true
+      rabbitmq:
         condition: service_healthy
         restart: true
       prestart:
@@ -107,9 +227,19 @@ services:
       - POSTGRES_USER=${POSTGRES_USER?Variable not set}
       - POSTGRES_PASSWORD=${POSTGRES_PASSWORD?Variable not set}
       - SENTRY_DSN=${SENTRY_DSN}
+      - MONGO_SERVER=mongodb
+      - MONGO_USER=${MONGO_USER:-mongouser}
+      - MONGO_PASSWORD=${MONGO_PASSWORD:-mongopassword}
+      - MONGO_DB=${MONGO_DB:-socialmediadb}
+      - REDIS_SERVER=redis
+      - REDIS_PORT=6379
+      - RABBITMQ_SERVER=rabbitmq
+      - RABBITMQ_USER=${RABBITMQ_USER:-rabbitmquser}
+      - RABBITMQ_PASSWORD=${RABBITMQ_PASSWORD:-rabbitmqpassword}
+      - KAFKA_BOOTSTRAP_SERVERS=kafka:9092
 
     healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:8000/api/v1/utils/health-check/"]
+      test: [ "CMD", "curl", "-f", "http://localhost:8000/api/v1/utils/health-check/" ]
       interval: 10s
       timeout: 5s
       retries: 5
@@ -133,6 +263,97 @@ services:
 
       # Enable redirection for HTTP and HTTPS
       - traefik.http.routers.${STACK_NAME?Variable not set}-backend-http.middlewares=https-redirect
+
+  # Celery Worker for background task processing
+  celery-worker:
+    image: '${DOCKER_IMAGE_BACKEND?Variable not set}:${TAG-latest}'
+    restart: always
+    networks:
+      - traefik-public
+      - default
+    depends_on:
+      db:
+        condition: service_healthy
+        restart: true
+      mongodb:
+        condition: service_healthy
+        restart: true
+      redis:
+        condition: service_healthy
+        restart: true
+      rabbitmq:
+        condition: service_healthy
+        restart: true
+    command: celery -A app.tasks.worker worker --loglevel=info --concurrency=2
+    env_file:
+      - .env
+    environment:
+      - DOMAIN=${DOMAIN}
+      - ENVIRONMENT=${ENVIRONMENT}
+      - SECRET_KEY=${SECRET_KEY?Variable not set}
+      - POSTGRES_SERVER=db
+      - POSTGRES_PORT=${POSTGRES_PORT}
+      - POSTGRES_DB=${POSTGRES_DB}
+      - POSTGRES_USER=${POSTGRES_USER?Variable not set}
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD?Variable not set}
+      - SENTRY_DSN=${SENTRY_DSN}
+      - MONGO_SERVER=mongodb
+      - MONGO_USER=${MONGO_USER:-mongouser}
+      - MONGO_PASSWORD=${MONGO_PASSWORD:-mongopassword}
+      - MONGO_DB=${MONGO_DB:-socialmediadb}
+      - REDIS_SERVER=redis
+      - REDIS_PORT=6379
+      - RABBITMQ_SERVER=rabbitmq
+      - RABBITMQ_USER=${RABBITMQ_USER:-rabbitmquser}
+      - RABBITMQ_PASSWORD=${RABBITMQ_PASSWORD:-rabbitmqpassword}
+      - KAFKA_BOOTSTRAP_SERVERS=kafka:9092
+      - C_FORCE_ROOT=true
+
+  # Celery Beat for scheduled tasks
+  celery-beat:
+    image: '${DOCKER_IMAGE_BACKEND?Variable not set}:${TAG-latest}'
+    restart: always
+    networks:
+      - traefik-public
+      - default
+    depends_on:
+      db:
+        condition: service_healthy
+        restart: true
+      mongodb:
+        condition: service_healthy
+        restart: true
+      redis:
+        condition: service_healthy
+        restart: true
+      rabbitmq:
+        condition: service_healthy
+        restart: true
+      celery-worker:
+        condition: service_started
+    command: celery -A app.tasks.worker beat --loglevel=info
+    env_file:
+      - .env
+    environment:
+      - DOMAIN=${DOMAIN}
+      - ENVIRONMENT=${ENVIRONMENT}
+      - SECRET_KEY=${SECRET_KEY?Variable not set}
+      - POSTGRES_SERVER=db
+      - POSTGRES_PORT=${POSTGRES_PORT}
+      - POSTGRES_DB=${POSTGRES_DB}
+      - POSTGRES_USER=${POSTGRES_USER?Variable not set}
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD?Variable not set}
+      - SENTRY_DSN=${SENTRY_DSN}
+      - MONGO_SERVER=mongodb
+      - MONGO_USER=${MONGO_USER:-mongouser}
+      - MONGO_PASSWORD=${MONGO_PASSWORD:-mongopassword}
+      - MONGO_DB=${MONGO_DB:-socialmediadb}
+      - REDIS_SERVER=redis
+      - REDIS_PORT=6379
+      - RABBITMQ_SERVER=rabbitmq
+      - RABBITMQ_USER=${RABBITMQ_USER:-rabbitmquser}
+      - RABBITMQ_PASSWORD=${RABBITMQ_PASSWORD:-rabbitmqpassword}
+      - KAFKA_BOOTSTRAP_SERVERS=kafka:9092
 
   frontend:
     image: '${DOCKER_IMAGE_FRONTEND?Variable not set}:${TAG-latest}'
@@ -162,8 +383,15 @@ services:
 
       # Enable redirection for HTTP and HTTPS
       - traefik.http.routers.${STACK_NAME?Variable not set}-frontend-http.middlewares=https-redirect
+
 volumes:
   app-db-data:
+  mongodb-data:
+  redis-data:
+  rabbitmq-data:
+  zookeeper-data:
+  kafka-data:
+
 
 networks:
   traefik-public:

@@ -50,6 +50,93 @@ services:
     ports:
       - "5432:5432"
 
+  mongodb:
+    image: mongo:6
+    restart: "no"
+    ports:
+      - "27017:27017"
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: ${MONGO_USER:-mongo}
+      MONGO_INITDB_ROOT_PASSWORD: ${MONGO_PASSWORD:-mongo}
+      MONGO_INITDB_DATABASE: ${MONGODB_DATABASE:-political_analysis}
+    volumes:
+      - mongodb_data:/data/db
+    healthcheck:
+      test: echo 'db.runCommand("ping").ok' | mongosh localhost:27017/test --quiet
+      interval: 10s
+      timeout: 10s
+      retries: 5
+
+  redis:
+    image: redis:7-alpine
+    restart: "no"
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    healthcheck:
+      test: [ "CMD", "redis-cli", "ping" ]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  rabbitmq:
+    image: rabbitmq:3.12-management
+    restart: "no"
+    ports:
+      - "5672:5672" # AMQP port
+      - "15672:15672" # Management UI
+    environment:
+      - RABBITMQ_DEFAULT_USER=${RABBITMQ_USER:-guest}
+      - RABBITMQ_DEFAULT_PASS=${RABBITMQ_PASSWORD:-guest}
+    volumes:
+      - rabbitmq_data:/var/lib/rabbitmq
+    healthcheck:
+      test: [ "CMD", "rabbitmq-diagnostics", "check_port_connectivity" ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  zookeeper:
+    image: bitnami/zookeeper:latest
+    restart: "no"
+    ports:
+      - "2181:2181"
+    environment:
+      - ALLOW_ANONYMOUS_LOGIN=yes
+    volumes:
+      - zookeeper_data:/bitnami/zookeeper
+
+  kafka:
+    image: bitnami/kafka:3.4
+    restart: "no"
+    ports:
+      - "9092:9092"
+    environment:
+      - KAFKA_CFG_ZOOKEEPER_CONNECT=zookeeper:2181
+      - ALLOW_PLAINTEXT_LISTENER=yes
+      - KAFKA_CFG_LISTENER_SECURITY_PROTOCOL_MAP=CLIENT:PLAINTEXT,EXTERNAL:PLAINTEXT
+      - KAFKA_CFG_LISTENERS=CLIENT://:9093,EXTERNAL://:9092
+      - KAFKA_CFG_ADVERTISED_LISTENERS=CLIENT://kafka:9093,EXTERNAL://localhost:9092
+      - KAFKA_CFG_INTER_BROKER_LISTENER_NAME=CLIENT
+    volumes:
+      - kafka_data:/bitnami/kafka
+    depends_on:
+      - zookeeper
+
+  mongo-express:
+    image: mongo-express
+    restart: "no"
+    ports:
+      - "8081:8081"
+    environment:
+      ME_CONFIG_MONGODB_ADMINUSERNAME: ${MONGO_USER:-mongo}
+      ME_CONFIG_MONGODB_ADMINPASSWORD: ${MONGO_PASSWORD:-mongo}
+      ME_CONFIG_MONGODB_URL: mongodb://${MONGO_USER:-mongo}:${MONGO_PASSWORD:-mongo}@mongodb:27017/
+    depends_on:
+      mongodb:
+        condition: service_healthy
+
   adminer:
     restart: "no"
     ports:
@@ -85,6 +172,100 @@ services:
       SMTP_PORT: "1025"
       SMTP_TLS: "false"
       EMAILS_FROM_EMAIL: "noreply@example.com"
+      MONGODB_SERVER: "mongodb"
+      MONGODB_PORT: "27017"
+      MONGODB_USER: ${MONGO_USER:-mongo}
+      MONGODB_PASSWORD: ${MONGO_PASSWORD:-mongo}
+      MONGODB_DATABASE: ${MONGODB_DATABASE:-political_analysis}
+      REDIS_SERVER: "redis"
+      REDIS_PORT: "6379"
+    depends_on:
+      mongodb:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+
+  celery-worker:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile.celery
+    restart: "no"
+    command: celery -A app.tasks.celery_app worker --loglevel=info
+    volumes:
+      - ./backend:/app
+    environment:
+      MONGODB_SERVER: "mongodb"
+      MONGODB_PORT: "27017"
+      MONGODB_USER: ${MONGO_USER:-mongo}
+      MONGODB_PASSWORD: ${MONGO_PASSWORD:-mongo}
+      MONGODB_DATABASE: ${MONGODB_DATABASE:-political_analysis}
+      REDIS_SERVER: "redis"
+      REDIS_PORT: "6379"
+      RABBITMQ_SERVER: "rabbitmq"
+      RABBITMQ_USER: ${RABBITMQ_USER:-guest}
+      RABBITMQ_PASSWORD: ${RABBITMQ_PASSWORD:-guest}
+      KAFKA_BOOTSTRAP_SERVERS: "kafka:9093,localhost:9092"
+      CELERY_BROKER: "amqp://${RABBITMQ_USER:-guest}:${RABBITMQ_PASSWORD:-guest}@rabbitmq:5672//"
+    depends_on:
+      - backend
+      - redis
+      - mongodb
+      - rabbitmq
+
+  celery-beat:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile.celery
+    restart: "no"
+    command: celery -A app.tasks.celery_app beat --loglevel=info
+    volumes:
+      - ./backend:/app
+    environment:
+      MONGODB_SERVER: "mongodb"
+      MONGODB_PORT: "27017"
+      MONGODB_USER: ${MONGO_USER:-mongo}
+      MONGODB_PASSWORD: ${MONGO_PASSWORD:-mongo}
+      MONGODB_DATABASE: ${MONGODB_DATABASE:-political_analysis}
+      REDIS_SERVER: "redis"
+      REDIS_PORT: "6379"
+      RABBITMQ_SERVER: "rabbitmq"
+      RABBITMQ_USER: ${RABBITMQ_USER:-guest}
+      RABBITMQ_PASSWORD: ${RABBITMQ_PASSWORD:-guest}
+      KAFKA_BOOTSTRAP_SERVERS: "kafka:9093,localhost:9092"
+      CELERY_BROKER: "amqp://${RABBITMQ_USER:-guest}:${RABBITMQ_PASSWORD:-guest}@rabbitmq:5672//"
+    depends_on:
+      - celery-worker
+
+  celery-flower:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile.celery
+    restart: "no"
+    command: celery flower --broker=amqp://${RABBITMQ_USER:-guest}:${RABBITMQ_PASSWORD:-guest}@rabbitmq:5672// --port=5555
+    ports:
+      - "5555:5555"
+    environment:
+      MONGODB_SERVER: "mongodb"
+      MONGODB_PORT: "27017"
+      MONGODB_USER: ${MONGO_USER:-mongo}
+      MONGODB_PASSWORD: ${MONGO_PASSWORD:-mongo}
+      MONGODB_DATABASE: ${MONGODB_DATABASE:-political_analysis}
+      REDIS_SERVER: "redis"
+      REDIS_PORT: "6379"
+      RABBITMQ_SERVER: "rabbitmq"
+      RABBITMQ_USER: ${RABBITMQ_USER:-guest}
+      RABBITMQ_PASSWORD: ${RABBITMQ_PASSWORD:-guest}
+      CELERY_BROKER: "amqp://${RABBITMQ_USER:-guest}:${RABBITMQ_PASSWORD:-guest}@rabbitmq:5672//"
+      PROJECT_NAME: "Political Social Media Analysis Platform"
+      POSTGRES_SERVER: "db"
+      POSTGRES_PORT: "5432"
+      POSTGRES_DB: "app"
+      POSTGRES_USER: "postgres"
+      POSTGRES_PASSWORD: "changethis"
+      FIRST_SUPERUSER: "admin@example.com"
+      FIRST_SUPERUSER_PASSWORD: "password"
+    depends_on:
+      - celery-worker
 
   mailcatcher:
     image: schickling/mailcatcher
@@ -131,3 +312,10 @@ networks:
   traefik-public:
     # For local dev, don't expect an external Traefik network
     external: false
+
+volumes:
+  mongodb_data:
+  redis_data:
+  rabbitmq_data:
+  zookeeper_data:
+  kafka_data:
