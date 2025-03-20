@@ -1,0 +1,31 @@
+# File: .github/workflows/template-sync.yml
+name: Sync Template Updates
+
+on:
+    # cronjob trigger
+  schedule:
+  - cron:  "0 0 * * *"
+  # manual trigger
+  workflow_dispatch:
+jobs:
+  repo-sync:
+    runs-on: ubuntu-latest
+    # https://docs.github.com/en/actions/using-jobs/assigning-permissions-to-jobs
+    permissions:
+      contents: write
+      pull-requests: write
+
+    steps:
+      # To use this repository's private action, you must check out the repository
+      - name: Checkout
+        uses: actions/checkout@v4
+        # https://github.com/actions/checkout#usage
+        # uncomment if you use submodules within the repository
+        # with:
+        #   submodules: true
+
+      - name: actions-template-sync
+        uses: AndreasAugustin/actions-template-sync@v2
+        with:
+          source_repo_path: ebetancourt/full-stack-fastapi-template
+          upstream_branch: master
