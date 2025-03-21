@@ -1,6 +1,6 @@
 services:
   traefik:
-    image: traefik:3.0
+    image: traefik:3.3
     ports:
       # Listen on port 80, default for HTTP, necessary to redirect to HTTPS
       - 80:80
@@ -11,7 +11,7 @@ services:
       # Enable Traefik for this service, to make it available in the public network
       - traefik.enable=true
       # Use the traefik-public network (declared below)
-      - traefik.docker.network=traefik-public
+      - traefik.swarm.network=traefik-public
       # Define the port inside of the Docker service to use
       - traefik.http.services.traefik-dashboard.loadbalancer.server.port=8080
       # Make Traefik use this domain (from an environment variable) in HTTP
