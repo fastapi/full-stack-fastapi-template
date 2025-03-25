@@ -1,6 +1,14 @@
 import uuid
 from typing import Any
 
+
+from fastapi import APIRouter, HTTPException, Depends
+from app.models import User, UserRole
+from app.core.security import hash_password
+from app.core.db import SessionDep
+
+router = APIRouter()
+
 from fastapi import APIRouter, Depends, HTTPException
 from sqlmodel import col, delete, func, select
 
@@ -226,3 +234,17 @@ def delete_user(
     session.delete(user)
     session.commit()
     return Message(message="User deleted successfully")
+def register_user(
+    email: str,
+    password: str,
+    role: UserRole = UserRole.USER,  # Allow specifying role (default: user)
+    session: SessionDep = Depends(),
+):
+    existing_user = session.query(User).filter(User.email == email).first()
+    if existing_user:
+        raise HTTPException(status_code=400, detail="Email already registered")
+    
+    user = User(email=email, hashed_password=hash_password(password), role=role)
+    session.add(user)
+    session.commit()
+    return {"message": "User created successfully", "role": user.role}

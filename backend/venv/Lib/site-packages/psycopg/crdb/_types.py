@@ -1,0 +1,200 @@
+"""
+Types configuration specific for CockroachDB.
+"""
+
+# Copyright (C) 2022 The Psycopg Team
+
+from enum import Enum
+
+from ..abc import AdaptContext, NoneType
+from .._oids import TEXT_OID
+from .._typemod import BitTypeModifier, CharTypeModifier, NumericTypeModifier
+from .._typemod import TimeTypeModifier
+from .._typeinfo import TypeInfo, TypesRegistry
+from ..types.enum import EnumBinaryDumper, EnumDumper
+from ..types.none import NoneDumper
+from .._adapters_map import AdaptersMap
+
+types = TypesRegistry()
+
+# Global adapter maps with PostgreSQL types configuration
+adapters = AdaptersMap(types=types)
+
+
+class CrdbEnumDumper(EnumDumper):
+    oid = TEXT_OID
+
+
+class CrdbEnumBinaryDumper(EnumBinaryDumper):
+    oid = TEXT_OID
+
+
+class CrdbNoneDumper(NoneDumper):
+    oid = TEXT_OID
+
+
+def register_crdb_adapters(context: AdaptContext) -> None:
+    from .. import dbapi20
+    from ..types import array
+
+    _register_postgres_adapters(context)
+
+    # String must come after enum and none to map text oid -> string dumper
+    _register_crdb_none_adapters(context)
+    _register_crdb_enum_adapters(context)
+    _register_crdb_string_adapters(context)
+    _register_crdb_json_adapters(context)
+    _register_crdb_net_adapters(context)
+
+    dbapi20.register_dbapi20_adapters(adapters)
+
+    array.register_all_arrays(adapters)
+
+
+def _register_postgres_adapters(context: AdaptContext) -> None:
+    # Same adapters used by PostgreSQL, or a good starting point for customization
+
+    from ..types import array, bool, composite, datetime, numeric, numpy, string, uuid
+
+    array.register_default_adapters(context)
+    composite.register_default_adapters(context)
+    datetime.register_default_adapters(context)
+    string.register_default_adapters(context)
+    uuid.register_default_adapters(context)
+
+    # Both numpy Decimal and uint64 dumpers use the numeric oid, but the former
+    # covers the entire numeric domain, whereas the latter only deals with
+    # integers. For this reason, if we specify dumpers by oid, we want to make
+    # sure to get the Decimal dumper. We enforce that by registering the
+    # numeric dumpers last.
+    numpy.register_default_adapters(context)
+    bool.register_default_adapters(context)
+    numeric.register_default_adapters(context)
+
+
+def _register_crdb_string_adapters(context: AdaptContext) -> None:
+    from ..types import string
+
+    # Dump strings with text oid instead of unknown.
+    # Unlike PostgreSQL, CRDB seems able to cast text to most types.
+    context.adapters.register_dumper(str, string.StrDumper)
+    context.adapters.register_dumper(str, string.StrBinaryDumper)
+
+
+def _register_crdb_enum_adapters(context: AdaptContext) -> None:
+    context.adapters.register_dumper(Enum, CrdbEnumBinaryDumper)
+    context.adapters.register_dumper(Enum, CrdbEnumDumper)
+
+
+def _register_crdb_json_adapters(context: AdaptContext) -> None:
+    from ..types import json
+
+    adapters = context.adapters
+
+    # CRDB doesn't have json/jsonb: both names map to the jsonb oid
+    adapters.register_dumper(json.Json, json.JsonbBinaryDumper)
+    adapters.register_dumper(json.Json, json.JsonbDumper)
+
+    adapters.register_dumper(json.Jsonb, json.JsonbBinaryDumper)
+    adapters.register_dumper(json.Jsonb, json.JsonbDumper)
+
+    adapters.register_loader("json", json.JsonLoader)
+    adapters.register_loader("jsonb", json.JsonbLoader)
+    adapters.register_loader("json", json.JsonBinaryLoader)
+    adapters.register_loader("jsonb", json.JsonbBinaryLoader)
+
+
+def _register_crdb_net_adapters(context: AdaptContext) -> None:
+    from ..types import net
+
+    adapters = context.adapters
+
+    adapters.register_dumper("ipaddress.IPv4Address", net.InterfaceDumper)
+    adapters.register_dumper("ipaddress.IPv6Address", net.InterfaceDumper)
+    adapters.register_dumper("ipaddress.IPv4Interface", net.InterfaceDumper)
+    adapters.register_dumper("ipaddress.IPv6Interface", net.InterfaceDumper)
+    adapters.register_dumper("ipaddress.IPv4Address", net.AddressBinaryDumper)
+    adapters.register_dumper("ipaddress.IPv6Address", net.AddressBinaryDumper)
+    adapters.register_dumper("ipaddress.IPv4Interface", net.InterfaceBinaryDumper)
+    adapters.register_dumper("ipaddress.IPv6Interface", net.InterfaceBinaryDumper)
+    adapters.register_dumper(None, net.InetBinaryDumper)
+    adapters.register_loader("inet", net.InetLoader)
+    adapters.register_loader("inet", net.InetBinaryLoader)
+
+
+def _register_crdb_none_adapters(context: AdaptContext) -> None:
+    context.adapters.register_dumper(NoneType, CrdbNoneDumper)
+
+
+def register_crdb_types(types: TypesRegistry) -> None:
+    for t in [
+        TypeInfo("json", 3802, 3807, regtype="jsonb"),  # Alias json -> jsonb.
+        TypeInfo("int8", 20, 1016, regtype="integer"),  # Alias integer -> int8
+        TypeInfo('"char"', 18, 1002),  # special case, not generated
+        # autogenerated: start
+        # Generated from CockroachDB 23.1.10
+        TypeInfo("bit", 1560, 1561, typemod=BitTypeModifier),
+        TypeInfo("bool", 16, 1000, regtype="boolean"),
+        TypeInfo("bpchar", 1042, 1014, regtype="character", typemod=CharTypeModifier),
+        TypeInfo("bytea", 17, 1001),
+        TypeInfo("date", 1082, 1182),
+        TypeInfo("float4", 700, 1021, regtype="real"),
+        TypeInfo("float8", 701, 1022, regtype="double precision"),
+        TypeInfo("inet", 869, 1041),
+        TypeInfo("int2", 21, 1005, regtype="smallint"),
+        TypeInfo("int2vector", 22, 1006),
+        TypeInfo("int4", 23, 1007),
+        TypeInfo("int8", 20, 1016, regtype="bigint"),
+        TypeInfo("interval", 1186, 1187, typemod=TimeTypeModifier),
+        TypeInfo("jsonb", 3802, 3807),
+        TypeInfo("name", 19, 1003),
+        TypeInfo("numeric", 1700, 1231, typemod=NumericTypeModifier),
+        TypeInfo("oid", 26, 1028),
+        TypeInfo("oidvector", 30, 1013),
+        TypeInfo("record", 2249, 2287),
+        TypeInfo("regclass", 2205, 2210),
+        TypeInfo("regnamespace", 4089, 4090),
+        TypeInfo("regproc", 24, 1008),
+        TypeInfo("regprocedure", 2202, 2207),
+        TypeInfo("regrole", 4096, 4097),
+        TypeInfo("regtype", 2206, 2211),
+        TypeInfo("text", 25, 1009),
+        TypeInfo(
+            "time",
+            1083,
+            1183,
+            regtype="time without time zone",
+            typemod=TimeTypeModifier,
+        ),
+        TypeInfo(
+            "timestamp",
+            1114,
+            1115,
+            regtype="timestamp without time zone",
+            typemod=TimeTypeModifier,
+        ),
+        TypeInfo(
+            "timestamptz",
+            1184,
+            1185,
+            regtype="timestamp with time zone",
+            typemod=TimeTypeModifier,
+        ),
+        TypeInfo(
+            "timetz",
+            1266,
+            1270,
+            regtype="time with time zone",
+            typemod=TimeTypeModifier,
+        ),
+        TypeInfo("tsquery", 3615, 3645),
+        TypeInfo("tsvector", 3614, 3643),
+        TypeInfo("unknown", 705, 0),
+        TypeInfo("uuid", 2950, 2951),
+        TypeInfo("varbit", 1562, 1563, regtype="bit varying", typemod=BitTypeModifier),
+        TypeInfo(
+            "varchar", 1043, 1015, regtype="character varying", typemod=CharTypeModifier
+        ),
+        # autogenerated: end
+    ]:
+        types.add(t)

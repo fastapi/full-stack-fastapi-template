@@ -1,0 +1,70 @@
+Metadata-Version: 2.1
+Name: emails
+Version: 0.6
+Summary: Modern python library for emails.
+Home-page: https://github.com/lavr/python-emails
+Author: Sergey Lavrinenko
+Author-email: s@lavr.me
+License: UNKNOWN
+Platform: UNKNOWN
+Classifier: Development Status :: 4 - Beta
+Classifier: Intended Audience :: Developers
+Classifier: Natural Language :: English
+Classifier: License :: OSI Approved :: BSD License
+Classifier: Operating System :: OS Independent
+Classifier: Programming Language :: Python
+Classifier: Programming Language :: Python :: 2
+Classifier: Programming Language :: Python :: 2.6
+Classifier: Programming Language :: Python :: 2.7
+Classifier: Programming Language :: Python :: 3
+Classifier: Programming Language :: Python :: 3.3
+Classifier: Programming Language :: Python :: 3.4
+Classifier: Programming Language :: Python :: 3.5
+Classifier: Programming Language :: Python :: 3.6
+Classifier: Topic :: Communications
+Classifier: Topic :: Internet :: WWW/HTTP
+Classifier: Topic :: Other/Nonlisted Topic
+Classifier: Topic :: Software Development :: Libraries :: Python Modules
+Description-Content-Type: text/markdown
+Requires-Dist: cssutils
+Requires-Dist: lxml
+Requires-Dist: chardet
+Requires-Dist: python-dateutil
+Requires-Dist: requests
+Requires-Dist: premailer
+
+python-emails
+~~~~~~~~~~~~~
+
+Modern python library for email.
+
+Build message:
+
+   >>> import emails
+   >>> message = emails.html(html="<p>Hi!<br>Here is your receipt...",
+                          subject="Your receipt No. 567098123",
+                          mail_from=('Some Store', 'store@somestore.com'))
+   >>> message.attach(data=open('bill.pdf'), filename='bill.pdf')
+
+send message and get response from smtp server:
+
+   >>> r = message.send(to='s@lavr.me', smtp={'host': 'aspmx.l.google.com', 'timeout': 5})
+   >>> assert r.status_code == 250
+
+and more:
+
+ * DKIM signature
+ * Render body from template
+ * Flask extension and Django integration
+ * Message body transformation methods
+ * Load message from url or from file
+
+
+Links
+`````
+
+* `documentation <http://python-emails.readthedocs.org/>`_
+* `source code <http://github.com/lavr/python-emails>`_
+
+
+

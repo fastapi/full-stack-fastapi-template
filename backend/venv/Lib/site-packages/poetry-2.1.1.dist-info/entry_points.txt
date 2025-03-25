@@ -1,0 +1,3 @@
+[console_scripts]
+poetry=poetry.console.application:main
+

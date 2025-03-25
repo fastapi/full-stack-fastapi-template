@@ -1,0 +1,4 @@
+[pyinstaller40]
+hook-dirs = rapidfuzz.__pyinstaller:get_hook_dirs
+tests = rapidfuzz.__pyinstaller:get_PyInstaller_tests
+

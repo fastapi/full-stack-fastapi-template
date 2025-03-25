@@ -45,6 +45,11 @@ class User(UserBase, table=True):
     hashed_password: str
     items: list["Item"] = Relationship(back_populates="owner", cascade_delete=True)
 
+    class UserRole(str, Enum):
+        USER = "user"
+    ADMIN = "admin"
+    MODERATOR = "moderator"
+
 
 # Properties to return via API, id is always required
 class UserPublic(UserBase):
@@ -112,3 +117,5 @@ class TokenPayload(SQLModel):
 class NewPassword(SQLModel):
     token: str
     new_password: str = Field(min_length=8, max_length=40)
+
+
