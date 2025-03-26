@@ -1,0 +1,70 @@
+Metadata-Version: 2.2
+Name: psycopg-binary
+Version: 3.2.6
+Summary: PostgreSQL database adapter for Python -- C optimisation distribution
+Home-page: https://psycopg.org/psycopg3/
+Author: Daniele Varrazzo
+Author-email: daniele.varrazzo@gmail.com
+License: GNU Lesser General Public License v3 (LGPLv3)
+Project-URL: Homepage, https://psycopg.org/
+Project-URL: Documentation, https://psycopg.org/psycopg3/docs/
+Project-URL: Changes, https://psycopg.org/psycopg3/docs/news.html
+Project-URL: Code, https://github.com/psycopg/psycopg
+Project-URL: Issue Tracker, https://github.com/psycopg/psycopg/issues
+Project-URL: Download, https://pypi.org/project/psycopg-binary/
+Classifier: Development Status :: 5 - Production/Stable
+Classifier: Intended Audience :: Developers
+Classifier: License :: OSI Approved :: GNU Lesser General Public License v3 (LGPLv3)
+Classifier: Operating System :: MacOS :: MacOS X
+Classifier: Operating System :: Microsoft :: Windows
+Classifier: Operating System :: POSIX
+Classifier: Programming Language :: Cython
+Classifier: Programming Language :: Python :: 3
+Classifier: Programming Language :: Python :: 3.8
+Classifier: Programming Language :: Python :: 3.9
+Classifier: Programming Language :: Python :: 3.10
+Classifier: Programming Language :: Python :: 3.11
+Classifier: Programming Language :: Python :: 3.12
+Classifier: Programming Language :: Python :: 3.13
+Classifier: Programming Language :: Python :: Implementation :: CPython
+Classifier: Topic :: Database
+Classifier: Topic :: Database :: Front-Ends
+Classifier: Topic :: Software Development
+Classifier: Topic :: Software Development :: Libraries :: Python Modules
+Requires-Python: >=3.8
+Description-Content-Type: text/x-rst
+License-File: LICENSE.txt
+
+Psycopg 3: PostgreSQL database adapter for Python - binary package
+==================================================================
+
+This distribution package is an optional component of `Psycopg 3`__: it
+contains the optional optimization package `psycopg_binary`__.
+
+.. __: https://pypi.org/project/psycopg/
+.. __: https://www.psycopg.org/psycopg3/docs/basic/install.html
+       #binary-installation
+
+You shouldn't install this package directly: use instead ::
+
+    pip install "psycopg[binary]"
+
+to install a version of the optimization package matching the ``psycopg``
+version installed.
+
+Installing this package requires pip >= 20.3 or newer installed.
+
+This package is not available for every platform: check out `Binary
+installation`__ in the documentation.
+
+.. __: https://www.psycopg.org/psycopg3/docs/basic/install.html
+       #binary-installation
+
+Please read `the project readme`__ and `the installation documentation`__ for
+more details.
+
+.. __: https://github.com/psycopg/psycopg#readme
+.. __: https://www.psycopg.org/psycopg3/docs/basic/install.html
+
+
+Copyright (C) 2020 The Psycopg Team

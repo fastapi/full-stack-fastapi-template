@@ -1,0 +1,472 @@
+Metadata-Version: 2.1
+Name: cleo
+Version: 2.1.0
+Summary: Cleo allows you to create beautiful and testable command-line interfaces.
+Home-page: https://github.com/python-poetry/cleo
+License: MIT
+Keywords: cli,commands
+Author: Sébastien Eustace
+Author-email: sebastien@eustace.io
+Maintainer: Branch Vincent
+Maintainer-email: branchevincent@gmail.com
+Requires-Python: >=3.7,<4.0
+Classifier: Development Status :: 5 - Production/Stable
+Classifier: Environment :: Console
+Classifier: Intended Audience :: Developers
+Classifier: Intended Audience :: Information Technology
+Classifier: Intended Audience :: System Administrators
+Classifier: License :: OSI Approved :: MIT License
+Classifier: Operating System :: OS Independent
+Classifier: Programming Language :: Python :: 3
+Classifier: Programming Language :: Python :: 3.7
+Classifier: Programming Language :: Python :: 3.8
+Classifier: Programming Language :: Python :: 3.9
+Classifier: Programming Language :: Python :: 3.10
+Classifier: Programming Language :: Python :: 3.11
+Classifier: Topic :: Software Development
+Classifier: Topic :: Software Development :: Libraries
+Classifier: Topic :: Software Development :: Libraries :: Application Frameworks
+Classifier: Topic :: Software Development :: Libraries :: Python Modules
+Requires-Dist: crashtest (>=0.4.1,<0.5.0)
+Requires-Dist: rapidfuzz (>=3.0.0,<4.0.0)
+Project-URL: Repository, https://github.com/python-poetry/cleo
+Description-Content-Type: text/markdown
+
+# Cleo
+
+[![Poetry](https://img.shields.io/endpoint?url=https://python-poetry.org/badge/v0.json)](https://python-poetry.org/)
+[![Tests](https://github.com/python-poetry/cleo/actions/workflows/tests.yml/badge.svg)](https://github.com/python-poetry/cleo/actions/workflows/tests.yml)
+[![PyPI version](https://img.shields.io/pypi/v/cleo)](https://pypi.org/project/cleo/)
+
+Create beautiful and testable command-line interfaces.
+
+## Resources
+
+- [Documentation](http://cleo.readthedocs.io)
+- [Issue Tracker](https://github.com/python-poetry/cleo/issues)
+
+## Usage
+
+To make a command that greets you from the command line, create
+`greet_command.py` and add the following to it:
+
+```python
+from cleo.commands.command import Command
+from cleo.helpers import argument, option
+
+class GreetCommand(Command):
+    name = "greet"
+    description = "Greets someone"
+    arguments = [
+        argument(
+            "name",
+            description="Who do you want to greet?",
+            optional=True
+        )
+    ]
+    options = [
+        option(
+            "yell",
+            "y",
+            description="If set, the task will yell in uppercase letters",
+            flag=True
+        )
+    ]
+
+    def handle(self):
+        name = self.argument("name")
+
+        if name:
+            text = f"Hello {name}"
+        else:
+            text = "Hello"
+
+        if self.option("yell"):
+            text = text.upper()
+
+        self.line(text)
+```
+
+You also need to create the file `application.py` to run at the command line which
+creates an `Application` and adds commands to it:
+
+```python
+#!/usr/bin/env python
+
+from greet_command import GreetCommand
+
+from cleo.application import Application
+
+
+application = Application()
+application.add(GreetCommand())
+
+if __name__ == "__main__":
+    application.run()
+```
+
+Test the new command by running the following
+
+```bash
+$ python application.py greet John
+```
+
+This will print the following to the command line:
+
+```text
+Hello John
+```
+
+You can also use the `--yell` option to make everything uppercase:
+
+```bash
+$ python application.py greet John --yell
+```
+
+This prints:
+
+```text
+HELLO JOHN
+```
+
+
+### Coloring the Output
+
+Whenever you output text, you can surround the text with tags to color
+its output. For example:
+
+```python
+# blue text
+self.line("<info>foo</info>")
+
+# green text
+self.line("<comment>foo</comment>")
+
+# cyan text
+self.line("<question>foo</question>")
+
+# bold red text
+self.line("<error>foo</error>")
+```
+
+The closing tag can be replaced by `</>`, which revokes all formatting
+options established by the last opened tag.
+
+It is possible to define your own styles using the `add_style()` method:
+
+```python
+self.add_style("fire", fg="red", bg="yellow", options=["bold", "blink"])
+self.line("<fire>foo</fire>")
+```
+
+Available foreground and background colors are: `black`, `red`, `green`,
+`yellow`, `blue`, `magenta`, `cyan` and `white`.
+
+And available options are: `bold`, `underscore`, `blink`, `reverse` and
+`conceal`.
+
+You can also set these colors and options inside the tag name:
+
+```python
+# green text
+self.line("<fg=green>foo</>")
+
+# black text on a cyan background
+self.line("<fg=black;bg=cyan>foo</>")
+
+# bold text on a yellow background
+self.line("<bg=yellow;options=bold>foo</>")
+```
+
+### Verbosity Levels
+
+Cleo has four verbosity levels. These are defined in the `Output` class:
+
+| Mode                     | Meaning                            | Console option    |
+| ------------------------ | ---------------------------------- | ----------------- |
+| `Verbosity.QUIET`        | Do not output any messages         | `-q` or `--quiet` |
+| `Verbosity.NORMAL`       | The default verbosity level        | (none)            |
+| `Verbosity.VERBOSE`      | Increased verbosity of messages    | `-v`              |
+| `Verbosity.VERY_VERBOSE` | Informative non essential messages | `-vv`             |
+| `Verbosity.DEBUG`        | Debug messages                     | `-vvv`            |
+
+It is possible to print a message in a command for only a specific
+verbosity level. For example:
+
+```python
+if Verbosity.VERBOSE <= self.io.verbosity:
+    self.line(...)
+```
+
+There are also more semantic methods you can use to test for each of the
+verbosity levels:
+
+```python
+if self.output.is_quiet():
+    # ...
+
+if self.output.is_verbose():
+    # ...
+```
+
+You can also pass the verbosity flag directly to `line()`.
+
+```python
+self.line("", verbosity=Verbosity.VERBOSE)
+```
+
+When the quiet level is used, all output is suppressed.
+
+### Using Arguments
+
+The most interesting part of the commands are the arguments and options
+that you can make available. Arguments are the strings - separated by
+spaces - that come after the command name itself. They are ordered, and
+can be optional or required. For example, add an optional `last_name`
+argument to the command and make the `name` argument required:
+
+```python
+class GreetCommand(Command):
+    name = "greet"
+    description = "Greets someone"
+    arguments = [
+        argument(
+            "name",
+            description="Who do you want to greet?",
+        ),
+        argument(
+            "last_name",
+            description="Your last name?",
+            optional=True
+        )
+    ]
+    options = [
+        option(
+            "yell",
+            "y",
+            description="If set, the task will yell in uppercase letters",
+            flag=True
+        )
+    ]
+```
+
+You now have access to a `last_name` argument in your command:
+
+```python
+last_name = self.argument("last_name")
+if last_name:
+    text += f" {last_name}"
+```
+
+The command can now be used in either of the following ways:
+
+```bash
+$ python application.py greet John
+$ python application.py greet John Doe
+```
+
+It is also possible to let an argument take a list of values (imagine
+you want to greet all your friends). For this it must be specified at
+the end of the argument list:
+
+```python
+class GreetCommand(Command):
+    name = "greet"
+    description = "Greets someone"
+    arguments = [
+        argument(
+            "names",
+            description="Who do you want to greet?",
+            multiple=True
+        )
+    ]
+    options = [
+        option(
+            "yell",
+            "y",
+            description="If set, the task will yell in uppercase letters",
+            flag=True
+        )
+    ]
+```
+
+To use this, just specify as many names as you want:
+
+```bash
+$ python application.py greet John Jane
+```
+
+You can access the `names` argument as a list:
+
+```python
+names = self.argument("names")
+if names:
+    text = "Hello " + ", ".join(names)
+```
+
+
+### Using Options
+
+Unlike arguments, options are not ordered (meaning you can specify them
+in any order) and are specified with two dashes (e.g. `--yell` - you can
+also declare a one-letter shortcut that you can call with a single dash
+like `-y`). Options are _always_ optional, and can be setup to accept a
+value (e.g. `--dir=src`) or simply as a boolean flag without a value
+(e.g. `--yell`).
+
+> _Tip_: It is also possible to make an option _optionally_ accept a value (so
+> that `--yell` or `--yell=loud` work). Options can also be configured to
+> accept a list of values.
+
+For example, add a new option to the command that can be used to specify
+how many times in a row the message should be printed:
+
+```python
+class GreetCommand(Command):
+    name = "greet"
+    description = "Greets someone"
+    arguments = [
+        argument(
+            "name",
+            description="Who do you want to greet?",
+            optional=True
+        )
+    ]
+    options = [
+        option(
+            "yell",
+            "y",
+            description="If set, the task will yell in uppercase letters",
+            flag=True
+        ),
+        option(
+            "iterations",
+            description="How many times should the message be printed?",
+            default=1
+        )
+    ]
+```
+
+Next, use this in the command to print the message multiple times:
+
+```python
+for _ in range(int(self.option("iterations"))):
+    self.line(text)
+```
+
+Now, when you run the task, you can optionally specify a `--iterations`
+flag:
+
+```bash
+$ python application.py greet John
+$ python application.py greet John --iterations=5
+```
+
+The first example will only print once, since `iterations` is empty and
+defaults to `1`. The second example will print five times.
+
+Recall that options don\'t care about their order. So, either of the
+following will work:
+
+```bash
+$ python application.py greet John --iterations=5 --yell
+$ python application.py greet John --yell --iterations=5
+```
+
+
+### Testing Commands
+
+Cleo provides several tools to help you test your commands. The most
+useful one is the `CommandTester` class. It uses a special IO class to
+ease testing without a real console:
+
+```python
+from greet_command import GreetCommand
+
+from cleo.application import Application
+from cleo.testers.command_tester import CommandTester
+
+
+def test_execute():
+    application = Application()
+    application.add(GreetCommand())
+
+    command = application.find("greet")
+    command_tester = CommandTester(command)
+    command_tester.execute()
+
+    assert "..." == command_tester.io.fetch_output()
+```
+
+The `CommandTester.io.fetch_output()` method returns what would have
+been displayed during a normal call from the console.
+`CommandTester.io.fetch_error()` is also available to get what you have
+been written to the stderr.
+
+You can test sending arguments and options to the command by passing
+them as a string to the `CommandTester.execute()` method:
+
+```python
+from greet_command import GreetCommand
+
+from cleo.application import Application
+from cleo.testers.command_tester import CommandTester
+
+
+def test_execute():
+    application = Application()
+    application.add(GreetCommand())
+
+    command = application.find("greet")
+    command_tester = CommandTester(command)
+    command_tester.execute("John")
+
+    assert "John" in command_tester.io.fetch_output()
+```
+
+You can also test a whole console application by using the
+`ApplicationTester` class.
+
+### Calling an existing Command
+
+If a command depends on another one being run before it, instead of
+asking the user to remember the order of execution, you can call it
+directly yourself. This is also useful if you want to create a \"meta\"
+command that just runs a bunch of other commands.
+
+Calling a command from another one is straightforward:
+
+```python
+def handle(self):
+    return_code = self.call("greet", "John --yell")
+    return return_code
+```
+
+If you want to suppress the output of the executed command, you can use
+the `call_silent()` method instead.
+
+### Autocompletion
+
+Cleo supports automatic (tab) completion in `bash`, `zsh` and `fish`.
+
+By default, your application will have a `completions` command. To register these completions for your application, run one of the following in a terminal (replacing `[program]` with the command you use to run your application):
+
+```bash
+# Bash
+[program] completions bash | sudo tee /etc/bash_completion.d/[program].bash-completion
+
+# Bash - macOS/Homebrew (requires `brew install bash-completion`)
+[program] completions bash > $(brew --prefix)/etc/bash_completion.d/[program].bash-completion
+
+# Zsh
+mkdir ~/.zfunc
+echo "fpath+=~/.zfunc" >> ~/.zshrc
+[program] completions zsh > ~/.zfunc/_[program]
+
+# Zsh - macOS/Homebrew
+[program] completions zsh > $(brew --prefix)/share/zsh/site-functions/_[program]
+
+# Fish
+[program] completions fish > ~/.config/fish/completions/[program].fish
+```
+

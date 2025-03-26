@@ -1,0 +1,338 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "name": "project",
+  "type": "object",
+  "additionalProperties": true,
+  "required": [
+    "name"
+  ],
+  "properties": {
+    "name": {
+      "title": "Project name",
+      "type": "string",
+      "pattern": "^([a-zA-Z\\d]|[a-zA-Z\\d][\\w.-]*[a-zA-Z\\d])$"
+    },
+    "version": {
+      "title": "Project version",
+      "type": "string",
+      "pattern": "^v?((([0-9]+)!)?([0-9]+(\\.[0-9]+)*)([-_\\.]?(alpha|a|beta|b|preview|pre|c|rc)[-_\\.]?([0-9]+)?)?((-([0-9]+))|([-_\\.]?(post|rev|r)[-_\\.]?([0-9]+)?))?([-_\\.]?(dev)[-_\\.]?([0-9]+)?)?)(\\+([a-z0-9]+([-_\\.][a-z0-9]+)*))?$",
+      "examples": [
+        "42.0.1",
+        "0.3.9rc7.post0.dev5"
+      ]
+    },
+    "description": {
+      "title": "Project summary description",
+      "type": "string"
+    },
+    "readme": {
+      "title": "Project full description",
+      "description": "AKA the README",
+      "oneOf": [
+        {
+          "title": "README file path",
+          "type": "string"
+        },
+        {
+          "type": "object",
+          "required": [
+            "content-type"
+          ],
+          "properties": {
+            "content-type": {
+              "title": "README text content-type",
+              "description": "RFC 1341 compliant content-type (with optional charset, defaulting to UTF-8)",
+              "type": "string"
+            }
+          },
+          "oneOf": [
+            {
+              "additionalProperties": false,
+              "required": [
+                "file"
+              ],
+              "properties": {
+                "content-type": true,
+                "file": {
+                  "title": "README file path",
+                  "type": "string"
+                }
+              }
+            },
+            {
+              "additionalProperties": false,
+              "required": [
+                "text"
+              ],
+              "properties": {
+                "content-type": true,
+                "text": {
+                  "title": "README text",
+                  "type": "string"
+                }
+              }
+            }
+          ]
+        }
+      ],
+      "examples": [
+        "README.md",
+        {
+          "file": "README.txt",
+          "content-type": "text/plain"
+        },
+        {
+          "text": "# Example project\n\nAn example project",
+          "content-type": "text/markdown"
+        }
+      ]
+    },
+    "requires-python": {
+      "title": "Python version compatibility",
+      "type": "string",
+      "examples": [
+        ">= 3.7"
+      ]
+    },
+    "license": {
+      "title": "Project license",
+      "oneOf": [
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "file"
+          ],
+          "properties": {
+            "file": {
+              "title": "License file path",
+              "type": "string"
+            }
+          }
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "text"
+          ],
+          "properties": {
+            "text": {
+              "title": "License text",
+              "type": "string"
+            }
+          }
+        },
+        {
+          "type": "string",
+          "description": "A SPDX license identifier"
+        }
+      ],
+      "examples": [
+        {
+          "text": "MIT"
+        },
+        {
+          "file": "LICENSE"
+        },
+        "MIT",
+        "LicenseRef-Proprietary"
+      ]
+    },
+    "authors": {
+      "title": "Project authors",
+      "type": "array",
+      "items": {
+        "$ref": "#/definitions/projectAuthor"
+      }
+    },
+    "maintainers": {
+      "title": "Project maintainers",
+      "type": "array",
+      "items": {
+        "$ref": "#/definitions/projectAuthor"
+      }
+    },
+    "keywords": {
+      "title": "Project keywords",
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "classifiers": {
+      "title": "Applicable Trove classifiers",
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "urls": {
+      "title": "Project URLs",
+      "type": "object",
+      "additionalProperties": {
+        "type": "string",
+        "format": "uri"
+      },
+      "examples": [
+        {
+          "homepage": "https://example.com/example-project"
+        }
+      ]
+    },
+    "scripts": {
+      "title": "Console scripts",
+      "type": "object",
+      "additionalProperties": {
+        "type": "string"
+      },
+      "examples": [
+        {
+          "mycmd": "package.module:object.function"
+        }
+      ]
+    },
+    "gui-scripts": {
+      "title": "GUI scripts",
+      "type": "object",
+      "additionalProperties": {
+        "type": "string"
+      },
+      "examples": [
+        {
+          "mycmd": "package.module:object.function"
+        }
+      ]
+    },
+    "entry-points": {
+      "title": "Other entry-point groups",
+      "type": "object",
+      "additionalProperties": false,
+      "patternProperties": {
+        "^\\w+(\\.\\w+)*$": {
+          "type": "object",
+          "additionalProperties": {
+            "type": "string"
+          }
+        }
+      },
+      "propertyNames": {
+        "not": {
+          "anyOf": [
+            {
+              "const": "console_scripts"
+            },
+            {
+              "const": "gui_scripts"
+            }
+          ]
+        }
+      },
+      "examples": [
+        {
+          "pygments.styles": {
+            "monokai": "package.module:object.attribute"
+          }
+        }
+      ]
+    },
+    "dependencies": {
+      "title": "Project dependency requirements",
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "examples": [
+        [
+          "attrs",
+          "requests ~= 2.28"
+        ]
+      ]
+    },
+    "optional-dependencies": {
+      "title": "Project extra dependency requirements",
+      "description": "keys are extra names",
+      "type": "object",
+      "patternProperties": {
+        "^([a-z\\d]|[a-z\\d]([a-z\\d-](?!--))*[a-z\\d])$": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        }
+      },
+      "examples": [
+        {
+          "typing": [
+            "boto3-stubs",
+            "typing-extensions ~= 4.1"
+          ]
+        }
+      ]
+    },
+    "dynamic": {
+      "title": "Dynamic metadata values",
+      "type": "array",
+      "items": {
+        "type": "string",
+        "enum": [
+          "version",
+          "description",
+          "readme",
+          "requires-python",
+          "license",
+          "authors",
+          "maintainers",
+          "keywords",
+          "classifiers",
+          "urls",
+          "scripts",
+          "gui-scripts",
+          "entry-points",
+          "dependencies",
+          "optional-dependencies"
+        ]
+      },
+      "examples": [
+        [
+          "version"
+        ]
+      ]
+    }
+  },
+  "definitions": {
+    "projectAuthor": {
+      "type": "object",
+      "additionalProperties": false,
+      "anyOf": [
+        {
+          "required": [
+            "name"
+          ],
+          "properties": {
+            "name": true
+          }
+        },
+        {
+          "required": [
+            "email"
+          ],
+          "properties": {
+            "email": true
+          }
+        }
+      ],
+      "properties": {
+        "name": {
+          "title": "Author name",
+          "type": "string"
+        },
+        "email": {
+          "title": "Author email",
+          "type": "string",
+          "format": "email"
+        }
+      }
+    }
+  }
+}

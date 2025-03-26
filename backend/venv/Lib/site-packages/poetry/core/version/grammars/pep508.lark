@@ -1,0 +1,29 @@
+start: _requirement
+
+_requirement: _full_name (_MARKER_SEPARATOR marker_spec)?
+_full_name: NAME _extras? (version_specification | _url)?
+_extras: _L_BRACKET _extra? _R_BRACKET
+_extra: EXTRA (_COMMA EXTRA)*
+version_specification: (_version_many | _L_PAREN _version_many _R_PAREN)
+_version_many: _single_version (_COMMA _single_version)*
+_single_version: LEGACY_VERSION_CONSTRAINT
+_url: _AT URI
+marker_spec: marker
+
+NAME: /[a-zA-Z0-9][a-zA-Z0-9-_.]*/
+FULL_NAME: NAME
+EXTRA: NAME
+VERSION_CONSTRAINT: /(~=|==|!=|<=|>=|<|>|===)((?:(?<====)\s*[^\s]*)|(?:(?<===|!=)\s*v?(?:[0-9]+!)?[0-9]+(?:\.[0-9]+)*(?:[-_.]?(a|b|c|rc|alpha|beta|pre|preview)[-_.]?[0-9]*)?(?:(?:-[0-9]+)|(?:[-_.]?(post|rev|r)[-_.]?[0-9]*))?(?:(?:[-_.]?dev[-_.]?[0-9]*)?(?:\+[a-z0-9]+(?:[-_.][a-z0-9]+)*)? # local|\.\*)?)|(?:(?<=~=)\s*v?(?:[0-9]+!)?[0-9]+(?:\.[0-9]+)+(?:[-_.]?(a|b|c|rc|alpha|beta|pre|preview)[-_.]?[0-9]*)?(?:(?:-[0-9]+)|(?:[-_.]?(post|rev|r)[-_.]?[0-9]*))?(?:[-_.]?dev[-_.]?[0-9]*)?)|(?:(?<!==|!=|~=)\s*v?(?:[0-9]+!)?[0-9]+(?:\.[0-9]+)*(?:[-_.]?(a|b|c|rc|alpha|beta|pre|preview)[-_.]?[0-9]*)?(?:(?:-[0-9]+)|(?:[-_.]?(post|rev|r)[-_.]?[0-9]*))?(?:[-_.]?dev[-_.]?[0-9]*)?))/i
+LEGACY_VERSION_CONSTRAINT: /(~=|==|!=|<=|>=|<|>)\s*[^,;\s)]*/i
+URI: /[^ ]+/
+_MARKER_SEPARATOR: ";"
+_L_PAREN: "("
+_R_PAREN: ")"
+_L_BRACKET: "["
+_R_BRACKET: "]"
+_COMMA: ","
+_AT: "@"
+
+%import .markers.marker
+%import common.WS_INLINE
+%ignore WS_INLINE

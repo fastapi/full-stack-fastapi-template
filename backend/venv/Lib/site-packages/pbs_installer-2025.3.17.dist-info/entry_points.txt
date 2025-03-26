@@ -1,0 +1,5 @@
+[console_scripts]
+pbs-install = pbs_installer.__main__:main
+
+[gui_scripts]
+

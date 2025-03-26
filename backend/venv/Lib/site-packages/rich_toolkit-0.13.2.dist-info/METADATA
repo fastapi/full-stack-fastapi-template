@@ -1,0 +1,36 @@
+Metadata-Version: 2.4
+Name: rich-toolkit
+Version: 0.13.2
+Summary: Rich toolkit for building command-line applications
+License-Expression: MIT
+License-File: LICENSE
+Classifier: Development Status :: 4 - Beta
+Classifier: Intended Audience :: Developers
+Classifier: License :: OSI Approved :: MIT License
+Classifier: Topic :: Software Development :: Libraries
+Classifier: Topic :: Software Development :: Libraries :: Python Modules
+Requires-Python: >=3.8
+Requires-Dist: click>=8.1.7
+Requires-Dist: rich>=13.7.1
+Requires-Dist: typing-extensions>=4.12.2
+Description-Content-Type: text/markdown
+
+# Rich Toolkit
+
+This is a very opinionated set of components for building CLI applications.
+It is based on [Rich](https://github.com/Textualize/rich)
+
+## Installation
+
+```bash
+pip install rich-toolkit
+```
+
+## Example usage
+
+Rich toolkit comes with an `App` class, this is used to give a consistent
+style to your CLI application, it can be used as a context manager, like so:
+
+```python
+TODO: new example
+```

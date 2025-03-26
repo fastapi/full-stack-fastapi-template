@@ -1,0 +1,134 @@
+Metadata-Version: 2.1
+Name: pywin32-ctypes
+Version: 0.2.3
+Summary: A (partial) reimplementation of pywin32 using ctypes/cffi
+Home-page: https://github.com/enthought/pywin32-ctypes
+Author: Enthought Inc.
+Author-email: info@enthough.com
+License: BSD-3-Clause
+Classifier: Programming Language :: Python :: 3
+Classifier: Programming Language :: Python :: 3.6
+Classifier: Programming Language :: Python :: 3.7
+Classifier: Programming Language :: Python :: 3.8
+Classifier: Programming Language :: Python :: 3.9
+Classifier: Programming Language :: Python :: 3.10
+Classifier: Programming Language :: Python :: 3.11
+Requires-Python: >=3.6
+
+
+.. image:: https://readthedocs.org/projects/pywin32-ctypes/badge/?version=master
+   :target: http://pywin32-ctypes.readthedocs.org/en/latest/?badge=master
+   :alt: Documentation Status
+
+A reimplementation of pywin32 that is pure python. The default
+behaviour will try to use cffi (>= 1.3.0), if available, and fall back
+to using ctypes. Please note that there is no need to have a compiler
+available on installation or at runtime.
+
+Usage
+=====
+
+Example::
+
+  # Equivalent to 'import win32api' from pywin32.
+  from win32ctypes.pywin32 import win32api
+
+  win32api.LoadLibraryEx(sys.executable, 0, win32api.LOAD_LIBRARY_AS_DATAFILE)
+
+.. note::
+
+   Currently pywin32ctypes implements only a very small subset
+   of pywin32, for internal needs at Enthought. We do welcome
+   additional features and PRs, though.
+
+Development setup
+=================
+
+The following should be good enough::
+
+  pip install -r test_requirements.txt
+  python install -e .
+
+.. note::
+
+   - While pywin32-ctypes should regularly be tested on windows, you can also
+     develop/test on unix by using wine
+
+Change Log
+==========
+
+Version 0.2.3
+-------------
+
+- Do not use loal_module in backend selection code (#131, #132)
+- Add pywin32.pywintypes.Time (#122)
+
+Version 0.2.2
+-------------
+
+- Use ctypes.set_last_error to avoid race conditions (#122)
+
+Version 0.2.1
+-------------
+
+- Use faulthandler when testing and fix discovered errors (#115, #117).
+- Fix support for None username in credentials to be consistent in all backends (#99).
+- Test also on cp38, cp39, cp310, cp311 and use cp38 for linking (#114, #107, #100).
+- Add support for CredEnumerate extending code from @markb-EE (#110, #109, #111)
+- Remove support for older python versions < cp36 (#104, #120).
+
+Version 0.2.0
+-------------
+
+- Fix syntax error when installing in python 3.7 (#81).
+- Support testing on python 3.7 (#82).
+- Support testing on python 3.3 and python 3.4 (#77).
+- Do not use 2to3 (#75).
+- Support lazy wrapping of win32 functions (#67).
+- Add CRED_PERSIST constants (#79 contributed by @tivnet).
+
+Version 0.1.2
+-------------
+
+(bugfix release)
+
+- Fix implementation for the deprecated api (#64).
+
+Version 0.1.1
+-------------
+
+(bugfix release)
+
+- Update Manifest.in entries (#63)
+- fix VERSION path in Manifest.in (#62 contributed by @MinchinWeb)
+
+
+Version 0.1.0
+-------------
+
+- Update tests and provide better compatibility with pywin32 for
+  Resource functions
+- Fix: Python 3.5 and 3.6 support (#52).
+- API additions to allow pywin32-ctypes to work with pyinstaller (#46
+  and #57 contributed by @virtuald).
+- Fix: do not update the global copy of the windows dlls (#42)
+- Add documentation and setup automatic builds in ReadTheDocs (#3, #36).
+- Add cffi backend to be used when available (#31).
+- Fix: EnumResourceTypes and EnumResourceNames would only return ints
+  (#21, #30).
+- Restructure package layout to split core wrapping modules from
+  pywin32 emulation (#15, #17).
+
+Version 0.0.1
+-------------
+
+7/04/2014
+
+- Python 2.6 support (#13)
+- Python 3 support (#12)
+- Basic maintenance work (#11, #7)
+- Fix error raising to be pywin32 compatible (#8)
+- Package rename mini_pywin32 -> pywin32-ctypes
+- Add travis-ci integration using wine! (#2)
+- Support basic library and resource loading (#1)
+- mini_pywin32 is born

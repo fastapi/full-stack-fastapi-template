@@ -1,0 +1,26 @@
+"""
+psycopg -- PostgreSQL database adapter for Python -- C optimization package
+"""
+
+
+# start delvewheel patch
+def _delvewheel_patch_1_10_0():
+    import os
+    if os.path.isdir(libs_dir := os.path.abspath(os.path.join(os.path.dirname(__file__), os.pardir, 'psycopg_binary.libs'))):
+        os.add_dll_directory(libs_dir)
+
+
+_delvewheel_patch_1_10_0()
+del _delvewheel_patch_1_10_0
+# end delvewheel patch
+
+# Copyright (C) 2020 The Psycopg Team
+
+import sys
+
+# This package shouldn't be imported before psycopg itself, or weird things
+# will happen
+if "psycopg" not in sys.modules:
+    raise ImportError("the psycopg package should be imported before psycopg_binary")
+
+from .version import __version__ as __version__  # noqa

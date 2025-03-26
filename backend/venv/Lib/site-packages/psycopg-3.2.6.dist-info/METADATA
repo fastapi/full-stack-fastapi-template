@@ -1,0 +1,112 @@
+Metadata-Version: 2.2
+Name: psycopg
+Version: 3.2.6
+Summary: PostgreSQL database adapter for Python
+Home-page: https://psycopg.org/psycopg3/
+Author: Daniele Varrazzo
+Author-email: daniele.varrazzo@gmail.com
+License: GNU Lesser General Public License v3 (LGPLv3)
+Project-URL: Homepage, https://psycopg.org/
+Project-URL: Documentation, https://psycopg.org/psycopg3/docs/
+Project-URL: Changes, https://psycopg.org/psycopg3/docs/news.html
+Project-URL: Code, https://github.com/psycopg/psycopg
+Project-URL: Issue Tracker, https://github.com/psycopg/psycopg/issues
+Project-URL: Download, https://pypi.org/project/psycopg/
+Classifier: Development Status :: 5 - Production/Stable
+Classifier: Intended Audience :: Developers
+Classifier: License :: OSI Approved :: GNU Lesser General Public License v3 (LGPLv3)
+Classifier: Operating System :: MacOS :: MacOS X
+Classifier: Operating System :: Microsoft :: Windows
+Classifier: Operating System :: POSIX
+Classifier: Programming Language :: Python :: 3
+Classifier: Programming Language :: Python :: 3.8
+Classifier: Programming Language :: Python :: 3.9
+Classifier: Programming Language :: Python :: 3.10
+Classifier: Programming Language :: Python :: 3.11
+Classifier: Programming Language :: Python :: 3.12
+Classifier: Programming Language :: Python :: 3.13
+Classifier: Programming Language :: Python :: Implementation :: CPython
+Classifier: Programming Language :: Python :: Implementation :: PyPy
+Classifier: Topic :: Database
+Classifier: Topic :: Database :: Front-Ends
+Classifier: Topic :: Software Development
+Classifier: Topic :: Software Development :: Libraries :: Python Modules
+Requires-Python: >=3.8
+Description-Content-Type: text/x-rst
+License-File: LICENSE.txt
+Requires-Dist: backports.zoneinfo>=0.2.0; python_version < "3.9"
+Requires-Dist: typing-extensions>=4.6; python_version < "3.13"
+Requires-Dist: tzdata; sys_platform == "win32"
+Provides-Extra: c
+Requires-Dist: psycopg-c==3.2.6; implementation_name != "pypy" and extra == "c"
+Provides-Extra: binary
+Requires-Dist: psycopg-binary==3.2.6; implementation_name != "pypy" and extra == "binary"
+Provides-Extra: pool
+Requires-Dist: psycopg-pool; extra == "pool"
+Provides-Extra: test
+Requires-Dist: anyio>=4.0; extra == "test"
+Requires-Dist: mypy>=1.14; extra == "test"
+Requires-Dist: pproxy>=2.7; extra == "test"
+Requires-Dist: pytest>=6.2.5; extra == "test"
+Requires-Dist: pytest-cov>=3.0; extra == "test"
+Requires-Dist: pytest-randomly>=3.5; extra == "test"
+Provides-Extra: dev
+Requires-Dist: ast-comments>=1.1.2; extra == "dev"
+Requires-Dist: black>=24.1.0; extra == "dev"
+Requires-Dist: codespell>=2.2; extra == "dev"
+Requires-Dist: dnspython>=2.1; extra == "dev"
+Requires-Dist: flake8>=4.0; extra == "dev"
+Requires-Dist: isort[colors]>=6.0; extra == "dev"
+Requires-Dist: isort-psycopg; extra == "dev"
+Requires-Dist: mypy>=1.14; extra == "dev"
+Requires-Dist: pre-commit>=4.0.1; extra == "dev"
+Requires-Dist: types-setuptools>=57.4; extra == "dev"
+Requires-Dist: wheel>=0.37; extra == "dev"
+Provides-Extra: docs
+Requires-Dist: Sphinx>=5.0; extra == "docs"
+Requires-Dist: furo==2022.6.21; extra == "docs"
+Requires-Dist: sphinx-autobuild>=2021.3.14; extra == "docs"
+Requires-Dist: sphinx-autodoc-typehints>=1.12; extra == "docs"
+
+Psycopg 3: PostgreSQL database adapter for Python
+=================================================
+
+Psycopg 3 is a modern implementation of a PostgreSQL adapter for Python.
+
+This distribution contains the pure Python package ``psycopg``.
+
+.. Note::
+
+    Despite the lack of number in the package name, this package is the
+    successor of psycopg2_.
+
+    Please use the psycopg2 package if you are maintaining an existing program
+    using psycopg2 as a dependency. If you are developing something new,
+    Psycopg 3 is the most current implementation of the adapter.
+
+    .. _psycopg2: https://pypi.org/project/psycopg2/
+
+
+Installation
+------------
+
+In short, run the following::
+
+    pip install --upgrade pip           # to upgrade pip
+    pip install "psycopg[binary,pool]"  # to install package and dependencies
+
+If something goes wrong, and for more information about installation, please
+check out the `Installation documentation`__.
+
+.. __: https://www.psycopg.org/psycopg3/docs/basic/install.html#
+
+
+Hacking
+-------
+
+For development information check out `the project readme`__.
+
+.. __: https://github.com/psycopg/psycopg#readme
+
+
+Copyright (C) 2020 The Psycopg Team

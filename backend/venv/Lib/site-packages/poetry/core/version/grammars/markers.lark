@@ -1,0 +1,36 @@
+start: marker
+
+marker: _atom (BOOL_OP _atom)*
+_atom: item | (L_PAREN marker R_PAREN)
+item: (MARKER_NAME MARKER_OP _marker_value) | (_marker_value MARKER_OP MARKER_NAME)
+_marker_value: SINGLE_QUOTED_STRING | ESCAPED_STRING
+
+MARKER_NAME: "implementation_version"
+    | "platform_python_implementation"
+    | "implementation_name"
+    | "python_full_version"
+    | "platform_release"
+    | "platform_version"
+    | "platform_machine"
+    | "platform_system"
+    | "python_version"
+    | "sys_platform"
+    | "os_name"
+    | "os.name"
+    | "sys.platform"
+    | "platform.version"
+    | "platform.machine"
+    | "platform.python_implementation"
+    | "python_implementation"
+    | "extra"
+MARKER_OP: "===" | "==" | ">=" | "<=" | ">" | "<" | "!=" | "~=" | "not in" | "in"
+SINGLE_QUOTED_STRING: /'([^'])*'/
+QUOTED_STRING: /"([^"])*"/
+MARKER_VALUE: /(.+?)/
+BOOL_OP: "and" | "or"
+L_PAREN: "("
+R_PAREN: ")"
+
+%import common.WS_INLINE
+%import common.ESCAPED_STRING
+%ignore WS_INLINE

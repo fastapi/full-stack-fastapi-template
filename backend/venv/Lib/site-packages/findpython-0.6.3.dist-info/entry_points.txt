@@ -1,0 +1,5 @@
+[console_scripts]
+findpython = findpython.__main__:main
+
+[gui_scripts]
+

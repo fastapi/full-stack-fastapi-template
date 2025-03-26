@@ -1,0 +1,92 @@
+Metadata-Version: 2.3
+Name: CacheControl
+Version: 0.14.2
+Summary: httplib2 caching for requests
+Keywords: requests,http,caching,web
+Author-email: Eric Larson <ericlarson@ionrock.com>, Frost Ming <me@frostming.com>, William Woodruff <william@yossarian.net>
+Requires-Python: >=3.8
+Description-Content-Type: text/x-rst
+Classifier: Development Status :: 4 - Beta
+Classifier: Environment :: Web Environment
+Classifier: License :: OSI Approved :: Apache Software License
+Classifier: Operating System :: OS Independent
+Classifier: Programming Language :: Python :: 3.8
+Classifier: Programming Language :: Python :: 3.9
+Classifier: Programming Language :: Python :: 3.10
+Classifier: Programming Language :: Python :: 3.11
+Classifier: Programming Language :: Python :: 3.12
+Classifier: Programming Language :: Python :: 3.13
+Classifier: Topic :: Internet :: WWW/HTTP
+Requires-Dist: requests >= 2.16.0
+Requires-Dist: msgpack >= 0.5.2, < 2.0.0
+Requires-Dist: CacheControl[filecache, redis] ; extra == "dev"
+Requires-Dist: build ; extra == "dev"
+Requires-Dist: cherrypy ; extra == "dev"
+Requires-Dist: codespell[tomli] ; extra == "dev"
+Requires-Dist: furo ; extra == "dev"
+Requires-Dist: mypy ; extra == "dev"
+Requires-Dist: pytest ; extra == "dev"
+Requires-Dist: pytest-cov ; extra == "dev"
+Requires-Dist: ruff ; extra == "dev"
+Requires-Dist: sphinx ; extra == "dev"
+Requires-Dist: sphinx-copybutton ; extra == "dev"
+Requires-Dist: tox ; extra == "dev"
+Requires-Dist: types-redis ; extra == "dev"
+Requires-Dist: types-requests ; extra == "dev"
+Requires-Dist: filelock >= 3.8.0 ; extra == "filecache"
+Requires-Dist: redis>=2.10.5 ; extra == "redis"
+Project-URL: Homepage, https://pypi.org/project/CacheControl/
+Project-URL: Issues, https://github.com/psf/cachecontrol/issues
+Project-URL: Source, https://github.com/psf/cachecontrol
+Provides-Extra: dev
+Provides-Extra: filecache
+Provides-Extra: redis
+
+..
+  SPDX-FileCopyrightText: SPDX-FileCopyrightText: 2015 Eric Larson
+
+  SPDX-License-Identifier: Apache-2.0
+
+==============
+ CacheControl
+==============
+
+.. image:: https://img.shields.io/pypi/v/cachecontrol.svg
+    :target: https://pypi.python.org/pypi/cachecontrol
+    :alt: Latest Version
+
+.. image:: https://github.com/psf/cachecontrol/actions/workflows/tests.yml/badge.svg
+  :target: https://github.com/psf/cachecontrol/actions/workflows/tests.yml
+
+CacheControl is a port of the caching algorithms in httplib2_ for use with
+requests_ session object.
+
+It was written because httplib2's better support for caching is often
+mitigated by its lack of thread safety. The same is true of requests in
+terms of caching.
+
+
+Quickstart
+==========
+
+.. code-block:: python
+
+  import requests
+
+  from cachecontrol import CacheControl
+
+
+  sess = requests.session()
+  cached_sess = CacheControl(sess)
+
+  response = cached_sess.get('https://google.com')
+
+If the URL contains any caching based headers, it will cache the
+result in a simple dictionary.
+
+For more info, check out the docs_
+
+.. _docs: http://cachecontrol.readthedocs.org/en/latest/
+.. _httplib2: https://github.com/httplib2/httplib2
+.. _requests: http://docs.python-requests.org/
+

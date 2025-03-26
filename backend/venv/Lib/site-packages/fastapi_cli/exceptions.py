@@ -1,0 +1,2 @@
+class FastAPICLIException(Exception):
+    pass

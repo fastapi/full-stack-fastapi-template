@@ -1,0 +1,26 @@
+Metadata-Version: 2.1
+Name: pbs-installer
+Version: 2025.3.17
+Summary: Installer for Python Build Standalone
+Author-Email: Frost Ming <me@frostming.com>
+License: MIT
+Project-URL: Repository, https://github.com/frostming/pbs-installer
+Project-URL: Documentation, http://pbs-installer.readthedocs.io
+Requires-Python: >=3.8
+Provides-Extra: download
+Requires-Dist: httpx<1,>=0.27.0; extra == "download"
+Provides-Extra: install
+Requires-Dist: zstandard>=0.21.0; extra == "install"
+Provides-Extra: all
+Requires-Dist: pbs-installer[download,install]; extra == "all"
+Description-Content-Type: text/markdown
+
+# pbs-installer
+
+[![PyPI](https://img.shields.io/pypi/v/pbs-installer)](https://pypi.org/project/pbs-installer)
+
+An installer for @indygreg's [python-build-standalone](https://github.com/astral-sh/python-build-standalone)
+
+The list of python versions are kept sync with the upstream automatically, via a periodically GitHub Action.
+
+[📖 Read the docs](http://pbs-installer.readthedocs.io/)

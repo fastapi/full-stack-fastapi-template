@@ -1,0 +1,26 @@
+Metadata-Version: 2.1
+Name: crashtest
+Version: 0.4.1
+Summary: Manage Python errors with ease
+Home-page: https://github.com/sdispater/crashtest
+License: MIT
+Author: Sébastien Eustace
+Author-email: sebastien@eustace.io
+Requires-Python: >=3.7,<4.0
+Classifier: License :: OSI Approved :: MIT License
+Classifier: Programming Language :: Python :: 3
+Classifier: Programming Language :: Python :: 3.7
+Classifier: Programming Language :: Python :: 3.8
+Classifier: Programming Language :: Python :: 3.9
+Classifier: Programming Language :: Python :: 3.10
+Classifier: Programming Language :: Python :: 3.11
+Project-URL: Repository, https://github.com/sdispater/crashtest
+Description-Content-Type: text/markdown
+
+# Crashtest
+
+[![Tests](https://github.com/sdispater/crashtest/actions/workflows/main.yml/badge.svg)](https://github.com/sdispater/crashtest/actions/workflows/main.yml)
+[![PyPI version](https://img.shields.io/pypi/v/crashtest)](https://pypi.org/project/crashtest/)
+
+Crashtest is a Python library that makes exceptions handling and inspection easier.
+
