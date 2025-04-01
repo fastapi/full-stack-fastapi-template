@@ -17,6 +17,7 @@ function Tickets() {
             <Text>
                   <ul>
                         <ol><b>Página de Listagem de Tickets</b></ol>
+                        <li>Requisitos: </li>
                         <li>- Exibição dos tickets cadastrados em formato de tabela ou lista com informações resumidas (título, status, prioridade, data de criação)</li>
                         <li>- Campo de busca para filtrar por palavra-chave</li>
                         <li>- Filtros para status, data, prioridade e categoria</li>
