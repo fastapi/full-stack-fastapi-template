@@ -38,5 +38,12 @@
     "dotenv": "^16.4.5",
     "typescript": "^5.2.2",
     "vite": "^5.4.14"
-  }
+  },
+  "description": "The frontend is built with [Vite](https://vitejs.dev/), [React](https://reactjs.org/), [TypeScript](https://www.typescriptlang.org/), [TanStack Query](https://tanstack.com/query), [TanStack Router](https://tanstack.com/router) and [Chakra UI](https://chakra-ui.com/).",
+  "main": "index.js",
+  "directories": {
+    "test": "tests"
+  },
+  "author": "",
+  "license": "ISC"
 }

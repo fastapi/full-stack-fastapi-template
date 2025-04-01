@@ -5,11 +5,14 @@ import { FiBriefcase, FiHome, FiSettings, FiUsers } from "react-icons/fi"
 import type { IconType } from "react-icons/lib"
 
 import type { UserPublic } from "@/client"
+import { BsTicketDetailedFill } from "react-icons/bs"
 
 const items = [
+  //Adicionando mais menus ( ticket), e renomeando seções
   { icon: FiHome, title: "Dashboard", path: "/" },
   { icon: FiBriefcase, title: "Items", path: "/items" },
-  { icon: FiSettings, title: "User Settings", path: "/settings" },
+  { icon: FiSettings, title: "Configurações do Usuário", path: "/settings" },
+  { icon: BsTicketDetailedFill, title: "Tickets", path: "/tickets" },
 ]
 
 interface SidebarItemsProps {
