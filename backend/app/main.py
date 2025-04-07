@@ -32,6 +32,10 @@ app = FastAPI(
     title=settings.PROJECT_NAME, openapi_url=f"{settings.API_V1_STR}/openapi.json", lifespan=lifespan
 )
 
+# Debug logging for CORS origins
+origins = settings.all_cors_origins
+logger.info(f"CORS origins: {origins}")
+
 # Use our custom CORS middleware instead of the default FastAPI one
 setup_cors(app)
 
