@@ -29,3 +29,18 @@ def test_email(email_to: EmailStr) -> Message:
 @router.get("/health-check/")
 async def health_check() -> bool:
     return True
+
+
+@router.get("/cors-debug", tags=["utils"], response_model=dict)
+def cors_debug() -> dict:
+    """
+    Endpoint for debugging CORS settings
+    """
+    from app.core.config import settings
+    
+    return {
+        "cors_origins": settings.BACKEND_CORS_ORIGINS,
+        "all_cors_origins": settings.all_cors_origins,
+        "frontend_host": settings.FRONTEND_HOST,
+        "environment": settings.ENVIRONMENT,
+    }

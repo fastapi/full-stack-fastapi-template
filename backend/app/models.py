@@ -47,6 +47,7 @@ class User(UserBase, table=True):
     id: uuid.UUID = Field(default_factory=uuid.uuid4, primary_key=True)
     hashed_password: str
     items: list["Item"] = Relationship(back_populates="owner", cascade_delete=True)
+    tickets: list["Ticket"] = Relationship(back_populates="user", sa_relationship_kwargs={"cascade": "all, delete-orphan"})
 
 
 # Properties to return via API, id is always required
@@ -208,8 +209,3 @@ class TicketsPublic(SQLModel):
     data: list[TicketPublic]
     count: int
     page: int
-
-
-# Update User model to include tickets relationship
-User.model_rebuild()
-setattr(User, "tickets", Relationship(back_populates="user", sa_relationship_kwargs={"cascade": "all, delete-orphan"}))
