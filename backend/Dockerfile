@@ -40,5 +40,5 @@ COPY ./app /app/app
 RUN --mount=type=cache,target=/root/.cache/uv \
     uv sync
 
-# Run migrations before starting the server
-CMD ["sh", "-c", "alembic upgrade head && uvicorn app.main:app --host 0.0.0.0 --port ${PORT:-8000}"]
+# Run migrations and create superuser before starting the server
+CMD ["sh", "-c", "alembic upgrade head && python -c 'from app.main import create_superuser; create_superuser()' && uvicorn app.main:app --host 0.0.0.0 --port ${PORT:-8000}"]
