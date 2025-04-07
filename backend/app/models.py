@@ -1,4 +1,7 @@
 import uuid
+from datetime import datetime
+from enum import Enum
+from typing import Optional
 
 from pydantic import EmailStr
 from sqlmodel import Field, Relationship, SQLModel
@@ -111,3 +114,102 @@ class TokenPayload(SQLModel):
 class NewPassword(SQLModel):
     token: str
     new_password: str = Field(min_length=8, max_length=40)
+
+
+# Ticket Enums
+class TicketCategory(str, Enum):
+    SUPPORT = "Suporte"
+    MAINTENANCE = "Manutenção" 
+    QUESTION = "Dúvida"
+
+
+class TicketPriority(str, Enum):
+    LOW = "Baixa"
+    MEDIUM = "Média"
+    HIGH = "Alta"
+
+
+class TicketStatus(str, Enum):
+    OPEN = "Aberto"
+    IN_PROGRESS = "Em andamento"
+    CLOSED = "Fechado"
+
+
+# Ticket models
+class TicketBase(SQLModel):
+    title: str = Field(min_length=1, max_length=255)
+    description: str | None = Field(default=None)
+    category: TicketCategory
+    priority: TicketPriority
+    status: TicketStatus = Field(default=TicketStatus.OPEN)
+
+
+class TicketCreate(TicketBase):
+    pass
+
+
+class TicketUpdate(SQLModel):
+    title: str | None = Field(default=None, min_length=1, max_length=255)
+    description: str | None = Field(default=None)
+    category: TicketCategory | None = None
+    priority: TicketPriority | None = None
+    status: TicketStatus | None = None
+
+
+class Ticket(TicketBase, table=True):
+    id: uuid.UUID = Field(default_factory=uuid.uuid4, primary_key=True)
+    user_id: uuid.UUID = Field(foreign_key="user.id", nullable=False)
+    created_at: datetime = Field(default_factory=datetime.utcnow)
+    updated_at: datetime = Field(default_factory=datetime.utcnow, sa_column_kwargs={"onupdate": datetime.utcnow})
+    
+    # Relationships
+    user: User = Relationship(back_populates="tickets")
+    comments: list["Comment"] = Relationship(back_populates="ticket", sa_relationship_kwargs={"cascade": "all, delete-orphan"})
+
+
+# Comment models
+class CommentBase(SQLModel):
+    comment: str = Field(min_length=1)
+
+
+class CommentCreate(CommentBase):
+    pass
+
+
+class Comment(CommentBase, table=True):
+    id: uuid.UUID = Field(default_factory=uuid.uuid4, primary_key=True)
+    ticket_id: uuid.UUID = Field(foreign_key="ticket.id", nullable=False)
+    user_id: uuid.UUID = Field(foreign_key="user.id", nullable=False)
+    created_at: datetime = Field(default_factory=datetime.utcnow)
+    
+    # Relationships
+    ticket: Ticket = Relationship(back_populates="comments")
+    user: User = Relationship()
+
+
+# API response models
+class CommentPublic(CommentBase):
+    id: uuid.UUID
+    created_at: datetime
+
+
+class TicketPublic(TicketBase):
+    id: uuid.UUID
+    user_id: uuid.UUID
+    created_at: datetime
+    updated_at: datetime
+
+
+class TicketDetailPublic(TicketPublic):
+    comments: list[CommentPublic] = []
+
+
+class TicketsPublic(SQLModel):
+    data: list[TicketPublic]
+    count: int
+    page: int
+
+
+# Update User model to include tickets relationship
+User.model_rebuild()
+setattr(User, "tickets", Relationship(back_populates="user", sa_relationship_kwargs={"cascade": "all, delete-orphan"}))
