@@ -1,57 +1,33 @@
-import logging
-from contextlib import asynccontextmanager
-
+import sentry_sdk
 from fastapi import FastAPI
-from fastapi.staticfiles import StaticFiles
+from fastapi.routing import APIRoute
+from starlette.middleware.cors import CORSMiddleware
 
 from app.api.main import api_router
 from app.core.config import settings
-from app.core.middleware import setup_cors
-
-logging.basicConfig(
-    level=logging.INFO,
-    format="%(asctime)s %(levelname)s: %(message)s",
-    datefmt="%Y-%m-%d %H:%M:%S",
-)
-logger = logging.getLogger(__name__)
 
 
-@asynccontextmanager
-async def lifespan(app: FastAPI):
-    """
-    Function that runs before the application starts,
-    and again when the application is shutting down.
+def custom_generate_unique_id(route: APIRoute) -> str:
+    return f"{route.tags[0]}-{route.name}"
 
-    For now, just a placeholder, but we can use this to setup
-    database connections, etc.
-    """
-    yield
 
+if settings.SENTRY_DSN and settings.ENVIRONMENT != "local":
+    sentry_sdk.init(dsn=str(settings.SENTRY_DSN), enable_tracing=True)
 
 app = FastAPI(
-    title=settings.PROJECT_NAME, openapi_url=f"{settings.API_V1_STR}/openapi.json", lifespan=lifespan
+    title=settings.PROJECT_NAME,
+    openapi_url=f"{settings.API_V1_STR}/openapi.json",
+    generate_unique_id_function=custom_generate_unique_id,
 )
 
-# Use our custom CORS middleware instead of the default FastAPI one
-setup_cors(app)
+# Set all CORS enabled origins
+if settings.all_cors_origins:
+    app.add_middleware(
+        CORSMiddleware,
+        allow_origins=settings.all_cors_origins,
+        allow_credentials=True,
+        allow_methods=["*"],
+        allow_headers=["*"],
+    )
 
 app.include_router(api_router, prefix=settings.API_V1_STR)
-
-# Mount the static files directory to serve static files
-# app.mount("/static", StaticFiles(directory="static"), name="static")
-
-
-@app.get("/")
-def root():
-    """
-    Root endpoint for health checks
-    """
-    return {"message": "Hello! This is the API root. Go to /docs for API documentation."}
-
-
-@app.get("/health")
-def health_check():
-    """
-    Health check endpoint
-    """
-    return {"status": "ok"}
