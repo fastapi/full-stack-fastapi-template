@@ -4,6 +4,7 @@ from pydantic.networks import EmailStr
 from app.api.deps import get_current_active_superuser
 from app.models import Message
 from app.utils import generate_test_email, send_email
+from app.core.config import settings
 
 router = APIRouter(prefix="/utils", tags=["utils"])
 
@@ -29,3 +30,10 @@ def test_email(email_to: EmailStr) -> Message:
 @router.get("/health-check/")
 async def health_check() -> bool:
     return True
+
+@router.get("/cors-origins/")
+async def get_cors_origins() -> list[str]:
+    """
+    Get the CORS origins.
+    """
+    return settings.all_cors_origins
