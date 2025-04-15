@@ -1,0 +1,55 @@
+# Global values
+global:
+  environment: production
+
+# Backend configuration
+backend:
+  image:
+    repository: dperezsa/sdp-backend
+    tag: 1.0.0
+    pullPolicy: IfNotPresent
+  replicaCount: 1
+  resources:
+    limits:
+      cpu: 500m
+      memory: 512Mi
+    requests:
+      cpu: 200m
+      memory: 256Mi
+  service:
+    type: ClusterIP
+    port: 8000
+  env:
+    PROJECT_NAME: Service Data Platform
+    ENVIRONMENT: production
+    FIRST_SUPERUSER: admin@example.com
+    FIRST_SUPERUSER_PASSWORD: changeme123
+    FRONTEND_HOST: http://localhost:5173
+    SECRET_KEY: changeme123
+    SQLITE_DB: ./sqlite.db
+  volumeMounts:
+    - name: sqlite-data
+      mountPath: /app/data
+  volumes:
+    - name: sqlite-data
+      emptyDir: {}
+
+# Frontend configuration
+frontend:
+  image:
+    repository: dperezsa/sdp-frontend
+    tag: 1.0.0
+    pullPolicy: IfNotPresent
+  replicaCount: 1
+  resources:
+    limits:
+      cpu: 200m
+      memory: 256Mi
+    requests:
+      cpu: 100m
+      memory: 128Mi
+  service:
+    type: ClusterIP
+    port: 80
+  env:
+    VITE_API_URL: http://{{ .Release.Name }}-backend.default.svc.cluster.local:8000

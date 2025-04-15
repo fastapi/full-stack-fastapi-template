@@ -3,11 +3,8 @@
 set -e
 set -x
 
-# Let the DB start
-python app/backend_pre_start.py
+export PYTHONPATH="${PYTHONPATH}:$(pwd)"
 
-# Run migrations
-alembic upgrade head
+python app/tests_pre_start.py
 
-# Create initial data in DB
-python app/initial_data.py
+bash scripts/test.sh "$@"

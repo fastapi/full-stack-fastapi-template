@@ -1,0 +1,80 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ .Release.Name }}-backend
+  labels:
+    app.kubernetes.io/name: {{ .Release.Name }}-backend
+    app.kubernetes.io/instance: {{ .Release.Name }}
+spec:
+  replicas: {{ .Values.backend.replicaCount }}
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: {{ .Release.Name }}-backend
+      app.kubernetes.io/instance: {{ .Release.Name }}
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: {{ .Release.Name }}-backend
+        app.kubernetes.io/instance: {{ .Release.Name }}
+    spec:
+      initContainers:
+        - name: init-db
+          image: "{{ .Values.backend.image.repository }}:{{ .Values.backend.image.tag }}"
+          command: ["sh", "-c", "mkdir -p /app/data && chmod 777 /app/data"]
+          securityContext:
+            runAsUser: 0
+          volumeMounts:
+            - name: sqlite-data
+              mountPath: /app/data
+      containers:
+        - name: backend
+          image: "{{ .Values.backend.image.repository }}:{{ .Values.backend.image.tag }}"
+          imagePullPolicy: {{ .Values.backend.image.pullPolicy }}
+          ports:
+            - name: http
+              containerPort: 8000
+              protocol: TCP
+          resources:
+            {{- toYaml .Values.backend.resources | nindent 12 }}
+          env:
+            {{- range $key, $value := .Values.backend.env }}
+            - name: {{ $key }}
+              value: {{ $value | quote }}
+            {{- end }}
+            - name: PYTHONPATH
+              value: "/app"
+          volumeMounts:
+            - name: sqlite-data
+              mountPath: /app/data
+          command: ["sh", "-c"]
+          args:
+            - |
+              echo "Current directory: $(pwd)" &&
+              echo "Python path: $PYTHONPATH" &&
+              echo "Contents of /app: $(ls -la /app)" &&
+              echo "Python version: $(python3.11 --version)" &&
+              python3.11 -m app.backend_pre_start &&
+              python3.11 -m uvicorn app.main:app --host 0.0.0.0 --port 8000 --log-level debug
+          startupProbe:
+            httpGet:
+              path: /api/v1/utils/health-check/
+              port: http
+            failureThreshold: 30
+            periodSeconds: 10
+          livenessProbe:
+            httpGet:
+              path: /api/v1/utils/health-check/
+              port: http
+            initialDelaySeconds: 30
+            periodSeconds: 10
+            failureThreshold: 3
+          readinessProbe:
+            httpGet:
+              path: /api/v1/utils/health-check/
+              port: http
+            initialDelaySeconds: 5
+            periodSeconds: 10
+            failureThreshold: 3
+      volumes:
+        - name: sqlite-data
+          emptyDir: {}
