@@ -1,7 +1,7 @@
 services:
 
   db:
-    image: postgres:12
+    image: docker.arvancloud.ir/postgres
     restart: always
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER} -d ${POSTGRES_DB}"]
@@ -20,7 +20,7 @@ services:
       - POSTGRES_DB=${POSTGRES_DB?Variable not set}
 
   adminer:
-    image: adminer
+    image: docker.arvancloud.ir/adminer
     restart: always
     networks:
       - traefik-public
