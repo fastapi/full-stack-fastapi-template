@@ -53,3 +53,29 @@ frontend:
     port: 80
   env:
     VITE_API_URL: http://{{ .Release.Name }}-backend.default.svc.cluster.local:8000
+
+# Adminer configuration
+adminer:
+  enabled: false
+  image:
+    repository: dperezsa/adminer
+    tag: latest
+    pullPolicy: IfNotPresent
+  replicaCount: 1
+  resources:
+    limits:
+      cpu: 200m
+      memory: 256Mi
+    requests:
+      cpu: 100m
+      memory: 128Mi
+  service:
+    type: ClusterIP
+    port: 80
+  env: {}
+  volumeMounts:
+    - name: sqlite-data
+      mountPath: /var/www/html/data
+  volumes:
+    - name: sqlite-data
+      emptyDir: {}

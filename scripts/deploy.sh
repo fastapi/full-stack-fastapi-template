@@ -8,6 +8,7 @@ HELM_CHART_DIR="./kubernetes/charts/sdp"
 RELEASE_NAME="sdp"
 BACKEND_PORT=8000
 FRONTEND_PORT=5173
+ADMINER_PORT=5173
 TIMEOUT=300  # 5 minute timeout
 
 # Main deployment
