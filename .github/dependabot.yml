@@ -16,13 +16,13 @@ updates:
       prefix: ⬆
   # npm
   - package-ecosystem: npm
-    directory: /
+    directory: /frontend
     schedule:
       interval: daily
     commit-message:
       prefix: ⬆
   # Docker
-  - package-ecosystem: docker
+  - package-ecosystem: docker-compose
     directory: /
     schedule:
       interval: weekly
