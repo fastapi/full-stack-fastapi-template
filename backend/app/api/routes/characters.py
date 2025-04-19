@@ -31,6 +31,23 @@ def list_approved_characters(
     return CharactersPublic(data=characters, count=count)
 
 
+@router.get("/my-submissions", response_model=CharactersPublic)
+def list_my_character_submissions(
+    session: SessionDep, current_user: CurrentUser, skip: int = 0, limit: int = 100
+) -> Any:
+    """
+    Retrieve characters submitted by the current user.
+    Includes characters with any status (pending, approved, rejected).
+    """
+    count = crud.characters.get_characters_count(
+        session=session, creator_id=current_user.id
+    )
+    characters = crud.characters.get_characters(
+        session=session, creator_id=current_user.id, skip=skip, limit=limit
+    )
+    return CharactersPublic(data=characters, count=count)
+
+
 @router.get("/{id}", response_model=CharacterPublic)
 def get_approved_character(
     session: SessionDep, id: uuid.UUID
