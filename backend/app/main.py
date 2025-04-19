@@ -20,6 +20,11 @@ app = FastAPI(
     generate_unique_id_function=custom_generate_unique_id,
 )
 
+# Add health check endpoint directly to main app
+@app.get("/health", tags=["health"])
+async def health_check():
+    return {"status": "ok", "message": "Service is healthy"}
+
 # Set all CORS enabled origins
 if settings.all_cors_origins:
     app.add_middleware(
