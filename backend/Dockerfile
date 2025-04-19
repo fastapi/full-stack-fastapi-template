@@ -40,5 +40,12 @@ COPY ./app /app/app
 RUN --mount=type=cache,target=/root/.cache/uv \
     uv sync
 
-# Use Uvicorn directly for better compatibility with Render's $PORT
-CMD ["uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "${PORT:-8000}", "--workers", "4"]
+# Copy the entrypoint script
+COPY ./docker-entrypoint.sh /app/docker-entrypoint.sh
+RUN chmod +x /app/docker-entrypoint.sh
+
+# Remove the old CMD
+# CMD ["uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "${PORT:-8000}", "--workers", "4"]
+
+# Set the entrypoint
+ENTRYPOINT ["/app/docker-entrypoint.sh"]
