@@ -1,4 +1,6 @@
 import uuid
+import datetime
+from enum import Enum
 
 from pydantic import EmailStr
 from sqlmodel import Field, Relationship, SQLModel
@@ -44,6 +46,12 @@ class User(UserBase, table=True):
     id: uuid.UUID = Field(default_factory=uuid.uuid4, primary_key=True)
     hashed_password: str
     items: list["Item"] = Relationship(back_populates="owner", cascade_delete=True)
+    created_characters: list["Character"] = Relationship(
+        back_populates="creator", cascade_delete=True
+    )
+    conversations: list["Conversation"] = Relationship(
+        back_populates="user", cascade_delete=True
+    )
 
 
 # Properties to return via API, id is always required
@@ -111,3 +119,126 @@ class TokenPayload(SQLModel):
 class NewPassword(SQLModel):
     token: str
     new_password: str = Field(min_length=8, max_length=40)
+
+
+# Shared properties
+class CharacterBase(SQLModel):
+    name: str = Field(index=True, max_length=100)
+    description: str | None = Field(default=None, max_length=1000)
+    image_url: str | None = Field(default=None, max_length=255)
+    greeting_message: str | None = Field(default=None, max_length=1000)
+
+
+class CharacterStatus(str, Enum):
+    PENDING = "pending"
+    APPROVED = "approved"
+    REJECTED = "rejected"
+
+
+# Properties to receive via API on creation (user submission)
+class CharacterCreate(CharacterBase):
+    pass
+
+
+# Properties to receive via API on update (admin only)
+class CharacterUpdate(CharacterBase):
+    name: str | None = Field(default=None, max_length=100)
+    description: str | None = Field(default=None, max_length=1000)
+    image_url: str | None = Field(default=None, max_length=255)
+    greeting_message: str | None = Field(default=None, max_length=1000)
+    status: CharacterStatus | None = None
+
+
+# Database model
+class Character(CharacterBase, table=True):
+    id: uuid.UUID = Field(default_factory=uuid.uuid4, primary_key=True)
+    status: CharacterStatus = Field(default=CharacterStatus.PENDING)
+    creator_id: uuid.UUID = Field(foreign_key="user.id", nullable=False)
+
+    creator: User = Relationship(back_populates="created_characters")
+    conversations: list["Conversation"] = Relationship(back_populates="character")
+
+
+# Properties to return via API
+class CharacterPublic(CharacterBase):
+    id: uuid.UUID
+    status: CharacterStatus
+    creator_id: uuid.UUID
+
+
+class CharactersPublic(SQLModel):
+    data: list[CharacterPublic]
+    count: int
+
+
+# ---------------- Conversation Models ----------------
+
+
+class ConversationBase(SQLModel):
+    pass  # No shared fields initially, maybe add title later?
+
+
+class ConversationCreate(SQLModel):
+    character_id: uuid.UUID
+
+
+# Database model
+class Conversation(ConversationBase, table=True):
+    id: uuid.UUID = Field(default_factory=uuid.uuid4, primary_key=True)
+    user_id: uuid.UUID = Field(foreign_key="user.id", nullable=False)
+    character_id: uuid.UUID = Field(foreign_key="character.id", nullable=False)
+    created_at: datetime.datetime = Field(default_factory=datetime.datetime.utcnow)
+
+    user: User = Relationship(back_populates="conversations")
+    character: Character = Relationship(back_populates="conversations")
+    messages: list["Message"] = Relationship(back_populates="conversation")
+
+
+class ConversationPublic(ConversationBase):
+    id: uuid.UUID
+    user_id: uuid.UUID
+    character_id: uuid.UUID
+    created_at: datetime.datetime
+
+
+class ConversationsPublic(SQLModel):
+    data: list[ConversationPublic]
+    count: int
+
+
+# ---------------- Message Models ----------------
+
+
+class MessageSender(str, Enum):
+    USER = "user"
+    AI = "ai"
+
+
+class MessageBase(SQLModel):
+    content: str = Field(max_length=5000)  # Limit message length
+
+
+class MessageCreate(MessageBase):
+    pass  # Content is the main input
+
+
+# Database model
+class Message(MessageBase, table=True):
+    id: uuid.UUID = Field(default_factory=uuid.uuid4, primary_key=True)
+    conversation_id: uuid.UUID = Field(foreign_key="conversation.id", nullable=False)
+    sender: MessageSender
+    timestamp: datetime.datetime = Field(default_factory=datetime.datetime.utcnow)
+
+    conversation: Conversation = Relationship(back_populates="messages")
+
+
+class MessagePublic(MessageBase):
+    id: uuid.UUID
+    conversation_id: uuid.UUID
+    sender: MessageSender
+    timestamp: datetime.datetime
+
+
+class MessagesPublic(SQLModel):
+    data: list[MessagePublic]
+    count: int
