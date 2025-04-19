@@ -1,5 +1,6 @@
 import uuid
 
+from fastapi import status
 from fastapi.testclient import TestClient
 from sqlmodel import Session
 
@@ -16,7 +17,7 @@ def test_create_item(
         headers=superuser_token_headers,
         json=data,
     )
-    assert response.status_code == 200
+    assert response.status_code == status.HTTP_200_OK
     content = response.json()
     assert content["title"] == data["title"]
     assert content["description"] == data["description"]
@@ -32,7 +33,7 @@ def test_read_item(
         f"{settings.API_V1_STR}/items/{item.id}",
         headers=superuser_token_headers,
     )
-    assert response.status_code == 200
+    assert response.status_code == status.HTTP_200_OK
     content = response.json()
     assert content["title"] == item.title
     assert content["description"] == item.description
@@ -47,7 +48,7 @@ def test_read_item_not_found(
         f"{settings.API_V1_STR}/items/{uuid.uuid4()}",
         headers=superuser_token_headers,
     )
-    assert response.status_code == 404
+    assert response.status_code == status.HTTP_404_NOT_FOUND
     content = response.json()
     assert content["detail"] == "Item not found"
 
@@ -60,7 +61,7 @@ def test_read_item_not_enough_permissions(
         f"{settings.API_V1_STR}/items/{item.id}",
         headers=normal_user_token_headers,
     )
-    assert response.status_code == 400
+    assert response.status_code == status.HTTP_400_BAD_REQUEST
     content = response.json()
     assert content["detail"] == "Not enough permissions"
 
@@ -74,7 +75,7 @@ def test_read_items(
         f"{settings.API_V1_STR}/items/",
         headers=superuser_token_headers,
     )
-    assert response.status_code == 200
+    assert response.status_code == status.HTTP_200_OK
     content = response.json()
     assert len(content["data"]) >= 2
 
@@ -89,7 +90,7 @@ def test_update_item(
         headers=superuser_token_headers,
         json=data,
     )
-    assert response.status_code == 200
+    assert response.status_code == status.HTTP_200_OK
     content = response.json()
     assert content["title"] == data["title"]
     assert content["description"] == data["description"]
@@ -106,7 +107,7 @@ def test_update_item_not_found(
         headers=superuser_token_headers,
         json=data,
     )
-    assert response.status_code == 404
+    assert response.status_code == status.HTTP_404_NOT_FOUND
     content = response.json()
     assert content["detail"] == "Item not found"
 
@@ -121,7 +122,7 @@ def test_update_item_not_enough_permissions(
         headers=normal_user_token_headers,
         json=data,
     )
-    assert response.status_code == 400
+    assert response.status_code == status.HTTP_400_BAD_REQUEST
     content = response.json()
     assert content["detail"] == "Not enough permissions"
 
@@ -134,7 +135,7 @@ def test_delete_item(
         f"{settings.API_V1_STR}/items/{item.id}",
         headers=superuser_token_headers,
     )
-    assert response.status_code == 200
+    assert response.status_code == status.HTTP_200_OK
     content = response.json()
     assert content["message"] == "Item deleted successfully"
 
@@ -146,7 +147,7 @@ def test_delete_item_not_found(
         f"{settings.API_V1_STR}/items/{uuid.uuid4()}",
         headers=superuser_token_headers,
     )
-    assert response.status_code == 404
+    assert response.status_code == status.HTTP_404_NOT_FOUND
     content = response.json()
     assert content["detail"] == "Item not found"
 
@@ -159,6 +160,6 @@ def test_delete_item_not_enough_permissions(
         f"{settings.API_V1_STR}/items/{item.id}",
         headers=normal_user_token_headers,
     )
-    assert response.status_code == 400
+    assert response.status_code == status.HTTP_400_BAD_REQUEST
     content = response.json()
     assert content["detail"] == "Not enough permissions"
