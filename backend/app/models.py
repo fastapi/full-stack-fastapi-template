@@ -1,7 +1,10 @@
+from typing import Optional
 import uuid
 
-from pydantic import EmailStr
+from pydantic import EmailStr, BaseModel
 from sqlmodel import Field, Relationship, SQLModel
+from datetime import datetime
+import enum
 
 
 # Shared properties
@@ -112,3 +115,53 @@ class TokenPayload(SQLModel):
 class NewPassword(SQLModel):
     token: str
     new_password: str = Field(min_length=8, max_length=40)
+
+class TaskDifficulty(enum.Enum):
+    ONE_STAR = "one_star"
+    TWO_STAR = "two_star"
+    THREE_STAR = "three_star"
+    FOUR_STAR = "four_star"
+    FIVE_STAR = "five_star"
+
+
+class Task(SQLModel, table=True):
+    __tablename__ = "tasks" 
+
+    id: Optional[int] = Field(default=None, primary_key=True, index=True)
+    title: str = Field(..., max_length=255, description="Заголовок задачи (короткое описание)")
+    description: str = Field(..., description="Полный текст задачи (условие)")
+    test_cases: str = Field(..., description="JSON-объект с тестами (входные данные и ожидание ответа)")
+    constraints: str = Field(default=None, description="JSON-объект с ограничениями (например, время/память)")
+    difficulty: TaskDifficulty = Field(default=TaskDifficulty.ONE_STAR, description="Сложность задачи (1-5 звезд)")
+    tags: str = Field(default=None, description="Тема задачи или теги (например, ['dynamic programming', 'math'])")
+    illumination_type: str = Field(default=None, description="Тип иллюминации, к которой относится задача (interview, kids)")
+    category: str = Field(description="Категория задачи (строки, числа, связные списки и пр.)")
+    hint: Optional[str] = Field(default=None, description="Подсказка к задаче")
+    created_at: datetime = Field(default_factory=datetime, description="Дата создания задачи")
+    is_active: bool = Field(default=True, description="Активность задачи (например, скрытие её в системе)")
+    solutions: list["Solution"] = Relationship(back_populates="task")
+
+
+class Solution(SQLModel, table=True):
+    __tablename__ = "solutions"
+
+    id: Optional[int] = Field(default=None, primary_key=True, index=True)
+    task_id: int = Field(..., foreign_key="tasks.id", description="Связь с задачей")
+    solution_code: str = Field(..., description="Текст решения (например, Python-код)")
+    is_correct: bool = Field(default=False, description="Флаг корректности решения")
+    created_at: datetime = Field(default_factory=datetime.utcnow, description="Дата создания решения")
+    task: Task = Relationship(back_populates="solutions")
+
+class TaskPublic(BaseModel):
+    id: Optional[int] = Field(default=None, primary_key=True, index=True)
+    title: str = Field(..., max_length=255, description="Заголовок задачи (короткое описание)")
+    description: str = Field(..., description="Полный текст задачи (условие)")
+    difficulty: TaskDifficulty = Field(default=TaskDifficulty.ONE_STAR, description="Сложность задачи (1-5 звезд)")
+    illumination_type: str = Field(default=None, description="Тип иллюминации, к которой относится задача (interview, kids)")
+    category: str = Field(description="Категория задачи (строки, числа, связные списки и пр.)")
+    created_at: datetime = Field(default_factory=datetime, description="Дата создания задачи")
+
+class IlluminationPublic(SQLModel):
+    illumination_type: str
+    tasks: list[TaskPublic]
+

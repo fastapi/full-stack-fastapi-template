@@ -34,6 +34,7 @@ const UserMenu = () => {
             aria-label="Options"
             icon={<FaUserAstronaut color="white" fontSize="18px" />}
             bg="ui.main"
+            _hover={{ bg: "gray.700" }}
             isRound
             data-testid="user-menu"
           />
