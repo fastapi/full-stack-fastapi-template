@@ -1,0 +1,126 @@
+{{- if .Values.backend.enabled }}
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ .Release.Name }}-backend
+  labels:
+    app.kubernetes.io/name: {{ .Release.Name }}
+    app.kubernetes.io/instance: {{ .Release.Name }}
+    app.kubernetes.io/component: backend
+spec:
+  replicas: {{ .Values.backend.replicaCount }}
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: {{ .Release.Name }}
+      app.kubernetes.io/instance: {{ .Release.Name }}
+      app.kubernetes.io/component: backend
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: {{ .Release.Name }}
+        app.kubernetes.io/instance: {{ .Release.Name }}
+        app.kubernetes.io/component: backend
+    spec:
+      initContainers:
+        - name: init-db
+          image: "{{ .Values.backend.image.repository }}:{{ .Values.backend.image.tag }}"
+          command: ["sh", "-c", "mkdir -p /app/data && chmod 777 /app/data"]
+          securityContext:
+            runAsUser: 0
+          volumeMounts:
+            - name: app-db-data
+              mountPath: /app/data
+        - name: wait-for-prestart
+          image: postgres:12
+          command: ['sh', '-c', 'until pg_isready -h {{ .Release.Name }}-db -p 5432 -U postgres -d app; do echo "waiting for database..."; sleep 2; done']
+          env:
+            - name: PGPASSWORD
+              value: {{ .Values.db.env.POSTGRES_PASSWORD | quote }}
+      containers:
+        - name: backend
+          image: "{{ .Values.backend.image.repository }}:{{ .Values.backend.image.tag }}"
+          imagePullPolicy: {{ .Values.backend.image.pullPolicy }}
+          ports:
+            - name: http
+              containerPort: 8000
+              protocol: TCP
+          resources:
+            {{- toYaml .Values.backend.resources | nindent 12 }}
+          envFrom:
+            - configMapRef:
+                name: {{ .Release.Name }}-config
+            - secretRef:
+                name: {{ .Release.Name }}-secrets
+          env:
+            - name: PYTHONPATH
+              value: "/app"
+            - name: PROJECT_NAME
+              value: {{ .Values.backend.env.PROJECT_NAME | quote }}
+            - name: ENVIRONMENT
+              value: {{ .Values.backend.env.ENVIRONMENT | quote }}
+            - name: FIRST_SUPERUSER
+              value: {{ .Values.backend.env.FIRST_SUPERUSER | quote }}
+            - name: FIRST_SUPERUSER_PASSWORD
+              value: {{ .Values.backend.env.FIRST_SUPERUSER_PASSWORD | quote }}
+            - name: FRONTEND_HOST
+              value: {{ .Values.backend.env.FRONTEND_HOST | quote }}
+            - name: SECRET_KEY
+              value: {{ .Values.backend.env.SECRET_KEY | quote }}
+            - name: BACKEND_CORS_ORIGINS
+              value: {{ .Values.backend.env.BACKEND_CORS_ORIGINS | quote }}
+            - name: SMTP_HOST
+              value: {{ .Values.backend.env.SMTP_HOST | quote }}
+            - name: SMTP_USER
+              value: {{ .Values.backend.env.SMTP_USER | quote }}
+            - name: SMTP_PASSWORD
+              value: {{ .Values.backend.env.SMTP_PASSWORD | quote }}
+            - name: EMAILS_FROM_EMAIL
+              value: {{ .Values.backend.env.EMAILS_FROM_EMAIL | quote }}
+            - name: SENTRY_DSN
+              value: {{ .Values.backend.env.SENTRY_DSN | quote }}
+            - name: POSTGRES_SERVER
+              value: {{ .Values.backend.env.POSTGRES_SERVER | quote }}
+            - name: POSTGRES_PORT
+              value: {{ .Values.backend.env.POSTGRES_PORT | quote }}
+            - name: POSTGRES_DB
+              value: {{ .Values.backend.env.POSTGRES_DB | quote }}
+            - name: POSTGRES_USER
+              value: {{ .Values.backend.env.POSTGRES_USER | quote }}
+            - name: POSTGRES_PASSWORD
+              value: {{ .Values.backend.env.POSTGRES_PASSWORD | quote }}
+          volumeMounts:
+            - name: app-db-data
+              mountPath: /app/data
+          command: ["sh", "-c"]
+          args:
+            - |
+              echo "Current directory: $(pwd)" &&
+              echo "Python path: $PYTHONPATH" &&
+              echo "Contents of /app: $(ls -la /app)" &&
+              echo "Python version: $(python3.11 --version)" &&
+              python3.11 -m app.backend_pre_start &&
+              python3.11 -m uvicorn app.main:app --host 0.0.0.0 --port 8000 --log-level debug
+          startupProbe:
+            httpGet:
+              path: /api/v1/utils/health-check/
+              port: http
+            failureThreshold: 30
+            periodSeconds: 10
+          livenessProbe:
+            httpGet:
+              path: /api/v1/utils/health-check/
+              port: http
+            initialDelaySeconds: 30
+            periodSeconds: 10
+            failureThreshold: 3
+          readinessProbe:
+            httpGet:
+              path: /api/v1/utils/health-check/
+              port: http
+            initialDelaySeconds: 5
+            periodSeconds: 10
+            failureThreshold: 3
+      volumes:
+        - name: app-db-data
+          emptyDir: {}
+{{- end }}

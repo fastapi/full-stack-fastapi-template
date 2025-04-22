@@ -1,0 +1,15 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ .Release.Name }}-config
+data:
+  DOMAIN: {{ .Values.global.domain | quote }}
+  ENVIRONMENT: {{ .Values.global.environment | quote }}
+  FRONTEND_HOST: {{ .Values.backend.env.FRONTEND_HOST | quote }}
+  BACKEND_CORS_ORIGINS: {{ .Values.backend.env.BACKEND_CORS_ORIGINS | default "*" | quote }}
+  SMTP_HOST: {{ .Values.backend.env.SMTP_HOST | default "" | quote }}
+  EMAILS_FROM_EMAIL: {{ .Values.backend.env.EMAILS_FROM_EMAIL | default "" | quote }}
+  POSTGRES_SERVER: {{ .Release.Name }}-db
+  POSTGRES_PORT: "5432"
+  SENTRY_DSN: {{ .Values.backend.env.SENTRY_DSN | default "" | quote }}
+  DATABASE_URL: postgresql://{{ .Values.db.env.POSTGRES_USER }}:{{ .Values.db.env.POSTGRES_PASSWORD }}@{{ .Release.Name }}-db:5432/{{ .Values.db.env.POSTGRES_DB }} 

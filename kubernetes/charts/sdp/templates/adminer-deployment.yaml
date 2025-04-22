@@ -1,0 +1,35 @@
+# Adminer Deployment
+{{- if .Values.adminer.enabled }}
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ .Release.Name }}-adminer
+  labels:
+    app: adminer
+spec:
+  replicas: {{ .Values.adminer.replicaCount }}
+  selector:
+    matchLabels:
+      app: adminer
+  template:
+    metadata:
+      labels:
+        app: adminer
+    spec:
+      containers:
+      - name: adminer
+        image: "{{ .Values.adminer.image.repository }}:{{ .Values.adminer.image.tag }}"
+        imagePullPolicy: {{ .Values.adminer.image.pullPolicy }}
+        ports:
+        - containerPort: {{ .Values.adminer.service.port }}
+        volumeMounts:
+        {{- range .Values.adminer.volumeMounts }}
+        - name: {{ .name }}
+          mountPath: {{ .mountPath }}
+        {{- end }}
+      volumes:
+      {{- range .Values.adminer.volumes }}
+      - name: {{ .name }}
+        emptyDir: {}
+      {{- end }}
+{{- end }}

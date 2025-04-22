@@ -1,0 +1,214 @@
+# Global values
+global:
+  environment: production
+  domain: example.com
+
+# Backend configuration
+backend:
+  enabled: true
+  image:
+    repository: dperezsa/sdp-backend
+    tag: 1.0.0
+    pullPolicy: IfNotPresent
+  replicaCount: 1
+  resources:
+    limits:
+      cpu: 500m
+      memory: 512Mi
+    requests:
+      cpu: 200m
+      memory: 256Mi
+  service:
+    type: ClusterIP
+    port: 8000
+  env:
+    PROJECT_NAME: Service Data Platform
+    ENVIRONMENT: production
+    FIRST_SUPERUSER: admin@example.com
+    FIRST_SUPERUSER_PASSWORD: changeme123
+    FRONTEND_HOST: http://localhost:5173
+    SECRET_KEY: changeme123
+    BACKEND_CORS_ORIGINS: '["http://localhost", "https://dashboard.example.com"]'
+    SMTP_HOST: ""
+    SMTP_USER: ""
+    SMTP_PASSWORD: ""
+    EMAILS_FROM_EMAIL: ""
+    SENTRY_DSN: ""
+    POSTGRES_SERVER: sdp-db
+    POSTGRES_PORT: 5432
+    POSTGRES_DB: app
+    POSTGRES_USER: postgres
+    POSTGRES_PASSWORD: changeme123
+  volumeMounts:
+    - name: app-db-data
+      mountPath: /app/data
+  volumes:
+    - name: app-db-data
+      emptyDir: {}
+
+# Prestart configuration
+prestart:
+  enabled: false
+  image:
+    repository: dperezsa/sdp-backend55
+    tag: 1.0.0
+    pullPolicy: IfNotPresent
+  resources:
+    limits:
+      cpu: 500m
+      memory: 512Mi
+    requests:
+      cpu: 200m
+      memory: 256Mi
+  env:
+    PROJECT_NAME: Service Data Platform
+    ENVIRONMENT: production
+    FIRST_SUPERUSER: admin@example.com
+    FIRST_SUPERUSER_PASSWORD: changeme123
+    FRONTEND_HOST: http://localhost:5173
+    SECRET_KEY: changeme123
+    BACKEND_CORS_ORIGINS: '["http://localhost", "https://dashboard.example.com"]'
+    SMTP_HOST: ""
+    SMTP_USER: ""
+    SMTP_PASSWORD: ""
+    EMAILS_FROM_EMAIL: ""
+    SENTRY_DSN: ""
+    POSTGRES_SERVER: sdp-db
+    POSTGRES_PORT: 5432
+    POSTGRES_DB: app
+    POSTGRES_USER: postgres
+    POSTGRES_PASSWORD: changeme123
+
+# Frontend configuration
+frontend:
+  enabled: false
+  image:
+    repository: dperezsa/sdp-frontend
+    tag: 1.0.0
+    pullPolicy: IfNotPresent
+  replicaCount: 1
+  resources:
+    limits:
+      cpu: 200m
+      memory: 256Mi
+    requests:
+      cpu: 100m
+      memory: 128Mi
+  service:
+    type: ClusterIP
+    port: 80
+  env:
+    VITE_API_URL: http://{{ .Release.Name }}-backend.default.svc.cluster.local:8000
+
+# Adminer configuration
+adminer:
+  enabled: false
+  image:
+    repository: dperezsa/adminer
+    tag: latest
+    pullPolicy: IfNotPresent
+  replicaCount: 1
+  resources:
+    limits:
+      cpu: 200m
+      memory: 256Mi
+    requests:
+      cpu: 100m
+      memory: 128Mi
+  service:
+    type: ClusterIP
+    port: 8080
+  env:
+    ADMINER_DESIGN: pepa-linha-dark
+  volumeMounts:
+    - name: app-db-data
+      mountPath: /var/www/html/data
+  volumes:
+    - name: app-db-data
+      emptyDir: {}
+
+# Database configuration
+db:
+  enabled: false
+  image:
+    repository: postgres
+    tag: "12"
+    pullPolicy: IfNotPresent
+  replicaCount: 1
+  resources:
+    limits:
+      cpu: 500m
+      memory: 512Mi
+    requests:
+      cpu: 200m
+      memory: 256Mi
+  service:
+    type: ClusterIP
+    port: 5432
+  env:
+    POSTGRES_PASSWORD: changeme123
+    POSTGRES_DB: app
+    POSTGRES_USER: postgres
+    POSTGRES_HOST_AUTH_METHOD: trust
+  config:
+    PGDATA: /var/lib/postgresql/data/pgdata
+  volumeMounts:
+    - name: postgres-data
+      mountPath: /var/lib/postgresql/data
+  volumes:
+    - name: postgres-data
+      persistentVolumeClaim:
+        claimName: sdp-db-pvc
+  persistence:
+    size: 10Gi
+  postgresqlConfig:
+    max_connections: "100"
+    shared_buffers: "128MB"
+    effective_cache_size: "256MB"
+    maintenance_work_mem: "64MB"
+    checkpoint_completion_target: "0.9"
+    wal_buffers: "16MB"
+    default_statistics_target: "100"
+    random_page_cost: "1.1"
+    effective_io_concurrency: "200"
+    work_mem: "4MB"
+    min_wal_size: "1GB"
+    max_wal_size: "4GB"
+    max_worker_processes: "2"
+    max_parallel_workers_per_gather: "1"
+    max_parallel_workers: "2"
+    max_parallel_maintenance_workers: "2"
+
+
+# Ingress configuration
+ingress:
+  enabled: false
+  className: nginx
+  annotations:
+    cert-manager.io/cluster-issuer: letsencrypt-prod
+  hosts:
+    - host: dashboard.example.com
+      paths:
+        - path: /
+          pathType: Prefix
+          service: frontend
+    - host: api.example.com
+      paths:
+        - path: /
+          pathType: Prefix
+          service: backend
+    - host: adminer.example.com
+      paths:
+        - path: /
+          pathType: Prefix
+          service: adminer
+  tls:
+    - secretName: dashboard-tls
+      hosts:
+        - dashboard.example.com
+    - secretName: api-tls
+      hosts:
+        - api.example.com
+    - secretName: adminer-tls
+      hosts:
+        - adminer.example.com

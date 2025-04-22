@@ -1,0 +1,73 @@
+{{- if .Values.prestart.enabled }}
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: {{ .Release.Name }}-prestart
+  labels:
+    app.kubernetes.io/name: {{ .Release.Name }}
+    app.kubernetes.io/instance: {{ .Release.Name }}
+    app.kubernetes.io/component: prestart
+spec:
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: {{ .Release.Name }}
+        app.kubernetes.io/instance: {{ .Release.Name }}
+        app.kubernetes.io/component: prestart
+    spec:
+      initContainers:
+        - name: wait-for-db
+          image: postgres:12
+          command: ['sh', '-c', 'until pg_isready -h {{ .Release.Name }}-db -p 5432 -U postgres -d app; do echo "waiting for database..."; sleep 2; done']
+          env:
+            - name: PGPASSWORD
+              value: {{ .Values.db.env.POSTGRES_PASSWORD | quote }}
+      containers:
+      - name: prestart
+        image: {{ .Values.prestart.image.repository }}:{{ .Values.prestart.image.tag }}
+        imagePullPolicy: {{ .Values.prestart.image.pullPolicy }}
+        command: ["bash", "scripts/prestart.sh"]
+        env:
+        - name: PROJECT_NAME
+          value: {{ .Values.prestart.env.PROJECT_NAME | quote }}
+        - name: ENVIRONMENT
+          value: {{ .Values.prestart.env.ENVIRONMENT | quote }}
+        - name: FIRST_SUPERUSER
+          value: {{ .Values.prestart.env.FIRST_SUPERUSER | quote }}
+        - name: FIRST_SUPERUSER_PASSWORD
+          value: {{ .Values.prestart.env.FIRST_SUPERUSER_PASSWORD | quote }}
+        - name: FRONTEND_HOST
+          value: {{ .Values.prestart.env.FRONTEND_HOST | quote }}
+        - name: SECRET_KEY
+          value: {{ .Values.prestart.env.SECRET_KEY | quote }}
+        - name: BACKEND_CORS_ORIGINS
+          value: {{ .Values.prestart.env.BACKEND_CORS_ORIGINS | quote }}
+        - name: SMTP_HOST
+          value: {{ .Values.prestart.env.SMTP_HOST | quote }}
+        - name: SMTP_USER
+          value: {{ .Values.prestart.env.SMTP_USER | quote }}
+        - name: SMTP_PASSWORD
+          value: {{ .Values.prestart.env.SMTP_PASSWORD | quote }}
+        - name: EMAILS_FROM_EMAIL
+          value: {{ .Values.prestart.env.EMAILS_FROM_EMAIL | quote }}
+        - name: SENTRY_DSN
+          value: {{ .Values.prestart.env.SENTRY_DSN | quote }}
+        - name: POSTGRES_SERVER
+          value: {{ .Values.prestart.env.POSTGRES_SERVER | quote }}
+        - name: POSTGRES_PORT
+          value: {{ .Values.prestart.env.POSTGRES_PORT | quote }}
+        - name: POSTGRES_DB
+          value: {{ .Values.prestart.env.POSTGRES_DB | quote }}
+        - name: POSTGRES_USER
+          value: {{ .Values.prestart.env.POSTGRES_USER | quote }}
+        - name: POSTGRES_PASSWORD
+          value: {{ .Values.prestart.env.POSTGRES_PASSWORD | quote }}
+        resources:
+          limits:
+            cpu: {{ .Values.prestart.resources.limits.cpu }}
+            memory: {{ .Values.prestart.resources.limits.memory }}
+          requests:
+            cpu: {{ .Values.prestart.resources.requests.cpu }}
+            memory: {{ .Values.prestart.resources.requests.memory }}
+      restartPolicy: OnFailure
+{{- end }}
