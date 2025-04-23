@@ -1,14 +1,31 @@
 #!/usr/bin/env sh
 
-# Exit on error
+# Exit in case of error
 set -e
 
-# Config
-HELM_CHART_DIR="./kubernetes/charts/sdp"
-RELEASE_NAME="SDP"
+# Define variables
+CHART_PACKAGE=$(ls *.tgz | head -n 1)  # Automatically pick the first .tgz file
+RELEASE_NAME="sdp"
+NAMESPACE="default"
 BACKEND_PORT=8000
 FRONTEND_PORT=5173
 ADMINER_PORT=8080
+TIMEOUT=360  # 6 minute timeout
+
+# Check if a chart package exists
+if [ -z "$CHART_PACKAGE" ]; then
+  echo "Error: No .tgz file found. Please run build.sh first."
+  exit 1
+fi
+
+# Deploy the Helm chart
+echo "Deploying Helm chart from package: $CHART_PACKAGE..."
+helm upgrade --install $RELEASE_NAME $CHART_PACKAGE --namespace $NAMESPACE --timeout ${TIMEOUT}s --wait
+
+echo "Deployment completed successfully!"
+
+# Port forwarding section
+echo "Starting port forwarding..."
 
 # Get pod names using go-template
 echo "🔍 Getting pod names..."
@@ -52,25 +69,26 @@ fi
 echo "🔌 Starting port forwarding..."
 
 if [ -n "$BACKEND_POD" ]; then
-  echo "🌐 Backend API: http://localhost:$BACKEND_PORT"
   kubectl port-forward pod/$BACKEND_POD $BACKEND_PORT:8000 &
   BACKEND_PID=$!
+  echo "🌐 Backend API: http://localhost:$BACKEND_PORT"
 else
   BACKEND_PID=""
 fi
 
 if [ -n "$FRONTEND_POD" ]; then
-  echo "🖥️ Frontend: http://localhost:$FRONTEND_PORT"
   kubectl port-forward pod/$FRONTEND_POD $FRONTEND_PORT:80 &
   FRONTEND_PID=$!
+  echo "🖥️ Frontend: http://localhost:$FRONTEND_PORT"
+  
 else
   FRONTEND_PID=""
 fi
 
 if [ -n "$ADMINER_POD" ]; then
-  echo "🛠️ Adminer: http://localhost:$ADMINER_PORT"
   kubectl port-forward pod/$ADMINER_POD $ADMINER_PORT:80 &
   ADMINER_PID=$!
+  echo "🛠️ Adminer: http://localhost:$ADMINER_PORT"
 else
   ADMINER_PID=""
 fi

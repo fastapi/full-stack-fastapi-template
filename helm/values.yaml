@@ -48,9 +48,9 @@ backend:
 
 # Prestart configuration
 prestart:
-  enabled: false
+  enabled: true
   image:
-    repository: dperezsa/sdp-backend55
+    repository: dperezsa/sdp-backend
     tag: 1.0.0
     pullPolicy: IfNotPresent
   resources:
@@ -81,7 +81,7 @@ prestart:
 
 # Frontend configuration
 frontend:
-  enabled: false
+  enabled: true
   image:
     repository: dperezsa/sdp-frontend
     tag: 1.0.0
@@ -102,7 +102,7 @@ frontend:
 
 # Adminer configuration
 adminer:
-  enabled: false
+  enabled: true
   image:
     repository: dperezsa/adminer
     tag: latest
@@ -129,7 +129,7 @@ adminer:
 
 # Database configuration
 db:
-  enabled: false
+  enabled: true
   image:
     repository: postgres
     tag: "12"
@@ -182,7 +182,7 @@ db:
 
 # Ingress configuration
 ingress:
-  enabled: false
+  enabled: true
   className: nginx
   annotations:
     cert-manager.io/cluster-issuer: letsencrypt-prod
