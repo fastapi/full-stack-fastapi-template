@@ -13,7 +13,7 @@ import {
 import { handleError } from "@/utils"
 
 const isLoggedIn = () => {
-  return localStorage.getItem("access_token") !== null
+  return localStorage.getItem("is_authenticated") !== null
 }
 
 const useAuth = () => {
@@ -45,7 +45,7 @@ const useAuth = () => {
     const response = await LoginService.loginAccessToken({
       formData: data,
     })
-    localStorage.setItem("access_token", response.access_token)
+    localStorage.setItem("is_authenticated", "true")
   }
 
   const loginMutation = useMutation({
@@ -61,7 +61,7 @@ const useAuth = () => {
   const logout = async () => {
     try {
       await LoginService.logout();
-      localStorage.removeItem("access_token");
+      localStorage.removeItem("is_authenticated");
       navigate({ to: "/login" });
     } catch (error) {
       console.error("Logout failed:", error);
