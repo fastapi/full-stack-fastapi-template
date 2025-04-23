@@ -49,6 +49,9 @@ export type Token = {
   token_type?: string
 }
 
+export type HTTPOnlyCookie = {
+  message: string
+}
 export type UpdatePassword = {
   current_password: string
   new_password: string
@@ -136,7 +139,7 @@ export type LoginLoginAccessTokenData = {
   formData: Body_login_login_access_token
 }
 
-export type LoginLoginAccessTokenResponse = Token
+export type LoginLoginAccessTokenResponse = HTTPOnlyCookie
 
 export type LoginTestTokenResponse = UserPublic
 

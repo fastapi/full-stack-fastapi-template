@@ -122,6 +122,7 @@ def read_user_me(current_user: CurrentUser) -> Any:
     """
     Get current user.
     """
+    print("read_user_me!!!!!!!")
     return current_user
 
 

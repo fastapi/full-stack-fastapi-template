@@ -183,7 +183,11 @@ export class LoginService {
       method: "POST",
       url: "/api/v1/login/access-token",
       formData: data.formData,
+      headers:  {
+        "Content-Type": "application/x-www-form-urlencoded",
+      },
       mediaType: "application/x-www-form-urlencoded",
+      withCredentials: true,
       errors: {
         422: "Validation Error",
       },
@@ -200,6 +204,7 @@ export class LoginService {
     return __request(OpenAPI, {
       method: "POST",
       url: "/api/v1/login/test-token",
+      withCredentials: true,
     })
   }
 
@@ -326,12 +331,20 @@ export class UsersService {
    * @returns UserPublic Successful Response
    * @throws ApiError
    */
-  public static readUserMe(): CancelablePromise<UsersReadUserMeResponse> {
-    return __request(OpenAPI, {
-      method: "GET",
-      url: "/api/v1/users/me",
-    })
-  }
+  // public static readUserMe(): CancelablePromise<UsersReadUserMeResponse> {
+  //   console.log("readUserMe")
+  //   let r = __request(OpenAPI, {
+  //     method: "GET",
+  //     url: "/api/v1/users/me",
+  //     withCredentials: true,
+  //   })
+  //   console.log(r.promise)
+  //   return __request(OpenAPI, {
+  //     method: "GET",
+  //     url: "/api/v1/users/me",
+  //     withCredentials: true,
+  //   })
+  // }
 
   /**
    * Delete User Me

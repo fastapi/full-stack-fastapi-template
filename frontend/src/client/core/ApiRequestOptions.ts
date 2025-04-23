@@ -18,4 +18,5 @@ export type ApiRequestOptions<T = unknown> = {
   readonly responseHeader?: string
   readonly responseTransformer?: (data: unknown) => Promise<T>
   readonly url: string
+  readonly withCredentials?: boolean 
 }

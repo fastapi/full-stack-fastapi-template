@@ -1,9 +1,9 @@
 from collections.abc import Generator
-from typing import Annotated
+from typing import Annotated, Optional
 
 import jwt
-from fastapi import Depends, HTTPException, status
-from fastapi.security import OAuth2PasswordBearer
+from fastapi import Depends, HTTPException, status, Cookie
+from fastapi.security import OAuth2PasswordBearer, APIKeyCookie
 from jwt.exceptions import InvalidTokenError
 from pydantic import ValidationError
 from sqlmodel import Session
@@ -16,7 +16,7 @@ from app.models import TokenPayload, User
 reusable_oauth2 = OAuth2PasswordBearer(
     tokenUrl=f"{settings.API_V1_STR}/login/access-token"
 )
-
+cookie_scheme = APIKeyCookie(name="http_only_auth_cookie")
 
 def get_db() -> Generator[Session, None, None]:
     with Session(engine) as session:
@@ -27,27 +27,42 @@ SessionDep = Annotated[Session, Depends(get_db)]
 TokenDep = Annotated[str, Depends(reusable_oauth2)]
 
 
-def get_current_user(session: SessionDep, token: TokenDep) -> User:
+def get_current_user(
+        session: SessionDep,
+        http_only_auth_cookie: str = Depends(cookie_scheme),
+) -> User:
+    print("start get_current_user...")
+    if not http_only_auth_cookie:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Not authenticated",
+        )
+
     try:
         payload = jwt.decode(
-            token, settings.SECRET_KEY, algorithms=[security.ALGORITHM]
+            http_only_auth_cookie,
+            settings.SECRET_KEY,
+            algorithms=[security.ALGORITHM]
         )
         token_data = TokenPayload(**payload)
+        print(f"get_current_user token data: {token_data}")
     except (InvalidTokenError, ValidationError):
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,
             detail="Could not validate credentials",
         )
+
     user = session.get(User, token_data.sub)
     if not user:
         raise HTTPException(status_code=404, detail="User not found")
     if not user.is_active:
         raise HTTPException(status_code=400, detail="Inactive user")
+
     return user
 
 
 CurrentUser = Annotated[User, Depends(get_current_user)]
-
+print(f"CurrentUser {CurrentUser}")
 
 def get_current_active_superuser(current_user: CurrentUser) -> User:
     if not current_user.is_superuser:
