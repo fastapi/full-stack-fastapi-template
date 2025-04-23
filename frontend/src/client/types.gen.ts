@@ -141,6 +141,8 @@ export type LoginLoginAccessTokenData = {
 
 export type LoginLoginAccessTokenResponse = HTTPOnlyCookie
 
+export type LogoutResponse = HTTPOnlyCookie
+
 export type LoginTestTokenResponse = UserPublic
 
 export type LoginRecoverPasswordData = {

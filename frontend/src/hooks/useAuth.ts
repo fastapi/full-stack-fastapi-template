@@ -58,9 +58,15 @@ const useAuth = () => {
     },
   })
 
-  const logout = () => {
-    localStorage.removeItem("access_token")
-    navigate({ to: "/login" })
+  const logout = async () => {
+    try {
+      await LoginService.logout();
+      localStorage.removeItem("access_token");
+      navigate({ to: "/login" });
+    } catch (error) {
+      console.error("Logout failed:", error);
+      navigate({ to: "/login" });
+    }
   }
 
   return {

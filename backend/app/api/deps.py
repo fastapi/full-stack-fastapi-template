@@ -31,7 +31,6 @@ def get_current_user(
         session: SessionDep,
         http_only_auth_cookie: str = Depends(cookie_scheme),
 ) -> User:
-    print("start get_current_user...")
     if not http_only_auth_cookie:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
@@ -45,7 +44,6 @@ def get_current_user(
             algorithms=[security.ALGORITHM]
         )
         token_data = TokenPayload(**payload)
-        print(f"get_current_user token data: {token_data}")
     except (InvalidTokenError, ValidationError):
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,
@@ -62,7 +60,6 @@ def get_current_user(
 
 
 CurrentUser = Annotated[User, Depends(get_current_user)]
-print(f"CurrentUser {CurrentUser}")
 
 def get_current_active_superuser(current_user: CurrentUser) -> User:
     if not current_user.is_superuser:

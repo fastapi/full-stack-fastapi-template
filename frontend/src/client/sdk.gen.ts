@@ -15,6 +15,7 @@ import type {
   ItemsDeleteItemData,
   ItemsDeleteItemResponse,
   LoginLoginAccessTokenData,
+  LogoutResponse,
   LoginLoginAccessTokenResponse,
   LoginTestTokenResponse,
   LoginRecoverPasswordData,
@@ -66,6 +67,7 @@ export class ItemsService {
         skip: data.skip,
         limit: data.limit,
       },
+      withCredentials: true,
       errors: {
         422: "Validation Error",
       },
@@ -88,6 +90,7 @@ export class ItemsService {
       url: "/api/v1/items/",
       body: data.requestBody,
       mediaType: "application/json",
+      withCredentials: true,
       errors: {
         422: "Validation Error",
       },
@@ -111,6 +114,7 @@ export class ItemsService {
       path: {
         id: data.id,
       },
+      withCredentials: true,
       errors: {
         422: "Validation Error",
       },
@@ -135,6 +139,7 @@ export class ItemsService {
       path: {
         id: data.id,
       },
+      withCredentials: true,
       body: data.requestBody,
       mediaType: "application/json",
       errors: {
@@ -160,6 +165,7 @@ export class ItemsService {
       path: {
         id: data.id,
       },
+      withCredentials: true,
       errors: {
         422: "Validation Error",
       },
@@ -193,6 +199,31 @@ export class LoginService {
       },
     })
   }
+
+
+    /**
+   * Login Access Token
+   * OAuth2 compatible token login, get an access token for future requests
+   * @param data The data for the request.
+   * @param data.formData
+   * @returns Token Successful Response
+   * @throws ApiError
+   */
+    public static logout(): CancelablePromise<LogoutResponse> {
+      return __request(OpenAPI, {
+        method: "POST",
+        url: "/api/v1/logout",
+        headers:  {
+          "Content-Type": "application/x-www-form-urlencoded",
+        },
+        mediaType: "application/x-www-form-urlencoded",
+        withCredentials: true,
+        errors: {
+          422: "Validation Error",
+        },
+      })
+    }
+  
 
   /**
    * Test Token
@@ -331,20 +362,13 @@ export class UsersService {
    * @returns UserPublic Successful Response
    * @throws ApiError
    */
-  // public static readUserMe(): CancelablePromise<UsersReadUserMeResponse> {
-  //   console.log("readUserMe")
-  //   let r = __request(OpenAPI, {
-  //     method: "GET",
-  //     url: "/api/v1/users/me",
-  //     withCredentials: true,
-  //   })
-  //   console.log(r.promise)
-  //   return __request(OpenAPI, {
-  //     method: "GET",
-  //     url: "/api/v1/users/me",
-  //     withCredentials: true,
-  //   })
-  // }
+  public static readUserMe(): CancelablePromise<UsersReadUserMeResponse> {
+    return __request(OpenAPI, {
+      method: "GET",
+      url: "/api/v1/users/me",
+      withCredentials: true,
+    })
+  }
 
   /**
    * Delete User Me
@@ -356,6 +380,7 @@ export class UsersService {
     return __request(OpenAPI, {
       method: "DELETE",
       url: "/api/v1/users/me",
+      withCredentials: true,
     })
   }
 
@@ -375,6 +400,7 @@ export class UsersService {
       url: "/api/v1/users/me",
       body: data.requestBody,
       mediaType: "application/json",
+      withCredentials: true,
       errors: {
         422: "Validation Error",
       },
@@ -397,6 +423,7 @@ export class UsersService {
       url: "/api/v1/users/me/password",
       body: data.requestBody,
       mediaType: "application/json",
+      withCredentials: true,
       errors: {
         422: "Validation Error",
       },
@@ -468,6 +495,7 @@ export class UsersService {
       },
       body: data.requestBody,
       mediaType: "application/json",
+      withCredentials: true,
       errors: {
         422: "Validation Error",
       },
@@ -488,6 +516,7 @@ export class UsersService {
     return __request(OpenAPI, {
       method: "DELETE",
       url: "/api/v1/users/{user_id}",
+      withCredentials: true,
       path: {
         user_id: data.userId,
       },
