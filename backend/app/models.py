@@ -132,11 +132,13 @@ class CharacterBase(SQLModel):
     scenario: str | None = Field(default=None, max_length=2000)
     category: str | None = Field(default=None, max_length=255)
     greeting: str | None = Field(default=None, max_length=1000)
+
     voice_id: str | None = Field(default=None, max_length=255)
     language: str | None = Field(default=None, max_length=50)
     tags: list[str] | None = Field(default=None)
     popularity_score: float | None = Field(default=None)
     is_featured: bool = Field(default=False)
+
     created_at: datetime = Field(default_factory=datetime.utcnow)
 
 
@@ -164,10 +166,9 @@ class CharacterUpdate(CharacterBase):
     voice_id: str | None = Field(default=None, max_length=255)
     language: str | None = Field(default=None, max_length=50)
     tags: list[str] | None = Field(default=None)
-    popularity_score: float | None = Field(default=0.0)
+
     is_featured: bool = Field(default=False)
     created_at: datetime | None = None
-
     status: CharacterStatus | None = None
 
 
@@ -176,11 +177,11 @@ class Character(CharacterBase, table=True):
     id: uuid.UUID = Field(default_factory=uuid.uuid4, primary_key=True)
 
     status: CharacterStatus = Field(default=CharacterStatus.PENDING)
-    like_count: int = Field(default=0)
+    
     total_messages: int = Field(default=0) 
 
+    
     creator_id: uuid.UUID = Field(foreign_key="user.id", nullable=False)
-
     creator: User = Relationship(back_populates="created_characters")
     conversations: list["Conversation"] = Relationship(back_populates="character")
 
@@ -190,7 +191,7 @@ class CharacterPublic(CharacterBase):
     status: CharacterStatus
     creator_id: uuid.UUID
 
-    like_count: int
+    
     total_messages: int
     created_at: datetime
 
