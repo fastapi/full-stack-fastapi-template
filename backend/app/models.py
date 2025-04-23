@@ -120,6 +120,7 @@ class NewPassword(SQLModel):
     token: str
     new_password: str = Field(min_length=8, max_length=40)
 
+# ------------------------Character Model----------------------------
 
 # Shared properties
 class CharacterBase(SQLModel):
@@ -127,6 +128,16 @@ class CharacterBase(SQLModel):
     description: str | None = Field(default=None, max_length=1000)
     image_url: str | None = Field(default=None, max_length=255)
     greeting_message: str | None = Field(default=None, max_length=1000)
+# More field
+    scenario: str | None = Field(default=None, max_length=2000)
+    category: str | None = Field(default=None, max_length=255)
+    greeting: str | None = Field(default=None, max_length=1000)
+    voice_id: str | None = Field(default=None, max_length=255)
+    language: str | None = Field(default=None, max_length=50)
+    tags: list[str] | None = Field(default=None)
+    popularity_score: float | None = Field(default=None)
+    is_featured: bool = Field(default=False)
+    created_at: datetime = Field(default_factory=datetime.utcnow)
 
 
 class CharacterStatus(str, Enum):
@@ -146,24 +157,42 @@ class CharacterUpdate(CharacterBase):
     description: str | None = Field(default=None, max_length=1000)
     image_url: str | None = Field(default=None, max_length=255)
     greeting_message: str | None = Field(default=None, max_length=1000)
+# More fields
+    scenario: str | None = Field(default=None, max_length=2000)
+    greeting: str | None = Field(default=None, max_length=1000)
+    category: str | None = Field(default=None, max_length=255)
+    voice_id: str | None = Field(default=None, max_length=255)
+    language: str | None = Field(default=None, max_length=50)
+    tags: list[str] | None = Field(default=None)
+    popularity_score: float | None = Field(default=0.0)
+    is_featured: bool = Field(default=False)
+    created_at: datetime | None = None
+
     status: CharacterStatus | None = None
 
 
 # Database model
 class Character(CharacterBase, table=True):
     id: uuid.UUID = Field(default_factory=uuid.uuid4, primary_key=True)
+
     status: CharacterStatus = Field(default=CharacterStatus.PENDING)
+    like_count: int = Field(default=0)
+    total_messages: int = Field(default=0) 
+
     creator_id: uuid.UUID = Field(foreign_key="user.id", nullable=False)
 
     creator: User = Relationship(back_populates="created_characters")
     conversations: list["Conversation"] = Relationship(back_populates="character")
-
 
 # Properties to return via API
 class CharacterPublic(CharacterBase):
     id: uuid.UUID
     status: CharacterStatus
     creator_id: uuid.UUID
+
+    like_count: int
+    total_messages: int
+    created_at: datetime
 
 
 class CharactersPublic(SQLModel):
