@@ -1,10 +1,11 @@
-import os
 from datetime import datetime, timedelta, timezone
 from typing import Any
+
 import jwt
-from passlib.context import CryptContext
-from fastapi.responses import JSONResponse
 from fastapi import Response
+from fastapi.responses import JSONResponse
+from passlib.context import CryptContext
+
 from app.core.config import settings
 
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
@@ -21,9 +22,7 @@ def create_access_token(subject: str | Any, expires_delta: timedelta) -> str:
 
 def set_auth_cookie(subject: str | Any, expires_delta: timedelta) -> Response:
     access_token = create_access_token(subject, expires_delta)
-    response = JSONResponse(
-        content={"message": "Login successful"}
-    )
+    response = JSONResponse(content={"message": "Login successful"})
     # Note: The secure flag on cookies ensures they're only sent over encrypted HTTPS connections. For local development (HTTP) set it to False
     response.set_cookie(
         key="http_only_auth_cookie",
@@ -33,6 +32,7 @@ def set_auth_cookie(subject: str | Any, expires_delta: timedelta) -> Response:
         expires=3600,
         samesite="lax",
         secure=True,
+        domain=None,
     )
     return response
 

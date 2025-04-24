@@ -2,8 +2,8 @@ from collections.abc import Generator
 from typing import Annotated
 
 import jwt
-from fastapi import Depends, HTTPException, status, Cookie
-from fastapi.security import OAuth2PasswordBearer, APIKeyCookie
+from fastapi import Depends, HTTPException, status
+from fastapi.security import APIKeyCookie, OAuth2PasswordBearer
 from jwt.exceptions import InvalidTokenError
 from pydantic import ValidationError
 from sqlmodel import Session
@@ -18,6 +18,7 @@ reusable_oauth2 = OAuth2PasswordBearer(
 )
 cookie_scheme = APIKeyCookie(name="http_only_auth_cookie")
 
+
 def get_db() -> Generator[Session, None, None]:
     with Session(engine) as session:
         yield session
@@ -28,8 +29,8 @@ TokenDep = Annotated[str, Depends(reusable_oauth2)]
 
 
 def get_current_user(
-        session: SessionDep,
-        http_only_auth_cookie: str = Depends(cookie_scheme),
+    session: SessionDep,
+    http_only_auth_cookie: str = Depends(cookie_scheme),
 ) -> User:
     if not http_only_auth_cookie:
         raise HTTPException(
@@ -39,9 +40,7 @@ def get_current_user(
 
     try:
         payload = jwt.decode(
-            http_only_auth_cookie,
-            settings.SECRET_KEY,
-            algorithms=[security.ALGORITHM]
+            http_only_auth_cookie, settings.SECRET_KEY, algorithms=[security.ALGORITHM]
         )
         token_data = TokenPayload(**payload)
     except (InvalidTokenError, ValidationError):
@@ -60,6 +59,7 @@ def get_current_user(
 
 
 CurrentUser = Annotated[User, Depends(get_current_user)]
+
 
 def get_current_active_superuser(current_user: CurrentUser) -> User:
     if not current_user.is_superuser:
