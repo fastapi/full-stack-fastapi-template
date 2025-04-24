@@ -25,7 +25,7 @@ def login_access_token(
         session: SessionDep, form_data: Annotated[OAuth2PasswordRequestForm, Depends()]
 ) -> JSONResponse:
     """
-    OAuth2 compatible token login, get an access token for future requests (sent in a HTTP-only cookie)
+    OAuth2-compatible token login: get an access token for future requests (sent in an HTTP-only cookie)
     """
     user = crud.authenticate(
         session=session, email=form_data.username, password=form_data.password
@@ -35,7 +35,7 @@ def login_access_token(
     elif not user.is_active:
         raise HTTPException(status_code=400, detail="Inactive user")
     access_token_expires = timedelta(minutes=settings.ACCESS_TOKEN_EXPIRE_MINUTES)
-    return security.set_response_cookie(user.id, access_token_expires)
+    return security.set_auth_cookie(user.id, access_token_expires)
 
 
 @router.post("/login/test-token", response_model=UserPublic)
@@ -124,15 +124,4 @@ def logout() -> JSONResponse:
     """
     Delete the HTTP-only cookie during logout
     """
-
-    response = JSONResponse(content={"message": "Logout successful"})
-
-    response.delete_cookie(
-        key="http_only_auth_cookie",
-        path="/",
-        domain=None,
-        httponly=True,
-        samesite="lax",
-        secure=False,  # Should be True in production
-    )
-    return response
+    return security.delete_auth_cookie()

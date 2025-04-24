@@ -1,5 +1,5 @@
 from collections.abc import Generator
-from typing import Annotated, Optional
+from typing import Annotated
 
 import jwt
 from fastapi import Depends, HTTPException, status, Cookie
