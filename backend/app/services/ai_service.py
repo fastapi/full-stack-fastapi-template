@@ -1,33 +1,50 @@
-# Placeholder for AI service integration logic 
+import os
+from typing import Optional
 
-import uuid
-from typing import Sequence
+from gemini_provider import GeminiAIProvider  
+from openai_provider import OpenAIProvider    
+from base import AIProvider       
+def get_active_provider() -> Optional[AIProvider]:
+    """
+    Trả về một AIProvider đã khởi tạo, dựa trên cấu hình môi trường.
+    Ưu tiên OpenAI nếu có, fallback về Gemini nếu không.
+    """
+    gemini_key = os.getenv("GEMINI_API_KEY")
+    if gemini_key:
+        print("[AI Service] Using GeminiAIProvider.")
+        return GeminiAIProvider(api_key=gemini_key, model_name="gemini-1.5-flash")
 
-from app.models import Character, Message
 
-
+    openai_key = os.getenv("OPENAI_API_KEY")
+    if openai_key:
+        print("[AI Service] Using OpenAIProvider.")
+        return OpenAIProvider(model_name="gpt-4o")
+    print("[AI Service] No valid AI provider found.")
+    return None
 def get_ai_response(
-    *, character: Character, history: Sequence[Message]
+    *, character: Character, history: list[Message]
 ) -> str:
     """
-    Placeholder function to simulate getting a response from an AI model.
+    Gọi phản hồi AI dựa trên character và lịch sử hội thoại.
 
     Args:
-        character: The character the user is talking to.
-        history: A sequence of recent messages in the conversation.
+        character: Đối tượng nhân vật (Character) dùng để cung cấp system_prompt.
+        history: Danh sách các tin nhắn lịch sử, bao gồm user message cuối.
 
     Returns:
-        A string containing the AI's response.
+        Chuỗi phản hồi từ AI.
     """
-    last_user_message = next((msg.content for msg in reversed(history) if msg.sender == "user"), None)
+    provider = get_active_provider()
 
-    response = (
-        f"Okay, you said: '{last_user_message}'. As {character.name}, I'm still under development!"
-        if last_user_message
-        else f"Hi! I'm {character.name}. Thanks for starting a chat!"
-    )
-    print(f"---> AI Service called for Character: {character.name}")
-    print(f"---> History: {[(msg.sender, msg.content) for msg in history]}")
-    print(f"---> AI Response: {response}")
+    if not provider:
+        return "AI service is not available due to missing API configuration."
 
-    return response 
+    print(f"\n[AI Service] Character: {character.name}")
+    print(f"[AI Service] Provider: {type(provider).__name__}")
+
+    try:
+        response = provider.get_completion(character=character, history=history)
+        return response
+    except Exception as e:
+        print(f"[AI Service] Error during response generation: {e}")
+        return "An error occurred while generating the AI response."
