@@ -12,7 +12,7 @@ def get_active_provider() -> Optional[AIProvider]:
     gemini_key = os.getenv("GEMINI_API_KEY")
     if gemini_key:
         print("[AI Service] Using GeminiAIProvider.")
-        return GeminiAIProvider(api_key=gemini_key, model_name="gemini-1.5-flash")
+        return GeminiAIProvider(api_key=gemini_key, model_name="gemini-2.5-flash")
 
 
     openai_key = os.getenv("OPENAI_API_KEY")
