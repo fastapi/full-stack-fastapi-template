@@ -42,7 +42,7 @@ const useAuth = () => {
   })
 
   const login = async (data: AccessToken) => {
-    const response = await LoginService.loginAccessToken({
+    await LoginService.loginAccessToken({
       formData: data,
     })
     localStorage.setItem("is_authenticated", "true")

@@ -132,10 +132,10 @@ export const getHeaders = async <T>(
   options: ApiRequestOptions<T>,
 ): Promise<Record<string, string>> => {
   const [token, username, password, additionalHeaders] = await Promise.all([
-    resolve(options, config.TOKEN),
-    resolve(options, config.USERNAME),
-    resolve(options, config.PASSWORD),
-    resolve(options, config.HEADERS),
+    resolve<string>(options as ApiRequestOptions<string>, config.TOKEN),
+    resolve<string>(options as ApiRequestOptions<string>, config.USERNAME),
+    resolve<string>(options as ApiRequestOptions<string>, config.PASSWORD),
+    resolve<Record<string, string>>(options as ApiRequestOptions<Record<string, string>>, config.HEADERS),
   ])
 
   const headers = Object.entries({
