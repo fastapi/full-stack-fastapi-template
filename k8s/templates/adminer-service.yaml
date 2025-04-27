@@ -1,0 +1,16 @@
+# Adminer Service
+{{- if .Values.adminer.enabled }}
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ .Release.Name }}-adminer
+  labels:
+    app: adminer
+spec:
+  type: {{ .Values.adminer.service.type }}
+  ports:
+  - port: {{ .Values.adminer.service.port }}
+    targetPort: {{ .Values.adminer.service.port }}
+  selector:
+    app: adminer
+{{- end }}

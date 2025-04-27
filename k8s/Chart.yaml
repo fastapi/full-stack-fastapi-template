@@ -1,0 +1,6 @@
+apiVersion: v2
+name: sdp
+description: A Helm chart for deploying the FastAPI fullstack application
+type: application
+version: 0.1.0
+appVersion: "1.0.0" 
