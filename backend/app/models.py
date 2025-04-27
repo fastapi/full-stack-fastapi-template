@@ -170,7 +170,7 @@ class Ticket(TicketBase, table=True):
 
 # Comment models
 class CommentBase(SQLModel):
-    comment: str = Field(min_length=1)
+    content: str = Field(min_length=1)
 
 
 class CommentCreate(CommentBase):
