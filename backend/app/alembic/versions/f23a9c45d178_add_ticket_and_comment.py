@@ -26,10 +26,10 @@ def upgrade():
         sa.Column("priority", sqlmodel.sql.sqltypes.AutoString(), nullable=True),
         sa.Column("created_at", sa.DateTime(), nullable=False, server_default=sa.text("now()")),
         sa.Column("updated_at", sa.DateTime(), nullable=True),
-        sa.Column("owner_id", UUID(), nullable=False),
+        sa.Column("user_id", UUID(), nullable=False),
         sa.PrimaryKeyConstraint("id"),
         sa.ForeignKeyConstraint(
-            ["owner_id"], ["user.id"], ondelete="CASCADE"
+            ["user_id"], ["user.id"], ondelete="CASCADE"
         ),
     )
     
