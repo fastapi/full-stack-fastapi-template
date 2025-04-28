@@ -7,8 +7,15 @@ updates:
       interval: daily
     commit-message:
       prefix: ⬆
-  # Python
+  # Python pip
   - package-ecosystem: pip
+    directory: /
+    schedule:
+      interval: daily
+    commit-message:
+      prefix: ⬆
+  # Python uv
+  - package-ecosystem: uv
     directory: /
     schedule:
       interval: daily
