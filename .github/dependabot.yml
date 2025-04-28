@@ -30,3 +30,10 @@ updates:
       interval: weekly
     commit-message:
       prefix: ⬆
+  # Docker Compose
+  - package-ecosystem: docker-compose
+    directory: /
+    schedule:
+      interval: weekly
+    commit-message:
+      prefix: ⬆
