@@ -2,7 +2,6 @@ from datetime import datetime, timedelta, timezone
 from typing import Any
 
 import jwt
-from fastapi import Response
 from fastapi.responses import JSONResponse
 from passlib.context import CryptContext
 
@@ -20,7 +19,7 @@ def create_access_token(subject: str | Any, expires_delta: timedelta) -> str:
     return encoded_jwt
 
 
-def set_auth_cookie(subject: str | Any, expires_delta: timedelta) -> Response:
+def set_auth_cookie(subject: str | Any, expires_delta: timedelta) -> JSONResponse:
     access_token = create_access_token(subject, expires_delta)
     response = JSONResponse(content={"message": "Login successful"})
     # Note: The secure flag on cookies ensures they're only sent over encrypted HTTPS connections. For local development (HTTP) set it to False
@@ -37,7 +36,7 @@ def set_auth_cookie(subject: str | Any, expires_delta: timedelta) -> Response:
     return response
 
 
-def delete_auth_cookie() -> Response:
+def delete_auth_cookie() -> JSONResponse:
     response = JSONResponse(content={"message": "Logout successful"})
 
     response.delete_cookie(

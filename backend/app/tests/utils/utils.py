@@ -1,6 +1,8 @@
 import random
 import string
 
+import httpx
+from fastapi import Response
 from fastapi.responses import JSONResponse
 from fastapi.testclient import TestClient
 
@@ -24,13 +26,22 @@ def get_superuser_auth_cookies(client: TestClient) -> dict[str, str]:
     return extract_cookies(r)
 
 
-def extract_cookies(response: JSONResponse) -> dict[str, str]:
-    cookie_header = response.headers.get("Set-Cookie")
+def extract_cookies(
+    response: JSONResponse | httpx._models.Response | Response,
+) -> dict[str, str]:
+    if isinstance(response, httpx._models.Response):
+        # Handle httpx Response
+        cookie_value = response.cookies.get("http_only_auth_cookie")
+        if cookie_value:
+            return {"http_only_auth_cookie": cookie_value}
+    else:
+        # Handle Starlette Response
+        cookie_header = response.headers.get("Set-Cookie")
+        if cookie_header and "http_only_auth_cookie=" in cookie_header:
+            cookie_value = cookie_header.split("http_only_auth_cookie=")[1].split(";")[
+                0
+            ]
+            if cookie_value:
+                return {"http_only_auth_cookie": cookie_value}
 
-    cookie_value = None
-    if cookie_header and "http_only_auth_cookie=" in cookie_header:
-        cookie_value = cookie_header.split("http_only_auth_cookie=")[1].split(";")[0]
-
-    assert cookie_value, "Cookie value not found"
-
-    return {"http_only_auth_cookie": cookie_value}
+    raise AssertionError("Cookie value not found")

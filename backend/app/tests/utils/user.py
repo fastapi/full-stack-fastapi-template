@@ -13,6 +13,7 @@ def user_authentication_headers(
     data = {"username": email, "password": password}
 
     r = client.post(f"{settings.API_V1_STR}/login/access-token", data=data)
+    print(f"user_authentication_headers: {r}")
     return extract_cookies(r)
 
 
