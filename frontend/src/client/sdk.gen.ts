@@ -232,7 +232,6 @@ export class LoginService {
    * @throws ApiError
    */
   public static testToken(): CancelablePromise<LoginTestTokenResponse> {
-    console.log("test token")
     return __request(OpenAPI, {
       method: "POST",
       url: "/api/v1/login/test-token",

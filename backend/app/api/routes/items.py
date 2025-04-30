@@ -100,7 +100,6 @@ def delete_item(
     Delete an item.
     """
     item = session.get(Item, id)
-    print(current_user)
     if not item:
         raise HTTPException(status_code=404, detail="Item not found")
     if not current_user.is_superuser and (item.owner_id != current_user.id):

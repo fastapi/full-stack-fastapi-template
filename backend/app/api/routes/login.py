@@ -41,9 +41,7 @@ def login_access_token(
     elif not user.is_active:
         raise HTTPException(status_code=400, detail="Inactive user")
     access_token_expires = timedelta(minutes=settings.ACCESS_TOKEN_EXPIRE_MINUTES)
-    r = security.set_auth_cookie(user.id, access_token_expires)
-    print(r)
-    return r
+    return security.set_auth_cookie(user.id, access_token_expires)
 
 
 @router.post("/login/test-token", response_model=UserPublic)

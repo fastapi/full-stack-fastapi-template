@@ -205,14 +205,12 @@ export const sendRequest = async <T>(
 ): Promise<AxiosResponse<T>> => {
   const controller = new AbortController()
 
-  // Properly handle form data for URL-encoded submissions
   let data = body;
   
   // If we have formData but it's not a FormData instance,
   // and Content-Type is application/x-www-form-urlencoded
   if (options.formData && !isFormData(options.formData) && 
       headers["Content-Type"] === "application/x-www-form-urlencoded") {
-    // Use URLSearchParams or axios's built-in handling for url-encoded data
     const params = new URLSearchParams();
     Object.entries(options.formData).forEach(([key, value]) => {
       if (value !== undefined && value !== null) {
@@ -232,14 +230,6 @@ export const sendRequest = async <T>(
     url,
     withCredentials: options.withCredentials ?? config.WITH_CREDENTIALS,
   }
-
-  console.log("Request config:", JSON.stringify({
-    url: requestConfig.url,
-    method: requestConfig.method,
-    headers: requestConfig.headers,
-    withCredentials: requestConfig.withCredentials
-  }));
-
   onCancel(() => controller.abort())
 
   for (const fn of config.interceptors.request._fns) {
@@ -402,7 +392,6 @@ export const request = <T>(
           statusText: response.statusText,
           body: responseHeader ?? transformedBody,
         }
-        console.log(result)
         catchErrorCodes(options, result)
 
         resolve(result.body)
