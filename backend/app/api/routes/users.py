@@ -9,6 +9,7 @@ from app.api.deps import (
     CurrentUser,
     SessionDep,
     get_current_active_superuser,
+    get_current_user,
 )
 from app.core.config import settings
 from app.core.security import get_password_hash, verify_password
@@ -117,15 +118,16 @@ def update_password_me(
     return Message(message="Password updated successfully")
 
 
-@router.get("/me", response_model=UserPublic)
+@router.get("/me", response_model=UserPublic, dependencies=[Depends(get_current_user)])
 def read_user_me(current_user: CurrentUser) -> Any:
     """
     Get current user.
     """
+    print(current_user)
     return current_user
 
 
-@router.delete("/me", response_model=Message)
+@router.delete("/me", response_model=Message, dependencies=[Depends(get_current_user)])
 def delete_user_me(session: SessionDep, current_user: CurrentUser) -> Any:
     """
     Delete own user.
