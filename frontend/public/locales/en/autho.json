@@ -1,0 +1,11 @@
+{
+  "login": {
+    "title": "Welcome back",
+    "email_label": "Email address",
+    "password_label": "Password",
+    "submit_button": "Sign In"
+  },
+  "errors": {
+    "invalid_credentials": "Invalid email or password"
+  }
+}
