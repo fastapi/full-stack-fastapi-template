@@ -26,7 +26,7 @@ from app.models import (
 )
 from app.utils import generate_new_account_email, send_email
 
-router = APIRouter()
+router = APIRouter(prefix="/users", tags=["users"])
 
 
 @router.get(
@@ -139,8 +139,6 @@ def delete_user_me(session: SessionDep, current_user: CurrentUser) -> Any:
             status_code=status.HTTP_403_FORBIDDEN,
             detail="Super users are not allowed to delete themselves",
         )
-    statement = delete(Item).where(col(Item.owner_id) == current_user.id)
-    session.exec(statement)  # type: ignore
     session.delete(current_user)
     session.commit()
     return Message(message="User deleted successfully")
