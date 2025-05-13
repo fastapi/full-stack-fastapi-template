@@ -34,7 +34,7 @@ def upgrade():
     )
     
     # Create index for ticket lookup by owner
-    op.create_index(op.f('ix_ticket_owner_id'), 'ticket', ['owner_id'], unique=False)
+    op.create_index(op.f('ix_ticket_owner_id'), 'ticket', ['user_id'], unique=False)
     
     # Create comment table
     op.create_table(
