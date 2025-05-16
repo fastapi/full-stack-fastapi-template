@@ -219,3 +219,97 @@ export type UtilsTestEmailData = {
 export type UtilsTestEmailResponse = Message
 
 export type UtilsHealthCheckResponse = boolean
+
+export type TicketCategory = "Suporte" | "Manutenção" | "Dúvida"
+
+export type TicketPriority = "Baixa" | "Média" | "Alta"
+
+export type TicketStatus = "Aberto" | "Em andamento" | "Encerrado"
+
+export type CommentBase = {
+  content: string
+}
+
+export type CommentCreate = CommentBase
+
+export type CommentPublic = CommentBase & {
+  id: string
+  created_at: string
+}
+
+export type TicketBase = {
+  title: string
+  description?: string | null
+  category: TicketCategory
+  priority: TicketPriority
+  status?: TicketStatus
+}
+
+export type TicketCreate = TicketBase
+
+export type TicketUpdate = {
+  title?: string | null
+  description?: string | null
+  category?: TicketCategory | null
+  priority?: TicketPriority | null
+  status?: TicketStatus | null
+}
+
+export type TicketPublic = TicketBase & {
+  id: string
+  user_id: string
+  created_at: string
+  updated_at: string
+}
+
+export type TicketDetailPublic = TicketPublic & {
+  comments: Array<CommentPublic>
+}
+
+export type TicketsPublic = {
+  data: Array<TicketPublic>
+  count: number
+  page: number
+}
+
+// API Request/Response types
+export type TicketsReadTicketsData = {
+  limit?: number
+  skip?: number
+  status?: TicketStatus
+  category?: TicketCategory
+}
+
+export type TicketsReadTicketsResponse = TicketsPublic
+
+export type TicketsCreateTicketData = {
+  requestBody: TicketCreate
+}
+
+export type TicketsCreateTicketResponse = TicketPublic
+
+export type TicketsReadTicketData = {
+  id: string
+}
+
+export type TicketsReadTicketResponse = TicketDetailPublic
+
+export type TicketsUpdateTicketData = {
+  id: string
+  requestBody: TicketUpdate
+}
+
+export type TicketsUpdateTicketResponse = TicketPublic
+
+export type TicketsDeleteTicketData = {
+  id: string
+}
+
+export type TicketsDeleteTicketResponse = Message
+
+export type CommentsCreateCommentData = {
+  ticket_id: string
+  requestBody: CommentCreate
+}
+
+export type CommentsCreateCommentResponse = CommentPublic

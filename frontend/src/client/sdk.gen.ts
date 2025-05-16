@@ -44,6 +44,18 @@ import type {
   UtilsTestEmailData,
   UtilsTestEmailResponse,
   UtilsHealthCheckResponse,
+  TicketsReadTicketsData,
+  TicketsReadTicketsResponse,
+  TicketsCreateTicketData,
+  TicketsCreateTicketResponse,
+  TicketsReadTicketData,
+  TicketsReadTicketResponse,
+  TicketsUpdateTicketData,
+  TicketsUpdateTicketResponse,
+  TicketsDeleteTicketData,
+  TicketsDeleteTicketResponse,
+  CommentsCreateCommentData,
+  CommentsCreateCommentResponse,
 } from "./types.gen"
 
 export class ItemsService {
@@ -518,6 +530,159 @@ export class UtilsService {
     return __request(OpenAPI, {
       method: "GET",
       url: "/api/v1/utils/health-check/",
+    })
+  }
+}
+
+export class TicketsService {
+  /**
+   * Read Tickets
+   * Retrieve tickets.
+   * @param data The data for the request.
+   * @param data.skip
+   * @param data.limit
+   * @param data.status
+   * @param data.category
+   * @returns TicketsPublic Successful Response
+   * @throws ApiError
+   */
+  public static readTickets(
+    data: TicketsReadTicketsData = {},
+  ): CancelablePromise<TicketsReadTicketsResponse> {
+    return __request(OpenAPI, {
+      method: "GET",
+      url: "/api/v1/tickets/",
+      query: {
+        skip: data.skip,
+        limit: data.limit,
+        status: data.status,
+        category: data.category,
+      },
+      errors: {
+        422: "Validation Error",
+      },
+    })
+  }
+
+  /**
+   * Create Ticket
+   * Create new ticket.
+   * @param data The data for the request.
+   * @param data.requestBody
+   * @returns TicketPublic Successful Response
+   * @throws ApiError
+   */
+  public static createTicket(
+    data: TicketsCreateTicketData,
+  ): CancelablePromise<TicketsCreateTicketResponse> {
+    return __request(OpenAPI, {
+      method: "POST",
+      url: "/api/v1/tickets/",
+      body: data.requestBody,
+      mediaType: "application/json",
+      errors: {
+        422: "Validation Error",
+      },
+    })
+  }
+
+  /**
+   * Read Ticket
+   * Get ticket by ID.
+   * @param data The data for the request.
+   * @param data.id
+   * @returns TicketDetailPublic Successful Response
+   * @throws ApiError
+   */
+  public static readTicket(
+    data: TicketsReadTicketData,
+  ): CancelablePromise<TicketsReadTicketResponse> {
+    return __request(OpenAPI, {
+      method: "GET",
+      url: "/api/v1/tickets/{id}",
+      path: {
+        id: data.id,
+      },
+      errors: {
+        422: "Validation Error",
+      },
+    })
+  }
+
+  /**
+   * Update Ticket
+   * Update a ticket.
+   * @param data The data for the request.
+   * @param data.id
+   * @param data.requestBody
+   * @returns TicketPublic Successful Response
+   * @throws ApiError
+   */
+  public static updateTicket(
+    data: TicketsUpdateTicketData,
+  ): CancelablePromise<TicketsUpdateTicketResponse> {
+    return __request(OpenAPI, {
+      method: "PUT",
+      url: "/api/v1/tickets/{id}",
+      path: {
+        id: data.id,
+      },
+      body: data.requestBody,
+      mediaType: "application/json",
+      errors: {
+        422: "Validation Error",
+      },
+    })
+  }
+
+  /**
+   * Delete Ticket
+   * Delete a ticket.
+   * @param data The data for the request.
+   * @param data.id
+   * @returns Message Successful Response
+   * @throws ApiError
+   */
+  public static deleteTicket(
+    data: TicketsDeleteTicketData,
+  ): CancelablePromise<TicketsDeleteTicketResponse> {
+    return __request(OpenAPI, {
+      method: "DELETE",
+      url: "/api/v1/tickets/{id}",
+      path: {
+        id: data.id,
+      },
+      errors: {
+        422: "Validation Error",
+      },
+    })
+  }
+}
+
+export class CommentsService {
+  /**
+   * Create Comment
+   * Add a comment to a ticket.
+   * @param data The data for the request.
+   * @param data.ticket_id
+   * @param data.requestBody
+   * @returns CommentPublic Successful Response
+   * @throws ApiError
+   */
+  public static createComment(
+    data: CommentsCreateCommentData,
+  ): CancelablePromise<CommentsCreateCommentResponse> {
+    return __request(OpenAPI, {
+      method: "POST",
+      url: "/api/v1/tickets/{ticket_id}/comments",
+      path: {
+        ticket_id: data.ticket_id,
+      },
+      body: data.requestBody,
+      mediaType: "application/json",
+      errors: {
+        422: "Validation Error",
+      },
     })
   }
 }
