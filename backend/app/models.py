@@ -133,7 +133,7 @@ class TicketPriority(str, Enum):
 class TicketStatus(str, Enum):
     OPEN = "Aberto"
     IN_PROGRESS = "Em andamento"
-    CLOSED = "Fechado"
+    CLOSED = "Encerrado"
 
 
 # Período para estatísticas
