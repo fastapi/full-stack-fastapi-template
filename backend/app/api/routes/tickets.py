@@ -102,10 +102,6 @@ def get_tickets_by_status(
         .group_by(Ticket.status)
     )
     
-    # Aplicar filtro por usuário se não for superusuário
-    if not current_user.is_superuser:
-        query = query.where(Ticket.user_id == current_user.id)
-    
     results = session.exec(query).all()
     
     # Transformar resultados no formato esperado
@@ -133,8 +129,6 @@ def get_tickets_by_user(
     """
     Obter estatísticas de tickets por usuário em um período específico.
     """
-    if not current_user.is_superuser:
-        raise HTTPException(status_code=403, detail="Apenas administradores podem acessar esta função")
     
     start, end = get_period_dates(period_type, start_date, end_date)
     
@@ -179,8 +173,6 @@ def get_tickets_by_user_status(
     """
     Obter estatísticas de tickets por usuário e status em um período específico.
     """
-    if not current_user.is_superuser:
-        raise HTTPException(status_code=403, detail="Apenas administradores podem acessar esta função")
     
     start, end = get_period_dates(period_type, start_date, end_date)
     
@@ -236,10 +228,6 @@ def get_tickets_by_category(
         .group_by(Ticket.category)
     )
     
-    # Aplicar filtro por usuário se não for superusuário
-    if not current_user.is_superuser:
-        query = query.where(Ticket.user_id == current_user.id)
-    
     results = session.exec(query).all()
     
     # Transformar resultados no formato esperado
@@ -267,8 +255,6 @@ def get_tickets_by_user_category(
     """
     Obter estatísticas de tickets por usuário e categoria em um período específico.
     """
-    if not current_user.is_superuser:
-        raise HTTPException(status_code=403, detail="Apenas administradores podem acessar esta função")
     
     start, end = get_period_dates(period_type, start_date, end_date)
     
@@ -324,10 +310,6 @@ def get_tickets_by_category_status(
         .group_by(Ticket.category, Ticket.status)
     )
     
-    # Aplicar filtro por usuário se não for superusuário
-    if not current_user.is_superuser:
-        query = query.where(Ticket.user_id == current_user.id)
-    
     results = session.exec(query).all()
     
     # Transformar resultados no formato esperado
@@ -380,11 +362,6 @@ def read_tickets(
     if status:
         query = query.where(Ticket.status == status)
         count_query = count_query.where(Ticket.status == status)
-    
-    # Apply user filter if not superuser
-    if not current_user.is_superuser:
-        query = query.where(Ticket.user_id == current_user.id)
-        count_query = count_query.where(Ticket.user_id == current_user.id)
     
     # Get count and tickets
     count = session.exec(count_query).one()
