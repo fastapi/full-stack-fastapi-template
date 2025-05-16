@@ -22,6 +22,7 @@ def upgrade():
         sa.Column("id", UUID(), nullable=False, server_default=sa.text("gen_random_uuid()")),
         sa.Column("title", sqlmodel.sql.sqltypes.AutoString(), nullable=False),
         sa.Column("description", sqlmodel.sql.sqltypes.AutoString(), nullable=True),
+        sa.Column("category", sqlmodel.sql.sqltypes.AutoString(), nullable=False),
         sa.Column("status", sqlmodel.sql.sqltypes.AutoString(), nullable=False),
         sa.Column("priority", sqlmodel.sql.sqltypes.AutoString(), nullable=True),
         sa.Column("created_at", sa.DateTime(), nullable=False, server_default=sa.text("now()")),
