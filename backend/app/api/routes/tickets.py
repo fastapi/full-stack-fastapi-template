@@ -1,5 +1,6 @@
 import uuid
-from typing import Any
+from typing import Any, Optional
+from datetime import datetime, timedelta
 
 from fastapi import APIRouter, HTTPException, Query
 from sqlmodel import func, select
@@ -18,10 +19,333 @@ from app.models import (
     Message,
     TicketCategory,
     TicketPriority,
-    TicketStatus
+    TicketStatus,
+    PeriodType,
+    User,
+    TicketStatusCount,
+    TicketUserCount,
+    TicketUserStatusCount,
+    TicketCategoryCount,
+    TicketUserCategoryCount,
+    TicketCategoryStatusCount,
+    TicketStatusStatsResponse,
+    TicketUserStatsResponse,
+    TicketUserStatusStatsResponse,
+    TicketCategoryStatsResponse,
+    TicketUserCategoryStatsResponse,
+    TicketCategoryStatusStatsResponse
 )
 
 router = APIRouter(prefix="/tickets", tags=["tickets"])
+
+
+# Função auxiliar para determinar datas de início e fim com base no tipo de período
+def get_period_dates(
+    period_type: PeriodType, 
+    start_date: Optional[datetime] = None, 
+    end_date: Optional[datetime] = None
+) -> tuple[datetime, datetime]:
+    """Calcula as datas de início e fim com base no tipo de período especificado"""
+    now = datetime.utcnow()
+    
+    if period_type == PeriodType.CUSTOM and start_date and end_date:
+        return start_date, end_date
+    
+    if period_type == PeriodType.WEEKLY:
+        # Início da semana atual (segunda-feira)
+        start = now - timedelta(days=now.weekday())
+        start = datetime(start.year, start.month, start.day, 0, 0, 0)
+        # Fim da semana (domingo)
+        end = start + timedelta(days=6, hours=23, minutes=59, seconds=59)
+        return start, end
+        
+    if period_type == PeriodType.MONTHLY:
+        # Início do mês atual
+        start = datetime(now.year, now.month, 1, 0, 0, 0)
+        # Calcular o último dia do mês
+        if now.month == 12:
+            end = datetime(now.year + 1, 1, 1, 0, 0, 0) - timedelta(seconds=1)
+        else:
+            end = datetime(now.year, now.month + 1, 1, 0, 0, 0) - timedelta(seconds=1)
+        return start, end
+    
+    if period_type == PeriodType.YEARLY:
+        # Início do ano atual
+        start = datetime(now.year, 1, 1, 0, 0, 0)
+        # Fim do ano atual
+        end = datetime(now.year, 12, 31, 23, 59, 59)
+        return start, end
+    
+    # Default para CUSTOM sem datas - usar últimos 30 dias
+    start = now - timedelta(days=30)
+    return start, now
+
+
+@router.get("/stats/status", response_model=TicketStatusStatsResponse)
+def get_tickets_by_status(
+    session: SessionDep,
+    current_user: CurrentUser,
+    period_type: PeriodType,
+    start_date: Optional[datetime] = None,
+    end_date: Optional[datetime] = None
+) -> Any:
+    """
+    Obter estatísticas de tickets por status em um período específico.
+    """
+    start, end = get_period_dates(period_type, start_date, end_date)
+    
+    # Query para contar tickets por status
+    query = (
+        select(Ticket.status, func.count(Ticket.id).label("count"))
+        .where(Ticket.created_at >= start)
+        .where(Ticket.created_at <= end)
+        .group_by(Ticket.status)
+    )
+    
+    # Aplicar filtro por usuário se não for superusuário
+    if not current_user.is_superuser:
+        query = query.where(Ticket.user_id == current_user.id)
+    
+    results = session.exec(query).all()
+    
+    # Transformar resultados no formato esperado
+    data = [
+        TicketStatusCount(status=status, count=count)
+        for status, count in results
+    ]
+    
+    return TicketStatusStatsResponse(
+        data=data,
+        period_type=period_type,
+        start_date=start,
+        end_date=end
+    )
+
+
+@router.get("/stats/users", response_model=TicketUserStatsResponse)
+def get_tickets_by_user(
+    session: SessionDep,
+    current_user: CurrentUser,
+    period_type: PeriodType,
+    start_date: Optional[datetime] = None,
+    end_date: Optional[datetime] = None
+) -> Any:
+    """
+    Obter estatísticas de tickets por usuário em um período específico.
+    """
+    if not current_user.is_superuser:
+        raise HTTPException(status_code=403, detail="Apenas administradores podem acessar esta função")
+    
+    start, end = get_period_dates(period_type, start_date, end_date)
+    
+    # Query para contar tickets por usuário
+    query = (
+        select(User.id, User.full_name, User.email, func.count(Ticket.id).label("count"))
+        .join(Ticket, User.id == Ticket.user_id)
+        .where(Ticket.created_at >= start)
+        .where(Ticket.created_at <= end)
+        .group_by(User.id, User.full_name, User.email)
+    )
+    
+    results = session.exec(query).all()
+    
+    # Transformar resultados no formato esperado
+    data = [
+        TicketUserCount(
+            user_id=user_id,
+            full_name=full_name,
+            email=email,
+            count=count
+        )
+        for user_id, full_name, email, count in results
+    ]
+    
+    return TicketUserStatsResponse(
+        data=data,
+        period_type=period_type,
+        start_date=start,
+        end_date=end
+    )
+
+
+@router.get("/stats/users-status", response_model=TicketUserStatusStatsResponse)
+def get_tickets_by_user_status(
+    session: SessionDep,
+    current_user: CurrentUser,
+    period_type: PeriodType,
+    start_date: Optional[datetime] = None,
+    end_date: Optional[datetime] = None
+) -> Any:
+    """
+    Obter estatísticas de tickets por usuário e status em um período específico.
+    """
+    if not current_user.is_superuser:
+        raise HTTPException(status_code=403, detail="Apenas administradores podem acessar esta função")
+    
+    start, end = get_period_dates(period_type, start_date, end_date)
+    
+    # Query para contar tickets por usuário e status
+    query = (
+        select(User.id, User.full_name, User.email, Ticket.status, func.count(Ticket.id).label("count"))
+        .join(Ticket, User.id == Ticket.user_id)
+        .where(Ticket.created_at >= start)
+        .where(Ticket.created_at <= end)
+        .group_by(User.id, User.full_name, User.email, Ticket.status)
+    )
+    
+    results = session.exec(query).all()
+    
+    # Transformar resultados no formato esperado
+    data = [
+        TicketUserStatusCount(
+            user_id=user_id,
+            full_name=full_name,
+            email=email,
+            status=status,
+            count=count
+        )
+        for user_id, full_name, email, status, count in results
+    ]
+    
+    return TicketUserStatusStatsResponse(
+        data=data,
+        period_type=period_type,
+        start_date=start,
+        end_date=end
+    )
+
+
+@router.get("/stats/category", response_model=TicketCategoryStatsResponse)
+def get_tickets_by_category(
+    session: SessionDep,
+    current_user: CurrentUser,
+    period_type: PeriodType,
+    start_date: Optional[datetime] = None,
+    end_date: Optional[datetime] = None
+) -> Any:
+    """
+    Obter estatísticas de tickets por categoria em um período específico.
+    """
+    start, end = get_period_dates(period_type, start_date, end_date)
+    
+    # Query para contar tickets por categoria
+    query = (
+        select(Ticket.category, func.count(Ticket.id).label("count"))
+        .where(Ticket.created_at >= start)
+        .where(Ticket.created_at <= end)
+        .group_by(Ticket.category)
+    )
+    
+    # Aplicar filtro por usuário se não for superusuário
+    if not current_user.is_superuser:
+        query = query.where(Ticket.user_id == current_user.id)
+    
+    results = session.exec(query).all()
+    
+    # Transformar resultados no formato esperado
+    data = [
+        TicketCategoryCount(category=category, count=count)
+        for category, count in results
+    ]
+    
+    return TicketCategoryStatsResponse(
+        data=data,
+        period_type=period_type,
+        start_date=start,
+        end_date=end
+    )
+
+
+@router.get("/stats/users-category", response_model=TicketUserCategoryStatsResponse)
+def get_tickets_by_user_category(
+    session: SessionDep,
+    current_user: CurrentUser,
+    period_type: PeriodType,
+    start_date: Optional[datetime] = None,
+    end_date: Optional[datetime] = None
+) -> Any:
+    """
+    Obter estatísticas de tickets por usuário e categoria em um período específico.
+    """
+    if not current_user.is_superuser:
+        raise HTTPException(status_code=403, detail="Apenas administradores podem acessar esta função")
+    
+    start, end = get_period_dates(period_type, start_date, end_date)
+    
+    # Query para contar tickets por usuário e categoria
+    query = (
+        select(User.id, User.full_name, User.email, Ticket.category, func.count(Ticket.id).label("count"))
+        .join(Ticket, User.id == Ticket.user_id)
+        .where(Ticket.created_at >= start)
+        .where(Ticket.created_at <= end)
+        .group_by(User.id, User.full_name, User.email, Ticket.category)
+    )
+    
+    results = session.exec(query).all()
+    
+    # Transformar resultados no formato esperado
+    data = [
+        TicketUserCategoryCount(
+            user_id=user_id,
+            full_name=full_name,
+            email=email,
+            category=category,
+            count=count
+        )
+        for user_id, full_name, email, category, count in results
+    ]
+    
+    return TicketUserCategoryStatsResponse(
+        data=data,
+        period_type=period_type,
+        start_date=start,
+        end_date=end
+    )
+
+
+@router.get("/stats/category-status", response_model=TicketCategoryStatusStatsResponse)
+def get_tickets_by_category_status(
+    session: SessionDep,
+    current_user: CurrentUser,
+    period_type: PeriodType,
+    start_date: Optional[datetime] = None,
+    end_date: Optional[datetime] = None
+) -> Any:
+    """
+    Obter estatísticas de tickets por categoria e status em um período específico.
+    """
+    start, end = get_period_dates(period_type, start_date, end_date)
+    
+    # Query para contar tickets por categoria e status
+    query = (
+        select(Ticket.category, Ticket.status, func.count(Ticket.id).label("count"))
+        .where(Ticket.created_at >= start)
+        .where(Ticket.created_at <= end)
+        .group_by(Ticket.category, Ticket.status)
+    )
+    
+    # Aplicar filtro por usuário se não for superusuário
+    if not current_user.is_superuser:
+        query = query.where(Ticket.user_id == current_user.id)
+    
+    results = session.exec(query).all()
+    
+    # Transformar resultados no formato esperado
+    data = [
+        TicketCategoryStatusCount(
+            category=category,
+            status=status,
+            count=count
+        )
+        for category, status, count in results
+    ]
+    
+    return TicketCategoryStatusStatsResponse(
+        data=data,
+        period_type=period_type,
+        start_date=start,
+        end_date=end
+    )
 
 
 @router.get("/", response_model=TicketsPublic)

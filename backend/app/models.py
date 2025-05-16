@@ -136,6 +136,14 @@ class TicketStatus(str, Enum):
     CLOSED = "Fechado"
 
 
+# Período para estatísticas
+class PeriodType(str, Enum):
+    WEEKLY = "weekly"
+    MONTHLY = "monthly"
+    YEARLY = "yearly"
+    CUSTOM = "custom"
+
+
 # Ticket models
 class TicketBase(SQLModel):
     title: str = Field(min_length=1, max_length=255)
@@ -214,3 +222,72 @@ class TicketsPublic(SQLModel):
 # Update User model to include tickets relationship
 User.model_rebuild()
 setattr(User, "tickets", Relationship(back_populates="user", sa_relationship_kwargs={"cascade": "all, delete-orphan"}))
+
+# Modelos para estatísticas de tickets
+class TicketStatusCount(SQLModel):
+    status: TicketStatus
+    count: int
+
+
+class TicketUserCount(SQLModel):
+    user_id: uuid.UUID
+    full_name: str | None
+    email: str
+    count: int
+
+
+class TicketCategoryCount(SQLModel):
+    category: TicketCategory
+    count: int
+
+
+class TicketUserStatusCount(SQLModel):
+    user_id: uuid.UUID
+    full_name: str | None
+    email: str
+    status: TicketStatus
+    count: int
+
+
+class TicketUserCategoryCount(SQLModel):
+    user_id: uuid.UUID
+    full_name: str | None
+    email: str
+    category: TicketCategory
+    count: int
+
+
+class TicketCategoryStatusCount(SQLModel):
+    category: TicketCategory
+    status: TicketStatus
+    count: int
+
+
+class TicketStatsBase(SQLModel):
+    period_type: PeriodType
+    start_date: datetime
+    end_date: datetime
+
+
+class TicketStatusStatsResponse(TicketStatsBase):
+    data: list[TicketStatusCount]
+
+
+class TicketUserStatsResponse(TicketStatsBase):
+    data: list[TicketUserCount]
+
+
+class TicketCategoryStatsResponse(TicketStatsBase):
+    data: list[TicketCategoryCount]
+
+
+class TicketUserStatusStatsResponse(TicketStatsBase):
+    data: list[TicketUserStatusCount]
+
+
+class TicketUserCategoryStatsResponse(TicketStatsBase):
+    data: list[TicketUserCategoryCount]
+
+
+class TicketCategoryStatusStatsResponse(TicketStatsBase):
+    data: list[TicketCategoryStatusCount]
