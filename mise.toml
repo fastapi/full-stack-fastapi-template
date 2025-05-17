@@ -1,0 +1,73 @@
+[tools]
+# Core runtime dependencies
+python = "3.10.13"
+node = "20"
+
+# Python development tools
+uv = "latest"
+ruff = "latest"
+pytest = "latest"
+mypy = "latest"
+alembic = "latest"
+
+# Node development tools
+fnm = "latest"
+pnpm = "latest"
+typescript = "latest"
+biome = "latest"
+playwright = "latest"
+
+# Database and DevOps tools
+postgres = "17"
+docker = "latest"
+docker-compose = "latest"
+
+# Utility tools
+httpie = "latest"
+curl = "latest"
+
+# Set paths for shells to look for commands
+[env]
+PATH = ["$MISE_DATA_DIR/shims", "$PATH", "./node_modules/.bin"]
+PYTHONPATH = ["$PWD", "$PYTHONPATH"]
+PYTHONUNBUFFERED = "1"
+
+# Configure development environment
+[tasks]
+# Backend tasks
+backend-setup = "cd backend && uv sync && source .venv/bin/activate"
+backend-dev = "cd backend && fastapi dev app/main.py"
+backend-test = "cd backend && bash ./scripts/test.sh"
+backend-test-watch = "cd backend && python -m pytest -xvs --watch"
+backend-lint = "cd backend && uv run ruff check . --fix"
+backend-migration = "docker compose exec backend bash -c \"alembic revision --autogenerate -m '{{1}}'\""
+backend-migrate = "docker compose exec backend bash -c \"alembic upgrade head\""
+
+# Frontend tasks
+frontend-setup = "cd frontend && npm install"
+frontend-dev = "cd frontend && npm run dev"
+frontend-build = "cd frontend && npm run build"
+frontend-lint = "cd frontend && npm run lint"
+frontend-test = "cd frontend && npx playwright test"
+frontend-test-ui = "cd frontend && npx playwright test --ui"
+
+# Docker tasks
+dev = "docker compose watch"
+docker-up = "docker compose up -d"
+docker-down = "docker compose down"
+docker-logs = "docker compose logs -f"
+docker-ps = "docker compose ps"
+
+# General tasks
+generate-client = "./scripts/generate-client.sh"
+generate-secret = "python -c \"import secrets; print(secrets.token_urlsafe(32))\""
+security-check = "cd backend && uv pip audit && cd ../frontend && npm audit"
+
+# Python configurations
+[settings.python]
+use_pyenv = false
+virtualenv_dir = ".venv"
+
+# Node configurations
+[settings.node]
+enable_corepack = true
