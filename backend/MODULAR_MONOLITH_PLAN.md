@@ -170,8 +170,9 @@ backend/
 
 - ✅ Move the Message model to shared/models.py
 - ✅ Move the TokenPayload model to auth/domain/models.py
-- 🔄 Update all references to use the new models in modules
-- 🔄 Remove remaining models from app.models.py
+- ✅ Confirm NewPassword model already migrated to auth/domain/models.py
+- 🔄 Update remaining model references to use the modular structure
+- 🔄 Remove models from app.models.py as they are fully migrated
 
 ### 2. Complete Event System (Medium Priority)
 
