@@ -184,6 +184,48 @@ Common functionality is implemented in the `app/shared` directory:
    - Gradually migrate all models to their domain modules
    - Update Alembic migration scripts for modular models
 
+## Model Migration Guide
+
+We've established the following process for migrating models from the legacy `app.models.py` to the modular structure:
+
+1. **Simple Non-Table Models First**:
+   - Start with models that don't define database tables (like `Message`, `Token`, `TokenPayload`)
+   - These can be migrated without SQLAlchemy table conflicts
+
+2. **Move Model Definition**:
+   - Copy the model definition to the appropriate module (e.g., `app/modules/auth/domain/models.py`)
+   - Add proper docstrings and type annotations
+
+3. **Update Imports**:
+   - Find all imports of the model from `app.models`
+   - Update them to import from the new location
+   - Run tests after each change to verify functionality
+
+4. **Table Models Last**:
+   - Leave table models (with `table=True`) until all other models are migrated
+   - Update the Alembic environment to handle both legacy and modular models
+
+### Example: Message Model Migration
+
+1. Moved definition from `app.models.py` to `app.shared.models.py`:
+   ```python
+   class Message(SQLModel):
+       """Generic message response model."""
+       
+       message: str
+   ```
+
+2. Updated imports in API routes and services:
+   ```python
+   # Before
+   from app.models import Message
+   
+   # After
+   from app.shared.models import Message
+   ```
+
+3. Verified all tests pass after the migration
+
 2. **Event-Driven Communication**
    - Implement domain events for all key operations
    - Reduce direct dependencies between modules
