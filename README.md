@@ -24,6 +24,17 @@
 - 🚢 Deployment instructions using Docker Compose, including how to set up a frontend Traefik proxy to handle automatic HTTPS certificates.
 - 🏭 CI (continuous integration) and CD (continuous deployment) based on GitHub Actions.
 
+## Documentation
+
+For comprehensive documentation on how to use, develop, and extend this template, see the [documentation](./docs/README.md).
+
+Key documentation sections:
+
+- [Getting Started](./docs/01-getting-started/01-prerequisites.md) - Prerequisites and initial setup
+- [Architecture Overview](./docs/02-architecture/01-overview.md) - Modular monolith architecture design
+- [Development Workflow](./docs/03-development-workflow/) - Day-to-day development guidelines
+- [Extending the API](./docs/04-guides/01-extending-the-api.md) - How to add new modules and features
+
 ### Dashboard Login
 
 [![API docs](img/login.png)](https://github.com/fastapi/full-stack-fastapi-template)
@@ -138,7 +149,7 @@ Before deploying it, make sure you change at least the values for:
 
 You can (and should) pass these as environment variables from secrets.
 
-Read the [deployment.md](./deployment.md) docs for more details.
+Read the [deployment documentation](./docs/06-deployment/README.md) for more details.
 
 ### Generate Secret Keys
 
@@ -151,29 +162,6 @@ python -c "import secrets; print(secrets.token_urlsafe(32))"
 ```
 
 Copy the content and use that as password / secret key. And run that again to generate another secure key.
-
-
-## Backend Development
-
-Backend docs: [backend/README.md](./backend/README.md).
-
-## Frontend Development
-
-Frontend docs: [frontend/README.md](./frontend/README.md).
-
-## Deployment
-
-Deployment docs: [deployment.md](./deployment.md).
-
-## Development
-
-General development docs: [development.md](./development.md).
-
-This includes using Docker Compose, custom local domains, `.env` configurations, etc.
-
-## Release Notes
-
-Check the file [release-notes.md](./release-notes.md).
 
 ## License
 

@@ -11,6 +11,7 @@ from app.modules.auth import init_auth_module
 from app.modules.email import init_email_module
 from app.modules.items import init_items_module
 from app.modules.users import init_users_module
+from app.modules.utils import init_utils_module
 
 # Initialize logger
 logger = get_logger("api.main")
@@ -36,5 +37,6 @@ def init_api_routes(app: FastAPI) -> None:
     init_users_module(app)
     init_items_module(app)
     init_email_module(app)
+    init_utils_module(app)
 
     logger.info("API routes initialized")

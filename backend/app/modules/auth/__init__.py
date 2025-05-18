@@ -8,6 +8,9 @@ from fastapi import APIRouter, FastAPI
 from app.core.config import settings
 from app.core.logging import get_logger
 
+# Import domain events to ensure they're available
+from app.modules.auth.domain import events
+
 # Configure logger
 logger = get_logger("auth_module")
 

@@ -51,7 +51,7 @@ test("User can reset password successfully using the link", async ({
   })
 
   await page.goto(
-    `${process.env.MAILCATCHER_HOST}/messages/${emailData.id}.html`,
+    `${process.env.MAILCATCHER_HOST}/api/v1/messages/${emailData.id}/html`,
   )
 
   const selector = 'a[href*="/reset-password?token="]'
@@ -106,7 +106,7 @@ test("Weak new password validation", async ({ page, request }) => {
   })
 
   await page.goto(
-    `${process.env.MAILCATCHER_HOST}/messages/${emailData.id}.html`,
+    `${process.env.MAILCATCHER_HOST}/api/v1/messages/${emailData.id}/html`,
   )
 
   const selector = 'a[href*="/reset-password?token="]'

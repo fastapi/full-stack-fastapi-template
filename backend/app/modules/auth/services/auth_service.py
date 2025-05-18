@@ -20,6 +20,7 @@ from app.core.security import (
 )
 from app.modules.users.domain.models import User
 from app.modules.auth.domain.models import Token
+from app.modules.auth.domain.events import PasswordResetRequested
 from app.modules.auth.repository.auth_repo import AuthRepository
 from app.shared.exceptions import AuthenticationException, NotFoundException
 
@@ -127,13 +128,13 @@ class AuthService:
         # Generate password reset token
         password_reset_token = generate_password_reset_token(email=email)
 
-        # Event should be published here to notify email service to send password reset email
-        # self.event_publisher.publish_event(
-        #     PasswordResetRequested(
-        #         email=email,
-        #         token=password_reset_token
-        #     )
-        # )
+        # Publish event to notify email service to send password reset email
+        event = PasswordResetRequested(
+            email=email,
+            token=password_reset_token,
+            username=user.full_name or email
+        )
+        event.publish()
 
         return True
 

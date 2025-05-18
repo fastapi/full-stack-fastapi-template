@@ -52,4 +52,4 @@ def init_email_module(app: FastAPI) -> None:
             logger.warning("To enable, configure SMTP settings in environment variables")
 
         # Log event handlers registration
-        logger.info("Email event handlers registered for: user.created")
+        logger.info("Email event handlers registered for: user.created, password.reset.requested")

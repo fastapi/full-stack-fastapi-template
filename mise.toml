@@ -22,7 +22,8 @@ PYTHONUNBUFFERED = "1"
 
 [tasks]
 # Backend tasks
-backend-setup = "cd backend && uv sync && source .venv/bin/activate"
+backend-setup = "cd backend && uv sync"
+backend-install-fastapi = "cd backend && python -m pip install 'fastapi[standard]'"
 backend-dev = "cd backend && fastapi dev app/main.py"
 backend-test = "cd backend && bash ./scripts/test.sh"
 backend-test-watch = "cd backend && python -m pytest -xvs --watch"
@@ -40,7 +41,7 @@ frontend-test-ui = "cd frontend && npx playwright test --ui"
 
 # Docker tasks
 dev = "docker compose watch"
-clean = """	
+clean = """
     docker compose down -v --remove-orphans || true \
     && docker stop $(docker ps -q) || true \
     && docker rm $(docker ps -a -q) || true \
@@ -62,6 +63,9 @@ security-check = "cd backend && uv pip audit && cd ../frontend && npm audit"
 [settings.python]
 venv_auto_create = true
 venv_create_args = ["-p", "python3.10", ".venv"]
+
+[env._.python]
+venv = ".venv"
 
 # Node settings - only use supported options
 [settings.node]

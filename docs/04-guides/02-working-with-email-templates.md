@@ -210,7 +210,7 @@ def test_render_template():
             "project_name": "Test Project",
         },
     )
-    
+
     # Assert content contains expected values
     assert "test_user" in html_content
     assert "Test Project" in html_content
@@ -238,6 +238,7 @@ services:
 # In .env
 SMTP_HOST=mailhog
 SMTP_PORT=1025
+SMTP_TLS=false
 ```
 
 3. Access MailHog web UI at http://localhost:8025 to see sent emails

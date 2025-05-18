@@ -285,7 +285,7 @@ class EmailService:
             template_type=EmailTemplateType.RESET_PASSWORD,
             context={
                 "username": username,
-                "valid_hours": settings.EMAIL_RESET_TOKEN_EXPIRE_HOURS,
+                "valid_hours": str(settings.EMAIL_RESET_TOKEN_EXPIRE_HOURS),
                 "link": link,
             },
             email_to=email_to,
