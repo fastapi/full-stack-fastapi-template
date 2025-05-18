@@ -171,19 +171,26 @@ backend/
 - ✅ Move the Message model to shared/models.py
 - ✅ Move the TokenPayload model to auth/domain/models.py
 - ✅ Confirm NewPassword model already migrated to auth/domain/models.py
-- 🔄 Update remaining model references to use the modular structure
-- 🔄 Remove models from app.models.py as they are fully migrated
+- 🔄 Move non-table models: 
+  - Token (already duplicated in auth/domain/models.py)
+  - ItemsPublic (already duplicated in items/domain/models.py)
+  - UsersPublic (already duplicated in users/domain/models.py)
+- 🔄 Update remaining import references for non-table models
+- 🔄 Develop strategy for table models (User, Item) migration
 
 ### 2. Complete Event System (Medium Priority)
 
-- 📝 Implement complete example of event-based communication between modules
-- 📝 Test event system with a real use case (e.g., sending email after user creation)
+- 🔄 Document event system structure and usage
+- 🔄 Implement user.created event for sending welcome emails
+- 📝 Test event system with additional use cases
+- 📝 Create examples of inter-module communication via events
 
 ### 3. Finalize Alembic Integration (High Priority)
 
+- 🔄 Document current Alembic transition approach
 - 📝 Update Alembic environment to import models from all modules
 - 📝 Test migration generation with the new modular structure
-- 📝 Document the migration workflow
+- 📝 Create migration template for modular table models
 
 ### 4. Documentation and Examples (Medium Priority)
 
