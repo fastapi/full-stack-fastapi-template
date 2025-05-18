@@ -2,6 +2,7 @@
 set -e
 set -x
 
-python app/tests_pre_start.py
+# Use the same pre-start script as the main application
+python app/backend_pre_start.py
 
 bash scripts/test.sh "$@"

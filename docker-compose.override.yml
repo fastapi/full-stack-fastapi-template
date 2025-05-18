@@ -67,6 +67,11 @@ services:
       - run
       - --reload
       - "app/main.py"
+    depends_on:
+      db:
+        condition: service_healthy
+        restart: true
+      # Remove prestart dependency
     develop:
       watch:
         - path: ./backend

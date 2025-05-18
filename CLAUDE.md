@@ -105,9 +105,11 @@ npm run generate-client
 ### Backend
 
 - **FastAPI with SQLModel**: Modern Python API framework with SQLAlchemy/Pydantic integration
-- **Models**: Defined in `backend/app/models.py` for database tables
-- **CRUD**: Database operations in `backend/app/crud.py`
-- **API Routes**: Endpoints defined in `backend/app/api/routes/`
+- **Modular Architecture**: Domain-based modules with clear boundaries
+- **Models**: Defined in each module's domain directory (e.g., `app/modules/users/domain/models.py`)
+- **Services**: Business logic in service classes (e.g., `UserService`, `ItemService`)
+- **Repositories**: Data access layer in repository classes (e.g., `UserRepository`)
+- **API Routes**: Endpoints defined in each module's API directory (e.g., `app/modules/users/api/routes.py`)
 - **Core**: Configuration and core utilities in `backend/app/core/`
 - **Alembic**: Database migrations
 

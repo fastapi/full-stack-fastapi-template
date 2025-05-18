@@ -19,17 +19,21 @@ The modular monolith architecture has been successfully implemented with the fol
 
 ### 1. SQLModel Table Duplication
 
-**Challenge:** SQLModel doesn't allow duplicate table definitions with the same name in the SQLAlchemy metadata, causing errors during the migration to modular architecture.
+**Challenge:** SQLModel doesn't allow duplicate table definitions with the same name in the SQLAlchemy metadata, which required careful planning during the implementation of the modular architecture.
 
 **Solution:**
-- Temporarily use the legacy models from `app.models` in the new modules
-- Add clear documentation about the transitional nature of these imports
-- Plan for gradual migration of models once references to legacy models are removed
+- Define table models in their respective domain modules
+- Ensure consistent table naming across the application
+- Use a centralized Alembic configuration that imports all models
 
 Example:
 ```python
-# app/modules/users/repository/user_repo.py
-from app.models import User  # Temporary import until full migration
+# app/modules/users/domain/models.py
+class User(UserBase, BaseModel, table=True):
+    """Database model for a user."""
+    __tablename__ = "user"
+
+    id: uuid.UUID = Field(default_factory=uuid.uuid4, primary_key=True)
 ```
 
 ### 2. Circular Dependencies
@@ -46,7 +50,7 @@ Example:
 def init_users_module(app: FastAPI) -> None:
     # Import here to avoid circular imports
     from app.modules.users.api.routes import router as users_router
-    
+
     # Include the users router in the application
     app.include_router(users_router, prefix=settings.API_V1_STR)
 ```
@@ -76,12 +80,12 @@ def read_items(
 
 ### 4. Alembic Migration Environment
 
-**Challenge:** Alembic needed to recognize models from both the legacy structure and the new modular structure.
+**Challenge:** Alembic needed to recognize models from all modules in the modular structure.
 
 **Solution:**
-- Import only the legacy models in Alembic's `env.py` during transition
-- Add commented imports for future module models with clear documentation
-- Create a migration strategy for the gradual transition to module-based models
+- Configure Alembic's `env.py` to import models from all modules
+- Create a systematic approach for model discovery
+- Document the process for adding new models to the migration environment
 
 ## Module Structure Implementation
 
@@ -119,13 +123,13 @@ Example:
 def init_api_routes(app: FastAPI) -> None:
     # Include the API router
     app.include_router(api_router, prefix=settings.API_V1_STR)
-    
+
     # Initialize all modules
     init_auth_module(app)
     init_users_module(app)
     init_items_module(app)
     init_email_module(app)
-    
+
     logger.info("API routes initialized")
 ```
 
@@ -146,6 +150,7 @@ Common functionality is implemented in the `app/shared` directory:
 1. **Event System** (`app/core/events.py`)
    - Pub/sub pattern for communication between modules
    - Event handlers and subscribers
+   - Domain events for cross-module communication
 
 2. **Logging** (`app/core/logging.py`)
    - Centralized logging configuration
@@ -178,71 +183,136 @@ Common functionality is implemented in the `app/shared` directory:
    - Add comments explaining architecture decisions
    - Provide usage examples for module components
 
+## Event System Implementation
+
+The event system is a critical component of the modular monolith architecture, enabling loose coupling between modules while maintaining clear communication paths. It follows a publish-subscribe (pub/sub) pattern where events are published by one module and can be handled by any number of subscribers in other modules.
+
+### Core Components
+
+1. **EventBase Class** (`app/core/events.py`)
+   - Base class for all events in the system
+   - Provides common structure and behavior for events
+   - Includes event_type field to identify event types
+
+2. **Event Publishing**
+   - `publish_event()` function for broadcasting events
+   - Handles both synchronous and asynchronous event handlers
+   - Provides error isolation (errors in one handler don't affect others)
+
+3. **Event Subscription**
+   - `subscribe_to_event()` function for registering handlers
+   - `@event_handler` decorator for easy handler registration
+   - Support for multiple handlers per event type
+
+### Domain Events
+
+Domain events represent significant occurrences within a specific domain. They are implemented as Pydantic models extending the EventBase class:
+
+```python
+# app/modules/users/domain/events.py
+from app.core.events import EventBase, publish_event
+
+class UserCreatedEvent(EventBase):
+    """Event emitted when a new user is created."""
+    event_type: str = "user.created"
+    user_id: uuid.UUID
+    email: str
+    full_name: Optional[str] = None
+
+    def publish(self) -> None:
+        """Publish this event to all registered handlers."""
+        publish_event(self)
+```
+
+### Event Handlers
+
+Event handlers are functions that respond to specific event types. They can be defined in any module:
+
+```python
+# app/modules/email/services/email_event_handlers.py
+from app.core.events import event_handler
+from app.modules.users.domain.events import UserCreatedEvent
+
+@event_handler("user.created")
+def handle_user_created_event(event: UserCreatedEvent) -> None:
+    """Handle user created event by sending welcome email."""
+    email_service = get_email_service()
+    email_service.send_new_account_email(
+        email_to=event.email,
+        username=event.email,
+        password="**********"  # Password is masked in welcome email
+    )
+```
+
+### Module Integration
+
+Each module can both publish events and subscribe to events from other modules:
+
+1. **Publishing Events**
+   - Domain services publish events after completing operations
+   - Events include relevant data but avoid exposing internal implementation details
+
+2. **Subscribing to Events**
+   - Modules import event handlers at initialization
+   - Event handlers are registered automatically via the `@event_handler` decorator
+   - No direct dependencies between publishing and subscribing modules
+
+### Best Practices
+
+1. **Event Naming**
+   - Use past tense verbs (e.g., "user.created" not "user.create")
+   - Follow domain.event_name pattern (e.g., "user.created", "item.updated")
+   - Be specific about what happened
+
+2. **Event Content**
+   - Include only necessary data in events
+   - Use IDs rather than full objects when possible
+   - Ensure events are serializable
+
+3. **Handler Implementation**
+   - Keep handlers focused on a single responsibility
+   - Handle errors gracefully within handlers
+   - Consider performance implications for synchronous handlers
+
+### Example: User Registration Flow
+
+1. User service creates a new user in the database
+2. User service publishes a `UserCreatedEvent`
+3. Email module's handler receives the event
+4. Email handler sends a welcome email to the new user
+5. Other modules could also handle the same event for different purposes
+
+This approach decouples the user creation process from sending welcome emails, allowing each module to focus on its core responsibilities.
+
 ## Future Work
 
-1. **Complete Model Migration**
-   - Gradually migrate all models to their domain modules
-   - Update Alembic migration scripts for modular models
+1. **Performance Optimization**
+   - Identify and optimize performance bottlenecks
+   - Implement caching strategies for frequently accessed data
+   - Optimize database queries and ORM usage
 
-## Model Migration Guide
-
-We've established the following process for migrating models from the legacy `app.models.py` to the modular structure:
-
-1. **Simple Non-Table Models First**:
-   - Start with models that don't define database tables (like `Message`, `Token`, `TokenPayload`)
-   - These can be migrated without SQLAlchemy table conflicts
-
-2. **Move Model Definition**:
-   - Copy the model definition to the appropriate module (e.g., `app/modules/auth/domain/models.py`)
-   - Add proper docstrings and type annotations
-
-3. **Update Imports**:
-   - Find all imports of the model from `app.models`
-   - Update them to import from the new location
-   - Run tests after each change to verify functionality
-
-4. **Table Models Last**:
-   - Leave table models (with `table=True`) until all other models are migrated
-   - Update the Alembic environment to handle both legacy and modular models
-
-### Example: Message Model Migration
-
-1. Moved definition from `app.models.py` to `app.shared.models.py`:
-   ```python
-   class Message(SQLModel):
-       """Generic message response model."""
-       
-       message: str
-   ```
-
-2. Updated imports in API routes and services:
-   ```python
-   # Before
-   from app.models import Message
-   
-   # After
-   from app.shared.models import Message
-   ```
-
-3. Verified all tests pass after the migration
-
-2. **Event-Driven Communication**
-   - Implement domain events for all key operations
-   - Reduce direct dependencies between modules
+2. **Enhanced Event System**
+   - Add support for asynchronous event processing
+   - Implement event persistence for reliability
+   - Create more comprehensive event monitoring and debugging tools
 
 3. **Module Configuration**
-   - Module-specific configuration settings
-   - Better isolation of module settings
+   - Implement module-specific configuration settings
+   - Create a more flexible configuration system
+   - Support environment-specific module configurations
 
-4. **Testing Strategy**
-   - Unit tests for domain services and repositories
-   - Integration tests for module boundaries
-   - End-to-end tests for complete flows
+4. **Testing Improvements**
+   - Expand test coverage for all modules
+   - Implement more comprehensive integration tests
+   - Add performance benchmarking tests
+   - Create unit tests for domain services and repositories
+   - Develop integration tests for module boundaries
+   - Implement end-to-end tests for complete flows
 
 ## Conclusion
 
-The modular monolith architecture has been successfully implemented, with transitional patterns in place to allow for a gradual migration from the legacy code structure. The new architecture improves code organization, maintainability, and testability while maintaining deployment simplicity.
+The modular monolith architecture has been successfully implemented. The new architecture significantly improves code organization, maintainability, and testability while maintaining the deployment simplicity of a monolith.
 
-The implementation faced several challenges, particularly with SQLModel table definitions, circular dependencies, and FastAPI's dependency injection system. These challenges were addressed with careful design patterns and transitional approaches that maintain backward compatibility.
+The implementation addressed several challenges, particularly with SQLModel table definitions, circular dependencies, and FastAPI's dependency injection system. These challenges were overcome with careful design patterns and architectural decisions.
 
-As the codebase continues to evolve, the modular architecture will provide a strong foundation for future enhancements and potential extraction of modules into separate services if needed.
+The modular architecture provides a strong foundation for future enhancements and potential extraction of modules into separate microservices if needed. The clear boundaries between modules, standardized interfaces, and event-based communication make the codebase more maintainable and extensible.

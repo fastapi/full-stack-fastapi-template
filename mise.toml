@@ -40,6 +40,14 @@ frontend-test-ui = "cd frontend && npx playwright test --ui"
 
 # Docker tasks
 dev = "docker compose watch"
+clean = """	
+    docker compose down -v --remove-orphans || true \
+    && docker stop $(docker ps -q) || true \
+    && docker rm $(docker ps -a -q) || true \
+    && docker rmi $(docker images -q) || true \
+    && docker volume rm $(docker volume ls -q) || true \
+    && docker system prune -f || true \
+    && docker system df || true"""
 docker-up = "docker compose up -d"
 docker-down = "docker compose down"
 docker-logs = "docker compose logs -f"

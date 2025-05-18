@@ -8,8 +8,8 @@ from sqlmodel import Session
 
 from app.api.deps import CurrentUser
 from app.core.db import get_repository, get_session
-# Import User from the legacy models until full migration
-from app.models import User
+# Import User from the users module
+from app.modules.users.domain.models import User
 from app.modules.users.repository.user_repo import UserRepository
 from app.modules.users.services.user_service import UserService
 
@@ -17,10 +17,10 @@ from app.modules.users.services.user_service import UserService
 def get_user_repository(session: Session = Depends(get_session)) -> UserRepository:
     """
     Get a user repository instance.
-    
+
     Args:
         session: Database session
-        
+
     Returns:
         User repository instance
     """
@@ -32,10 +32,10 @@ def get_user_service(
 ) -> UserService:
     """
     Get a user service instance.
-    
+
     Args:
         user_repo: User repository
-        
+
     Returns:
         User service instance
     """
@@ -45,13 +45,13 @@ def get_user_service(
 def get_current_active_superuser(current_user: CurrentUser) -> User:
     """
     Get the current active superuser.
-    
+
     Args:
         current_user: Current user
-        
+
     Returns:
         Current user if superuser
-        
+
     Raises:
         HTTPException: If not a superuser
     """

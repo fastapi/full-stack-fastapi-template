@@ -27,7 +27,57 @@ $ source .venv/bin/activate
 
 Make sure your editor is using the correct Python virtual environment, with the interpreter at `backend/.venv/bin/python`.
 
-Modify or add SQLModel models for data and SQL tables in `./backend/app/models.py`, API endpoints in `./backend/app/api/`, CRUD (Create, Read, Update, Delete) utils in `./backend/app/crud.py`.
+## Modular Monolith Architecture
+
+This project follows a modular monolith architecture, which organizes the codebase into domain-specific modules while maintaining the deployment simplicity of a monolith.
+
+### Module Structure
+
+Each module follows this structure:
+
+```
+app/modules/{module_name}/
+├── __init__.py           # Module initialization
+├── api/                  # API layer
+│   ├── __init__.py
+│   ├── dependencies.py   # Module-specific dependencies
+│   └── routes.py         # API endpoints
+├── domain/               # Domain layer
+│   ├── __init__.py
+│   ├── events.py         # Domain events
+│   └── models.py         # Domain models
+├── repository/           # Data access layer
+│   ├── __init__.py
+│   └── {module}_repo.py  # Repository implementation
+└── services/             # Business logic layer
+    ├── __init__.py
+    └── {module}_service.py  # Service implementation
+```
+
+### Available Modules
+
+- **Auth**: Authentication and authorization
+- **Users**: User management
+- **Items**: Item management
+- **Email**: Email sending and templates
+
+### Working with Modules
+
+To add functionality to an existing module, locate the appropriate layer (API, domain, repository, or service) and make your changes there.
+
+To create a new module, follow the structure above and register it in `app/api/main.py`.
+
+For more details, see the [Modular Monolith Implementation](./MODULAR_MONOLITH_IMPLEMENTATION.md) document.
+
+### Adding New Features
+
+When adding new features to the application:
+
+- Add SQLModel models in the appropriate module's `domain/models.py` file
+- Add API endpoints in the module's `api/routes.py` file
+- Implement business logic in the module's `services/` directory
+- Create repositories for data access in the module's `repository/` directory
+- Define domain events in the module's `domain/events.py` file when needed
 
 ## VS Code
 
@@ -133,13 +183,15 @@ Make sure you create a "revision" of your models and that you "upgrade" your dat
 $ docker compose exec backend bash
 ```
 
-* Alembic is already configured to import your SQLModel models from `./backend/app/models.py`.
+* Alembic is configured to import models from their respective modules in the modular architecture
 
 * After changing a model (for example, adding a column), inside the container, create a revision, e.g.:
 
 ```console
 $ alembic revision --autogenerate -m "Add column last_name to User model"
 ```
+
+* For more details on working with Alembic in the modular architecture, see the [Modular Monolith Implementation](./MODULAR_MONOLITH_IMPLEMENTATION.md#alembic-migration-environment) document.
 
 * Commit to the git repository the files generated in the alembic directory.
 
@@ -162,6 +214,55 @@ $ alembic upgrade head
 ```
 
 If you don't want to start with the default models and want to remove them / modify them, from the beginning, without having any previous revision, you can remove the revision files (`.py` Python files) under `./backend/app/alembic/versions/`. And then create a first migration as described above.
+
+## Event System
+
+The project includes an event system for communication between modules. This allows for loose coupling while maintaining clear communication paths.
+
+### Publishing Events
+
+To publish an event from a module:
+
+1. Define an event class in the module's `domain/events.py` file:
+
+```python
+from app.core.events import EventBase
+
+class MyEvent(EventBase):
+    event_type: str = "my.event"
+    # Add event properties here
+
+    def publish(self) -> None:
+        from app.core.events import publish_event
+        publish_event(self)
+```
+
+2. Publish the event from a service:
+
+```python
+event = MyEvent(property1="value1", property2="value2")
+event.publish()
+```
+
+### Subscribing to Events
+
+To subscribe to events:
+
+1. Create an event handler in a module's services directory:
+
+```python
+from app.core.events import event_handler
+from other_module.domain.events import OtherEvent
+
+@event_handler("other.event")
+def handle_other_event(event: OtherEvent) -> None:
+    # Handle the event
+    pass
+```
+
+2. Import the handler in the module's `__init__.py` to register it.
+
+For more details, see the [Event System Documentation](./MODULAR_MONOLITH_IMPLEMENTATION.md#event-system-implementation).
 
 ## Email Templates
 

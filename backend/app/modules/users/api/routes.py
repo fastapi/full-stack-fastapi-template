@@ -38,18 +38,18 @@ router = APIRouter(prefix="/users", tags=["users"])
 )
 def read_users(
     current_user: CurrentSuperuser,
-    skip: int = 0, 
+    skip: int = 0,
     limit: int = 100,
     user_service: UserService = Depends(get_user_service),
 ) -> Any:
     """
     Retrieve users.
-    
+
     Args:
         skip: Number of records to skip
         limit: Maximum number of records to return
         user_service: User service
-        
+
     Returns:
         List of users
     """
@@ -58,7 +58,7 @@ def read_users(
 
 
 @router.post(
-    "/", 
+    "/",
     response_model=UserPublic,
 )
 def create_user(
@@ -68,23 +68,16 @@ def create_user(
 ) -> Any:
     """
     Create new user.
-    
+
     Args:
         user_in: User creation data
         user_service: User service
-        
+
     Returns:
         Created user
     """
     try:
         user = user_service.create_user(user_in)
-        
-        # Send email notification if enabled
-        if settings.emails_enabled and user_in.email:
-            # This will be handled by email module in future
-            # For now, just log that an email would be sent
-            logger.info(f"New account email would be sent to: {user_in.email}")
-            
         return user_service.to_public(user)
     except ValidationException as e:
         raise HTTPException(
@@ -101,12 +94,12 @@ def update_user_me(
 ) -> Any:
     """
     Update own user.
-    
+
     Args:
         user_in: User update data
         current_user: Current user
         user_service: User service
-        
+
     Returns:
         Updated user
     """
@@ -128,12 +121,12 @@ def update_password_me(
 ) -> Any:
     """
     Update own password.
-    
+
     Args:
         body: Password update data
         current_user: Current user
         user_service: User service
-        
+
     Returns:
         Success message
     """
@@ -142,11 +135,11 @@ def update_password_me(
             raise ValidationException(
                 detail="New password cannot be the same as the current one"
             )
-            
+
         user_service.update_password(
             current_user, body.current_password, body.new_password
         )
-        
+
         return Message(message="Password updated successfully")
     except ValidationException as e:
         raise HTTPException(
@@ -162,11 +155,11 @@ def read_user_me(
 ) -> Any:
     """
     Get current user.
-    
+
     Args:
         current_user: Current user
         user_service: User service
-        
+
     Returns:
         Current user
     """
@@ -180,11 +173,11 @@ def delete_user_me(
 ) -> Any:
     """
     Delete own user.
-    
+
     Args:
         current_user: Current user
         user_service: User service
-        
+
     Returns:
         Success message
     """
@@ -193,7 +186,7 @@ def delete_user_me(
             status_code=status.HTTP_403_FORBIDDEN,
             detail="Super users are not allowed to delete themselves",
         )
-        
+
     user_service.delete_user(current_user.id)
     return Message(message="User deleted successfully")
 
@@ -205,11 +198,11 @@ def register_user(
 ) -> Any:
     """
     Create new user without the need to be logged in.
-    
+
     Args:
         user_in: User registration data
         user_service: User service
-        
+
     Returns:
         Created user
     """
@@ -231,28 +224,28 @@ def read_user_by_id(
 ) -> Any:
     """
     Get a specific user by id.
-    
+
     Args:
         user_id: User ID
         current_user: Current user
         user_service: User service
-        
+
     Returns:
         User
     """
     try:
         user = user_service.get_user(user_id)
-        
+
         # Check permissions
         if user.id == current_user.id:
             return user_service.to_public(user)
-            
+
         if not current_user.is_superuser:
             raise HTTPException(
                 status_code=status.HTTP_403_FORBIDDEN,
                 detail="Not enough privileges",
             )
-            
+
         return user_service.to_public(user)
     except NotFoundException as e:
         raise HTTPException(
@@ -273,12 +266,12 @@ def update_user(
 ) -> Any:
     """
     Update a user.
-    
+
     Args:
         user_id: User ID
         user_in: User update data
         user_service: User service
-        
+
     Returns:
         Updated user
     """
@@ -298,7 +291,7 @@ def update_user(
 
 
 @router.delete(
-    "/{user_id}", 
+    "/{user_id}",
     response_model=Message,
 )
 def delete_user(
@@ -308,12 +301,12 @@ def delete_user(
 ) -> Any:
     """
     Delete a user.
-    
+
     Args:
         user_id: User ID
         current_user: Current user
         user_service: User service
-        
+
     Returns:
         Success message
     """
@@ -323,7 +316,7 @@ def delete_user(
                 status_code=status.HTTP_403_FORBIDDEN,
                 detail="Super users are not allowed to delete themselves",
             )
-            
+
         user_service.delete_user(user_id)
         return Message(message="User deleted successfully")
     except NotFoundException as e:

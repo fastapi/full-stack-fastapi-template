@@ -9,9 +9,10 @@ from fastapi import APIRouter, Depends, HTTPException, status
 from fastapi.responses import HTMLResponse
 from fastapi.security import OAuth2PasswordRequestForm
 
-from app.api.deps import CurrentSuperuser, CurrentUser, SessionDep
+from app.api.deps import CurrentSuperuser, CurrentUser
+from app.core.config import settings
 from app.core.logging import get_logger
-from app.models import UserPublic  # Temporary import until User module is extracted
+from app.modules.users.domain.models import UserPublic
 from app.shared.models import Message  # Using shared Message model
 from app.modules.auth.dependencies import get_auth_service
 from app.modules.auth.domain.models import NewPassword, PasswordReset, Token
@@ -32,11 +33,11 @@ def login_access_token(
 ) -> Token:
     """
     OAuth2 compatible token login, get an access token for future requests.
-    
+
     Args:
         form_data: OAuth2 form data
         auth_service: Auth service
-        
+
     Returns:
         Token object
     """
@@ -55,10 +56,10 @@ def login_access_token(
 def test_token(current_user: CurrentUser) -> Any:
     """
     Test access token endpoint.
-    
+
     Args:
         current_user: Current authenticated user
-        
+
     Returns:
         User object
     """
@@ -72,16 +73,16 @@ def recover_password(
 ) -> Message:
     """
     Password recovery endpoint.
-    
+
     Args:
         body: Password reset request
         auth_service: Auth service
-        
+
     Returns:
         Message object
     """
     auth_service.request_password_reset(email=body.email)
-    
+
     # Always return success to prevent email enumeration
     return Message(message="Password recovery email sent")
 
@@ -93,11 +94,11 @@ def reset_password(
 ) -> Message:
     """
     Reset password endpoint.
-    
+
     Args:
         body: New password data
         auth_service: Auth service
-        
+
     Returns:
         Message object
     """
@@ -118,24 +119,45 @@ def reset_password(
 )
 def recover_password_html_content(
     email: str,
-    auth_service: AuthService = Depends(get_auth_service),
 ) -> Any:
     """
     HTML content for password recovery (for testing/debugging).
-    
+
     This endpoint is only available to superusers and is intended for
     testing and debugging the password recovery email template.
-    
+
     Args:
         email: User email
         auth_service: Auth service
-        
+
     Returns:
         HTML content of password recovery email
     """
-    # Implementation will depend on email service which will be extracted later
-    # For now, just return a placeholder
+    from app.modules.email.dependencies import get_email_service
+    from app.modules.email.domain.models import TemplateData, EmailTemplateType
+    from app.core.security import generate_password_reset_token
+
+    # Generate a dummy token for template preview
+    token = generate_password_reset_token(email)
+
+    # Get email service
+    email_service = get_email_service()
+
+    # Create template data
+    template_data = TemplateData(
+        template_type=EmailTemplateType.RESET_PASSWORD,
+        context={
+            "username": email,
+            "valid_hours": settings.EMAIL_RESET_TOKEN_EXPIRE_HOURS,
+            "link": f"{settings.FRONTEND_HOST}/reset-password?token={token}",
+        },
+        email_to=email,
+    )
+
+    # Get template content
+    template_content = email_service.get_template_content(template_data)
+
     return HTMLResponse(
-        content="<p>Password recovery template - will be implemented with email module</p>",
-        headers={"subject": "Password recovery"},
+        content=template_content.html_content,
+        headers={"subject": template_content.subject},
     )

@@ -15,11 +15,10 @@ logger = get_logger("items_module")
 def get_items_router() -> APIRouter:
     """
     Get the items module's router.
-    
+
     Returns:
         APIRouter for items module
     """
-    # Import here to avoid circular imports
     from app.modules.items.api.routes import router as items_router
     return items_router
 
@@ -27,18 +26,17 @@ def get_items_router() -> APIRouter:
 def init_items_module(app: FastAPI) -> None:
     """
     Initialize the items module.
-    
+
     This function sets up routes and event handlers for the items module.
-    
+
     Args:
         app: FastAPI application
     """
-    # Import here to avoid circular imports
     from app.modules.items.api.routes import router as items_router
-    
+
     # Include the items router in the application
     app.include_router(items_router, prefix=settings.API_V1_STR)
-    
+
     # Set up any event handlers or startup tasks for the items module
     @app.on_event("startup")
     async def init_items():

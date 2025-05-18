@@ -8,7 +8,7 @@ from fastapi.encoders import jsonable_encoder
 from sqlmodel import Session
 
 from app.core.security import verify_password
-from app.models import User
+from app.modules.users.domain.models import User
 from app.modules.users.domain.models import UserCreate, UserUpdate
 from app.modules.users.services.user_service import UserService
 from app.shared.exceptions import NotFoundException, ValidationException
@@ -33,7 +33,7 @@ def test_create_user_duplicate_email(user_service: UserService) -> None:
     password = random_lower_string()
     user_in = UserCreate(email=email, password=password)
     user_service.create_user(user_in)
-    
+
     # Try to create another user with the same email
     with pytest.raises(ValidationException):
         user_service.create_user(user_in)
@@ -45,7 +45,7 @@ def test_authenticate_user(user_service: UserService) -> None:
     password = random_lower_string()
     user_in = UserCreate(email=email, password=password)
     user = user_service.create_user(user_in)
-    
+
     # Use the auth service for authentication
     authenticated_user = user_service.get_user_by_email(email)
     assert authenticated_user is not None
@@ -56,7 +56,7 @@ def test_authenticate_user(user_service: UserService) -> None:
 def test_get_non_existent_user(user_service: UserService) -> None:
     """Test getting a non-existent user raises exception."""
     non_existent_id = uuid.uuid4()
-    
+
     with pytest.raises(NotFoundException):
         user_service.get_user(non_existent_id)
 
@@ -120,12 +120,12 @@ def test_update_user_me(db: Session, user_service: UserService) -> None:
     email = random_email()
     user_in = UserCreate(email=email, password=password)
     user = user_service.create_user(user_in)
-    
+
     # Update full name
     new_name = "New Name"
     from app.modules.users.domain.models import UserUpdateMe
     update_data = UserUpdateMe(full_name=new_name)
     updated_user = user_service.update_user_me(user, update_data)
-    
+
     assert updated_user.full_name == new_name
     assert updated_user.email == email
