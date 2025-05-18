@@ -1,14 +1,48 @@
-from fastapi import APIRouter
+"""
+API routes registration and initialization.
 
-from app.api.routes import items, login, private, users, utils
+This module handles the registration of all API routes and module initialization.
+"""
+from fastapi import FastAPI, APIRouter
+
 from app.core.config import settings
+from app.core.logging import get_logger
+from app.modules.auth import init_auth_module
+from app.modules.email import init_email_module
+from app.modules.items import init_items_module
+from app.modules.users import init_users_module
 
+# Import old routes for compatibility until migration is complete
+from app.api.routes import private, utils
+
+# Initialize logger
+logger = get_logger("api.main")
+
+# Create the main API router
 api_router = APIRouter()
-api_router.include_router(login.router)
-api_router.include_router(users.router)
+
+# Add utils and private routes for compatibility until migration is complete
 api_router.include_router(utils.router)
-api_router.include_router(items.router)
-
-
 if settings.ENVIRONMENT == "local":
     api_router.include_router(private.router)
+
+
+def init_api_routes(app: FastAPI) -> None:
+    """
+    Initialize API routes.
+    
+    This function registers all module routers and initializes the modules.
+    
+    Args:
+        app: FastAPI application
+    """
+    # Include the API router
+    app.include_router(api_router, prefix=settings.API_V1_STR)
+    
+    # Initialize all modules
+    init_auth_module(app)
+    init_users_module(app)
+    init_items_module(app)
+    init_email_module(app)
+    
+    logger.info("API routes initialized")
