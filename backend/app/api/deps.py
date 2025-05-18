@@ -17,12 +17,7 @@ from app.core.logging import get_logger
 from app.core.security import ALGORITHM, decode_access_token
 from app.shared.exceptions import AuthenticationException, PermissionException
 
-# Import these when the modules are ready
-# from app.modules.auth.domain.models import TokenPayload
-# from app.modules.users.domain.models import User
-# from app.modules.users.repository.user_repo import UserRepository
-
-# Temporary imports until modules are ready
+# Temporary imports until modules are ready - use legacy models
 from app.models import TokenPayload, User
 
 # Initialize logger
@@ -81,9 +76,7 @@ def get_current_user(session: SessionDep, token: TokenDep) -> User:
             detail="Could not validate credentials",
         )
         
-    # Get user from database (will use UserRepository when available)
-    # user_repo = UserRepository(session)
-    # user = user_repo.get_by_id(token_data.sub)
+    # Get user from database using legacy model for now
     user = session.get(User, token_data.sub)
     
     if not user:

@@ -8,7 +8,8 @@ from sqlmodel import Session
 
 from app.api.deps import CurrentUser
 from app.core.db import get_repository, get_session
-from app.modules.users.domain.models import User
+# Import User from the legacy models until full migration
+from app.models import User
 from app.modules.users.repository.user_repo import UserRepository
 from app.modules.users.services.user_service import UserService
 

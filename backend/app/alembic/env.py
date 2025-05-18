@@ -21,27 +21,23 @@ from app.core.config import settings  # noqa: E402
 from app.core.logging import get_logger  # noqa: E402
 
 # Import all models
-# Keep the legacy import for now
+# Keep the legacy import for now - this is sufficient for initial migrations
 from app.models import *  # noqa: F403, F401
 
-# Import models from modules
-# Auth module models
-try:
-    from app.modules.auth.domain.models import *  # noqa: F403, F401
-except ImportError:
-    pass
-
-# Users module models
-try:
-    from app.modules.users.domain.models import *  # noqa: F403, F401
-except ImportError:
-    pass
-
-# Items module models
-try:
-    from app.modules.items.domain.models import *  # noqa: F403, F401
-except ImportError:
-    pass
+# NOTE: During the transition to a modular architecture, we're only importing the
+# legacy models to avoid table definition conflicts. Once the transition is complete,
+# we'll replace this with imports from each module.
+#
+# DO NOT uncomment these imports until all legacy model references are removed and
+# the transition to modular models is complete.
+#
+# # Import models from modules
+# # Auth module models
+# # from app.modules.auth.domain.models import *  # noqa: F403, F401
+# # Users module models
+# # from app.modules.users.domain.models import *  # noqa: F403, F401
+# # Items module models
+# # from app.modules.items.domain.models import *  # noqa: F403, F401
 
 # Set up target metadata
 target_metadata = SQLModel.metadata

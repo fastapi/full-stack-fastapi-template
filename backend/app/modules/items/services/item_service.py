@@ -7,8 +7,8 @@ import uuid
 from typing import List, Optional, Tuple
 
 from app.core.logging import get_logger
+from app.models import Item  # Temporary import until full migration
 from app.modules.items.domain.models import (
-    Item, 
     ItemCreate, 
     ItemPublic, 
     ItemsPublic, 
@@ -53,7 +53,7 @@ class ItemService:
         item = self.item_repo.get_by_id(item_id)
         
         if not item:
-            raise NotFoundException(detail=f"Item with ID {item_id} not found")
+            raise NotFoundException(message=f"Item with ID {item_id} not found")
         
         return item
     
@@ -111,7 +111,7 @@ class ItemService:
         Returns:
             Created item
         """
-        # Create item
+        # Create item using the legacy model for now
         item = Item(
             title=item_create.title,
             description=item_create.description,
@@ -152,7 +152,7 @@ class ItemService:
                 f"User {owner_id} attempted to update item {item_id} "
                 f"owned by {item.owner_id}"
             )
-            raise PermissionException(detail="Not enough permissions")
+            raise PermissionException(message="Not enough permissions")
         
         # Update fields
         if item_update.title is not None:
@@ -190,7 +190,7 @@ class ItemService:
                 f"User {owner_id} attempted to delete item {item_id} "
                 f"owned by {item.owner_id}"
             )
-            raise PermissionException(detail="Not enough permissions")
+            raise PermissionException(message="Not enough permissions")
         
         # Delete item
         self.item_repo.delete(item)

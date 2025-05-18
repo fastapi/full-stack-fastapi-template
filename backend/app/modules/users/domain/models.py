@@ -60,17 +60,25 @@ class UpdatePassword(SQLModel):
     new_password: str = Field(min_length=8, max_length=40)
 
 
-# Database model, database table inferred from class name
-class User(UserBase, BaseModel, table=True):
-    """Database model for a user."""
-    
-    __tablename__ = "user"
-    
-    hashed_password: str
-    items: List["Item"] = Relationship(  # type: ignore
-        back_populates="owner",
-        sa_relationship_kwargs={"cascade": "all, delete-orphan"}
-    )
+# IMPORTANT: DO NOT IMPORT User MODEL HERE
+# TRANSITIONAL NOTES:
+# 1. During the transition to modular architecture, we're using the original User model
+#    from app.models instead of defining our own to avoid table conflicts.
+# 2. All imports of the User model should be done from app.models directly.
+# 3. DO NOT define a User model in this file until the transition is complete.
+# 4. This is TEMPORARY until we fully migrate away from the legacy models.
+
+# Future User model definition (currently commented out to avoid conflicts):
+# class User(UserBase, BaseModel, table=True):
+#     """Database model for a user."""
+#     
+#     __tablename__ = "user"
+#     
+#     hashed_password: str
+#     items: List["Item"] = Relationship(  # type: ignore
+#         back_populates="owner",
+#         sa_relationship_kwargs={"cascade": "all, delete-orphan"}
+#     )
 
 
 # Properties to return via API, id is always required

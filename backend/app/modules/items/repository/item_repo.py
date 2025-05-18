@@ -9,7 +9,7 @@ from typing import List, Optional, Tuple
 from sqlmodel import Session, col, select
 
 from app.core.db import BaseRepository
-from app.modules.items.domain.models import Item
+from app.models import Item  # Temporary import until full migration
 
 
 class ItemRepository(BaseRepository):

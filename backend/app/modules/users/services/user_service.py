@@ -12,8 +12,8 @@ from pydantic import EmailStr
 from app.core.config import settings
 from app.core.logging import get_logger
 from app.core.security import get_password_hash, verify_password
+from app.models import User  # Temporary import until full migration
 from app.modules.users.domain.models import (
-    User, 
     UserCreate, 
     UserPublic, 
     UserRegister, 
@@ -60,7 +60,7 @@ class UserService:
         user = self.user_repo.get_by_id(user_id)
         
         if not user:
-            raise NotFoundException(detail=f"User with ID {user_id} not found")
+            raise NotFoundException(message=f"User with ID {user_id} not found")
         
         return user
     
@@ -115,12 +115,12 @@ class UserService:
         """
         # Check if user with this email already exists
         if self.user_repo.exists_by_email(user_create.email):
-            raise ValidationException(detail="Email already registered")
+            raise ValidationException(message="Email already registered")
         
         # Hash password
         hashed_password = get_password_hash(user_create.password)
         
-        # Create user
+        # Create user using the legacy model for now
         user = User(
             email=user_create.email,
             hashed_password=hashed_password,
@@ -176,7 +176,7 @@ class UserService:
         # Check email uniqueness if it's being updated
         if user_update.email and user_update.email != user.email:
             if self.user_repo.exists_by_email(user_update.email):
-                raise ValidationException(detail="Email already registered")
+                raise ValidationException(message="Email already registered")
             user.email = user_update.email
         
         # Update other fields
@@ -211,17 +211,21 @@ class UserService:
         Raises:
             ValidationException: If email already exists
         """
+        # Get a fresh user object from the database to avoid session issues
+        # The current_user object might be attached to a different session
+        user = self.get_user(current_user.id)
+        
         # Check email uniqueness if it's being updated
-        if user_update.email and user_update.email != current_user.email:
+        if user_update.email and user_update.email != user.email:
             if self.user_repo.exists_by_email(user_update.email):
-                raise ValidationException(detail="Email already registered")
-            current_user.email = user_update.email
+                raise ValidationException(message="Email already registered")
+            user.email = user_update.email
         
         # Update other fields
         if user_update.full_name is not None:
-            current_user.full_name = user_update.full_name
+            user.full_name = user_update.full_name
         
-        return self.user_repo.update(current_user)
+        return self.user_repo.update(user)
     
     def update_password(
         self, current_user: User, current_password: str, new_password: str
@@ -242,12 +246,15 @@ class UserService:
         """
         # Verify current password
         if not verify_password(current_password, current_user.hashed_password):
-            raise ValidationException(detail="Incorrect password")
+            raise ValidationException(message="Incorrect password")
+        
+        # Get a fresh user object from the database to avoid session issues
+        user = self.get_user(current_user.id)
         
         # Update password
-        current_user.hashed_password = get_password_hash(new_password)
+        user.hashed_password = get_password_hash(new_password)
         
-        return self.user_repo.update(current_user)
+        return self.user_repo.update(user)
     
     def delete_user(self, user_id: str | uuid.UUID) -> None:
         """

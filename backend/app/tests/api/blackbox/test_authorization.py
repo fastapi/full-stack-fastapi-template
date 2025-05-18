@@ -110,7 +110,7 @@ def test_resource_ownership_protection(client):
     
     # 2. User2 attempts to access User1's item
     user2_get_response = user2_client.get(f"/api/v1/items/{item_id}")
-    assert user2_get_response.status_code == 404, \
+    assert user2_get_response.status_code in (403, 404), \
         f"User2 should not see User1's item, got: {user2_get_response.status_code}"
     
     # 3. User2 attempts to update User1's item

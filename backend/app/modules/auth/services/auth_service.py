@@ -104,7 +104,7 @@ class AuthService:
         
         if not user:
             logger.warning(f"Failed login attempt for email: {email}")
-            raise AuthenticationException(detail="Incorrect email or password")
+            raise AuthenticationException(message="Incorrect email or password")
         
         return self.create_access_token_for_user(user)
     
@@ -155,12 +155,12 @@ class AuthService:
         email = verify_password_reset_token(token)
         
         if not email:
-            raise AuthenticationException(detail="Invalid or expired token")
+            raise AuthenticationException(message="Invalid or expired token")
         
         user = self.auth_repo.get_user_by_email(email)
         
         if not user:
-            raise NotFoundException(detail="User not found")
+            raise NotFoundException(message="User not found")
         
         # Hash new password
         hashed_password = get_password_hash(new_password)

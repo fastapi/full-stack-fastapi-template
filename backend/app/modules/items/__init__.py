@@ -7,7 +7,6 @@ from fastapi import APIRouter, FastAPI
 
 from app.core.config import settings
 from app.core.logging import get_logger
-from app.modules.items.api.routes import router as items_router
 
 # Configure logger
 logger = get_logger("items_module")
@@ -20,6 +19,8 @@ def get_items_router() -> APIRouter:
     Returns:
         APIRouter for items module
     """
+    # Import here to avoid circular imports
+    from app.modules.items.api.routes import router as items_router
     return items_router
 
 
@@ -32,6 +33,9 @@ def init_items_module(app: FastAPI) -> None:
     Args:
         app: FastAPI application
     """
+    # Import here to avoid circular imports
+    from app.modules.items.api.routes import router as items_router
+    
     # Include the items router in the application
     app.include_router(items_router, prefix=settings.API_V1_STR)
     

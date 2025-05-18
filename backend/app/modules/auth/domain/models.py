@@ -8,10 +8,8 @@ from typing import Optional
 from pydantic import Field
 from sqlmodel import SQLModel
 
-
-class TokenPayload(SQLModel):
-    """Contents of JWT token."""
-    sub: Optional[str] = None
+# Use legacy TokenPayload model to avoid conflicts
+from app.models import TokenPayload
 
 
 class Token(SQLModel):

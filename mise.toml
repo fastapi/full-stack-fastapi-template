@@ -1,38 +1,25 @@
 [tools]
 # Core runtime dependencies
 python = "3.10.13"
-node = "20"
+node = "23"
 
 # Python development tools
 uv = "latest"
 ruff = "latest"
-pytest = "latest"
-mypy = "latest"
-alembic = "latest"
 
 # Node development tools
-fnm = "latest"
 pnpm = "latest"
-typescript = "latest"
 biome = "latest"
-playwright = "latest"
 
 # Database and DevOps tools
-postgres = "17"
-docker = "latest"
 docker-compose = "latest"
 
-# Utility tools
-httpie = "latest"
-curl = "latest"
 
-# Set paths for shells to look for commands
 [env]
-PATH = ["$MISE_DATA_DIR/shims", "$PATH", "./node_modules/.bin"]
-PYTHONPATH = ["$PWD", "$PYTHONPATH"]
+# Environment variables
+PYTHONPATH = "$PWD:$PYTHONPATH"
 PYTHONUNBUFFERED = "1"
 
-# Configure development environment
 [tasks]
 # Backend tasks
 backend-setup = "cd backend && uv sync && source .venv/bin/activate"
@@ -63,11 +50,11 @@ generate-client = "./scripts/generate-client.sh"
 generate-secret = "python -c \"import secrets; print(secrets.token_urlsafe(32))\""
 security-check = "cd backend && uv pip audit && cd ../frontend && npm audit"
 
-# Python configurations
+# Python settings
 [settings.python]
-use_pyenv = false
-virtualenv_dir = ".venv"
+venv_auto_create = true
+venv_create_args = ["-p", "python3.10", ".venv"]
 
-# Node configurations
+# Node settings - only use supported options
 [settings.node]
-enable_corepack = true
+flavor = "node"  # Default flavor

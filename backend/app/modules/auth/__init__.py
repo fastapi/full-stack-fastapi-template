@@ -6,7 +6,10 @@ This module handles authentication and authorization operations.
 from fastapi import APIRouter, FastAPI
 
 from app.core.config import settings
-from app.modules.auth.api.routes import router as auth_router
+from app.core.logging import get_logger
+
+# Configure logger
+logger = get_logger("auth_module")
 
 
 def get_auth_router() -> APIRouter:
@@ -16,6 +19,8 @@ def get_auth_router() -> APIRouter:
     Returns:
         APIRouter for auth module
     """
+    # Import here to avoid circular imports
+    from app.modules.auth.api.routes import router as auth_router
     return auth_router
 
 
@@ -28,6 +33,9 @@ def init_auth_module(app: FastAPI) -> None:
     Args:
         app: FastAPI application
     """
+    # Import here to avoid circular imports
+    from app.modules.auth.api.routes import router as auth_router
+    
     # Include the auth router in the application
     app.include_router(auth_router, prefix=settings.API_V1_STR)
     
@@ -35,4 +43,4 @@ def init_auth_module(app: FastAPI) -> None:
     @app.on_event("startup")
     async def init_auth():
         """Initialize auth module on application startup."""
-        pass  # Add any initialization code here
+        logger.info("Auth module initialized")

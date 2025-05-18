@@ -9,7 +9,7 @@ from typing import List, Optional
 from sqlmodel import Session, select
 
 from app.core.db import BaseRepository
-from app.modules.users.domain.models import User
+from app.models import User  # Temporary import until full migration
 
 
 class UserRepository(BaseRepository):

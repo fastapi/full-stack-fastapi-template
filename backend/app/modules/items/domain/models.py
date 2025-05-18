@@ -8,8 +8,11 @@ from typing import List, Optional
 
 from sqlmodel import Field, Relationship, SQLModel
 
-from app.modules.users.domain.models import User
 from app.shared.models import BaseModel
+
+# Use legacy Item model from app.models to avoid conflict
+# This is a transitional measure until the legacy model can be fully removed
+from app.models import Item, User
 
 
 # Shared properties
@@ -33,16 +36,17 @@ class ItemUpdate(ItemBase):
     title: Optional[str] = Field(default=None, min_length=1, max_length=255)  # type: ignore
 
 
-# Database model, database table inferred from class name
-class Item(ItemBase, BaseModel, table=True):
-    """Database model for an item."""
-    
-    __tablename__ = "item"
-    
-    owner_id: uuid.UUID = Field(
-        foreign_key="user.id", nullable=False, ondelete="CASCADE"
-    )
-    owner: Optional[User] = Relationship(back_populates="items")
+# Do not define a duplicate Item model
+# Remove this after all references to models.Item are removed
+# class Item(ItemBase, BaseModel, table=True):
+#     """Database model for an item."""
+#     
+#     __tablename__ = "item"
+#     
+#     owner_id: uuid.UUID = Field(
+#         foreign_key="user.id", nullable=False, ondelete="CASCADE"
+#     )
+#     owner: Optional[User] = Relationship(back_populates="items")
 
 
 # Properties to return via API, id is always required

@@ -193,3 +193,26 @@ def get_repository(repo_class: Type[T]) -> Callable[[Session], T]:
 
 # Reusable dependency for a database session
 SessionDep = Depends(get_session)
+
+
+def init_db(session: Session) -> None:
+    """
+    Initialize database with required data.
+    
+    During the modular transition, we're delegating this to the users module
+    to create the initial superuser. In the future, this will be a coordinated
+    initialization process for all modules.
+    
+    Args:
+        session: Database session
+    """
+    # Import here to avoid circular imports
+    from app.modules.users.repository.user_repo import UserRepository
+    from app.modules.users.services.user_service import UserService
+    
+    # Initialize user data (create superuser)
+    user_repo = UserRepository(session)
+    user_service = UserService(user_repo)
+    user_service.create_initial_superuser()
+    
+    logger.info("Database initialized with initial data")
