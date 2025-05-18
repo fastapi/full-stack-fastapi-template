@@ -74,14 +74,24 @@
 - [x] Remover testes de rotas legadas (app/tests/api/routes/test_*.py)
 - [x] Verificar que a aplicação continua funcionando após a remoção dos arquivos
 
+### Phase 9: Reorganização da Documentação ✅
+
+- [x] Criar estrutura de pastas docs/ seguindo as práticas recomendadas
+- [x] Criar documentação de introdução (getting-started)
+- [x] Criar documentação de arquitetura detalhada
+- [x] Criar documentação de fluxo de desenvolvimento
+- [x] Criar guias práticos para extensão da API
+- [x] Criar documentação de testes
+- [x] Criar documentação de deployment
+- [x] Remover arquivos de documentação redundantes após migração
+- [x] Garantir consistência de estilo em toda a documentação
+
 ## Next Steps
 
-### Phase 9: Melhorias na Experiência do Desenvolvedor
+### Phase 10: Melhorias na Experiência do Desenvolvedor
 
 - [ ] Criar ferramentas CLI para gerar novos módulos e componentes
-- [ ] Adicionar documentação detalhada sobre como estender a arquitetura
 - [ ] Criar templates para novos módulos e componentes
-- [ ] Melhorar a documentação de API com exemplos mais completos
 - [ ] Adicionar scripts de automação para tarefas comuns de desenvolvimento
 - [ ] Melhorar ferramentas de tratamento de erros e depuração
 - [ ] Aprimorar recursos de logging e monitoramento
