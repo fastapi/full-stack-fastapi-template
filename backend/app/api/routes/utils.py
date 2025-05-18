@@ -6,7 +6,7 @@ class EmailRequest(BaseModel):
     email_to: EmailStr
 
 from app.api.deps import get_current_active_superuser
-from app.models import Message
+from app.shared.models import Message
 from app.utils import generate_test_email, send_email
 
 router = APIRouter(prefix="/utils", tags=["utils"])

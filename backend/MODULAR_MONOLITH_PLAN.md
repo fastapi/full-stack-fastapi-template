@@ -168,9 +168,10 @@ backend/
 
 ### 1. Migrate Remaining Models (High Priority)
 
-- 📝 Move the Message model to shared/models.py
-- 📝 Remove temporary imports from app.models in all modules
-- 📝 Update all references to use the new models
+- ✅ Move the Message model to shared/models.py
+- ✅ Move the TokenPayload model to auth/domain/models.py
+- 🔄 Update all references to use the new models in modules
+- 🔄 Remove remaining models from app.models.py
 
 ### 2. Complete Event System (Medium Priority)
 

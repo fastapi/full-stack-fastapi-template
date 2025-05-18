@@ -18,7 +18,9 @@ from app.core.security import ALGORITHM, decode_access_token
 from app.shared.exceptions import AuthenticationException, PermissionException
 
 # Temporary imports until modules are ready - use legacy models
-from app.models import TokenPayload, User
+from app.models import User
+# Import TokenPayload from auth module
+from app.modules.auth.domain.models import TokenPayload
 
 # Initialize logger
 logger = get_logger("api.deps")
