@@ -1,6 +1,6 @@
 # Test Plan
 
-This document outlines the test plan for the modular monolith architecture.
+This document outlines the comprehensive test plan for the full-stack application.
 
 ## Test Types
 
@@ -51,7 +51,7 @@ API tests verify that the API endpoints work as expected.
 
 #### Test Approach
 
-- Use TestClient from FastAPI for API testing
+- Use httpx for blackbox API testing (no direct access to internal implementation)
 - Test different HTTP methods (GET, POST, PUT, DELETE)
 - Test different response codes (200, 201, 400, 401, 403, 404, 500)
 - Test with different input data (valid, invalid, edge cases)
@@ -253,48 +253,16 @@ Run tests in the CI/CD pipeline to ensure code quality before deployment.
    - Verify that the event is handled correctly
    - Verify that error handling works
 
-## Test Data
-
-### Test Users
-
-- **Admin User**: A user with superuser privileges
-- **Regular User**: A user with standard privileges
-- **Inactive User**: A user that is not active
-
-### Test Items
-
-- **Standard Item**: A regular item
-- **Item with Long Description**: An item with a long description
-- **Item with Special Characters**: An item with special characters in the title and description
-
 ## Test Environment
 
 ### Local Environment
 
 - **Database**: PostgreSQL
 - **Email**: SMTP server (or mock)
-- **API**: FastAPI TestClient
+- **API**: httpx for blackbox testing
 
 ### CI/CD Environment
 
 - **Database**: PostgreSQL (in Docker)
 - **Email**: Mock SMTP server
-- **API**: FastAPI TestClient
-
-## Test Reporting
-
-### Test Results
-
-- Generate test results for each test run
-- Include pass/fail status for each test
-- Include error messages for failing tests
-
-### Coverage Reports
-
-- Generate coverage reports for each test run
-- Include coverage percentage for each module
-- Include list of uncovered lines
-
-## Conclusion
-
-This test plan provides a comprehensive approach to testing the modular monolith architecture. By following this plan, we can ensure that the application works correctly and maintains high quality as it evolves.
+- **API**: httpx for blackbox testing

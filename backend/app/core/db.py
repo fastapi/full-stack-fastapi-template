@@ -39,10 +39,10 @@ UpdateSchemaType = TypeVar('UpdateSchemaType', bound=SQLModel)
 def get_session() -> Generator[Session, None, None]:
     """
     Get a database session.
-    
+
     This function yields a database session that is automatically closed
     when the caller is done with it.
-    
+
     Yields:
         SQLModel Session object
     """
@@ -61,10 +61,10 @@ def get_session() -> Generator[Session, None, None]:
 def session_manager() -> Generator[Session, None, None]:
     """
     Context manager for database sessions.
-    
+
     This context manager provides a database session that is automatically
     committed or rolled back based on whether an exception is raised.
-    
+
     Yields:
         SQLModel Session object
     """
@@ -83,61 +83,61 @@ def session_manager() -> Generator[Session, None, None]:
 class BaseRepository:
     """
     Base repository for database operations.
-    
+
     This class provides a base implementation of common database operations
     that can be inherited by module-specific repositories.
     """
-    
+
     def __init__(self, session: Session):
         """
         Initialize the repository with a database session.
-        
+
         Args:
             session: SQLModel Session object
         """
         self.session = session
-    
+
     def get(self, model: Type[ModelType], id: Any) -> ModelType | None:
         """
         Get a model instance by ID.
-        
+
         Args:
             model: SQLModel model class
             id: Primary key value
-            
+
         Returns:
             Model instance if found, None otherwise
         """
         return self.session.get(model, id)
-    
+
     def get_multi(
-        self, 
-        model: Type[ModelType], 
-        *, 
-        skip: int = 0, 
+        self,
+        model: Type[ModelType],
+        *,
+        skip: int = 0,
         limit: int = 100
     ) -> list[ModelType]:
         """
         Get multiple model instances with pagination.
-        
+
         Args:
             model: SQLModel model class
             skip: Number of records to skip
             limit: Maximum number of records to return
-            
+
         Returns:
             List of model instances
         """
         statement = select(model).offset(skip).limit(limit)
         return list(self.session.exec(statement))
-    
+
     def create(self, model_instance: ModelType) -> ModelType:
         """
         Create a new record in the database.
-        
+
         Args:
             model_instance: Instance of a SQLModel model
-            
+
         Returns:
             Created model instance with ID populated
         """
@@ -145,14 +145,14 @@ class BaseRepository:
         self.session.commit()
         self.session.refresh(model_instance)
         return model_instance
-    
+
     def update(self, model_instance: ModelType) -> ModelType:
         """
         Update an existing record in the database.
-        
+
         Args:
             model_instance: Instance of a SQLModel model
-            
+
         Returns:
             Updated model instance
         """
@@ -160,11 +160,11 @@ class BaseRepository:
         self.session.commit()
         self.session.refresh(model_instance)
         return model_instance
-    
+
     def delete(self, model_instance: ModelType) -> None:
         """
         Delete a record from the database.
-        
+
         Args:
             model_instance: Instance of a SQLModel model
         """
@@ -176,13 +176,13 @@ class BaseRepository:
 def get_repository(repo_class: Type[T]) -> Callable[[Session], T]:
     """
     Factory function for repository injection.
-    
+
     This function creates a dependency that injects a repository instance
     into a route function.
-    
+
     Args:
         repo_class: Repository class to instantiate
-        
+
     Returns:
         Dependency function
     """
@@ -199,20 +199,26 @@ def init_db(session: Session) -> None:
     """
     Initialize database with required data.
     
-    During the modular transition, we're delegating this to the users module
-    to create the initial superuser. In the future, this will be a coordinated
-    initialization process for all modules.
-    
+    This function initializes the database with required data including
+    the initial superuser account. Each module's initialization is handled
+    by its respective service.
+
     Args:
         session: Database session
     """
-    # Import here to avoid circular imports
+    # Import models here to ensure SQLAlchemy knows about them before
+    # services/repositories that use them are initialized and queries are made,
+    # especially for scripts like initial_data.py that don't run the full app startup.
+    from app.modules.items.domain.models import Item  # noqa: F401
+    from app.modules.users.domain.models import User  # noqa: F401
+
+    # Import services/repositories after models
     from app.modules.users.repository.user_repo import UserRepository
     from app.modules.users.services.user_service import UserService
-    
+
     # Initialize user data (create superuser)
     user_repo = UserRepository(session)
     user_service = UserService(user_repo)
     user_service.create_initial_superuser()
-    
+
     logger.info("Database initialized with initial data")

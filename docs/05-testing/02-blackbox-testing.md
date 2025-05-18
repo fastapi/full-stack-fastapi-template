@@ -1,34 +1,15 @@
-# Blackbox Testing Strategy for Modular Monolith Refactoring
+# Blackbox Testing Strategy
 
-This document outlines a comprehensive blackbox testing approach to ensure that the behavior of the FastAPI backend remains consistent before and after the modular monolith refactoring.
+This document outlines a comprehensive blackbox testing approach to ensure that the behavior of the FastAPI backend is thoroughly tested from an external client's perspective.
 
-## Current Implementation Status
+## Blackbox Testing Principles
 
-**✅ New implementation complete!** We have now set up the following:
-
-- A fully external HTTP-based testing approach using httpx
-- Tests run against a real running server without TestClient
-- No direct database manipulation in tests
-- Helper utilities for interacting with the API
-- Proper server lifecycle management during tests
-- Clean separation of API testing from implementation details
-
-This is a significant improvement over the previous implementation, which used:
-- TestClient (FastAPI's built-in testing client)
-- Direct access to the database
-- Knowledge of internal implementation details
-
-## Test Principles
-
-1. **True Blackbox Testing**: Tests interact with the API solely through HTTP requests, just like any external client would
+1. **True External Testing**: Tests interact with the API solely through HTTP requests, just like any external client would
 2. **No Implementation Knowledge**: Tests have no knowledge of internal implementation details
 3. **Stateless Tests**: Tests do not rely on database state between tests
 4. **Independent Execution**: Tests can run against any server instance (local, Docker, remote)
-5. **Before/After Validation**: Tests can be run before and after each refactoring phase
 
-## Test Implementation
-
-### Test Infrastructure
+## Test Infrastructure
 
 The blackbox tests use the following components:
 
@@ -37,7 +18,7 @@ The blackbox tests use the following components:
 3. **BlackboxClient**: A custom client that wraps httpx with API-specific helpers
 4. **Test utilities**: Helper functions for common operations and assertions
 
-### Running Tests
+## Running Tests
 
 Tests can be run using the included run_blackbox_tests.sh script:
 
@@ -52,7 +33,7 @@ The script:
 3. Generates test reports
 4. Stops the server if it was started by the script
 
-### Client Utilities
+## Client Utilities
 
 The BlackboxClient provides an interface for interacting with the API:
 
@@ -165,39 +146,9 @@ def test_resource_ownership_protection(client):
     assert user2_get_response.status_code == 404, "User2 should not see User1's item"
 ```
 
-## Test Execution Plan
+## Test Setup in CI/CD
 
-### Pre-Refactoring Phase
-
-1. Run the complete test suite against the current architecture
-2. Establish a baseline of expected responses and behaviors
-3. Create a test report documenting the current behavior
-
-### During Refactoring Phase
-
-1. After each module refactoring, run the relevant subset of tests
-2. Verify that the refactored module maintains the same external behavior
-3. Document any differences or issues encountered
-
-### Post-Refactoring Phase
-
-1. Run the complete test suite against the fully refactored architecture
-2. Compare results with the pre-refactoring baseline
-3. Verify all tests pass with the same results as before refactoring
-4. Create a final test report documenting the comparison
-
-## Dependencies and Setup
-
-The tests require the following:
-
-1. httpx: `pip install httpx`
-2. pytest: `pip install pytest`
-3. A running FastAPI server (started automatically by the test script if not running)
-4. The superuser credentials in environment variables (for admin tests)
-
-## Continuous Integration Integration
-
-Add the blackbox tests to the CI/CD pipeline to ensure they run on every pull request:
+The blackbox tests are integrated into the CI/CD pipeline to ensure they run on every pull request:
 
 ```yaml
 # .github/workflows/backend-tests.yml (example)
@@ -249,6 +200,26 @@ jobs:
         path: backend/test-reports/
 ```
 
-## Conclusion
+## Benefits of Blackbox Testing
 
-This blackbox testing strategy ensures that the external behavior of the API remains consistent throughout the refactoring process. By focusing exclusively on HTTP interactions without any knowledge of implementation details, these tests provide the most reliable validation that the refactoring does not introduce changes in behavior from an external client's perspective.
+1. **Architecture Independence**: Tests remain valid regardless of internal code changes
+2. **Refactoring Safety**: Refactoring the codebase doesn't require changing tests as long as the API behavior remains the same
+3. **Client Perspective**: Tests verify the application from the client's perspective
+4. **Documentation**: Tests serve as executable documentation of the API's behavior
+5. **Regression Detection**: Changes that break client compatibility are quickly detected
+
+## Implementation Details
+
+The blackbox testing code is located in:
+
+```
+backend/app/tests/api/blackbox/
+├── README.md
+├── client_utils.py           # Client utilities and helpers
+├── conftest.py               # Test fixtures
+├── test_api_contract.py      # API contract tests
+├── test_authorization.py     # Authorization tests
+├── test_basic.py             # Basic functionality tests
+├── test_user_lifecycle.py    # User lifecycle tests
+└── test_utils.py             # Testing utilities
+```
