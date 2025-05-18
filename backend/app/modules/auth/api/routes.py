@@ -11,7 +11,8 @@ from fastapi.security import OAuth2PasswordRequestForm
 
 from app.api.deps import CurrentSuperuser, CurrentUser, SessionDep
 from app.core.logging import get_logger
-from app.models import Message, UserPublic  # Temporary import until User module is extracted
+from app.models import UserPublic  # Temporary import until User module is extracted
+from app.shared.models import Message  # Using shared Message model
 from app.modules.auth.dependencies import get_auth_service
 from app.modules.auth.domain.models import NewPassword, PasswordReset, Token
 from app.modules.auth.services.auth_service import AuthService

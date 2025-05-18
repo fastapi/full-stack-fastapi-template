@@ -47,3 +47,9 @@ class PaginatedResponse(SQLModel):
     def create(cls, items: list, count: int):
         """Create a paginated response with the given items and count."""
         return cls(data=items, count=count)
+
+
+class Message(SQLModel):
+    """Generic message response model."""
+    
+    message: str

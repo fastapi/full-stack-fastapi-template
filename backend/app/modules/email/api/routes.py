@@ -11,7 +11,7 @@ from pydantic import EmailStr
 from app.api.deps import CurrentSuperuser
 from app.core.config import settings
 from app.core.logging import get_logger
-from app.models import Message  # Temporary import until Message is moved to shared
+from app.shared.models import Message  # Using shared Message model
 from app.modules.email.dependencies import get_email_service
 from app.modules.email.domain.models import EmailRequest, TemplateData, EmailTemplateType
 from app.modules.email.services.email_service import EmailService
@@ -25,9 +25,9 @@ router = APIRouter(prefix="/email", tags=["email"])
 
 @router.post("/test", response_model=Message)
 def test_email(
+    current_user: CurrentSuperuser,
     email_to: EmailStr,
     background_tasks: BackgroundTasks,
-    current_user: CurrentSuperuser = Depends(),
     email_service: EmailService = Depends(get_email_service),
 ) -> Any:
     """
@@ -56,9 +56,9 @@ def test_email(
 
 @router.post("/", response_model=Message)
 def send_email(
+    current_user: CurrentSuperuser,
     email_request: EmailRequest,
     background_tasks: BackgroundTasks,
-    current_user: CurrentSuperuser = Depends(),
     email_service: EmailService = Depends(get_email_service),
 ) -> Any:
     """
@@ -87,9 +87,9 @@ def send_email(
 
 @router.post("/template", response_model=Message)
 def send_template_email(
+    current_user: CurrentSuperuser,
     template_data: TemplateData,
     background_tasks: BackgroundTasks,
-    current_user: CurrentSuperuser = Depends(),
     email_service: EmailService = Depends(get_email_service),
 ) -> Any:
     """

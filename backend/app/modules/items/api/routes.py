@@ -10,7 +10,7 @@ from fastapi import APIRouter, Depends, HTTPException, status
 
 from app.api.deps import CurrentUser, CurrentSuperuser, SessionDep
 from app.core.logging import get_logger
-from app.models import Message  # Temporary import until Message is moved to shared
+from app.shared.models import Message  # Using shared Message model
 from app.modules.items.dependencies import get_item_service
 from app.modules.items.domain.models import (
     ItemCreate,
@@ -30,9 +30,9 @@ router = APIRouter(prefix="/items", tags=["items"])
 
 @router.get("/", response_model=ItemsPublic)
 def read_items(
+    current_user: CurrentUser,
     skip: int = 0, 
     limit: int = 100,
-    current_user: CurrentUser = Depends(),
     item_service: ItemService = Depends(get_item_service),
 ) -> Any:
     """
@@ -61,8 +61,8 @@ def read_items(
 
 @router.get("/{item_id}", response_model=ItemPublic)
 def read_item(
+    current_user: CurrentUser,
     item_id: uuid.UUID,
-    current_user: CurrentUser = Depends(),
     item_service: ItemService = Depends(get_item_service),
 ) -> Any:
     """
@@ -85,7 +85,7 @@ def read_item(
                 f"User {current_user.id} attempted to access item {item_id} "
                 f"owned by {item.owner_id}"
             )
-            raise PermissionException(detail="Not enough permissions")
+            raise PermissionException(message="Not enough permissions")
             
         return item_service.to_public(item)
     except NotFoundException as e:
@@ -102,8 +102,8 @@ def read_item(
 
 @router.post("/", response_model=ItemPublic)
 def create_item(
+    current_user: CurrentUser,
     item_in: ItemCreate,
-    current_user: CurrentUser = Depends(),
     item_service: ItemService = Depends(get_item_service),
 ) -> Any:
     """
@@ -126,9 +126,9 @@ def create_item(
 
 @router.put("/{item_id}", response_model=ItemPublic)
 def update_item(
+    current_user: CurrentUser,
     item_id: uuid.UUID,
     item_in: ItemUpdate,
-    current_user: CurrentUser = Depends(),
     item_service: ItemService = Depends(get_item_service),
 ) -> Any:
     """
@@ -169,8 +169,8 @@ def update_item(
 
 @router.delete("/{item_id}")
 def delete_item(
+    current_user: CurrentUser,
     item_id: uuid.UUID,
-    current_user: CurrentUser = Depends(),
     item_service: ItemService = Depends(get_item_service),
 ) -> Message:
     """

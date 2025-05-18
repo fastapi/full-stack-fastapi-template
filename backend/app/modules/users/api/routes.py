@@ -11,7 +11,7 @@ from fastapi import APIRouter, Depends, HTTPException, status
 from app.api.deps import CurrentUser, CurrentSuperuser, SessionDep
 from app.core.config import settings
 from app.core.logging import get_logger
-from app.models import Message  # Temporary import until Message is moved to shared
+from app.shared.models import Message  # Using shared Message model
 from app.modules.users.dependencies import get_user_service
 from app.modules.users.domain.models import (
     UpdatePassword,
@@ -34,10 +34,10 @@ router = APIRouter(prefix="/users", tags=["users"])
 
 @router.get(
     "/",
-    dependencies=[Depends(CurrentSuperuser)],
     response_model=UsersPublic,
 )
 def read_users(
+    current_user: CurrentSuperuser,
     skip: int = 0, 
     limit: int = 100,
     user_service: UserService = Depends(get_user_service),
@@ -59,11 +59,11 @@ def read_users(
 
 @router.post(
     "/", 
-    dependencies=[Depends(CurrentSuperuser)], 
     response_model=UserPublic,
 )
 def create_user(
     user_in: UserCreate,
+    current_user: CurrentSuperuser,
     user_service: UserService = Depends(get_user_service),
 ) -> Any:
     """
@@ -263,12 +263,12 @@ def read_user_by_id(
 
 @router.patch(
     "/{user_id}",
-    dependencies=[Depends(CurrentSuperuser)],
     response_model=UserPublic,
 )
 def update_user(
     user_id: uuid.UUID,
     user_in: UserUpdate,
+    current_user: CurrentSuperuser,
     user_service: UserService = Depends(get_user_service),
 ) -> Any:
     """
@@ -299,12 +299,11 @@ def update_user(
 
 @router.delete(
     "/{user_id}", 
-    dependencies=[Depends(CurrentSuperuser)],
     response_model=Message,
 )
 def delete_user(
     user_id: uuid.UUID,
-    current_user: CurrentUser,
+    current_user: CurrentSuperuser,
     user_service: UserService = Depends(get_user_service),
 ) -> Any:
     """
