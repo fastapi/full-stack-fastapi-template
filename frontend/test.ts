@@ -3454,6 +3454,66 @@ You can also provide a configuration file in JSON format:
 python main.py https://example.com --config config.json
 ```
 
+
+Interactive artifact 
+Technical Implementation Process Flow
+The technical diagram above illustrates the detailed architecture and workflow of our LLM-Powered UI Testing System. Let me explain the core technical aspects that would be relevant to your engineering team:
+
+1. System Architecture & Component Interaction
+The system is implemented as a set of specialized Python modules with clear separation of concerns:
+
+Orchestrator: Central coordinator that manages the workflow and component interaction
+BrowserController: Handles all Playwright browser automation operations
+LLMInterface: Provides a unified interface to OpenAI or Google LLM APIs
+StateTracker: Manages URL/state tracking to avoid duplicate exploration
+ElementExtractor: Extracts form elements using both LLM and DOM parsing
+TestGenerator: Creates human-readable test cases from element metadata
+CodeGenerator: Produces Page Object Model classes and pytest scripts
+These components interact through well-defined interfaces, making the system modular and maintainable.
+
+2. Data Flow & Process Pipelines
+The system operates in three primary phases with distinct data flows:
+
+Phase 1: Configuration & Initialization
+Command-line arguments are parsed and validated
+Configuration is loaded from JSON or environment variables
+Component instances are created and initialized
+Browser session is launched
+Phase 2: Web Crawling & Element Discovery
+Starting from the root URL, the system initiates a breadth-first or depth-first crawl
+For each page:
+Browser navigates to the URL
+DOM content and screenshot are captured
+LLM analyzes the page to suggest next actions
+State tracker records the visited page/state
+Element extractor identifies form elements
+The orchestrator decides on next steps based on LLM suggestions
+The crawl continues until completion (max pages, max depth, or no new pages)
+Phase 3: Test Artifact Generation
+JSON metadata is compiled from all discovered form elements
+Human-readable test cases are generated for each form
+Page Object Model classes are created for each page
+Test scripts are generated using the POM classes
+A summary report is produced
+3. Key Technical Implementation Details
+Several sophisticated technical approaches ensure robust operation:
+
+LLM Prompting Strategy: Carefully designed prompt templates optimize LLM interactions for navigation decisions, element extraction, and code generation
+Hybrid Element Extraction: Combines LLM-based analysis with traditional DOM parsing for more accurate results
+State Deduplication: Uses DOM hashing to identify unique states, especially important for SPAs
+Error Handling & Recovery: Implements robust error detection with fallback mechanisms
+Selector Verification: Validates LLM-suggested selectors against the actual DOM
+Token Optimization: Truncates DOM content and implements caching to reduce API costs
+4. Configuration & Extension Points
+The system provides multiple configuration options and extension points:
+
+LLM Provider Selection: Support for OpenAI GPT-4 Vision or Google Gemini
+Test Framework Choice: Generates code for either Playwright or Selenium
+Authentication Handling: Configurable for basic auth, form-based login, or SSO
+Crawl Strategy Settings: Adjustable depth, breadth, and domain restrictions
+Output Customization: Various output formats for test cases and reports
+This modular architecture allows your team to easily adapt the system for different web applications or extend it with additional capabilities as needed.
+
 Example configuration:
 
 ```json
