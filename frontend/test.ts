@@ -3533,3 +3533,22 @@ pytest test_scripts/tests/test_login_page.py
 ## License
 
 MIT
+
+
+# notes
+Key Components
+
+Orchestrator: The central coordination component that controls the workflow
+Browser Controller: Handles browser automation using Playwright
+LLM Interface: Communicates with language model APIs (OpenAI or Google)
+State Tracker: Keeps track of visited pages and states
+Element Extractor: Identifies form elements using LLM and DOM analysis
+Test Generator: Creates human-readable test cases
+Code Generator: Generates POM-based Python test scripts
+
+Generated Artifacts
+The system produces three main outputs:
+
+JSON Metadata: Structured information about all discovered form elements
+Human-Readable Test Cases: In Gherkin or plain text format
+Executable Test Scripts: Python code following the Page Object Model pattern
