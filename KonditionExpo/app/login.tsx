@@ -62,9 +62,9 @@ export default function LoginScreen() {
   };
   
   const handleSignUp = () => {
-    // For now, just go back to main screen since we don't have signup yet
-    router.push('/(tabs)');
+    router.push('/signup'); // created a new screen for signup (signup.tsx)
   };
+  
   
   return (
     <KeyboardAvoidingView
