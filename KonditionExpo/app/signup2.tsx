@@ -55,7 +55,7 @@ export default function SignUpStep2() {
       return;
     }
     // Proceed to next screen or API call
-    router.replace('/(tabs)');
+    router.replace('/home');
   };
 
   return (
