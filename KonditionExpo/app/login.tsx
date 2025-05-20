@@ -48,7 +48,7 @@ export default function LoginScreen() {
       await new Promise(resolve => setTimeout(resolve, 1500));
       
       // Navigate to main screen after successful login
-      router.replace('/(tabs)');
+      router.replace('/home');
     } catch (error) {
       console.error('Login error:', error);
     } finally {
