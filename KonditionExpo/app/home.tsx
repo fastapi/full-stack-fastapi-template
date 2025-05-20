@@ -26,7 +26,7 @@ const HomeScreen = ({ navigation }) => {
         {/* Header */}
         <View style={styles.header}>
           <Text style={styles.welcomeText}>Welcome Back,</Text>
-          <Text style={styles.userName}>Stefani Wong</Text>
+          <Text style={styles.userName}>Andy Vo</Text>
           <TouchableOpacity style={styles.notificationBtn} onPress={() => navigation.navigate('Notifications')}>
             <Image source={require('./assets/bell.png')} style={styles.bellIcon} />
           </TouchableOpacity>
