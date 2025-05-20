@@ -17,7 +17,7 @@ export default function SignUpScreen() {
     }
 
     // TODO: Send signup data to API
-    router.replace('/(tabs)');
+    router.replace('/signup2');
   };
 
   return (
