@@ -15,8 +15,8 @@ const HomeScreen = ({ navigation }) => {
   const workoutProgressData = [20, 40, 30, 60, 90, 80, 70];
   const workoutDays = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
   const latestWorkouts = [
-    { id: '1', type: 'Fullbody Workout', calories: 180, duration: '20 minutes', icon: require('./assets/fullbody.png') },
-    { id: '2', type: 'Lowerbody Workout', calories: 200, duration: '30 minutes', icon: require('./assets/lowerbody.png') },
+    { id: '1', type: 'Fullbody Workout', calories: 180, duration: '20 minutes', icon: require('./assets/images/fullbody.png') },
+    { id: '2', type: 'Lowerbody Workout', calories: 200, duration: '30 minutes', icon: require('./assets/images/lowerbody.png') },
     // ... more workouts
   ];
 
@@ -28,7 +28,7 @@ const HomeScreen = ({ navigation }) => {
           <Text style={styles.welcomeText}>Welcome Back,</Text>
           <Text style={styles.userName}>Andy Vo</Text>
           <TouchableOpacity style={styles.notificationBtn} onPress={() => navigation.navigate('Notifications')}>
-            <Image source={require('./assets/bell.png')} style={styles.bellIcon} />
+            <Image source={require('./assets/images/bell.png')} style={styles.bellIcon} />
           </TouchableOpacity>
         </View>
 
@@ -147,7 +147,7 @@ const HomeScreen = ({ navigation }) => {
                 <Text style={styles.workoutType}>{w.type}</Text>
                 <Text style={styles.workoutMeta}>{w.calories} Calories Burn | {w.duration}</Text>
               </View>
-              <Image source={require('./assets/arrow-right.png')} style={styles.arrowIcon} />
+              <Image source={require('./assets/images/arrow-right.png')} style={styles.arrowIcon} />
             </TouchableOpacity>
           ))}
         </View>
@@ -156,19 +156,19 @@ const HomeScreen = ({ navigation }) => {
       {/* Bottom Navigation */}
       <View style={styles.bottomNav}>
         <TouchableOpacity onPress={() => navigation.navigate('Home')}>
-          <Image source={require('./assets/home-active.png')} style={styles.navIcon} />
+          <Image source={require('./assets/images/home-active.png')} style={styles.navIcon} />
         </TouchableOpacity>
         <TouchableOpacity onPress={() => navigation.navigate('Progress')}>
-          <Image source={require('./assets/chart.png')} style={styles.navIcon} />
+          <Image source={require('./assets/images/chart.png')} style={styles.navIcon} />
         </TouchableOpacity>
         <TouchableOpacity onPress={() => navigation.navigate('Search')} style={styles.centerButton}>
-          <Image source={require('./assets/search.png')} style={styles.searchIcon} />
+          <Image source={require('./assets/images/search.png')} style={styles.searchIcon} />
         </TouchableOpacity>
         <TouchableOpacity onPress={() => navigation.navigate('Camera')}>
-          <Image source={require('./assets/camera.png')} style={styles.navIcon} />
+          <Image source={require('./assets/images/camera.png')} style={styles.navIcon} />
         </TouchableOpacity>
         <TouchableOpacity onPress={() => navigation.navigate('Profile')}>
-          <Image source={require('./assets/user.png')} style={styles.navIcon} />
+          <Image source={require('./assets/images/user.png')} style={styles.navIcon} />
         </TouchableOpacity>
       </View>
     </SafeAreaView>
