@@ -1,6 +1,6 @@
 import React from 'react';
 import { SafeAreaView, View, Text, StyleSheet, ScrollView, TouchableOpacity, Image, Dimensions } from 'react-native';
-import { LineChart, PieChart } from 'react-native-svg-charts';
+import { LineChart, PieChart } from 'react-native-chart-kit';
 
 const { width } = Dimensions.get('window');
 
