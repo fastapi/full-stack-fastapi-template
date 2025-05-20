@@ -1,6 +1,7 @@
 import React from 'react';
 import { SafeAreaView, View, Text, StyleSheet, ScrollView, TouchableOpacity, Image, Dimensions } from 'react-native';
 import { LineChart, PieChart } from 'react-native-svg-charts';
+import { router } from 'expo-router';
 
 const { width } = Dimensions.get('window');
 
