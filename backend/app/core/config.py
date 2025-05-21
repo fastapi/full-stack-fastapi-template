@@ -1,6 +1,7 @@
 import secrets
 import warnings
 from typing import Annotated, Any, Literal
+import os # Added for os.getenv
 
 from pydantic import (
     AnyUrl,
@@ -37,6 +38,10 @@ class Settings(BaseSettings):
     ACCESS_TOKEN_EXPIRE_MINUTES: int = 60 * 24 * 8
     FRONTEND_HOST: str = "http://localhost:5173"
     ENVIRONMENT: Literal["local", "staging", "production"] = "local"
+    
+    # Analytics settings
+    PARQUET_DATA_PATH: str = os.getenv("PARQUET_DATA_PATH", "backend/data/parquet/")
+    SERVICE_NAME: str = os.getenv("SERVICE_NAME", "fastapi-analytics-app")
 
     BACKEND_CORS_ORIGINS: Annotated[
         list[AnyUrl] | str, BeforeValidator(parse_cors)

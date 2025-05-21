@@ -23,6 +23,7 @@
 - 📞 [Traefik](https://traefik.io) as a reverse proxy / load balancer.
 - 🚢 Deployment instructions using Docker Compose, including how to set up a frontend Traefik proxy to handle automatic HTTPS certificates.
 - 🏭 CI (continuous integration) and CD (continuous deployment) based on GitHub Actions.
+- 📊 **New Analytics Module**: Integrated analytics capabilities using DuckDB and Polars for efficient querying of exported data. Features an ETL process for data extraction and OpenTelemetry for performance tracing. For more details, see the [Backend README](./backend/README.md#analytics-module).
 
 ### Dashboard Login
 
