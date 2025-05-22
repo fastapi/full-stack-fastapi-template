@@ -39,6 +39,7 @@ def parse_cors(v: Any) -> list[str] | str:
 
 class DatabaseSettings(BaseSettings):
     """Database configuration settings."""
+    model_config = SettingsConfigDict(env_prefix="DATABASE_")
     
     POSTGRES_SERVER: str = "localhost"
     POSTGRES_USER: str = "postgres"
@@ -78,6 +79,7 @@ class DatabaseSettings(BaseSettings):
 
 class AuthSettings(BaseSettings):
     """Authentication and authorization settings."""
+    model_config = SettingsConfigDict(env_prefix="AUTH_")
     
     SECRET_KEY: str = secrets.token_urlsafe(32)
     ALGORITHM: str = "HS256"
@@ -108,9 +110,9 @@ class AuthSettings(BaseSettings):
     SESSION_COOKIE_DOMAIN: Optional[str] = None
     
     # CORS
-    BACKEND_CORS_ORIGINS: list[AnyUrl] = [
-        "http://localhost:3000",
-        "http://localhost:8000",
+    BACKEND_CORS_ORIGINS: list[HttpUrl] = [
+        HttpUrl("http://localhost:3000"),
+        HttpUrl("http://localhost:8000"),
     ]
     
     @property
@@ -121,6 +123,7 @@ class AuthSettings(BaseSettings):
 
 class EmailSettings(BaseSettings):
     """Email configuration settings."""
+    model_config = SettingsConfigDict(env_prefix="EMAIL_")
     
     SMTP_TLS: bool = True
     SMTP_PORT: int = 587
@@ -138,6 +141,7 @@ class EmailSettings(BaseSettings):
 
 class RedisSettings(BaseSettings):
     """Redis configuration settings."""
+    model_config = SettingsConfigDict(env_prefix="REDIS_")
     
     REDIS_HOST: str = "localhost"
     REDIS_PORT: int = 6379
@@ -159,10 +163,6 @@ class RedisSettings(BaseSettings):
         )
 
 
-class Settings(DatabaseSettings, AuthSettings, EmailSettings, RedisSettings):
-    """Application settings."""
-
-
 def parse_cors(v: Any) -> list[str] | str:
     if isinstance(v, str) and not v.startswith("["):
         return [i.strip() for i in v.split(",")]
@@ -171,7 +171,8 @@ def parse_cors(v: Any) -> list[str] | str:
     raise ValueError(v)
 
 
-class Settings(BaseSettings):
+class Settings(DatabaseSettings, AuthSettings, EmailSettings, RedisSettings):
+    """Application settings."""
     model_config = SettingsConfigDict(
         env_file=PROJECT_ROOT / ".env",
         env_file_encoding="utf-8",
@@ -184,6 +185,15 @@ class Settings(BaseSettings):
     PROJECT_NAME: str = "Copilot API"
     API_V1_STR: str = "/api/v1"
     ENVIRONMENT: Literal["local", "staging", "production"] = "local"
+    
+    # Allow development as an alias for local
+    @model_validator(mode='before')
+    @classmethod
+    def validate_environment(cls, data: Any) -> Any:
+        if isinstance(data, dict) and data.get('ENVIRONMENT') == 'development':
+            data['ENVIRONMENT'] = 'local'
+        return data
+    
     DEBUG: bool = False
     
     # Security
@@ -255,27 +265,36 @@ class Settings(BaseSettings):
         return v
     
     @field_validator("BACKEND_CORS_ORIGINS", mode="before")
-    def assemble_cors_origins(cls, v: Union[str, list[str]]) -> list[str] | str:
+    def assemble_cors_origins(cls, v: Union[str, list[Union[str, HttpUrl]]]) -> list[HttpUrl]:
         """Parse CORS origins from a comma-separated string or list."""
-        if isinstance(v, str) and not v.startswith("["):
-            return [i.strip() for i in v.split(",")]
-        elif isinstance(v, list):
-            return v
-        raise ValueError(v)
+        if isinstance(v, str):
+            if v.startswith("["):
+                # Handle JSON array string
+                import json
+                v = json.loads(v)
+            else:
+                # Handle comma-separated string
+                v = [i.strip() for i in v.split(",")]
+        
+        # Convert all items to HttpUrl objects
+        result = []
+        for item in v:
+            if isinstance(item, str):
+                result.append(HttpUrl(item))
+            elif isinstance(item, HttpUrl):
+                result.append(item)
+            else:
+                raise ValueError(f"Invalid CORS origin: {item}")
+        return result
     
-    class Config:
-        case_sensitive = True
-        env_file = ".env"
-        env_file_encoding = "utf-8"
-
     PROJECT_NAME: str
     SENTRY_DSN: HttpUrl | None = None
-    POSTGRES_SERVER: str
+    POSTGRES_SERVER: str = "localhost"
+    POSTGRES_USER: str = "postgres"
+    POSTGRES_PASSWORD: str = "postgres"
+    POSTGRES_DB: str = "copilot"
     POSTGRES_PORT: int = 5432
-    POSTGRES_USER: str
-    POSTGRES_PASSWORD: str = ""
-    POSTGRES_DB: str = ""
-
+    
     @computed_field  # type: ignore[prop-decorator]
     @property
     def SQLALCHEMY_DATABASE_URI(self) -> PostgresDsn:
@@ -295,7 +314,7 @@ class Settings(BaseSettings):
     SMTP_USER: str | None = None
     SMTP_PASSWORD: str | None = None
     EMAILS_FROM_EMAIL: EmailStr | None = None
-    EMAILS_FROM_NAME: EmailStr | None = None
+    EMAILS_FROM_NAME: str | None = None
 
     @model_validator(mode="after")
     def _set_default_emails_from(self) -> Self:

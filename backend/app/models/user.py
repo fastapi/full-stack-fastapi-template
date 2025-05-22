@@ -28,7 +28,6 @@ class UserBase(SQLModel):
     """Base user model with common fields."""
     email: EmailStr = SQLModelField(
         ...,
-        index=True,
         sa_column=Column(String(255), unique=True, nullable=False, index=True),
     )
     is_active: bool = Field(default=False, nullable=False)
@@ -130,16 +129,13 @@ class UserInDB(UserBase, BaseDBModel, table=True):
         default_factory=uuid4,
         primary_key=True,
         index=True,
-        nullable=False,
     )
     created_at: datetime = SQLModelField(
         default_factory=datetime.utcnow,
-        nullable=False,
         sa_column=Column(DateTime(timezone=True), server_default=func.now(), nullable=False),
     )
     updated_at: datetime = SQLModelField(
         default_factory=datetime.utcnow,
-        nullable=False,
         sa_column=Column(
             DateTime(timezone=True),
             server_default=func.now(),
@@ -216,7 +212,6 @@ class RefreshToken(RefreshTokenBase, BaseDBModel, table=True):
     
     user_id: UUID = SQLModelField(
         foreign_key="users.id",
-        nullable=False,
         index=True,
     )
     user: UserInDB = Relationship(back_populates="refresh_tokens")
@@ -226,16 +221,13 @@ class RefreshToken(RefreshTokenBase, BaseDBModel, table=True):
         default_factory=uuid4,
         primary_key=True,
         index=True,
-        nullable=False,
     )
     created_at: datetime = SQLModelField(
         default_factory=datetime.utcnow,
-        nullable=False,
         sa_column=Column(DateTime(timezone=True), server_default=func.now(), nullable=False),
     )
     updated_at: datetime = SQLModelField(
         default_factory=datetime.utcnow,
-        nullable=False,
         sa_column=Column(
             DateTime(timezone=True),
             server_default=func.now(),
@@ -274,15 +266,91 @@ class PasswordResetConfirm(SQLModel):
     """Schema for confirming a password reset."""
     token: str
     new_password: str = Field(..., min_length=8, max_length=100)
-    
-    @validator('new_password')
+
+    @validator("new_password")
     def password_strength(cls, v):
         if len(v) < 8:
-            raise ValueError('Password must be at least 8 characters long')
-        if not any(c.isupper() for c in v):
-            raise ValueError('Password must contain at least one uppercase letter')
-        if not any(c.islower() for c in v):
-            raise ValueError('Password must contain at least one lowercase letter')
-        if not any(c.isdigit() for c in v):
-            raise ValueError('Password must contain at least one number')
+            raise ValueError("Password must be at least 8 characters long")
+        if not any(char.isdigit() for char in v):
+            raise ValueError("Password must contain at least one number")
+        if not any(char.isupper() for char in v):
+            raise ValueError("Password must contain at least one uppercase letter")
+        if not any(char.islower() for char in v):
+            raise ValueError("Password must contain at least one lowercase letter")
         return v
+
+
+class NewPassword(SQLModel):
+    """Schema for setting a new password."""
+    current_password: str = Field(..., min_length=1, description="Current password")
+    new_password: str = Field(..., min_length=8, max_length=100, description="New password")
+
+    @validator("new_password")
+    def password_strength(cls, v):
+        if len(v) < 8:
+            raise ValueError("Password must be at least 8 characters long")
+        if not any(char.isdigit() for char in v):
+            raise ValueError("Password must contain at least one number")
+        if not any(char.isupper() for char in v):
+            raise ValueError("Password must contain at least one uppercase letter")
+        if not any(char.islower() for char in v):
+            raise ValueError("Password must contain at least one lowercase letter")
+        return v
+
+
+class UpdatePassword(SQLModel):
+    """Schema for updating a user's password."""
+    current_password: str = Field(..., min_length=1, description="Current password")
+    new_password: str = Field(..., min_length=8, max_length=100, description="New password")
+
+    @validator("new_password")
+    def password_strength(cls, v):
+        if len(v) < 8:
+            raise ValueError("Password must be at least 8 characters long")
+        if not any(char.isdigit() for char in v):
+            raise ValueError("Password must contain at least one number")
+        if not any(char.isupper() for char in v):
+            raise ValueError("Password must contain at least one uppercase letter")
+        if not any(char.islower() for char in v):
+            raise ValueError("Password must contain at least one lowercase letter")
+        return v
+
+
+class UserRegister(UserCreate):
+    """Schema for user registration."""
+    full_name: Optional[str] = Field(None, max_length=255, description="User's full name")
+    
+    class Config:
+        schema_extra = {
+            "example": {
+                "email": "user@example.com",
+                "password": "SecurePass123",
+                "full_name": "John Doe"
+            }
+        }
+
+
+class UsersPublic(SQLModel):
+    """Schema for returning a paginated list of users."""
+    count: int = Field(..., description="Total number of users")
+    data: List[UserPublic] = Field(..., description="List of users")
+    
+    class Config:
+        json_encoders = {
+            UUID: str,
+            datetime: lambda v: v.isoformat() if v else None
+        }
+
+
+class UserUpdateMe(SQLModel):
+    """Schema for updating the current user's profile."""
+    email: Optional[EmailStr] = None
+    full_name: Optional[str] = Field(None, max_length=255)
+    
+    class Config:
+        schema_extra = {
+            "example": {
+                "email": "new.email@example.com",
+                "full_name": "New Name"
+            }
+        }

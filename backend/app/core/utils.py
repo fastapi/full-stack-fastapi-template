@@ -20,7 +20,7 @@ from functools import wraps
 from typing import Any, Callable, Dict, List, Optional, TypeVar, Union, cast
 
 import jwt
-from fastapi import HTTPException, status
+from fastapi import HTTPException, Request, status
 from jose import jwe
 from passlib.context import CryptContext
 from pydantic import BaseModel, EmailStr, ValidationError

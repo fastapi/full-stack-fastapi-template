@@ -8,7 +8,8 @@ from pathlib import Path
 from typing import Any, Dict, Optional
 
 from loguru import logger
-from pydantic import BaseSettings, Field
+from pydantic import Field
+from pydantic_settings import BaseSettings
 
 
 class LoggingSettings(BaseSettings):

@@ -10,7 +10,7 @@ from app.api.deps import CurrentUser, SessionDep, get_current_active_superuser
 from app.core import security
 from app.core.config import settings
 from app.core.security import get_password_hash
-from app.models import Message, NewPassword, Token, UserPublic
+from app.models import Message, NewPassword, TokenPair as Token, UserPublic
 from app.utils import (
     generate_password_reset_token,
     generate_reset_password_email,

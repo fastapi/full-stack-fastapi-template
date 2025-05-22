@@ -11,33 +11,31 @@ class BaseDBModel(SQLModel):
     
     id: UUID = Field(
         default_factory=uuid4,
-        primary_key=True,
-        index=True,
-        nullable=False,
         sa_column=Column(
             PG_UUID(as_uuid=True),
+            primary_key=True,
             server_default=text("gen_random_uuid()"),
-            unique=True,
+            
             index=True,
         ),
     )
     created_at: datetime = Field(
         default_factory=datetime.utcnow,
-        nullable=False,
+        
         sa_column=Column(
             DateTime(timezone=True),
             server_default=func.now(),
-            nullable=False,
+            
         ),
     )
     updated_at: datetime = Field(
         default_factory=datetime.utcnow,
-        nullable=False,
+        
         sa_column=Column(
             DateTime(timezone=True),
             server_default=func.now(),
             onupdate=func.now(),
-            nullable=False,
+            
         ),
     )
     
@@ -62,20 +60,20 @@ class TimestampMixin(SQLModel):
     """
     created_at: datetime = Field(
         default_factory=datetime.utcnow,
-        nullable=False,
+        
         sa_column=Column(
             DateTime(timezone=True),
             server_default=func.now(),
-            nullable=False,
+            
         ),
     )
     updated_at: datetime = Field(
         default_factory=datetime.utcnow,
-        nullable=False,
+        
         sa_column=Column(
             DateTime(timezone=True),
             server_default=func.now(),
             onupdate=func.now(),
-            nullable=False,
+            
         ),
     )
