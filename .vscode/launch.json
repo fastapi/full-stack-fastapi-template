@@ -5,24 +5,31 @@
     "version": "0.2.0",
     "configurations": [
         {
-            "name": "Debug FastAPI Project backend: Python Debugger",
+            "type": "node",
+            "request": "launch",
+            "name": "Debug frontend - React: npm run dev",
+            "runtimeExecutable": "npm",
+            "runtimeArgs": ["run", "dev"],
+            "console": "integratedTerminal",
+            "cwd": "${workspaceFolder}/frontend",
+            "envFile": "${workspaceFolder}/.env"
+        },
+        {
+            "name": "Debug backend - Fastapi: debugpy",
             "type": "debugpy",
             "request": "launch",
             "module": "uvicorn",
-            "args": [
-                "app.main:app",
-                "--reload"
-            ],
+            "args": ["app.main:app", "--reload"],
             "cwd": "${workspaceFolder}/backend",
             "jinja": true,
-            "envFile": "${workspaceFolder}/.env",
+            "envFile": "${workspaceFolder}/.env"
         },
         {
             "type": "chrome",
             "request": "launch",
-            "name": "Debug Frontend: Launch Chrome against http://localhost:5173",
+            "name": "Debug Frontend: Launch Chrome http://localhost:5173",
             "url": "http://localhost:5173",
             "webRoot": "${workspaceFolder}/frontend"
-        },
+        }
     ]
 }
