@@ -34,9 +34,23 @@ router = APIRouter(prefix="/users", tags=["users"])
     dependencies=[Depends(get_current_active_superuser)],
     response_model=UsersPublic,
 )
-def read_users(session: SessionDep, skip: int = 0, limit: int = 100) -> Any:
+def read_users(
+    session: SessionDep,
+    skip: int = 0,
+    limit: int = 100
+) -> Any:
     """
-    Retrieve users.
+    Retrieve all users.
+    
+    This endpoint allows superusers to retrieve a list of all users in the system.
+    
+    Parameters:
+    - **skip**: Number of records to skip for pagination
+    - **limit**: Maximum number of records to return
+    
+    Returns a list of users and the total count.
+    
+    Note: This endpoint is restricted to superusers only.
     """
 
     count_statement = select(func.count()).select_from(User)
@@ -51,9 +65,25 @@ def read_users(session: SessionDep, skip: int = 0, limit: int = 100) -> Any:
 @router.post(
     "/", dependencies=[Depends(get_current_active_superuser)], response_model=UserPublic
 )
-def create_user(*, session: SessionDep, user_in: UserCreate) -> Any:
+def create_user(
+    *,
+    session: SessionDep,
+    user_in: UserCreate
+) -> Any:
     """
-    Create new user.
+    Create a new user.
+    
+    This endpoint allows superusers to create new user accounts.
+    
+    Parameters:
+    - **email**: Required. The email address of the new user
+    - **password**: Required. The password for the new user
+    - **full_name**: Optional. The full name of the user
+    - **is_superuser**: Optional. Whether the user should have superuser privileges
+    
+    Returns the created user.
+    
+    Note: This endpoint is restricted to superusers only.
     """
     user = crud.get_user_by_email(session=session, email=user_in.email)
     if user:
@@ -77,10 +107,23 @@ def create_user(*, session: SessionDep, user_in: UserCreate) -> Any:
 
 @router.patch("/me", response_model=UserPublic)
 def update_user_me(
-    *, session: SessionDep, user_in: UserUpdateMe, current_user: CurrentUser
+    *,
+    session: SessionDep,
+    user_in: UserUpdateMe,
+    current_user: CurrentUser
 ) -> Any:
     """
-    Update own user.
+    Update current user's profile.
+    
+    This endpoint allows users to update their own profile information.
+    
+    Parameters:
+    - **email**: Optional. The new email address
+    - **full_name**: Optional. The new full name
+    
+    Returns the updated user profile.
+    
+    Note: If the email is changed, the system will check if the new email is already in use.
     """
 
     if user_in.email:
@@ -99,10 +142,23 @@ def update_user_me(
 
 @router.patch("/me/password", response_model=Message)
 def update_password_me(
-    *, session: SessionDep, body: UpdatePassword, current_user: CurrentUser
+    *,
+    session: SessionDep,
+    body: UpdatePassword,
+    current_user: CurrentUser
 ) -> Any:
     """
-    Update own password.
+    Update current user's password.
+    
+    This endpoint allows users to change their password.
+    
+    Parameters:
+    - **current_password**: Required. The user's current password for verification
+    - **new_password**: Required. The new password to set
+    
+    Returns a success message.
+    
+    Note: The current password must be correct for the change to be accepted.
     """
     if not verify_password(body.current_password, current_user.hashed_password):
         raise HTTPException(status_code=400, detail="Incorrect password")
@@ -120,7 +176,11 @@ def update_password_me(
 @router.get("/me", response_model=UserPublic)
 def read_user_me(current_user: CurrentUser) -> Any:
     """
-    Get current user.
+    Get current user profile.
+    
+    This endpoint returns the profile information of the currently authenticated user.
+    
+    Returns the user's profile information including email, full name, and other details.
     """
     return current_user
 
@@ -128,7 +188,13 @@ def read_user_me(current_user: CurrentUser) -> Any:
 @router.delete("/me", response_model=Message)
 def delete_user_me(session: SessionDep, current_user: CurrentUser) -> Any:
     """
-    Delete own user.
+    Delete current user account.
+    
+    This endpoint allows users to delete their own account.
+    
+    Returns a success message upon successful deletion.
+    
+    Note: Superusers are not allowed to delete their own accounts.
     """
     if current_user.is_superuser:
         raise HTTPException(
@@ -142,6 +208,18 @@ def delete_user_me(session: SessionDep, current_user: CurrentUser) -> Any:
 @router.post("/signup", response_model=UserPublic)
 def register_user(session: SessionDep, user_in: UserRegister) -> Any:
     """
+    Register a new user account.
+    
+    This endpoint allows new users to create an account.
+    
+    Parameters:
+    - **email**: Required. The email address for the new account
+    - **password**: Required. The password for the new account
+    - **full_name**: Optional. The user's full name
+    
+    Returns the created user profile.
+    
+    Note: If an account with the provided email already exists, an error will be returned.
     Create new user without the need to be logged in.
     """
     user = crud.get_user_by_email(session=session, email=user_in.email)

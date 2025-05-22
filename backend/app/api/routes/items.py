@@ -12,10 +12,22 @@ router = APIRouter(prefix="/items", tags=["items"])
 
 @router.get("/", response_model=ItemsPublic)
 def read_items(
-    session: SessionDep, current_user: CurrentUser, skip: int = 0, limit: int = 100
+    session: SessionDep,
+    current_user: CurrentUser,
+    skip: int = 0,
+    limit: int = 100
 ) -> Any:
     """
     Retrieve items.
+    
+    This endpoint retrieves a list of items. For regular users, it returns only their own items.
+    For superusers, it returns all items in the system.
+    
+    Parameters:
+    - **skip**: Number of records to skip for pagination
+    - **limit**: Maximum number of records to return
+    
+    Returns a list of items and the total count.
     """
 
     if current_user.is_superuser:
@@ -42,9 +54,24 @@ def read_items(
 
 
 @router.get("/{id}", response_model=ItemPublic)
-def read_item(session: SessionDep, current_user: CurrentUser, id: uuid.UUID) -> Any:
+def read_item(
+    session: SessionDep,
+    current_user: CurrentUser,
+    id: uuid.UUID
+) -> Any:
     """
     Get item by ID.
+    
+    This endpoint retrieves a specific item by its ID.
+    
+    Parameters:
+    - **id**: The UUID of the item to retrieve
+    
+    Returns the item details.
+    
+    Raises:
+    - 404: If the item is not found
+    - 400: If the user doesn't have permission to access this item
     """
     item = session.get(Item, id)
     if not item:
@@ -56,10 +83,29 @@ def read_item(session: SessionDep, current_user: CurrentUser, id: uuid.UUID) -> 
 
 @router.post("/", response_model=ItemPublic)
 def create_item(
-    *, session: SessionDep, current_user: CurrentUser, item_in: ItemCreate
+    *,
+    session: SessionDep,
+    current_user: CurrentUser,
+    item_in: ItemCreate
 ) -> Any:
     """
     Create new item.
+    
+    This endpoint allows users to create a new item.
+    
+    Parameters:
+    - **title**: Required. The title of the item
+    - **description**: Optional. A description of the item
+    
+    Returns the created item with its ID and owner information.
+    
+    Example request body:
+    ```json
+    {
+        "title": "My Item",
+        "description": "This is a description of my item"
+    }
+    ```
     """
     item = Item.model_validate(item_in, update={"owner_id": current_user.id})
     session.add(item)
@@ -78,6 +124,27 @@ def update_item(
 ) -> Any:
     """
     Update an item.
+    
+    This endpoint allows users to update an existing item.
+    
+    Parameters:
+    - **id**: The UUID of the item to update
+    - **title**: Optional. The updated title
+    - **description**: Optional. The updated description
+    
+    Returns the updated item.
+    
+    Raises:
+    - 404: If the item is not found
+    - 400: If the user doesn't have permission to update this item
+    
+    Example request body:
+    ```json
+    {
+        "title": "Updated Title",
+        "description": "Updated description"
+    }
+    ```
     """
     item = session.get(Item, id)
     if not item:
@@ -94,10 +161,23 @@ def update_item(
 
 @router.delete("/{id}")
 def delete_item(
-    session: SessionDep, current_user: CurrentUser, id: uuid.UUID
+    session: SessionDep,
+    current_user: CurrentUser,
+    id: uuid.UUID
 ) -> Message:
     """
     Delete an item.
+    
+    This endpoint allows users to delete an item.
+    
+    Parameters:
+    - **id**: The UUID of the item to delete
+    
+    Returns a success message upon successful deletion.
+    
+    Raises:
+    - 404: If the item is not found
+    - 400: If the user doesn't have permission to delete this item
     """
     item = session.get(Item, id)
     if not item:

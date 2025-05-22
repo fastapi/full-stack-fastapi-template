@@ -1,172 +1,528 @@
-# FastAPI Project - Backend
+# Kondition Backend - FastAPI Documentation
 
-## Requirements
+## Overview
 
-* [Docker](https://www.docker.com/).
-* [uv](https://docs.astral.sh/uv/) for Python package and environment management.
+This is the FastAPI backend for the Kondition fitness motivator application. It provides a robust API for user management, authentication, and data storage to support the mobile frontend.
 
-## Docker Compose
+## Tech Stack
 
-Start the local development environment with Docker Compose following the guide in [../development.md](../development.md).
+- **FastAPI**: High-performance Python web framework
+- **SQLModel**: SQL database ORM combining SQLAlchemy and Pydantic
+- **PostgreSQL**: Relational database
+- **Alembic**: Database migration tool
+- **JWT**: JSON Web Tokens for authentication
+- **Docker**: Containerization for deployment
+- **Sentry**: Error tracking and monitoring
 
-## General Workflow
+## Project Structure
 
-By default, the dependencies are managed with [uv](https://docs.astral.sh/uv/), go there and install it.
-
-From `./backend/` you can install all the dependencies with:
-
-```console
-$ uv sync
+```
+backend/
+├── app/                      # Main application package
+│   ├── __init__.py           # Package initialization
+│   ├── main.py               # FastAPI application entry point
+│   ├── crud.py               # CRUD operations
+│   ├── models.py             # Data models
+│   ├── utils.py              # Utility functions
+│   ├── alembic/              # Database migrations
+│   ├── api/                  # API endpoints
+│   │   ├── routes/           # Route definitions
+│   │   │   ├── login.py      # Authentication endpoints
+│   │   │   ├── users.py      # User management endpoints
+│   │   │   ├── items.py      # Item endpoints
+│   │   │   └── ...           # Other endpoint modules
+│   │   ├── deps.py           # Dependency injection
+│   │   └── main.py           # API router configuration
+│   ├── core/                 # Core functionality
+│   │   ├── config.py         # Application configuration
+│   │   ├── security.py       # Security utilities
+│   │   └── db.py             # Database connection
+│   └── tests/                # Test suite
+├── Dockerfile                # Docker configuration
+├── pyproject.toml            # Python project metadata
+└── alembic.ini               # Alembic configuration
 ```
 
-Then you can activate the virtual environment with:
+## API Endpoints
 
-```console
-$ source .venv/bin/activate
+### Authentication
+
+#### Login
+
+```
+POST /api/v1/login/access-token
 ```
 
-Make sure your editor is using the correct Python virtual environment, with the interpreter at `backend/.venv/bin/python`.
+Authenticates a user and returns a JWT access token.
 
-Modify or add SQLModel models for data and SQL tables in `./backend/app/models.py`, API endpoints in `./backend/app/api/`, CRUD (Create, Read, Update, Delete) utils in `./backend/app/crud.py`.
-
-## VS Code
-
-There are already configurations in place to run the backend through the VS Code debugger, so that you can use breakpoints, pause and explore variables, etc.
-
-The setup is also already configured so you can run the tests through the VS Code Python tests tab.
-
-## Docker Compose Override
-
-During development, you can change Docker Compose settings that will only affect the local development environment in the file `docker-compose.override.yml`.
-
-The changes to that file only affect the local development environment, not the production environment. So, you can add "temporary" changes that help the development workflow.
-
-For example, the directory with the backend code is synchronized in the Docker container, copying the code you change live to the directory inside the container. That allows you to test your changes right away, without having to build the Docker image again. It should only be done during development, for production, you should build the Docker image with a recent version of the backend code. But during development, it allows you to iterate very fast.
-
-There is also a command override that runs `fastapi run --reload` instead of the default `fastapi run`. It starts a single server process (instead of multiple, as would be for production) and reloads the process whenever the code changes. Have in mind that if you have a syntax error and save the Python file, it will break and exit, and the container will stop. After that, you can restart the container by fixing the error and running again:
-
-```console
-$ docker compose watch
+**Request Body:**
+```json
+{
+  "username": "user@example.com",
+  "password": "password123"
+}
 ```
 
-There is also a commented out `command` override, you can uncomment it and comment the default one. It makes the backend container run a process that does "nothing", but keeps the container alive. That allows you to get inside your running container and execute commands inside, for example a Python interpreter to test installed dependencies, or start the development server that reloads when it detects changes.
-
-To get inside the container with a `bash` session you can start the stack with:
-
-```console
-$ docker compose watch
+**Response:**
+```json
+{
+  "access_token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
+}
 ```
 
-and then in another terminal, `exec` inside the running container:
+#### Test Token
 
-```console
-$ docker compose exec backend bash
+```
+POST /api/v1/login/test-token
 ```
 
-You should see an output like:
+Tests if the current token is valid and returns the user information.
 
-```console
-root@7f2607af31c3:/app#
+**Headers:**
+```
+Authorization: Bearer {token}
 ```
 
-that means that you are in a `bash` session inside your container, as a `root` user, under the `/app` directory, this directory has another directory called "app" inside, that's where your code lives inside the container: `/app/app`.
-
-There you can use the `fastapi run --reload` command to run the debug live reloading server.
-
-```console
-$ fastapi run --reload app/main.py
+**Response:**
+```json
+{
+  "id": "123e4567-e89b-12d3-a456-426614174000",
+  "email": "user@example.com",
+  "is_active": true,
+  "is_superuser": false,
+  "full_name": "John Doe"
+}
 ```
 
-...it will look like:
+#### Password Recovery
 
-```console
-root@7f2607af31c3:/app# fastapi run --reload app/main.py
+```
+POST /api/v1/password-recovery/{email}
 ```
 
-and then hit enter. That runs the live reloading server that auto reloads when it detects code changes.
+Initiates the password recovery process for a user.
 
-Nevertheless, if it doesn't detect a change but a syntax error, it will just stop with an error. But as the container is still alive and you are in a Bash session, you can quickly restart it after fixing the error, running the same command ("up arrow" and "Enter").
-
-...this previous detail is what makes it useful to have the container alive doing nothing and then, in a Bash session, make it run the live reload server.
-
-## Backend tests
-
-To test the backend run:
-
-```console
-$ bash ./scripts/test.sh
+**Response:**
+```json
+{
+  "message": "Password recovery email sent"
+}
 ```
 
-The tests run with Pytest, modify and add tests to `./backend/app/tests/`.
+#### Reset Password
 
-If you use GitHub Actions the tests will run automatically.
-
-### Test running stack
-
-If your stack is already up and you just want to run the tests, you can use:
-
-```bash
-docker compose exec backend bash scripts/tests-start.sh
+```
+POST /api/v1/reset-password/
 ```
 
-That `/app/scripts/tests-start.sh` script just calls `pytest` after making sure that the rest of the stack is running. If you need to pass extra arguments to `pytest`, you can pass them to that command and they will be forwarded.
+Resets a user's password using a token.
 
-For example, to stop on first error:
-
-```bash
-docker compose exec backend bash scripts/tests-start.sh -x
+**Request Body:**
+```json
+{
+  "token": "recovery-token",
+  "new_password": "new-password123"
+}
 ```
 
-### Test Coverage
-
-When the tests are run, a file `htmlcov/index.html` is generated, you can open it in your browser to see the coverage of the tests.
-
-## Migrations
-
-As during local development your app directory is mounted as a volume inside the container, you can also run the migrations with `alembic` commands inside the container and the migration code will be in your app directory (instead of being only inside the container). So you can add it to your git repository.
-
-Make sure you create a "revision" of your models and that you "upgrade" your database with that revision every time you change them. As this is what will update the tables in your database. Otherwise, your application will have errors.
-
-* Start an interactive session in the backend container:
-
-```console
-$ docker compose exec backend bash
+**Response:**
+```json
+{
+  "message": "Password updated successfully"
+}
 ```
 
-* Alembic is already configured to import your SQLModel models from `./backend/app/models.py`.
+### User Management
 
-* After changing a model (for example, adding a column), inside the container, create a revision, e.g.:
+#### Create User (Admin)
 
-```console
-$ alembic revision --autogenerate -m "Add column last_name to User model"
+```
+POST /api/v1/users/
 ```
 
-* Commit to the git repository the files generated in the alembic directory.
+Creates a new user (admin only).
 
-* After creating the revision, run the migration in the database (this is what will actually change the database):
-
-```console
-$ alembic upgrade head
+**Request Body:**
+```json
+{
+  "email": "new-user@example.com",
+  "password": "password123",
+  "full_name": "New User",
+  "is_superuser": false
+}
 ```
 
-If you don't want to use migrations at all, uncomment the lines in the file at `./backend/app/core/db.py` that end in:
+**Response:**
+```json
+{
+  "id": "123e4567-e89b-12d3-a456-426614174000",
+  "email": "new-user@example.com",
+  "is_active": true,
+  "is_superuser": false,
+  "full_name": "New User"
+}
+```
+
+#### Get Current User
+
+```
+GET /api/v1/users/me
+```
+
+Returns the current user's information.
+
+**Headers:**
+```
+Authorization: Bearer {token}
+```
+
+**Response:**
+```json
+{
+  "id": "123e4567-e89b-12d3-a456-426614174000",
+  "email": "user@example.com",
+  "is_active": true,
+  "is_superuser": false,
+  "full_name": "John Doe"
+}
+```
+
+#### Update Current User
+
+```
+PATCH /api/v1/users/me
+```
+
+Updates the current user's information.
+
+**Headers:**
+```
+Authorization: Bearer {token}
+```
+
+**Request Body:**
+```json
+{
+  "full_name": "Updated Name",
+  "email": "updated-email@example.com"
+}
+```
+
+**Response:**
+```json
+{
+  "id": "123e4567-e89b-12d3-a456-426614174000",
+  "email": "updated-email@example.com",
+  "is_active": true,
+  "is_superuser": false,
+  "full_name": "Updated Name"
+}
+```
+
+#### Update Password
+
+```
+PATCH /api/v1/users/me/password
+```
+
+Updates the current user's password.
+
+**Headers:**
+```
+Authorization: Bearer {token}
+```
+
+**Request Body:**
+```json
+{
+  "current_password": "current-password",
+  "new_password": "new-password123"
+}
+```
+
+**Response:**
+```json
+{
+  "message": "Password updated successfully"
+}
+```
+
+#### Delete Current User
+
+```
+DELETE /api/v1/users/me
+```
+
+Deletes the current user's account.
+
+**Headers:**
+```
+Authorization: Bearer {token}
+```
+
+**Response:**
+```json
+{
+  "message": "User deleted successfully"
+}
+```
+
+#### User Registration
+
+```
+POST /api/v1/users/signup
+```
+
+Registers a new user without admin privileges.
+
+**Request Body:**
+```json
+{
+  "email": "new-user@example.com",
+  "password": "password123",
+  "full_name": "New User"
+}
+```
+
+**Response:**
+```json
+{
+  "id": "123e4567-e89b-12d3-a456-426614174000",
+  "email": "new-user@example.com",
+  "is_active": true,
+  "is_superuser": false,
+  "full_name": "New User"
+}
+```
+
+### Additional Endpoints
+
+The API includes additional endpoints for item management and other features that will be implemented in future sprints.
+
+## Data Models
+
+### User
 
 ```python
-SQLModel.metadata.create_all(engine)
+class User(SQLModel, table=True):
+    id: uuid.UUID = Field(default_factory=uuid.uuid4, primary_key=True)
+    email: str = Field(unique=True, index=True)
+    hashed_password: str
+    full_name: str | None = None
+    is_active: bool = True
+    is_superuser: bool = False
+    items: list["Item"] = Relationship(back_populates="owner")
 ```
 
-and comment the line in the file `scripts/prestart.sh` that contains:
+### Item
 
-```console
-$ alembic upgrade head
+```python
+class Item(SQLModel, table=True):
+    id: uuid.UUID = Field(default_factory=uuid.uuid4, primary_key=True)
+    title: str
+    description: str | None = None
+    owner_id: uuid.UUID = Field(foreign_key="user.id")
+    owner: User = Relationship(back_populates="items")
 ```
 
-If you don't want to start with the default models and want to remove them / modify them, from the beginning, without having any previous revision, you can remove the revision files (`.py` Python files) under `./backend/app/alembic/versions/`. And then create a first migration as described above.
+## Authentication Flow
 
-## Email Templates
+1. **User Registration**: Users register with email and password
+2. **Password Hashing**: Passwords are securely hashed before storage
+3. **Login**: Users authenticate with credentials to receive JWT token
+4. **Token Usage**: JWT token is included in API requests for authorization
+5. **Token Validation**: Backend validates token for protected endpoints
+6. **Password Recovery**: Email-based password reset flow
 
-The email templates are in `./backend/app/email-templates/`. Here, there are two directories: `build` and `src`. The `src` directory contains the source files that are used to build the final email templates. The `build` directory contains the final email templates that are used by the application.
+## Security Features
 
-Before continuing, ensure you have the [MJML extension](https://marketplace.visualstudio.com/items?itemName=attilabuti.vscode-mjml) installed in your VS Code.
+- **Password Hashing**: Secure password storage using bcrypt
+- **JWT Authentication**: Stateless authentication with expiring tokens
+- **Role-Based Access Control**: Superuser and regular user permissions
+- **CORS Protection**: Configurable CORS settings
+- **Rate Limiting**: Protection against brute force attacks (to be implemented)
+- **Input Validation**: Request validation using Pydantic models
 
-Once you have the MJML extension installed, you can create a new email template in the `src` directory. After creating the new email template and with the `.mjml` file open in your editor, open the command palette with `Ctrl+Shift+P` and search for `MJML: Export to HTML`. This will convert the `.mjml` file to a `.html` file and now you can save it in the build directory.
+## Development Setup
+
+### Prerequisites
+
+- Python 3.9+
+- PostgreSQL
+- Docker and Docker Compose (optional)
+
+### Local Setup
+
+1. **Clone the repository**
+
+```bash
+git clone <repository-url>
+cd PROJECT/KonditionFastAPI
+```
+
+2. **Set up a virtual environment**
+
+```bash
+python -m venv venv
+source venv/bin/activate  # On Windows: venv\Scripts\activate
+```
+
+3. **Install dependencies**
+
+```bash
+cd backend
+pip install -e .
+```
+
+4. **Set up environment variables**
+
+Create a `.env` file in the backend directory:
+
+```
+POSTGRES_SERVER=localhost
+POSTGRES_USER=postgres
+POSTGRES_PASSWORD=password
+POSTGRES_DB=kondition
+FIRST_SUPERUSER=admin@example.com
+FIRST_SUPERUSER_PASSWORD=admin
+```
+
+5. **Run database migrations**
+
+```bash
+alembic upgrade head
+```
+
+6. **Start the development server**
+
+```bash
+uvicorn app.main:app --reload
+```
+
+### Docker Setup
+
+1. **Build and start the containers**
+
+```bash
+docker-compose up -d
+```
+
+2. **Run migrations in the container**
+
+```bash
+docker-compose exec backend alembic upgrade head
+```
+
+3. **Create initial data**
+
+```bash
+docker-compose exec backend python -m app.initial_data
+```
+
+## Testing
+
+### Running Tests
+
+```bash
+# Run all tests
+pytest
+
+# Run with coverage report
+pytest --cov=app
+```
+
+### Test Structure
+
+- **Unit Tests**: Test individual functions and methods
+- **Integration Tests**: Test API endpoints and database interactions
+- **Fixtures**: Reusable test components
+
+## Database Migrations
+
+### Creating a Migration
+
+```bash
+# Generate a migration script
+alembic revision --autogenerate -m "description of changes"
+
+# Apply migrations
+alembic upgrade head
+
+# Revert migrations
+alembic downgrade -1
+```
+
+## Deployment
+
+### Production Deployment
+
+1. **Configure environment variables for production**
+
+2. **Build and deploy with Docker Compose**
+
+```bash
+docker-compose -f docker-compose.yml -f docker-compose.traefik.yml up -d
+```
+
+3. **Set up a reverse proxy (Traefik, Nginx, etc.)**
+
+4. **Configure SSL certificates**
+
+### Monitoring
+
+- **Sentry Integration**: Error tracking and performance monitoring
+- **Logging**: Structured logs for debugging and auditing
+- **Health Checks**: Endpoint for monitoring service health
+
+## Future Implementations
+
+### Planned Features
+
+1. **Workout Data Models**
+   - Workout sessions
+   - Exercise types
+   - User progress tracking
+
+2. **Scheduling System**
+   - Workout scheduling
+   - Reminder notifications
+
+3. **Social Features**
+   - Friend connections
+   - Activity sharing
+   - Leaderboards
+
+4. **Analytics**
+   - Progress visualization
+   - Achievement tracking
+   - Performance metrics
+
+## Best Practices
+
+### Code Style
+
+- Follow PEP 8 guidelines
+- Use type hints for better IDE support
+- Document functions and classes with docstrings
+- Use meaningful variable and function names
+
+### API Design
+
+- Follow RESTful principles
+- Use appropriate HTTP methods and status codes
+- Implement proper error handling
+- Version the API for backward compatibility
+
+### Security
+
+- Keep dependencies updated
+- Implement proper input validation
+- Use secure password hashing
+- Protect against common vulnerabilities (CSRF, XSS, etc.)
+
+## Resources
+
+- [FastAPI Documentation](https://fastapi.tiangolo.com/)
+- [SQLModel Documentation](https://sqlmodel.tiangolo.com/)
+- [Alembic Documentation](https://alembic.sqlalchemy.org/)
+- [JWT Documentation](https://jwt.io/)
