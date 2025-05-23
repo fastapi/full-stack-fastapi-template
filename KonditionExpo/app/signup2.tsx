@@ -1,32 +1,40 @@
 import React, { useState, useRef } from 'react';
-import { View, Text, StyleSheet, TextInput, KeyboardAvoidingView, Platform, ScrollView } from 'react-native';
+import {
+  View,
+  Text,
+  StyleSheet,
+  TextInput,
+  KeyboardAvoidingView,
+  Platform,
+  ScrollView,
+} from 'react-native';
 import RNPickerSelect from 'react-native-picker-select';
 import { Button } from '@/components/ui/Button';
 import { router } from 'expo-router';
 
 export default function SignUpStep2() {
   const [gender, setGender] = useState('');
-  
+
   // DOB parts
   const [dobMM, setDobMM] = useState('');
   const [dobDD, setDobDD] = useState('');
   const [dobYYYY, setDobYYYY] = useState('');
-  
+
   // Weight + units
   const [weight, setWeight] = useState('');
   const [weightUnit, setWeightUnit] = useState('lbs');
-  
+
   // Height + units
   const [height, setHeight] = useState('');
   const [heightUnit, setHeightUnit] = useState('ft/in');
+  const [heightFeet, setHeightFeet] = useState('');
+  const [heightInches, setHeightInches] = useState('');
 
-  // refs for DOB inputs to auto-focus next field
+
   const ddRef = useRef<TextInput>(null);
   const yyyyRef = useRef<TextInput>(null);
 
-  // Handle DOB input with auto-advance
   const onChangeDobMM = (text: string) => {
-    // Allow only digits, max 2 chars
     const cleanText = text.replace(/[^0-9]/g, '').slice(0, 2);
     setDobMM(cleanText);
     if (cleanText.length === 2) {
@@ -47,14 +55,11 @@ export default function SignUpStep2() {
     setDobYYYY(cleanText);
   };
 
-  // Submit handler
   const handleNext = () => {
-    // Add your validation & submit logic here
     if (!gender || !dobMM || !dobDD || !dobYYYY || !weight || !height) {
       alert('Please fill out all fields');
       return;
     }
-    // Proceed to next screen or API call
     router.replace('/home');
   };
 
@@ -62,11 +67,12 @@ export default function SignUpStep2() {
     <KeyboardAvoidingView
       style={styles.container}
       behavior={Platform.OS === 'ios' ? 'padding' : undefined}
-      keyboardVerticalOffset={Platform.OS === 'ios' ? 64 : 0}
+      keyboardVerticalOffset={64}
     >
       <ScrollView contentContainerStyle={styles.contentContainer}>
         <Text style={styles.title}>Additional Info</Text>
 
+        {/* Gender */}
         <Text style={styles.label}>Gender</Text>
         <RNPickerSelect
           onValueChange={setGender}
@@ -81,7 +87,9 @@ export default function SignUpStep2() {
           style={pickerSelectStyles}
         />
 
-        <Text style={styles.label}>Date of Birth (MM/DD/YYYY)</Text>
+        {/* DOB */}
+        <Text style={styles.label}>Date of Birth</Text>
+        <Text style={styles.subLabel}>MM / DD / YYYY</Text>
         <View style={styles.dobRow}>
           <TextInput
             style={[styles.dobInput, styles.dobPart]}
@@ -93,6 +101,7 @@ export default function SignUpStep2() {
             returnKeyType="next"
             blurOnSubmit={false}
             onSubmitEditing={() => ddRef.current?.focus()}
+            placeholderTextColor="#999"
           />
           <Text style={styles.slash}>/</Text>
           <TextInput
@@ -106,6 +115,7 @@ export default function SignUpStep2() {
             returnKeyType="next"
             blurOnSubmit={false}
             onSubmitEditing={() => yyyyRef.current?.focus()}
+            placeholderTextColor="#999"
           />
           <Text style={styles.slash}>/</Text>
           <TextInput
@@ -117,49 +127,95 @@ export default function SignUpStep2() {
             maxLength={4}
             placeholder="YYYY"
             returnKeyType="done"
+            placeholderTextColor="#999"
           />
         </View>
 
-        <Text style={styles.label}>Weight</Text>
-        <View style={styles.row}>
-          <TextInput
-            style={[styles.textInput, { flex: 1 }]}
-            value={weight}
-            onChangeText={setWeight}
-            keyboardType="numeric"
-            placeholder="Enter weight"
-          />
-          <RNPickerSelect
-            onValueChange={setWeightUnit}
-            value={weightUnit}
-            items={[
-              { label: 'lbs', value: 'lbs' },
-              { label: 'kg', value: 'kg' },
-            ]}
-            style={pickerSelectStylesSmall}
-          />
-        </View>
+        {/* Weight */}
+      <Text style={styles.label}>Weight</Text>
+      <View style={styles.row}>
+        <TextInput
+          style={[styles.textInput, { flex: 1, backgroundColor: 'white' }]}
+          value={weight}
+          onChangeText={(text) => {
+            const clean = text.replace(/[^0-9]/g, '');
+            setWeight(clean);
+          }}
+          keyboardType="numeric"
+          placeholder="Enter weight"
+          placeholderTextColor="#888"
+        />
+        <RNPickerSelect
+          onValueChange={setWeightUnit}
+          value={weightUnit}
+          items={[
+            { label: 'lbs', value: 'lbs' },
+            { label: 'kg', value: 'kg' },
+          ]}
+          style={pickerSelectStylesSmall}
+        />
+      </View>
 
-        <Text style={styles.label}>Height</Text>
-        <View style={styles.row}>
+      {/* Height */}
+      <Text style={styles.label}>Height</Text>
+      <View style={styles.row}>
+        {heightUnit === 'ft/in' ? (
+          <>
+            <TextInput
+              style={[styles.textInput, { flex: 1, backgroundColor: 'white' }]}
+              value={heightFeet}
+              onChangeText={(text) => {
+                const clean = text.replace(/[^0-9]/g, '');
+                setHeightFeet(clean);
+              }}
+              keyboardType="numeric"
+              placeholder="Feet"
+              placeholderTextColor="#888"
+            />
+            <TextInput
+              style={[styles.textInput, { flex: 1, marginLeft: 10, backgroundColor: 'white' }]}
+              value={heightInches}
+              onChangeText={(text) => {
+                const clean = text.replace(/[^0-9]/g, '');
+                setHeightInches(clean);
+              }}
+              keyboardType="numeric"
+              placeholder="Inches"
+              placeholderTextColor="#888"
+            />
+          </>
+        ) : (
           <TextInput
-            style={[styles.textInput, { flex: 1 }]}
+            style={[styles.textInput, { flex: 1, backgroundColor: 'white' }]}
             value={height}
-            onChangeText={setHeight}
+            onChangeText={(text) => {
+              const clean = text.replace(/[^0-9]/g, '');
+              setHeight(clean);
+            }}
             keyboardType="numeric"
-            placeholder={`Enter height in ${heightUnit === 'ft/in' ? 'feet/inches' : 'cm'}`}
+            placeholder="Height in cm"
+            placeholderTextColor="#888"
           />
-          <RNPickerSelect
-            onValueChange={setHeightUnit}
-            value={heightUnit}
-            items={[
-              { label: 'ft/in', value: 'ft/in' },
-              { label: 'cm', value: 'cm' },
-            ]}
-            style={pickerSelectStylesSmall}
-          />
-        </View>
+        )}
+        <RNPickerSelect
+          onValueChange={(val) => {
+            setHeightUnit(val);
+            // Reset fields on switch
+            setHeight('');
+            setHeightFeet('');
+            setHeightInches('');
+          }}
+          value={heightUnit}
+          items={[
+            { label: 'ft/in', value: 'ft/in' },
+            { label: 'cm', value: 'cm' },
+          ]}
+          style={pickerSelectStylesSmall}
+        />
+      </View>
 
+
+        {/* Submit */}
         <Button title="Next" onPress={handleNext} fullWidth style={{ marginTop: 30 }} />
       </ScrollView>
     </KeyboardAvoidingView>
@@ -172,16 +228,36 @@ const styles = StyleSheet.create({
     padding: 24,
     justifyContent: 'center',
   },
-  title: { fontSize: 24, fontWeight: 'bold', marginBottom: 24, textAlign: 'center' },
-  label: { fontSize: 16, marginBottom: 8, marginTop: 16 },
-  dobRow: { flexDirection: 'row', alignItems: 'center' },
+  title: {
+    fontSize: 24,
+    fontWeight: 'bold',
+    marginBottom: 24,
+    textAlign: 'center',
+  },
+  label: {
+    fontSize: 16,
+    marginBottom: 4,
+    marginTop: 16,
+    color: 'white',
+  },
+  subLabel: {
+    fontSize: 14,
+    marginBottom: 8,
+    color: '#aaa',
+  },
+  dobRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
   dobInput: {
     borderWidth: 1,
     borderColor: '#ccc',
+    backgroundColor: 'white',
     padding: 10,
     borderRadius: 6,
     fontSize: 16,
     textAlign: 'center',
+    color: 'black',
   },
   dobPart: {
     width: 50,
@@ -192,6 +268,7 @@ const styles = StyleSheet.create({
   slash: {
     fontSize: 18,
     marginHorizontal: 5,
+    color: 'white',
   },
   row: {
     flexDirection: 'row',
@@ -203,6 +280,8 @@ const styles = StyleSheet.create({
     borderRadius: 6,
     padding: 10,
     fontSize: 16,
+    backgroundColor: 'white',
+    color: 'black',
   },
 });
 
@@ -215,7 +294,8 @@ const pickerSelectStyles = {
     borderColor: '#ccc',
     borderRadius: 6,
     color: 'black',
-    paddingRight: 30, // to ensure the text is never behind the icon
+    backgroundColor: 'white',
+    paddingRight: 30,
     marginBottom: 8,
   },
   inputAndroid: {
@@ -226,6 +306,7 @@ const pickerSelectStyles = {
     borderColor: '#ccc',
     borderRadius: 6,
     color: 'black',
+    backgroundColor: 'white',
     paddingRight: 30,
     marginBottom: 8,
   },
@@ -240,6 +321,7 @@ const pickerSelectStylesSmall = {
     borderColor: '#ccc',
     borderRadius: 6,
     color: 'black',
+    backgroundColor: 'white',
     paddingRight: 30,
     marginLeft: 10,
     minWidth: 80,
@@ -252,6 +334,7 @@ const pickerSelectStylesSmall = {
     borderColor: '#ccc',
     borderRadius: 6,
     color: 'black',
+    backgroundColor: 'white',
     paddingRight: 30,
     marginLeft: 10,
     minWidth: 80,
