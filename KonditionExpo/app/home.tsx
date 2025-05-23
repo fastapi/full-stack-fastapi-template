@@ -158,19 +158,19 @@ const HomeScreen = ({ navigation }) => {
 
       {/* Bottom Navigation */}
       <View style={styles.bottomNav}>
-        <TouchableOpacity onPress={() => navigation.navigate('Home')}>
+        <TouchableOpacity onPress={() => router.push('/home')}>
           <Image source={require('../assets/images/home-active.png')} style={styles.navIcon} />
         </TouchableOpacity>
-        <TouchableOpacity onPress={() => navigation.navigate('Progress')}>
+        <TouchableOpacity onPress={() => alert('Progress screen not yet implemented')}>
           <Image source={require('../assets/images/chart.png')} style={styles.navIcon} />
         </TouchableOpacity>
-        <TouchableOpacity onPress={() => navigation.navigate('Search')} style={styles.centerButton}>
+        <TouchableOpacity onPress={() => alert('Search screen not yet implemented')} style={styles.centerButton}>
           <Image source={require('../assets/images/search.png')} style={styles.searchIcon} />
         </TouchableOpacity>
-        <TouchableOpacity onPress={() => navigation.navigate('Camera')}>
+        <TouchableOpacity onPress={() => alert('Camera screen not yet implemented')}>
           <Image source={require('../assets/images/camera.png')} style={styles.navIcon} />
         </TouchableOpacity>
-        <TouchableOpacity onPress={() => navigation.navigate('Profile')}>
+        <TouchableOpacity onPress={() => router.push('/profile')}>
           <Image source={require('../assets/images/user.png')} style={styles.navIcon} />
         </TouchableOpacity>
       </View>

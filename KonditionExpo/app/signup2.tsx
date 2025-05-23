@@ -56,20 +56,37 @@ export default function SignUpStep2() {
   };
 
   const handleNext = () => {
-    if (
-      !gender ||
-      !dobMM ||
-      !dobDD ||
-      !dobYYYY ||
-      !weight ||
-      (heightUnit === 'ft/in' && (!heightFeet || !heightInches)) ||  // check feet/inches
-      (heightUnit === 'cm' && !height)  // check cm
+    const mm = parseInt(dobMM, 10);
+    const dd = parseInt(dobDD, 10);
+    const yyyy = parseInt(dobYYYY, 10);
+    const currentYear = new Date().getFullYear();
+  
+    if (!gender || !dobMM || !dobDD || !dobYYYY || !weight || 
+      (heightUnit === 'ft/in' && (!heightFeet || !heightInches)) ||
+      (heightUnit === 'cm' && !height)
     ) {
       alert('Please fill out all fields');
       return;
     }
+  
+    if (mm < 1 || mm > 12) {
+      alert('Month must be between 1 and 12');
+      return;
+    }
+  
+    if (dd < 1 || dd > 31) {
+      alert('Day must be between 1 and 31');
+      return;
+    }
+  
+    if (yyyy < 1900 || yyyy > currentYear) {
+      alert(`Year must be between 1900 and ${currentYear}`);
+      return;
+    }
+  
     router.replace('/home');
   };
+  
   
 
   return (
