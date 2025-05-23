@@ -30,7 +30,7 @@ class UserBase(SQLModel):
         ...,
         sa_column=Column(String(255), unique=True, nullable=False, index=True),
     )
-    is_active: bool = Field(default=False, nullable=False)
+    is_active: bool = Field(default=True, nullable=False)  # Changed from False to True so all new users are active by default
     is_verified: bool = Field(default=False, nullable=False)
     email_verified: bool = Field(default=False, nullable=False)
     full_name: Optional[str] = Field(default=None, max_length=255)
