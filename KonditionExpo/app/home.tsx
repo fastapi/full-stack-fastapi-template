@@ -6,7 +6,7 @@ import { router } from 'expo-router';
 
 const { width } = Dimensions.get('window');
 
-const HomeScreen = ({ navigation }) => {
+const HomeScreen = () => {
   // TODO: Replace with real data
   const bmiValue = '20.1';
   const { name } = useUser();
@@ -30,7 +30,7 @@ const HomeScreen = ({ navigation }) => {
         <View style={styles.header}>
           <Text style={styles.welcomeText}>Welcome Back,</Text>
           <Text style={styles.userName}>{name}</Text>
-          <TouchableOpacity style={styles.notificationBtn} onPress={() => navigation.navigate('Notifications')}>
+          <TouchableOpacity style={styles.notificationBtn} onPress={() => router.push('/notification')}>
             <Image source={require('../assets/images/bell.png')} style={styles.bellIcon} />
           </TouchableOpacity>
         </View>
@@ -40,7 +40,7 @@ const HomeScreen = ({ navigation }) => {
           <View style={styles.bmiInfo}>
             <Text style={styles.bmiLabel}>BMI (Body Mass Index)</Text>
             <Text style={styles.bmiStatus}>You have a normal weight</Text>
-            <TouchableOpacity style={styles.viewMoreBtn} onPress={() => navigation.navigate('BMIDetails')}>
+            <TouchableOpacity style={styles.viewMoreBtn} onPress={() => alert('BMI screen not yet implemented')}>
               <Text style={styles.viewMoreText}>View More</Text>
             </TouchableOpacity>
           </View>
@@ -61,7 +61,7 @@ const HomeScreen = ({ navigation }) => {
         {/* Today Target */}
         <View style={styles.targetCard}>
           <Text style={styles.targetText}>Today Target</Text>
-          <TouchableOpacity style={styles.checkBtn} onPress={() => navigation.navigate('Targets')}>
+          <TouchableOpacity style={styles.checkBtn} onPress={() => alert('Targets screen not yet implemented')}>
             <Text style={styles.checkText}>Check</Text>
           </TouchableOpacity>
         </View>
@@ -87,12 +87,10 @@ const HomeScreen = ({ navigation }) => {
           <View style={styles.statsCard}>
             <Text style={styles.statsLabel}>Water Intake</Text>
             <Text style={styles.statsValue}>{waterIntake}</Text>
-            {/* Timeline dots & bars could go here */}
           </View>
           <View style={styles.statsCard}>
             <Text style={styles.statsLabel}>Sleep</Text>
             <Text style={styles.statsValue}>{sleepHours}</Text>
-            {/* Sleep wave chart placeholder */}
           </View>
           <View style={styles.statsCardSmall}>
             <Text style={styles.statsLabel}>Calories</Text>
@@ -139,12 +137,12 @@ const HomeScreen = ({ navigation }) => {
         <View style={styles.latestSection}>
           <View style={styles.sectionHeader}>
             <Text style={styles.sectionTitle}>Latest Workout</Text>
-            <TouchableOpacity onPress={() => navigation.navigate('WorkoutList')}>
+            <TouchableOpacity onPress={() => alert('Workout List not yet implemented')}>
               <Text style={styles.seeMore}>See more</Text>
             </TouchableOpacity>
           </View>
           {latestWorkouts.map(w => (
-            <TouchableOpacity key={w.id} style={styles.workoutItem} onPress={() => navigation.navigate('WorkoutDetail', { id: w.id })}>
+            <TouchableOpacity key={w.id} style={styles.workoutItem} onPress={() => alert('Workout Details not yet implemented')}>
               <Image source={w.icon} style={styles.workoutIcon} />
               <View style={styles.workoutInfo}>
                 <Text style={styles.workoutType}>{w.type}</Text>
