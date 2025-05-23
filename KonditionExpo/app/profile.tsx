@@ -4,7 +4,7 @@ import { useUser } from '@/contexts/UserContext';
 import { router } from 'expo-router';
 
 const ProfileScreen = () => {
-  const { name } = useUser();
+  const { name, height, weight, age } = useUser();
   const [notificationsEnabled, setNotificationsEnabled] = useState(false);
 
   const toggleNotifications = () => setNotificationsEnabled(prev => !prev);
@@ -19,15 +19,24 @@ const ProfileScreen = () => {
 
         {/* Profile Box */}
         <View style={styles.profileBox}>
-          <Text style={styles.profileName}>{name}</Text>
+          <Text style={styles.profileName}>{name || 'User'}</Text>
           <TouchableOpacity style={styles.editBtn}>
             <Text style={styles.editText}>Edit</Text>
           </TouchableOpacity>
 
           <View style={styles.statsRow}>
-            <View style={styles.statBox}><Text style={styles.statLabel}>Height</Text><Text style={styles.statValue}>180 cm</Text></View>
-            <View style={styles.statBox}><Text style={styles.statLabel}>Weight</Text><Text style={styles.statValue}>75 kg</Text></View>
-            <View style={styles.statBox}><Text style={styles.statLabel}>Age</Text><Text style={styles.statValue}>28</Text></View>
+            <View style={styles.statBox}>
+              <Text style={styles.statLabel}>Height</Text>
+              <Text style={styles.statValue}>{height ? `${height} cm` : '-'}</Text>
+            </View>
+            <View style={styles.statBox}>
+              <Text style={styles.statLabel}>Weight</Text>
+              <Text style={styles.statValue}>{weight ? `${weight} kg` : '-'}</Text>
+            </View>
+            <View style={styles.statBox}>
+              <Text style={styles.statLabel}>Age</Text>
+              <Text style={styles.statValue}>{age > 0 ? age : '-'}</Text>
+            </View>
           </View>
         </View>
 
@@ -71,7 +80,7 @@ const ProfileScreen = () => {
         <TouchableOpacity onPress={() => alert('Progress screen not yet implemented')}>
           <Image source={require('../assets/images/chart.png')} style={styles.navIcon} />
         </TouchableOpacity>
-        <TouchableOpacity onPress={() =>  alert('Search screen not yet implemented')}>
+        <TouchableOpacity onPress={() => alert('Search screen not yet implemented')}>
           <Image source={require('../assets/images/search.png')} style={styles.searchIcon} />
         </TouchableOpacity>
         <TouchableOpacity onPress={() => alert('Camera screen not yet implemented')}>
@@ -104,7 +113,6 @@ const styles = StyleSheet.create({
   toggleRow: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
   bottomNav: { position: 'absolute', bottom: 0, left: 0, right: 0, height: 60, flexDirection: 'row', justifyContent: 'space-around', alignItems: 'center', backgroundColor: '#FFF', borderTopWidth: 1, borderColor: '#EEE' },
   navIcon: { width: 24, height: 24 },
-  centerButton: { backgroundColor: '#fff', padding: 12, borderRadius: 24, elevation: 4 },
   searchIcon: { width: 28, height: 28 },
 });
 
