@@ -1,5 +1,6 @@
 import React from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, FlatList, Image } from 'react-native';
+/*
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
 
 const notifications = [
@@ -10,6 +11,7 @@ const notifications = [
   { id: '5', title: "Hey, it's time for lunch", time: '8 April', icon: require('./assets/lunch.png') },
   { id: '6', title: 'Ups, You have missed your Lowerbo..', time: '3 April', icon: require('./assets/workout.png') },
 ];
+*/
 
 export default function NotificationScreen({ navigation }) {
   const renderItem = ({ item }) => (

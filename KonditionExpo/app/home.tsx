@@ -1,4 +1,5 @@
 import React from 'react';
+import { useUser } from '@/contexts/UserContext';
 import { SafeAreaView, View, Text, StyleSheet, ScrollView, TouchableOpacity, Image, Dimensions } from 'react-native';
 import { LineChart, PieChart } from 'react-native-svg-charts';
 import { router } from 'expo-router';
@@ -8,6 +9,7 @@ const { width } = Dimensions.get('window');
 const HomeScreen = ({ navigation }) => {
   // TODO: Replace with real data
   const bmiValue = '20.1';
+  const { name } = useUser();
   const heartRateData = [60, 62, 65, 70, 75, 78, 80, 82, 79, 76];
   const waterIntake = '4L';
   const sleepHours = '8h 20m';
@@ -27,7 +29,7 @@ const HomeScreen = ({ navigation }) => {
         {/* Header */}
         <View style={styles.header}>
           <Text style={styles.welcomeText}>Welcome Back,</Text>
-          <Text style={styles.userName}>Andy Vo</Text>
+          <Text style={styles.userName}>{name}</Text>
           <TouchableOpacity style={styles.notificationBtn} onPress={() => navigation.navigate('Notifications')}>
             <Image source={require('../assets/images/bell.png')} style={styles.bellIcon} />
           </TouchableOpacity>

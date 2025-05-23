@@ -5,8 +5,10 @@ import { Button } from '../components/ui/Button';
 import { Input } from '../components/ui/Input';
 import { Checkbox } from '../components/ui/Checkbox';
 import { router } from 'expo-router';
+import { useUser } from '@/contexts/UserContext';
 
 export default function LoginScreen() {
+  const { setName: setUserName } = useUser();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [rememberMe, setRememberMe] = useState(false);
@@ -21,33 +23,28 @@ export default function LoginScreen() {
   const handleLogin = async () => {
     setErrors({});
     
-    // Simple validation
     const newErrors: { email?: string; password?: string } = {};
-    
-    if (!email) {
-      newErrors.email = 'Email is required';
-    } else if (!/\S+@\S+\.\S+/.test(email)) {
-      newErrors.email = 'Please enter a valid email';
-    }
-    
-    if (!password) {
-      newErrors.password = 'Password is required';
-    } else if (password.length < 6) {
-      newErrors.password = 'Password must be at least 6 characters';
-    }
-    
+  
+    if (!email) newErrors.email = 'Email is required';
+    else if (!/\S+@\S+\.\S+/.test(email)) newErrors.email = 'Please enter a valid email';
+  
+    if (!password) newErrors.password = 'Password is required';
+    else if (password.length < 6) newErrors.password = 'Password must be at least 6 characters';
+  
     if (Object.keys(newErrors).length > 0) {
       setErrors(newErrors);
       return;
     }
-    
+  
     setIsLoading(true);
-    
+  
     try {
       // Simulate API call
       await new Promise(resolve => setTimeout(resolve, 1500));
-      
-      // Navigate to main screen after successful login
+  
+      // Set the name (this mimics what signup does)
+      setUserName('Returning User'); // You can replace this with a real name from API later
+  
       router.replace('/home');
     } catch (error) {
       console.error('Login error:', error);
@@ -57,7 +54,6 @@ export default function LoginScreen() {
   };
   
   const handleForgotPassword = () => {
-    // For now, just go back to main screen since we don't have forgot password yet
     router.push('/(tabs)');
   };
   

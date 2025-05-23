@@ -3,22 +3,30 @@ import { View, Text, StyleSheet, ScrollView } from 'react-native';
 import { Input } from '@/components/ui/Input';
 import { Button } from '@/components/ui/Button';
 import { router } from 'expo-router';
+import { useUser } from '@/contexts/UserContext';
+
+
+
 
 export default function SignUpScreen() {
   const [email, setEmail] = useState('');
   const [name, setName] = useState('');
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
+  const { setName: setUserName } = useUser();
 
   const handleCreateAccount = () => {
     if (password !== confirmPassword) {
       alert("Passwords don't match");
       return;
     }
-
+  
+    setUserName(name);
+  
     // TODO: Send signup data to API
     router.replace('/signup2');
   };
+  
 
   return (
     <ScrollView contentContainerStyle={styles.container}>
