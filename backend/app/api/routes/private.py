@@ -10,7 +10,7 @@ from app.models import (
     UserPublic,
 )
 
-router = APIRouter(tags=["private"], prefix="/private")
+router = APIRouter(tags=["private"])
 
 
 class PrivateUserCreate(BaseModel):

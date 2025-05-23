@@ -6,15 +6,15 @@ from app.core.config import settings
 
 api_router = APIRouter()
 
-# Include auth routes
-api_router.include_router(auth_router, prefix=settings.API_V1_STR)
+# Include auth routes - already prefixed with /api/v1 in main.py
+api_router.include_router(auth_router)
 
-# Include other routes
-api_router.include_router(login.router, tags=["login"])
+# Include other routes - they will be under /api/v1 prefix added in main.py
+api_router.include_router(login.router, prefix="/login", tags=["login"])
 api_router.include_router(users.router, prefix="/users", tags=["users"])
-api_router.include_router(utils.router, tags=["utils"])
+api_router.include_router(utils.router, prefix="/utils", tags=["utils"])
 api_router.include_router(items.router, prefix="/items", tags=["items"])
 
 # Include private routes in local environment
 if settings.ENVIRONMENT == "local":
-    api_router.include_router(private.router, tags=["private"])
+    api_router.include_router(private.router, prefix="/private", tags=["private"])
