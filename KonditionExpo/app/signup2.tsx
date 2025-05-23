@@ -56,12 +56,21 @@ export default function SignUpStep2() {
   };
 
   const handleNext = () => {
-    if (!gender || !dobMM || !dobDD || !dobYYYY || !weight || !height) {
+    if (
+      !gender ||
+      !dobMM ||
+      !dobDD ||
+      !dobYYYY ||
+      !weight ||
+      (heightUnit === 'ft/in' && (!heightFeet || !heightInches)) ||  // check feet/inches
+      (heightUnit === 'cm' && !height)  // check cm
+    ) {
       alert('Please fill out all fields');
       return;
     }
     router.replace('/home');
   };
+  
 
   return (
     <KeyboardAvoidingView
