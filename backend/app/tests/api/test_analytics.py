@@ -1,14 +1,14 @@
 from fastapi.testclient import TestClient
-from sqlmodel import Session # For potential future use with fixtures
-import pytest # For potential future use with fixtures
 
 from app.core.config import settings
+
 # Assuming your FastAPI app instance is named 'app' in 'app.main'
 # Adjust the import if your app instance is located elsewhere for tests
-# from app.main import app 
+# from app.main import app
 
 # Expected Pydantic response models (adjust import path if they are moved)
-# from app.api.routes.analytics import UserAnalyticsSummary, ItemAnalyticsTrends 
+# from app.api.routes.analytics import UserAnalyticsSummary, ItemAnalyticsTrends
+
 
 # Test for User Analytics Summary
 def test_get_user_summary(client: TestClient) -> None:
