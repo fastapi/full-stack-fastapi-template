@@ -1,5 +1,6 @@
 import os
 
+from fastapi import FastAPI
 from opentelemetry import trace
 from opentelemetry.exporter.otlp.proto.grpc.trace_exporter import OTLPSpanExporter
 from opentelemetry.instrumentation.fastapi import FastAPIInstrumentor
@@ -12,7 +13,7 @@ from app.core.config import settings  # To potentially get service name
 from app.core.db import engine  # Assuming engine is in app.core.db
 
 
-def init_telemetry(app):
+def init_telemetry(app: FastAPI) -> None:
     # Set service name, try from settings or default
     service_name = getattr(settings, "OTEL_SERVICE_NAME", "fastapi-application")
 

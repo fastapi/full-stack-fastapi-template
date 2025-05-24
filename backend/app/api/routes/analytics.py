@@ -52,12 +52,13 @@ tracer = trace.get_tracer(__name__)
 @router.get("/user-summary", response_model=UserAnalyticsSummary)
 def get_user_summary(
     session: SessionDep,
+) -> (
+    UserAnalyticsSummary
 ):  # get_current_active_superuser is imported but not used here yet
     with tracer.start_as_current_span("user_summary_endpoint"):
-        users_list: list[User]
         with tracer.start_as_current_span("fetch_all_users_sql"):
             statement = select(User)
-            users_list = session.exec(statement).all()
+            users_list = list(session.exec(statement).all())
 
         if not users_list:
             return UserAnalyticsSummary(
@@ -134,12 +135,11 @@ def get_user_summary(
 
 
 @router.get("/item-trends", response_model=ItemAnalyticsTrends)
-def get_item_trends(session: SessionDep):
+def get_item_trends(session: SessionDep) -> ItemAnalyticsTrends:
     with tracer.start_as_current_span("item_trends_endpoint"):
-        items_list: list[Item]
         with tracer.start_as_current_span("fetch_all_items_sql"):
             statement = select(Item)
-            items_list = session.exec(statement).all()
+            items_list = list(session.exec(statement).all())
 
         if not items_list:
             return ItemAnalyticsTrends(
