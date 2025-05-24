@@ -13,9 +13,19 @@ export type HTTPValidationError = {
   detail?: Array<ValidationError>
 }
 
+export type ItemAnalyticsTrends = {
+  total_items: number
+  creation_trends: Array<ItemCreationTrend>
+}
+
 export type ItemCreate = {
   title: string
   description?: string | null
+}
+
+export type ItemCreationTrend = {
+  creation_date: string
+  count: number
 }
 
 export type ItemPublic = {
@@ -61,6 +71,17 @@ export type UpdatePassword = {
   new_password: string
 }
 
+export type UserActivity = {
+  active_users: number
+  inactive_users: number
+}
+
+export type UserAnalyticsSummary = {
+  total_users: number
+  signup_trends: Array<UserSignupTrend>
+  activity_summary: UserActivity
+}
+
 export type UserCreate = {
   email: string
   is_active?: boolean
@@ -81,6 +102,11 @@ export type UserRegister = {
   email: string
   password: string
   full_name?: string | null
+}
+
+export type UserSignupTrend = {
+  signup_date: string
+  count: number
 }
 
 export type UsersPublic = {
@@ -106,6 +132,10 @@ export type ValidationError = {
   msg: string
   type: string
 }
+
+export type AnalyticsGetUserSummaryResponse = UserAnalyticsSummary
+
+export type AnalyticsGetItemTrendsResponse = ItemAnalyticsTrends
 
 export type ItemsReadItemsData = {
   limit?: number

@@ -4,6 +4,8 @@ import type { CancelablePromise } from "./core/CancelablePromise"
 import { OpenAPI } from "./core/OpenAPI"
 import { request as __request } from "./core/request"
 import type {
+  AnalyticsGetUserSummaryResponse,
+  AnalyticsGetItemTrendsResponse,
   ItemsReadItemsData,
   ItemsReadItemsResponse,
   ItemsCreateItemData,
@@ -47,6 +49,32 @@ import type {
   UtilsTestEmailResponse,
   UtilsHealthCheckResponse,
 } from "./types.gen"
+
+export class AnalyticsService {
+  /**
+   * Get User Summary
+   * @returns UserAnalyticsSummary Successful Response
+   * @throws ApiError
+   */
+  public static getUserSummary(): CancelablePromise<AnalyticsGetUserSummaryResponse> {
+    return __request(OpenAPI, {
+      method: "GET",
+      url: "/api/v1/analytics/user-summary",
+    })
+  }
+
+  /**
+   * Get Item Trends
+   * @returns ItemAnalyticsTrends Successful Response
+   * @throws ApiError
+   */
+  public static getItemTrends(): CancelablePromise<AnalyticsGetItemTrendsResponse> {
+    return __request(OpenAPI, {
+      method: "GET",
+      url: "/api/v1/analytics/item-trends",
+    })
+  }
+}
 
 export class ItemsService {
   /**
