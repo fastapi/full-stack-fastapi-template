@@ -24,6 +24,20 @@
 - 🚢 Deployment instructions using Docker Compose, including how to set up a frontend Traefik proxy to handle automatic HTTPS certificates.
 - 🏭 CI (continuous integration) and CD (continuous deployment) based on GitHub Actions.
 
+## Analytics and Observability
+
+This project now includes enhanced analytics capabilities and observability through OpenTelemetry:
+
+*   **New Analytics Endpoints**:
+    *   `/api/v1/analytics/user-summary`: Provides a summary of user statistics, including total users, active/inactive counts, and signup trends (if user creation timestamps are available).
+    *   `/api/v1/analytics/item-trends`: Provides a summary of item statistics, including total items and creation trends (if item creation timestamps are available).
+    These endpoints utilize Polars for efficient in-memory data aggregation.
+
+*   **OpenTelemetry Integration**:
+    *   The backend is instrumented with OpenTelemetry for distributed tracing. This provides insights into request flows and database interactions.
+    *   To export traces, configure the OTLP exporter endpoint via the environment variable: `OTEL_EXPORTER_OTLP_ENDPOINT="<your_otlp_collector_url:port>"` (e.g., `http://localhost:4317`).
+    *   You can also customize the service name reported to your observability platform using the `OTEL_SERVICE_NAME` environment variable.
+
 ### Dashboard Login
 
 [![API docs](img/login.png)](https://github.com/fastapi/full-stack-fastapi-template)
