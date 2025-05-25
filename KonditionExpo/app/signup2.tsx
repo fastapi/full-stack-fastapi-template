@@ -107,7 +107,7 @@ export default function SignUpStep2() {
     setHeight(heightInCm);
     setWeight(weightInKg);
 
-    router.replace('/home');
+    router.replace('/(tabs)');
   };
 
   return (

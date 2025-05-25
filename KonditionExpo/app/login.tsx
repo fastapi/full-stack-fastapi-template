@@ -45,7 +45,7 @@ export default function LoginScreen() {
       // Set the name (this mimics what signup does)
       setUserName('Returning User'); // You can replace this with a real name from API later
   
-      router.replace('/home');
+      router.replace('/(tabs)');
     } catch (error) {
       console.error('Login error:', error);
     } finally {

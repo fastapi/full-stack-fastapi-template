@@ -12,11 +12,6 @@ const ProfileScreen = () => {
   return (
     <SafeAreaView style={styles.container}>
       <ScrollView contentContainerStyle={styles.content}>
-        {/* Back Arrow */}
-        <TouchableOpacity onPress={() => router.back()} style={styles.backBtn}>
-          <Image source={require('@/assets/images/arrow-left.png')} style={styles.backIcon} />
-        </TouchableOpacity>
-
         {/* Profile Box */}
         <View style={styles.profileBox}>
           <Text style={styles.profileName}>{name || 'User'}</Text>
@@ -78,8 +73,6 @@ const ProfileScreen = () => {
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: '#FFFFFF' },
   content: { padding: 16, paddingBottom: 80 },
-  backBtn: { marginBottom: 16 },
-  backIcon: { width: 24, height: 24 },
   profileBox: { backgroundColor: '#E5F1FF', borderRadius: 20, padding: 16, marginBottom: 24 },
   profileName: { fontSize: 24, fontWeight: 'bold', color: '#333' },
   editBtn: { backgroundColor: '#70A1FF', borderRadius: 12, paddingVertical: 6, paddingHorizontal: 12, alignSelf: 'flex-start', marginTop: 8 },
@@ -94,4 +87,4 @@ const styles = StyleSheet.create({
   toggleRow: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
 });
 
-export default ProfileScreen;
+export default ProfileScreen; 

@@ -1,7 +1,7 @@
 import React from 'react';
 import { useUser } from '@/contexts/UserContext';
 import { SafeAreaView, View, Text, StyleSheet, ScrollView, TouchableOpacity, Image, Dimensions } from 'react-native';
-import { LineChart, PieChart } from 'react-native-svg-charts';
+import { LineChart, PieChart } from 'react-native-chart-kit';
 import { router } from 'expo-router';
 
 const { width } = Dimensions.get('window');
@@ -45,13 +45,20 @@ const HomeScreen = () => {
             </TouchableOpacity>
           </View>
           <PieChart
-            style={styles.bmiPie}
             data={[
-              { value: parseFloat(bmiValue), svg: { fill: '#A3C9FD' } },
-              { value: 30 - parseFloat(bmiValue), svg: { fill: '#E5EFFF' } },
+              { name: 'BMI', population: parseFloat(bmiValue), color: '#A3C9FD', legendFontColor: '#7F7F7F', legendFontSize: 15 },
+              { name: 'Other', population: 30 - parseFloat(bmiValue), color: '#E5EFFF', legendFontColor: '#7F7F7F', legendFontSize: 15 },
             ]}
-            innerRadius={40}
-            outerRadius={50}
+            width={100}
+            height={100}
+            chartConfig={{
+              color: (opacity = 1) => `rgba(163, 201, 253, ${opacity})`,
+            }}
+            accessor={'population'}
+            backgroundColor={'transparent'}
+            paddingLeft={'0'}
+            hasLegend={false}
+            center={[0, 0]}
           />
           <View style={styles.bmiOverlay}>
             <Text style={styles.bmiValue}>{bmiValue}</Text>
@@ -72,10 +79,26 @@ const HomeScreen = () => {
           <Text style={styles.activityLabel}>Heart Rate</Text>
           <Text style={styles.activityValue}>78 BPM</Text>
           <LineChart
+            data={{
+              labels: [],
+              datasets: [
+                {
+                  data: heartRateData,
+                  color: () => '#91D5A1',
+                  strokeWidth: 2,
+                },
+              ],
+            }}
+            width={width - 64}
+            height={100}
+            chartConfig={{
+              backgroundGradientFrom: '#fff',
+              backgroundGradientTo: '#fff',
+              color: () => '#91D5A1',
+              strokeWidth: 2,
+            }}
+            bezier
             style={styles.lineChart}
-            data={heartRateData}
-            svg={{ stroke: '#91D5A1', strokeWidth: 2 }}
-            contentInset={{ top: 10, bottom: 10 }}
           />
           <View style={styles.timestampBadge}>
             <Text style={styles.timestampText}>3 mins ago</Text>
@@ -96,13 +119,20 @@ const HomeScreen = () => {
             <Text style={styles.statsLabel}>Calories</Text>
             <Text style={styles.statsValue}>{caloriesBurnt} kCal</Text>
             <PieChart
-              style={{ height: 80 }}
               data={[
-                { value: caloriesBurnt, svg: { fill: '#FFC069' } },
-                { value: caloriesLeft, svg: { fill: '#FFECCE' } },
+                { name: 'Burnt', population: caloriesBurnt, color: '#FFC069', legendFontColor: '#7F7F7F', legendFontSize: 15 },
+                { name: 'Left', population: caloriesLeft, color: '#FFECCE', legendFontColor: '#7F7F7F', legendFontSize: 15 },
               ]}
-              innerRadius={20}
-              outerRadius={25}
+              width={80}
+              height={80}
+              chartConfig={{
+                color: (opacity = 1) => `rgba(255, 192, 105, ${opacity})`,
+              }}
+              accessor={'population'}
+              backgroundColor={'transparent'}
+              paddingLeft={'0'}
+              hasLegend={false}
+              center={[0, 0]}
             />
             <View style={styles.calOverlay}>
               <Text style={styles.calOverlayText}>{caloriesLeft} kCal</Text>
@@ -119,12 +149,26 @@ const HomeScreen = () => {
             </TouchableOpacity>
           </View>
           <LineChart
+            data={{
+              labels: workoutDays,
+              datasets: [
+                {
+                  data: workoutProgressData,
+                  color: () => '#B07FFD',
+                  strokeWidth: 2,
+                },
+              ],
+            }}
+            width={width - 64}
+            height={100}
+            chartConfig={{
+              backgroundGradientFrom: '#fff',
+              backgroundGradientTo: '#fff',
+              color: () => '#B07FFD',
+              strokeWidth: 2,
+            }}
+            bezier
             style={styles.progressChart}
-            data={workoutProgressData}
-            svg={{ stroke: '#B07FFD', strokeWidth: 2 }}
-            contentInset={{ top: 10, bottom: 10 }}
-            gridMin={0}
-            gridMax={100}
           />
           <View style={styles.daysRow}>
             {workoutDays.map(day => (
@@ -153,25 +197,6 @@ const HomeScreen = () => {
           ))}
         </View>
       </ScrollView>
-
-      {/* Bottom Navigation */}
-      <View style={styles.bottomNav}>
-        <TouchableOpacity onPress={() => router.push('/home')}>
-          <Image source={require('../assets/images/home-active.png')} style={styles.navIcon} />
-        </TouchableOpacity>
-        <TouchableOpacity onPress={() => alert('Progress screen not yet implemented')}>
-          <Image source={require('../assets/images/chart.png')} style={styles.navIcon} />
-        </TouchableOpacity>
-        <TouchableOpacity onPress={() => alert('Search screen not yet implemented')} style={styles.centerButton}>
-          <Image source={require('../assets/images/search.png')} style={styles.searchIcon} />
-        </TouchableOpacity>
-        <TouchableOpacity onPress={() => alert('Camera screen not yet implemented')}>
-          <Image source={require('../assets/images/camera.png')} style={styles.navIcon} />
-        </TouchableOpacity>
-        <TouchableOpacity onPress={() => router.push('/profile')}>
-          <Image source={require('../assets/images/user.png')} style={styles.navIcon} />
-        </TouchableOpacity>
-      </View>
     </SafeAreaView>
   );
 };
@@ -233,10 +258,6 @@ const styles = StyleSheet.create({
   workoutType: { fontSize: 16, fontWeight: 'bold', color: '#333' },
   workoutMeta: { fontSize: 12, color: '#777', marginTop: 4 },
   arrowIcon: { width: 24, height: 24, tintColor: '#777' },
-  bottomNav: { position: 'absolute', bottom: 0, left: 0, right: 0, height: 60, flexDirection: 'row', justifyContent: 'space-around', alignItems: 'center', backgroundColor: '#FFF', borderTopWidth: 1, borderColor: '#EEE' },
-  navIcon: { width: 24, height: 24 },
-  centerButton: { backgroundColor: '#fff', padding: 12, borderRadius: 24, elevation: 4 },
-  searchIcon: { width: 28, height: 28 },
 });
 
 export default HomeScreen;
