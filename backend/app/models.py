@@ -9,7 +9,7 @@ from sqlmodel import Field, Relationship, SQLModel
 # Shared properties
 class UserBase(SQLModel):
     email: EmailStr = Field(unique=True, index=True, max_length=255)
-    is_active: bool = False  # Changed to False to require email verification
+    is_active: bool = True  # Default to True for immediate access (email verification is optional)
     is_superuser: bool = False
     is_verified: bool = False
     full_name: str | None = Field(default=None, max_length=255)
@@ -168,3 +168,24 @@ class TokenPair(SQLModel):
     access_token: str
     refresh_token: str
     token_type: str = "bearer"
+
+
+# OAuth State for CSRF protection
+class OAuthStateBase(SQLModel):
+    state_token: str = Field(unique=True, index=True)
+    provider: str = Field(max_length=50)
+    redirect_uri: str = Field(max_length=500)
+    expires_at: datetime
+    used: bool = Field(default=False)
+
+
+class OAuthState(OAuthStateBase, table=True):
+    id: uuid.UUID = Field(default_factory=uuid.uuid4, primary_key=True)
+    created_at: datetime = Field(
+        default_factory=datetime.utcnow,
+        sa_column=Column(DateTime(timezone=True), server_default=func.now())
+    )
+
+
+class OAuthStateCreate(OAuthStateBase):
+    pass

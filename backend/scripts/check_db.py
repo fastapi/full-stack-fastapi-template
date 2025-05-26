@@ -50,13 +50,19 @@ def check_database_connection() -> bool:
                 logger.error("❌ Database connection check failed: Unexpected result")
                 return False
     except OperationalError as e:
-        logger.error(f"❌ Database connection failed (OperationalError): {e}")
+        # Log generic message, but include detailed error in debug mode only
+        logger.error("❌ Database connection failed: Unable to connect to database")
+        logger.debug(f"OperationalError details: {e}")
         return False
     except SQLAlchemyError as e:
-        logger.error(f"❌ Database connection failed (SQLAlchemyError): {e}")
+        # Log generic message for production safety
+        logger.error("❌ Database connection failed: Database error occurred")
+        logger.debug(f"SQLAlchemyError details: {e}")
         return False
     except Exception as e:
-        logger.error(f"❌ Database connection failed (Unexpected error): {e}")
+        # Log generic message to avoid exposing sensitive info
+        logger.error("❌ Database connection failed: Unexpected error occurred")
+        logger.debug(f"Exception details: {e}")
         return False
 
 def check_database_version() -> bool:
@@ -82,11 +88,13 @@ def check_database_version() -> bool:
                     if 'pgcrypto' not in extensions:
                         logger.warning("⚠️  Extension 'pgcrypto' is not installed. Some features may not work correctly.")
                 except Exception as e:
-                    logger.warning(f"⚠️  Could not check database extensions: {e}")
+                    logger.warning("⚠️  Could not check database extensions")
+                    logger.debug(f"Extension check error: {e}")
             
             return True
     except Exception as e:
-        logger.warning(f"⚠️  Could not check database version: {e}")
+        logger.warning("⚠️  Could not check database version")
+        logger.debug(f"Version check error: {e}")
         return False
 
 def main():
@@ -100,7 +108,7 @@ def main():
     if not check_database_connection():
         print("\n❌ Database connection failed. Please check the following:")
         print(f"  1. Is the database server running?")
-        print(f"  2. Does the database '{settings.SQLALCHEMY_DATABASE_URI.split('/')[-1]}' exist?")
+        print(f"  2. Does the database exist?")
         print(f"  3. Are the database credentials in your .env file correct?")
         print(f"  4. Is the database server accessible from this machine?")
         sys.exit(1)

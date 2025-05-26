@@ -81,6 +81,8 @@ class AuthSettings(BaseSettings):
     """Authentication and authorization settings."""
     model_config = SettingsConfigDict(env_prefix="AUTH_")
     
+    # SECURITY WARNING: In production, SECRET_KEY must be set via environment variable
+    # to ensure token persistence across application restarts
     SECRET_KEY: str = secrets.token_urlsafe(32)
     ALGORITHM: str = "HS256"
     ACCESS_TOKEN_EXPIRE_MINUTES: int = 60 * 24 * 7  # 7 days
@@ -197,6 +199,8 @@ class Settings(DatabaseSettings, AuthSettings, EmailSettings, RedisSettings):
     DEBUG: bool = False
     
     # Security
+    # SECURITY WARNING: SECRET_KEY is duplicated here and in AuthSettings
+    # In production, this must be set via environment variable
     SECRET_KEY: str = secrets.token_urlsafe(32)
     
     # API
@@ -351,6 +355,17 @@ class Settings(DatabaseSettings, AuthSettings, EmailSettings, RedisSettings):
         self._check_default_secret(
             "FIRST_SUPERUSER_PASSWORD", self.FIRST_SUPERUSER_PASSWORD
         )
+        
+        # Additional check for production environments
+        if self.ENVIRONMENT != "local":
+            # Check if SECRET_KEY was auto-generated (32 bytes = 43 chars in base64url)
+            if len(self.SECRET_KEY) == 43 and self.SECRET_KEY.replace("-", "").replace("_", "").isalnum():
+                message = (
+                    "SECRET_KEY appears to be auto-generated. "
+                    "In production, SECRET_KEY must be explicitly set via environment variable "
+                    "to ensure token persistence across application restarts."
+                )
+                raise ValueError(message)
 
         return self
 

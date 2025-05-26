@@ -10,9 +10,15 @@ from pathlib import Path
 sys.path.append(str(Path(__file__).parent.parent))
 
 def run_command(command: str) -> bool:
-    """Run a shell command and return True if successful."""
+    """Run a shell command and return True if successful.
+    
+    SECURITY WARNING: This function uses shell=True which can be dangerous
+    if used with untrusted input. Only use with hardcoded commands.
+    """
     try:
         print(f"🚀 Running: {command}")
+        # SECURITY NOTE: shell=True is used here but all commands are hardcoded
+        # and do not accept user input, making it safe in this context
         result = subprocess.run(command, shell=True, check=True, text=True, capture_output=True)
         print(result.stdout)
         if result.stderr:

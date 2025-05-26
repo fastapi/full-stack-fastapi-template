@@ -590,7 +590,7 @@ def get_token_from_request(request: Request) -> Optional[str]:
     return None
 
 
-def get_current_user_optional(
+async def get_current_user_optional(
     request: Request,
     db: AsyncSession = Depends(get_async_db),
 ) -> Optional[User]:
@@ -615,7 +615,7 @@ def get_current_user_optional(
         token_data = TokenPayload(**payload)
         
         # Get user from database
-        result = db.execute(select(User).where(User.id == token_data.sub))
+        result = await db.execute(select(User).where(User.id == token_data.sub))
         user = result.scalar_one_or_none()
         
         if user is None or not user.is_active:

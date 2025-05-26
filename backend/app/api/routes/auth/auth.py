@@ -10,7 +10,7 @@ from app.core.config import settings
 from app.db import get_db
 from app.models import User
 from app.schemas.auth import Token, UserLogin, UserRegister, UserOut, PasswordResetRequest, PasswordResetConfirm
-from app.crud import create_user, get_user_by_email, update_user
+from app.crud import create_user, get_user, get_user_by_email, update_user
 
 router = APIRouter()
 
@@ -85,7 +85,7 @@ def refresh_token(
         raise e
     
     # Get user
-    user = get_user(db, user_id=token_data["sub"])
+    user = get_user(session=db, user_id=token_data["sub"])
     if not user:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
