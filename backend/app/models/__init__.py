@@ -36,6 +36,16 @@ from app.models.item import (
     Message,
 )
 
+from app.models.mcp_server import (
+    MCPServer,
+    MCPServerBase,
+    MCPServerCreate,
+    MCPServerUpdate,
+    MCPServerPublic,
+    MCPTransportType,
+    MCPServerStatus,
+)
+
 # This ensures that SQLModel knows about all models for migrations
 __all__ = [
     'BaseDBModel',
@@ -68,4 +78,11 @@ __all__ = [
     'ItemPublic',
     'ItemsPublic',
     'Message',
+    'MCPServer',
+    'MCPServerBase',
+    'MCPServerCreate',
+    'MCPServerUpdate',
+    'MCPServerPublic',
+    'MCPTransportType',
+    'MCPServerStatus',
 ]
