@@ -19,6 +19,8 @@ from app.models.workout import (
     ExerciseUpdate,
     ExercisePublic,
 )
+from app.crud import update_personal_bests_after_workout
+
 
 router = APIRouter(prefix="/workouts", tags=["workouts"])
 
@@ -247,6 +249,7 @@ def delete_workout(
     
     return Message(message="Workout deleted successfully")
 
+# TODO - Kush, added PB updating, test
 
 @router.post("/{workout_id}/complete", response_model=WorkoutPublic)
 def complete_workout(
@@ -289,6 +292,10 @@ def complete_workout(
     session.add(workout)
     session.commit()
     session.refresh(workout)
+
+    #added for updating personalbests
+    update_personal_bests_after_workout(session=session, workout=workout)
+
     
     return workout
 

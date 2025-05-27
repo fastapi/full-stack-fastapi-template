@@ -14,7 +14,7 @@ class UserBase(SQLModel):
 
 # Properties to receive via API on creation
 class UserCreate(UserBase):
-    password: str = Field(min_length=8, max_length=40)
+    password: str = Field(min_length=8, max_length=50)
 
 
 class UserRegister(SQLModel):

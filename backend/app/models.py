@@ -2,6 +2,7 @@ import uuid
 
 from pydantic import EmailStr
 from sqlmodel import Field, Relationship, SQLModel
+from dates import date
 
 
 # Shared properties
@@ -45,6 +46,9 @@ class User(UserBase, table=True):
     hashed_password: str
     items: list["Item"] = Relationship(back_populates="owner", cascade_delete=True)
 
+    # TODO test
+    personal_bests: list["PB"] = Relationship(back_populates="user", cascade_delete=True)
+
 
 # Properties to return via API, id is always required
 class UserPublic(UserBase):
@@ -80,6 +84,25 @@ class Item(ItemBase, table=True):
     )
     owner: User | None = Relationship(back_populates="items")
 
+
+
+
+# TODO test, one-to-many User.personal_bests relationship.
+# expose PersonalBestBase for writes, PersonalBest for reads, and wrapper list.
+
+class PersonalBestBase(SQLModel):
+    metric: str = Field(max_length=100, description = "e.g. deadlift, 5k-run, pushups")
+    value: float = Field(..., description="numeric value of the best (e.g. kg, seconds, reps)")
+    date: date = Field(default_factory=date.today)
+
+class PersonalBest(PersonalBestBase, table=True):
+    id: uuid.UUID = Field(default_factory=uuid.uuid4, primary_key=True)
+    user_id: uuid.UUID = Field(foreign_key="user.id", nullable=False, ondelete="CASCADE")
+    user: User = Relationship(back_populates="personal_bests")
+
+class PersonalBestsList(SQLModel):
+    data: list[PersonalBest]
+    count: int
 
 # Properties to return via API, id is always required
 class ItemPublic(ItemBase):
