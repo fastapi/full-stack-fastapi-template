@@ -1,11 +1,11 @@
 import uuid
+from uuid import UUID, uuid4
 from datetime import datetime
 from typing import List, Optional
 from sqlmodel import Field, Relationship, SQLModel
 
 # Import directly from user module to avoid circular imports
 from app.models.user import User
-
 
 # Workout Model
 class Workout(SQLModel, table=True):
@@ -147,3 +147,18 @@ class WorkoutsPublic(SQLModel):
     """
     data: List[WorkoutPublic]
     count: int
+
+#Personal Bests Model - Related to Workouts
+class PersonalBest(SQLModel, table=True):
+    id: UUID = Field(default_factory=uuid4, primary_key=True)
+    user_id: UUID = Field(foreign_key="user.id")
+    exercise_name: str
+    metric_type: str  # e.g. "max_weight", "max_reps"
+    metric_value: float
+    date_achieved: Optional[datetime]
+
+class PersonalBestCreate(SQLModel):
+    exercise_name: str
+    metric_type: str
+    metric_value: float
+    date_achieved: Optional[datetime]

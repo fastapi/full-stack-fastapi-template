@@ -1,15 +1,22 @@
-import React from 'react';
+  import React from 'react';
 import { useUser } from '@/contexts/UserContext';
 import { SafeAreaView, View, Text, StyleSheet, ScrollView, TouchableOpacity, Image, Dimensions } from 'react-native';
 import { LineChart, PieChart } from 'react-native-chart-kit';
 import { router } from 'expo-router';
+import { usePersonalBests } from "@/hooks/usePersonalBests";
 
 const { width } = Dimensions.get('window');
-
+//console.log(" 1 HomeScreen about to be rendered rendered");
 const HomeScreen = () => {
+  //console.log("2 HomeScreen rendered");
   // TODO: Replace with real data
   const bmiValue = '20.1';
-  const { name } = useUser();
+  const user = useUser();
+  if (!user) {
+    console.warn("User context is undefined");
+    return null;
+  }
+  const { name } = user;
   const heartRateData = [60, 62, 65, 70, 75, 78, 80, 82, 79, 76];
   const waterIntake = '4L';
   const sleepHours = '8h 20m';
@@ -22,6 +29,11 @@ const HomeScreen = () => {
     { id: '2', type: 'Lowerbody Workout', calories: 200, duration: '30 minutes', icon: require('../assets/images/lowerbody.png') },
     // ... more workouts
   ];
+  const { pbs, loading } = usePersonalBests();
+  const testPbs = pbs.length === 0 ? [{ metric: "Deadlift", value: 315, date: "2025-05-27" }] : pbs;
+  
+  console.log('PBS LOADED:', pbs);
+  console.log("Rendering personal bests section. pbs:", pbs, "loading:", loading);
 
   return (
     <SafeAreaView style={styles.container}>
@@ -178,7 +190,7 @@ const HomeScreen = () => {
         </View>
 
         {/* Latest Workout */}
-        <View style={styles.latestSection}>
+        <View style={[styles.latestSection, { backgroundColor: '#f0f0f0' }]}>
           <View style={styles.sectionHeader}>
             <Text style={styles.sectionTitle}>Latest Workout</Text>
             <TouchableOpacity onPress={() => alert('Workout List not yet implemented')}>
@@ -196,6 +208,35 @@ const HomeScreen = () => {
             </TouchableOpacity>
           ))}
         </View>
+
+        {/* Personal Bests */}
+
+        <View style={[styles.latestSection, { paddingBottom: 16 }]}>
+          <View style={styles.sectionHeader}>
+            <Text style={styles.sectionTitle}>Personal Bests</Text>
+            <TouchableOpacity onPress={() => alert('Full Personal Bests screen not implemented')}>
+              <Text style={styles.seeMore}>See more</Text>
+            </TouchableOpacity>
+          </View>
+
+          {loading ? (
+            <Text style={{ textAlign: 'center', color: '#666', marginBottom: 12 }}>Loading personal bests...</Text>
+          ) : pbs.length === 0 ? (
+            <Text style={{ textAlign: 'center', color: '#999', marginBottom: 12 }}>No personal bests yet. Start training to set new records!</Text>
+          ) : (
+            testPbs.map((pb) => (
+              <View key={pb.metric} style={styles.workoutItem}>
+                <Image source={require('../assets/images/trophy.png')} style={styles.workoutIcon} />
+                <View style={styles.workoutInfo}>
+                  <Text style={styles.workoutType}>{pb.metric}</Text>
+                  <Text style={styles.workoutMeta}>{pb.value} • {pb.date}</Text>
+                </View>
+              </View>
+            ))
+          )}
+        </View>
+
+
       </ScrollView>
     </SafeAreaView>
   );

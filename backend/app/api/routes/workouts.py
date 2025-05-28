@@ -19,7 +19,7 @@ from app.models.workout import (
     ExerciseUpdate,
     ExercisePublic,
 )
-from app.crud import update_personal_bests_after_workout
+from app.crudFuncs import update_personal_bests_after_workout
 
 
 router = APIRouter(prefix="/workouts", tags=["workouts"])

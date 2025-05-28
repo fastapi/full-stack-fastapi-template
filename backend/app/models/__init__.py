@@ -40,7 +40,10 @@ from app.models.workout import (
     ExercisePublic,
     WorkoutWithExercisesPublic,
     WorkoutsPublic,
+    PersonalBest,
+    PersonalBestCreate
 )
+# not needed - from app.models.personal_best import PersonalBest, PersonalBestCreate
 
 __all__ = [
     # SQLModel
@@ -90,4 +93,6 @@ __all__ = [
     "ExercisePublic",
     "WorkoutWithExercisesPublic",
     "WorkoutsPublic",
+    "PersonalBest",
+    "PersonalBestCreate",
 ]

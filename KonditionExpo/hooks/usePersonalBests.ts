@@ -1,18 +1,26 @@
 import { useEffect, useState } from "react";
 import { getAccessToken } from "@/scripts/auth"; // adjust based on your token handling
 
+type PersonalBest = {
+  metric: string;
+  value: number;
+  date: string;
+};
+
 export const usePersonalBests = () => {
-  const [pbs, setPbs] = useState([]);
-  const [loading, setLoading] = useState(true);
+
+  console.log("usePersonalBests hook loaded");
+
+  const [pbs, setPbs] = useState<PersonalBest[]>([]);
+  const [loading, setLoading] = useState( true);
 
   useEffect(() => {
-    console.log("🔁 usePersonalBests hook loaded");
   
     const fetchPBs = async () => {
-      console.log("📡 Fetching personal bests...");
+      console.log("Fetching personal bests...");
       setLoading(true);
       try {
-        console.log("🔑 Attempting to get token...");
+        console.log("Attempting to get token...");
         const token = await getAccessToken();
         console.log("Got token:", token);
   
@@ -23,10 +31,11 @@ export const usePersonalBests = () => {
         });
   
         const data = await res.json();
-        console.log("📬 Fetched PBs:", data);
-        setPbs(data.data); // Adjust if shape differs
+        console.log("Fetched PBs:", data);
+        setPbs(data?.data ?? []); //   Adjust if shape differs
       } catch (err) {
         console.error("Failed to fetch personal bests", err);
+        setPbs([]);
       } finally {
         setLoading(false);
       }

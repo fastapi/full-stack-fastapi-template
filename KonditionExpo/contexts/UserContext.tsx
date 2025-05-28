@@ -26,8 +26,17 @@ export const UserProvider = ({ children }: { children: ReactNode }) => {
   );
 };
 
+//Added default fallback
 export const useUser = () => {
-  const context = useContext(UserContext);
-  if (!context) throw new Error('useUser must be used within a UserProvider');
-  return context;
+  return useContext(UserContext) ?? {
+    name: '',
+    setName: () => {},
+    height: '',
+    setHeight: () => {},
+    weight: '',
+    setWeight: () => {},
+    age: 0,
+    setAge: () => {},
+  };
 };
+
