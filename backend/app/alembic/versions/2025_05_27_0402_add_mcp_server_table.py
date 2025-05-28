@@ -14,14 +14,20 @@ import sqlmodel
 
 # revision identifiers, used by Alembic.
 revision: str = '2025_05_27_0402'
-down_revision: Union[str, None] = '2025_05_26_1343'
+down_revision: Union[str, None] = '1a31ce608336'
 branch_labels: Union[str, Sequence[str], None] = None
 depends_on: Union[str, Sequence[str], None] = None
 
 
 def upgrade() -> None:
-    # Create enum type for transport
-    op.execute("CREATE TYPE mcptransporttype AS ENUM ('stdio', 'http_sse')")
+    # Create enum type for transport if it doesn't exist
+    op.execute("""
+        DO $$ BEGIN
+            CREATE TYPE mcptransporttype AS ENUM ('stdio', 'http_sse');
+        EXCEPTION
+            WHEN duplicate_object THEN null;
+        END $$;
+    """)
     
     # Create mcp_servers table
     op.create_table('mcp_servers',
@@ -37,6 +43,8 @@ def upgrade() -> None:
         sa.Column('headers', postgresql.JSON(astext_type=sa.Text()), nullable=True),
         sa.Column('is_enabled', sa.Boolean(), nullable=False, server_default='true'),
         sa.Column('is_remote', sa.Boolean(), nullable=False, server_default='false'),
+        sa.Column('auth_type', sa.String(), nullable=True),
+        sa.Column('auth_config', postgresql.JSON(astext_type=sa.Text()), nullable=True),
         sa.Column('capabilities', postgresql.JSON(astext_type=sa.Text()), nullable=True),
         sa.Column('tools', postgresql.JSON(astext_type=sa.Text()), nullable=True),
         sa.Column('resources', postgresql.JSON(astext_type=sa.Text()), nullable=True),

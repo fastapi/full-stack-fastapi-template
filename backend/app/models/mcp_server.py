@@ -34,6 +34,8 @@ class MCPServerBase(SQLModel):
     headers: Optional[dict[str, str]] = Field(default=None, sa_column=Column(JSON))
     is_enabled: bool = Field(default=True)
     is_remote: bool = Field(default=False)
+    auth_type: Optional[str] = Field(default=None, description="Authentication type: 'api_key', 'bearer', 'basic'")
+    auth_config: Optional[dict[str, str]] = Field(default=None, sa_column=Column(JSON), description="Authentication configuration")
 
 
 class MCPServer(BaseDBModel, MCPServerBase, table=True):
@@ -63,6 +65,8 @@ class MCPServerUpdate(SQLModel):
     headers: Optional[dict[str, str]] = None
     is_enabled: Optional[bool] = None
     is_remote: Optional[bool] = None
+    auth_type: Optional[str] = None
+    auth_config: Optional[dict[str, str]] = None
 
 
 class MCPServerPublic(MCPServerBase):

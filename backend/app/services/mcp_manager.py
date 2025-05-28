@@ -2,6 +2,8 @@
 import asyncio
 import json
 import logging
+import os
+import re
 from typing import Dict, Optional, Any
 from datetime import datetime
 import subprocess
@@ -28,6 +30,27 @@ class MCPConnection:
         self.status: MCPServerStatus = MCPServerStatus.DISCONNECTED
         self.error_message: Optional[str] = None
         
+    def _expand_env_vars(self, value: str) -> str:
+        """Expand environment variables in a string."""
+        # Replace ${VAR} and $VAR patterns with environment variable values
+        def replace_env_var(match):
+            var_name = match.group(1) or match.group(2)
+            return os.environ.get(var_name, match.group(0))
+        
+        # Match ${VAR} or $VAR patterns
+        pattern = r'\$\{([^}]+)\}|\$([A-Za-z_][A-Za-z0-9_]*)'
+        return re.sub(pattern, replace_env_var, value)
+    
+    def _expand_config_env_vars(self, config: Any) -> Any:
+        """Recursively expand environment variables in configuration."""
+        if isinstance(config, str):
+            return self._expand_env_vars(config)
+        elif isinstance(config, dict):
+            return {k: self._expand_config_env_vars(v) for k, v in config.items()}
+        elif isinstance(config, list):
+            return [self._expand_config_env_vars(item) for item in config]
+        return config
+        
     async def connect(self) -> bool:
         """Connect to the MCP server."""
         try:
@@ -48,20 +71,35 @@ class MCPConnection:
         if not self.server.command:
             raise ValueError("Command is required for stdio transport")
             
-        args = [self.server.command]
+        # Expand environment variables in command and args
+        command = self._expand_env_vars(self.server.command)
+        args = [command]
         if self.server.args:
-            args.extend(self.server.args)
+            expanded_args = [self._expand_env_vars(arg) for arg in self.server.args]
+            args.extend(expanded_args)
             
         # Start the process
-        self.process = await asyncio.create_subprocess_exec(
-            *args,
-            stdin=asyncio.subprocess.PIPE,
-            stdout=asyncio.subprocess.PIPE,
-            stderr=asyncio.subprocess.PIPE
-        )
+        try:
+            self.process = await asyncio.create_subprocess_exec(
+                *args,
+                stdin=asyncio.subprocess.PIPE,
+                stdout=asyncio.subprocess.PIPE,
+                stderr=asyncio.subprocess.PIPE,
+                env={**os.environ}  # Pass current environment variables
+            )
+        except FileNotFoundError:
+            raise RuntimeError(f"Command not found: {command}")
+        except Exception as e:
+            raise RuntimeError(f"Failed to start process: {str(e)}")
         
         self.reader = self.process.stdout
         self.writer = self.process.stdin
+        
+        # Check if process started successfully
+        await asyncio.sleep(0.1)  # Give process time to start
+        if self.process.returncode is not None:
+            stderr = await self.process.stderr.read()
+            raise RuntimeError(f"Process exited immediately with code {self.process.returncode}: {stderr.decode()}")
         
         # Start reading messages
         self._read_task = asyncio.create_task(self._read_messages())
@@ -96,7 +134,34 @@ class MCPConnection:
         if not self.server.url:
             raise ValueError("URL is required for HTTP+SSE transport")
             
-        self.session = aiohttp.ClientSession(headers=self.server.headers or {})
+        # Expand environment variables in URL
+        url = self._expand_env_vars(self.server.url)
+        
+        # Build headers with authentication
+        headers = self._expand_config_env_vars(dict(self.server.headers or {}))
+        if self.server.auth_type and self.server.auth_config:
+            # Expand environment variables in auth config
+            auth_config = self._expand_config_env_vars(self.server.auth_config)
+            
+            if self.server.auth_type == "bearer":
+                token = auth_config.get("token")
+                if token:
+                    headers["Authorization"] = f"Bearer {token}"
+            elif self.server.auth_type == "api_key":
+                key_name = auth_config.get("key_name", "X-API-Key")
+                api_key = auth_config.get("api_key")
+                if api_key:
+                    headers[key_name] = api_key
+            elif self.server.auth_type == "basic":
+                username = auth_config.get("username")
+                password = auth_config.get("password")
+                if username and password:
+                    import base64
+                    auth_str = f"{username}:{password}"
+                    b64_auth = base64.b64encode(auth_str.encode()).decode()
+                    headers["Authorization"] = f"Basic {b64_auth}"
+        
+        self.session = aiohttp.ClientSession(headers=headers)
         
         # Send initialize request
         response = await self._send_http_request("initialize", {
@@ -193,11 +258,23 @@ class MCPConnection:
             "params": params
         }
         
-        async with self.session.post(self.server.url, json=message) as response:
-            if response.status == 200:
-                return await response.json()
-            else:
-                raise RuntimeError(f"HTTP error: {response.status}")
+        # Use the expanded URL
+        url = self._expand_env_vars(self.server.url)
+        
+        try:
+            async with self.session.post(url, json=message, timeout=aiohttp.ClientTimeout(total=30)) as response:
+                if response.status == 200:
+                    result = await response.json()
+                    if "error" in result:
+                        raise RuntimeError(f"JSON-RPC error: {result['error']}")
+                    return result.get("result")
+                else:
+                    text = await response.text()
+                    raise RuntimeError(f"HTTP error {response.status}: {text}")
+        except asyncio.TimeoutError:
+            raise RuntimeError("Request timed out")
+        except aiohttp.ClientError as e:
+            raise RuntimeError(f"Connection error: {str(e)}")
                 
     async def _read_messages(self):
         """Read messages from stdio."""
@@ -285,6 +362,7 @@ class MCPServerManager:
     
     def __init__(self):
         self.connections: Dict[str, MCPConnection] = {}
+        self.connection_callbacks: Dict[str, Any] = {}
         
     async def connect_server(self, server: MCPServer) -> bool:
         """Connect to an MCP server."""
@@ -331,6 +409,40 @@ class MCPServerManager:
         """Disconnect from all MCP servers."""
         for server_name in list(self.connections.keys()):
             await self.disconnect_server(server_name)
+    
+    def get_server_status(self, server_name: str) -> Dict[str, Any]:
+        """Get the status of a specific server."""
+        if server_name not in self.connections:
+            return {
+                "status": MCPServerStatus.DISCONNECTED.value,
+                "error_message": None,
+                "capabilities": None,
+                "tools": None,
+                "resources": None,
+                "prompts": None
+            }
+        
+        connection = self.connections[server_name]
+        return {
+            "status": connection.status.value,
+            "error_message": connection.error_message,
+            "capabilities": connection.server.capabilities,
+            "tools": connection.server.tools,
+            "resources": connection.server.resources,
+            "prompts": connection.server.prompts
+        }
+    
+    def set_connection_callback(self, server_name: str, callback: Any):
+        """Set a callback for connection status changes."""
+        self.connection_callbacks[server_name] = callback
+    
+    async def _notify_status_change(self, server_name: str):
+        """Notify about server status change."""
+        if server_name in self.connection_callbacks:
+            callback = self.connection_callbacks[server_name]
+            if callback:
+                status = self.get_server_status(server_name)
+                await callback(server_name, status)
 
 
 # Global instance

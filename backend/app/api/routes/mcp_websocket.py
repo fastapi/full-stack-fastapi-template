@@ -204,7 +204,8 @@ async def handle_websocket_message(
             
             if server.name in mcp_manager.connections:
                 connection = mcp_manager.connections[server.name]
-                status["status"] = connection.server.status.value
+                status["status"] = connection.status.value
+                status["error_message"] = connection.error_message
                 status["capabilities"] = connection.server.capabilities
                 status["tools"] = connection.server.tools
                 status["resources"] = connection.server.resources
