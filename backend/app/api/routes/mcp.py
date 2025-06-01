@@ -3,7 +3,15 @@ from typing import List, Any
 from fastapi import APIRouter, HTTPException, Depends
 from sqlmodel import Session, select
 from app.api.deps import get_current_active_user, get_current_active_superuser, get_db
-from app.models import User, MCPServer, MCPServerCreate, MCPServerUpdate, MCPServerPublic
+from app.models import User
+from app.models.mcp_server import (
+    MCPServer, 
+    MCPServerStatus, 
+    MCPServerBase, 
+    MCPServerCreate, 
+    MCPServerUpdate, 
+    MCPServerPublic
+)
 from app.services.mcp_manager import mcp_manager
 import logging
 
@@ -19,7 +27,7 @@ async def list_mcp_servers(
     current_user: User = Depends(get_current_active_user),
 ) -> List[MCPServerPublic]:
     """List all MCP servers."""
-    servers = session.exec(select(MCPServer)).all()
+    servers = session.execute(select(MCPServer)).scalars().all()
     
     # Update runtime data from manager
     result = []
@@ -41,12 +49,12 @@ async def list_mcp_servers(
 async def create_mcp_server(
     *,
     session: Session = Depends(get_db),
-    current_user: User = Depends(get_current_active_superuser),
+    current_user: User = Depends(get_current_active_user),
     server_in: MCPServerCreate,
 ) -> MCPServerPublic:
     """Create a new MCP server configuration."""
     # Check if server with same name exists
-    existing = session.exec(select(MCPServer).where(MCPServer.name == server_in.name)).first()
+    existing = session.execute(select(MCPServer).where(MCPServer.name == server_in.name)).scalar_one_or_none()
     if existing:
         raise HTTPException(status_code=400, detail="Server with this name already exists")
     
@@ -94,7 +102,7 @@ async def get_mcp_server(
 async def update_mcp_server(
     *,
     session: Session = Depends(get_db),
-    current_user: User = Depends(get_current_active_superuser),
+    current_user: User = Depends(get_current_active_user),
     server_id: str,
     server_in: MCPServerUpdate,
 ) -> MCPServerPublic:
@@ -130,7 +138,7 @@ async def update_mcp_server(
 async def delete_mcp_server(
     *,
     session: Session = Depends(get_db),
-    current_user: User = Depends(get_current_active_superuser),
+    current_user: User = Depends(get_current_active_user),
     server_id: str,
 ) -> dict:
     """Delete MCP server."""

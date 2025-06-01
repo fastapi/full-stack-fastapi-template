@@ -61,7 +61,9 @@ class MCPConnection:
             else:
                 raise ValueError(f"Unsupported transport: {self.server.transport}")
         except Exception as e:
+            import traceback
             logger.error(f"Failed to connect to MCP server {self.server.name}: {e}")
+            logger.error(f"Traceback: {traceback.format_exc()}")
             self.status = MCPServerStatus.ERROR
             self.error_message = str(e)
             return False
@@ -80,6 +82,7 @@ class MCPConnection:
             
         # Start the process
         try:
+            logger.info(f"Starting MCP server process: {' '.join(args)}")
             self.process = await asyncio.create_subprocess_exec(
                 *args,
                 stdin=asyncio.subprocess.PIPE,
@@ -87,6 +90,7 @@ class MCPConnection:
                 stderr=asyncio.subprocess.PIPE,
                 env={**os.environ}  # Pass current environment variables
             )
+            logger.info(f"MCP server process started with PID: {self.process.pid}")
         except FileNotFoundError:
             raise RuntimeError(f"Command not found: {command}")
         except Exception as e:
@@ -101,18 +105,15 @@ class MCPConnection:
             stderr = await self.process.stderr.read()
             raise RuntimeError(f"Process exited immediately with code {self.process.returncode}: {stderr.decode()}")
         
+        logger.info(f"MCP server process is running, starting message reader task")
+        
         # Start reading messages
         self._read_task = asyncio.create_task(self._read_messages())
         
         # Send initialize request
         response = await self._send_request("initialize", {
-            "protocolVersion": "0.1.0",
-            "capabilities": {
-                "roots": True,
-                "tools": True,
-                "prompts": True,
-                "resources": True
-            },
+            "protocolVersion": "2025-03-26",
+            "capabilities": {},
             "clientInfo": {
                 "name": "copilot-mcp-host",
                 "version": "0.1.0"
@@ -121,6 +122,10 @@ class MCPConnection:
         
         if response and "capabilities" in response:
             self.server.capabilities = response["capabilities"]
+            
+            # Send initialized notification to complete handshake
+            await self._send_notification("notifications/initialized", {})
+            
             self.status = MCPServerStatus.CONNECTED
             
             # Fetch available tools, resources, and prompts
@@ -165,13 +170,8 @@ class MCPConnection:
         
         # Send initialize request
         response = await self._send_http_request("initialize", {
-            "protocolVersion": "0.1.0",
-            "capabilities": {
-                "roots": True,
-                "tools": True,
-                "prompts": True,
-                "resources": True
-            },
+            "protocolVersion": "2025-03-26",
+            "capabilities": {},
             "clientInfo": {
                 "name": "copilot-mcp-host",
                 "version": "0.1.0"
@@ -180,6 +180,10 @@ class MCPConnection:
         
         if response and "capabilities" in response:
             self.server.capabilities = response["capabilities"]
+            
+            # Send initialized notification to complete handshake
+            await self._send_notification("notifications/initialized", {})
+            
             self.status = MCPServerStatus.CONNECTED
             
             # Fetch available tools, resources, and prompts
@@ -215,6 +219,13 @@ class MCPConnection:
         elif self.server.transport == MCPTransportType.HTTP_SSE:
             return await self._send_http_request(method, params)
             
+    async def _send_notification(self, method: str, params: Dict[str, Any]) -> None:
+        """Send a JSON-RPC notification to the server."""
+        if self.server.transport == MCPTransportType.STDIO:
+            await self._send_stdio_notification(method, params)
+        elif self.server.transport == MCPTransportType.HTTP_SSE:
+            await self._send_http_notification(method, params)
+            
     async def _send_stdio_request(self, method: str, params: Dict[str, Any]) -> Optional[Dict[str, Any]]:
         """Send a request via stdio."""
         if not self.writer:
@@ -234,16 +245,42 @@ class MCPConnection:
         
         # Send the message
         message_str = json.dumps(message) + "\n"
+        logger.info(f"Sending message to MCP server: {message_str.strip()}")
         self.writer.write(message_str.encode())
         await self.writer.drain()
+        logger.info(f"Message sent and drained, waiting for response with ID {self._message_id}")
         
         # Wait for response
         try:
             response = await asyncio.wait_for(future, timeout=30.0)
             return response
         except asyncio.TimeoutError:
+            # Check if process is still alive
+            if self.process and self.process.returncode is not None:
+                stderr = await self.process.stderr.read()
+                logger.error(f"MCP server process died during request: exit code {self.process.returncode}, stderr: {stderr.decode()}")
+            else:
+                logger.error(f"Timeout waiting for response from MCP server, process still alive")
             self._pending_requests.pop(self._message_id, None)
             raise
+            
+    async def _send_stdio_notification(self, method: str, params: Dict[str, Any]) -> None:
+        """Send a notification via stdio (no response expected)."""
+        if not self.writer:
+            raise RuntimeError("Not connected")
+            
+        message = {
+            "jsonrpc": "2.0",
+            "method": method,
+            "params": params
+        }
+        
+        # Send the notification
+        message_str = json.dumps(message) + "\n"
+        logger.info(f"Sending notification to MCP server: {message_str.strip()}")
+        self.writer.write(message_str.encode())
+        await self.writer.drain()
+        logger.info(f"Notification sent and drained")
             
     async def _send_http_request(self, method: str, params: Dict[str, Any]) -> Optional[Dict[str, Any]]:
         """Send a request via HTTP."""
@@ -275,22 +312,31 @@ class MCPConnection:
             raise RuntimeError("Request timed out")
         except aiohttp.ClientError as e:
             raise RuntimeError(f"Connection error: {str(e)}")
+            
+    async def _send_http_notification(self, method: str, params: Dict[str, Any]) -> None:
+        """Send a notification via HTTP (not implemented yet)."""
+        # TODO: Implement HTTP notification if needed
+        pass
                 
     async def _read_messages(self):
         """Read messages from stdio."""
+        logger.info(f"Starting message reader for MCP server {self.server.name}")
         buffer = ""
         while self.reader and not self.reader.at_eof():
             try:
                 data = await self.reader.read(1024)
                 if not data:
+                    logger.info(f"No more data from MCP server {self.server.name}, ending reader")
                     break
                     
+                logger.info(f"Read {len(data)} bytes from MCP server: {data[:100]}...")
                 buffer += data.decode()
                 
                 # Process complete messages
                 while "\n" in buffer:
                     line, buffer = buffer.split("\n", 1)
                     if line.strip():
+                        logger.debug(f"Received message from MCP server: {line.strip()}")
                         try:
                             message = json.loads(line)
                             await self._handle_message(message)
