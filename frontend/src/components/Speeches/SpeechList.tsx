@@ -17,50 +17,66 @@ import {
   ModalBody,
   useDisclosure,
 } from '@chakra-ui/react';
-import SpeechListItem from './SpeechListItem'; // SecretSpeechPublic is imported from mockData now
-import SpeechCreateForm from './SpeechCreateForm'; // To add a new speech
-// import { SpeechesService, SecretSpeechPublicDetailed } from '../../client'; // Step 7
-// import { useAuth } from '../../hooks/useAuth';
-import { mockSpeeches as globalMockSpeeches, currentUserId, SecretSpeechPublicDetailed } from '../../mocks/mockData'; // Use detailed for consistency if needed by item
+import React from 'react'; // Removed useState, useCallback, useEffect
+import { useQuery, useQueryClient } from '@tanstack/react-query';
+import {
+  VStack,
+  Text,
+  Spinner,
+  Alert,
+  AlertIcon,
+  SimpleGrid,
+  Heading,
+  Box,
+  Button,
+  Modal,
+  ModalOverlay,
+  ModalContent,
+  ModalHeader,
+  ModalCloseButton,
+  ModalBody,
+  useDisclosure,
+  HStack,
+  AlertDescription,
+  AlertTitle,
+} from '@chakra-ui/react';
+import SpeechListItem from './SpeechListItem';
+import SpeechCreateForm from './SpeechCreateForm';
+import { SpeechesService, SecretSpeechPublic, ApiError } from '../../../client';
+// import { useAuth } from '../../../hooks/useAuth'; // For currentUserId
 
 interface SpeechListProps {
   eventId: string;
 }
 
-
 const SpeechList: React.FC<SpeechListProps> = ({ eventId }) => {
-  const [speeches, setSpeeches] = useState<SecretSpeechPublicDetailed[]>([]); // Use detailed type
-  const [isLoading, setIsLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
   const { isOpen, onOpen, onClose } = useDisclosure(); // For SpeechCreateForm modal
+  const queryClient = useQueryClient(); // To invalidate queries from child form
 
   // const { user } = useAuth();
-  // const actualCurrentUserId = user?.id || currentUserId;
-  const actualCurrentUserId = currentUserId; // Using mock currentUserId for owner checks
+  // const currentUserId = user?.id; // This would be the actual current user ID
+  const currentUserId = 'user-123-alice'; // Using mock currentUserId for SpeechListItem prop
 
-  const fetchSpeeches = useCallback(async () => {
-    setIsLoading(true);
-    setError(null);
-    try {
-      console.log(`SpeechList: Fetching speeches for event ${eventId}`);
-      await new Promise(resolve => setTimeout(resolve, 500)); // Simulate API call
-
-      setSpeeches(globalMockSpeeches.filter(s => s.event_id === eventId));
-    } catch (err) {
-      console.error(`Failed to fetch speeches for event ${eventId}:`, err);
-      setError('Failed to load speeches. Please try again later.');
-    } finally {
-      setIsLoading(false);
-    }
-  }, [eventId]);
-
-  useEffect(() => {
-    fetchSpeeches();
-  }, [fetchSpeeches]);
+  const {
+    data: speeches,
+    isLoading,
+    isError,
+    error
+  } = useQuery<SecretSpeechPublic[], ApiError>({
+    queryKey: ['eventSpeeches', eventId],
+    queryFn: async () => {
+      if (!eventId) throw new Error("Event ID is required to fetch speeches.");
+      // SpeechesService.listEventSpeeches expects SpeechesListEventSpeechesData: { eventId: string }
+      return SpeechesService.listEventSpeeches({ eventId });
+    },
+    enabled: !!eventId,
+  });
 
   const handleSpeechCreated = () => {
     onClose(); // Close the modal
-    fetchSpeeches(); // Refresh the list of speeches
+    // Query invalidation is handled by SpeechCreateForm's useMutation's onSuccess
+    // but if we need to ensure it happens even if form doesn't use queryClient itself:
+    // queryClient.invalidateQueries({ queryKey: ['eventSpeeches', eventId] });
   };
 
   if (isLoading) {
@@ -72,11 +88,16 @@ const SpeechList: React.FC<SpeechListProps> = ({ eventId }) => {
     );
   }
 
-  if (error) {
+  if (isError) {
     return (
-      <Alert status="error" mt={4}>
-        <AlertIcon />
-        {error}
+      <Alert status="error" mt={4} variant="subtle" flexDirection="column" alignItems="center" justifyContent="center" textAlign="center" height="150px">
+        <AlertIcon boxSize="30px" mr={0} />
+        <AlertTitle mt={3} mb={1} fontSize="md">
+          Error Loading Speeches
+        </AlertTitle>
+        <AlertDescription maxWidth="sm" fontSize="sm">
+          {error?.body?.detail || error?.message || 'An unexpected error occurred.'}
+        </AlertDescription>
       </Alert>
     );
   }
@@ -92,7 +113,7 @@ const SpeechList: React.FC<SpeechListProps> = ({ eventId }) => {
         </Button>
       </HStack>
 
-      {speeches.length === 0 ? (
+      {!speeches || speeches.length === 0 ? (
         <Text fontSize="md" color="gray.500" p={5} borderWidth="1px" borderRadius="md" textAlign="center">
           No speeches have been added to this event yet.
         </Text>
@@ -104,7 +125,7 @@ const SpeechList: React.FC<SpeechListProps> = ({ eventId }) => {
         </SimpleGrid>
       )}
 
-      <Modal isOpen={isOpen} onClose={onClose} size="xl">
+      <Modal isOpen={isOpen} onClose={onClose} size="xl" scrollBehavior="inside">
         <ModalOverlay />
         <ModalContent>
           <ModalHeader>Add Your Speech</ModalHeader>

@@ -1,4 +1,5 @@
-import React, { useEffect, useState } from 'react';
+import React from 'react'; // Removed useState, useEffect
+import { useQuery } from '@tanstack/react-query';
 import {
   Box,
   Button,
@@ -9,60 +10,29 @@ import {
   Alert,
   AlertIcon,
   SimpleGrid,
+  AlertDescription,
+  AlertTitle,
 } from '@chakra-ui/react';
-import EventListItem, { CoordinationEventPublic } from './EventListItem'; // Import the item component and its type
-// import { EventsService } from '../../client'; // Step 7
-import { Link as RouterLink } from '@tanstack/react-router'; // For "Create New" button
-import { modifiableMockEvents, currentUserId, mockParticipants } from '../../mocks/mockData'; // Using shared mock data & mockParticipants
+import EventListItem from './EventListItem';
+// No longer need to import CoordinationEventPublic from EventListItem, will use client's type
+import { EventsService, CoordinationEventPublic, ApiError } from '../../client';
+import { Link as RouterLink } from '@tanstack/react-router';
 
 const EventList: React.FC = () => {
-  // const { user } = useAuth(); // To get currentUserId for filtering if API returns all events
-  // For mock, we assume API would return events for the current user, or we filter them here.
-  // The backend `get_user_events` already filters by participation.
-  const [events, setEvents] = useState<CoordinationEventPublic[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
-
-  useEffect(() => {
-    const fetchEvents = async () => {
-      setIsLoading(true);
-      setError(null);
-      try {
-        // Simulate API call
-        console.log("EventList: Fetching events for user:", currentUserId);
-        await new Promise(resolve => setTimeout(resolve, 750));
-
-        // Filter events to show only those where the current user is a participant or creator
-        const userEventIds = new Set<string>();
-        mockParticipants.forEach(p => {
-            if (p.user_id === currentUserId) {
-                userEventIds.add(p.event_id);
-            }
-        });
-
-        modifiableMockEvents.forEach(event => {
-            if (event.creator_id === currentUserId) {
-                userEventIds.add(event.id);
-            }
-        });
-
-        const userVisibleEvents = modifiableMockEvents.filter(event => userEventIds.has(event.id));
-        setEvents(userVisibleEvents);
-      } catch (err) {
-        console.error('Failed to fetch events:', err);
-        setError('Failed to load events. Please try again later.');
-      } finally {
-        setIsLoading(false);
-      }
-    };
-
-    fetchEvents();
-    // Dependency array should be empty if we only fetch once on mount.
-    // If `modifiableMockEvents` could change from outside due to other components
-    // and we want this list to reflect that without a full page reload or prop drilling,
-    // a more complex state management (like Zustand, Redux, or React Context) would be needed.
-    // For now, this basic fetch-once is fine for mock data.
-  }, []);
+  const {
+    data: events,
+    isLoading,
+    isError,
+    error,
+  } = useQuery<CoordinationEventPublic[], ApiError>({
+    queryKey: ['events'],
+    queryFn: async () => {
+      // EventsService.listUserEvents returns CancelablePromise<EventsListUserEventsResponse>
+      // EventsListUserEventsResponse is Array<CoordinationEventPublic>
+      // The actual data is directly the response type.
+      return EventsService.listUserEvents();
+    },
+  });
 
   if (isLoading) {
     return (
@@ -73,11 +43,16 @@ const EventList: React.FC = () => {
     );
   }
 
-  if (error) {
+  if (isError) {
     return (
-      <Alert status="error" mt={4}>
-        <AlertIcon />
-        {error}
+      <Alert status="error" mt={4} variant="subtle" flexDirection="column" alignItems="center" justifyContent="center" textAlign="center" height="200px">
+        <AlertIcon boxSize="40px" mr={0} />
+        <AlertTitle mt={4} mb={1} fontSize="lg">
+          Error Loading Events
+        </AlertTitle>
+        <AlertDescription maxWidth="sm">
+          {error?.message || 'An unexpected error occurred. Please try again later.'}
+        </AlertDescription>
       </Alert>
     );
   }
@@ -88,12 +63,13 @@ const EventList: React.FC = () => {
         <Heading as="h2" size="xl">
           Your Coordination Events
         </Heading>
-        <Button as={RouterLink} to="/events/create" colorScheme="blue"> {/* Assuming a route for creation */}
+        {/* Updated link to match Tanstack Router v0.0.1-beta.28+ structure */}
+        <Button as={RouterLink} to="/_layout/events/create" colorScheme="blue">
           Create New Event
         </Button>
       </Box>
 
-      {events.length === 0 ? (
+      {!events || events.length === 0 ? (
         <Text fontSize="lg" color="gray.500" textAlign="center" p={10}>
           You are not part of any coordination events yet. Why not create one?
         </Text>

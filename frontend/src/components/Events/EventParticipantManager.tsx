@@ -19,205 +19,207 @@ import {
   Heading,
 } from '@chakra-ui/react';
 import { CloseIcon } from '@chakra-ui/icons';
-// import { EventsService, UserPublic as ApiUserPublic, EventParticipantPublic as ApiEventParticipantPublic, /* EventParticipantCreate */ } from '../../client'; // Step 7
+import React, { useState, useCallback } from 'react'; // Removed useEffect
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import {
-    mockParticipants,
-    addMockParticipant,
-    removeMockParticipant,
-    currentUserId, // To check against for permissions, e.g. can't remove self if creator
-    mockUserAlice, // For mocking newly added user details
-    mockUserBob,   // For mocking newly added user details
-    mockUserCharlie // For mocking newly added user details
-} from '../../mocks/mockData';
-
-// Using existing placeholder interface, assuming structure is compatible
-// Ensure UserPublic is defined if it's used for the 'user' field in EventParticipantPublic
-export interface UserPublic { // Defined here if not imported from another component's def
-    id: string;
-    email: string;
-    full_name?: string;
-    is_active: boolean;
-    is_superuser: boolean;
-}
-export interface EventParticipantPublic {
-    user_id: string;
-    event_id: string;
-    role: string;
-    added_at: string;
-    user?: UserPublic;
-}
-
-// Matches the Pydantic model for the request body of add_event_participant endpoint
-interface AddParticipantPayload {
-    user_id_to_add: string;
-    role: string;
-}
+  Box,
+  Button,
+  FormControl,
+  FormLabel,
+  Input,
+  VStack,
+  HStack,
+  List,
+  ListItem,
+  Text,
+  IconButton,
+  useToast,
+  Spinner,
+  Alert,
+  AlertIcon,
+  Select,
+  Heading,
+  AlertDescription,
+  AlertTitle,
+} from '@chakra-ui/react';
+import { CloseIcon } from '@chakra-ui/icons';
+import { EventsService, UserPublic, EventParticipantPublic, Body_events_add_event_participant, ApiError, Message } from '../../../client';
+// import { useAuth } from '../../../hooks/useAuth'; // For currentUserId
 
 interface EventParticipantManagerProps {
   eventId: string;
-  // eventCreatorId?: string; // Optional: to implement specific creator permissions
+  // eventCreatorId?: string; // Optional for more granular permissions
 }
 
-const participantRoles = ["participant", "speaker", "organizer", "scribe", "admin", "bride", "groom", "officiant"];
-// Mock user lookup - in real app, this might involve an API call to search users
-const mockUserLookup: Record<string, UserPublic> = {
-    [mockUserAlice.email]: mockUserAlice,
-    [mockUserAlice.id]: mockUserAlice,
-    [mockUserBob.email]: mockUserBob,
-    [mockUserBob.id]: mockUserBob,
-    [mockUserCharlie.email]: mockUserCharlie,
-    [mockUserCharlie.id]: mockUserCharlie,
-    "newuser@example.com": {id: "user-new-temp", email: "newuser@example.com", full_name: "New User", is_active: true, is_superuser: false}
-};
+// Note: The UserPublic type from the client might not include all fields if they are from a separate endpoint.
+// The listEventParticipants endpoint returns Array<UserPublic>.
+// We'll assume UserPublic from client has what we need (id, email, full_name).
 
+const participantRoles = ["participant", "speaker", "organizer", "scribe", "admin", "bride", "groom", "officiant"];
 
 const EventParticipantManager: React.FC<EventParticipantManagerProps> = ({ eventId }) => {
-  const [participants, setParticipants] = useState<EventParticipantPublic[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
+  const queryClient = useQueryClient();
+  const toast = useToast();
+  // const { user: loggedInUser } = useAuth();
+  // const currentUserId = loggedInUser?.id;
 
   const [userInput, setUserInput] = useState(''); // For user email or ID to add
   const [newUserRole, setNewUserRole] = useState(participantRoles[0]);
-  const [isAdding, setIsAdding] = useState(false);
-  // const { user: loggedInUser } = useAuth(); // For permission checks
-  const loggedInUserId = currentUserId; // Using mock
 
-  const toast = useToast();
+  const {
+    data: participants,
+    isLoading: isLoadingParticipants,
+    isError: isParticipantsError,
+    error: participantsError
+  } = useQuery<UserPublic[], ApiError>({ // API returns Array<UserPublic>
+    queryKey: ['eventParticipants', eventId],
+    queryFn: async () => EventsService.listEventParticipants({ eventId }),
+    enabled: !!eventId,
+  });
 
-  const fetchParticipants = useCallback(async () => {
-    setIsLoading(true);
-    setError(null);
-    try {
-      console.log(`EventParticipantManager: Fetching participants for event ${eventId}`);
-      await new Promise(resolve => setTimeout(resolve, 700));
-      setParticipants(mockParticipants.filter(p => p.event_id === eventId));
-    } catch (err) {
-      console.error('Failed to fetch participants:', err);
-      setError('Failed to load participants.');
-    } finally {
-      setIsLoading(false);
-    }
-  }, [eventId]);
-
-  useEffect(() => {
-    fetchParticipants();
-  }, [fetchParticipants]);
-
-  const handleAddParticipant = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!userInput.trim() || !newUserRole) {
-        toast({ title: "User email/ID or role missing", status: "warning", duration: 3000, isClosable: true });
-        return;
-    }
-    setIsAdding(true);
-
-    // Simulate resolving email to user_id or using ID directly
-    const userToAdd = mockUserLookup[userInput.toLowerCase()] || { id: userInput, email: userInput, full_name: `User ${userInput.substring(0,8)}`, is_active: true, is_superuser: false };
-
-    if (participants.find(p => p.user_id === userToAdd.id)) {
-        toast({ title: "Already Participant", description: `${userToAdd.full_name || userToAdd.email} is already in this event.`, status: "info" });
-        setIsAdding(false);
-        return;
-    }
-
-    const payload: AddParticipantPayload = { user_id_to_add: userToAdd.id, role: newUserRole };
-
-    try {
-      console.log("Adding participant (mock):", payload);
-      await new Promise(resolve => setTimeout(resolve, 1000)); // Simulate API
-
-      const newParticipantEntry: EventParticipantPublic = {
-          event_id: eventId,
-          user_id: userToAdd.id,
-          role: newUserRole,
-          added_at: new Date().toISOString(),
-          user: userToAdd
-      };
-      addMockParticipant(newParticipantEntry); // Add to global mock store
-      fetchParticipants(); // Re-fetch to update local list
-
-      toast({ title: 'Participant Added (Mock)', description: `${userToAdd.full_name || userToAdd.email} added as ${newUserRole}.`, status: 'success' });
+  const addParticipantMutation = useMutation<
+    EventParticipantPublic, // Response type from addEventParticipant
+    ApiError,
+    Body_events_add_event_participant // Request body type
+  >({
+    mutationFn: async (participantData: Body_events_add_event_participant) => {
+      return EventsService.addEventParticipant({ eventId, requestBody: participantData });
+    },
+    onSuccess: (data) => {
+      queryClient.invalidateQueries({ queryKey: ['eventParticipants', eventId] });
+      toast({
+        title: 'Participant Added',
+        description: `User has been added as ${data.role}.`,
+        status: 'success',
+        duration: 3000,
+        isClosable: true,
+    });
       setUserInput('');
       setNewUserRole(participantRoles[0]);
-    } catch (err) {
-      console.error('Failed to add participant:', err);
-      toast({ title: 'Failed to Add (Mock)', description: 'Could not add participant.', status: 'error' });
-    } finally {
-      setIsAdding(false);
+    },
+    onError: (error) => {
+      toast({
+        title: 'Failed to Add Participant',
+        description: error.body?.detail || error.message || 'Could not add participant.',
+        status: 'error',
+        duration: 5000,
+        isClosable: true,
+    });
+    },
+  });
+
+  const removeParticipantMutation = useMutation<
+    Message, // Response type from removeEventParticipant
+    ApiError,
+    { userIdToRemove: string } // Variables for mutationFn
+  >({
+    mutationFn: async ({ userIdToRemove }) => {
+      return EventsService.removeEventParticipant({ eventId, userIdToRemove });
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['eventParticipants', eventId] });
+      toast({ title: 'Participant Removed', status: 'success', duration: 3000, isClosable: true });
+    },
+    onError: (error) => {
+      toast({
+        title: 'Failed to Remove Participant',
+        description: error.body?.detail || error.message || 'Could not remove participant.',
+        status: 'error',
+        duration: 5000,
+        isClosable: true,
+    });
+    },
+  });
+
+  const handleAddParticipantSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!userInput.trim() || !newUserRole) {
+      toast({ title: "User ID/Email and role are required.", status: "warning", duration: 3000, isClosable: true });
+      return;
+    }
+    // Assuming userInput is the user_id (UUID string) as per backend expectation for `user_id_to_add`
+    // In a real app, might need a lookup from email to ID if backend doesn't handle email directly.
+    addParticipantMutation.mutate({ user_id_to_add: userInput, role: newUserRole });
+  };
+
+  const handleRemoveParticipantClick = (userIdToRemove: string) => {
+    // Add more robust confirmation if desired
+    if (window.confirm(`Are you sure you want to remove this participant?`)) {
+      removeParticipantMutation.mutate({ userIdToRemove });
     }
   };
 
-  const handleRemoveParticipant = async (userIdToRemove: string) => {
-    // Add permission check: e.g., only event creator or self-removal
-    // const event = modifiableMockEvents.find(e => e.id === eventId);
-    // if (loggedInUserId !== event?.creator_id && loggedInUserId !== userIdToRemove) {
-    //    toast({ title: "Permission Denied", status: "error"}); return;
-    // }
-    if (!window.confirm(`Are you sure you want to remove participant ${mockUserLookup[userIdToRemove]?.full_name || userIdToRemove}?`)) return;
+  if (isLoadingParticipants) return (
+    <Box textAlign="center" p={5}><Spinner size="lg" /><Text mt={2}>Loading participants...</Text></Box>
+  );
 
-    try {
-      console.log("Removing participant (mock):", userIdToRemove, "from event", eventId);
-      await new Promise(resolve => setTimeout(resolve, 1000)); // Simulate API
-
-      removeMockParticipant(eventId, userIdToRemove); // Remove from global mock store
-      fetchParticipants(); // Re-fetch to update local list
-
-      toast({ title: 'Participant Removed (Mock)', description: `Participant removed.`, status: 'success' });
-    } catch (err) {
-      console.error('Failed to remove participant:', err);
-      toast({ title: 'Failed to Remove (Mock)', description: 'Could not remove participant.', status: 'error' });
-    }
-  };
-
-  if (isLoading) return <Spinner />;
-  if (error) return <Alert status="error"><AlertIcon />{error}</Alert>;
+  if (isParticipantsError) return (
+    <Alert status="error" mt={4}>
+      <AlertIcon />
+      <AlertTitle>Error Loading Participants</AlertTitle>
+      <AlertDescription>{participantsError?.body?.detail || participantsError?.message || 'An unexpected error occurred.'}</AlertDescription>
+    </Alert>
+  );
 
   return (
     <Box>
       <Heading size="lg" mb={4}>Manage Participants</Heading>
-      <VStack as="form" onSubmit={handleAddParticipant} spacing={4} mb={6} align="stretch">
-        <FormControl id="user-input-to-add" isRequired>
-          <FormLabel>User Email or ID to Add</FormLabel>
+      <VStack as="form" onSubmit={handleAddParticipantSubmit} spacing={4} mb={6} align="stretch">
+        <FormControl id="user-id-to-add" isRequired isInvalid={!!addParticipantMutation.error?.body?.detail?.find((err: any) => err.loc?.includes('user_id_to_add'))}>
+          <FormLabel>User ID to Add</FormLabel>
           <Input
             type="text"
             value={userInput}
             onChange={(e) => setUserInput(e.target.value)}
-            placeholder="Enter user's email or exact ID"
+            placeholder="Enter exact User ID (UUID)"
+            isDisabled={addParticipantMutation.isPending}
           />
         </FormControl>
-        <FormControl id="user-role" isRequired>
+        <FormControl id="user-role" isRequired isInvalid={!!addParticipantMutation.error?.body?.detail?.find((err: any) => err.loc?.includes('role'))}>
           <FormLabel>Role</FormLabel>
-          <Select value={newUserRole} onChange={(e) => setNewUserRole(e.target.value)}>
+          <Select
+            value={newUserRole}
+            onChange={(e) => setNewUserRole(e.target.value)}
+            isDisabled={addParticipantMutation.isPending}
+          >
             {participantRoles.map(role => (
               <option key={role} value={role}>{role.charAt(0).toUpperCase() + role.slice(1)}</option>
             ))}
           </Select>
         </FormControl>
-        <Button type="submit" colorScheme="blue" isLoading={isAdding} loadingText="Adding...">
+        <Button type="submit" colorScheme="blue" isLoading={addParticipantMutation.isPending} loadingText="Adding...">
           Add Participant
         </Button>
       </VStack>
 
       <Heading size="md" mb={3}>Current Participants</Heading>
-      {participants.length === 0 ? (
+      {!participants || participants.length === 0 ? (
         <Text>No participants yet.</Text>
       ) : (
         <List spacing={3}>
-          {participants.map((p) => (
-            <ListItem key={p.user_id} d="flex" justifyContent="space-between" alignItems="center" p={2} borderWidth="1px" borderRadius="md">
+          {participants.map((participant) => (
+            <ListItem key={participant.id} d="flex" justifyContent="space-between" alignItems="center" p={2} borderWidth="1px" borderRadius="md">
               <Box>
-                <Text fontWeight="bold">{p.user?.full_name || p.user?.email || p.user_id}</Text>
-                <Text fontSize="sm" color="gray.600">Role: {p.role}</Text>
+                {/* Assuming UserPublic has full_name and email. Adjust if structure differs. */}
+                <Text fontWeight="bold">{participant.full_name || participant.email || participant.id}</Text>
+                {/* The API for listEventParticipants returns UserPublic, which doesn't include 'role'.
+                    This means we can't display role directly from this list.
+                    This is a mismatch between `EventParticipantPublic` (which has role) and `UserPublic`.
+                    The backend `GET /events/{event_id}/participants` returns `list[UserPublic]`.
+                    To show role, backend would need to return `list[EventParticipantPublic]` or similar.
+                    For now, role cannot be displayed here from the API call.
+                    If we want to keep showing role as in mock, we'd need to adjust backend response or make another call.
+                */}
+                {/* <Text fontSize="sm" color="gray.600">Role: {participant.role}</Text> */}
               </Box>
-              {/* Basic permission: Don't allow removing self if creator, or some other logic */}
-              {/* This should be driven by current_user context eventually */}
               <IconButton
                 aria-label="Remove participant"
                 icon={<CloseIcon />}
                 colorScheme="red"
                 variant="ghost"
-                onClick={() => handleRemoveParticipant(p.user_id)}
-                // isDisabled={p.role === 'creator'} // Example: disable removing creator
+                onClick={() => handleRemoveParticipantClick(participant.id)} // participant.id is user_id here
+                isLoading={removeParticipantMutation.isPending && removeParticipantMutation.variables?.userIdToRemove === participant.id}
+                // Example permission: isDisabled={participant.id === currentUserId && event?.creator_id === currentUserId}
               />
             </ListItem>
           ))}

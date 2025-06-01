@@ -16,99 +16,58 @@ import {
   NumberDecrementStepper,
   Box,
 } from '@chakra-ui/react';
-// import { SpeechesService, SecretSpeechWithInitialVersionCreate as ApiSpeechCreate } from '../../client'; // Step 7
+import React, { useState } from 'react';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
 import {
-    addMockSpeech,
-    currentUserId,
-    mockUserAlice,
-    SecretSpeechPublicDetailed, // For constructing the object to add
-    SecretSpeechVersionData,  // For constructing the initial version
-} from '../../mocks/mockData'; // Import mock function and user
-
-// Placeholder interface for the data this form collects (matches backend Pydantic model)
-interface SpeechCreateFormPayload {
-  initial_speech_draft: string;
-  initial_speech_tone: string;
-  initial_estimated_duration_minutes: number;
-}
+  Button,
+  FormControl,
+  FormLabel,
+  Input, // Keep if needed, but duration uses NumberInput
+  Textarea,
+  VStack,
+  Heading,
+  useToast,
+  Select,
+  NumberInput,
+  NumberInputField,
+  NumberInputStepper,
+  NumberIncrementStepper,
+  NumberDecrementStepper,
+  Box,
+} from '@chakra-ui/react';
+import { SpeechesService, SecretSpeechWithInitialVersionCreate, SecretSpeechPublic, ApiError } from '../../../client';
+// import { useAuth } from '../../../hooks/useAuth'; // For creator_id if not handled by backend
 
 const speechTones = ["neutral", "sentimental", "humorous", "serious", "inspirational", "mixed", "other"];
 
 interface SpeechCreateFormProps {
   eventId: string;
-  onSpeechCreated?: () => void; // Optional callback to refresh list or close modal
+  onSpeechCreated?: () => void;
 }
 
 const SpeechCreateForm: React.FC<SpeechCreateFormProps> = ({ eventId, onSpeechCreated }) => {
+  const queryClient = useQueryClient();
+  const toast = useToast();
+  // const { user } = useAuth(); // If creator_id needs to be sent explicitly from frontend
+
   const [draft, setDraft] = useState('');
   const [tone, setTone] = useState(speechTones[0]);
-  const [duration, setDuration] = useState<number | string>(5); // Can be string if input is empty
-  const [isLoading, setIsLoading] = useState(false);
-  const toast = useToast();
-  // const { user } = useAuth();
-  // const actualCreatorId = user?.id || currentUserId;
-  const actualCreatorId = currentUserId; // From mockData
-  const actualCreatorName = mockUserAlice.full_name; // Assuming Alice is current user
+  const [duration, setDuration] = useState<number | string>(5);
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setIsLoading(true);
-
-    if (!draft.trim() || !tone || duration === '' || Number(duration) <= 0) {
+  const mutation = useMutation<
+    SecretSpeechPublic, // Expected response type
+    ApiError,
+    SecretSpeechWithInitialVersionCreate // Input type to mutationFn
+  >({
+    mutationFn: async (newSpeechData: SecretSpeechWithInitialVersionCreate) => {
+      // SpeechesService.createSpeech expects SpeechesCreateSpeechData which has requestBody
+      return SpeechesService.createSpeech({ requestBody: newSpeechData });
+    },
+    onSuccess: (data) => {
+      queryClient.invalidateQueries({ queryKey: ['eventSpeeches', eventId] });
       toast({
-        title: 'Missing or invalid fields',
-        description: 'Draft, Tone, and a valid Duration are required.',
-        status: 'error',
-        duration: 5000,
-        isClosable: true,
-      });
-      setIsLoading(false);
-      return;
-    }
-
-    // This is what would be sent to the backend API
-    const apiPayload = {
-      event_id: eventId,
-      initial_speech_draft: draft,
-      initial_speech_tone: tone,
-      initial_estimated_duration_minutes: Number(duration)
-    };
-    console.log('Simulating API submission with payload:', apiPayload);
-
-    try {
-      await new Promise(resolve => setTimeout(resolve, 1000)); // Simulate API call
-
-      // For mock data update, construct the full SecretSpeechPublicDetailed object
-      const newSpeechId = `speech-mock-${Date.now()}`;
-      const newVersionId = `v-mock-${newSpeechId}-1`;
-
-      const initialVersion: SecretSpeechVersionData = {
-        id: newVersionId,
-        version_number: 1,
-        speech_id: newSpeechId, // Link back to speech
-        speech_draft: draft,
-        speech_tone: tone,
-        estimated_duration_minutes: Number(duration),
-        created_at: new Date().toISOString(),
-        creator_id: actualCreatorId,
-      };
-
-      const newSpeech: SecretSpeechPublicDetailed = {
-        id: newSpeechId,
-        event_id: eventId,
-        creator_id: actualCreatorId,
-        creator_name: actualCreatorName,
-        created_at: new Date().toISOString(),
-        updated_at: new Date().toISOString(),
-        current_version_id: newVersionId,
-        current_version: initialVersion,
-      };
-
-      addMockSpeech(newSpeech); // Add to the shared mock data array
-
-      toast({
-        title: 'Speech Created (Mock)',
-        description: 'Your new speech has been successfully created.',
+        title: 'Speech Created',
+        description: `Your speech has been successfully added to the event.`,
         status: 'success',
         duration: 5000,
         isClosable: true,
@@ -117,20 +76,42 @@ const SpeechCreateForm: React.FC<SpeechCreateFormProps> = ({ eventId, onSpeechCr
       setTone(speechTones[0]);
       setDuration(5);
       if (onSpeechCreated) {
-        onSpeechCreated();
+        onSpeechCreated(); // Typically closes modal and might trigger other actions in parent
       }
-    } catch (error) {
-      console.error('Failed to create speech:', error);
+    },
+    onError: (error) => {
       toast({
         title: 'Creation Failed',
-        description: 'There was an error creating the speech. Please try again.',
+        description: error.body?.detail?.[0]?.msg || error.message || 'There was an error creating the speech.',
         status: 'error',
         duration: 5000,
         isClosable: true,
       });
-    } finally {
-      setIsLoading(false);
+    },
+  });
+
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!draft.trim() || !tone || duration === '' || Number(duration) <= 0) {
+      toast({
+        title: 'Missing or invalid fields',
+        description: 'Draft, Tone, and a valid Duration are required.',
+        status: 'warning',
+        duration: 3000,
+        isClosable: true,
+      });
+      return;
     }
+
+    const speechPayload: SecretSpeechWithInitialVersionCreate = {
+      event_id: eventId,
+      initial_speech_draft: draft,
+      initial_speech_tone: tone,
+      initial_estimated_duration_minutes: Number(duration),
+      // creator_id would be set by the backend based on the authenticated user
+    };
+
+    mutation.mutate(speechPayload);
   };
 
   return (
@@ -139,19 +120,24 @@ const SpeechCreateForm: React.FC<SpeechCreateFormProps> = ({ eventId, onSpeechCr
         <Heading as="h3" size="md" textAlign="center">
           Add New Speech to Event
         </Heading>
-        <FormControl id="speech-draft" isRequired>
+        <FormControl id="speech-draft" isRequired isInvalid={!!mutation.error?.body?.detail?.find((e: any) => e.loc?.includes('initial_speech_draft'))}>
           <FormLabel>Initial Speech Draft</FormLabel>
           <Textarea
             value={draft}
             onChange={(e) => setDraft(e.target.value)}
             placeholder="Write your speech draft here..."
             rows={8}
+            isDisabled={mutation.isPending}
           />
         </FormControl>
 
-        <FormControl id="speech-tone" isRequired>
+        <FormControl id="speech-tone" isRequired isInvalid={!!mutation.error?.body?.detail?.find((e: any) => e.loc?.includes('initial_speech_tone'))}>
           <FormLabel>Initial Speech Tone</FormLabel>
-          <Select value={tone} onChange={(e) => setTone(e.target.value)}>
+          <Select
+            value={tone}
+            onChange={(e) => setTone(e.target.value)}
+            isDisabled={mutation.isPending}
+          >
             {speechTones.map(t => (
               <option key={t} value={t}>
                 {t.charAt(0).toUpperCase() + t.slice(1)}
@@ -160,12 +146,13 @@ const SpeechCreateForm: React.FC<SpeechCreateFormProps> = ({ eventId, onSpeechCr
           </Select>
         </FormControl>
 
-        <FormControl id="speech-duration" isRequired>
+        <FormControl id="speech-duration" isRequired isInvalid={!!mutation.error?.body?.detail?.find((e: any) => e.loc?.includes('initial_estimated_duration_minutes'))}>
           <FormLabel>Estimated Duration (minutes)</FormLabel>
           <NumberInput
             min={1}
             value={duration}
             onChange={(valueString) => setDuration(valueString ? parseInt(valueString) : '')}
+            isDisabled={mutation.isPending}
           >
             <NumberInputField placeholder="e.g., 5" />
             <NumberInputStepper>
@@ -178,7 +165,7 @@ const SpeechCreateForm: React.FC<SpeechCreateFormProps> = ({ eventId, onSpeechCr
         <Button
           type="submit"
           colorScheme="teal"
-          isLoading={isLoading}
+          isLoading={mutation.isPending}
           loadingText="Saving..."
           w="100%"
         >

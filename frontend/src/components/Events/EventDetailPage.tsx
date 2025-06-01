@@ -15,83 +15,110 @@ import {
   TabPanel,
   Divider,
 } from '@chakra-ui/react';
-// import { EventsService } from '../../client'; // Step 7
-import { CoordinationEventPublic } from './EventListItem'; // Reuse existing interface
+import React from 'react'; // Removed useState, useEffect
+import { useParams } from '@tanstack/react-router';
+import { useQuery } from '@tanstack/react-query';
+import {
+  Box,
+  Heading,
+  Text,
+  VStack,
+  Spinner,
+  Alert,
+  AlertIcon,
+  Tabs,
+  TabList,
+  Tab,
+  TabPanels,
+  TabPanel,
+  Divider,
+  AlertDescription,
+  AlertTitle,
+} from '@chakra-ui/react';
+import { EventsService, CoordinationEventPublic, ApiError } from '../../client';
 import EventParticipantManager from './EventParticipantManager';
-import SpeechList from '../Speeches/SpeechList'; // Added for integration
-import SpeechAnalysisDisplay from '../Analysis/SpeechAnalysisDisplay'; // Added for integration
-import { modifiableMockEvents, currentUserId } from '../../mocks/mockData'; // Import mock data
+import SpeechList from '../Speeches/SpeechList';
+import SpeechAnalysisDisplay from '../Analysis/SpeechAnalysisDisplay';
+// No longer need mockEvents for this component's direct data fetching
+// import { currentUserId } from '../../mocks/mockData';
 
 const EventDetailPage: React.FC = () => {
-  const { eventId } = useParams({ from: '/_layout/events/$eventId' }); // Adjusted 'from' to match route definition
+  const { eventId } = useParams({ from: '/_layout/events/$eventId' });
+  // const { user } = useAuth(); // For currentUserId if needed for permissions on this page directly
+  // const actualCurrentUserId = user?.id || currentUserId; // Using mock
 
-  const [event, setEvent] = useState<CoordinationEventPublic | null>(null);
-  const [isLoading, setIsLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
-  // const { user } = useAuth(); // For currentUserId
-  // const actualCurrentUserId = user?.id || currentUserId;
-  const actualCurrentUserId = currentUserId; // Using mock
-
-  useEffect(() => {
-    if (!eventId) {
-      setError('Event ID not found in URL.');
-      setIsLoading(false);
-      return;
-    }
-
-    const fetchEventDetails = async () => {
-      setIsLoading(true);
-      setError(null);
-      try {
-        console.log(`EventDetailPage: Fetching event ${eventId}`);
-        await new Promise(resolve => setTimeout(resolve, 750));
-        const foundEvent = modifiableMockEvents.find(e => e.id === eventId);
-        if (foundEvent) {
-          setEvent(foundEvent);
-        } else {
-          throw new Error("Event not found in mock data");
-        }
-      } catch (err) {
-        console.error(`Failed to fetch event details for ${eventId}:`, err);
-        setError(`Failed to load event details. Please check the event ID or try again later.`);
-      } finally {
-        setIsLoading(false);
+  const {
+    data: event,
+    isLoading,
+    isError,
+    error
+  } = useQuery<CoordinationEventPublic, ApiError>({
+    queryKey: ['event', eventId],
+    queryFn: async () => {
+      if (!eventId) {
+        throw new Error("Event ID is not available.");
       }
-    };
-
-    fetchEventDetails();
-  }, [eventId]);
+      // EventsService.getEventDetails expects EventsGetEventDetailsData: { eventId: string }
+      return EventsService.getEventDetails({ eventId });
+    },
+    enabled: !!eventId, // Only run query if eventId is available
+    // Optional: staleTime, cacheTime, etc.
+  });
 
   const formatDate = (dateString?: string) => {
     if (!dateString) return 'N/A';
-    return new Date(dateString).toLocaleDateString(undefined, {
-        year: 'numeric', month: 'long', day: 'numeric', hour: '2-digit', minute: '2-digit'
+    // Using toLocaleString for date and time, toLocaleDateString for date only
+    return new Date(dateString).toLocaleString(undefined, {
+        year: 'numeric', month: 'long', day: 'numeric', hour: 'numeric', minute: '2-digit'
     });
   };
+
+  const formatJustDate = (dateString?: string) => {
+    if (!dateString) return 'N/A';
+     return new Date(dateString).toLocaleDateString(undefined, {
+        year: 'numeric', month: 'long', day: 'numeric'
+    });
+  }
+
+  if (!eventId) { // Handle case where eventId might not be ready from router
+    return (
+      <Alert status="warning" mt={4}>
+        <AlertIcon />
+        <AlertTitle>Missing Event ID</AlertTitle>
+        <AlertDescription>The event ID is missing from the URL.</AlertDescription>
+      </Alert>
+    );
+  }
 
   if (isLoading) {
     return (
       <Box textAlign="center" p={10}>
         <Spinner size="xl" />
-        <Text mt={4}>Loading event details...</Text>
+        <Text mt={4}>Loading event details for ID: {eventId}...</Text>
       </Box>
     );
   }
 
-  if (error) {
+  if (isError) {
     return (
-      <Alert status="error" mt={4}>
-        <AlertIcon />
-        {error}
+       <Alert status="error" mt={4} variant="subtle" flexDirection="column" alignItems="center" justifyContent="center" textAlign="center" height="200px">
+        <AlertIcon boxSize="40px" mr={0} />
+        <AlertTitle mt={4} mb={1} fontSize="lg">
+          Error Loading Event
+        </AlertTitle>
+        <AlertDescription maxWidth="sm">
+          {error?.body?.detail || error?.message || 'An unexpected error occurred.'}
+          {error?.status === 404 && " The event was not found."}
+        </AlertDescription>
       </Alert>
     );
   }
 
-  if (!event) {
+  if (!event) { // Should be covered by isLoading or isError, but as a fallback
     return (
-      <Alert status="warning" mt={4}>
+      <Alert status="info" mt={4}>
         <AlertIcon />
-        No event data available.
+        No event data available, or event not found.
       </Alert>
     );
   }

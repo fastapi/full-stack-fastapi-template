@@ -1,61 +1,48 @@
 import React from 'react';
 import { Box, Text, Heading, LinkBox, LinkOverlay, Tag, HStack, Avatar } from '@chakra-ui/react';
 import { Link as RouterLink } from '@tanstack/react-router';
-// import { UserContext } from '../../hooks/useAuth'; // To get current user ID for "isCreator" check
-
-// Placeholder interface for SecretSpeechPublic
-// This should ideally include creator's info and current version's metadata.
-// The actual draft is not included here for general listing.
-export interface SecretSpeechPublic {
-  id: string; // Speech ID
-  event_id: string;
-  creator_id: string;
-  current_version_id?: string | null;
-  created_at: string; // ISO string
-  updated_at: string; // ISO string
-  // Denormalized or fetched separately for display:
-  creator_name?: string; // e.g., "John Doe" or "User <uuid>"
-  creator_avatar_url?: string; // Optional
-  current_version_tone?: string;
-  current_version_duration?: number;
-}
+import { SecretSpeechPublic } from '../../../client'; // Use type from generated client
+// import { useAuth } from '../../../hooks/useAuth'; // For currentUserId
 
 interface SpeechListItemProps {
-  speech: SecretSpeechPublic;
-  currentUserId?: string; // Pass current user's ID to determine if they are the creator
+  speech: SecretSpeechPublic; // This type from client does NOT have creator_name, tone, duration directly
+  currentUserId?: string;
 }
 
 const SpeechListItem: React.FC<SpeechListItemProps> = ({ speech, currentUserId }) => {
   const isCreator = speech.creator_id === currentUserId;
+  // const { data: user } = useQuery(['user', speech.creator_id], () => UsersService.readUserById({userId: speech.creator_id}), { enabled: !!speech.creator_id })
+  // const creatorDisplayName = user?.full_name || user?.email || speech.creator_id;
+  // For now, to avoid N+1 fetching in list, just show creator ID or generic name
+  const creatorDisplayName = `User ${speech.creator_id.substring(0, 8)}...`;
 
-  // Fallback if creator name is not readily available
-  const displayName = speech.creator_name || `User ${speech.creator_id.substring(0, 8)}...`;
+  // To get current_version_tone and duration, another fetch would be needed per item, or backend needs to provide it.
+  // For now, these fields will not be displayed in the list item directly from this prop.
+  // They are available on SpeechDetailPage.
 
   return (
     <LinkBox as="article" p={4} borderWidth="1px" rounded="md" _hover={{ shadow: 'lg', bg: 'teal.50' }}>
       <VStack align="start" spacing={2}>
         <HStack spacing={3} w="100%">
-          <Avatar size="sm" name={displayName} src={speech.creator_avatar_url} />
+          <Avatar size="sm" name={creatorDisplayName} /> {/* Basic avatar based on ID */}
           <Heading size="sm" noOfLines={1}>
-            <LinkOverlay as={RouterLink} to={`/speeches/${speech.id}`}>
-              Speech by {displayName}
+            {/* Updated link to match Tanstack Router structure */}
+            <LinkOverlay as={RouterLink} to={`/_layout/speeches/${speech.id}`}>
+              Speech by {creatorDisplayName}
             </LinkOverlay>
           </Heading>
           {isCreator && <Tag size="sm" colorScheme="green">My Speech</Tag>}
         </HStack>
 
-        {speech.current_version_tone && (
-          <Tag colorScheme="blue" size="sm">Tone: {speech.current_version_tone}</Tag>
-        )}
-
-        {speech.current_version_duration !== undefined && (
-          <Text fontSize="sm" color="gray.600">
-            Duration: {speech.current_version_duration} min
-          </Text>
-        )}
+        <Text fontSize="xs" color="gray.500">
+            Event ID: {speech.event_id.substring(0,8)}...
+        </Text>
 
         {!speech.current_version_id && (
-            <Text fontSize="sm" fontStyle="italic" color="gray.500">No current version available.</Text>
+            <Tag size="sm" colorScheme="orange">No active version</Tag>
+        )}
+         {speech.current_version_id && (
+            <Tag size="sm" colorScheme="gray">Version ID: {speech.current_version_id.substring(0,8)}...</Tag>
         )}
 
         <Text fontSize="xs" color="gray.400" pt={1}>

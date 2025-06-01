@@ -2,17 +2,7 @@ import React from 'react';
 import { Box, Text, Heading, LinkBox, LinkOverlay } from '@chakra-ui/react';
 import { Link as RouterLink } from '@tanstack/react-router'; // Assuming usage for navigation
 
-// Interface based on CoordinationEventPublic schema (backend/app/models.py)
-// Replace with actual import from client when available (Step 7)
-export interface CoordinationEventPublic {
-  id: string; // Assuming UUID is string
-  event_name: string;
-  event_type: string;
-  event_date?: string; // ISO string
-  creator_id: string;
-  created_at: string; // ISO string
-  updated_at: string; // ISO string
-}
+import { CoordinationEventPublic } from '../../client'; // Import type from generated client
 
 interface EventListItemProps {
   event: CoordinationEventPublic;
@@ -36,7 +26,8 @@ const EventListItem: React.FC<EventListItemProps> = ({ event }) => {
   return (
     <LinkBox as="article" p={5} borderWidth="1px" rounded="md" _hover={{ shadow: 'md', bg: 'gray.50' }}>
       <Heading size="md" my={2}>
-        <LinkOverlay as={RouterLink} to={`/events/${event.id}`}>
+        {/* Updated link to match Tanstack Router v0.0.1-beta.28+ structure */}
+        <LinkOverlay as={RouterLink} to={`/_layout/events/${event.id}`}>
           {event.event_name}
         </LinkOverlay>
       </Heading>

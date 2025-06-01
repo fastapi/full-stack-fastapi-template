@@ -1,4 +1,5 @@
-import React, { useEffect, useState, useCallback } from 'react';
+import React, { useState } from 'react'; // Removed useEffect, useCallback
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import {
   Box,
   Text,
@@ -25,14 +26,10 @@ import {
   useDisclosure,
   Textarea,
   Heading,
+  AlertDescription,
+  AlertTitle,
 } from '@chakra-ui/react';
-// import { SpeechesService, SecretSpeechVersionPublic as ApiVersion } from '../../client'; // Step 7
-import {
-    mockSpeechVersionsStore,
-    setMockSpeechCurrentVersion,
-    SecretSpeechVersionHistoryItem // Using the interface from mockData
-} from '../../mocks/mockData';
-
+import { SpeechesService, SecretSpeechVersionPublic, SecretSpeechPublic as SecretSpeechDetailPublic, ApiError } from '../../../client';
 
 interface SpeechVersionHistoryProps {
   speechId: string;
@@ -42,88 +39,84 @@ interface SpeechVersionHistoryProps {
   onVersionSetAsCurrent?: () => void;
 }
 
-
 const SpeechVersionHistory: React.FC<SpeechVersionHistoryProps> = ({
     speechId,
     isCreator,
-    currentSpeechVersionId, // This prop correctly identifies the active version
+    currentSpeechVersionId,
     onVersionSetAsCurrent
 }) => {
-  const [versions, setVersions] = useState<SecretSpeechVersionHistoryItem[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
+  const queryClient = useQueryClient();
   const toast = useToast();
-  const { isOpen, onOpen, onClose } = useDisclosure(); // For View Draft modal
+  const { isOpen, onOpen, onClose } = useDisclosure();
   const [selectedDraft, setSelectedDraft] = useState<string | undefined>('');
 
-  const fetchVersions = useCallback(async () => {
-    setIsLoading(true);
-    setError(null);
-    console.log(`SpeechVersionHistory: Fetching versions for speech ${speechId}. Current version is ${currentSpeechVersionId}`);
-    try {
-      await new Promise(resolve => setTimeout(resolve, 500)); // Simulate API
-      const speechSpecificVersions = mockSpeechVersionsStore[speechId] || [];
+  const {
+    data: versions,
+    isLoading,
+    isError,
+    error
+  } = useQuery<SecretSpeechVersionPublic[], ApiError>({
+    queryKey: ['speechVersions', speechId],
+    queryFn: async () => {
+      if (!speechId) throw new Error("Speech ID is required to fetch versions.");
+      return SpeechesService.listSpeechVersions({ speechId });
+    },
+    enabled: !!speechId,
+    select: (data) => [...data].sort((a, b) => b.version_number - a.version_number), // Show newest first
+  });
 
-      // Sort by version_number descending to show newest first
-      const sortedVersions = [...speechSpecificVersions].sort((a, b) => b.version_number - a.version_number);
-
-      // Simulate draft privacy: only creator sees drafts of past versions
-      const processedVersions = sortedVersions.map(v => {
-        if (!isCreator && v.id !== currentSpeechVersionId) { // Non-creator doesn't see drafts of non-current versions
-          return { ...v, speech_draft: undefined };
-        }
-        // If it IS the current version, SpeechDetailPage handles its draft privacy.
-        // Here, we assume if isCreator is false, the draft for current might also be hidden by parent or backend.
-        // For simplicity, if isCreator is true, they can see all their drafts from history.
-        return v;
-      });
-      setVersions(processedVersions);
-    } catch (err) {
-      console.error(`Failed to fetch versions for speech ${speechId}:`, err);
-      setError('Failed to load version history.');
-    } finally {
-      setIsLoading(false);
-    }
-  }, [speechId, isCreator]);
-
-  useEffect(() => {
-    fetchVersions();
-  }, [fetchVersions]);
-
-  const handleSetAsCurrent = async (versionId: string) => {
-    if (!isCreator) return;
-    try {
-      console.log(`Setting version ${versionId} as current for speech ${speechId} (mock)`);
-      await new Promise(resolve => setTimeout(resolve, 1000)); // Simulate API
-      setMockSpeechCurrentVersion(speechId, versionId); // Update global mock store
-
-      toast({ title: 'Version Updated (Mock)', description: `Version has been set as current.`, status: 'success' });
+  const setCurrentVersionMutation = useMutation<
+    SecretSpeechDetailPublic,
+    ApiError,
+    { versionId: string }
+  >({
+    mutationFn: async ({ versionId }) => {
+      if (!speechId) throw new Error("Speech ID is missing.");
+      return SpeechesService.setCurrentSpeechVersion({ speechId, versionId });
+    },
+    onSuccess: () => {
+      toast({ title: 'Version Updated', description: 'This version is now set as current.', status: 'success' });
+      queryClient.invalidateQueries({ queryKey: ['speech', speechId] });
+      queryClient.invalidateQueries({ queryKey: ['speechVersions', speechId] });
       if (onVersionSetAsCurrent) {
-        onVersionSetAsCurrent(); // Trigger refresh in parent (SpeechDetailPage)
+        onVersionSetAsCurrent();
       }
-      // fetchVersions(); // Re-fetch local list - parent will trigger our re-fetch via prop change if needed
-    } catch (err) {
-      console.error('Failed to set version as current:', err);
-      toast({ title: 'Update Failed (Mock)', description: 'Could not set version as current.', status: 'error' });
-    }
+    },
+    onError: (error) => {
+      toast({ title: 'Update Failed', description: error.body?.detail?.[0]?.msg || error.message, status: 'error' });
+    },
+  });
+
+  const handleSetAsCurrentClick = (versionId: string) => {
+    if (!isCreator) return;
+    setCurrentVersionMutation.mutate({ versionId });
   };
 
-  const handleViewDraft = (draft?: string) => {
-    if (!isCreator && !draft) { // Double check, though button shouldn't show
-        setSelectedDraft("Draft not available for viewing.");
-    } else {
-        setSelectedDraft(draft || "No draft content for this version.");
-    }
+  const handleViewDraftClick = (version: SecretSpeechVersionPublic) => {
+    // Backend controls draft visibility in the fetched `version.speech_draft`
+    // If `isCreator` is true, backend should send the draft.
+    // If `isCreator` is false, backend should not send draft for non-current versions.
+    // For current version draft for non-creator, `SpeechDetailPage` logic applies.
+    setSelectedDraft(version.speech_draft || "Draft not available for this version.");
     onOpen();
   };
 
-  if (isLoading) return <Spinner />;
-  if (error) return <Alert status="error"><AlertIcon />{error}</Alert>;
+  if (isLoading) return (
+    <Box textAlign="center" p={5}><Spinner size="lg" /><Text mt={2}>Loading version history...</Text></Box>
+  );
+
+  if (isError) return (
+    <Alert status="error" mt={4}>
+      <AlertIcon />
+      <AlertTitle>Error Loading Versions</AlertTitle>
+      <AlertDescription>{error?.body?.detail?.[0]?.msg || error?.message}</AlertDescription>
+    </Alert>
+  );
 
   return (
     <Box>
       <Heading size="md" mb={4}>Version History</Heading>
-      {versions.length === 0 ? (
+      {!versions || versions.length === 0 ? (
         <Text>No version history found for this speech.</Text>
       ) : (
         <Table variant="simple" size="sm">
@@ -148,13 +141,19 @@ const SpeechVersionHistory: React.FC<SpeechVersionHistoryProps> = ({
                 <Td>{new Date(version.created_at).toLocaleString()}</Td>
                 <Td>
                   <VStack align="start" spacing={1}>
-                    {(isCreator || version.id === currentSpeechVersionId) && version.speech_draft && ( // Allow viewing current version draft for non-creator if available
-                      <Button size="xs" variant="outline" onClick={() => handleViewDraft(version.speech_draft)}>
+                    {version.speech_draft && ( // Only show button if draft is available (backend controls this for creator)
+                      <Button size="xs" variant="outline" onClick={() => handleViewDraftClick(version)}>
                         View Draft
                       </Button>
                     )}
                     {isCreator && version.id !== currentSpeechVersionId && (
-                      <Button size="xs" colorScheme="blue" variant="outline" onClick={() => handleSetAsCurrent(version.id)}>
+                      <Button
+                        size="xs"
+                        colorScheme="blue"
+                        variant="outline"
+                        onClick={() => handleSetAsCurrentClick(version.id)}
+                        isLoading={setCurrentVersionMutation.isPending && setCurrentVersionMutation.variables?.versionId === version.id}
+                      >
                         Set as Current
                       </Button>
                     )}
@@ -166,14 +165,13 @@ const SpeechVersionHistory: React.FC<SpeechVersionHistoryProps> = ({
         </Table>
       )}
 
-      {/* Modal for Viewing Draft - available to creator, or for current version if draft is passed */}
       <Modal isOpen={isOpen} onClose={onClose} size="xl" scrollBehavior="inside">
         <ModalOverlay />
         <ModalContent>
           <ModalHeader>View Speech Draft</ModalHeader>
           <ModalCloseButton />
           <ModalBody>
-            <Textarea value={selectedDraft} isReadOnly rows={20} whiteSpace="pre-wrap" />
+            <Textarea value={selectedDraft} isReadOnly rows={20} whiteSpace="pre-wrap" fontFamily="monospace" />
           </ModalBody>
           <ModalFooter>
             <Button onClick={onClose}>Close</Button>

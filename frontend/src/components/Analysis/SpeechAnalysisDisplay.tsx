@@ -1,4 +1,5 @@
-import React, { useState, useCallback } from 'react';
+import React, { useState } from 'react'; // Removed useCallback
+import { useQuery } from '@tanstack/react-query';
 import {
   Box,
   Button,
@@ -16,16 +17,13 @@ import {
   HStack,
   Icon,
 } from '@chakra-ui/react';
-import { InfoIcon, WarningIcon, CheckCircleIcon, QuestionOutlineIcon } from '@chakra-ui/icons'; // Example icons
-// import { EventsService, PersonalizedNudgePublic as ApiNudge } from '../../client'; // Step 7
-import { mockNudges as globalMockNudges, PersonalizedNudgePublic } from '../../mocks/mockData'; // Import mock nudges
-
+import { InfoIcon, WarningIcon, CheckCircleIcon, QuestionOutlineIcon } from '@chakra-ui/icons';
+import { EventsService, PersonalizedNudgePublic, ApiError } from '../../../client';
 
 interface SpeechAnalysisDisplayProps {
   eventId: string;
 }
 
-// NudgeSeverityIcon and NudgeSeverityColorScheme can remain as they are, or be moved to a utils file if preferred.
 const NudgeSeverityIcon: React.FC<{ severity: string }> = ({ severity }) => {
   switch (severity.toLowerCase()) {
     case 'warning':
@@ -35,7 +33,7 @@ const NudgeSeverityIcon: React.FC<{ severity: string }> = ({ severity }) => {
     case 'suggestion':
       return <QuestionOutlineIcon color="purple.500" />
     default:
-      return <CheckCircleIcon color="green.500" />; // Default or for "success" like severities
+      return <CheckCircleIcon color="green.500" />;
   }
 };
 
@@ -49,44 +47,27 @@ const NudgeSeverityColorScheme = (severity: string): string => {
 }
 
 const SpeechAnalysisDisplay: React.FC<SpeechAnalysisDisplayProps> = ({ eventId }) => {
-  const [nudges, setNudges] = useState<PersonalizedNudgePublic[]>([]);
-  const [isLoading, setIsLoading] = useState(false);
   const [hasAnalyzed, setHasAnalyzed] = useState(false);
-  const [error, setError] = useState<string | null>(null);
-  // const { user } = useAuth(); // To pass currentUserId if backend needs it for filtering (though plan is backend filters)
 
-  const handleFetchAnalysis = useCallback(async () => {
-    setIsLoading(true);
-    setError(null);
+  const {
+    data: nudges,
+    isFetching,
+    isError,
+    error,
+    refetch
+  } = useQuery<PersonalizedNudgePublic[], ApiError>({
+    queryKey: ['speechAnalysis', eventId],
+    queryFn: async () => {
+      if (!eventId) throw new Error("Event ID is required for analysis.");
+      return EventsService.getEventSpeechAnalysis({ eventId });
+    },
+    enabled: false,
+  });
+
+  const handleFetchAnalysisClick = () => {
     setHasAnalyzed(true);
-    try {
-      console.log(`SpeechAnalysisDisplay: Fetching analysis for event ${eventId}`);
-      // const fetchedNudges = await EventsService.getEventSpeechAnalysis({ eventId }); // Step 7
-      await new Promise(resolve => setTimeout(resolve, 1500)); // Simulate API call
-
-      // Backend is expected to filter nudges for the current user.
-      // So, for mock, we just return all globalMockNudges if the eventId is one we have speeches for.
-      // A more sophisticated mock might check if currentUserId has speeches in that event.
-      if (eventId === 'event-001-wedding' || eventId === 'event-002-techconf') {
-        setNudges(globalMockNudges);
-      } else if (eventId === 'event-003-bookclub') { // Event with no speeches initially, or different user
-        setNudges([]); // No nudges for this event or user
-      }
-       else {
-        // For other eventIds in mock, or if we want to simulate an error for specific event
-        // throw new Error("Mock: Analysis data not available for this specific event.");
-        setNudges([]); // Default to no nudges for unknown mock events
-      }
-
-    } catch (err) {
-      console.error(`Failed to fetch speech analysis for event ${eventId}:`, err);
-      const errorMessage = (err instanceof Error) ? err.message : 'An unknown error occurred.';
-      setError(`Failed to load analysis (mock). ${errorMessage}`);
-      setNudges([]); // Clear previous nudges on error
-    } finally {
-      setIsLoading(false);
-    }
-  }, [eventId]);
+    refetch();
+  };
 
   return (
     <Box p={4} borderWidth="1px" borderRadius="lg" shadow="base">
@@ -95,46 +76,46 @@ const SpeechAnalysisDisplay: React.FC<SpeechAnalysisDisplayProps> = ({ eventId }
       </Heading>
       <VStack spacing={4} align="stretch">
         <Button
-          onClick={handleFetchAnalysis}
-          isLoading={isLoading}
+          onClick={handleFetchAnalysisClick}
+          isLoading={isFetching}
           loadingText="Analyzing..."
           colorScheme="blue"
-          disabled={isLoading}
+          disabled={isFetching}
         >
-          {hasAnalyzed ? 'Refresh Suggestions' : 'Get Personalized Suggestions'}
+          {hasAnalyzed && !isFetching ? 'Refresh Suggestions' : 'Get Personalized Suggestions'}
         </Button>
 
-        {isLoading && (
+        {isFetching && (
           <Box textAlign="center" p={5}>
             <Spinner size="lg" />
             <Text mt={2}>Generating your suggestions...</Text>
           </Box>
         )}
 
-        {!isLoading && error && (
-          <Alert status="error">
-            <AlertIcon />
-            <AlertTitle>Error Fetching Analysis!</AlertTitle>
-            <AlertDescription>{error}</AlertDescription>
+        {!isFetching && isError && (
+          <Alert status="error" mt={4} variant="subtle" flexDirection="column" alignItems="center" justifyContent="center" textAlign="center" minHeight="150px">
+            <AlertIcon boxSize="30px" mr={0} />
+            <AlertTitle mt={3} mb={1} fontSize="md">Error Fetching Analysis!</AlertTitle>
+            <AlertDescription maxWidth="sm" fontSize="sm">{error?.body?.detail || error?.message || 'An unexpected error occurred.'}</AlertDescription>
           </Alert>
         )}
 
-        {!isLoading && !error && hasAnalyzed && nudges.length === 0 && (
-          <Alert status="info">
-            <AlertIcon />
-            <AlertTitle>No Specific Nudges!</AlertTitle>
-            <AlertDescription>No specific suggestions for you at this moment, or all speeches align well!</AlertDescription>
+        {!isFetching && !isError && hasAnalyzed && (!nudges || nudges.length === 0) && (
+          <Alert status="info" mt={4} variant="subtle" flexDirection="column" alignItems="center" justifyContent="center" textAlign="center" minHeight="150px">
+            <AlertIcon boxSize="30px" mr={0} />
+            <AlertTitle mt={3} mb={1} fontSize="md">No Specific Nudges!</AlertTitle>
+            <AlertDescription maxWidth="sm" fontSize="sm">No specific suggestions for you at this moment, or all speeches align well!</AlertDescription>
           </Alert>
         )}
 
-        {!isLoading && !error && nudges.length > 0 && (
+        {!isFetching && !isError && nudges && nudges.length > 0 && (
           <List spacing={3}>
             {nudges.map((nudge, index) => (
-              <ListItem key={index} p={3} borderWidth="1px" borderRadius="md" bg="gray.50">
+              <ListItem key={index} p={3} borderWidth="1px" borderRadius="md" bg="gray.50" _hover={{ bg: 'gray.100' }}>
                 <HStack spacing={3} align="start">
-                  <Icon as={() => <NudgeSeverityIcon severity={nudge.severity} />} w={5} h={5} mt={1} />
+                  <Icon as={() => <NudgeSeverityIcon severity={nudge.severity} />} w={6} h={6} mt={1} />
                   <Box>
-                    <Tag size="sm" colorScheme={NudgeSeverityColorScheme(nudge.severity)} mb={1}>
+                    <Tag size="md" colorScheme={NudgeSeverityColorScheme(nudge.severity)} mb={1} variant="subtle">
                       {nudge.nudge_type.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase())}
                     </Tag>
                     <Text fontSize="sm">{nudge.message}</Text>
