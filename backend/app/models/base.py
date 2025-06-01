@@ -11,32 +11,27 @@ class BaseDBModel(SQLModel):
     
     id: UUID = Field(
         default_factory=uuid4,
-        sa_column=Column(
-            PG_UUID(as_uuid=True),
-            primary_key=True,
-            server_default=text("gen_random_uuid()"),
-            
-            index=True,
-        ),
+        sa_column_kwargs={
+            "primary_key": True,
+            "server_default": text("gen_random_uuid()"),
+            "index": True,
+        },
+        sa_type=PG_UUID(as_uuid=True),
     )
     created_at: datetime = Field(
         default_factory=datetime.utcnow,
-        
-        sa_column=Column(
-            DateTime(timezone=True),
-            server_default=func.now(),
-            
-        ),
+        sa_column_kwargs={
+            "server_default": func.now(),
+        },
+        sa_type=DateTime(timezone=True),
     )
     updated_at: datetime = Field(
         default_factory=datetime.utcnow,
-        
-        sa_column=Column(
-            DateTime(timezone=True),
-            server_default=func.now(),
-            onupdate=func.now(),
-            
-        ),
+        sa_column_kwargs={
+            "server_default": func.now(),
+            "onupdate": func.now(),
+        },
+        sa_type=DateTime(timezone=True),
     )
     
     class Config:
@@ -60,20 +55,16 @@ class TimestampMixin(SQLModel):
     """
     created_at: datetime = Field(
         default_factory=datetime.utcnow,
-        
-        sa_column=Column(
-            DateTime(timezone=True),
-            server_default=func.now(),
-            
-        ),
+        sa_column_kwargs={
+            "server_default": func.now(),
+        },
+        sa_type=DateTime(timezone=True),
     )
     updated_at: datetime = Field(
         default_factory=datetime.utcnow,
-        
-        sa_column=Column(
-            DateTime(timezone=True),
-            server_default=func.now(),
-            onupdate=func.now(),
-            
-        ),
+        sa_column_kwargs={
+            "server_default": func.now(),
+            "onupdate": func.now(),
+        },
+        sa_type=DateTime(timezone=True),
     )

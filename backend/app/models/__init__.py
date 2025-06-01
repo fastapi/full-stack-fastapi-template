@@ -46,6 +46,14 @@ from app.models.mcp_server import (
     MCPServerStatus,
 )
 
+from app.models.oauth import (
+    OAuthState,
+    OAuthStateBase,
+    OAuthStateCreate,
+    OAuthStateUpdate,
+    OAuthStatePublic,
+)
+
 # This ensures that SQLModel knows about all models for migrations
 __all__ = [
     'BaseDBModel',
@@ -85,4 +93,9 @@ __all__ = [
     'MCPServerPublic',
     'MCPTransportType',
     'MCPServerStatus',
+    'OAuthState',
+    'OAuthStateBase',
+    'OAuthStateCreate',
+    'OAuthStateUpdate',
+    'OAuthStatePublic',
 ]

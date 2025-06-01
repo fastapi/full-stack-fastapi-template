@@ -378,10 +378,6 @@ logging_config = {
     "version": 1,
     "disable_existing_loggers": False,
     "formatters": {
-        "json": {
-            "()": "pythonjsonlogger.jsonlogger.JsonFormatter",
-            "format": "%(asctime)s %(levelname)s %(name)s %(message)s",
-        },
         "console": {
             "format": "%(asctime)s - %(name)s - %(levelname)s - %(message)s",
         },

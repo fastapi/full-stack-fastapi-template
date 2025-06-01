@@ -4,6 +4,7 @@ from typing import Optional
 from uuid import UUID, uuid4
 
 from pydantic import BaseModel, Field
+from sqlalchemy import text
 from sqlmodel import SQLModel, Field as SQLModelField
 
 from app.models.base import BaseDBModel
@@ -34,17 +35,10 @@ class ItemUpdate(SQLModel):
 
 class Item(ItemBase, BaseDBModel, table=True):
     """Database model for items."""
-    __tablename__ = "items"
+    __tablename__ = "item"
     
-    id: UUID = SQLModelField(
-        default_factory=uuid4,
-        primary_key=True,
-        index=True,
-        nullable=False,
-        sa_column_kwargs={"server_default": "gen_random_uuid()"},
-    )
     owner_id: UUID = SQLModelField(
-        ..., foreign_key="users.id", description="ID of the user who owns this item"
+        ..., foreign_key="user.id", description="ID of the user who owns this item"
     )
 
 

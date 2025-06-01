@@ -119,7 +119,7 @@ class UserUpdate(SQLModel):
 
 class UserInDB(UserBase, BaseDBModel, table=True):
     """User model for database representation."""
-    __tablename__ = "users"
+    __tablename__ = "user"
     
     # Relationships
     refresh_tokens: List["RefreshToken"] = Relationship(back_populates="user")
@@ -211,7 +211,7 @@ class RefreshToken(RefreshTokenBase, BaseDBModel, table=True):
     __tablename__ = "refresh_tokens"
     
     user_id: UUID = SQLModelField(
-        foreign_key="users.id",
+        foreign_key="user.id",
         index=True,
     )
     user: UserInDB = Relationship(back_populates="refresh_tokens")

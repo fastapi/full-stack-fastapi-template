@@ -32,7 +32,7 @@ TokenDep = Annotated[str, Depends(reusable_oauth2)]
 def get_current_user(session: SessionDep, token: TokenDep) -> User:
     try:
         payload = jwt.decode(
-            token, settings.SECRET_KEY, algorithms=[security.ALGORITHM]
+            token, settings.SECRET_KEY, algorithms=[settings.ALGORITHM]
         )
         token_data = TokenPayload(**payload)
     except (InvalidTokenError, ValidationError):
@@ -51,8 +51,15 @@ def get_current_user(session: SessionDep, token: TokenDep) -> User:
 CurrentUser = Annotated[User, Depends(get_current_user)]
 
 
+def get_current_active_user(current_user: CurrentUser) -> User:
+    """Get current active user (already checked by get_current_user)."""
+    return current_user
+
+
 def get_current_active_superuser(current_user: CurrentUser) -> User:
-    if not current_user.is_superuser:
+    """Get current user if they are a superuser."""
+    from app.models.user import UserRole
+    if current_user.role not in [UserRole.ADMIN, UserRole.SUPERUSER]:
         raise HTTPException(
             status_code=403, detail="The user doesn't have enough privileges"
         )

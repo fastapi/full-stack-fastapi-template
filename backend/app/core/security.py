@@ -26,7 +26,7 @@ from sqlmodel import Session, select
 from app.core.config import settings
 from app.core.logging import logger
 from app.db import get_db, get_async_db
-from app.models import TokenPayload, User, UserRole
+from app.models import TokenPayload, User
 
 # Configure logging
 logger = logging.getLogger(__name__)
@@ -625,3 +625,7 @@ async def get_current_user_optional(
         
     except (jose_jwt.JWTError, ValidationError):
         return None
+
+
+# Alias for compatibility
+decode_token = verify_token
