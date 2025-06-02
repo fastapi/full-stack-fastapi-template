@@ -72,18 +72,32 @@ class ApiService {
     };
 
     try {
+      console.log(`Making request to: ${url}`);
       const response = await fetch(url, config);
       
       if (!response.ok) {
-        const errorData: ApiError = await response.json();
-        throw new Error(errorData.detail || `HTTP error! status: ${response.status}`);
+        let errorMessage = `HTTP error! status: ${response.status}`;
+        try {
+          const errorData: ApiError = await response.json();
+          errorMessage = errorData.detail || errorMessage;
+        } catch {
+          // If we can't parse error response, use status message
+        }
+        throw new Error(errorMessage);
       }
 
       return await response.json();
     } catch (error) {
+      console.error(`Request failed for ${url}:`, error);
+      
+      if (error instanceof TypeError && error.message.includes('Network request failed')) {
+        throw new Error('Network connection failed. Please check your internet connection and API server.');
+      }
+      
       if (error instanceof Error) {
         throw error;
       }
+      
       throw new Error('Network request failed');
     }
   }

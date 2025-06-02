@@ -1,40 +1,47 @@
 import React, { useState } from 'react';
-import { SafeAreaView, View, Text, StyleSheet, ScrollView, TouchableOpacity, Image, Switch, Alert } from 'react-native';
+import { SafeAreaView, View, Text, StyleSheet, ScrollView, TouchableOpacity, Image, Switch } from 'react-native';
 import { useUser } from '@/contexts/UserContext';
 import { useAuth } from '@/contexts/AuthContext';
 import { router } from 'expo-router';
+import { DevTools } from '@/components/DevTools';
+import { Dialog } from '@/components/ui/Dialog';
+import { Button } from '@/components/ui/Button';
 
 const ProfileScreen = () => {
   const { name, height, weight, age } = useUser();
   const { user, logout, isLoading } = useAuth();
   const [notificationsEnabled, setNotificationsEnabled] = useState(false);
+  const [showDevTools, setShowDevTools] = useState(false);
+  const [showLogoutDialog, setShowLogoutDialog] = useState(false);
 
   const toggleNotifications = () => setNotificationsEnabled(prev => !prev);
 
   const handleLogout = () => {
-    Alert.alert(
-      'Sign Out',
-      'Are you sure you want to sign out?',
-      [
-        {
-          text: 'Cancel',
-          style: 'cancel',
-        },
-        {
-          text: 'Sign Out',
-          style: 'destructive',
-          onPress: async () => {
-            try {
-              await logout();
-              // Navigation will be handled automatically by AuthNavigator
-            } catch (error) {
-              console.error('Logout error:', error);
-              Alert.alert('Error', 'Failed to sign out. Please try again.');
-            }
-          },
-        },
-      ]
-    );
+    setShowLogoutDialog(true);
+  };
+
+  const confirmLogout = async () => {
+    try {
+      console.log('Starting logout process...');
+      setShowLogoutDialog(false);
+      await logout();
+      console.log('Logout successful');
+      // Navigation will be handled automatically by ProtectedRoute
+    } catch (error) {
+      console.error('Logout error:', error);
+      // For web compatibility, we'll use a simple alert or could create another dialog
+      if (typeof window !== 'undefined') {
+        // Web environment
+        alert(`Failed to sign out: ${error instanceof Error ? error.message : 'Unknown error'}. Please try again.`);
+      } else {
+        // Mobile environment - this shouldn't happen but as fallback
+        console.error('Logout failed:', error);
+      }
+    }
+  };
+
+  const cancelLogout = () => {
+    setShowLogoutDialog(false);
   };
 
   return (
@@ -93,6 +100,9 @@ const ProfileScreen = () => {
           <Text style={styles.optionItem}>Privacy Policy</Text>
           <Text style={styles.optionItem}>Contact Us</Text>
           <Text style={styles.optionItem}>Settings</Text>
+          <TouchableOpacity onPress={() => setShowDevTools(true)}>
+            <Text style={[styles.optionItem, { color: '#70A1FF' }]}>Developer Tools</Text>
+          </TouchableOpacity>
         </View>
 
         {/* Logout Button */}
@@ -106,6 +116,41 @@ const ProfileScreen = () => {
           </Text>
         </TouchableOpacity>
       </ScrollView>
+
+      {/* DevTools Modal */}
+      <DevTools
+        visible={showDevTools}
+        onClose={() => setShowDevTools(false)}
+      />
+
+      {/* Logout Confirmation Dialog */}
+      <Dialog
+        isOpen={showLogoutDialog}
+        onClose={cancelLogout}
+        title="Sign Out"
+        size="sm"
+        footer={
+          <View style={styles.dialogFooter}>
+            <Button
+              title="Cancel"
+              variant="outline"
+              onPress={cancelLogout}
+              style={styles.cancelButton}
+            />
+            <Button
+              title="Sign Out"
+              onPress={confirmLogout}
+              loading={isLoading}
+              loadingText="Signing Out..."
+              style={styles.confirmButton}
+            />
+          </View>
+        }
+      >
+        <Text style={styles.dialogText}>
+          Are you sure you want to sign out?
+        </Text>
+      </Dialog>
     </SafeAreaView>
   );
 };
@@ -138,6 +183,23 @@ const styles = StyleSheet.create({
     color: '#FFF',
     fontSize: 16,
     fontWeight: 'bold'
+  },
+  dialogFooter: {
+    flexDirection: 'row',
+    gap: 12,
+  },
+  cancelButton: {
+    flex: 1,
+  },
+  confirmButton: {
+    flex: 1,
+    backgroundColor: '#FF6B6B',
+  },
+  dialogText: {
+    fontSize: 16,
+    color: '#333',
+    textAlign: 'center',
+    lineHeight: 24,
   },
 });
 

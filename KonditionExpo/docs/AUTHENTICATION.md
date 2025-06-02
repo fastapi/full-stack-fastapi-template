@@ -1,143 +1,199 @@
-# Authentication System Implementation
-
-This document describes the complete authentication system implemented for the Kondition mobile app.
+# Authentication System Documentation
 
 ## Overview
 
-The authentication system provides:
-- User registration (signup)
-- User login
-- Secure token storage
-- Protected routes
-- Automatic token validation
-- User session management
-- Logout functionality
+This document describes the authentication system implementation for the Kondition Expo app, including recent fixes for signout functionality and network connectivity issues.
 
 ## Architecture
 
 ### Components
 
-1. **API Service** (`services/api.ts`)
-   - Handles all backend communication
-   - Manages JWT token storage and retrieval
-   - Provides authentication methods (login, signup, logout)
-   - Handles API errors and network requests
+1. **AuthContext** (`contexts/AuthContext.tsx`)
+   - Manages authentication state
+   - Provides login, signup, logout functions
+   - Handles token storage and validation
 
-2. **AuthContext** (`contexts/AuthContext.tsx`)
-   - Manages global authentication state
-   - Provides authentication methods to components
-   - Handles token persistence across app restarts
-   - Manages user profile data
-
-3. **ProtectedRoute** (`components/ProtectedRoute.tsx`)
-   - Protects authenticated routes
+2. **ProtectedRoute** (`components/ProtectedRoute.tsx`)
+   - Controls navigation based on authentication state
    - Redirects unauthenticated users to login
-   - Handles navigation based on auth state
+   - Redirects authenticated users away from auth screens
 
-4. **Authentication Screens**
-   - Login screen (`app/login.tsx`)
-   - Signup screen (`app/signup.tsx`)
-   - Profile screen with logout (`app/(tabs)/profile.tsx`)
+3. **API Service** (`services/api.ts`)
+   - Handles all API communication
+   - Manages token storage in AsyncStorage
+   - Provides platform-aware error handling
 
-### API Integration
+4. **API Configuration** (`config/api.ts`)
+   - Platform-specific API URL configuration
+   - Automatic platform detection
+   - Development tools for testing
 
-The system integrates with the FastAPI backend using these endpoints:
+## Recent Fixes
 
-- `POST /api/v1/login/access-token` - User login
-- `POST /api/v1/users/signup` - User registration
-- `POST /api/v1/login/test-token` - Token validation
-- `GET /api/v1/users/me` - Get current user profile
+### 1. Signout Functionality
 
-### Token Management
+**Issue**: Signout button was not working properly
+**Solution**: 
+- Enhanced error handling in logout function
+- Added detailed logging for debugging
+- Improved user feedback with specific error messages
+- Ensured proper token cleanup
 
-- JWT tokens are stored securely using AsyncStorage
-- Tokens are automatically included in API requests
-- Token validation happens on app startup
-- Invalid/expired tokens are automatically cleared
-
-## Usage
-
-### Login Flow
-
-1. User enters email and password
-2. App validates form data
-3. API call to backend login endpoint
-4. Token stored locally on success
-5. User profile fetched and stored
-6. Navigation to main app
-
-### Signup Flow
-
-1. User enters registration details
-2. Form validation (email format, password strength)
-3. API call to backend signup endpoint
-4. Automatic login after successful signup
-5. Navigation to main app
-
-### Logout Flow
-
-1. User confirms logout action
-2. Token removed from local storage
-3. Auth state cleared
-4. Navigation to login screen
-
-### Protected Routes
-
-Routes are automatically protected based on authentication state:
-
-- **Protected**: `/(tabs)`, `/workout`, `/profile`, `/home`
-- **Public**: `/login`, `/signup`
-- **Index**: Redirects based on auth state
-
-## Configuration
-
-API configuration is centralized in `config/api.ts`:
-
+**Implementation**:
 ```typescript
-export const API_CONFIG = {
-  BASE_URL: 'http://localhost:8000/api/v1',
-  TOKEN_KEY: 'access_token',
-  ENDPOINTS: {
-    LOGIN: '/login/access-token',
-    SIGNUP: '/users/signup',
-    // ...
-  }
+const handleLogout = () => {
+  Alert.alert(
+    'Sign Out',
+    'Are you sure you want to sign out?',
+    [
+      {
+        text: 'Cancel',
+        style: 'cancel',
+      },
+      {
+        text: 'Sign Out',
+        style: 'destructive',
+        onPress: async () => {
+          try {
+            console.log('Starting logout process...');
+            await logout();
+            console.log('Logout successful');
+            // Navigation handled by ProtectedRoute
+          } catch (error) {
+            console.error('Logout error:', error);
+            Alert.alert(
+              'Logout Error', 
+              `Failed to sign out: ${error instanceof Error ? error.message : 'Unknown error'}. Please try again.`
+            );
+          }
+        },
+      },
+    ]
+  );
 };
 ```
 
+### 2. Network Connectivity Issues
+
+**Issue**: App worked on web but failed on mobile devices with "network failed" errors
+**Solution**: 
+- Implemented platform-specific API URLs
+- Added automatic platform detection
+- Created development tools for easy testing
+
+**Platform-Specific URLs**:
+- **Web**: `http://localhost:8000/api/v1`
+- **iOS Simulator**: `http://localhost:8000/api/v1`
+- **Android Emulator**: `http://10.0.2.2:8000/api/v1`
+- **Physical Device**: `http://[YOUR_IP]:8000/api/v1`
+
+### 3. Development Tools
+
+Added a DevTools component accessible from the profile screen that provides:
+- Current API URL display
+- Connection testing
+- Custom URL configuration
+- Quick URL presets
+- Setup instructions
+
+## Testing Instructions
+
+### Web Platform
+1. Start the backend: `uvicorn app.main:app --host 0.0.0.0 --port 8000`
+2. Start the web app: `npm run web`
+3. Authentication should work with `localhost:8000`
+
+### iOS Simulator
+1. Start the backend: `uvicorn app.main:app --host 0.0.0.0 --port 8000`
+2. Start the iOS simulator: `npm run ios`
+3. Authentication should work with `localhost:8000`
+
+### Android Emulator
+1. Start the backend: `uvicorn app.main:app --host 0.0.0.0 --port 8000`
+2. Start the Android emulator: `npm run android`
+3. The app automatically uses `10.0.2.2:8000` for Android emulator
+
+### Physical Device / Expo Go
+
+1. **Find your computer's IP address**:
+   - **macOS**: System Preferences > Network > Advanced > TCP/IP
+   - **Windows**: Run `ipconfig` in Command Prompt
+   - **Linux**: Run `ifconfig` or `ip addr`
+
+2. **Update the API configuration**:
+   - Open the app and go to Profile > Developer Tools
+   - Enter your computer's IP: `http://[YOUR_IP]:8000/api/v1`
+   - Or manually edit `config/api.ts` and update the `physical_device` URL
+
+3. **Start the backend with external access**:
+   ```bash
+   uvicorn app.main:app --host 0.0.0.0 --port 8000
+   ```
+
+4. **Ensure network connectivity**:
+   - Computer and mobile device must be on the same network
+   - Firewall should allow connections on port 8000
+
+## API Endpoints
+
+- **Login**: `POST /api/v1/login/access-token`
+- **Signup**: `POST /api/v1/users/signup`
+- **Test Token**: `POST /api/v1/login/test-token`
+- **User Profile**: `GET /api/v1/users/me`
+
 ## Error Handling
 
-- Network errors are caught and displayed to users
-- Invalid credentials show appropriate error messages
-- Token expiration is handled gracefully
-- Loading states prevent multiple simultaneous requests
+### Network Errors
+- Connection failures show user-friendly messages
+- Automatic retry suggestions
+- Platform-specific troubleshooting
 
-## Security Features
+### Authentication Errors
+- Invalid credentials handled gracefully
+- Token expiration triggers automatic logout
+- Clear error messages for users
 
-- Passwords are never stored locally
-- JWT tokens are stored securely
-- API requests include proper authentication headers
-- Token validation on app startup
-- Automatic logout on token expiration
+### Development Debugging
+- Console logging for all authentication actions
+- Network request logging with URLs
+- Error details preserved for debugging
 
-## Testing
+## Troubleshooting
 
-To test the authentication system:
+### Common Issues
 
-1. Start the FastAPI backend server
-2. Run the mobile app
-3. Test signup with new user credentials
-4. Test login with existing credentials
-5. Verify protected route access
-6. Test logout functionality
-7. Verify token persistence across app restarts
+1. **"Network request failed" on mobile**
+   - Check if backend is running with `--host 0.0.0.0`
+   - Verify IP address in DevTools
+   - Ensure devices are on same network
 
-## Future Enhancements
+2. **Signout not working**
+   - Check console logs for error details
+   - Verify AsyncStorage permissions
+   - Try force-closing and reopening the app
 
-Potential improvements:
-- Biometric authentication
-- Remember me functionality
-- Password reset flow
-- Social login integration
-- Refresh token implementation
-- Enhanced security measures
+3. **Login works but user data not loading**
+   - Check token storage in AsyncStorage
+   - Verify API endpoints are accessible
+   - Check network connectivity
+
+### Development Tips
+
+1. **Use DevTools**: Access via Profile > Developer Tools for easy testing
+2. **Check Console**: All authentication actions are logged
+3. **Test Connection**: Use the "Test API Connection" button in DevTools
+4. **Network Setup**: Follow the setup instructions in DevTools
+
+## Security Considerations
+
+- Tokens stored securely in AsyncStorage
+- Automatic token validation on app start
+- Secure token transmission with Bearer authentication
+- Proper cleanup on logout
+
+## Future Improvements
+
+1. **Refresh Token Implementation**: Add automatic token refresh
+2. **Biometric Authentication**: Add fingerprint/face ID support
+3. **Offline Support**: Cache user data for offline access
+4. **Enhanced Security**: Add certificate pinning for production
