@@ -35,7 +35,6 @@ export default function RootLayout() {
                 <Stack.Screen name="workout" options={{ headerShown: false }} />
                 <Stack.Screen name="notification" options={{ headerShown: false }} />
                 <Stack.Screen name="profile" options={{ headerShown: false }} />
-                <Stack.Screen name="home" options={{ headerShown: false }} />
                 <Stack.Screen name="+not-found" />
               </Stack>
             </ProtectedRoute>

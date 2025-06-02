@@ -126,7 +126,7 @@ const WorkoutScreen = () => {
   
   useEffect(() => {
     if (!currentWorkout) {
-      router.back();
+      router.replace('/(tabs)');
     }
   }, [currentWorkout]);
 
@@ -163,7 +163,7 @@ const WorkoutScreen = () => {
             const duration = Math.round((new Date().getTime() - startTime.getTime()) / 60000);
             const updatedWorkout = { ...currentWorkout, duration };
             endWorkout();
-            router.replace('/home');
+            router.replace('/(tabs)');
           },
         },
       ]
@@ -177,7 +177,7 @@ const WorkoutScreen = () => {
   return (
     <SafeAreaView style={[styles.container, { backgroundColor: '#FFFFFF' }]}>
       <View style={styles.header}>
-        <TouchableOpacity onPress={() => router.replace('/home')}>
+        <TouchableOpacity onPress={() => router.replace('/(tabs)')}>
           <Text style={[styles.backButton, { color: '#70A1FF' }]}>← Exit</Text>
         </TouchableOpacity>
         <Text style={[styles.workoutTitle, { color: '#333' }]}>{currentWorkout.name}</Text>
