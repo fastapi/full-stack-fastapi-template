@@ -10,6 +10,11 @@ class UserBase(SQLModel):
     is_active: bool = True
     is_superuser: bool = False
     full_name: Optional[str] = Field(default=None, max_length=255)
+    # Profile fields
+    gender: Optional[str] = Field(default=None, max_length=50)
+    date_of_birth: Optional[str] = Field(default=None, max_length=10)  # YYYY-MM-DD format
+    weight: Optional[float] = Field(default=None)  # in kg
+    height: Optional[float] = Field(default=None)  # in cm
 
 
 # Properties to receive via API on creation
@@ -32,6 +37,11 @@ class UserUpdate(UserBase):
 class UserUpdateMe(SQLModel):
     full_name: Optional[str] = Field(default=None, max_length=255)
     email: Optional[EmailStr] = Field(default=None, max_length=255)
+    # Profile fields
+    gender: Optional[str] = Field(default=None, max_length=50)
+    date_of_birth: Optional[str] = Field(default=None, max_length=10)  # YYYY-MM-DD format
+    weight: Optional[float] = Field(default=None)  # in kg
+    height: Optional[float] = Field(default=None)  # in cm
 
 
 class UpdatePassword(SQLModel):

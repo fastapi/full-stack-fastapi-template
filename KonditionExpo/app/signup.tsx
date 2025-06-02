@@ -25,12 +25,8 @@ export default function SignUpScreen() {
   const textColor = useThemeColor({}, 'text');
   const tintColor = useThemeColor({}, 'tint');
 
-  // Redirect if already authenticated
-  useEffect(() => {
-    if (isAuthenticated) {
-      router.replace('/(tabs)');
-    }
-  }, [isAuthenticated]);
+  // Note: We don't redirect authenticated users here anymore since we want them
+  // to complete the profile setup flow after signup
 
   const validateForm = () => {
     const newErrors: typeof errors = {};
@@ -75,12 +71,17 @@ export default function SignUpScreen() {
     }
 
     try {
+      console.log('Starting signup process...');
       await signup({
         email: email.trim(),
         password,
         full_name: fullName.trim(),
       });
-      // Navigation will happen automatically via useEffect when isAuthenticated becomes true
+      
+      console.log('Signup successful, user is now logged in. Navigating to profile completion...');
+      // User is now logged in automatically, redirect to profile completion
+      router.replace('/signup2');
+      console.log('Navigation to profile completion initiated');
     } catch (error) {
       console.error('Signup error:', error);
       Alert.alert(

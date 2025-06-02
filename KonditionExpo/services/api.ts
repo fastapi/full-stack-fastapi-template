@@ -13,6 +13,15 @@ export interface SignupRequest {
   full_name?: string;
 }
 
+export interface ProfileUpdateRequest {
+  full_name?: string;
+  email?: string;
+  gender?: string;
+  date_of_birth?: string;
+  weight?: number;
+  height?: number;
+}
+
 export interface AuthResponse {
   access_token: string;
   token_type: string;
@@ -24,6 +33,11 @@ export interface UserProfile {
   full_name?: string;
   is_active: boolean;
   is_superuser: boolean;
+  // Profile fields
+  gender?: string;
+  date_of_birth?: string;
+  weight?: number;
+  height?: number;
 }
 
 export interface ApiError {
@@ -136,6 +150,13 @@ class ApiService {
   async testToken(): Promise<UserProfile> {
     return this.makeRequest<UserProfile>(API_CONFIG.ENDPOINTS.TEST_TOKEN, {
       method: 'POST',
+    });
+  }
+
+  async updateProfile(profileData: ProfileUpdateRequest): Promise<UserProfile> {
+    return this.makeRequest<UserProfile>(API_CONFIG.ENDPOINTS.USER_PROFILE, {
+      method: 'PATCH',
+      body: JSON.stringify(profileData),
     });
   }
 

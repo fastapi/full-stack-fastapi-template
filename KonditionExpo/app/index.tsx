@@ -1,24 +1,38 @@
 import React, { useEffect } from 'react';
 import { View, ActivityIndicator, StyleSheet } from 'react-native';
-import { router } from 'expo-router';
+import { router, useSegments } from 'expo-router';
 import { useAuth } from '@/contexts/AuthContext';
 import { useThemeColor } from '@/hooks/useThemeColor';
 import { ThemedText } from '@/components/ThemedText';
 
 export default function IndexScreen() {
-  const { isAuthenticated, isLoading } = useAuth();
+  const { isAuthenticated, isLoading, isInSignupFlow } = useAuth();
+  const segments = useSegments();
   const backgroundColor = useThemeColor({}, 'background');
   const textColor = useThemeColor({}, 'text');
 
   useEffect(() => {
     if (!isLoading) {
+      // Don't redirect if we're already on a specific route (like signup2)
+      const currentRoute = segments[0];
+      if (currentRoute) {
+        console.log('IndexScreen: Already on route:', currentRoute, '- not redirecting');
+        return;
+      }
+      
+      // Don't redirect if user is in signup flow - let them complete it
+      if (isInSignupFlow) {
+        console.log('IndexScreen: User in signup flow - not redirecting');
+        return;
+      }
+      
       if (isAuthenticated) {
         router.replace('/(tabs)');
       } else {
         router.replace('/login');
       }
     }
-  }, [isAuthenticated, isLoading]);
+  }, [isAuthenticated, isLoading, isInSignupFlow, segments]);
 
   return (
     <View style={[styles.container, { backgroundColor }]}>

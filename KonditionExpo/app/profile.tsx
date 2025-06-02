@@ -1,13 +1,28 @@
 import React, { useState } from 'react';
 import { SafeAreaView, View, Text, StyleSheet, ScrollView, TouchableOpacity, Image, Switch } from 'react-native';
-import { useUser } from '@/contexts/UserContext';
+import { useAuth } from '@/contexts/AuthContext';
 import { router } from 'expo-router';
 
 const ProfileScreen = () => {
-  const { name, height, weight, age } = useUser();
+  const { user } = useAuth();
   const [notificationsEnabled, setNotificationsEnabled] = useState(false);
 
   const toggleNotifications = () => setNotificationsEnabled(prev => !prev);
+
+  // Calculate age from date of birth
+  const calculateAge = (dateOfBirth: string | undefined): number => {
+    if (!dateOfBirth) return 0;
+    const today = new Date();
+    const birthDate = new Date(dateOfBirth);
+    let age = today.getFullYear() - birthDate.getFullYear();
+    const monthDiff = today.getMonth() - birthDate.getMonth();
+    if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < birthDate.getDate())) {
+      age--;
+    }
+    return age;
+  };
+
+  const age = calculateAge(user?.date_of_birth);
 
   return (
     <SafeAreaView style={styles.container}>
@@ -19,7 +34,7 @@ const ProfileScreen = () => {
 
         {/* Profile Box */}
         <View style={styles.profileBox}>
-          <Text style={styles.profileName}>{name || 'User'}</Text>
+          <Text style={styles.profileName}>{user?.full_name || user?.email || 'User'}</Text>
           <TouchableOpacity style={styles.editBtn}>
             <Text style={styles.editText}>Edit</Text>
           </TouchableOpacity>
@@ -27,11 +42,11 @@ const ProfileScreen = () => {
           <View style={styles.statsRow}>
             <View style={styles.statBox}>
               <Text style={styles.statLabel}>Height</Text>
-              <Text style={styles.statValue}>{height ? `${height} cm` : '-'}</Text>
+              <Text style={styles.statValue}>{user?.height ? `${user.height} cm` : '-'}</Text>
             </View>
             <View style={styles.statBox}>
               <Text style={styles.statLabel}>Weight</Text>
-              <Text style={styles.statValue}>{weight ? `${weight} kg` : '-'}</Text>
+              <Text style={styles.statValue}>{user?.weight ? `${user.weight} kg` : '-'}</Text>
             </View>
             <View style={styles.statBox}>
               <Text style={styles.statLabel}>Age</Text>
