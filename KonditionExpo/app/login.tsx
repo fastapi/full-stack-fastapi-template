@@ -111,7 +111,6 @@ export default function LoginScreen() {
                 <Text style={{ color: tintColor }}>{showPassword ? 'Hide' : 'Show'}</Text>
               </TouchableOpacity>
             }
-            onRightIconPress={() => setShowPassword(!showPassword)}
           />
           
           <View style={styles.optionsRow}>

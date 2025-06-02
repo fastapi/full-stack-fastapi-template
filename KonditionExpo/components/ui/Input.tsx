@@ -97,15 +97,20 @@ export function Input({
         />
         
         {rightIcon && (
-          <TouchableOpacity
-            style={styles.rightIcon}
-            onPress={onRightIconPress}
-            disabled={!onRightIconPress}
-            accessibilityRole="button"
-            accessible={!!onRightIconPress}
-          >
-            {rightIcon}
-          </TouchableOpacity>
+          onRightIconPress ? (
+            <TouchableOpacity
+              style={styles.rightIcon}
+              onPress={onRightIconPress}
+              accessibilityRole="button"
+              accessible={true}
+            >
+              {rightIcon}
+            </TouchableOpacity>
+          ) : (
+            <View style={styles.rightIcon}>
+              {rightIcon}
+            </View>
+          )
         )}
       </View>
       
