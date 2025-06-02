@@ -44,6 +44,10 @@ export function Checkbox({
       }}
       activeOpacity={0.7}
       disabled={disabled}
+      accessibilityLabel={label || 'Checkbox'}
+      accessibilityRole="checkbox"
+      accessibilityState={{ checked: isChecked, disabled }}
+      accessible={true}
     >
       <View
         style={[

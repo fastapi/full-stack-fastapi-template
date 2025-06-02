@@ -1,24 +1,30 @@
-import React, { useState } from 'react';
-import { View, StyleSheet, TouchableOpacity, Text, Image, KeyboardAvoidingView, Platform, ScrollView } from 'react-native';
+import React, { useState, useEffect } from 'react';
+import { View, StyleSheet, TouchableOpacity, Text, Image, KeyboardAvoidingView, Platform, ScrollView, Alert } from 'react-native';
 import { useThemeColor } from '../hooks/useThemeColor';
 import { Button } from '../components/ui/Button';
 import { Input } from '../components/ui/Input';
 import { Checkbox } from '../components/ui/Checkbox';
 import { router } from 'expo-router';
-import { useUser } from '@/contexts/UserContext';
+import { useAuth } from '@/contexts/AuthContext';
 
 export default function LoginScreen() {
-  const { setName: setUserName } = useUser();
+  const { login, isLoading, isAuthenticated } = useAuth();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [rememberMe, setRememberMe] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
-  const [isLoading, setIsLoading] = useState(false);
   const [errors, setErrors] = useState<{ email?: string; password?: string }>({});
   
   const backgroundColor = useThemeColor({}, 'background');
   const textColor = useThemeColor({}, 'text');
   const tintColor = useThemeColor({}, 'tint');
+
+  // Redirect if already authenticated
+  useEffect(() => {
+    if (isAuthenticated) {
+      router.replace('/(tabs)');
+    }
+  }, [isAuthenticated]);
   
   const handleLogin = async () => {
     setErrors({});
@@ -36,20 +42,16 @@ export default function LoginScreen() {
       return;
     }
   
-    setIsLoading(true);
-  
     try {
-      // Simulate API call
-      await new Promise(resolve => setTimeout(resolve, 1500));
-  
-      // Set the name (this mimics what signup does)
-      setUserName('Returning User'); // You can replace this with a real name from API later
-  
-      router.replace('/(tabs)');
+      await login(email, password);
+      // Navigation will happen automatically via useEffect when isAuthenticated becomes true
     } catch (error) {
       console.error('Login error:', error);
-    } finally {
-      setIsLoading(false);
+      Alert.alert(
+        'Login Failed',
+        error instanceof Error ? error.message : 'An unexpected error occurred. Please try again.',
+        [{ text: 'OK' }]
+      );
     }
   };
   
@@ -100,7 +102,12 @@ export default function LoginScreen() {
             secureTextEntry={!showPassword}
             error={errors.password}
             rightIcon={
-              <TouchableOpacity onPress={() => setShowPassword(!showPassword)}>
+              <TouchableOpacity
+                onPress={() => setShowPassword(!showPassword)}
+                accessibilityLabel={showPassword ? 'Hide password' : 'Show password'}
+                accessibilityRole="button"
+                accessible={true}
+              >
                 <Text style={{ color: tintColor }}>{showPassword ? 'Hide' : 'Show'}</Text>
               </TouchableOpacity>
             }
@@ -114,7 +121,12 @@ export default function LoginScreen() {
               label="Remember me"
             />
             
-            <TouchableOpacity onPress={handleForgotPassword}>
+            <TouchableOpacity
+              onPress={handleForgotPassword}
+              accessibilityLabel="Forgot Password"
+              accessibilityRole="button"
+              accessible={true}
+            >
               <Text style={[styles.forgotPassword, { color: tintColor }]}>Forgot Password?</Text>
             </TouchableOpacity>
           </View>
@@ -130,7 +142,12 @@ export default function LoginScreen() {
           
           <View style={styles.signupContainer}>
             <Text style={{ color: textColor }}>Don't have an account? </Text>
-            <TouchableOpacity onPress={handleSignUp}>
+            <TouchableOpacity
+              onPress={handleSignUp}
+              accessibilityLabel="Sign Up"
+              accessibilityRole="button"
+              accessible={true}
+            >
               <Text style={{ color: tintColor, fontWeight: '600' }}>Sign Up</Text>
             </TouchableOpacity>
           </View>

@@ -75,7 +75,7 @@ export function Input({
           value={value}
           onChangeText={onChangeText}
           style={[
-            styles.input, 
+            styles.input,
             { color: textColor },
             leftIcon && { paddingLeft: 0 },
             rightIcon && { paddingRight: 0 },
@@ -90,13 +90,19 @@ export function Input({
           onFocus={() => setIsFocused(true)}
           onBlur={() => setIsFocused(false)}
           placeholderTextColor="#A0AEC0"
+          accessibilityLabel={label || placeholder}
+          accessibilityHint={error ? `Error: ${error}` : undefined}
+          accessibilityRole="text"
+          accessible={true}
         />
         
         {rightIcon && (
-          <TouchableOpacity 
-            style={styles.rightIcon} 
+          <TouchableOpacity
+            style={styles.rightIcon}
             onPress={onRightIconPress}
             disabled={!onRightIconPress}
+            accessibilityRole="button"
+            accessible={!!onRightIconPress}
           >
             {rightIcon}
           </TouchableOpacity>

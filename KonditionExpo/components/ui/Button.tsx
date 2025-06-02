@@ -88,6 +88,10 @@ export function Button({
         style,
       ]}
       activeOpacity={0.7}
+      accessibilityLabel={loading ? (loadingText || `Loading ${title}`) : title}
+      accessibilityRole="button"
+      accessibilityState={{ disabled: disabled || loading }}
+      accessible={true}
     >
       {loading ? (
         <View style={styles.loadingContainer}>
