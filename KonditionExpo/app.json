@@ -8,18 +8,13 @@
     "scheme": "konditionexpo",
     "userInterfaceStyle": "automatic",
     "newArchEnabled": true,
+    "notification": {
+      "vapidPublicKey": "BHIYUSgOOx7MC1EXPT5HSZ6snrLWCe4uV2tloytm3uB8rZtTiNl5234SLOWPzdBa8TcIr1CubVkh_8jXipesK8E",
+      "serviceWorkerPath": "service-worker.js"
+    },
     "ios": {
       "supportsTablet": true
     },
-    "plugins": [
-      [
-        "expo-notifications",
-        {
-          "icon": "./assets/images/bell.png",
-          "color": "#ffffff"
-        }
-      ]
-    ],
     "android": {
       "adaptiveIcon": {
         "foregroundImage": "./assets/images/adaptive-icon.png",
@@ -41,6 +36,13 @@
           "imageWidth": 200,
           "resizeMode": "contain",
           "backgroundColor": "#ffffff"
+        }
+      ],
+      [
+        "expo-notifications",
+        {
+          "icon": "./assets/images/bell.png",
+          "color": "#ffffff"
         }
       ]
     ],
