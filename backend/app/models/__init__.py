@@ -1,6 +1,7 @@
 from sqlmodel import SQLModel  # Re-export SQLModel for Alembic
 
 from app.models.token import Message, NewPassword, Token, TokenPayload
+from app.models.notifications import PushToken, CustomReminder
 from app.models.user import (
     UpdatePassword,
     User,

@@ -11,6 +11,15 @@
     "ios": {
       "supportsTablet": true
     },
+    "plugins": [
+      [
+        "expo-notifications",
+        {
+          "icon": "./assets/images/bell.png",
+          "color": "#ffffff"
+        }
+      ]
+    ],
     "android": {
       "adaptiveIcon": {
         "foregroundImage": "./assets/images/adaptive-icon.png",
