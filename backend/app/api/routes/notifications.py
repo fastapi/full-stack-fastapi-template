@@ -1,4 +1,5 @@
-from datetime import datetime
+from datetime import date, datetime, timedelta
+from typing import List
 import uuid
 
 from fastapi import APIRouter, Depends, HTTPException
@@ -69,3 +70,39 @@ def schedule_reminder_endpoint(
         return {"status": "scheduled", "reminder_id": rem_obj.id}
     except ValueError as e:
         raise HTTPException(status_code=404, detail=str(e))
+
+class QuoteOut(BaseModel):
+    date: date
+    text: str
+
+PRESET_QUOTES = [
+    "Believe you can and you’re halfway there.",
+    "Fall seven times, stand up eight.",
+    "Your limitation—it’s only your imagination.",
+    "Push yourself, because no one else is going to do it for you.",
+    "Great things never come from comfort zones.",
+    "Dream it. Wish it. Do it.",
+    "Success doesn’t just find you—you have to go out and get it.",
+]
+
+@router.get("/quotes", response_model=List[QuoteOut])
+def get_daily_quotes():
+    """
+    Return a list of the past 7 days (including today) with
+    one motivational quote per day, in descending date order.
+    """
+    today = date.today()
+    results: List[QuoteOut] = []
+
+    for i in range(7):
+        d = today - timedelta(days=i)
+        # determine which quote to use for date d
+        # calculate day-of-year for d
+        start_of_year = date(d.year, 1, 1)
+        day_of_year = (d - start_of_year).days
+        idx = day_of_year % len(PRESET_QUOTES)
+        quote_text = PRESET_QUOTES[idx]
+
+        results.append(QuoteOut(date=d, text=quote_text))
+
+    return results

@@ -1,61 +1,128 @@
-import React from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, FlatList, Image } from 'react-native';
-/*
-import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
+// app/screens/NotificationScreen.tsx
 
-const notifications = [
-  { id: '1', title: "Hey, it's time for lunch", time: 'About 1 minute ago', icon: require('./assets/lunch.png') },
-  { id: '2', title: "Don't miss your lowerbody workout", time: 'About 3 hours ago', icon: require('./assets/workout.png') },
-  { id: '3', title: "Hey, let's add some meals for your b..", time: 'About 3 hours ago', icon: require('./assets/meals.png') },
-  { id: '4', title: 'Congratulations, You have finished A..', time: '29 May', icon: require('./assets/congrats.png') },
-  { id: '5', title: "Hey, it's time for lunch", time: '8 April', icon: require('./assets/lunch.png') },
-  { id: '6', title: 'Ups, You have missed your Lowerbo..', time: '3 April', icon: require('./assets/workout.png') },
-];
-*/
+import React, { useState, useEffect } from "react";
+import {
+  SafeAreaView,
+  View,
+  Text,
+  StyleSheet,
+  FlatList,
+  Dimensions,
+  ActivityIndicator,
+} from "react-native";
 
-export default function NotificationScreen({ navigation }) {
-  const renderItem = ({ item }) => (
+// Define the shape of each quote, matching QuoteOut from the backend
+type QuoteItem = {
+  date: string; // "YYYY-MM-DD"
+  text: string;
+};
+
+export default function NotificationScreen() {
+  const [notifications, setNotifications] = useState<QuoteItem[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    // Fetch the last 7 days of quotes from the backend
+    // Replace localhost with your actual host or LAN IP if testing on device
+    fetch("http://localhost:8000/api/v1/notifications/quotes")
+      .then((res) => res.json())
+      .then((data: QuoteItem[]) => {
+        // data is an array like [{ date: "2025-06-05", text: "..." }, …]
+        setNotifications(data);
+      })
+      .catch((err) => {
+        console.error("Error fetching quotes:", err);
+      })
+      .finally(() => {
+        setLoading(false);
+      });
+  }, []);
+
+  const renderItem = ({ item }: { item: QuoteItem }) => (
     <View style={styles.item}>
-      <Image source={item.icon} style={styles.itemIcon} />
       <View style={styles.itemText}>
-        <Text style={styles.title} numberOfLines={1}>{item.title}</Text>
-        <Text style={styles.time}>{item.time}</Text>
+        <Text style={styles.title} numberOfLines={2}>
+          {item.text}
+        </Text>
+        <Text style={styles.time}>{item.date}</Text>
       </View>
-      <TouchableOpacity style={styles.itemMenu}>
-        <Icon name="dots-vertical" size={20} />
-      </TouchableOpacity>
     </View>
   );
+
+  if (loading) {
+    return (
+      <SafeAreaView style={styles.container}>
+        <ActivityIndicator size="large" color="#333" />
+      </SafeAreaView>
+    );
+  }
+
   return (
-    <View style={styles.container}>
+    <SafeAreaView style={styles.container}>
       <View style={styles.header}>
-        <TouchableOpacity onPress={() => navigation.goBack()}>
-          <Icon name="arrow-left" size={24} />
-        </TouchableOpacity>
-        <Text style={styles.headerTitle}>Notification</Text>
-        <TouchableOpacity>
-          <Icon name="dots-horizontal" size={24} />
-        </TouchableOpacity>
+        <Text style={styles.headerTitle}>Daily Quotes</Text>
       </View>
       <FlatList
         data={notifications}
-        keyExtractor={item => item.id}
+        keyExtractor={(item) => item.date}
         renderItem={renderItem}
         ItemSeparatorComponent={() => <View style={styles.separator} />}
+        contentContainerStyle={styles.listContent}
       />
-    </View>
+    </SafeAreaView>
   );
 }
 
+const { width, height } = Dimensions.get("window");
+
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: '#fff' },
-  header: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', padding: 16 },
-  headerTitle: { fontSize: 18, fontWeight: 'bold' },
-  item: { flexDirection: 'row', alignItems: 'center', padding: 16 },
-  itemIcon: { width: 40, height: 40, borderRadius: 20 },
-  itemText: { flex: 1, marginLeft: 12 },
-  title: { fontSize: 16 },
-  time: { fontSize: 12, color: '#888' },
-  itemMenu: { padding: 8 },
-  separator: { height: 1, backgroundColor: '#eee', marginLeft: 68 },
+  container: {
+    flex: 1,
+    width,
+    height,
+    backgroundColor: "#ffffff",
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  header: {
+    padding: 16,
+    borderBottomWidth: 1,
+    borderBottomColor: "#ddd",
+    backgroundColor: "#fafafa",
+    alignItems: "center",
+    width: "100%",
+  },
+  headerTitle: {
+    fontSize: 20,
+    fontWeight: "bold",
+  },
+  listContent: {
+    paddingVertical: 8,
+    width: "100%",
+  },
+  item: {
+    flexDirection: "row",
+    alignItems: "center",
+    paddingHorizontal: 16,
+    paddingVertical: 12,
+    backgroundColor: "#fff",
+  },
+  itemText: {
+    flex: 1,
+  },
+  title: {
+    fontSize: 16,
+    color: "#333",
+  },
+  time: {
+    fontSize: 12,
+    color: "#888",
+    marginTop: 4,
+  },
+  separator: {
+    height: 1,
+    backgroundColor: "#eee",
+    marginLeft: 16,
+    width: "100%",
+  },
 });
