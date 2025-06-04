@@ -11,7 +11,7 @@ Start the local development environment with Docker Compose following the guide 
 
 ## General Workflow
 
-By default, the dependencies are managed with [uv](https://docs.astral.sh/uv/), go there and install it.
+Dependencies are managed with [uv](https://docs.astral.sh/uv/). If you haven't already, please install it.
 
 From `./backend/` you can install all the dependencies with:
 
@@ -31,25 +31,25 @@ Modify or add SQLModel models for data and SQL tables in `./backend/app/models.p
 
 ## VS Code
 
-There are already configurations in place to run the backend through the VS Code debugger, so that you can use breakpoints, pause and explore variables, etc.
+VS Code configurations are provided to run the backend with the debugger, allowing use of breakpoints, variable exploration, etc.
 
-The setup is also already configured so you can run the tests through the VS Code Python tests tab.
+The setup also allows running tests via the VS Code Python tests tab.
 
 ## Docker Compose Override
 
-During development, you can change Docker Compose settings that will only affect the local development environment in the file `docker-compose.override.yml`.
+Docker Compose settings specific to local development can be configured in `docker-compose.override.yml`.
 
-The changes to that file only affect the local development environment, not the production environment. So, you can add "temporary" changes that help the development workflow.
+These overrides only affect the local development environment, not production, allowing for temporary changes that aid development.
 
-For example, the directory with the backend code is synchronized in the Docker container, copying the code you change live to the directory inside the container. That allows you to test your changes right away, without having to build the Docker image again. It should only be done during development, for production, you should build the Docker image with a recent version of the backend code. But during development, it allows you to iterate very fast.
+For instance, the backend code directory is synchronized with the Docker container, reflecting live code changes inside the container. This allows for immediate testing of changes without rebuilding the Docker image. This live synchronization is intended for development; for production, Docker images should be built with the finalized code. This approach significantly speeds up the development iteration cycle.
 
-There is also a command override that runs `fastapi run --reload` instead of the default `fastapi run`. It starts a single server process (instead of multiple, as would be for production) and reloads the process whenever the code changes. Have in mind that if you have a syntax error and save the Python file, it will break and exit, and the container will stop. After that, you can restart the container by fixing the error and running again:
+There is also a command override that runs `fastapi dev` instead of the default command. It starts a single server process (unlike multiple processes typical for production) and reloads the process whenever code changes are detected. Note that a syntax error in a saved Python file will cause the server to break and exit, stopping the container. After fixing the error, the container can be restarted by running:
 
 ```console
 $ docker compose watch
 ```
 
-There is also a commented out `command` override, you can uncomment it and comment the default one. It makes the backend container run a process that does "nothing", but keeps the container alive. That allows you to get inside your running container and execute commands inside, for example a Python interpreter to test installed dependencies, or start the development server that reloads when it detects changes.
+A commented-out `command` override is available in `docker-compose.override.yml`. If uncommented (and the default one commented out), it makes the backend container run a minimal process that keeps it alive without starting the main application. This allows you to `exec` into the running container and execute commands manually, such as starting a Python interpreter, testing installed dependencies, or running the development server with live reload.
 
 To get inside the container with a `bash` session you can start the stack with:
 
@@ -123,7 +123,7 @@ When the tests are run, a file `htmlcov/index.html` is generated, you can open i
 
 ## Migrations
 
-As during local development your app directory is mounted as a volume inside the container, you can also run the migrations with `alembic` commands inside the container and the migration code will be in your app directory (instead of being only inside the container). So you can add it to your git repository.
+During local development, the application directory is mounted as a volume within the container. This allows you to run Alembic migration commands inside the container, with the generated migration code appearing directly in your application directory, ready to be committed to Git.
 
 Make sure you create a "revision" of your models and that you "upgrade" your database with that revision every time you change them. As this is what will update the tables in your database. Otherwise, your application will have errors.
 
@@ -133,7 +133,7 @@ Make sure you create a "revision" of your models and that you "upgrade" your dat
 $ docker compose exec backend bash
 ```
 
-* Alembic is already configured to import your SQLModel models from `./backend/app/models.py`.
+* Alembic is configured to import SQLModel models from `./backend/app/models.py`.
 
 * After changing a model (for example, adding a column), inside the container, create a revision, e.g.:
 
@@ -149,7 +149,7 @@ $ alembic revision --autogenerate -m "Add column last_name to User model"
 $ alembic upgrade head
 ```
 
-If you don't want to use migrations at all, uncomment the lines in the file at `./backend/app/core/db.py` that end in:
+If migrations are not desired for this project, uncomment the lines in `./backend/app/core/db.py` that end with:
 
 ```python
 SQLModel.metadata.create_all(engine)
@@ -161,7 +161,7 @@ and comment the line in the file `scripts/prestart.sh` that contains:
 $ alembic upgrade head
 ```
 
-If you don't want to start with the default models and want to remove them / modify them, from the beginning, without having any previous revision, you can remove the revision files (`.py` Python files) under `./backend/app/alembic/versions/`. And then create a first migration as described above.
+If you need to reset or start fresh with migrations (e.g., squash existing migrations or initialize a new migration history), you can remove the existing revision files (the `.py` Python files) under `./backend/app/alembic/versions/`. After doing so, you can create a new initial migration as described above.
 
 ## Email Templates
 

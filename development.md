@@ -74,11 +74,11 @@ fastapi dev app/main.py
 
 When you start the Docker Compose stack, it uses `localhost` by default, with different ports for each service (backend, frontend, adminer, etc).
 
-When you deploy it to production (or staging), it will deploy each service in a different subdomain, like `api.example.com` for the backend and `dashboard.example.com` for the frontend.
+In production or staging environments, services are typically deployed to different subdomains, such as `api.example.com` for the backend and `dashboard.example.com` for the frontend.
 
-In the guide about [deployment](deployment.md) you can read about Traefik, the configured proxy. That's the component in charge of transmitting traffic to each service based on the subdomain.
+The [deployment guide](deployment.md) details how Traefik is used as a reverse proxy to route traffic to services based on subdomains.
 
-If you want to test that it's all working locally, you can edit the local `.env` file, and change:
+To test domain-based routing locally, you can edit the `.env` file and set:
 
 ```dotenv
 DOMAIN=localhost.tiangolo.com
@@ -88,7 +88,7 @@ That will be used by the Docker Compose files to configure the base domain for t
 
 Traefik will use this to transmit traffic at `api.localhost.tiangolo.com` to the backend, and traffic at `dashboard.localhost.tiangolo.com` to the frontend.
 
-The domain `localhost.tiangolo.com` is a special domain that is configured (with all its subdomains) to point to `127.0.0.1`. This way you can use that for your local development.
+The domain `localhost.tiangolo.com` (and its subdomains) is configured to point to `127.0.0.1`, allowing for local development and testing of domain-based routing.
 
 After you update it, run again:
 
@@ -96,7 +96,7 @@ After you update it, run again:
 docker compose watch
 ```
 
-When deploying, for example in production, the main Traefik is configured outside of the Docker Compose files. For local development, there's an included Traefik in `docker-compose.override.yml`, just to let you test that the domains work as expected, for example with `api.localhost.tiangolo.com` and `dashboard.localhost.tiangolo.com`.
+While in production the main Traefik instance is typically configured outside the application's Docker Compose setup, for local development, Traefik is included and configured in `docker-compose.override.yml`. This allows testing of domain routing (e.g., `api.localhost.tiangolo.com` and `dashboard.localhost.tiangolo.com`) locally.
 
 ## Docker Compose files and env vars
 
@@ -116,23 +116,21 @@ docker compose watch
 
 ## The .env file
 
-The `.env` file is the one that contains all your configurations, generated keys and passwords, etc.
+The `.env` file contains all project configurations, including generated keys and passwords.
 
-Depending on your workflow, you could want to exclude it from Git, for example if your project is public. In that case, you would have to make sure to set up a way for your CI tools to obtain it while building or deploying your project.
-
-One way to do it could be to add each environment variable to your CI/CD system, and updating the `docker-compose.yml` file to read that specific env var instead of reading the `.env` file.
+It is recommended to exclude the `.env` file from Git, especially for public projects. If excluded, ensure your CI/CD pipeline has a secure way to obtain these configurations during build or deployment (e.g., by setting environment variables directly in the CI/CD system and updating `docker-compose.yml` to read them).
 
 ## Pre-commits and code linting
 
-we are using a tool called [pre-commit](https://pre-commit.com/) for code linting and formatting.
+This project uses [pre-commit](https://pre-commit.com/) for code linting and formatting.
 
-When you install it, it runs right before making a commit in git. This way it ensures that the code is consistent and formatted even before it is committed.
+Installed pre-commit hooks run before each commit, ensuring code consistency and formatting.
 
 You can find a file `.pre-commit-config.yaml` with configurations at the root of the project.
 
 #### Install pre-commit to run automatically
 
-`pre-commit` is already part of the dependencies of the project, but you could also install it globally if you prefer to, following [the official pre-commit docs](https://pre-commit.com/).
+`pre-commit` is included in the project's dependencies. Alternatively, it can be installed globally by following [the official pre-commit docs](https://pre-commit.com/).
 
 After having the `pre-commit` tool installed and available, you need to "install" it in the local repository, so that it runs automatically before each commit.
 
