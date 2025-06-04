@@ -14,6 +14,18 @@ const ProfileScreen = () => {
 
   const toggleNotifications = () => setNotificationsEnabled(prev => !prev);
 
+  // Unit conversion functions
+  const cmToFeetInches = (cm: number): { feet: number; inches: number } => {
+    const totalInches = cm / 2.54;
+    const feet = Math.floor(totalInches / 12);
+    const inches = Math.round(totalInches % 12);
+    return { feet, inches };
+  };
+
+  const kgToLbs = (kg: number): number => {
+    return Math.round(kg * 2.20462);
+  };
+
   // Calculate age from date of birth
   const calculateAge = (dateOfBirth: string | undefined): number => {
     if (!dateOfBirth) return 0;
@@ -28,6 +40,24 @@ const ProfileScreen = () => {
   };
 
   const age = calculateAge(user?.date_of_birth);
+
+  // Display formatted height in feet and inches
+  const getDisplayHeight = (): string => {
+    if (!user?.height) return '-';
+    const { feet, inches } = cmToFeetInches(user.height);
+    return `${feet}' ${inches}"`;
+  };
+
+  // Display formatted weight in pounds
+  const getDisplayWeight = (): string => {
+    if (!user?.weight) return '-';
+    return `${kgToLbs(user.weight)} lbs`;
+  };
+
+  // Navigate to edit profile screen
+  const handleEditProfile = () => {
+    router.push('/edit-profile');
+  };
 
   const handleLogout = () => {
     setShowLogoutDialog(true);
@@ -64,18 +94,18 @@ const ProfileScreen = () => {
         <View style={styles.profileBox}>
           <Text style={styles.profileName}>{user?.full_name || user?.email || 'User'}</Text>
           <Text style={styles.profileEmail}>{user?.email || 'No email'}</Text>
-          <TouchableOpacity style={styles.editBtn}>
+          <TouchableOpacity style={styles.editBtn} onPress={handleEditProfile}>
             <Text style={styles.editText}>Edit</Text>
           </TouchableOpacity>
 
           <View style={styles.statsRow}>
             <View style={styles.statBox}>
               <Text style={styles.statLabel}>Height</Text>
-              <Text style={styles.statValue}>{user?.height ? `${user.height} cm` : '-'}</Text>
+              <Text style={styles.statValue}>{getDisplayHeight()}</Text>
             </View>
             <View style={styles.statBox}>
               <Text style={styles.statLabel}>Weight</Text>
-              <Text style={styles.statValue}>{user?.weight ? `${user.weight} kg` : '-'}</Text>
+              <Text style={styles.statValue}>{getDisplayWeight()}</Text>
             </View>
             <View style={styles.statBox}>
               <Text style={styles.statLabel}>Age</Text>
@@ -164,6 +194,7 @@ const ProfileScreen = () => {
           Are you sure you want to sign out?
         </Text>
       </Dialog>
+
     </SafeAreaView>
   );
 };

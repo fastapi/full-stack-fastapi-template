@@ -15,6 +15,8 @@ export const API_CONFIG = {
     SIGNUP: '/users/signup',
     TEST_TOKEN: '/login/test-token',
     USER_PROFILE: '/users/me',
+    WORKOUTS: '/workouts',
+    WORKOUT_BY_ID: (id: string) => `/workouts/${id}`,
   },
 };
 
