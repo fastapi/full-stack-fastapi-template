@@ -4,6 +4,19 @@ import type { CancelablePromise } from "./core/CancelablePromise"
 import { OpenAPI } from "./core/OpenAPI"
 import { request as __request } from "./core/request"
 import type {
+  EventsListUserEventsResponse,
+  EventsCreateEventData,
+  EventsCreateEventResponse,
+  EventsGetEventDetailsData,
+  EventsGetEventDetailsResponse,
+  EventsAddEventParticipantData,
+  EventsAddEventParticipantResponse,
+  EventsListEventParticipantsData,
+  EventsListEventParticipantsResponse,
+  EventsRemoveEventParticipantData,
+  EventsRemoveEventParticipantResponse,
+  EventsGetEventSpeechAnalysisData,
+  EventsGetEventSpeechAnalysisResponse,
   ItemsReadItemsData,
   ItemsReadItemsResponse,
   ItemsCreateItemData,
@@ -25,6 +38,18 @@ import type {
   LoginRecoverPasswordHtmlContentResponse,
   PrivateCreateUserData,
   PrivateCreateUserResponse,
+  SpeechesCreateSpeechData,
+  SpeechesCreateSpeechResponse,
+  SpeechesListEventSpeechesData,
+  SpeechesListEventSpeechesResponse,
+  SpeechesGetSpeechDetailsData,
+  SpeechesGetSpeechDetailsResponse,
+  SpeechesCreateSpeechVersionData,
+  SpeechesCreateSpeechVersionResponse,
+  SpeechesListSpeechVersionsData,
+  SpeechesListSpeechVersionsResponse,
+  SpeechesSetCurrentSpeechVersionData,
+  SpeechesSetCurrentSpeechVersionResponse,
   UsersReadUsersData,
   UsersReadUsersResponse,
   UsersCreateUserData,
@@ -48,6 +73,168 @@ import type {
   UtilsHealthCheckResponse,
 } from "./types.gen"
 
+export class EventsService {
+  /**
+   * List User Events
+   * List all events the current user is participating in.
+   * @returns CoordinationEventPublic Successful Response
+   * @throws ApiError
+   */
+  public static listUserEvents(): CancelablePromise<EventsListUserEventsResponse> {
+    return __request(OpenAPI, {
+      method: "GET",
+      url: "/api/v1/events/",
+    })
+  }
+
+  /**
+   * Create Event
+   * Create a new coordination event.
+   * The current user will be set as the creator and an initial participant.
+   * @param data The data for the request.
+   * @param data.requestBody
+   * @returns CoordinationEventPublic Successful Response
+   * @throws ApiError
+   */
+  public static createEvent(
+    data: EventsCreateEventData,
+  ): CancelablePromise<EventsCreateEventResponse> {
+    return __request(OpenAPI, {
+      method: "POST",
+      url: "/api/v1/events/",
+      body: data.requestBody,
+      mediaType: "application/json",
+      errors: {
+        422: "Validation Error",
+      },
+    })
+  }
+
+  /**
+   * Get Event Details
+   * Get details of a specific event. User must be a participant.
+   * @param data The data for the request.
+   * @param data.eventId
+   * @returns CoordinationEventPublic Successful Response
+   * @throws ApiError
+   */
+  public static getEventDetails(
+    data: EventsGetEventDetailsData,
+  ): CancelablePromise<EventsGetEventDetailsResponse> {
+    return __request(OpenAPI, {
+      method: "GET",
+      url: "/api/v1/events/{event_id}",
+      path: {
+        event_id: data.eventId,
+      },
+      errors: {
+        422: "Validation Error",
+      },
+    })
+  }
+
+  /**
+   * Add Event Participant
+   * Add a user to an event. Only the event creator can add participants.
+   * @param data The data for the request.
+   * @param data.eventId
+   * @param data.requestBody
+   * @returns EventParticipantPublic Successful Response
+   * @throws ApiError
+   */
+  public static addEventParticipant(
+    data: EventsAddEventParticipantData,
+  ): CancelablePromise<EventsAddEventParticipantResponse> {
+    return __request(OpenAPI, {
+      method: "POST",
+      url: "/api/v1/events/{event_id}/participants",
+      path: {
+        event_id: data.eventId,
+      },
+      body: data.requestBody,
+      mediaType: "application/json",
+      errors: {
+        422: "Validation Error",
+      },
+    })
+  }
+
+  /**
+   * List Event Participants
+   * List participants of an event. User must be a participant of the event.
+   * @param data The data for the request.
+   * @param data.eventId
+   * @returns UserPublic Successful Response
+   * @throws ApiError
+   */
+  public static listEventParticipants(
+    data: EventsListEventParticipantsData,
+  ): CancelablePromise<EventsListEventParticipantsResponse> {
+    return __request(OpenAPI, {
+      method: "GET",
+      url: "/api/v1/events/{event_id}/participants",
+      path: {
+        event_id: data.eventId,
+      },
+      errors: {
+        422: "Validation Error",
+      },
+    })
+  }
+
+  /**
+   * Remove Event Participant
+   * Remove a participant from an event.
+   * Allowed if:
+   * - Current user is the event creator.
+   * - Current user is removing themselves.
+   * @param data The data for the request.
+   * @param data.eventId
+   * @param data.userIdToRemove
+   * @returns Message Successful Response
+   * @throws ApiError
+   */
+  public static removeEventParticipant(
+    data: EventsRemoveEventParticipantData,
+  ): CancelablePromise<EventsRemoveEventParticipantResponse> {
+    return __request(OpenAPI, {
+      method: "DELETE",
+      url: "/api/v1/events/{event_id}/participants/{user_id_to_remove}",
+      path: {
+        event_id: data.eventId,
+        user_id_to_remove: data.userIdToRemove,
+      },
+      errors: {
+        422: "Validation Error",
+      },
+    })
+  }
+
+  /**
+   * Get Event Speech Analysis
+   * Perform analysis on speeches within an event and return personalized nudges
+   * for the current user. User must be a participant of the event.
+   * @param data The data for the request.
+   * @param data.eventId
+   * @returns PersonalizedNudgePublic Successful Response
+   * @throws ApiError
+   */
+  public static getEventSpeechAnalysis(
+    data: EventsGetEventSpeechAnalysisData,
+  ): CancelablePromise<EventsGetEventSpeechAnalysisResponse> {
+    return __request(OpenAPI, {
+      method: "GET",
+      url: "/api/v1/events/{event_id}/speech-analysis",
+      path: {
+        event_id: data.eventId,
+      },
+      errors: {
+        422: "Validation Error",
+      },
+    })
+  }
+}
+
 export class ItemsService {
   /**
    * Read Items
@@ -63,7 +250,7 @@ export class ItemsService {
   ): CancelablePromise<ItemsReadItemsResponse> {
     return __request(OpenAPI, {
       method: "GET",
-      url: "/api/v1/items/",
+      url: "/api/v1/items/items/",
       query: {
         skip: data.skip,
         limit: data.limit,
@@ -87,7 +274,7 @@ export class ItemsService {
   ): CancelablePromise<ItemsCreateItemResponse> {
     return __request(OpenAPI, {
       method: "POST",
-      url: "/api/v1/items/",
+      url: "/api/v1/items/items/",
       body: data.requestBody,
       mediaType: "application/json",
       errors: {
@@ -109,7 +296,7 @@ export class ItemsService {
   ): CancelablePromise<ItemsReadItemResponse> {
     return __request(OpenAPI, {
       method: "GET",
-      url: "/api/v1/items/{id}",
+      url: "/api/v1/items/items/{id}",
       path: {
         id: data.id,
       },
@@ -133,7 +320,7 @@ export class ItemsService {
   ): CancelablePromise<ItemsUpdateItemResponse> {
     return __request(OpenAPI, {
       method: "PUT",
-      url: "/api/v1/items/{id}",
+      url: "/api/v1/items/items/{id}",
       path: {
         id: data.id,
       },
@@ -158,7 +345,7 @@ export class ItemsService {
   ): CancelablePromise<ItemsDeleteItemResponse> {
     return __request(OpenAPI, {
       method: "DELETE",
-      url: "/api/v1/items/{id}",
+      url: "/api/v1/items/items/{id}",
       path: {
         id: data.id,
       },
@@ -288,9 +475,161 @@ export class PrivateService {
   ): CancelablePromise<PrivateCreateUserResponse> {
     return __request(OpenAPI, {
       method: "POST",
-      url: "/api/v1/private/users/",
+      url: "/api/v1/private/private/users/",
       body: data.requestBody,
       mediaType: "application/json",
+      errors: {
+        422: "Validation Error",
+      },
+    })
+  }
+}
+
+export class SpeechesService {
+  /**
+   * Create Speech
+   * Create a new secret speech. The current user will be set as the creator.
+   * An initial version of the speech is created with the provided draft.
+   * User must be a participant of the specified event.
+   * @param data The data for the request.
+   * @param data.requestBody
+   * @returns SecretSpeechPublic Successful Response
+   * @throws ApiError
+   */
+  public static createSpeech(
+    data: SpeechesCreateSpeechData,
+  ): CancelablePromise<SpeechesCreateSpeechResponse> {
+    return __request(OpenAPI, {
+      method: "POST",
+      url: "/api/v1/speeches/",
+      body: data.requestBody,
+      mediaType: "application/json",
+      errors: {
+        422: "Validation Error",
+      },
+    })
+  }
+
+  /**
+   * List Event Speeches
+   * Get all speeches for a given event. User must be a participant of the event.
+   * @param data The data for the request.
+   * @param data.eventId
+   * @returns SecretSpeechPublic Successful Response
+   * @throws ApiError
+   */
+  public static listEventSpeeches(
+    data: SpeechesListEventSpeechesData,
+  ): CancelablePromise<SpeechesListEventSpeechesResponse> {
+    return __request(OpenAPI, {
+      method: "GET",
+      url: "/api/v1/speeches/event/{event_id}",
+      path: {
+        event_id: data.eventId,
+      },
+      errors: {
+        422: "Validation Error",
+      },
+    })
+  }
+
+  /**
+   * Get Speech Details
+   * Get a specific speech. User must have access to the event of this speech.
+   * If the user is the creator of the speech, they might get more details
+   * (e.g. draft of the current version - this needs handling in response shaping).
+   * @param data The data for the request.
+   * @param data.speechId
+   * @returns SecretSpeechPublic Successful Response
+   * @throws ApiError
+   */
+  public static getSpeechDetails(
+    data: SpeechesGetSpeechDetailsData,
+  ): CancelablePromise<SpeechesGetSpeechDetailsResponse> {
+    return __request(OpenAPI, {
+      method: "GET",
+      url: "/api/v1/speeches/{speech_id}",
+      path: {
+        speech_id: data.speechId,
+      },
+      errors: {
+        422: "Validation Error",
+      },
+    })
+  }
+
+  /**
+   * Create Speech Version
+   * Create a new version for a secret speech.
+   * User must be the creator of the speech or a participant in the event (adjust as needed).
+   * @param data The data for the request.
+   * @param data.speechId
+   * @param data.requestBody
+   * @returns SecretSpeechVersionPublic Successful Response
+   * @throws ApiError
+   */
+  public static createSpeechVersion(
+    data: SpeechesCreateSpeechVersionData,
+  ): CancelablePromise<SpeechesCreateSpeechVersionResponse> {
+    return __request(OpenAPI, {
+      method: "POST",
+      url: "/api/v1/speeches/{speech_id}/versions",
+      path: {
+        speech_id: data.speechId,
+      },
+      body: data.requestBody,
+      mediaType: "application/json",
+      errors: {
+        422: "Validation Error",
+      },
+    })
+  }
+
+  /**
+   * List Speech Versions
+   * List all versions of a speech.
+   * If current user is speech creator, they see full details (including draft).
+   * Otherwise, they see the public version (no draft).
+   * @param data The data for the request.
+   * @param data.speechId
+   * @returns SecretSpeechVersionPublic Successful Response
+   * @throws ApiError
+   */
+  public static listSpeechVersions(
+    data: SpeechesListSpeechVersionsData,
+  ): CancelablePromise<SpeechesListSpeechVersionsResponse> {
+    return __request(OpenAPI, {
+      method: "GET",
+      url: "/api/v1/speeches/{speech_id}/versions",
+      path: {
+        speech_id: data.speechId,
+      },
+      errors: {
+        422: "Validation Error",
+      },
+    })
+  }
+
+  /**
+   * Set Current Speech Version
+   * Set a specific version of a speech as the current one.
+   * User must be the creator of the speech.
+   * @param data The data for the request.
+   * @param data.speechId
+   * @param data.versionId
+   * @returns SecretSpeechPublic Successful Response
+   * @throws ApiError
+   */
+  public static setCurrentSpeechVersion(
+    data: SpeechesSetCurrentSpeechVersionData,
+  ): CancelablePromise<SpeechesSetCurrentSpeechVersionResponse> {
+    return __request(OpenAPI, {
+      method: "PUT",
+      url: "/api/v1/speeches/{speech_id}/versions/{version_id}/set-current",
+      path: {
+        speech_id: data.speechId,
+        version_id: data.versionId,
+      },
       errors: {
         422: "Validation Error",
       },
@@ -313,7 +652,7 @@ export class UsersService {
   ): CancelablePromise<UsersReadUsersResponse> {
     return __request(OpenAPI, {
       method: "GET",
-      url: "/api/v1/users/",
+      url: "/api/v1/users/users/",
       query: {
         skip: data.skip,
         limit: data.limit,
@@ -337,7 +676,7 @@ export class UsersService {
   ): CancelablePromise<UsersCreateUserResponse> {
     return __request(OpenAPI, {
       method: "POST",
-      url: "/api/v1/users/",
+      url: "/api/v1/users/users/",
       body: data.requestBody,
       mediaType: "application/json",
       errors: {
@@ -355,7 +694,7 @@ export class UsersService {
   public static readUserMe(): CancelablePromise<UsersReadUserMeResponse> {
     return __request(OpenAPI, {
       method: "GET",
-      url: "/api/v1/users/me",
+      url: "/api/v1/users/users/me",
     })
   }
 
@@ -368,7 +707,7 @@ export class UsersService {
   public static deleteUserMe(): CancelablePromise<UsersDeleteUserMeResponse> {
     return __request(OpenAPI, {
       method: "DELETE",
-      url: "/api/v1/users/me",
+      url: "/api/v1/users/users/me",
     })
   }
 
@@ -385,7 +724,7 @@ export class UsersService {
   ): CancelablePromise<UsersUpdateUserMeResponse> {
     return __request(OpenAPI, {
       method: "PATCH",
-      url: "/api/v1/users/me",
+      url: "/api/v1/users/users/me",
       body: data.requestBody,
       mediaType: "application/json",
       errors: {
@@ -407,7 +746,7 @@ export class UsersService {
   ): CancelablePromise<UsersUpdatePasswordMeResponse> {
     return __request(OpenAPI, {
       method: "PATCH",
-      url: "/api/v1/users/me/password",
+      url: "/api/v1/users/users/me/password",
       body: data.requestBody,
       mediaType: "application/json",
       errors: {
@@ -429,7 +768,7 @@ export class UsersService {
   ): CancelablePromise<UsersRegisterUserResponse> {
     return __request(OpenAPI, {
       method: "POST",
-      url: "/api/v1/users/signup",
+      url: "/api/v1/users/users/signup",
       body: data.requestBody,
       mediaType: "application/json",
       errors: {
@@ -451,7 +790,7 @@ export class UsersService {
   ): CancelablePromise<UsersReadUserByIdResponse> {
     return __request(OpenAPI, {
       method: "GET",
-      url: "/api/v1/users/{user_id}",
+      url: "/api/v1/users/users/{user_id}",
       path: {
         user_id: data.userId,
       },
@@ -475,7 +814,7 @@ export class UsersService {
   ): CancelablePromise<UsersUpdateUserResponse> {
     return __request(OpenAPI, {
       method: "PATCH",
-      url: "/api/v1/users/{user_id}",
+      url: "/api/v1/users/users/{user_id}",
       path: {
         user_id: data.userId,
       },
@@ -500,7 +839,7 @@ export class UsersService {
   ): CancelablePromise<UsersDeleteUserResponse> {
     return __request(OpenAPI, {
       method: "DELETE",
-      url: "/api/v1/users/{user_id}",
+      url: "/api/v1/users/users/{user_id}",
       path: {
         user_id: data.userId,
       },
@@ -525,7 +864,7 @@ export class UtilsService {
   ): CancelablePromise<UtilsTestEmailResponse> {
     return __request(OpenAPI, {
       method: "POST",
-      url: "/api/v1/utils/test-email/",
+      url: "/api/v1/utils/utils/test-email/",
       query: {
         email_to: data.emailTo,
       },
@@ -543,7 +882,7 @@ export class UtilsService {
   public static healthCheck(): CancelablePromise<UtilsHealthCheckResponse> {
     return __request(OpenAPI, {
       method: "GET",
-      url: "/api/v1/utils/health-check/",
+      url: "/api/v1/utils/utils/health-check/",
     })
   }
 }
