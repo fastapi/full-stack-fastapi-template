@@ -212,6 +212,16 @@ The input variables, with their default values (some auto generated) are:
 - `postgres_password`: (default: `"changethis"`) The password for the PostgreSQL database, stored in .env, you can generate one with the method above.
 - `sentry_dsn`: (default: "") The DSN for Sentry, if you are using it, you can set it later in .env.
 
+## Getting Started / Local Development Setup
+
+Docker Compose is the recommended way to run the project locally.
+Use the command `docker compose watch` to start the services.
+
+For more details on Docker Compose, including how to access services (frontend, backend, docs, etc.), please refer to `development.md`.
+
+For faster development iteration, frontend and backend services can be run directly on the host machine.
+Instructions for this can be found in `frontend/README.md` and `backend/README.md`.
+
 ## Backend Development
 
 Backend docs: [backend/README.md](./backend/README.md).
@@ -229,6 +239,18 @@ Deployment docs: [deployment.md](./deployment.md).
 General development docs: [development.md](./development.md).
 
 This includes using Docker Compose, custom local domains, `.env` configurations, etc.
+
+## Useful Scripts
+
+Here's a list of scripts available in the project to help with common development tasks:
+
+-   `scripts/build.sh`: Builds the Docker images for the project.
+-   `scripts/test.sh`: Runs the complete test suite in a Dockerized environment. This typically includes backend tests and can be expanded to include frontend end-to-end tests.
+-   `scripts/test-local.sh`: Runs backend tests directly on the host. It assumes the backend services (like the database) are already running (e.g., via `docker compose watch` or a similar local setup).
+-   `scripts/generate-client.sh`: Generates or updates the frontend client based on the backend's OpenAPI schema. This usually involves fetching the schema and running a code generation tool.
+-   `backend/scripts/format.sh`: Formats the backend Python code using Ruff to ensure consistent code style.
+-   `backend/scripts/lint.sh`: Lints the backend Python code using MyPy for static type checking and Ruff for identifying potential errors and style issues.
+-   `backend/scripts/test.sh`: Runs backend tests directly on the host (similar to `scripts/test-local.sh` but often focused only on backend unit/integration tests) and generates a test coverage report.
 
 ## Release Notes
 
