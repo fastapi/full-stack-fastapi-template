@@ -6,6 +6,8 @@ import { Input } from '../components/ui/Input';
 import { Checkbox } from '../components/ui/Checkbox';
 import { router } from 'expo-router';
 import { useUser } from '@/contexts/UserContext';
+import { useAuth } from '@/contexts/AuthContext';
+import { API_URL } from '@/constants/config';
 
 export default function LoginScreen() {
   const { setName: setUserName } = useUser();
@@ -15,39 +17,28 @@ export default function LoginScreen() {
   const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [errors, setErrors] = useState<{ email?: string; password?: string }>({});
+  const { login } = useAuth();
+
   
   const backgroundColor = useThemeColor({}, 'background');
   const textColor = useThemeColor({}, 'text');
   const tintColor = useThemeColor({}, 'tint');
   
   const handleLogin = async () => {
-    setErrors({});
-    
-    const newErrors: { email?: string; password?: string } = {};
-  
-    if (!email) newErrors.email = 'Email is required';
-    else if (!/\S+@\S+\.\S+/.test(email)) newErrors.email = 'Please enter a valid email';
-  
-    if (!password) newErrors.password = 'Password is required';
-    else if (password.length < 6) newErrors.password = 'Password must be at least 6 characters';
-  
-    if (Object.keys(newErrors).length > 0) {
-      setErrors(newErrors);
-      return;
-    }
-  
-    setIsLoading(true);
-  
     try {
-      // Simulate API call
-      await new Promise(resolve => setTimeout(resolve, 1500));
-  
-      // Set the name (this mimics what signup does)
-      setUserName('Returning User'); // You can replace this with a real name from API later
-  
-      router.replace('/(tabs)');
-    } catch (error) {
-      console.error('Login error:', error);
+      setIsLoading(true);
+      await login(email, password); // Use context login logic
+      setUserName(email); // optionally call setUserName if it's useful
+      router.replace('/'); // Redirect to home or dashboard
+    } catch (err: any) {
+      console.error('Login error:', err instanceof Error ? err.message : err);
+      if (err instanceof Error) {
+        console.error('Login error:', err.message);
+        console.error('Full stack:', err.stack);
+      } else {
+        console.error('Login error (raw):', err);
+      }
+      alert(`Login failed: ${err.message}`);
     } finally {
       setIsLoading(false);
     }

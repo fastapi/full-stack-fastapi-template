@@ -4,6 +4,10 @@ import { SafeAreaView, View, Text, StyleSheet, ScrollView, TouchableOpacity, Ima
 import { LineChart, PieChart } from 'react-native-chart-kit';
 import { router } from 'expo-router';
 import { usePersonalBests } from "@/hooks/usePersonalBests";
+import { getAccessToken } from '@/scripts/auth';
+import { useEffect } from 'react';
+
+
 
 const { width } = Dimensions.get('window');
 //console.log(" 1 HomeScreen about to be rendered rendered");
@@ -17,6 +21,30 @@ const HomeScreen = () => {
     return null;
   }
   const { name } = user;
+  useEffect(() => {
+    const fetchAdminDbStructure = async () => {
+      try {
+        const token = await getAccessToken();
+        const res = await fetch('http://localhost:8000/api/v1/inspect-db', {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        });
+  
+        if (!res.ok) {
+          console.error(`Failed to fetch admin DB structure: ${res.status}`);
+          return;
+        }
+  
+        const dbStructure = await res.json();
+        console.log("🛠 Admin DB Structure:", dbStructure);
+      } catch (err) {
+        console.error("Error fetching admin DB structure:", err);
+      }
+    };
+  
+    fetchAdminDbStructure();
+  }, []);
   const heartRateData = [60, 62, 65, 70, 75, 78, 80, 82, 79, 76];
   const waterIntake = '4L';
   const sleepHours = '8h 20m';
@@ -29,7 +57,7 @@ const HomeScreen = () => {
     { id: '2', type: 'Lowerbody Workout', calories: 200, duration: '30 minutes', icon: require('../assets/images/lowerbody.png') },
     // ... more workouts
   ];
-  const { pbs, loading } = usePersonalBests();
+  const { pbs = [], loading } = usePersonalBests();
   const testPbs = pbs.length === 0 ? [{ metric: "Deadlift", value: 315, date: "2025-05-27" }] : pbs;
   
   console.log('PBS LOADED:', pbs);
@@ -224,7 +252,7 @@ const HomeScreen = () => {
           ) : pbs.length === 0 ? (
             <Text style={{ textAlign: 'center', color: '#999', marginBottom: 12 }}>No personal bests yet. Start training to set new records!</Text>
           ) : (
-            testPbs.map((pb) => (
+            pbs.map((pb) => (
               <View key={pb.metric} style={styles.workoutItem}>
                 <Image source={require('../assets/images/trophy.png')} style={styles.workoutIcon} />
                 <View style={styles.workoutInfo}>

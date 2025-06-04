@@ -29,6 +29,16 @@ from app.crud.user import (
     update_user,
 )
 
+from app.crud.pbests import(
+    create_or_update_personal_best,
+    get_personal_best,
+    get_personal_bests
+)
+
+from app.crud.workouts import (
+    create_or_update_personal_best
+)
+
 __all__ = [
     # User operations
     "authenticate",
@@ -61,4 +71,10 @@ __all__ = [
     "get_feed_posts",
     "update_workout_post",
     "delete_workout_post",
+
+    #Pbests
+    "create_or_update_personal_best",
+    "get_personal_best",
+    "get_personal_bests",
+    "create_or_update_personal_best"
 ]

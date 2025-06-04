@@ -1,5 +1,6 @@
 from typing import Optional
-
+from pydantic import BaseModel
+from app.models.user import UserPublic
 from sqlmodel import SQLModel
 
 
@@ -13,6 +14,9 @@ class Token(SQLModel):
 class TokenPayload(SQLModel):
     sub: Optional[str] = None
 
+class TokenWithUser(BaseModel):
+    access_token: str
+    user: UserPublic
 
 class NewPassword(SQLModel):
     token: str

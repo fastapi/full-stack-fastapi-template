@@ -14,62 +14,66 @@ from app.models.workout import (
     WorkoutPublic,
     WorkoutsPublic,
     WorkoutWithExercisesPublic,
-    Exercise,
-    ExerciseCreate,
-    ExerciseUpdate,
-    ExercisePublic,
+    WorkoutExercise,
+    WorkoutExerciseCreate,
+    WorkoutExerciseUpdate,
+    WorkoutExercisePublic,
+    WorkoutSet,
+    WorkoutSetCreate,
+    WorkoutSetUpdate,
+    WorkoutSetPublic,
 )
-from app.crudFuncs import update_personal_bests_after_workout
+from app.crud.workouts import update_personal_bests_after_workout
 
 
 router = APIRouter(prefix="/workouts", tags=["workouts"])
 
 
-@router.post("/", response_model=WorkoutPublic)
+@router.post("/", response_model=WorkoutWithExercisesPublic)
 def create_workout(
     *,
     session: SessionDep,
     current_user: CurrentUser,
-    workout_in: WorkoutCreate = Body(
-        ...,
-        examples=[
-            {
-                "name": "Monday Strength Training",
-                "description": "Focus on upper body strength",
-                "scheduled_date": "2025-05-20T08:00:00Z",
-                "duration_minutes": 60
-            }
-        ],
-    )
-) -> Any:
-    """
-    Create a new workout.
-    
-    This endpoint allows users to create a new workout plan with details such as name,
-    description, scheduled date, and expected duration.
-    
-    - **name**: Required. The name of the workout (1-255 characters)
-    - **description**: Optional. A detailed description of the workout (up to 1000 characters)
-    - **scheduled_date**: Optional. When the workout is scheduled to take place
-    - **duration_minutes**: Optional. The expected duration of the workout in minutes
-    
-    Returns the created workout with its ID and other metadata.
-    """
+    workout_in: WorkoutCreate
+):
     workout = Workout(
         user_id=current_user.id,
         name=workout_in.name,
         description=workout_in.description,
         scheduled_date=workout_in.scheduled_date,
         duration_minutes=workout_in.duration_minutes,
-        is_completed=False,
+        is_completed=workout_in.is_completed or False,
+        completed_date=workout_in.completed_date,
         created_at=datetime.utcnow(),
     )
-    
+
     session.add(workout)
+    session.flush()  # Get workout.id
+
+    for ex in workout_in.exercises:
+        w_ex = WorkoutExercise(
+            workout_id=workout.id,
+            name=ex.name,
+            muscle_group=ex.muscle_group,
+            type=ex.type,
+            created_at=datetime.utcnow(),
+        )
+        session.add(w_ex)
+        session.flush()  # Get w_ex.id
+
+        for s in ex.sets:
+            set_obj = WorkoutSet(
+                exercise_id=w_ex.id,
+                weight=s.weight,
+                reps=s.reps
+            )
+            session.add(set_obj)
+
     session.commit()
     session.refresh(workout)
-    
     return workout
+
+
 
 
 @router.get("/", response_model=WorkoutsPublic)
@@ -456,232 +460,143 @@ def get_workout_stats(
     }
 
 
-@router.post("/{workout_id}/exercises", response_model=ExercisePublic)
+@router.post("/{workout_id}/exercises", response_model=WorkoutExercisePublic)
 def add_exercise(
     *,
     session: SessionDep,
     current_user: CurrentUser,
-    workout_id: uuid.UUID = Path(..., description="The ID of the workout to add the exercise to"),
-    exercise_in: ExerciseCreate = Body(
-        ...,
-        examples=[
-            {
-                "name": "Bench Press",
-                "description": "Flat bench press with barbell",
-                "category": "Strength",
-                "sets": 4,
-                "reps": 8,
-                "weight": 135.5
-            }
-        ],
-    )
+    workout_id: uuid.UUID,
+    exercise_in: WorkoutExerciseCreate
 ) -> Any:
-    """
-    Add an exercise to a workout.
-    
-    This endpoint allows users to add an exercise to an existing workout.
-    
-    - **workout_id**: The UUID of the workout to add the exercise to
-    - **name**: Required. The name of the exercise (1-255 characters)
-    - **description**: Optional. A detailed description of the exercise (up to 1000 characters)
-    - **category**: Required. The category of the exercise (e.g., Strength, Cardio)
-    - **sets**: Optional. The number of sets
-    - **reps**: Optional. The number of repetitions per set
-    - **weight**: Optional. The weight used (in pounds/kg)
-    
-    Returns the created exercise.
-    
-    Raises:
-    - 404: If the workout is not found
-    - 403: If the workout doesn't belong to the current user
-    """
-    # Check if workout exists and belongs to user
     workout = session.get(Workout, workout_id)
-    
     if not workout:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail="Workout not found"
-        )
-    
+        raise HTTPException(status_code=404, detail="Workout not found")
     if workout.user_id != current_user.id:
-        raise HTTPException(
-            status_code=status.HTTP_403_FORBIDDEN,
-            detail="Not enough permissions"
-        )
-    
-    # Create exercise
-    exercise = Exercise(
+        raise HTTPException(status_code=403, detail="Not enough permissions")
+
+    workout_ex = WorkoutExercise(
         workout_id=workout_id,
         name=exercise_in.name,
-        description=exercise_in.description,
-        category=exercise_in.category,
-        sets=exercise_in.sets,
-        reps=exercise_in.reps,
-        weight=exercise_in.weight,
-        created_at=datetime.utcnow(),
+        muscle_group=exercise_in.muscle_group,
+        type=exercise_in.type,
+        created_at=datetime.utcnow()
     )
-    
-    session.add(exercise)
+    session.add(workout_ex)
+    session.flush()  # to get ID
+
+    for set_in in exercise_in.sets:
+        w_set = WorkoutSet(
+            exercise_id=workout_ex.id,
+            weight=set_in.weight,
+            reps=set_in.reps
+        )
+        session.add(w_set)
+
     session.commit()
-    session.refresh(exercise)
-    
-    return exercise
+    session.refresh(workout_ex)
+
+    # Manually load sets for response
+    workout_ex.sets = session.exec(
+        select(WorkoutSet).where(WorkoutSet.exercise_id == workout_ex.id)
+    ).all()
+
+    return workout_ex
 
 
-@router.get("/{workout_id}/exercises", response_model=List[ExercisePublic])
+
+@router.get("/{workout_id}/exercises", response_model=List[WorkoutExercisePublic])
 def get_exercises(
-    workout_id: uuid.UUID = Path(..., description="The ID of the workout to get exercises for"),
-    session: SessionDep = None,
-    current_user: CurrentUser = None,
+    workout_id: uuid.UUID,
+    session: SessionDep,
+    current_user: CurrentUser
 ) -> Any:
-    """
-    Get exercises for a workout.
-    
-    This endpoint retrieves all exercises associated with a specific workout.
-    
-    - **workout_id**: The UUID of the workout to get exercises for
-    
-    Returns a list of exercises.
-    
-    Raises:
-    - 404: If the workout is not found
-    - 403: If the workout doesn't belong to the current user
-    """
-    # Check if workout exists and belongs to user
     workout = session.get(Workout, workout_id)
-    
     if not workout:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail="Workout not found"
-        )
-    
+        raise HTTPException(status_code=404, detail="Workout not found")
     if workout.user_id != current_user.id:
-        raise HTTPException(
-            status_code=status.HTTP_403_FORBIDDEN,
-            detail="Not enough permissions"
-        )
-    
-    # Get exercises
-    statement = select(Exercise).where(Exercise.workout_id == workout_id)
-    exercises = session.exec(statement).all()
-    
+        raise HTTPException(status_code=403, detail="Not enough permissions")
+
+    exercises = session.exec(
+        select(WorkoutExercise).where(WorkoutExercise.workout_id == workout_id)
+    ).all()
+
+    for ex in exercises:
+        ex.sets = session.exec(
+            select(WorkoutSet).where(WorkoutSet.exercise_id == ex.id)
+        ).all()
+
     return exercises
 
 
-@router.put("/exercises/{exercise_id}", response_model=ExercisePublic)
+
+@router.put("/exercises/{exercise_id}", response_model=WorkoutExercisePublic)
 def update_exercise(
     *,
     session: SessionDep,
     current_user: CurrentUser,
-    exercise_id: uuid.UUID = Path(..., description="The ID of the exercise to update"),
-    exercise_in: ExerciseUpdate = Body(
-        ...,
-        examples=[
-            {
-                "name": "Incline Bench Press",
-                "description": "Incline bench press with dumbbells",
-                "category": "Strength",
-                "sets": 3,
-                "reps": 10,
-                "weight": 50.0
-            }
-        ],
-    )
+    exercise_id: uuid.UUID,
+    exercise_in: WorkoutExerciseUpdate
 ) -> Any:
-    """
-    Update an exercise.
-    
-    This endpoint allows users to update an existing exercise's details.
-    
-    - **exercise_id**: The UUID of the exercise to update
-    - **name**: Optional. The updated name of the exercise
-    - **description**: Optional. The updated description
-    - **category**: Optional. The updated category
-    - **sets**: Optional. The updated number of sets
-    - **reps**: Optional. The updated number of repetitions
-    - **weight**: Optional. The updated weight
-    
-    Returns the updated exercise.
-    
-    Raises:
-    - 404: If the exercise is not found
-    - 403: If the exercise's workout doesn't belong to the current user
-    """
-    # Get exercise
-    exercise = session.get(Exercise, exercise_id)
-    
+    exercise = session.get(WorkoutExercise, exercise_id)
     if not exercise:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail="Exercise not found"
-        )
-    
-    # Check if workout belongs to user
+        raise HTTPException(status_code=404, detail="Exercise not found")
+
     workout = session.get(Workout, exercise.workout_id)
-    
     if not workout or workout.user_id != current_user.id:
-        raise HTTPException(
-            status_code=status.HTTP_403_FORBIDDEN,
-            detail="Not enough permissions"
-        )
-    
-    # Update exercise
-    update_dict = exercise_in.model_dump(exclude_unset=True)
-    
-    # Set updated_at timestamp
-    update_dict["updated_at"] = datetime.utcnow()
-    
-    exercise.sqlmodel_update(update_dict)
+        raise HTTPException(status_code=403, detail="Not enough permissions")
+
+    update_data = exercise_in.model_dump(exclude_unset=True, exclude={"sets"})
+    for key, value in update_data.items():
+        setattr(exercise, key, value)
     session.add(exercise)
+
+    # Replace sets if provided
+    if exercise_in.sets is not None:
+        session.exec(
+            select(WorkoutSet)
+            .where(WorkoutSet.exercise_id == exercise.id)
+        ).all()
+        session.exec(
+            select(WorkoutSet)
+            .where(WorkoutSet.exercise_id == exercise.id)
+        ).delete()
+        for s in exercise_in.sets:
+            session.add(
+                WorkoutSet(
+                    exercise_id=exercise.id,
+                    weight=s.weight,
+                    reps=s.reps
+                )
+            )
+
     session.commit()
     session.refresh(exercise)
-    
+
+    # Reload sets
+    exercise.sets = session.exec(
+        select(WorkoutSet).where(WorkoutSet.exercise_id == exercise.id)
+    ).all()
+
     return exercise
+
 
 
 @router.delete("/exercises/{exercise_id}", response_model=Message)
 def delete_exercise(
-    exercise_id: uuid.UUID = Path(..., description="The ID of the exercise to delete"),
-    session: SessionDep = None,
-    current_user: CurrentUser = None,
+    exercise_id: uuid.UUID,
+    session: SessionDep,
+    current_user: CurrentUser
 ) -> Any:
-    """
-    Delete an exercise.
-    
-    This endpoint allows users to delete an exercise from a workout.
-    
-    - **exercise_id**: The UUID of the exercise to delete
-    
-    Returns a success message.
-    
-    Raises:
-    - 404: If the exercise is not found
-    - 403: If the exercise's workout doesn't belong to the current user
-    """
-    # Get exercise
-    exercise = session.get(Exercise, exercise_id)
-    
+    exercise = session.get(WorkoutExercise, exercise_id)
     if not exercise:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail="Exercise not found"
-        )
-    
-    # Check if workout belongs to user
+        raise HTTPException(status_code=404, detail="Exercise not found")
+
     workout = session.get(Workout, exercise.workout_id)
-    
     if not workout or workout.user_id != current_user.id:
-        raise HTTPException(
-            status_code=status.HTTP_403_FORBIDDEN,
-            detail="Not enough permissions"
-        )
-    
-    # Delete exercise
+        raise HTTPException(status_code=403, detail="Not enough permissions")
+
     session.delete(exercise)
     session.commit()
-    
     return Message(message="Exercise deleted successfully")
 
 

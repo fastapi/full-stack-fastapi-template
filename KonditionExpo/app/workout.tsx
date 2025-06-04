@@ -14,6 +14,8 @@ import { router } from 'expo-router';
 import { useWorkout, Exercise, WorkoutSet } from '@/contexts/WorkoutContext';
 import { Button } from '@/components/ui/Button';
 import { Input } from '@/components/ui/Input';
+import { getAccessToken } from "@/scripts/auth";
+
 
 // Predefined exercises database
 const EXERCISES: Exercise[] = [
@@ -151,7 +153,7 @@ const WorkoutScreen = () => {
 
   const handleFinishWorkout = () => {
     if (!currentWorkout) return;
-    
+  
     Alert.alert(
       'Finish Workout',
       'Are you sure you want to finish this workout?',
@@ -159,9 +161,70 @@ const WorkoutScreen = () => {
         { text: 'Cancel', style: 'cancel' },
         {
           text: 'Finish',
-          onPress: () => {
+          onPress: async () => {
             const duration = Math.round((new Date().getTime() - startTime.getTime()) / 60000);
-            const updatedWorkout = { ...currentWorkout, duration };
+            const updatedWorkout = {
+              ...currentWorkout,
+              duration_minutes: duration,
+              is_completed: true,
+              completed_date: new Date().toISOString(),
+            };
+            const sanitizedWorkout = {
+              ...currentWorkout,
+              duration_minutes: duration,
+              is_completed: true,
+              completed_date: new Date().toISOString(),
+              exercises: currentWorkout.exercises.map((ex) => ({
+                name: ex.exercise.name,
+                muscle_group: ex.exercise.muscle_group,
+                type: ex.exercise.type,
+                sets: ex.sets.map(set => ({
+                  reps: set.reps,
+                  weight: set.weight
+                }))
+              }))
+            };
+  
+            try {
+              const token = await getAccessToken();
+  
+              // Save workout to backend
+              const workoutRes = await fetch(`http://localhost:8000/api/v1/workouts/`, {
+                method: "POST",
+                headers: {
+                  "Authorization": `Bearer ${token}`,
+                  "Content-Type": "application/json",
+                },
+                body: JSON.stringify(sanitizedWorkout),
+              });
+  
+              if (!workoutRes.ok) {
+                const errText = await workoutRes.text();
+                console.error("❌ Failed to save workout:", errText);
+              } else {
+                const savedWorkout = await workoutRes.json();
+                console.log("✅ Workout saved:", savedWorkout);
+              }
+  
+              // Optionally update PBs too
+              const pbRes = await fetch(`$http://localhost:8000/api/v1/personal-bests/update-from-workout`, {
+                method: "POST",
+                headers: {
+                  "Authorization": `Bearer ${token}`,
+                  "Content-Type": "application/json",
+                },
+                body: JSON.stringify(sanitizedWorkout),
+              });
+  
+              if (!pbRes.ok) {
+                console.error("❌ Failed to update PBs", await pbRes.text());
+              } else {
+                console.log("🏆 PBs updated");
+              }
+            } catch (err) {
+              console.error("🚨 Workout submission error:", err);
+            }
+  
             endWorkout();
             router.replace('/home');
           },
@@ -169,6 +232,8 @@ const WorkoutScreen = () => {
       ]
     );
   };
+  
+  
 
   if (!currentWorkout) {
     return null;

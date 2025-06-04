@@ -12,6 +12,8 @@ import RNPickerSelect from 'react-native-picker-select';
 import { Button } from '@/components/ui/Button';
 import { router } from 'expo-router';
 import { useUser } from '@/contexts/UserContext';
+import { TouchableWithoutFeedback, Keyboard } from 'react-native';
+
 
 export default function SignUpStep2() {
   const [gender, setGender] = useState('');
@@ -112,134 +114,162 @@ export default function SignUpStep2() {
 
   return (
     <KeyboardAvoidingView
-      style={styles.container}
-      behavior={Platform.OS === 'ios' ? 'padding' : undefined}
-      keyboardVerticalOffset={64}
-    >
-      <ScrollView contentContainerStyle={styles.contentContainer}>
-        <Text style={styles.title}>Additional Info</Text>
+        style={styles.container}
+        behavior={Platform.OS === 'ios' ? 'padding' : undefined}
+        keyboardVerticalOffset={64}
+      >
+        <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
+        <ScrollView contentContainerStyle={styles.contentContainer} keyboardShouldPersistTaps="handled" style={{ flex: 1, overflow: 'visible' }}>
+          <Text style={styles.title}>Additional Info</Text>
 
-        <Text style={styles.label}>Gender</Text>
-        <RNPickerSelect
-          onValueChange={setGender}
-          value={gender}
-          placeholder={{ label: 'Select Gender...', value: '' }}
-          items={[
-            { label: 'Male', value: 'male' },
-            { label: 'Female', value: 'female' },
-            { label: 'Non-binary', value: 'non-binary' },
-            { label: 'Other', value: 'other' },
-          ]}
-          style={pickerSelectStyles}
-        />
-
-        <Text style={styles.label}>Date of Birth</Text>
-        <Text style={styles.subLabel}>MM / DD / YYYY</Text>
-        <View style={styles.dobRow}>
-          <TextInput
-            style={[styles.dobInput, styles.dobPart]}
-            value={dobMM}
-            onChangeText={onChangeDobMM}
-            keyboardType="numeric"
-            maxLength={2}
-            placeholder="MM"
-            placeholderTextColor="#aaa"
-          />
-          <Text style={styles.slash}>/</Text>
-          <TextInput
-            ref={ddRef}
-            style={[styles.dobInput, styles.dobPart]}
-            value={dobDD}
-            onChangeText={onChangeDobDD}
-            keyboardType="numeric"
-            maxLength={2}
-            placeholder="DD"
-            placeholderTextColor="#aaa"
-          />
-          <Text style={styles.slash}>/</Text>
-          <TextInput
-            ref={yyyyRef}
-            style={[styles.dobInput, styles.dobYear]}
-            value={dobYYYY}
-            onChangeText={onChangeDobYYYY}
-            keyboardType="numeric"
-            maxLength={4}
-            placeholder="YYYY"
-            placeholderTextColor="#aaa"
-          />
-        </View>
-
-        <Text style={styles.label}>Weight</Text>
-        <View style={styles.row}>
-          <TextInput
-            style={styles.textInput}
-            value={weight}
-            onChangeText={(text) => updateWeight(text.replace(/[^0-9]/g, ''))}
-            keyboardType="numeric"
-            placeholder="Enter weight"
-            placeholderTextColor="#aaa"
-          />
-          <RNPickerSelect
-            onValueChange={setWeightUnit}
-            value={weightUnit}
-            items={[
-              { label: 'lbs', value: 'lbs' },
-              { label: 'kg', value: 'kg' },
-            ]}
-            style={pickerSelectStylesSmall}
-          />
-        </View>
-
-        <Text style={styles.label}>Height</Text>
-        <View style={styles.row}>
-          {heightUnit === 'ft/in' ? (
-            <>
-              <TextInput
-                style={styles.textInput}
-                value={heightFeet}
-                onChangeText={(text) => setHeightFeet(text.replace(/[^0-9]/g, ''))}
-                keyboardType="numeric"
-                placeholder="Feet"
-                placeholderTextColor="#aaa"
-              />
-              <TextInput
-                style={[styles.textInput, { marginLeft: 10 }]}
-                value={heightInches}
-                onChangeText={(text) => setHeightInches(text.replace(/[^0-9]/g, ''))}
-                keyboardType="numeric"
-                placeholder="Inches"
-                placeholderTextColor="#aaa"
-              />
-            </>
-          ) : (
-            <TextInput
-              style={styles.textInput}
-              value={height}
-              onChangeText={(text) => updateHeight(text.replace(/[^0-9]/g, ''))}
-              keyboardType="numeric"
-              placeholder="Height in cm"
-              placeholderTextColor="#aaa"
-            />
-          )}
+          <Text style={styles.label}>Gender</Text>
+          <View style={styles.pickerContainer}>
           <RNPickerSelect
             onValueChange={(val) => {
-              setHeightUnit(val);
-              updateHeight('');
-              setHeightFeet('');
-              setHeightInches('');
+              setGender(val);
             }}
-            value={heightUnit}
+            value={gender}
+            placeholder={{ label: 'Select Gender...', value: '' }}
             items={[
-              { label: 'ft/in', value: 'ft/in' },
-              { label: 'cm', value: 'cm' },
+              { label: 'Male', value: 'male' },
+              { label: 'Female', value: 'female' },
+              { label: 'Non-binary', value: 'non-binary' },
+              { label: 'Other', value: 'other' },
             ]}
-            style={pickerSelectStylesSmall}
-          />
-        </View>
+            style={pickerSelectStyles}
+            useNativeAndroidPickerStyle={false}
+            onOpen={() => Keyboard.dismiss}
+          /></View>
 
-        <Button title="Next" onPress={handleNext} fullWidth style={{ marginTop: 30 }} />
-      </ScrollView>
-    </KeyboardAvoidingView>
+          <Text style={styles.label}>Date of Birth</Text>
+          <Text style={styles.subLabel}>MM / DD / YYYY</Text>
+          <View style={styles.dobRow}>
+            <TextInput
+              style={[styles.dobInput, styles.dobPart]}
+              value={dobMM}
+              onChangeText={onChangeDobMM}
+              keyboardType="numeric"
+              maxLength={2}
+              placeholder="MM"
+              placeholderTextColor="#aaa"
+              returnKeyType="done"
+              blurOnSubmit={true}
+            />
+            <Text style={styles.slash}>/</Text>
+            <TextInput
+              ref={ddRef}
+              style={[styles.dobInput, styles.dobPart]}
+              value={dobDD}
+              onChangeText={onChangeDobDD}
+              keyboardType="numeric"
+              maxLength={2}
+              placeholder="DD"
+              placeholderTextColor="#aaa"
+              returnKeyType="done"
+              blurOnSubmit={true}
+            />
+            <Text style={styles.slash}>/</Text>
+            <TextInput
+              ref={yyyyRef}
+              style={[styles.dobInput, styles.dobYear]}
+              value={dobYYYY}
+              onChangeText={onChangeDobYYYY}
+              keyboardType="numeric"
+              maxLength={4}
+              placeholder="YYYY"
+              placeholderTextColor="#aaa"
+              returnKeyType="done"
+              blurOnSubmit={true}
+            />
+          </View>
+
+          <Text style={styles.label}>Weight</Text>
+          <View style={styles.row}>
+            <TextInput
+              style={styles.textInput}
+              value={weight}
+              onChangeText={(text) => updateWeight(text.replace(/[^0-9]/g, ''))}
+              keyboardType="numeric"
+              placeholder="Enter weight"
+              placeholderTextColor="#aaa"
+              returnKeyType="done"
+              blurOnSubmit={true}
+            />
+            <View style={styles.pickerContainer}>
+            <RNPickerSelect
+              onValueChange={setWeightUnit}
+              value={weightUnit}
+              items={[
+                { label: 'lbs', value: 'lbs' },
+                { label: 'kg', value: 'kg' },
+              ]}
+              style={pickerSelectStylesSmall}
+              useNativeAndroidPickerStyle={false}
+              onOpen={() => Keyboard.dismiss()}
+            /></View>
+          </View>
+
+          <Text style={styles.label}>Height</Text>
+          <View style={styles.row}>
+            {heightUnit === 'ft/in' ? (
+              <>
+                <TextInput
+                  style={styles.textInput}
+                  value={heightFeet}
+                  onChangeText={(text) => setHeightFeet(text.replace(/[^0-9]/g, ''))}
+                  keyboardType="numeric"
+                  placeholder="Feet"
+                  placeholderTextColor="#aaa"
+                  returnKeyType="done"
+                  blurOnSubmit={true}
+                />
+                <TextInput
+                  style={[styles.textInput, { marginLeft: 10 }]}
+                  value={heightInches}
+                  onChangeText={(text) => setHeightInches(text.replace(/[^0-9]/g, ''))}
+                  keyboardType="numeric"
+                  placeholder="Inches"
+                  placeholderTextColor="#aaa"
+                  returnKeyType="done"
+                  blurOnSubmit={true}
+                />
+              </>
+            ) : (
+              <TextInput
+                style={styles.textInput}
+                value={height}
+                onChangeText={(text) => updateHeight(text.replace(/[^0-9]/g, ''))}
+                keyboardType="numeric"
+                placeholder="Height in cm"
+                placeholderTextColor="#aaa"
+                returnKeyType="done"
+                blurOnSubmit={true}
+              />
+            )}
+            <View style={styles.pickerContainer}>
+            <RNPickerSelect
+              onValueChange={(val) => {
+                setHeightUnit(val);
+                updateHeight('');
+                setHeightFeet('');
+                setHeightInches('');
+              }}
+              value={heightUnit}
+              items={[
+                { label: 'ft/in', value: 'ft/in' },
+                { label: 'cm', value: 'cm' },
+              ]}
+              style={pickerSelectStylesSmall}
+              useNativeAndroidPickerStyle={false}
+              onOpen={() => Keyboard.dismiss()}
+            /></View>
+          </View>
+
+          <Button title="Next" onPress={handleNext} fullWidth style={{ marginTop: 30 }} />
+        </ScrollView>
+        </TouchableWithoutFeedback>
+      </KeyboardAvoidingView>
+
   );
 }
 
@@ -308,6 +338,15 @@ const styles = StyleSheet.create({
     color: 'white',
     fontFamily: 'System',
   },
+  pickerContainer: {
+    height: 48,
+    justifyContent: 'center',
+    marginBottom: 8,
+    borderWidth: 1,
+    borderColor: '#555',
+    borderRadius: 6,
+    backgroundColor: '#1a1a1a',
+  },
 });
 
 const pickerSelectStyles = {
@@ -322,6 +361,8 @@ const pickerSelectStyles = {
     backgroundColor: '#1a1a1a',
     paddingRight: 30,
     marginBottom: 8,
+    flex: 1,
+    justifyContent: 'center',
   },
   inputAndroid: {
     fontSize: 16,
@@ -334,6 +375,7 @@ const pickerSelectStyles = {
     backgroundColor: '#1a1a1a',
     paddingRight: 30,
     marginBottom: 8,
+    justifyContent: 'center',
   },
 };
 
@@ -350,6 +392,8 @@ const pickerSelectStylesSmall = {
     paddingRight: 30,
     marginLeft: 10,
     minWidth: 80,
+    minHeight: 44,
+    justifyContent: 'center'
   },
   inputAndroid: {
     fontSize: 16,
@@ -363,5 +407,7 @@ const pickerSelectStylesSmall = {
     paddingRight: 30,
     marginLeft: 10,
     minWidth: 80,
+    minHeight: 44,
+    justifyContent: 'center',
   },
 };

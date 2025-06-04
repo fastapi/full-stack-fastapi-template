@@ -3,6 +3,7 @@ from uuid import UUID, uuid4
 from datetime import datetime
 from typing import List, Optional
 from sqlmodel import Field, Relationship, SQLModel
+from sqlalchemy.orm import relationship
 
 # Import directly from user module to avoid circular imports
 from app.models.user import User
@@ -25,38 +26,80 @@ class Workout(SQLModel, table=True):
     
     # Relationships
     user: User = Relationship(back_populates="workouts")
-    exercises: List["Exercise"] = Relationship(back_populates="workout", cascade_delete=True)
+    exercises: List["WorkoutExercise"] = Relationship(back_populates="workout")
 
 
-# Exercise Model
-class Exercise(SQLModel, table=True):
-    """
-    Model representing an exercise within a workout.
-    """
-    id: uuid.UUID = Field(default_factory=uuid.uuid4, primary_key=True)
-    workout_id: uuid.UUID = Field(foreign_key="workout.id", nullable=False)
-    name: str = Field(min_length=1, max_length=255)
-    description: Optional[str] = Field(default=None, max_length=1000)
-    category: str = Field(max_length=50)
-    sets: Optional[int] = Field(default=None, ge=0)
-    reps: Optional[int] = Field(default=None, ge=0)
-    weight: Optional[float] = Field(default=None, ge=0)
+# Exercise Model Old
+
+
+#New Exercise Model
+
+class WorkoutExercise(SQLModel, table=True):
+    id: uuid.UUID = Field(default_factory=uuid4, primary_key=True)
+    workout_id: uuid.UUID = Field(foreign_key="workout.id")
+    name: str  # Or use foreign key to a static ExerciseCatalog table if needed
+    muscle_group: Optional[str] = None
+    type: Optional[str] = None
     created_at: datetime = Field(default_factory=datetime.utcnow)
-    updated_at: Optional[datetime] = Field(default=None)
-    
-    # Relationships
-    workout: Workout = Relationship(back_populates="exercises")
 
+    workout: "Workout" = Relationship(back_populates="exercises")
+    sets: List["WorkoutSet"] = Relationship(back_populates="exercise")
+
+
+class WorkoutSet(SQLModel, table=True):
+    id: uuid.UUID = Field(default_factory=uuid4, primary_key=True)
+    exercise_id: uuid.UUID = Field(foreign_key="workoutexercise.id")
+    weight: float
+    reps: int
+
+    exercise: "WorkoutExercise" = Relationship(back_populates="sets")
+
+class WorkoutSetCreate(SQLModel):
+    weight: float
+    reps: int
+
+
+class WorkoutExerciseCreate(SQLModel):
+    name: str
+    muscle_group: Optional[str]
+    type: Optional[str]
+    sets: List[WorkoutSetCreate]
+
+class WorkoutSetPublic(SQLModel):
+    id: uuid.UUID
+    weight: float
+    reps: int
+
+class WorkoutExercisePublic(SQLModel):
+    id: uuid.UUID
+    name: str
+    muscle_group: Optional[str] = None
+    type: Optional[str] = None
+    sets: List[WorkoutSetPublic] = []
+    created_at: datetime
+
+class WorkoutSetUpdate(SQLModel):
+    id: Optional[uuid.UUID]
+    weight: float
+    reps: int
+
+class WorkoutExerciseUpdate(SQLModel):
+    id: Optional[uuid.UUID]
+    name: str
+    muscle_group: Optional[str]
+    type: Optional[str]
+    sets: List[WorkoutSetUpdate]
 
 # Workout Create Schema
+
 class WorkoutCreate(SQLModel):
-    """
-    Schema for creating a workout.
-    """
-    name: str = Field(min_length=1, max_length=255)
-    description: Optional[str] = Field(default=None, max_length=1000)
-    scheduled_date: Optional[datetime] = Field(default=None)
-    duration_minutes: Optional[int] = Field(default=None, ge=0)
+    name: str
+    description: Optional[str] = None
+    scheduled_date: Optional[datetime] = None
+    duration_minutes: Optional[int] = None
+    is_completed: bool = False
+    completed_date: Optional[datetime] = None
+    exercises: List[WorkoutExerciseCreate]
 
 
 # Workout Update Schema
@@ -70,32 +113,8 @@ class WorkoutUpdate(SQLModel):
     completed_date: Optional[datetime] = Field(default=None)
     duration_minutes: Optional[int] = Field(default=None, ge=0)
     is_completed: Optional[bool] = Field(default=None)
+    exercises: Optional[List[WorkoutExerciseUpdate]] = None
 
-
-# Exercise Create Schema
-class ExerciseCreate(SQLModel):
-    """
-    Schema for creating an exercise.
-    """
-    name: str = Field(min_length=1, max_length=255)
-    description: Optional[str] = Field(default=None, max_length=1000)
-    category: str = Field(max_length=50)
-    sets: Optional[int] = Field(default=None, ge=0)
-    reps: Optional[int] = Field(default=None, ge=0)
-    weight: Optional[float] = Field(default=None, ge=0)
-
-
-# Exercise Update Schema
-class ExerciseUpdate(SQLModel):
-    """
-    Schema for updating an exercise.
-    """
-    name: Optional[str] = Field(default=None, min_length=1, max_length=255)
-    description: Optional[str] = Field(default=None, max_length=1000)
-    category: Optional[str] = Field(default=None, max_length=50)
-    sets: Optional[int] = Field(default=None, ge=0)
-    reps: Optional[int] = Field(default=None, ge=0)
-    weight: Optional[float] = Field(default=None, ge=0)
 
 
 # Workout Public Schema
@@ -114,30 +133,12 @@ class WorkoutPublic(SQLModel):
     created_at: datetime
     updated_at: Optional[datetime] = None
 
-
-# Exercise Public Schema
-class ExercisePublic(SQLModel):
-    """
-    Schema for returning exercise data via API.
-    """
-    id: uuid.UUID
-    workout_id: uuid.UUID
-    name: str
-    description: Optional[str] = None
-    category: str
-    sets: Optional[int] = None
-    reps: Optional[int] = None
-    weight: Optional[float] = None
-    created_at: datetime
-    updated_at: Optional[datetime] = None
-
-
 # Workout With Exercises Public Schema
 class WorkoutWithExercisesPublic(WorkoutPublic):
     """
     Schema for returning workout data with exercises via API.
     """
-    exercises: List[ExercisePublic] = []
+    exercises: List[WorkoutExercisePublic] = []
 
 
 # Workouts Public Schema
@@ -148,17 +149,3 @@ class WorkoutsPublic(SQLModel):
     data: List[WorkoutPublic]
     count: int
 
-#Personal Bests Model - Related to Workouts
-class PersonalBest(SQLModel, table=True):
-    id: UUID = Field(default_factory=uuid4, primary_key=True)
-    user_id: UUID = Field(foreign_key="user.id")
-    exercise_name: str
-    metric_type: str  # e.g. "max_weight", "max_reps"
-    metric_value: float
-    date_achieved: Optional[datetime]
-
-class PersonalBestCreate(SQLModel):
-    exercise_name: str
-    metric_type: str
-    metric_value: float
-    date_achieved: Optional[datetime]

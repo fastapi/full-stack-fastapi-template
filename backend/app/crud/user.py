@@ -5,6 +5,9 @@ from sqlmodel import Session, select, func
 from app.core.security import get_password_hash, verify_password
 from app.models.user import User, UserCreate, UserUpdate
 
+from jose import jwt, JWTError
+from app.core.config import settings  # make sure this has SECRET_KEY
+
 
 def create_user(*, session: Session, user_create: UserCreate) -> User:
     """

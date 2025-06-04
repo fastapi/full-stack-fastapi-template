@@ -31,19 +31,21 @@ from app.models.social import (
 )
 from app.models.workout import (
     Workout,
-    Exercise,
     WorkoutCreate,
     WorkoutUpdate,
-    ExerciseCreate,
-    ExerciseUpdate,
     WorkoutPublic,
-    ExercisePublic,
     WorkoutWithExercisesPublic,
     WorkoutsPublic,
-    PersonalBest,
-    PersonalBestCreate
+    WorkoutSetCreate,
+    WorkoutSet,
+    WorkoutExercise,
+    WorkoutExerciseCreate,
+    WorkoutExercisePublic,
+    WorkoutExerciseUpdate,
+    WorkoutSetPublic,
+    WorkoutSetUpdate
 )
-# not needed - from app.models.personal_best import PersonalBest, PersonalBestCreate
+from app.models.pbests import PersonalBest, PersonalBestCreate, PersonalBestRead, PersonalBestsList
 
 __all__ = [
     # SQLModel
@@ -95,4 +97,6 @@ __all__ = [
     "WorkoutsPublic",
     "PersonalBest",
     "PersonalBestCreate",
+    "PersonalBestRead",
+    "PersonalBestsList"
 ]

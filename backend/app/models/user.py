@@ -3,6 +3,10 @@ from typing import List, Optional
 
 from pydantic import EmailStr
 from sqlmodel import Field, Relationship, SQLModel
+from typing import TYPE_CHECKING, List, Optional
+
+if TYPE_CHECKING:
+    from app.models.pbests import PersonalBest
 
 # Shared properties
 class UserBase(SQLModel):
@@ -67,6 +71,8 @@ class User(UserBase, table=True):
         back_populates="user", cascade_delete=True
     )
 
+    #personal_bests
+    personal_bests: list["PersonalBest"] = Relationship(back_populates="user", cascade_delete=True)
 
 # Properties to return via API, id is always required
 class UserPublic(UserBase):
@@ -87,3 +93,4 @@ class UsersPublic(SQLModel):
 # Forward references for type hints
 from app.models.social import UserFollow, WorkoutPost
 from app.models.workout import Workout
+from app.models.pbests import PersonalBest
