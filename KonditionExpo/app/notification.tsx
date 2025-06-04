@@ -9,7 +9,10 @@ import {
   FlatList,
   Dimensions,
   ActivityIndicator,
+  TouchableOpacity,
 } from "react-native";
+import { useRouter } from "expo-router";
+import { Ionicons } from "@expo/vector-icons";
 
 // Define the shape of each quote, matching QuoteOut from the backend
 type QuoteItem = {
@@ -18,17 +21,17 @@ type QuoteItem = {
 };
 
 export default function NotificationScreen() {
+  const router = useRouter();
   const [notifications, setNotifications] = useState<QuoteItem[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     // Fetch the last 7 days of quotes from the backend
-    // Replace localhost with your actual host or LAN IP if testing on device
+    // Replace "localhost" with your LAN IP or actual host when testing on device
     fetch("http://localhost:8000/api/v1/notifications/quotes")
       .then((res) => res.json())
       .then((data: QuoteItem[]) => {
-        // data is an array like [{ date: "2025-06-05", text: "..." }, …]
-        setNotifications(data);
+        setNotifications(data); // data is an array like [{ date: "2025-06-05", text: "..." }, …]
       })
       .catch((err) => {
         console.error("Error fetching quotes:", err);
@@ -60,8 +63,20 @@ export default function NotificationScreen() {
   return (
     <SafeAreaView style={styles.container}>
       <View style={styles.header}>
+        <TouchableOpacity
+          style={styles.backButton}
+          onPress={() => {
+            // Go back in the navigation stack (like HomeScreen’s notification button did)
+            router.back();
+          }}
+        >
+          <Ionicons name="arrow-back" size={24} color="#333" />
+        </TouchableOpacity>
         <Text style={styles.headerTitle}>Daily Quotes</Text>
+        {/* Dummy view to balance centering (same width as backButton) */}
+        <View style={styles.placeholder} />
       </View>
+
       <FlatList
         data={notifications}
         keyExtractor={(item) => item.date}
@@ -73,39 +88,56 @@ export default function NotificationScreen() {
   );
 }
 
-const { width, height } = Dimensions.get("window");
+const { width } = Dimensions.get("window");
 
 const styles = StyleSheet.create({
+  // ——— Container now matches HomeScreen’s container style ———
   container: {
     flex: 1,
-    width,
-    height,
-    backgroundColor: "#ffffff",
-    alignItems: "center",
-    justifyContent: "center",
+    backgroundColor: "#FFFFFF",
   },
+
+  // ——— Header is identical in structure to the back‐arrow version previously shown ———
   header: {
-    padding: 16,
+    flexDirection: "row",
+    alignItems: "center",
+    paddingVertical: 12,
+    paddingHorizontal: 8,
     borderBottomWidth: 1,
     borderBottomColor: "#ddd",
     backgroundColor: "#fafafa",
-    alignItems: "center",
     width: "100%",
+  },
+  backButton: {
+    padding: 4,
   },
   headerTitle: {
+    flex: 1,
+    textAlign: "center",
     fontSize: 20,
     fontWeight: "bold",
+    color: "#333",
   },
+  placeholder: {
+    width: 32, // same width as backButton + icon, to keep title centered
+  },
+
+  // ——— Make the FlatList’s content match HomeScreen’s padding:16 ———
   listContent: {
-    paddingVertical: 8,
+    padding: 16,
+    paddingBottom: 80, // if you want similar bottom padding (e.g., for any tab bar)
     width: "100%",
   },
+
+  // ——— Each item in the quote list ———
   item: {
     flexDirection: "row",
     alignItems: "center",
     paddingHorizontal: 16,
     paddingVertical: 12,
     backgroundColor: "#fff",
+    borderRadius: 8, // optional, just to match HomeScreen’s card feel
+    marginBottom: 8,
   },
   itemText: {
     flex: 1,
