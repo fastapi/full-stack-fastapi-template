@@ -106,7 +106,23 @@ def get_workouts(
     )
     workouts = session.exec(statement).all()
     
-    return WorkoutsPublic(data=workouts, count=count)
+    # Add exercise count to each workout
+    workout_data = []
+    for workout in workouts:
+        # Count exercises for this workout
+        exercise_count_stmt = (
+            select(func.count())
+            .select_from(Exercise)
+            .where(Exercise.workout_id == workout.id)
+        )
+        exercise_count = session.exec(exercise_count_stmt).one()
+        
+        # Convert to dict and add exercise_count
+        workout_dict = workout.model_dump()
+        workout_dict["exercise_count"] = exercise_count
+        workout_data.append(workout_dict)
+    
+    return WorkoutsPublic(data=workout_data, count=count)
 
 
 @router.get("/{workout_id}", response_model=WorkoutWithExercisesPublic)

@@ -1,0 +1,26 @@
+{
+  "name": "Kondition",
+  "short_name": "Kondition",
+  "description": "Your personal fitness tracking app",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#ffffff",
+  "theme_color": "#007bff",
+  "orientation": "portrait",
+  "icons": [
+    {
+      "src": "/assets/images/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/assets/images/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ],
+  "gcm_sender_id": "103953800507",
+  "vapid_public_key": "BHIYUSgOOx7MC1EXPT5HSZ6snrLWCe4uV2tloytm3uB8rZtTiNl5234SLOWPzdBa8TcIr1CubVkh_8jXipesK8E"
+}

@@ -22,6 +22,40 @@ export interface ProfileUpdateRequest {
   height?: number;
 }
 
+// Workout-related types
+export interface WorkoutResponse {
+  id: string;
+  user_id: string;
+  name: string;
+  description?: string;
+  scheduled_date?: string;
+  completed_date?: string;
+  duration_minutes?: number;
+  is_completed: boolean;
+  created_at: string;
+  updated_at?: string;
+  exercises?: ExerciseResponse[];
+  exercise_count?: number;
+}
+
+export interface ExerciseResponse {
+  id: string;
+  workout_id: string;
+  name: string;
+  description?: string;
+  category: string;
+  sets?: number;
+  reps?: number;
+  weight?: number;
+  created_at: string;
+  updated_at?: string;
+}
+
+export interface WorkoutsPublicResponse {
+  data: WorkoutResponse[];
+  count: number;
+}
+
 export interface AuthResponse {
   access_token: string;
   token_type: string;
@@ -158,6 +192,16 @@ class ApiService {
       method: 'PATCH',
       body: JSON.stringify(profileData),
     });
+  }
+
+  // Workout Methods
+  async getWorkouts(): Promise<WorkoutResponse[]> {
+    const response = await this.makeRequest<WorkoutsPublicResponse>(API_CONFIG.ENDPOINTS.WORKOUTS);
+    return response.data;
+  }
+
+  async getWorkoutById(id: string): Promise<WorkoutResponse> {
+    return this.makeRequest<WorkoutResponse>(API_CONFIG.ENDPOINTS.WORKOUT_BY_ID(id));
   }
 
   // Token Management

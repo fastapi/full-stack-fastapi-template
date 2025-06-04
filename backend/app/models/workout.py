@@ -113,6 +113,7 @@ class WorkoutPublic(SQLModel):
     is_completed: bool
     created_at: datetime
     updated_at: Optional[datetime] = None
+    exercise_count: Optional[int] = None
 
 
 # Exercise Public Schema
