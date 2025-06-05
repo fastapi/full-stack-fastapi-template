@@ -74,6 +74,80 @@ export interface UserProfile {
   height?: number;
 }
 
+// Social-related types
+export interface UserSearchResult {
+  id: string;
+  email: string;
+  full_name?: string;
+  is_active: boolean;
+  is_superuser: boolean;
+  gender?: string;
+  date_of_birth?: string;
+  weight?: number;
+  height?: number;
+  follower_count: number;
+  following_count: number;
+  is_following: boolean;
+}
+
+export interface UserSearchResultsResponse {
+  data: UserSearchResult[];
+  count: number;
+}
+
+export interface UsersPublicResponse {
+  data: UserProfile[];
+  count: number;
+}
+
+export interface UserPublicExtended extends UserProfile {
+  follower_count: number;
+  following_count: number;
+}
+
+export interface FollowStatusResponse {
+  is_following: boolean;
+}
+
+// Workout Post types
+export interface WorkoutPostResponse {
+  id: string;
+  user_id: string;
+  title: string;
+  description?: string;
+  workout_type: string;
+  duration_minutes: number;
+  calories_burned?: number;
+  is_public: boolean;
+  created_at: string;
+  updated_at?: string;
+  user_full_name?: string;
+  is_mutual_follow?: boolean;
+}
+
+export interface WorkoutPostsResponse {
+  data: WorkoutPostResponse[];
+  count: number;
+}
+
+export interface WorkoutPostCreateRequest {
+  title: string;
+  description?: string;
+  workout_type: string;
+  duration_minutes: number;
+  calories_burned?: number;
+  is_public?: boolean;
+}
+
+export interface WorkoutPostUpdateRequest {
+  title?: string;
+  description?: string;
+  workout_type?: string;
+  duration_minutes?: number;
+  calories_burned?: number;
+  is_public?: boolean;
+}
+
 export interface ApiError {
   detail: string;
 }
@@ -236,6 +310,143 @@ class ApiService {
       await this.removeToken();
       return false;
     }
+  }
+
+  // Social Methods
+  async searchUsers(query: string, skip: number = 0, limit: number = 20): Promise<UserSearchResultsResponse> {
+    const params = new URLSearchParams({
+      q: query,
+      skip: skip.toString(),
+      limit: limit.toString(),
+    });
+    
+    return this.makeRequest<UserSearchResultsResponse>(
+      `${API_CONFIG.ENDPOINTS.SEARCH_USERS}?${params.toString()}`
+    );
+  }
+
+  async followUser(userId: string): Promise<{ message: string }> {
+    return this.makeRequest<{ message: string }>(API_CONFIG.ENDPOINTS.FOLLOW_USER(userId), {
+      method: 'POST',
+    });
+  }
+
+  async unfollowUser(userId: string): Promise<{ message: string }> {
+    return this.makeRequest<{ message: string }>(API_CONFIG.ENDPOINTS.UNFOLLOW_USER(userId), {
+      method: 'DELETE',
+    });
+  }
+
+  async getFollowers(skip: number = 0, limit: number = 100): Promise<UserSearchResultsResponse> {
+    const params = new URLSearchParams({
+      skip: skip.toString(),
+      limit: limit.toString(),
+    });
+    
+    return this.makeRequest<UserSearchResultsResponse>(
+      `${API_CONFIG.ENDPOINTS.GET_FOLLOWERS}?${params.toString()}`
+    );
+  }
+
+  async getFollowing(skip: number = 0, limit: number = 100): Promise<UserSearchResultsResponse> {
+    const params = new URLSearchParams({
+      skip: skip.toString(),
+      limit: limit.toString(),
+    });
+    
+    return this.makeRequest<UserSearchResultsResponse>(
+      `${API_CONFIG.ENDPOINTS.GET_FOLLOWING}?${params.toString()}`
+    );
+  }
+
+  async isFollowing(userId: string): Promise<FollowStatusResponse> {
+    return this.makeRequest<FollowStatusResponse>(API_CONFIG.ENDPOINTS.IS_FOLLOWING(userId));
+  }
+
+  async getUserProfileExtended(userId: string): Promise<UserPublicExtended> {
+    return this.makeRequest<UserPublicExtended>(API_CONFIG.ENDPOINTS.USER_PROFILE_EXTENDED(userId));
+  }
+
+  // Feed Methods
+  async getFeed(feedType: 'personal' | 'public' | 'combined' = 'personal', skip: number = 0, limit: number = 20): Promise<WorkoutPostsResponse> {
+    const params = new URLSearchParams({
+      feed_type: feedType,
+      skip: skip.toString(),
+      limit: limit.toString(),
+    });
+    
+    return this.makeRequest<WorkoutPostsResponse>(
+      `/social/feed?${params.toString()}`
+    );
+  }
+
+  async getPublicFeed(skip: number = 0, limit: number = 20): Promise<WorkoutPostsResponse> {
+    const params = new URLSearchParams({
+      skip: skip.toString(),
+      limit: limit.toString(),
+    });
+    
+    return this.makeRequest<WorkoutPostsResponse>(
+      `/social/feed/public?${params.toString()}`
+    );
+  }
+
+  async getPersonalFeed(skip: number = 0, limit: number = 20): Promise<WorkoutPostsResponse> {
+    const params = new URLSearchParams({
+      skip: skip.toString(),
+      limit: limit.toString(),
+    });
+    
+    return this.makeRequest<WorkoutPostsResponse>(
+      `/social/feed/personal?${params.toString()}`
+    );
+  }
+
+  // Workout Post Methods
+  async createWorkoutPost(postData: WorkoutPostCreateRequest): Promise<WorkoutPostResponse> {
+    return this.makeRequest<WorkoutPostResponse>('/social/workout-posts', {
+      method: 'POST',
+      body: JSON.stringify(postData),
+    });
+  }
+
+  async getMyWorkoutPosts(skip: number = 0, limit: number = 20): Promise<WorkoutPostsResponse> {
+    const params = new URLSearchParams({
+      skip: skip.toString(),
+      limit: limit.toString(),
+    });
+    
+    return this.makeRequest<WorkoutPostsResponse>(
+      `/social/workout-posts?${params.toString()}`
+    );
+  }
+
+  async getUserWorkoutPosts(userId: string, skip: number = 0, limit: number = 20): Promise<WorkoutPostsResponse> {
+    const params = new URLSearchParams({
+      skip: skip.toString(),
+      limit: limit.toString(),
+    });
+    
+    return this.makeRequest<WorkoutPostsResponse>(
+      `/social/user/${userId}/workout-posts?${params.toString()}`
+    );
+  }
+
+  async getWorkoutPost(postId: string): Promise<WorkoutPostResponse> {
+    return this.makeRequest<WorkoutPostResponse>(`/social/workout-posts/${postId}`);
+  }
+
+  async updateWorkoutPost(postId: string, postData: WorkoutPostUpdateRequest): Promise<WorkoutPostResponse> {
+    return this.makeRequest<WorkoutPostResponse>(`/social/workout-posts/${postId}`, {
+      method: 'PUT',
+      body: JSON.stringify(postData),
+    });
+  }
+
+  async deleteWorkoutPost(postId: string): Promise<{ message: string }> {
+    return this.makeRequest<{ message: string }>(`/social/workout-posts/${postId}`, {
+      method: 'DELETE',
+    });
   }
 }
 
