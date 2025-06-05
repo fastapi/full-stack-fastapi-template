@@ -17,6 +17,14 @@ export const API_CONFIG = {
     USER_PROFILE: '/users/me',
     WORKOUTS: '/workouts',
     WORKOUT_BY_ID: (id: string) => `/workouts/${id}`,
+    // Social endpoints
+    SEARCH_USERS: '/social/users/search',
+    FOLLOW_USER: (userId: string) => `/social/follow/${userId}`,
+    UNFOLLOW_USER: (userId: string) => `/social/unfollow/${userId}`,
+    GET_FOLLOWERS: '/social/followers',
+    GET_FOLLOWING: '/social/following',
+    IS_FOLLOWING: (userId: string) => `/social/is-following/${userId}`,
+    USER_PROFILE_EXTENDED: (userId: string) => `/social/user/${userId}/profile`,
   },
 };
 

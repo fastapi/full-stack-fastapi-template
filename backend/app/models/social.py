@@ -44,6 +44,7 @@ class WorkoutPost(SQLModel, table=True):
     workout_type: str = Field(max_length=50)
     duration_minutes: int = Field(ge=1)
     calories_burned: Optional[int] = Field(default=None, ge=0)
+    is_public: bool = Field(default=True)  # True for public posts, False for private posts
     created_at: datetime = Field(default_factory=datetime.utcnow)
     updated_at: Optional[datetime] = Field(default=None)
     
@@ -61,6 +62,7 @@ class WorkoutPostCreate(SQLModel):
     workout_type: str = Field(max_length=50)
     duration_minutes: int = Field(ge=1)
     calories_burned: Optional[int] = Field(default=None, ge=0)
+    is_public: bool = Field(default=True)  # Default to public posts
 
 
 # Workout Post Update Schema
@@ -73,6 +75,7 @@ class WorkoutPostUpdate(SQLModel):
     workout_type: Optional[str] = Field(default=None, max_length=50)
     duration_minutes: Optional[int] = Field(default=None, ge=1)
     calories_burned: Optional[int] = Field(default=None, ge=0)
+    is_public: Optional[bool] = Field(default=None)
 
 
 # Workout Post Public Schema
@@ -87,9 +90,11 @@ class WorkoutPostPublic(SQLModel):
     workout_type: str
     duration_minutes: int
     calories_burned: Optional[int] = None
+    is_public: bool
     created_at: datetime
     updated_at: Optional[datetime] = None
     user_full_name: Optional[str] = None  # Included for convenience in the feed
+    is_mutual_follow: Optional[bool] = None  # For privacy logic in responses
 
 
 # Workout Posts Public Schema
@@ -98,4 +103,33 @@ class WorkoutPostsPublic(SQLModel):
     Schema for returning multiple workout posts via API.
     """
     data: List[WorkoutPostPublic]
+    count: int
+
+
+# User Search Result Schema
+class UserSearchResult(SQLModel):
+    """
+    Schema for returning user search results with extended information.
+    Extends UserPublicExtended with is_following status.
+    """
+    id: uuid.UUID
+    email: str
+    full_name: Optional[str] = None
+    is_active: bool = True
+    is_superuser: bool = False
+    gender: Optional[str] = None
+    date_of_birth: Optional[str] = None
+    weight: Optional[float] = None
+    height: Optional[float] = None
+    follower_count: int = 0
+    following_count: int = 0
+    is_following: bool = False
+
+
+# User Search Results Public Schema
+class UserSearchResultsPublic(SQLModel):
+    """
+    Schema for returning multiple user search results via API.
+    """
+    data: List[UserSearchResult]
     count: int

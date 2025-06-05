@@ -318,3 +318,116 @@ def test_get_feed(test_client: TestClientWrapper, db: Session):
     post_titles = [post["title"] for post in feed_data["data"]]
     assert "Morning Run" in post_titles
     assert "Evening Yoga" in post_titles
+
+
+def test_search_users(test_client: TestClientWrapper, db: Session):
+    """Test searching for users by name or email."""
+    # Create a searcher user
+    searcher_email = random_email()
+    searcher_password = random_lower_string()
+    searcher = create_test_user(db, email=searcher_email, password=searcher_password)
+    
+    # Create users to search for
+    user1_email = "john.doe@example.com"
+    user1 = create_test_user(
+        db,
+        email=user1_email,
+        password="password",
+        full_name="John Doe"
+    )
+    
+    user2_email = "jane.smith@example.com"
+    user2 = create_test_user(
+        db,
+        email=user2_email,
+        password="password",
+        full_name="Jane Smith"
+    )
+    
+    user3_email = "bob.johnson@test.com"
+    user3 = create_test_user(
+        db,
+        email=user3_email,
+        password="password",
+        full_name="Bob Johnson"
+    )
+    
+    # Create some follow relationships to test is_following
+    create_test_follow_relationship(db, follower_id=searcher.id, followed_id=user1.id)
+    
+    # Login as searcher
+    auth_headers = test_client.login(searcher_email, searcher_password)
+    
+    # Test search by name
+    response = test_client.get("/social/users/search?q=john", headers=auth_headers)
+    search_data = assert_successful_response(response)
+    
+    assert "data" in search_data
+    assert "count" in search_data
+    assert search_data["count"] == 2  # John Doe and Bob Johnson
+    
+    # Check that results include expected users
+    found_names = [user["full_name"] for user in search_data["data"]]
+    assert "John Doe" in found_names
+    assert "Bob Johnson" in found_names
+    assert "Jane Smith" not in found_names
+    
+    # Check that is_following is correctly set
+    john_doe_result = next(user for user in search_data["data"] if user["full_name"] == "John Doe")
+    bob_johnson_result = next(user for user in search_data["data"] if user["full_name"] == "Bob Johnson")
+    
+    assert john_doe_result["is_following"] is True
+    assert bob_johnson_result["is_following"] is False
+    
+    # Check that follower/following counts are included
+    assert "follower_count" in john_doe_result
+    assert "following_count" in john_doe_result
+    
+    # Test search by email
+    response = test_client.get("/social/users/search?q=example.com", headers=auth_headers)
+    search_data = assert_successful_response(response)
+    
+    assert search_data["count"] == 2  # john.doe@example.com and jane.smith@example.com
+    
+    # Test pagination
+    response = test_client.get("/social/users/search?q=john&skip=0&limit=1", headers=auth_headers)
+    search_data = assert_successful_response(response)
+    
+    assert len(search_data["data"]) == 1
+    assert search_data["count"] == 2  # Total count should still be 2
+    
+    # Test case insensitive search
+    response = test_client.get("/social/users/search?q=JOHN", headers=auth_headers)
+    search_data = assert_successful_response(response)
+    
+    assert search_data["count"] == 2
+    
+    # Test that current user is excluded from results
+    response = test_client.get(f"/social/users/search?q={searcher_email}", headers=auth_headers)
+    search_data = assert_successful_response(response)
+    
+    assert search_data["count"] == 0  # Searcher should not appear in their own search results
+
+
+def test_search_users_validation(test_client: TestClientWrapper, db: Session):
+    """Test user search input validation."""
+    # Create a user
+    email = random_email()
+    password = random_lower_string()
+    user = create_test_user(db, email=email, password=password)
+    
+    # Login
+    auth_headers = test_client.login(email, password)
+    
+    # Test empty query
+    response = test_client.get("/social/users/search?q=", headers=auth_headers)
+    assert_error_response(response, status_code=400)
+    
+    # Test missing query parameter
+    response = test_client.get("/social/users/search", headers=auth_headers)
+    assert_error_response(response, status_code=422)  # FastAPI validation error
+    
+    # Test limit validation (should cap at 100)
+    response = test_client.get("/social/users/search?q=test&limit=200", headers=auth_headers)
+    search_data = assert_successful_response(response)
+    # The endpoint should work but limit should be capped at 100

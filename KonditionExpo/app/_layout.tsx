@@ -14,6 +14,8 @@ import "react-native-reanimated";
 import { useColorScheme } from "@/hooks/useColorScheme";
 import { UserProvider } from "@/contexts/UserContext";
 import { WorkoutProvider } from "@/contexts/WorkoutContext";
+import { SocialProvider } from "@/contexts/SocialContext";
+import { FeedProvider } from "@/contexts/FeedContext";
 
 // ─── IMPORTS FOR PUSH NOTIFICATIONS ─────────────────────────────────────────────
 import * as Device from "expo-device";
@@ -28,8 +30,8 @@ export default function RootLayout() {
 
   // ─── STATE / REFS FOR PUSH REGISTRATION ────────────────────────────────────────
   const [expoPushToken, setExpoPushToken] = useState<string>("");
-  const notificationListener = useRef<any>();
-  const responseListener = useRef<any>();
+  const notificationListener = useRef<any>(null);
+  const responseListener = useRef<any>(null);
 
   // Replace this with your actual user‐ID retrieval logic (e.g. from AuthContext)
   const fakeUserId = "user123";
@@ -130,22 +132,27 @@ export default function RootLayout() {
     <AuthProvider>
       <UserProvider>
         <WorkoutProvider>
-          <ThemeProvider value={colorScheme === "dark" ? DarkTheme : DefaultTheme}>
-            <ProtectedRoute>
-              <Stack>
-                <Stack.Screen name="index" options={{ headerShown: false }} />
-                <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
-                <Stack.Screen name="login" options={{ headerShown: false }} />
-                <Stack.Screen name="signup" options={{ headerShown: false }} />
-                <Stack.Screen name="signup2" options={{ headerShown: false }} />
-                <Stack.Screen name="workout" options={{ headerShown: false }} />
-                <Stack.Screen name="notification" options={{ headerShown: false }} />
-                <Stack.Screen name="profile" options={{ headerShown: false }} />
-                <Stack.Screen name="+not-found" />
-              </Stack>
-            </ProtectedRoute>
-            <StatusBar style="auto" />
-          </ThemeProvider>
+          <SocialProvider>
+            <FeedProvider>
+              <ThemeProvider value={colorScheme === "dark" ? DarkTheme : DefaultTheme}>
+                <ProtectedRoute>
+                  <Stack>
+                    <Stack.Screen name="index" options={{ headerShown: false }} />
+                    <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
+                    <Stack.Screen name="login" options={{ headerShown: false }} />
+                    <Stack.Screen name="signup" options={{ headerShown: false }} />
+                    <Stack.Screen name="signup2" options={{ headerShown: false }} />
+                    <Stack.Screen name="workout" options={{ headerShown: false }} />
+                    <Stack.Screen name="notification" options={{ headerShown: false }} />
+                    <Stack.Screen name="profile" options={{ headerShown: false }} />
+                    <Stack.Screen name="create-post" options={{ headerShown: false }} />
+                    <Stack.Screen name="+not-found" />
+                  </Stack>
+                </ProtectedRoute>
+                <StatusBar style="auto" />
+              </ThemeProvider>
+            </FeedProvider>
+          </SocialProvider>
         </WorkoutProvider>
       </UserProvider>
     </AuthProvider>

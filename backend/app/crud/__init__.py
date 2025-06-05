@@ -17,6 +17,7 @@ from app.crud.social import (
     get_user_workout_posts,
     get_workout_post,
     is_following,
+    search_users,
     unfollow_user,
     update_workout_post,
 )
@@ -53,6 +54,7 @@ __all__ = [
     "is_following",
     "get_follower_count",
     "get_following_count",
+    "search_users",
     
     # Social operations - Workout Posts
     "create_workout_post",
