@@ -1,27 +1,45 @@
-  import React from 'react';
-import { useUser } from '@/contexts/UserContext';
-import { SafeAreaView, View, Text, StyleSheet, ScrollView, TouchableOpacity, Image, Dimensions } from 'react-native';
-import { LineChart, PieChart } from 'react-native-chart-kit';
+import React, { useMemo, useState } from 'react';
+import { useAuth } from '@/contexts/AuthContext';
+import { SafeAreaView, View, Text, StyleSheet, ScrollView, TouchableOpacity, Image, Dimensions,} from 'react-native';
+import { LineChart } from 'react-native-chart-kit';
 import { router } from 'expo-router';
 import { usePersonalBests } from "@/hooks/usePersonalBests";
+import { Dialog } from '@/components/ui/Dialog';
+import { Button } from '@/components/ui/Button';
 
 const { width } = Dimensions.get('window');
 //console.log(" 1 HomeScreen about to be rendered rendered");
 const HomeScreen = () => {
   //console.log("2 HomeScreen rendered");
-  // TODO: Replace with real data
-  const bmiValue = '20.1';
-  const user = useUser();
+  const { user } = useAuth();
   if (!user) {
     console.warn("User context is undefined");
     return null;
   }
-  const { name } = user;
-  const heartRateData = [60, 62, 65, 70, 75, 78, 80, 82, 79, 76];
-  const waterIntake = '4L';
-  const sleepHours = '8h 20m';
-  const caloriesBurnt = 760;
-  const caloriesLeft = 230;
+  // 1) Calculate BMI (kg / m²) whenever height or weight change
+  //    - height is in cm -> convert to meters by dividing by 100
+  //    - weight is in kg, so we can directly use it in the formula
+  const bmiValue = useMemo(() => {
+    if (!user.height || !user.weight) return null;               
+    const heightMeters = user.height / 100;
+    if (heightMeters <= 0) return null;                
+    const raw = user.weight / (heightMeters * heightMeters);
+    return Number(raw.toFixed(1));                     
+  }, [user.height, user.weight]);
+
+  // 2) Derive the status string based on BMI ranges
+  const bmiStatus = useMemo(() => {
+    if (bmiValue === null) return '—'; 
+    if (bmiValue < 18.5) return 'Underweight';
+    if (bmiValue < 25) return 'Normal Weight';
+    if (bmiValue < 30) return 'Overweight';
+    if (bmiValue < 35) return 'Obesity Class 1';
+    if (bmiValue < 40) return 'Obesity Class 2';
+    return 'Obesity Class 3';
+  }, [bmiValue]);
+
+  const [showBmiDialog, setShowBmiDialog] = useState(false);
+
   const workoutProgressData = [20, 40, 30, 60, 90, 80, 70];
   const workoutDays = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
   const latestWorkouts = [
@@ -41,39 +59,24 @@ const HomeScreen = () => {
         {/* Header */}
         <View style={styles.header}>
           <Text style={styles.welcomeText}>Welcome Back,</Text>
-          <Text style={styles.userName}>{name}</Text>
+          <Text style={styles.userName}>{user.full_name}</Text>
           <TouchableOpacity style={styles.notificationBtn} onPress={() => router.push('/notification')}>
             <Image source={require('../assets/images/bell.png')} style={styles.bellIcon} />
           </TouchableOpacity>
         </View>
 
-        {/* BMI Card */}
+        {/* ===== BMI Card ===== */}
         <View style={styles.bmiCard}>
           <View style={styles.bmiInfo}>
             <Text style={styles.bmiLabel}>BMI (Body Mass Index)</Text>
-            <Text style={styles.bmiStatus}>You have a normal weight</Text>
-            <TouchableOpacity style={styles.viewMoreBtn} onPress={() => alert('BMI screen not yet implemented')}>
+            <Text style={styles.bmiStatus}>{bmiStatus}</Text>
+            <TouchableOpacity style={styles.viewMoreBtn} onPress={() => setShowBmiDialog(true)}>
               <Text style={styles.viewMoreText}>View More</Text>
             </TouchableOpacity>
           </View>
-          <PieChart
-            data={[
-              { name: 'BMI', population: parseFloat(bmiValue), color: '#A3C9FD', legendFontColor: '#7F7F7F', legendFontSize: 15 },
-              { name: 'Other', population: 30 - parseFloat(bmiValue), color: '#E5EFFF', legendFontColor: '#7F7F7F', legendFontSize: 15 },
-            ]}
-            width={100}
-            height={100}
-            chartConfig={{
-              color: (opacity = 1) => `rgba(163, 201, 253, ${opacity})`,
-            }}
-            accessor={'population'}
-            backgroundColor={'transparent'}
-            paddingLeft={'0'}
-            hasLegend={false}
-            center={[0, 0]}
-          />
+
           <View style={styles.bmiOverlay}>
-            <Text style={styles.bmiValue}>{bmiValue}</Text>
+            <Text style={styles.bmiValue}>{bmiValue !== null ? bmiValue.toString() : '-'}</Text>
           </View>
         </View>
 
@@ -83,73 +86,6 @@ const HomeScreen = () => {
           <TouchableOpacity style={styles.checkBtn} onPress={() => alert('Targets screen not yet implemented')}>
             <Text style={styles.checkText}>Check</Text>
           </TouchableOpacity>
-        </View>
-
-        {/* Activity Status */}
-        <Text style={styles.sectionTitle}>Activity Status</Text>
-        <View style={styles.activityCard}>
-          <Text style={styles.activityLabel}>Heart Rate</Text>
-          <Text style={styles.activityValue}>78 BPM</Text>
-          <LineChart
-            data={{
-              labels: [],
-              datasets: [
-                {
-                  data: heartRateData,
-                  color: () => '#91D5A1',
-                  strokeWidth: 2,
-                },
-              ],
-            }}
-            width={width - 64}
-            height={100}
-            chartConfig={{
-              backgroundGradientFrom: '#fff',
-              backgroundGradientTo: '#fff',
-              color: () => '#91D5A1',
-              strokeWidth: 2,
-            }}
-            bezier
-            style={styles.lineChart}
-          />
-          <View style={styles.timestampBadge}>
-            <Text style={styles.timestampText}>3 mins ago</Text>
-          </View>
-        </View>
-
-        {/* Stats Grid */}
-        <View style={styles.statsGrid}>
-          <View style={styles.statsCard}>
-            <Text style={styles.statsLabel}>Water Intake</Text>
-            <Text style={styles.statsValue}>{waterIntake}</Text>
-          </View>
-          <View style={styles.statsCard}>
-            <Text style={styles.statsLabel}>Sleep</Text>
-            <Text style={styles.statsValue}>{sleepHours}</Text>
-          </View>
-          <View style={styles.statsCardSmall}>
-            <Text style={styles.statsLabel}>Calories</Text>
-            <Text style={styles.statsValue}>{caloriesBurnt} kCal</Text>
-            <PieChart
-              data={[
-                { name: 'Burnt', population: caloriesBurnt, color: '#FFC069', legendFontColor: '#7F7F7F', legendFontSize: 15 },
-                { name: 'Left', population: caloriesLeft, color: '#FFECCE', legendFontColor: '#7F7F7F', legendFontSize: 15 },
-              ]}
-              width={80}
-              height={80}
-              chartConfig={{
-                color: (opacity = 1) => `rgba(255, 192, 105, ${opacity})`,
-              }}
-              accessor={'population'}
-              backgroundColor={'transparent'}
-              paddingLeft={'0'}
-              hasLegend={false}
-              center={[0, 0]}
-            />
-            <View style={styles.calOverlay}>
-              <Text style={styles.calOverlayText}>{caloriesLeft} kCal</Text>
-            </View>
-          </View>
         </View>
 
         {/* Workout Progress */}
@@ -238,6 +174,28 @@ const HomeScreen = () => {
 
 
       </ScrollView>
+        {/* ─── BMI Disclaimer Dialog ─── */}
+        <Dialog
+        isOpen={showBmiDialog}
+        onClose={() => setShowBmiDialog(false)}
+        title="BMI Disclaimer"
+        size="sm"
+        footer={
+          <View style={styles.footer}>
+            <Button
+              title="OK"
+              onPress={() => setShowBmiDialog(false)}
+              style={styles.okButton}
+            />
+          </View>
+        }
+      >
+        <Text style={styles.bodyText}>
+          BMI is a screening tool and should not be used as a definitive diagnosis of health problems. 
+          It does not take into account factors such as muscle mass, body composition, or age. 
+          It is recommended to consult with a healthcare professional for personalized advice on weight management and health.
+        </Text>
+      </Dialog>
     </SafeAreaView>
   );
 };
@@ -266,6 +224,9 @@ const styles = StyleSheet.create({
   bmiPie: { height: 100, width: 100, flex: 1 },
   bmiOverlay: { position: 'absolute', right: 32, top: 32, alignItems: 'center' },
   bmiValue: { fontSize: 18, fontWeight: 'bold', color: '#333' },
+  footer: { flexDirection: 'row', justifyContent: 'flex-end' },
+  okButton: { backgroundColor: '#70A1FF' },
+  bodyText: { fontSize: 14, color: '#333', lineHeight: 20 },
   targetCard: { flexDirection: 'row', backgroundColor: '#F5F8FF', borderRadius: 16, padding: 16, alignItems: 'center', marginBottom: 24 },
   targetText: { fontSize: 16, color: '#333' },
   checkBtn: { marginLeft: 'auto', backgroundColor: '#A3C9FD', borderRadius: 12, paddingVertical: 6, paddingHorizontal: 12 },
