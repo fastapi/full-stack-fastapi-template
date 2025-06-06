@@ -225,6 +225,11 @@ def get_personal_feed_posts(
     Get workout posts from users that the specified user follows (personal feed).
     Includes privacy filtering: private posts only visible if mutual follow.
     """
+    # Early check: if no WorkoutPost records exist, return empty result immediately
+    total_posts_check = session.exec(select(func.count()).select_from(WorkoutPost)).one()
+    if total_posts_check == 0:
+        return [], 0
+    
     # Get IDs of users that the current user follows
     following_statement = (
         select(UserFollow.followed_id)
@@ -235,6 +240,10 @@ def get_personal_feed_posts(
     # Include the user's own posts in the feed
     following_ids.append(user_id)
     
+    # If no one to follow (including self), return empty
+    if not following_ids:
+        return [], 0
+    
     # Build privacy filter conditions
     privacy_conditions = []
     
@@ -242,9 +251,7 @@ def get_personal_feed_posts(
         if followed_id == user_id:
             # User's own posts - always visible
             privacy_conditions.append(
-                and_(
-                    WorkoutPost.user_id == user_id
-                )
+                WorkoutPost.user_id == user_id
             )
         else:
             # Posts from followed users
@@ -297,6 +304,11 @@ def get_public_feed_posts(
     """
     Get all public workout posts from all users (discovery feed).
     """
+    # Early check: if no WorkoutPost records exist, return empty result immediately
+    total_posts_check = session.exec(select(func.count()).select_from(WorkoutPost)).one()
+    if total_posts_check == 0:
+        return [], 0
+    
     # Count all public posts
     count_statement = (
         select(func.count())

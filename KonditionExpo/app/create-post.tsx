@@ -276,14 +276,14 @@ export default function CreatePostScreen() {
             )}
             <View style={styles.previewStats}>
               <Text style={styles.previewStat}>
-                🏃‍♂️ {formData.workout_type}
+                <Text>🏃‍♂️ {formData.workout_type}</Text>
               </Text>
               <Text style={styles.previewStat}>
-                ⏱️ {formatDuration(formData.duration_minutes)}
+                <Text>⏱️ {formatDuration(formData.duration_minutes)}</Text>
               </Text>
               {formData.calories_burned && (
                 <Text style={styles.previewStat}>
-                  🔥 {formData.calories_burned} cal
+                  <Text>🔥 {formData.calories_burned} cal</Text>
                 </Text>
               )}
             </View>

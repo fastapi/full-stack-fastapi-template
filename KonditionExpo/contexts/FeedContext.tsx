@@ -167,25 +167,44 @@ export function FeedProvider({ children }: FeedProviderProps) {
   }, []);
 
   const deletePost = useCallback(async (postId: string) => {
+    // Store the post data for potential restoration
+    let deletedPost: WorkoutPostResponse | null = null;
+    let previousState: FeedState | null = null;
+
     try {
-      setLoading(true);
       setError(null);
 
+      // Store current state and find the post to delete
+      setState(prev => {
+        previousState = { ...prev };
+        deletedPost = prev.personalFeed.find(post => post.id === postId) ||
+                     prev.publicFeed.find(post => post.id === postId) ||
+                     prev.combinedFeed.find(post => post.id === postId) ||
+                     null;
+
+        // Optimistic update: Remove the post immediately from all feeds
+        return {
+          ...prev,
+          personalFeed: prev.personalFeed.filter(post => post.id !== postId),
+          publicFeed: prev.publicFeed.filter(post => post.id !== postId),
+          combinedFeed: prev.combinedFeed.filter(post => post.id !== postId),
+        };
+      });
+
+      // Attempt to delete the post on the server
       await apiService.deleteWorkoutPost(postId);
       
-      // Remove the post from all feeds
-      setState(prev => ({
-        ...prev,
-        personalFeed: prev.personalFeed.filter(post => post.id !== postId),
-        publicFeed: prev.publicFeed.filter(post => post.id !== postId),
-        combinedFeed: prev.combinedFeed.filter(post => post.id !== postId),
-      }));
+      // Success - the optimistic update stands
     } catch (error) {
       console.error('Error deleting post:', error);
+      
+      // Restore the post to its previous position if deletion failed
+      if (previousState && deletedPost) {
+        setState(previousState);
+      }
+      
       setError(error instanceof Error ? error.message : 'Failed to delete post');
       throw error;
-    } finally {
-      setLoading(false);
     }
   }, []);
 
