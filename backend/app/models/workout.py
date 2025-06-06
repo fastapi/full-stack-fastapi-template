@@ -149,6 +149,18 @@ class WorkoutsPublic(SQLModel):
     data: List[WorkoutPublic]
     count: int
 
+class ExerciseNestedCreate(SQLModel):
+    name: str
+    description: Optional[str] = None
+    category: str
+    sets: Optional[int] = None
+    reps: Optional[int] = None
+    weight: Optional[float] = None
+
+
+class WorkoutWithExercisesCreate(WorkoutCreate):
+    exercises: List[ExerciseNestedCreate] = []
+
 #Personal Bests Model - Related to Workouts
 class PersonalBest(SQLModel, table=True):
     id: UUID = Field(default_factory=uuid4, primary_key=True)

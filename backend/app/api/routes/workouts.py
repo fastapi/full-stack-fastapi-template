@@ -14,10 +14,12 @@ from app.models.workout import (
     WorkoutPublic,
     WorkoutsPublic,
     WorkoutWithExercisesPublic,
+    WorkoutWithExercisesCreate,
     Exercise,
     ExerciseCreate,
     ExerciseUpdate,
     ExercisePublic,
+    ExerciseNestedCreate
 )
 from app.crudFuncs import update_personal_bests_after_workout
 
@@ -25,36 +27,13 @@ from app.crudFuncs import update_personal_bests_after_workout
 router = APIRouter(prefix="/workouts", tags=["workouts"])
 
 
-@router.post("/", response_model=WorkoutPublic)
+@router.post("/", response_model=WorkoutWithExercisesPublic)
 def create_workout(
     *,
     session: SessionDep,
     current_user: CurrentUser,
-    workout_in: WorkoutCreate = Body(
-        ...,
-        examples=[
-            {
-                "name": "Monday Strength Training",
-                "description": "Focus on upper body strength",
-                "scheduled_date": "2025-05-20T08:00:00Z",
-                "duration_minutes": 60
-            }
-        ],
-    )
+    workout_in: WorkoutWithExercisesCreate
 ) -> Any:
-    """
-    Create a new workout.
-    
-    This endpoint allows users to create a new workout plan with details such as name,
-    description, scheduled date, and expected duration.
-    
-    - **name**: Required. The name of the workout (1-255 characters)
-    - **description**: Optional. A detailed description of the workout (up to 1000 characters)
-    - **scheduled_date**: Optional. When the workout is scheduled to take place
-    - **duration_minutes**: Optional. The expected duration of the workout in minutes
-    
-    Returns the created workout with its ID and other metadata.
-    """
     workout = Workout(
         user_id=current_user.id,
         name=workout_in.name,
@@ -64,13 +43,33 @@ def create_workout(
         is_completed=False,
         created_at=datetime.utcnow(),
     )
-    
+
     session.add(workout)
     session.commit()
     session.refresh(workout)
-    
-    return workout
 
+    # Add nested exercises
+    for ex in workout_in.exercises:
+        exercise = Exercise(
+            workout_id=workout.id,
+            name=ex.name,
+            description=ex.description,
+            category=ex.category,
+            sets=ex.sets,
+            reps=ex.reps,
+            weight=ex.weight,
+        )
+        session.add(exercise)
+
+    session.commit()
+    session.refresh(workout)
+
+    # Load exercises manually
+    workout.exercises = session.exec(
+        select(Exercise).where(Exercise.workout_id == workout.id)
+    ).all()
+
+    return workout
 
 @router.get("/", response_model=WorkoutsPublic)
 def get_workouts(

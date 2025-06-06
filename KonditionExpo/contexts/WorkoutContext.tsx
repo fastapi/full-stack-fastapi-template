@@ -5,6 +5,7 @@ import { useAuth } from '@/contexts/AuthContext'; // adjust if needed
 export interface Exercise {
   id: string;
   name: string;
+  description?: string;
   muscle_group: string;
   type: 'strength' | 'cardio' | 'flexibility';
 }
@@ -64,11 +65,27 @@ export const WorkoutProvider = ({ children }: { children: ReactNode }) => {
 
   const generateId = () => Math.random().toString(36).substr(2, 9);
 
+  const transformWorkoutForBackend = (workout: Workout) => ({
+    name: workout.name,
+    description: workout.notes || null,
+    scheduled_date: workout.date.toISOString(),
+    duration_minutes: workout.duration,
+    exercises: workout.exercises.map(ex => ({
+      name: ex.exercise.name,
+      description: ex.exercise.description || null,
+      category: ex.exercise.muscle_group, // or ex.exercise.type if that's better
+      sets: ex.sets.length,
+      reps: ex.sets.reduce((sum, s) => sum + (s.reps || 0), 0),
+      weight: ex.sets.reduce((max, s) => Math.max(max, s.weight || 0), 0),
+    })),
+  });
+
   const addWorkout = async (workout: Workout) => {
     try {
+      const payload = transformWorkoutForBackend(workout);
       const response = await axios.post(
         'http://localhost:8000/api/v1/workouts/', // Replace with deployment endpoint
-        workout,
+        payload,
         {
           headers: {
             Authorization: `Bearer ${token}`,
@@ -77,7 +94,16 @@ export const WorkoutProvider = ({ children }: { children: ReactNode }) => {
       );
       console.log("Response from POST /workouts: ", response);
       const savedWorkout = response.data;
-      setWorkouts(prev => [...prev, savedWorkout]);
+
+      const saved = {
+        ...response.data,
+        date: new Date(response.data.created_at),
+        exercises: [], // if backend doesn't return them
+        duration: response.data.duration_minutes || 0,
+      };
+  
+      setWorkouts(prev => [...prev, saved]);
+
     } catch (error) {
       console.error('Failed to save workout to backend:', error.response?.data || error.message);
     }
