@@ -19,6 +19,7 @@
     "@react-navigation/bottom-tabs": "^7.3.10",
     "@react-navigation/elements": "^2.3.8",
     "@react-navigation/native": "^7.1.6",
+    "axios": "^1.9.0",
     "d3-shape": "^3.2.0",
     "expo": "^53.0.9",
     "expo-blur": "~14.1.4",

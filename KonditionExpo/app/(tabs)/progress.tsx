@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { 
   SafeAreaView, 
   View, 
@@ -15,7 +15,7 @@ import { useWorkout, Workout } from '@/contexts/WorkoutContext';
 import { Button } from '@/components/ui/Button';
 import { Input } from '@/components/ui/Input';
 import { router } from 'expo-router';
-
+import { useAuth } from '@/contexts/AuthContext';
 const { width } = Dimensions.get('window');
 
 interface WorkoutItemProps {
@@ -51,14 +51,31 @@ const WorkoutItem = ({ workout, onPress }: WorkoutItemProps) => {
   );
 };
 
+
+
 const ProgressScreen = () => {
-  const { workouts, currentWorkout, startWorkout } = useWorkout();
+  const { workouts, currentWorkout, startWorkout, getWorkouts } = useWorkout();
+  const { isAuthenticated, isLoading } = useAuth();
   const [showNewWorkoutModal, setShowNewWorkoutModal] = useState(false);
   const [newWorkoutName, setNewWorkoutName] = useState('');
-  
   const backgroundColor = '#FFFFFF';
   const textColor = '#333';
   const tintColor = '#70A1FF';
+  
+  // ⬇️ Load backend workouts once auth is ready
+  useEffect(() => {
+    if (isAuthenticated && !isLoading) {
+      getWorkouts();
+    }
+  }, [isAuthenticated, isLoading]);
+
+  if (isLoading || !isAuthenticated) {
+    return (
+      <SafeAreaView style={styles.container}>
+        <Text style={{ textAlign: 'center', marginTop: 100 }}>Loading your progress...</Text>
+      </SafeAreaView>
+    );
+  }
 
   const handleStartWorkout = () => {
     if (!newWorkoutName.trim()) {

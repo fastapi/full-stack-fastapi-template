@@ -1,4 +1,6 @@
 import React, { createContext, useContext, useState, ReactNode } from 'react';
+import axios from 'axios';
+import { useAuth } from '@/contexts/AuthContext'; // adjust if needed
 
 export interface Exercise {
   id: string;
@@ -34,11 +36,12 @@ export interface Workout {
 interface WorkoutContextType {
   workouts: Workout[];
   currentWorkout: Workout | null;
-  addWorkout: (workout: Workout) => void;
+  addWorkout: (workout: Workout) => Promise<void>; // <-- async now
   updateWorkout: (workoutId: string, workout: Workout) => void;
+  getWorkouts: () => void;
   deleteWorkout: (workoutId: string) => void;
   startWorkout: (name: string) => void;
-  endWorkout: () => void;
+  endWorkout: (updatedWorkout: Workout) => Promise<void>; // <-- async now
   addExerciseToCurrentWorkout: (exercise: Exercise) => void;
   addSetToExercise: (exerciseId: string, set: Omit<WorkoutSet, 'id'>) => void;
   removeSetFromExercise: (exerciseId: string, setId: string) => void;
@@ -50,18 +53,72 @@ const WorkoutContext = createContext<WorkoutContextType | undefined>(undefined);
 export const WorkoutProvider = ({ children }: { children: ReactNode }) => {
   const [workouts, setWorkouts] = useState<Workout[]>([]);
   const [currentWorkout, setCurrentWorkout] = useState<Workout | null>(null);
+  const { token, isAuthenticated, isLoading } = useAuth(); //token of user
+
+
+  // Early return while loading or not authenticated
+  if (isLoading || !isAuthenticated || !token) {
+    return null; // or <LoadingIndicator />
+  }
+  console.log("In WorkoutContext - Current User token is: ", token);
 
   const generateId = () => Math.random().toString(36).substr(2, 9);
 
-  const addWorkout = (workout: Workout) => {
-    setWorkouts(prev => [...prev, workout]);
+  const addWorkout = async (workout: Workout) => {
+    try {
+      const response = await axios.post(
+        'http://localhost:8000/api/v1/workouts/', // Replace with deployment endpoint
+        workout,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+      console.log("Response from POST /workouts: ", response);
+      const savedWorkout = response.data;
+      setWorkouts(prev => [...prev, savedWorkout]);
+    } catch (error) {
+      console.error('Failed to save workout to backend:', error.response?.data || error.message);
+    }
   };
 
-  const updateWorkout = (workoutId: string, updatedWorkout: Workout) => {
+  const getWorkouts = async () => {
+    try {
+      const response = await axios.get('http://localhost:8000/api/v1/workouts/', {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+  
+      // Extract array properly
+      const workoutArray = response.data.data;
+  
+      // Convert string dates to Date objects
+      const parsed = workoutArray.map((w: any) => ({
+        ...w,
+        date: new Date(w.created_at),
+        exercises: w.exercises || [], // fallback to empty array
+        duration: w.duration_minutes || 0,
+      }));
+  
+      setWorkouts(parsed);
+    } catch (error) {
+      console.error('Failed to load workouts:', error.response?.data || error.message);
+    }
+  };
+  const endWorkout = async (updatedWorkout: Workout) => {
+    await addWorkout(updatedWorkout);
+    setCurrentWorkout(null);
+  };
+
+  //Everything below this is old - only updates local state rather than send backend requests
+
+  const updateWorkout = (workoutId: string, updatedWorkout: Workout) => { //Old
     setWorkouts(prev => prev.map(w => w.id === workoutId ? updatedWorkout : w));
   };
 
-  const deleteWorkout = (workoutId: string) => {
+  const deleteWorkout = (workoutId: string) => { // Old
     setWorkouts(prev => prev.filter(w => w.id !== workoutId));
   };
 
@@ -74,13 +131,6 @@ export const WorkoutProvider = ({ children }: { children: ReactNode }) => {
       duration: 0,
     };
     setCurrentWorkout(newWorkout);
-  };
-
-  const endWorkout = () => {
-    if (currentWorkout) {
-      addWorkout(currentWorkout);
-      setCurrentWorkout(null);
-    }
   };
 
   const addExerciseToCurrentWorkout = (exercise: Exercise) => {
@@ -155,11 +205,12 @@ export const WorkoutProvider = ({ children }: { children: ReactNode }) => {
       updateWorkout,
       deleteWorkout,
       startWorkout,
-      endWorkout,
+      endWorkout,   
       addExerciseToCurrentWorkout,
       addSetToExercise,
       removeSetFromExercise,
       updateSet,
+      getWorkouts,
     }}>
       {children}
     </WorkoutContext.Provider>
