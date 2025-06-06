@@ -1,7 +1,12 @@
 import uuid
 
 from pydantic import EmailStr
-from sqlmodel import Field, Relationship, SQLModel
+from sqlmodel import Field, Relationship, SQLModel, Column, DateTime
+from dates import date
+from datetime import datetime
+from typing import Optional
+
+
 
 
 # Shared properties
@@ -45,6 +50,9 @@ class User(UserBase, table=True):
     hashed_password: str
     items: list["Item"] = Relationship(back_populates="owner", cascade_delete=True)
 
+    # TODO test
+    personal_bests: list["PB"] = Relationship(back_populates="user", cascade_delete=True)
+
 
 # Properties to return via API, id is always required
 class UserPublic(UserBase):
@@ -81,6 +89,25 @@ class Item(ItemBase, table=True):
     owner: User | None = Relationship(back_populates="items")
 
 
+
+
+# TODO test, one-to-many User.personal_bests relationship.
+# expose PersonalBestBase for writes, PersonalBest for reads, and wrapper list.
+
+class PersonalBestBase(SQLModel):
+    metric: str = Field(max_length=100, description = "e.g. deadlift, 5k-run, pushups")
+    value: float = Field(..., description="numeric value of the best (e.g. kg, seconds, reps)")
+    date: date = Field(default_factory=date.today)
+
+class PersonalBest(PersonalBestBase, table=True):
+    id: uuid.UUID = Field(default_factory=uuid.uuid4, primary_key=True)
+    user_id: uuid.UUID = Field(foreign_key="user.id", nullable=False, ondelete="CASCADE")
+    user: User = Relationship(back_populates="personal_bests")
+
+class PersonalBestsList(SQLModel):
+    data: list[PersonalBest]
+    count: int
+
 # Properties to return via API, id is always required
 class ItemPublic(ItemBase):
     id: uuid.UUID
@@ -111,3 +138,64 @@ class TokenPayload(SQLModel):
 class NewPassword(SQLModel):
     token: str
     new_password: str = Field(min_length=8, max_length=40)
+
+# ─────────────────────────────────────────────────────────────────────────────
+# Push notifications & custom reminders
+# ─────────────────────────────────────────────────────────────────────────────
+
+class PushToken(SQLModel, table=True):
+    """
+    Stores the Expo push token for each User.
+    We’ll assume one token per user (so user_id is unique).
+    """
+    __tablename__ = "push_tokens"
+
+    id: uuid.UUID = Field(default_factory=uuid.uuid4, primary_key=True)
+    user_id: uuid.UUID = Field(
+        foreign_key="user.id",
+        nullable=False,
+        unique=True,
+        index=True,
+    )
+    expo_token: str = Field(
+        sa_column=Column("expo_token", str, unique=True, index=True),
+        description="The Expo Push Token (e.g. ExponentPushToken[xxxxx])",
+    )
+
+
+class CustomReminderBase(SQLModel):
+    """
+    Shared properties for custom reminders.
+    """
+    user_id: uuid.UUID = Field(
+        foreign_key="user.id",
+        nullable=False,
+        index=True,
+        description="Which user this reminder belongs to",
+    )
+    expo_token: str = Field(
+        description="Copy the Expo push token here for convenience",
+    )
+    remind_time: datetime = Field(
+        sa_column=Column(DateTime(timezone=True)),
+        description="UTC‐timestamp when the push should fire",
+    )
+    message: str = Field(
+        max_length=255,
+        description="The custom reminder text to send",
+    )
+
+
+class CustomReminder(CustomReminderBase, table=True):
+    """
+    A table of single‐fire reminders. Once sent, you can delete them in your scheduler.
+    """
+    __tablename__ = "custom_reminders"
+
+    id: uuid.UUID = Field(default_factory=uuid.uuid4, primary_key=True)
+    sent_at: Optional[datetime] = Field(
+        default=None,
+        sa_column=Column(DateTime(timezone=True)),
+        description="Set to now() after you send the notification (optional)",
+    )
+

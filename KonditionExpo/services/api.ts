@@ -1,0 +1,455 @@
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import { API_CONFIG, getApiBaseUrl } from '../config/api';
+
+// Types for API requests and responses
+export interface LoginRequest {
+  username: string; // FastAPI OAuth2 expects 'username' field for email
+  password: string;
+}
+
+export interface SignupRequest {
+  email: string;
+  password: string;
+  full_name?: string;
+}
+
+export interface ProfileUpdateRequest {
+  full_name?: string;
+  email?: string;
+  gender?: string;
+  date_of_birth?: string;
+  weight?: number;
+  height?: number;
+}
+
+// Workout-related types
+export interface WorkoutResponse {
+  id: string;
+  user_id: string;
+  name: string;
+  description?: string;
+  scheduled_date?: string;
+  completed_date?: string;
+  duration_minutes?: number;
+  is_completed: boolean;
+  created_at: string;
+  updated_at?: string;
+  exercises?: ExerciseResponse[];
+  exercise_count?: number;
+}
+
+export interface ExerciseResponse {
+  id: string;
+  workout_id: string;
+  name: string;
+  description?: string;
+  category: string;
+  sets?: number;
+  reps?: number;
+  weight?: number;
+  created_at: string;
+  updated_at?: string;
+}
+
+export interface WorkoutsPublicResponse {
+  data: WorkoutResponse[];
+  count: number;
+}
+
+export interface AuthResponse {
+  access_token: string;
+  token_type: string;
+}
+
+export interface UserProfile {
+  id: string;
+  email: string;
+  full_name?: string;
+  is_active: boolean;
+  is_superuser: boolean;
+  // Profile fields
+  gender?: string;
+  date_of_birth?: string;
+  weight?: number;
+  height?: number;
+}
+
+// Social-related types
+export interface UserSearchResult {
+  id: string;
+  email: string;
+  full_name?: string;
+  is_active: boolean;
+  is_superuser: boolean;
+  gender?: string;
+  date_of_birth?: string;
+  weight?: number;
+  height?: number;
+  follower_count: number;
+  following_count: number;
+  is_following: boolean;
+}
+
+export interface UserSearchResultsResponse {
+  data: UserSearchResult[];
+  count: number;
+}
+
+export interface UsersPublicResponse {
+  data: UserProfile[];
+  count: number;
+}
+
+export interface UserPublicExtended extends UserProfile {
+  follower_count: number;
+  following_count: number;
+}
+
+export interface FollowStatusResponse {
+  is_following: boolean;
+}
+
+// Workout Post types
+export interface WorkoutPostResponse {
+  id: string;
+  user_id: string;
+  title: string;
+  description?: string;
+  workout_type: string;
+  duration_minutes: number;
+  calories_burned?: number;
+  is_public: boolean;
+  created_at: string;
+  updated_at?: string;
+  user_full_name?: string;
+  is_mutual_follow?: boolean;
+}
+
+export interface WorkoutPostsResponse {
+  data: WorkoutPostResponse[];
+  count: number;
+}
+
+export interface WorkoutPostCreateRequest {
+  title: string;
+  description?: string;
+  workout_type: string;
+  duration_minutes: number;
+  calories_burned?: number;
+  is_public?: boolean;
+}
+
+export interface WorkoutPostUpdateRequest {
+  title?: string;
+  description?: string;
+  workout_type?: string;
+  duration_minutes?: number;
+  calories_burned?: number;
+  is_public?: boolean;
+}
+
+export interface ApiError {
+  detail: string;
+}
+
+// API Service Class
+class ApiService {
+  private baseUrl: string;
+
+  constructor(baseUrl: string = getApiBaseUrl()) {
+    this.baseUrl = baseUrl;
+  }
+
+  // Helper method to get stored token
+  private async getToken(): Promise<string | null> {
+    try {
+      return await AsyncStorage.getItem(API_CONFIG.TOKEN_KEY);
+    } catch (error) {
+      console.error('Error getting token:', error);
+      return null;
+    }
+  }
+
+  // Helper method to make authenticated requests
+  private async makeRequest<T>(
+    endpoint: string,
+    options: RequestInit = {}
+  ): Promise<T> {
+    const url = `${this.baseUrl}${endpoint}`;
+    const token = await this.getToken();
+
+    const headers: Record<string, string> = {
+      'Content-Type': 'application/json',
+      ...(options.headers as Record<string, string>),
+    };
+
+    // Add authorization header if token exists
+    if (token) {
+      headers.Authorization = `Bearer ${token}`;
+    }
+
+    const config: RequestInit = {
+      ...options,
+      headers,
+    };
+
+    try {
+      console.log(`Making request to: ${url}`);
+      const response = await fetch(url, config);
+      
+      if (!response.ok) {
+        let errorMessage = `HTTP error! status: ${response.status}`;
+        try {
+          const errorData: ApiError = await response.json();
+          errorMessage = errorData.detail || errorMessage;
+        } catch {
+          // If we can't parse error response, use status message
+        }
+        throw new Error(errorMessage);
+      }
+
+      return await response.json();
+    } catch (error) {
+      console.error(`Request failed for ${url}:`, error);
+      
+      if (error instanceof TypeError && error.message.includes('Network request failed')) {
+        throw new Error('Network connection failed. Please check your internet connection and API server.');
+      }
+      
+      if (error instanceof Error) {
+        throw error;
+      }
+      
+      throw new Error('Network request failed');
+    }
+  }
+
+  // Authentication Methods
+  async login(email: string, password: string): Promise<AuthResponse> {
+    // FastAPI OAuth2 expects form data with 'username' field
+    const formData = new FormData();
+    formData.append('username', email);
+    formData.append('password', password);
+
+    const response = await fetch(`${this.baseUrl}${API_CONFIG.ENDPOINTS.LOGIN}`, {
+      method: 'POST',
+      body: formData,
+    });
+
+    if (!response.ok) {
+      const errorData: ApiError = await response.json();
+      throw new Error(errorData.detail || 'Login failed');
+    }
+
+    return await response.json();
+  }
+
+  async signup(userData: SignupRequest): Promise<UserProfile> {
+    return this.makeRequest<UserProfile>(API_CONFIG.ENDPOINTS.SIGNUP, {
+      method: 'POST',
+      body: JSON.stringify(userData),
+    });
+  }
+
+  async getCurrentUser(): Promise<UserProfile> {
+    return this.makeRequest<UserProfile>(API_CONFIG.ENDPOINTS.USER_PROFILE);
+  }
+
+  async testToken(): Promise<UserProfile> {
+    return this.makeRequest<UserProfile>(API_CONFIG.ENDPOINTS.TEST_TOKEN, {
+      method: 'POST',
+    });
+  }
+
+  async updateProfile(profileData: ProfileUpdateRequest): Promise<UserProfile> {
+    return this.makeRequest<UserProfile>(API_CONFIG.ENDPOINTS.USER_PROFILE, {
+      method: 'PATCH',
+      body: JSON.stringify(profileData),
+    });
+  }
+
+  // Workout Methods
+  async getWorkouts(): Promise<WorkoutResponse[]> {
+    const response = await this.makeRequest<WorkoutsPublicResponse>(API_CONFIG.ENDPOINTS.WORKOUTS);
+    return response.data;
+  }
+
+  async getWorkoutById(id: string): Promise<WorkoutResponse> {
+    return this.makeRequest<WorkoutResponse>(API_CONFIG.ENDPOINTS.WORKOUT_BY_ID(id));
+  }
+
+  // Token Management
+  async storeToken(token: string): Promise<void> {
+    try {
+      await AsyncStorage.setItem(API_CONFIG.TOKEN_KEY, token);
+    } catch (error) {
+      console.error('Error storing token:', error);
+      throw new Error('Failed to store authentication token');
+    }
+  }
+
+  async removeToken(): Promise<void> {
+    try {
+      await AsyncStorage.removeItem(API_CONFIG.TOKEN_KEY);
+    } catch (error) {
+      console.error('Error removing token:', error);
+      throw new Error('Failed to remove authentication token');
+    }
+  }
+
+  async hasValidToken(): Promise<boolean> {
+    try {
+      const token = await this.getToken();
+      if (!token) return false;
+
+      // Test if token is still valid
+      await this.testToken();
+      return true;
+    } catch (error) {
+      // Token is invalid or expired
+      await this.removeToken();
+      return false;
+    }
+  }
+
+  // Social Methods
+  async searchUsers(query: string, skip: number = 0, limit: number = 20): Promise<UserSearchResultsResponse> {
+    const params = new URLSearchParams({
+      q: query,
+      skip: skip.toString(),
+      limit: limit.toString(),
+    });
+    
+    return this.makeRequest<UserSearchResultsResponse>(
+      `${API_CONFIG.ENDPOINTS.SEARCH_USERS}?${params.toString()}`
+    );
+  }
+
+  async followUser(userId: string): Promise<{ message: string }> {
+    return this.makeRequest<{ message: string }>(API_CONFIG.ENDPOINTS.FOLLOW_USER(userId), {
+      method: 'POST',
+    });
+  }
+
+  async unfollowUser(userId: string): Promise<{ message: string }> {
+    return this.makeRequest<{ message: string }>(API_CONFIG.ENDPOINTS.UNFOLLOW_USER(userId), {
+      method: 'DELETE',
+    });
+  }
+
+  async getFollowers(skip: number = 0, limit: number = 100): Promise<UserSearchResultsResponse> {
+    const params = new URLSearchParams({
+      skip: skip.toString(),
+      limit: limit.toString(),
+    });
+    
+    return this.makeRequest<UserSearchResultsResponse>(
+      `${API_CONFIG.ENDPOINTS.GET_FOLLOWERS}?${params.toString()}`
+    );
+  }
+
+  async getFollowing(skip: number = 0, limit: number = 100): Promise<UserSearchResultsResponse> {
+    const params = new URLSearchParams({
+      skip: skip.toString(),
+      limit: limit.toString(),
+    });
+    
+    return this.makeRequest<UserSearchResultsResponse>(
+      `${API_CONFIG.ENDPOINTS.GET_FOLLOWING}?${params.toString()}`
+    );
+  }
+
+  async isFollowing(userId: string): Promise<FollowStatusResponse> {
+    return this.makeRequest<FollowStatusResponse>(API_CONFIG.ENDPOINTS.IS_FOLLOWING(userId));
+  }
+
+  async getUserProfileExtended(userId: string): Promise<UserPublicExtended> {
+    return this.makeRequest<UserPublicExtended>(API_CONFIG.ENDPOINTS.USER_PROFILE_EXTENDED(userId));
+  }
+
+  // Feed Methods
+  async getFeed(feedType: 'personal' | 'public' | 'combined' = 'personal', skip: number = 0, limit: number = 20): Promise<WorkoutPostsResponse> {
+    const params = new URLSearchParams({
+      feed_type: feedType,
+      skip: skip.toString(),
+      limit: limit.toString(),
+    });
+    
+    return this.makeRequest<WorkoutPostsResponse>(
+      `/social/feed?${params.toString()}`
+    );
+  }
+
+  async getPublicFeed(skip: number = 0, limit: number = 20): Promise<WorkoutPostsResponse> {
+    const params = new URLSearchParams({
+      skip: skip.toString(),
+      limit: limit.toString(),
+    });
+    
+    return this.makeRequest<WorkoutPostsResponse>(
+      `/social/feed/public?${params.toString()}`
+    );
+  }
+
+  async getPersonalFeed(skip: number = 0, limit: number = 20): Promise<WorkoutPostsResponse> {
+    const params = new URLSearchParams({
+      skip: skip.toString(),
+      limit: limit.toString(),
+    });
+    
+    return this.makeRequest<WorkoutPostsResponse>(
+      `/social/feed/personal?${params.toString()}`
+    );
+  }
+
+  // Workout Post Methods
+  async createWorkoutPost(postData: WorkoutPostCreateRequest): Promise<WorkoutPostResponse> {
+    return this.makeRequest<WorkoutPostResponse>('/social/workout-posts', {
+      method: 'POST',
+      body: JSON.stringify(postData),
+    });
+  }
+
+  async getMyWorkoutPosts(skip: number = 0, limit: number = 20): Promise<WorkoutPostsResponse> {
+    const params = new URLSearchParams({
+      skip: skip.toString(),
+      limit: limit.toString(),
+    });
+    
+    return this.makeRequest<WorkoutPostsResponse>(
+      `/social/workout-posts?${params.toString()}`
+    );
+  }
+
+  async getUserWorkoutPosts(userId: string, skip: number = 0, limit: number = 20): Promise<WorkoutPostsResponse> {
+    const params = new URLSearchParams({
+      skip: skip.toString(),
+      limit: limit.toString(),
+    });
+    
+    return this.makeRequest<WorkoutPostsResponse>(
+      `/social/user/${userId}/workout-posts?${params.toString()}`
+    );
+  }
+
+  async getWorkoutPost(postId: string): Promise<WorkoutPostResponse> {
+    return this.makeRequest<WorkoutPostResponse>(`/social/workout-posts/${postId}`);
+  }
+
+  async updateWorkoutPost(postId: string, postData: WorkoutPostUpdateRequest): Promise<WorkoutPostResponse> {
+    return this.makeRequest<WorkoutPostResponse>(`/social/workout-posts/${postId}`, {
+      method: 'PUT',
+      body: JSON.stringify(postData),
+    });
+  }
+
+  async deleteWorkoutPost(postId: string): Promise<{ message: string }> {
+    return this.makeRequest<{ message: string }>(`/social/workout-posts/${postId}`, {
+      method: 'DELETE',
+    });
+  }
+}
+
+// Export singleton instance
+export const apiService = new ApiService();
+export default apiService;
