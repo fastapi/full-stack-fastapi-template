@@ -149,25 +149,21 @@ const WorkoutScreen = () => {
     addSetToExercise(exerciseId, newSet);
   };
 
-  const handleFinishWorkout = () => {
+  const handleFinishWorkout = async () => {
     if (!currentWorkout) return;
-    
-    Alert.alert(
-      'Finish Workout',
-      'Are you sure you want to finish this workout?',
-      [
-        { text: 'Cancel', style: 'cancel' },
-        {
-          text: 'Finish',
-          onPress: () => {
-            const duration = Math.round((new Date().getTime() - startTime.getTime()) / 60000);
-            const updatedWorkout = { ...currentWorkout, duration };
-            endWorkout();
-            router.replace('/(tabs)');
-          },
-        },
-      ]
-    );
+  
+    const duration = Math.round((new Date().getTime() - startTime.getTime()) / 60000);
+    const updatedWorkout = { ...currentWorkout, duration };
+  
+    console.log("FinishWorkout-UpdatedWorkout: ", updatedWorkout);
+  
+    try {
+      await endWorkout(updatedWorkout); // wait for backend POST to complete
+      router.replace('/(tabs)');
+    } catch (error) {
+      console.error("Error finishing workout:", error);
+      // Optionally show UI feedback
+    }
   };
 
   if (!currentWorkout) {

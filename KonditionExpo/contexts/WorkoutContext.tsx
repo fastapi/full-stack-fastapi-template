@@ -1,8 +1,11 @@
 import React, { createContext, useContext, useState, ReactNode } from 'react';
+import axios from 'axios';
+import { useAuth } from '@/contexts/AuthContext'; // adjust if needed
 
 export interface Exercise {
   id: string;
   name: string;
+  description?: string;
   muscle_group: string;
   type: 'strength' | 'cardio' | 'flexibility';
 }
@@ -34,11 +37,12 @@ export interface Workout {
 interface WorkoutContextType {
   workouts: Workout[];
   currentWorkout: Workout | null;
-  addWorkout: (workout: Workout) => void;
+  addWorkout: (workout: Workout) => Promise<void>; // <-- async now
   updateWorkout: (workoutId: string, workout: Workout) => void;
+  getWorkouts: () => void;
   deleteWorkout: (workoutId: string) => void;
   startWorkout: (name: string) => void;
-  endWorkout: () => void;
+  endWorkout: (updatedWorkout: Workout) => Promise<void>; // <-- async now
   addExerciseToCurrentWorkout: (exercise: Exercise) => void;
   addSetToExercise: (exerciseId: string, set: Omit<WorkoutSet, 'id'>) => void;
   removeSetFromExercise: (exerciseId: string, setId: string) => void;
@@ -50,18 +54,96 @@ const WorkoutContext = createContext<WorkoutContextType | undefined>(undefined);
 export const WorkoutProvider = ({ children }: { children: ReactNode }) => {
   const [workouts, setWorkouts] = useState<Workout[]>([]);
   const [currentWorkout, setCurrentWorkout] = useState<Workout | null>(null);
+  const { token, isAuthenticated, isLoading } = useAuth(); //token of user
+
+  //NO WAIT FOR TOKEN, IS GIVING NULL IN WORKOUT CONTEXT
+
+  //console.log("In WorkoutContext - Current User token is: ", token);
 
   const generateId = () => Math.random().toString(36).substr(2, 9);
 
-  const addWorkout = (workout: Workout) => {
-    setWorkouts(prev => [...prev, workout]);
+  const transformWorkoutForBackend = (workout: Workout) => ({
+    name: workout.name,
+    description: workout.notes || null,
+    scheduled_date: workout.date.toISOString(),
+    duration_minutes: workout.duration,
+    exercises: workout.exercises.map(ex => ({
+      name: ex.exercise.name,
+      description: ex.exercise.description || null,
+      category: ex.exercise.muscle_group, // or ex.exercise.type if that's better
+      sets: ex.sets.length,
+      reps: ex.sets.reduce((sum, s) => sum + (s.reps || 0), 0),
+      weight: ex.sets.reduce((max, s) => Math.max(max, s.weight || 0), 0),
+    })),
+  });
+
+  const addWorkout = async (workout: Workout) => {
+    try {
+      const payload = transformWorkoutForBackend(workout);
+      const response = await axios.post(
+        'http://localhost:8000/api/v1/workouts/', // Replace with deployment endpoint
+        payload,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+      //console.log("Response from POST /workouts: ", response);
+      const savedWorkout = response.data;
+
+      const saved = {
+        ...response.data,
+        date: new Date(response.data.created_at),
+        exercises: [], // if backend doesn't return them
+        duration: response.data.duration_minutes || 0,
+      };
+  
+      setWorkouts(prev => [...prev, saved]);
+
+    } catch (error) {
+      console.error('Failed to save workout to backend:', error.response?.data || error.message);
+    }
   };
 
-  const updateWorkout = (workoutId: string, updatedWorkout: Workout) => {
+  const getWorkouts = async () => {
+    try {
+      console.log("About to get workouts with token: ", token);
+      const response = await axios.get('http://localhost:8000/api/v1/workouts/', {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+  
+      //console.log("Get workouts response: ", response);      
+      // Extract array properly
+      const workoutArray = response.data;
+  
+      // Convert string dates to Date objects
+      const parsed = workoutArray.map((w: any) => ({
+        ...w,
+        date: new Date(w.created_at),
+        exercises: w.exercises || [], // fallback to empty array
+        duration: w.duration_minutes || 0,
+      }));
+  
+      setWorkouts(parsed);
+    } catch (error) {
+      console.error('Failed to load workouts:', error.response?.data || error.message);
+    }
+  };
+  const endWorkout = async (updatedWorkout: Workout) => {
+    await addWorkout(updatedWorkout);
+    setCurrentWorkout(null);
+  };
+
+  //Everything below this is old - only updates local state rather than send backend requests
+
+  const updateWorkout = (workoutId: string, updatedWorkout: Workout) => { //Old
     setWorkouts(prev => prev.map(w => w.id === workoutId ? updatedWorkout : w));
   };
 
-  const deleteWorkout = (workoutId: string) => {
+  const deleteWorkout = (workoutId: string) => { // Old
     setWorkouts(prev => prev.filter(w => w.id !== workoutId));
   };
 
@@ -74,13 +156,6 @@ export const WorkoutProvider = ({ children }: { children: ReactNode }) => {
       duration: 0,
     };
     setCurrentWorkout(newWorkout);
-  };
-
-  const endWorkout = () => {
-    if (currentWorkout) {
-      addWorkout(currentWorkout);
-      setCurrentWorkout(null);
-    }
   };
 
   const addExerciseToCurrentWorkout = (exercise: Exercise) => {
@@ -155,11 +230,12 @@ export const WorkoutProvider = ({ children }: { children: ReactNode }) => {
       updateWorkout,
       deleteWorkout,
       startWorkout,
-      endWorkout,
+      endWorkout,   
       addExerciseToCurrentWorkout,
       addSetToExercise,
       removeSetFromExercise,
       updateSet,
+      getWorkouts,
     }}>
       {children}
     </WorkoutContext.Provider>

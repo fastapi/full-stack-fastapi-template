@@ -39,8 +39,6 @@ from app.models.workout import (
     ExerciseUpdate,
     WorkoutPublic,
     ExercisePublic,
-    WorkoutWithExercisesPublic,
-    WorkoutsPublic,
     PersonalBest,
     PersonalBestCreate
 )
@@ -92,8 +90,6 @@ __all__ = [
     "ExerciseUpdate",
     "WorkoutPublic",
     "ExercisePublic",
-    "WorkoutWithExercisesPublic",
-    "WorkoutsPublic",
     "PersonalBest",
     "PersonalBestCreate",
 ]

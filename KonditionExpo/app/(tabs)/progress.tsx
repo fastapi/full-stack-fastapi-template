@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { 
   SafeAreaView, 
   View, 
@@ -15,7 +15,7 @@ import { useWorkout, Workout } from '@/contexts/WorkoutContext';
 import { Button } from '@/components/ui/Button';
 import { Input } from '@/components/ui/Input';
 import { router } from 'expo-router';
-
+import { useAuth } from '@/contexts/AuthContext';
 const { width } = Dimensions.get('window');
 
 interface WorkoutItemProps {
@@ -32,9 +32,7 @@ const WorkoutItem = ({ workout, onPress }: WorkoutItemProps) => {
     });
   };
 
-  const getTotalSets = () => {
-    return workout.exercises.reduce((total, exercise) => total + exercise.sets.length, 0);
-  };
+  console.log("Workout Item: ", workout);
 
   return (
     <TouchableOpacity style={styles.workoutItem} onPress={onPress}>
@@ -43,22 +41,40 @@ const WorkoutItem = ({ workout, onPress }: WorkoutItemProps) => {
         <Text style={styles.workoutDate}>{formatDate(workout.date)}</Text>
       </View>
       <View style={styles.workoutStats}>
-        <Text style={styles.workoutStat}>{workout.exercises.length} exercises</Text>
-        <Text style={styles.workoutStat}>{getTotalSets()} sets</Text>
-        <Text style={styles.workoutStat}>{workout.duration}min</Text>
+        <Text style={styles.workoutStat}>{workout.exercises.sets} sets</Text>
+        <Text style={styles.workoutStat}>{workout.exercises.reps} reps</Text>
+        <Text style={styles.workoutStat}>{workout.exercises.weight} weight</Text>
       </View>
     </TouchableOpacity>
   );
 };
 
+
+
 const ProgressScreen = () => {
-  const { workouts, currentWorkout, startWorkout } = useWorkout();
+  const { workouts, currentWorkout, startWorkout, getWorkouts } = useWorkout();
+  const { isAuthenticated, isLoading } = useAuth();
   const [showNewWorkoutModal, setShowNewWorkoutModal] = useState(false);
   const [newWorkoutName, setNewWorkoutName] = useState('');
-  
   const backgroundColor = '#FFFFFF';
   const textColor = '#333';
   const tintColor = '#70A1FF';
+  
+  // ⬇️ Load backend workouts once auth is ready
+  useEffect(() => {
+    if (isAuthenticated && !isLoading) {
+      console.log("Authenticated and loaded in workout context, about to get workouts!")
+      getWorkouts();
+    }
+  }, [isAuthenticated, isLoading]);
+
+  if (isLoading || !isAuthenticated) {
+    return (
+      <SafeAreaView style={styles.container}>
+        <Text style={{ textAlign: 'center', marginTop: 100 }}>Loading your progress...</Text>
+      </SafeAreaView>
+    );
+  }
 
   const handleStartWorkout = () => {
     if (!newWorkoutName.trim()) {
@@ -206,10 +222,10 @@ const ProgressScreen = () => {
                 No workouts yet. Start your first workout to track your progress!
               </Text>
             </View>
-          ) : (
+          ) : ( 
             workouts
               .sort((a, b) => b.date.getTime() - a.date.getTime())
-              .slice(0, 10)
+              .slice(0, 3) // Should prob just be 3 
               .map((workout) => (
                 <WorkoutItem
                   key={workout.id}

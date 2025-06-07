@@ -13,6 +13,7 @@ import {
 import { router } from 'expo-router';
 import { apiService, WorkoutResponse } from '@/services/api';
 import { useAuth } from '@/contexts/AuthContext';
+import axios from 'axios';
 
 const WorkoutHistoryScreen = () => {
   const { user } = useAuth();
@@ -20,6 +21,7 @@ const WorkoutHistoryScreen = () => {
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const { token, isAuthenticated, isLoading } = useAuth(); //token of user
 
   const fetchWorkouts = async (isRefresh = false) => {
     try {
@@ -30,7 +32,16 @@ const WorkoutHistoryScreen = () => {
       }
       setError(null);
 
-      const workoutData = await apiService.getWorkouts();
+      //const workoutData = await apiService.getWorkouts(); - Uses old api.ts, idk
+
+      const response = await axios.get('http://localhost:8000/api/v1/workouts/', {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+
+      console.log("Fetched workouts for history: ", response);
+      const workoutData = response.data;
       // Ensure workoutData is an array
       if (Array.isArray(workoutData)) {
         setWorkouts(workoutData);

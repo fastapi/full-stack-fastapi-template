@@ -48,30 +48,6 @@ class Exercise(SQLModel, table=True):
     workout: Workout = Relationship(back_populates="exercises")
 
 
-# Workout Create Schema
-class WorkoutCreate(SQLModel):
-    """
-    Schema for creating a workout.
-    """
-    name: str = Field(min_length=1, max_length=255)
-    description: Optional[str] = Field(default=None, max_length=1000)
-    scheduled_date: Optional[datetime] = Field(default=None)
-    duration_minutes: Optional[int] = Field(default=None, ge=0)
-
-
-# Workout Update Schema
-class WorkoutUpdate(SQLModel):
-    """
-    Schema for updating a workout.
-    """
-    name: Optional[str] = Field(default=None, min_length=1, max_length=255)
-    description: Optional[str] = Field(default=None, max_length=1000)
-    scheduled_date: Optional[datetime] = Field(default=None)
-    completed_date: Optional[datetime] = Field(default=None)
-    duration_minutes: Optional[int] = Field(default=None, ge=0)
-    is_completed: Optional[bool] = Field(default=None)
-
-
 # Exercise Create Schema
 class ExerciseCreate(SQLModel):
     """
@@ -97,6 +73,30 @@ class ExerciseUpdate(SQLModel):
     reps: Optional[int] = Field(default=None, ge=0)
     weight: Optional[float] = Field(default=None, ge=0)
 
+
+# Workout Create Schema
+class WorkoutCreate(SQLModel):
+    """
+    Schema for creating a workout.
+    """
+    name: str = Field(min_length=1, max_length=255)
+    description: Optional[str] = Field(default=None, max_length=1000)
+    scheduled_date: Optional[datetime] = Field(default=None)
+    duration_minutes: Optional[int] = Field(default=None, ge=0)
+    exercises: List[ExerciseCreate] = [] 
+
+
+# Workout Update Schema
+class WorkoutUpdate(SQLModel):
+    """
+    Schema for updating a workout.
+    """
+    name: Optional[str] = Field(default=None, min_length=1, max_length=255)
+    description: Optional[str] = Field(default=None, max_length=1000)
+    scheduled_date: Optional[datetime] = Field(default=None)
+    completed_date: Optional[datetime] = Field(default=None)
+    duration_minutes: Optional[int] = Field(default=None, ge=0)
+    is_completed: Optional[bool] = Field(default=None)
 
 # Workout Public Schema
 class WorkoutPublic(SQLModel):
@@ -132,22 +132,6 @@ class ExercisePublic(SQLModel):
     created_at: datetime
     updated_at: Optional[datetime] = None
 
-
-# Workout With Exercises Public Schema
-class WorkoutWithExercisesPublic(WorkoutPublic):
-    """
-    Schema for returning workout data with exercises via API.
-    """
-    exercises: List[ExercisePublic] = []
-
-
-# Workouts Public Schema
-class WorkoutsPublic(SQLModel):
-    """
-    Schema for returning multiple workouts via API.
-    """
-    data: List[WorkoutPublic]
-    count: int
 
 #Personal Bests Model - Related to Workouts
 class PersonalBest(SQLModel, table=True):

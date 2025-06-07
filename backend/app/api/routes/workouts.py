@@ -12,8 +12,6 @@ from app.models.workout import (
     WorkoutCreate,
     WorkoutUpdate,
     WorkoutPublic,
-    WorkoutsPublic,
-    WorkoutWithExercisesPublic,
     Exercise,
     ExerciseCreate,
     ExerciseUpdate,
@@ -30,31 +28,8 @@ def create_workout(
     *,
     session: SessionDep,
     current_user: CurrentUser,
-    workout_in: WorkoutCreate = Body(
-        ...,
-        examples=[
-            {
-                "name": "Monday Strength Training",
-                "description": "Focus on upper body strength",
-                "scheduled_date": "2025-05-20T08:00:00Z",
-                "duration_minutes": 60
-            }
-        ],
-    )
+    workout_in: WorkoutCreate
 ) -> Any:
-    """
-    Create a new workout.
-    
-    This endpoint allows users to create a new workout plan with details such as name,
-    description, scheduled date, and expected duration.
-    
-    - **name**: Required. The name of the workout (1-255 characters)
-    - **description**: Optional. A detailed description of the workout (up to 1000 characters)
-    - **scheduled_date**: Optional. When the workout is scheduled to take place
-    - **duration_minutes**: Optional. The expected duration of the workout in minutes
-    
-    Returns the created workout with its ID and other metadata.
-    """
     workout = Workout(
         user_id=current_user.id,
         name=workout_in.name,
@@ -64,15 +39,35 @@ def create_workout(
         is_completed=False,
         created_at=datetime.utcnow(),
     )
-    
+
     session.add(workout)
     session.commit()
     session.refresh(workout)
-    
+
+    # Add nested exercises
+    for ex in workout_in.exercises:
+        exercise = Exercise(
+            workout_id=workout.id,
+            name=ex.name,
+            description=ex.description,
+            category=ex.category,
+            sets=ex.sets,
+            reps=ex.reps,
+            weight=ex.weight,
+        )
+        session.add(exercise)
+
+    session.commit()
+    session.refresh(workout)
+
+    # Load exercises manually
+    workout.exercises = session.exec(
+        select(Exercise).where(Exercise.workout_id == workout.id)
+    ).all()
+
     return workout
 
-
-@router.get("/", response_model=WorkoutsPublic)
+@router.get("/", response_model=List[WorkoutPublic])
 def get_workouts(
     session: SessionDep,
     current_user: CurrentUser,
@@ -106,8 +101,9 @@ def get_workouts(
     )
     workouts = session.exec(statement).all()
     
-    # Add exercise count to each workout
+    """# Add exercise count to each workout
     workout_data = []
+    workout_list = [] #Actual list of Workout, not just data
     for workout in workouts:
         # Count exercises for this workout
         exercise_count_stmt = (
@@ -116,16 +112,16 @@ def get_workouts(
             .where(Exercise.workout_id == workout.id)
         )
         exercise_count = session.exec(exercise_count_stmt).one()
-        
+        workout_list.append(workout)
         # Convert to dict and add exercise_count
         workout_dict = workout.model_dump()
         workout_dict["exercise_count"] = exercise_count
-        workout_data.append(workout_dict)
+        workout_data.append(workout_dict)"""
     
-    return WorkoutsPublic(data=workout_data, count=count)
+    return workouts
 
 
-@router.get("/{workout_id}", response_model=WorkoutWithExercisesPublic)
+@router.get("/{workout_id}", response_model=WorkoutPublic)
 def get_workout(
     workout_id: uuid.UUID = Path(..., description="The ID of the workout to retrieve"),
     session: SessionDep = None,
@@ -316,7 +312,7 @@ def complete_workout(
     return workout
 
 
-@router.get("/scheduled", response_model=WorkoutsPublic)
+@router.get("/scheduled", response_model=List[WorkoutPublic])
 def get_scheduled_workouts(
     session: SessionDep,
     current_user: CurrentUser,
@@ -358,10 +354,10 @@ def get_scheduled_workouts(
     )
     workouts = session.exec(statement).all()
     
-    return WorkoutsPublic(data=workouts, count=count)
+    return workouts #Maybe check if list?
 
 
-@router.get("/completed", response_model=WorkoutsPublic)
+@router.get("/completed", response_model=List[WorkoutPublic])
 def get_completed_workouts(
     session: SessionDep,
     current_user: CurrentUser,
@@ -399,7 +395,7 @@ def get_completed_workouts(
     )
     workouts = session.exec(statement).all()
     
-    return WorkoutsPublic(data=workouts, count=count)
+    return workouts
 
 
 @router.get("/stats", response_model=dict)
