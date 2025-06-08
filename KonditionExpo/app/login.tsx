@@ -19,12 +19,12 @@ export default function LoginScreen() {
   const textColor = useThemeColor({}, 'text');
   const tintColor = useThemeColor({}, 'tint');
 
-  // Redirect if already authenticated
-  useEffect(() => {
+  // Redirect if already authenticated -- Might want to remove since i think we don't have logout
+  /*useEffect(() => {
     if (isAuthenticated) {
       router.replace('/(tabs)');
     }
-  }, [isAuthenticated]);
+  }, [isAuthenticated]);*/
   
   const handleLogin = async () => {
     setErrors({});

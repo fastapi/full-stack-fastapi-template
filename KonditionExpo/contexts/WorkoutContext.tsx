@@ -4,10 +4,16 @@ import { useAuth } from '@/contexts/AuthContext'; // adjust if needed
 
 export interface Exercise {
   id: string;
+  workout_id: string;
   name: string;
   description?: string;
   muscle_group: string;
-  type: 'strength' | 'cardio' | 'flexibility';
+  category: string;
+  sets?: number;
+  reps?: number;
+  weight?: number; 
+  created_at: Date;
+  updated_at?: Date;
 }
 
 export interface WorkoutSet {
@@ -29,14 +35,18 @@ export interface Workout {
   id: string;
   date: Date;
   name: string;
-  exercises: WorkoutExercise[];
+  exercises: Exercise[]; //This won't be updated, instead use id to retrieve all exercises for a related workout
   duration: number; // in minutes
   notes?: string;
 }
 
 interface WorkoutContextType {
   workouts: Workout[];
+  exercises: Exercise[];
   currentWorkout: Workout | null;
+  exerSets: number;
+  exerReps: number;
+  exerWeights: number;
   addWorkout: (workout: Workout) => Promise<void>; // <-- async now
   updateWorkout: (workoutId: string, workout: Workout) => void;
   getWorkouts: () => void;
@@ -47,14 +57,21 @@ interface WorkoutContextType {
   addSetToExercise: (exerciseId: string, set: Omit<WorkoutSet, 'id'>) => void;
   removeSetFromExercise: (exerciseId: string, setId: string) => void;
   updateSet: (exerciseId: string, setId: string, updatedSet: Partial<WorkoutSet>) => void;
+  getExercises: (workoutID: string) => void;
+  getExercises_2: () => Exercise[];
 }
 
 const WorkoutContext = createContext<WorkoutContextType | undefined>(undefined);
 
 export const WorkoutProvider = ({ children }: { children: ReactNode }) => {
   const [workouts, setWorkouts] = useState<Workout[]>([]);
+  const [exercises, setExercises] = useState<Exercise[]>([]);
   const [currentWorkout, setCurrentWorkout] = useState<Workout | null>(null);
   const { token, isAuthenticated, isLoading } = useAuth(); //token of user
+  const [exerSets, setExerSets] = useState(0);
+  const [exerReps, setExerReps] = useState(0);
+  const [exerWeights, setExerWeights] = useState(0);
+
 
   //NO WAIT FOR TOKEN, IS GIVING NULL IN WORKOUT CONTEXT
 
@@ -128,6 +145,7 @@ export const WorkoutProvider = ({ children }: { children: ReactNode }) => {
       }));
   
       setWorkouts(parsed);
+      //await getExercises(.id);
     } catch (error) {
       console.error('Failed to load workouts:', error.response?.data || error.message);
     }
@@ -135,6 +153,29 @@ export const WorkoutProvider = ({ children }: { children: ReactNode }) => {
   const endWorkout = async (updatedWorkout: Workout) => {
     await addWorkout(updatedWorkout);
     setCurrentWorkout(null);
+  };
+
+  const getExercises = async (workoutID: string) => {
+    try{
+      const exerReq = 'http://localhost:8000/api/v1/workouts/' + workoutID + '/exercises';
+      const response = await axios.get(exerReq, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },        
+      });
+
+      //console.log("getExercises response: ", response);
+      setExercises(response.data);
+      for (const ex of exercises) {
+        setExerSets(exerSets + ex.sets);
+        setExerReps(exerReps + ex.reps);
+        setExerWeights(exerWeights + ex.weight);
+      }
+      console.log(exercises);
+      console.log(exerSets);
+    } catch (error){
+      console.log("Failed to get exercises for associated ID ", workoutID, ". ", error.response?.data || error.message)
+    }
   };
 
   //Everything below this is old - only updates local state rather than send backend requests
@@ -226,6 +267,9 @@ export const WorkoutProvider = ({ children }: { children: ReactNode }) => {
     <WorkoutContext.Provider value={{
       workouts,
       currentWorkout,
+      exerSets,
+      exerReps,
+      exerWeights,
       addWorkout,
       updateWorkout,
       deleteWorkout,
@@ -236,6 +280,7 @@ export const WorkoutProvider = ({ children }: { children: ReactNode }) => {
       removeSetFromExercise,
       updateSet,
       getWorkouts,
+      getExercises,
     }}>
       {children}
     </WorkoutContext.Provider>

@@ -11,7 +11,7 @@ import {
   Dimensions 
 } from 'react-native';
 import { LineChart } from 'react-native-chart-kit';
-import { useWorkout, Workout } from '@/contexts/WorkoutContext';
+import { useWorkout, Workout, Exercise } from '@/contexts/WorkoutContext';
 import { Button } from '@/components/ui/Button';
 import { Input } from '@/components/ui/Input';
 import { router } from 'expo-router';
@@ -24,6 +24,7 @@ interface WorkoutItemProps {
 }
 
 const WorkoutItem = ({ workout, onPress }: WorkoutItemProps) => {
+  const { workouts, currentWorkout, exerSets, exerReps, exerWeights, startWorkout, getWorkouts, getExercises, getExercises_2} = useWorkout();
   const formatDate = (date: Date) => {
     return date.toLocaleDateString('en-US', { 
       month: 'short', 
@@ -32,7 +33,19 @@ const WorkoutItem = ({ workout, onPress }: WorkoutItemProps) => {
     });
   };
 
-  console.log("Workout Item: ", workout);
+  //getWorkouts();
+  //console.log(workout.id);
+
+  //getExercises(workout.id); // Set the exercises
+  //console.log(getExercises_2()); // Get the exercises
+
+  //const exercises = getExercises_2();
+
+  //for (const exercise of exercises) {
+  //  exerSets += exercise.sets || 0;
+  //  exerReps += exercise.reps || 0;
+  //  exerWeight += exercise.weight || 0;
+  //}
 
   return (
     <TouchableOpacity style={styles.workoutItem} onPress={onPress}>
@@ -41,9 +54,9 @@ const WorkoutItem = ({ workout, onPress }: WorkoutItemProps) => {
         <Text style={styles.workoutDate}>{formatDate(workout.date)}</Text>
       </View>
       <View style={styles.workoutStats}>
-        <Text style={styles.workoutStat}>{workout.exercises.sets} sets</Text>
-        <Text style={styles.workoutStat}>{workout.exercises.reps} reps</Text>
-        <Text style={styles.workoutStat}>{workout.exercises.weight} weight</Text>
+        <Text style={styles.workoutStat}>{exerSets} sets</Text>
+        <Text style={styles.workoutStat}>{exerReps} reps</Text>
+        <Text style={styles.workoutStat}>{exerWeights} weights</Text>
       </View>
     </TouchableOpacity>
   );
@@ -52,10 +65,11 @@ const WorkoutItem = ({ workout, onPress }: WorkoutItemProps) => {
 
 
 const ProgressScreen = () => {
-  const { workouts, currentWorkout, startWorkout, getWorkouts } = useWorkout();
+  const { workouts, currentWorkout, startWorkout, getWorkouts, getExercises} = useWorkout();
   const { isAuthenticated, isLoading } = useAuth();
   const [showNewWorkoutModal, setShowNewWorkoutModal] = useState(false);
   const [newWorkoutName, setNewWorkoutName] = useState('');
+  const [showFinishModal, setShowFinishModal] = useState(false);
   const backgroundColor = '#FFFFFF';
   const textColor = '#333';
   const tintColor = '#70A1FF';
@@ -211,6 +225,17 @@ const ProgressScreen = () => {
           />
         </View>
 
+        {/*Finish Old Workout Button*/}
+        <View style={styles.actionContainer}>
+        <Button
+          title="Finish Old Workout"
+          onPress={() => setShowFinishModal(true)}
+          size="lg"
+          fullWidth
+          style={{ backgroundColor: '#FFA07A' }}
+        />
+        </View>        
+
         {/* Recent Workouts */}
         <View style={styles.workoutHistoryContainer}>
           <Text style={[styles.sectionTitle, { color: textColor }]}>
@@ -275,6 +300,58 @@ const ProgressScreen = () => {
           </View>
         </View>
       </Modal>
+
+      {/* Finish Workout Modal*/}
+      <Modal
+      visible={showFinishModal}
+      transparent
+      animationType="slide"
+      onRequestClose={() => setShowFinishModal(false)}
+    >
+      <View style={styles.modalOverlay}>
+        <View style={[styles.modalContent, { backgroundColor }]}>
+          <Text style={[styles.modalTitle, { color: textColor }]}>
+            Unfinished Workouts
+          </Text>
+
+          {workouts.filter(w => !w.is_completed).length === 0 ? (
+            <Text style={{ textAlign: 'center', color: textColor }}>
+              No incomplete workouts.
+            </Text>
+          ) : (
+            workouts
+              .filter(w => !w.is_completed)
+              .map((workout) => (
+                <TouchableOpacity
+                  key={workout.id}
+                  onPress={() => {
+                    setShowFinishModal(false);
+                    router.push({
+                      pathname: '/finish',
+                      params: { workoutId: workout.id },
+                    });
+                  }}
+                  style={{
+                    padding: 12,
+                    backgroundColor: '#F5F8FF',
+                    borderRadius: 10,
+                    marginBottom: 10,
+                  }}
+                >
+                  <Text style={{ color: textColor }}>{workout.name}</Text>
+                </TouchableOpacity>
+              ))
+          )}
+
+          <Button
+            title="Close"
+            onPress={() => setShowFinishModal(false)}
+            variant="outline"
+            style={{ marginTop: 10 }}
+          />
+        </View>
+      </View>
+    </Modal>
     </SafeAreaView>
   );
 };

@@ -1,38 +1,40 @@
 import { useEffect, useState } from "react";
-import { getAccessToken } from "@/scripts/auth"; // adjust based on your token handling
+import { getAccessToken } from "@/scripts/auth";
 
 type PersonalBest = {
-  metric: string;
-  value: number;
-  date: string;
+  id: string;
+  user_id: string;
+  exercise_name: string;
+  metric_type: string;
+  metric_value: number;
+  date_achieved: string | null;
 };
-
+  
 export const usePersonalBests = () => {
-
-  console.log("usePersonalBests hook loaded");
-
   const [pbs, setPbs] = useState<PersonalBest[]>([]);
-  const [loading, setLoading] = useState( true);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-  
     const fetchPBs = async () => {
-      console.log("Fetching personal bests...");
       setLoading(true);
       try {
-        console.log("Attempting to get token...");
         const token = await getAccessToken();
-        console.log("Got token:", token);
-  
         const res = await fetch("http://localhost:8000/api/v1/personal-bests", {
           headers: {
             Authorization: `Bearer ${token}`,
+            "Content-Type": "application/json",
           },
         });
-  
+
+        if (!res.ok) {
+          throw new Error(`Failed to fetch: ${res.status} ${res.statusText}`);
+        }
+
         const data = await res.json();
-        console.log("Fetched PBs:", data);
-        setPbs(data?.data ?? []); //   Adjust if shape differs
+
+        // Confirm if data is directly a list or wrapped in { data: [...] }
+        const pbsList = Array.isArray(data) ? data : data.data;
+        setPbs(pbsList ?? []);
       } catch (err) {
         console.error("Failed to fetch personal bests", err);
         setPbs([]);
@@ -40,11 +42,9 @@ export const usePersonalBests = () => {
         setLoading(false);
       }
     };
-  
+
     fetchPBs();
   }, []);
-  
-  
 
   return { pbs, loading };
 };

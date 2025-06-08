@@ -146,7 +146,6 @@ const HomeScreen = () => {
         </View>
 
         {/* Personal Bests */}
-
         <View style={[styles.latestSection, { paddingBottom: 16 }]}>
           <View style={styles.sectionHeader}>
             <Text style={styles.sectionTitle}>Personal Bests</Text>
@@ -156,21 +155,25 @@ const HomeScreen = () => {
           </View>
 
           {loading ? (
-            <Text style={{ textAlign: 'center', color: '#666', marginBottom: 12 }}>Loading personal bests...</Text>
+            <Text style={styles.pbLoading}>Loading personal bests...</Text>
           ) : pbs.length === 0 ? (
-            <Text style={{ textAlign: 'center', color: '#999', marginBottom: 12 }}>No personal bests yet. Start training to set new records!</Text>
+            <Text style={styles.pbEmpty}>No personal bests yet. Start training to set new records!</Text>
           ) : (
             testPbs.map((pb) => (
-              <View key={pb.metric} style={styles.workoutItem}>
-                <Image source={require('../assets/images/trophy.png')} style={styles.workoutIcon} />
-                <View style={styles.workoutInfo}>
-                  <Text style={styles.workoutType}>{pb.metric}</Text>
-                  <Text style={styles.workoutMeta}>{pb.value} • {pb.date}</Text>
+              <View key={pb.exercise_name + pb.date_achieved} style={styles.pbCard}>
+                <Image source={require('../assets/images/trophy.png')} style={styles.pbIcon} />
+                <View style={styles.pbInfo}>
+                  <Text style={styles.pbTitle}>{pb.exercise_name}</Text>
+                  <View style={styles.pbDetails}>
+                    <Text style={styles.pbValue}>{pb.metric_value} pts</Text>
+                    <Text style={styles.pbDate}>{new Date(pb.date_achieved).toLocaleDateString()}</Text>
+                  </View>
                 </View>
               </View>
             ))
           )}
         </View>
+
 
 
       </ScrollView>
@@ -201,6 +204,52 @@ const HomeScreen = () => {
 };
 
 const styles = StyleSheet.create({
+  pbCard: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: '#FFFFFF',
+    borderRadius: 16,
+    padding: 16,
+    marginBottom: 12,
+    shadowColor: '#000',
+    shadowOpacity: 0.06,
+    shadowRadius: 6,
+    elevation: 2,
+  },
+  
+  pbIcon: {
+    width: 40,
+    height: 40,
+    marginRight: 12,
+  },
+  
+  pbInfo: {
+    flex: 1,
+    justifyContent: 'center',
+  },
+  
+  pbTitle: {
+    fontSize: 16,
+    fontWeight: '600',
+    color: '#333',
+    marginBottom: 4,
+  },
+  
+  pbDetails: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+  },
+  
+  pbValue: {
+    fontSize: 14,
+    color: '#70A1FF',
+    fontWeight: '500',
+  },
+  
+  pbDate: {
+    fontSize: 12,
+    color: '#888',
+  },    
   container: { flex: 1, backgroundColor: '#FFFFFF' },
   content: { padding: 16, paddingBottom: 80 },
   header: { flexDirection: 'row', alignItems: 'center', marginBottom: 24 },

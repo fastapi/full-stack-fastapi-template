@@ -147,3 +147,11 @@ class PersonalBestCreate(SQLModel):
     metric_type: str
     metric_value: float
     date_achieved: Optional[datetime]
+
+class PersonalBestPublic(SQLModel):
+    id: UUID
+    user_id: UUID
+    exercise_name: str
+    metric_type: str
+    metric_value: float
+    date_achieved: Optional[datetime]

@@ -75,15 +75,15 @@ def create_or_update_personal_best(
     # see if user already has a PB on this metric
     stmt = select(PersonalBest).where(
         PersonalBest.user_id == user_id,
-        PersonalBest.metric == pb_in.metric
+        PersonalBest.exercise_name == pb_in.exercise_name
     )
     existing = session.exec(stmt).one_or_none()
 
     # update if new value is "better" (you define the logic per metric)
     if existing:
-        if pb_in.value > existing.value:
-            existing.value = pb_in.value
-            existing.date = pb_in.date
+        if pb_in.metric_value > existing.metric_value:
+            existing.metric_value = pb_in.metric_value
+            existing.date_achieved = pb_in.date_achieved
             session.add(existing)
     else:
         existing = PersonalBest.model_validate(pb_in, update={"user_id": user_id})

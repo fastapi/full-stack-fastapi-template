@@ -1,21 +1,19 @@
-# TODO test PB dedicated router,  3 REST routes, 1 post & 2 gets  
-
 from typing import List
-from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import APIRouter, HTTPException, status
 from sqlmodel import Session
 
-from app import crud
-from app.core.db import get_session
-from app.core.security import get_current_active_user
-from app.models import PersonalBestCreate, PersonalBestRead, PersonalBestsList
+from app import crudFuncs as crud
+from app.api.deps import SessionDep, CurrentUser
+from app.models import PersonalBestCreate, PersonalBestPublic
+
 
 router = APIRouter(tags=["personal-bests"], prefix="/personal-bests")
 
-@router.post("/", response_model=PersonalBestRead, status_code=status.HTTP_201_CREATED)
+@router.post("/", response_model=PersonalBestPublic, status_code=status.HTTP_201_CREATED)
 def record_personal_best(
     pb_in: PersonalBestCreate,
-    session: Session = Depends(get_session),
-    current_user=Depends(get_current_active_user),
+    session: SessionDep,
+    current_user: CurrentUser,
 ):
     """
     Record or update a personal best for the current user.
@@ -25,19 +23,19 @@ def record_personal_best(
     )
     return pb
 
-@router.get("/", response_model=PersonalBestsList)
+@router.get("/", response_model=List[PersonalBestPublic])
 def list_personal_bests(
-    session: Session = Depends(get_session),
-    current_user=Depends(get_current_active_user),
+    session: SessionDep,
+    current_user: CurrentUser,
 ):
     all_pbs = crud.get_personal_bests(session=session, user_id=current_user.id)
-    return {"data": all_pbs, "count": len(all_pbs)}
+    return all_pbs
 
-@router.get("/{metric}", response_model=PersonalBestRead)
+@router.get("/{metric}", response_model=PersonalBestPublic)
 def get_personal_best(
     metric: str,
-    session: Session = Depends(get_session),
-    current_user=Depends(get_current_active_user),
+    session: SessionDep,
+    current_user: CurrentUser,
 ):
     pb = crud.get_personal_best(
         session=session, user_id=current_user.id, metric=metric

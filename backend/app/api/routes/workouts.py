@@ -17,11 +17,29 @@ from app.models.workout import (
     ExerciseUpdate,
     ExercisePublic,
 )
-from app.crudFuncs import update_personal_bests_after_workout
+from app.crudFuncs import create_or_update_personal_best, update_personal_bests_after_workout
+
+TRACKED_EXERCISES = {
+    "bench press": {"id": "1", "muscle_group": "Chest", "type": "strength"},
+    "squat": {"id": "2", "muscle_group": "Legs", "type": "strength"},
+    "deadlift": {"id": "3", "muscle_group": "Back", "type": "strength"},
+    "pull-ups": {"id": "4", "muscle_group": "Back", "type": "strength"},
+    "push-ups": {"id": "5", "muscle_group": "Chest", "type": "strength"},
+    "shoulder press": {"id": "6", "muscle_group": "Shoulders", "type": "strength"},
+    "bicep curls": {"id": "7", "muscle_group": "Arms", "type": "strength"},
+    "tricep dips": {"id": "8", "muscle_group": "Arms", "type": "strength"},
+    "lunges": {"id": "9", "muscle_group": "Legs", "type": "strength"},
+    "plank": {"id": "10", "muscle_group": "Core", "type": "strength"},
+    "running": {"id": "11", "muscle_group": "Cardio", "type": "cardio"},
+    "cycling": {"id": "12", "muscle_group": "Cardio", "type": "cardio"},
+}
+
 
 
 router = APIRouter(prefix="/workouts", tags=["workouts"])
 
+
+from app.models import PersonalBestCreate  # make sure this is imported
 
 @router.post("/", response_model=WorkoutPublic)
 def create_workout(
@@ -57,6 +75,21 @@ def create_workout(
         )
         session.add(exercise)
 
+        # Check if this exercise is tracked for PBs
+        name_key = ex.name.lower()
+        metric_info = TRACKED_EXERCISES.get(name_key)
+        if metric_info:
+            value = (ex.sets or 0) * (ex.reps or 0) * (ex.weight or 0) #Deciding Factor for upsert
+            pb_in = PersonalBestCreate(
+                exercise_name=ex.name,
+                metric_type=metric_info["type"],
+                metric_value=value,
+                date_achieved=datetime.utcnow().date()
+            )
+            create_or_update_personal_best(
+                session=session, user_id=current_user.id, pb_in=pb_in
+            )
+
     session.commit()
     session.refresh(workout)
 
@@ -66,6 +99,7 @@ def create_workout(
     ).all()
 
     return workout
+
 
 @router.get("/", response_model=List[WorkoutPublic])
 def get_workouts(
@@ -220,6 +254,32 @@ def update_workout(
     session.commit()
     session.refresh(workout)
     
+    return workout
+
+@router.put("/{workout_id}/complete", response_model=WorkoutPublic)
+def complete_workout(
+    *,
+    session: SessionDep,
+    current_user: CurrentUser,
+    workout_id: uuid.UUID
+) -> Any:
+    """
+    Mark a workout as completed.
+    """
+    workout = session.get(Workout, workout_id)
+    if not workout:
+        raise HTTPException(status_code=404, detail="Workout not found")
+    if workout.user_id != current_user.id:
+        raise HTTPException(status_code=403, detail="Not authorized")
+
+    workout.is_completed = True
+    workout.completed_date = datetime.utcnow()
+    workout.updated_at = datetime.utcnow()
+
+    session.add(workout)
+    session.commit()
+    session.refresh(workout)
+
     return workout
 
 
