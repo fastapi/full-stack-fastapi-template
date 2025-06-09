@@ -159,29 +159,32 @@ const HomeScreen = () => {
 
   <View style={{ alignItems: 'center' }}>
   <BarChart
-    data={{ labels, datasets: [{ data }] }}
-    width={Math.max(width, labels.length * 60)}
-    height={220}
-    fromZero
-    showValuesOnTopOfBars
-    withInnerLines={true}
-    withHorizontalLabels={false} // Hide Y-axis labels only
-    chartConfig={{
-      backgroundGradientFrom: '#fff',
-      backgroundGradientTo: '#fff',
-      color: () => '#70A1FF',
-      decimalPlaces: 0,
-      barPercentage: 0.6,
-      propsForBackgroundLines: {
-        stroke: '#E0E0E0',
-      },
-      formatYLabel: (yValue) => `${yValue}m`,
-    }}
-    style={{
-      marginVertical: 8,
-      borderRadius: 16,
-    }}
-  />
+  data={{ labels, datasets: [{ data }] }}
+  width={width + 100}
+  height={220}
+  fromZero
+  showValuesOnTopOfBars
+  withInnerLines={true}
+  withHorizontalLabels={false}
+  chartConfig={{
+    backgroundGradientFrom: '#fff',
+    backgroundGradientTo: '#fff',
+    decimalPlaces: 0,
+    barPercentage: 0.6,
+    fillShadowGradient: '#70A1FF',              // actual bar color
+    fillShadowGradientOpacity: 1,               // make sure it's visible
+    color: () => '#70A1FF',                     // label/text color
+    propsForBackgroundLines: {
+      stroke: '#E0E0E0',
+      strokeDasharray: '', // solid line
+    },
+  }}
+  style={{
+    marginVertical: 8,
+    borderRadius: 16,
+  }}
+/>
+
 </View>
 
 
