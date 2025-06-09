@@ -1,101 +1,139 @@
 from typing import List, Optional
-from fastapi import APIRouter, Depends, HTTPException, Query
-from ...models import Property, PropertyResponse, PropertyType, PropertyStatus
-from ...core.security import get_current_user
-from ...services import property_service
+from fastapi import APIRouter, Depends, HTTPException, Query, Request
+from uuid import UUID
+from ...models import Property, PropertyCreate, PropertyUpdate, PropertySearch, PropertyVisit, PropertyVisitCreate, PropertyVisitUpdate
+from ...services.property import PropertyService
+from ..deps import get_current_user, get_property_service
+from ...models import User
 
-router = APIRouter(prefix="/properties", tags=["properties"])
+router = APIRouter()
 
-@router.get("/", response_model=List[PropertyResponse])
-async def list_properties(
-    property_type: Optional[PropertyType] = None,
-    status: Optional[PropertyStatus] = None,
-    min_price: Optional[float] = None,
-    max_price: Optional[float] = None,
-    city: Optional[str] = None,
-    bedrooms: Optional[int] = None,
-    bathrooms: Optional[int] = None,
-    skip: int = Query(0, ge=0),
-    limit: int = Query(10, ge=1, le=100)
-):
-    """
-    Lista todas las propiedades con filtros opcionales
-    """
-    return await property_service.list_properties(
-        property_type=property_type,
-        status=status,
-        min_price=min_price,
-        max_price=max_price,
-        city=city,
-        bedrooms=bedrooms,
-        bathrooms=bathrooms,
-        skip=skip,
-        limit=limit
-    )
-
-@router.post("/", response_model=PropertyResponse)
+@router.post("/", response_model=Property)
 async def create_property(
-    property_data: Property,
-    current_user = Depends(get_current_user)
+    property_data: PropertyCreate,
+    current_user: User = Depends(get_current_user),
+    property_service: PropertyService = Depends(get_property_service)
 ):
-    """
-    Crea una nueva propiedad
-    """
-    return await property_service.create_property(property_data, current_user)
+    """Crear una nueva propiedad"""
+    if current_user.role not in ["agent", "manager", "supervisor"]:
+        raise HTTPException(status_code=403, detail="No tienes permiso para crear propiedades")
+    
+    return await property_service.create_property(property_data)
 
-@router.get("/{property_id}", response_model=PropertyResponse)
-async def get_property(property_id: str):
-    """
-    Obtiene los detalles de una propiedad específica
-    """
+@router.get("/{property_id}", response_model=Property)
+async def get_property(
+    property_id: UUID,
+    request: Request,
+    current_user: Optional[User] = Depends(get_current_user),
+    property_service: PropertyService = Depends(get_property_service)
+):
+    """Obtener una propiedad por su ID"""
     property = await property_service.get_property(property_id)
     if not property:
-        raise HTTPException(status_code=404, detail="Property not found")
+        raise HTTPException(status_code=404, detail="Propiedad no encontrada")
+    
+    # Registrar la vista
+    await property_service.record_view(
+        property_id=property_id,
+        user_id=current_user.id if current_user else None,
+        ip_address=request.client.host,
+        user_agent=request.headers.get("user-agent", "")
+    )
+    
     return property
 
-@router.put("/{property_id}", response_model=PropertyResponse)
+@router.put("/{property_id}", response_model=Property)
 async def update_property(
-    property_id: str,
-    property_data: Property,
-    current_user = Depends(get_current_user)
+    property_id: UUID,
+    property_data: PropertyUpdate,
+    current_user: User = Depends(get_current_user),
+    property_service: PropertyService = Depends(get_property_service)
 ):
-    """
-    Actualiza una propiedad existente
-    """
-    property = await property_service.update_property(property_id, property_data, current_user)
+    """Actualizar una propiedad"""
+    if current_user.role not in ["agent", "manager", "supervisor"]:
+        raise HTTPException(status_code=403, detail="No tienes permiso para actualizar propiedades")
+    
+    property = await property_service.update_property(property_id, property_data)
     if not property:
-        raise HTTPException(status_code=404, detail="Property not found")
+        raise HTTPException(status_code=404, detail="Propiedad no encontrada")
+    
     return property
 
 @router.delete("/{property_id}")
 async def delete_property(
-    property_id: str,
-    current_user = Depends(get_current_user)
+    property_id: UUID,
+    current_user: User = Depends(get_current_user),
+    property_service: PropertyService = Depends(get_property_service)
 ):
-    """
-    Elimina una propiedad
-    """
-    success = await property_service.delete_property(property_id, current_user)
+    """Eliminar una propiedad"""
+    if current_user.role not in ["manager", "supervisor"]:
+        raise HTTPException(status_code=403, detail="No tienes permiso para eliminar propiedades")
+    
+    success = await property_service.delete_property(property_id)
     if not success:
-        raise HTTPException(status_code=404, detail="Property not found")
-    return {"message": "Property deleted successfully"}
+        raise HTTPException(status_code=404, detail="Propiedad no encontrada")
+    
+    return {"message": "Propiedad eliminada exitosamente"}
 
-@router.get("/search/", response_model=List[PropertyResponse])
+@router.get("/", response_model=List[Property])
 async def search_properties(
-    query: str,
-    skip: int = Query(0, ge=0),
-    limit: int = Query(10, ge=1, le=100)
+    search_params: PropertySearch = Depends(),
+    limit: int = Query(10, ge=1, le=100),
+    offset: int = Query(0, ge=0),
+    property_service: PropertyService = Depends(get_property_service)
 ):
-    """
-    Busca propiedades por texto
-    """
-    return await property_service.search_properties(query, skip, limit)
+    """Buscar propiedades según criterios"""
+    return await property_service.search_properties(search_params, limit, offset)
 
-@router.get("/featured/", response_model=List[PropertyResponse])
-async def get_featured_properties(
-    limit: int = Query(6, ge=1, le=20)
+@router.post("/{property_id}/visits", response_model=PropertyVisit)
+async def schedule_visit(
+    property_id: UUID,
+    visit_data: PropertyVisitCreate,
+    current_user: User = Depends(get_current_user),
+    property_service: PropertyService = Depends(get_property_service)
 ):
-    """
-    Obtiene propiedades destacadas
-    """
-    return await property_service.get_featured_properties(limit) 
+    """Programar una visita a una propiedad"""
+    if current_user.role not in ["agent", "client"]:
+        raise HTTPException(status_code=403, detail="No tienes permiso para programar visitas")
+    
+    # Verificar que la propiedad existe
+    property = await property_service.get_property(property_id)
+    if not property:
+        raise HTTPException(status_code=404, detail="Propiedad no encontrada")
+    
+    return await property_service.schedule_visit(visit_data)
+
+@router.put("/visits/{visit_id}", response_model=PropertyVisit)
+async def update_visit(
+    visit_id: UUID,
+    visit_data: PropertyVisitUpdate,
+    current_user: User = Depends(get_current_user),
+    property_service: PropertyService = Depends(get_property_service)
+):
+    """Actualizar el estado de una visita"""
+    if current_user.role not in ["agent", "manager", "supervisor"]:
+        raise HTTPException(status_code=403, detail="No tienes permiso para actualizar visitas")
+    
+    visit = await property_service.update_visit(visit_id, visit_data)
+    if not visit:
+        raise HTTPException(status_code=404, detail="Visita no encontrada")
+    
+    return visit
+
+@router.post("/{property_id}/favorite")
+async def toggle_favorite(
+    property_id: UUID,
+    current_user: User = Depends(get_current_user),
+    property_service: PropertyService = Depends(get_property_service)
+):
+    """Agregar/quitar una propiedad de favoritos"""
+    if current_user.role != "client":
+        raise HTTPException(status_code=403, detail="Solo los clientes pueden marcar propiedades como favoritas")
+    
+    # Verificar que la propiedad existe
+    property = await property_service.get_property(property_id)
+    if not property:
+        raise HTTPException(status_code=404, detail="Propiedad no encontrada")
+    
+    is_favorite = await property_service.toggle_favorite(property_id, current_user.id)
+    return {"is_favorite": is_favorite} 
