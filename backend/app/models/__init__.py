@@ -42,6 +42,7 @@ from app.models.workout import (
     PersonalBest,
     PersonalBestCreate,
     PersonalBestPublic,
+    WorkoutWithExercisesPublic
 )
 # not needed - from app.models.personal_best import PersonalBest, PersonalBestCreate
 
@@ -93,5 +94,6 @@ __all__ = [
     "ExercisePublic",
     "PersonalBest",
     "PersonalBestCreate",
-    "PersonalBestPublic"
+    "PersonalBestPublic",
+    "WorkoutWithExercisesPublic"
 ]

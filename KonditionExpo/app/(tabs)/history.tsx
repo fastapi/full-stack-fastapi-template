@@ -11,9 +11,29 @@ import {
   Alert,
 } from 'react-native';
 import { router } from 'expo-router';
-import { apiService, WorkoutResponse } from '@/services/api';
+import { apiService } from '@/services/api';
 import { useAuth } from '@/contexts/AuthContext';
 import axios from 'axios';
+
+export type Exercise = {
+  id: string;
+  name: string;
+  sets?: number;
+  reps?: number;
+  weight?: number;
+  category: string;
+};
+
+export type WorkoutResponse = {
+  id: string;
+  name: string;
+  description?: string;
+  is_completed: boolean;
+  created_at: string;
+  completed_date?: string;
+  duration_minutes?: number;
+  exercises: Exercise[];  // <-- include this
+};
 
 const WorkoutHistoryScreen = () => {
   const { user } = useAuth();
@@ -34,7 +54,7 @@ const WorkoutHistoryScreen = () => {
 
       //const workoutData = await apiService.getWorkouts(); - Uses old api.ts, idk
 
-      const response = await axios.get('http://localhost:8000/api/v1/workouts/', {
+      const response = await axios.get('http://localhost:8000/api/v1/workouts/exercises/', {
         headers: {
           Authorization: `Bearer ${token}`,
         },
@@ -95,54 +115,66 @@ const WorkoutHistoryScreen = () => {
     return workout.is_completed ? '#4CAF50' : '#FF9800';
   };
 
-  const handleWorkoutPress = (workout: WorkoutResponse) => {
+  /*const handleWorkoutPress = (workout: WorkoutResponse) => {
     // Navigate to the detailed workout view
     router.push({
       pathname: '/workout-detail',
       params: { workoutId: workout.id }
     });
-  };
+  }; Not needed */
 
   const renderWorkoutItem = (workout: WorkoutResponse) => (
-    <TouchableOpacity
-      key={workout.id}
-      style={styles.workoutCard}
-      onPress={() => handleWorkoutPress(workout)}
-    >
+    <View key={workout.id} style={styles.workoutCard}>
+      {/* Workout Header */}
       <View style={styles.workoutHeader}>
         <Text style={styles.workoutName}>{workout.name}</Text>
         <View style={[styles.statusBadge, { backgroundColor: getStatusColor(workout) }]}>
           <Text style={styles.statusText}>{getCompletionStatus(workout)}</Text>
         </View>
       </View>
-      
+  
+      {/* Workout Date */}
       <Text style={styles.workoutDate}>
         {formatDate(workout.completed_date || workout.created_at)}
       </Text>
-      
+  
+      {/* Workout Metadata */}
       <View style={styles.workoutDetails}>
         <View style={styles.detailItem}>
           <Text style={styles.detailLabel}>Duration</Text>
           <Text style={styles.detailValue}>{formatDuration(workout.duration_minutes)}</Text>
         </View>
-        
+  
         <View style={styles.detailItem}>
           <Text style={styles.detailLabel}>Exercises</Text>
-          <Text style={styles.detailValue}>{workout.exercise_count || 0}</Text>
+          <Text style={styles.detailValue}>{workout.exercises?.length || 0}</Text>
         </View>
       </View>
-      
+  
+      {/* Workout Description */}
       {workout.description && (
         <Text style={styles.workoutDescription} numberOfLines={2}>
           {workout.description}
         </Text>
       )}
-      
-      <View style={styles.viewDetailsContainer}>
-        <Text style={styles.viewDetailsText}>Tap to view exercises →</Text>
-      </View>
-    </TouchableOpacity>
+  
+      {/* Exercise List */}
+      {workout.exercises?.length > 0 && (
+        <View style={{ marginTop: 12 }}>
+          <Text style={{ fontWeight: '600', color: '#444', marginBottom: 4 }}>Exercises:</Text>
+          {workout.exercises.map((ex) => (
+            <View key={ex.id} style={{ marginBottom: 6, paddingLeft: 8 }}>
+              <Text style={{ color: '#333' }}>
+                • {ex.name} — {ex.sets || 0} × {ex.reps || 0} @ {ex.weight || 0} lbs
+              </Text>
+            </View>
+          ))}
+        </View>
+      )}
+    </View>
   );
+  
+  
 
   const renderEmptyState = () => (
     <View style={styles.emptyState}>

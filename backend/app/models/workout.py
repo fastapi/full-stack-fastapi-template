@@ -132,6 +132,19 @@ class ExercisePublic(SQLModel):
     created_at: datetime
     updated_at: Optional[datetime] = None
 
+#Workout with Exercise Public Schema
+class WorkoutWithExercisesPublic(SQLModel):
+    id: uuid.UUID
+    user_id: uuid.UUID
+    name: str
+    description: Optional[str] = None
+    scheduled_date: Optional[datetime] = None
+    completed_date: Optional[datetime] = None
+    duration_minutes: Optional[int] = None
+    is_completed: bool
+    created_at: datetime
+    updated_at: Optional[datetime] = None
+    exercises: List[ExercisePublic] = []
 
 #Personal Bests Model - Related to Workouts
 class PersonalBest(SQLModel, table=True):

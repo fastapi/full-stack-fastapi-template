@@ -16,6 +16,7 @@ from app.models.workout import (
     ExerciseCreate,
     ExerciseUpdate,
     ExercisePublic,
+    WorkoutWithExercisesPublic
 )
 from app.crudFuncs import create_or_update_personal_best, update_personal_bests_after_workout
 
@@ -191,6 +192,25 @@ def get_workout(
     
     return workout
 
+@router.get("/exercises/", response_model=List[WorkoutWithExercisesPublic])
+def get_workouts_with_exercises(
+    session: SessionDep,
+    current_user: CurrentUser,
+) -> Any:
+    """
+    Get all workouts with their exercises for the current user.
+    """
+    # Fetch workouts
+    stmt = select(Workout).where(Workout.user_id == current_user.id)
+    workouts = session.exec(stmt).all()
+
+    # Load and attach exercises manually
+    for workout in workouts:
+        workout.exercises = session.exec(
+            select(Exercise).where(Exercise.workout_id == workout.id)
+        ).all()
+
+    return workouts
 
 @router.put("/{workout_id}", response_model=WorkoutPublic)
 def update_workout(
