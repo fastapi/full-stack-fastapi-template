@@ -145,10 +145,20 @@ const ProgressScreen = () => {
   };
 
   const getAverageWorkoutDuration = () => {
-    if (workouts.length === 0) return 0;
-    const total = workouts.reduce((sum, w) => sum + w.duration, 0);
-    return Math.round(total / workouts.length);
+    const completed = workouts.filter(w => w.is_completed && (w.updated_at || w.completed_date));
+  
+    if (completed.length === 0) return 0;
+  
+    const totalMinutes = completed.reduce((sum, w) => {
+      const start = new Date(w.created_at).getTime();
+      const end = new Date(w.updated_at ?? w.completed_date).getTime();
+      const duration = Math.round((end - start) / 60000); // in minutes
+      return sum + duration;
+    }, 0);
+  
+    return Math.round(totalMinutes / completed.length);
   };
+  
 
   const unfinishedCount = useMemo(
     () => workouts.filter(w => !w.is_completed).length,
@@ -196,7 +206,7 @@ const ProgressScreen = () => {
           </View>
           <View style={styles.statCard}>
             <Text style={styles.statNumber}>{getAverageWorkoutDuration()}</Text>
-            <Text style={styles.statLabel}>Avg Duration</Text>
+            <Text style={styles.statLabel}>Avg Mins Per Workout</Text>
           </View>
         </View>
 
