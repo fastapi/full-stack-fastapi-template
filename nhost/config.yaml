@@ -1,0 +1,182 @@
+# Nhost Configuration - GENIUS INDUSTRIES
+
+# Configuración de la base de datos
+database:
+  name: genius_industries
+  schema: public
+
+# Configuración de autenticación
+auth:
+  # Configuración de roles
+  roles:
+    - name: ceo
+      description: "Acceso total al sistema"
+      permissions:
+        - "*"  # Acceso total
+      
+    - name: manager
+      description: "Gestión de sucursal y supervisores"
+      permissions:
+        - "view:all"
+        - "manage:branch"
+        - "manage:supervisors"
+        - "approve:operations"
+        - "manage:budget"
+      
+    - name: supervisor
+      description: "Gestión de agentes y operaciones"
+      permissions:
+        - "view:branch"
+        - "manage:agents"
+        - "validate:operations"
+        - "manage:portfolio"
+        - "view:reports"
+      
+    - name: hr
+      description: "Gestión de recursos humanos"
+      permissions:
+        - "manage:employees"
+        - "manage:payroll"
+        - "manage:training"
+        - "manage:evaluations"
+        - "view:hr_reports"
+      
+    - name: support
+      description: "Atención al cliente"
+      permissions:
+        - "manage:tickets"
+        - "view:customer_data"
+        - "manage:support_cases"
+        - "view:support_reports"
+      
+    - name: agent
+      description: "Gestión de propiedades y clientes"
+      permissions:
+        - "manage:properties"
+        - "manage:clients"
+        - "manage:sales"
+        - "view:agent_reports"
+
+# Configuración de políticas RLS (Row Level Security)
+rls:
+  # Políticas para propiedades
+  properties:
+    - name: "properties_ceo_policy"
+      role: "ceo"
+      operation: "all"
+      using: "true"
+    
+    - name: "properties_manager_policy"
+      role: "manager"
+      operation: "all"
+      using: "branch_id = auth.jwt()->>'branch_id'"
+    
+    - name: "properties_supervisor_policy"
+      role: "supervisor"
+      operation: "all"
+      using: "branch_id = auth.jwt()->>'branch_id'"
+    
+    - name: "properties_agent_policy"
+      role: "agent"
+      operation: "select"
+      using: "agent_id = auth.uid()"
+      operation: "insert"
+      using: "agent_id = auth.uid()"
+      operation: "update"
+      using: "agent_id = auth.uid()"
+
+  # Políticas para usuarios
+  users:
+    - name: "users_ceo_policy"
+      role: "ceo"
+      operation: "all"
+      using: "true"
+    
+    - name: "users_hr_policy"
+      role: "hr"
+      operation: "all"
+      using: "true"
+    
+    - name: "users_manager_policy"
+      role: "manager"
+      operation: "select"
+      using: "branch_id = auth.jwt()->>'branch_id'"
+      operation: "update"
+      using: "branch_id = auth.jwt()->>'branch_id'"
+
+  # Políticas para tickets
+  tickets:
+    - name: "tickets_support_policy"
+      role: "support"
+      operation: "all"
+      using: "true"
+    
+    - name: "tickets_agent_policy"
+      role: "agent"
+      operation: "select"
+      using: "agent_id = auth.uid()"
+      operation: "insert"
+      using: "agent_id = auth.uid()"
+
+# Configuración de webhooks
+webhooks:
+  # Webhooks para gestión de roles
+  - name: "role_assignment"
+    url: "{{NHOST_BACKEND_URL}}/webhooks/role-assignment"
+    events:
+      - "user.created"
+      - "user.updated"
+    headers:
+      - name: "X-Webhook-Secret"
+        value: "{{WEBHOOK_SECRET}}"
+
+  # Webhooks para auditoría
+  - name: "audit_log"
+    url: "{{NHOST_BACKEND_URL}}/webhooks/audit-log"
+    events:
+      - "*.created"
+      - "*.updated"
+      - "*.deleted"
+    headers:
+      - name: "X-Webhook-Secret"
+        value: "{{WEBHOOK_SECRET}}"
+
+# Configuración de storage
+storage:
+  buckets:
+    - name: "public"
+      public: true
+      allowed_mime_types:
+        - "image/*"
+        - "application/pdf"
+      max_file_size: 10485760  # 10MB
+    
+    - name: "private"
+      public: false
+      allowed_mime_types:
+        - "image/*"
+        - "application/pdf"
+        - "application/msword"
+        - "application/vnd.openxmlformats-officedocument.wordprocessingml.document"
+      max_file_size: 10485760  # 10MB
+
+# Configuración de funciones serverless
+functions:
+  - name: "role-management"
+    handler: "index.handler"
+    events:
+      - "user.created"
+      - "user.updated"
+    environment:
+      - name: "NHOST_ADMIN_SECRET"
+        value: "{{NHOST_ADMIN_SECRET}}"
+
+  - name: "audit-logger"
+    handler: "index.handler"
+    events:
+      - "*.created"
+      - "*.updated"
+      - "*.deleted"
+    environment:
+      - name: "NHOST_ADMIN_SECRET"
+        value: "{{NHOST_ADMIN_SECRET}}" 

@@ -1,220 +1,562 @@
-# 📋 Checklist de Desarrollo - Plataforma Inmobiliaria
+# 📋 Checklist del Proyecto - GENIUS INDUSTRIES
 
-## 🚀 Fase 1: Configuración Inicial y Base de Datos
+## 👥 Roles y Permisos
 
-### Backend Setup
+### Implementación de Roles
+- [x] Configurar roles en Nhost
+  - [x] Definir roles base (CEO, Gerente, Supervisor, RRHH, Atención al Cliente, Agentes)
+  - [x] Configurar permisos por rol
+  - [x] Implementar políticas RLS
+  - [x] Configurar webhooks por rol
+  - [ ] Implementar auditoría
+
+### Backend
+- [ ] Implementar middleware de roles
+  - [ ] Validación de permisos
+  - [ ] Logging de acciones
+  - [ ] Auditoría de cambios
+  - [ ] Manejo de errores
+- [ ] Configurar endpoints por rol
+  - [ ] CEO endpoints
+  - [ ] Gerente endpoints
+  - [ ] Supervisor endpoints
+  - [ ] RRHH endpoints
+  - [ ] Atención al Cliente endpoints
+  - [ ] Agente endpoints
+
+### Frontend
+- [ ] Implementar guardias de ruta
+  - [ ] Protección de rutas
+  - [ ] Redirecciones
+  - [ ] Mensajes de error
+- [ ] Componentes por rol
+  - [ ] CEO dashboard
+  - [ ] Gerente dashboard
+  - [ ] Supervisor dashboard
+  - [ ] RRHH dashboard
+  - [ ] Atención al Cliente dashboard
+  - [ ] Agente dashboard
+- [ ] UI adaptativa
+  - [ ] Menús por rol
+  - [ ] Acciones permitidas
+  - [ ] Reportes específicos
+
+### Funcionalidades por Rol
+
+#### CEO
+- [ ] Dashboard global
+  - [ ] KPIs financieros
+  - [ ] Rendimiento sucursales
+  - [ ] Estado del negocio
+- [ ] Gestión de roles
+  - [ ] Asignación de permisos
+  - [ ] Creación de roles
+  - [ ] Auditoría de cambios
+- [ ] Configuración global
+  - [ ] Parámetros del sistema
+  - [ ] Integraciones
+  - [ ] Seguridad
+
+#### Gerente
+- [ ] Dashboard sucursal
+  - [ ] KPIs locales
+  - [ ] Rendimiento equipo
+  - [ ] Estado operativo
+- [ ] Gestión de supervisores
+  - [ ] Asignación de tareas
+  - [ ] Evaluación de desempeño
+  - [ ] Reportes de equipo
+- [ ] Aprobaciones
+  - [ ] Operaciones
+  - [ ] Gastos
+  - [ ] Contratos
+
+#### Supervisor
+- [ ] Dashboard equipo
+  - [ ] KPIs agentes
+  - [ ] Rendimiento individual
+  - [ ] Estado de cartera
+- [ ] Gestión de agentes
+  - [ ] Asignación de leads
+  - [ ] Seguimiento de actividades
+  - [ ] Evaluación de desempeño
+- [ ] Validaciones
+  - [ ] Operaciones
+  - [ ] Documentación
+  - [ ] Reportes
+
+#### Recursos Humanos
+- [ ] Gestión de empleados
+  - [ ] Registro de personal
+  - [ ] Nómina
+  - [ ] Beneficios
+- [ ] Capacitación
+  - [ ] Planes de formación
+  - [ ] Evaluaciones
+  - [ ] Certificaciones
+- [ ] Documentación
+  - [ ] Contratos
+  - [ ] Expedientes
+  - [ ] Reportes
+
+#### Atención al Cliente
+- [ ] Gestión de tickets
+  - [ ] Creación
+  - [ ] Asignación
+  - [ ] Seguimiento
+- [ ] Soporte
+  - [ ] Resolución de casos
+  - [ ] Feedback
+  - [ ] Mejoras
+- [ ] Reportes
+  - [ ] Tiempo de respuesta
+  - [ ] Satisfacción
+  - [ ] Incidencias
+
+#### Agentes
+- [ ] Gestión de propiedades
+  - [ ] Registro
+  - [ ] Actualización
+  - [ ] Publicación
+- [ ] Gestión de clientes
+  - [ ] Registro
+  - [ ] Seguimiento
+  - [ ] Historial
+- [ ] Ventas
+  - [ ] Proceso de venta
+  - [ ] Documentación
+  - [ ] Comisiones
+
+## 🏗️ Configuración Inicial
+
+### Backend
 - [ ] Configurar entorno virtual Python
-- [ ] Instalar dependencias del backend
-- [ ] Configurar FastAPI y estructura base
-- [ ] Implementar sistema de logging
-- [ ] Configurar manejo de errores global
+- [ ] Instalar dependencias con uv
+- [ ] Configurar FastAPI con Nhost
+- [x] Configurar variables de entorno
+- [ ] Configurar CORS
+- [ ] Configurar logging
+- [ ] Configurar tests unitarios
+- [x] Configurar migraciones con Alembic
 
-### Supabase Setup
-- [ ] Crear proyecto en Supabase
-- [ ] Configurar autenticación y OAuth
-- [ ] Crear tablas principales:
-  - [ ] properties
-  - [ ] users
-  - [ ] transactions
-  - [ ] credits
-  - [ ] appraisals
-  - [ ] management_contracts
-  - [ ] advisory_sessions
-- [ ] Configurar políticas de seguridad RLS
-- [ ] Configurar almacenamiento para imágenes
-- [ ] Implementar triggers y funciones
+### Frontend
+- [ ] Configurar proyecto Vite + React
+- [ ] Instalar dependencias
+- [ ] Configurar TypeScript
+- [ ] Configurar Nhost Client
+- [ ] Configurar React Query
+- [ ] Configurar React Router
+- [ ] Configurar Chakra UI
+- [ ] Configurar tests con Playwright
 
-### Frontend Setup
-- [ ] Configurar proyecto Expo
-- [ ] Instalar dependencias principales
-- [ ] Configurar NativeWind
-- [ ] Implementar tema y estilos base
-- [ ] Configurar navegación
-- [ ] Implementar estado global (Context/Redux)
+### Nhost
+- [x] Crear proyecto en Nhost
+- [x] Configurar base de datos PostgreSQL
+- [x] Configurar Hasura
+  - [x] Configurar metadata
+  - [x] Configurar permisos RLS
+  - [x] Configurar acciones
+  - [x] Configurar eventos
+- [x] Configurar autenticación
+  - [x] Configurar proveedores OAuth
+  - [x] Configurar políticas de contraseñas
+  - [x] Configurar templates de email
+- [x] Configurar storage
+  - [x] Configurar buckets
+  - [x] Configurar políticas de acceso
+  - [x] Configurar transformaciones
+- [x] Configurar funciones serverless
+  - [x] Configurar entorno Node.js
+  - [x] Configurar dependencias
+  - [x] Configurar triggers
+- [x] Configurar webhooks
+  - [x] Configurar endpoints
+  - [x] Configurar secretos
+  - [x] Configurar retry policy
+- [x] Configurar monitoreo
+  - [x] Configurar logs
+  - [x] Configurar métricas
+  - [x] Configurar alertas
 
-## 🏗️ Fase 2: Desarrollo del Backend
+## 🏢 Módulo Inmobiliario
 
-### Autenticación y Usuarios
-- [ ] Implementar registro de usuarios
-- [ ] Implementar login/logout
-- [ ] Configurar OAuth (Google, Facebook)
-- [ ] Implementar recuperación de contraseña
-- [ ] Implementar verificación de email
-- [ ] Implementar gestión de perfiles
+### Gestión de Propiedades
+- [ ] Catálogo de propiedades
+  - [ ] Búsqueda avanzada
+  - [ ] Filtros dinámicos
+  - [ ] Geolocalización
+  - [ ] Favoritos
+  - [ ] Historial de visitas
+- [ ] Gestión de inmuebles
+  - [ ] Registro de propiedades
+  - [ ] Gestión de estados
+  - [ ] Historial de precios
+  - [ ] Documentación
+  - [ ] Imágenes y tours virtuales
+- [ ] Gestión de clientes
+  - [ ] Perfiles de clientes
+  - [ ] Historial de interacciones
+  - [ ] Preferencias
+  - [ ] Seguimiento de leads
+- [ ] Gestión de visitas
+  - [ ] Calendario de visitas
+  - [ ] Confirmaciones
+  - [ ] Recordatorios
+  - [ ] Feedback post-visita
 
-### API de Propiedades
-- [ ] Implementar CRUD de propiedades
-- [ ] Implementar búsqueda y filtros
-- [ ] Implementar carga de imágenes
-- [ ] Implementar geolocalización
-- [ ] Implementar sistema de favoritos
-- [ ] Implementar sistema de contactos
+### Transacciones
+- [ ] Gestión de ofertas
+  - [ ] Registro de ofertas
+  - [ ] Negociación
+  - [ ] Contratos
+  - [ ] Pagos
+- [ ] Gestión de alquileres
+  - [ ] Contratos
+  - [ ] Pagos recurrentes
+  - [ ] Mantenimiento
+  - [ ] Renovaciones
+- [ ] Gestión de ventas
+  - [ ] Proceso de venta
+  - [ ] Documentación legal
+  - [ ] Transferencias
+  - [ ] Comisiones
 
-### API de Transacciones
-- [ ] Implementar gestión de compra/venta
-- [ ] Implementar gestión de alquileres
-- [ ] Implementar sistema de pagos
-- [ ] Implementar notificaciones
-- [ ] Implementar historial de transacciones
+### Análisis y Reportes
+- [ ] Dashboard inmobiliario
+  - [ ] KPIs del sector
+  - [ ] Tendencias de mercado
+  - [ ] Análisis de precios
+  - [ ] Rendimiento de agentes
+- [ ] Reportes financieros
+  - [ ] Ingresos/egresos
+  - [ ] Comisiones
+  - [ ] Impuestos
+  - [ ] ROI
 
-### API de Créditos
-- [ ] Implementar simulador de créditos
-- [ ] Implementar solicitud de créditos
-- [ ] Implementar seguimiento de estado
-- [ ] Implementar documentación digital
-- [ ] Implementar sistema de aprobaciones
+## 💰 Módulo de Créditos
 
-### API de Administración
-- [ ] Implementar gestión de inquilinos
-- [ ] Implementar control de pagos
-- [ ] Implementar reportes
-- [ ] Implementar mantenimiento
-- [ ] Implementar notificaciones
+### Gestión de Préstamos
+- [ ] Solicitud de créditos
+  - [ ] Formularios de solicitud
+  - [ ] Validación de requisitos
+  - [ ] Scoring crediticio
+  - [ ] Aprobación/rechazo
+- [ ] Gestión de préstamos
+  - [ ] Contratos
+  - [ ] Planes de pago
+  - [ ] Seguimiento de pagos
+  - [ ] Morosidad
+- [ ] Garantías
+  - [ ] Avales
+  - [ ] Hipotecas
+  - [ ] Seguros
+  - [ ] Documentación
 
-### API de Avalúos
-- [ ] Implementar solicitud de avalúos
-- [ ] Implementar gestión de tasadores
-- [ ] Implementar generación de reportes
-- [ ] Implementar historial de avalúos
-- [ ] Implementar comparativas de mercado
+### Análisis Financiero
+- [ ] Scoring y riesgo
+  - [ ] Análisis crediticio
+  - [ ] Historial crediticio
+  - [ ] Capacidad de pago
+  - [ ] Riesgo de morosidad
+- [ ] Reportes financieros
+  - [ ] Cartera de préstamos
+  - [ ] Ingresos por intereses
+  - [ ] Provisiones
+  - [ ] Rentabilidad
 
-### API de Asesoría
-- [ ] Implementar solicitud de asesoría
-- [ ] Implementar gestión de asesores
-- [ ] Implementar sistema de citas
-- [ ] Implementar documentación
-- [ ] Implementar seguimiento
+### Integración Inmobiliaria
+- [ ] Préstamos hipotecarios
+  - [ ] Valoración de inmuebles
+  - [ ] LTV (Loan to Value)
+  - [ ] Seguros obligatorios
+  - [ ] Documentación legal
+- [ ] Préstamos para inversión
+  - [ ] Análisis de rentabilidad
+  - [ ] Planes de negocio
+  - [ ] Garantías adicionales
+  - [ ] Seguimiento de proyectos
 
-## 🎨 Fase 3: Desarrollo del Frontend
+## 🔄 Integración de Módulos
 
-### Componentes Base
-- [ ] Implementar componentes UI comunes
-- [ ] Implementar formularios reutilizables
-- [ ] Implementar modales y diálogos
-- [ ] Implementar sistema de notificaciones
-- [ ] Implementar cargadores y estados
+### Flujos de Trabajo
+- [ ] Proceso de compra-venta
+  - [ ] Integración con créditos
+  - [ ] Gestión documental
+  - [ ] Seguimiento de estado
+  - [ ] Notificaciones
+- [ ] Proceso de alquiler
+  - [ ] Verificación de ingresos
+  - [ ] Garantías
+  - [ ] Pagos recurrentes
+  - [ ] Renovaciones
 
-### Pantallas de Propiedades
-- [ ] Implementar listado de propiedades
-- [ ] Implementar detalles de propiedad
-- [ ] Implementar búsqueda avanzada
+### Análisis Unificado
+- [ ] Dashboard general
+  - [ ] KPIs globales
+  - [ ] Rentabilidad total
+  - [ ] Riesgo combinado
+  - [ ] Tendencias
+- [ ] Reportes integrados
+  - [ ] Estado financiero
+  - [ ] Cartera inmobiliaria
+  - [ ] Cartera de préstamos
+  - [ ] Análisis de riesgo
+
+## 📱 Experiencia de Usuario
+
+### Portal Cliente
+- [ ] Perfil de usuario
+  - [ ] Datos personales
+  - [ ] Documentación
+  - [ ] Preferencias
+  - [ ] Notificaciones
+- [ ] Gestión de propiedades
+  - [ ] Favoritos
+  - [ ] Historial de visitas
+  - [ ] Ofertas realizadas
+  - [ ] Contratos
+- [ ] Gestión de créditos
+  - [ ] Estado de préstamos
+  - [ ] Plan de pagos
+  - [ ] Documentación
+  - [ ] Renovaciones
+
+### Portal Agente
+- [ ] Gestión de propiedades
+  - [ ] Catálogo
+  - [ ] Visitas
+  - [ ] Ofertas
+  - [ ] Contratos
+- [ ] Gestión de clientes
+  - [ ] Leads
+  - [ ] Seguimiento
+  - [ ] Documentación
+  - [ ] Comisiones
+- [ ] Gestión de créditos
+  - [ ] Solicitudes
+  - [ ] Seguimiento
+  - [ ] Documentación
+  - [ ] Comisiones
+
+### Portal Administrador
+- [ ] Gestión global
+  - [ ] Usuarios
+  - [ ] Propiedades
+  - [ ] Créditos
+  - [ ] Configuración
+- [ ] Análisis y reportes
+  - [ ] KPIs
+  - [ ] Financiero
+  - [ ] Operativo
+  - [ ] Riesgo
+
+## 🔒 Cumplimiento Legal
+
+### Inmobiliario
+- [ ] Documentación legal
+  - [ ] Contratos
+  - [ ] Escrituras
+  - [ ] Permisos
+  - [ ] Certificados
+- [ ] Cumplimiento normativo
+  - [ ] Leyes inmobiliarias
+  - [ ] Protección de datos
+  - [ ] Transparencia
+  - [ ] Auditorías
+
+### Financiero
+- [ ] Documentación legal
+  - [ ] Contratos de préstamo
+  - [ ] Hipotecas
+  - [ ] Garantías
+  - [ ] Seguros
+- [ ] Cumplimiento normativo
+  - [ ] Regulación financiera
+  - [ ] Prevención de fraude
+  - [ ] Lavado de dinero
+  - [ ] Auditorías
+
+## 📊 Base de Datos
+
+### Nhost
+- [ ] Diseñar esquema de base de datos
+- [ ] Crear tablas
+- [ ] Configurar relaciones
+- [ ] Configurar índices
+- [ ] Configurar triggers
+- [ ] Configurar funciones
+- [ ] Configurar vistas
+- [ ] Configurar políticas RLS
+
+### Backend
+- [ ] Implementar modelos Pydantic
+- [ ] Configurar validaciones
+- [ ] Implementar migraciones
+- [ ] Configurar seeds
+- [ ] Implementar backups
+
+## 🚀 API y Endpoints
+
+### Backend
+- [ ] Implementar endpoints REST
+- [ ] Configurar validaciones
+- [ ] Implementar paginación
 - [ ] Implementar filtros
-- [ ] Implementar galería de imágenes
-- [ ] Implementar mapa interactivo
-
-### Pantallas de Usuario
-- [ ] Implementar registro/login
-- [ ] Implementar perfil de usuario
-- [ ] Implementar dashboard
-- [ ] Implementar favoritos
-- [ ] Implementar historial
-
-### Pantallas de Créditos
-- [ ] Implementar simulador
-- [ ] Implementar solicitud
-- [ ] Implementar seguimiento
-- [ ] Implementar documentación
-- [ ] Implementar calculadora
-
-### Pantallas de Administración
-- [ ] Implementar dashboard de admin
-- [ ] Implementar gestión de propiedades
-- [ ] Implementar gestión de inquilinos
-- [ ] Implementar reportes
-- [ ] Implementar pagos
-
-### Pantallas de Avalúos
-- [ ] Implementar solicitud
-- [ ] Implementar seguimiento
-- [ ] Implementar reportes
-- [ ] Implementar historial
-- [ ] Implementar comparativas
-
-### Pantallas de Asesoría
-- [ ] Implementar solicitud
-- [ ] Implementar agenda
-- [ ] Implementar chat
-- [ ] Implementar documentación
-- [ ] Implementar seguimiento
-
-## 🔒 Fase 4: Seguridad y Optimización
-
-### Seguridad
-- [ ] Implementar validación de datos
+- [ ] Implementar búsqueda
+- [ ] Configurar documentación OpenAPI
 - [ ] Implementar rate limiting
-- [ ] Implementar CORS
-- [ ] Implementar sanitización
-- [ ] Implementar auditoría
-- [ ] Realizar pruebas de seguridad
+- [ ] Configurar caché
 
-### Optimización
-- [ ] Optimizar consultas a base de datos
+### Nhost
+- [ ] Configurar GraphQL API
+- [ ] Configurar permisos
+- [ ] Configurar webhooks
+- [ ] Configurar eventos
+- [ ] Configurar funciones serverless
+
+## 📱 Frontend
+
+### UI/UX
+- [ ] Implementar diseño responsive
+- [ ] Configurar temas
+- [ ] Implementar modo oscuro
+- [ ] Configurar animaciones
+- [ ] Implementar feedback visual
+- [ ] Configurar accesibilidad
+- [ ] Optimizar rendimiento
+
+### Estado y Datos
+- [ ] Configurar React Query
 - [ ] Implementar caché
+- [ ] Configurar optimistic updates
+- [ ] Implementar infinite scroll
+- [ ] Configurar prefetching
+- [ ] Implementar error boundaries
+
+### Navegación
+- [ ] Configurar rutas
+- [ ] Implementar guards
+- [ ] Configurar breadcrumbs
+- [ ] Implementar lazy loading
+- [ ] Configurar transiciones
+
+## 🔄 Integración
+
+### Backend-Frontend
+- [ ] Configurar cliente Nhost
+- [ ] Implementar interceptores
+- [ ] Configurar manejo de errores
+- [ ] Implementar retry logic
+- [ ] Configurar timeouts
+
+### Nhost-Backend
+- [ ] Configurar webhooks
+  - [ ] Configurar eventos de autenticación
+  - [ ] Configurar eventos de base de datos
+  - [ ] Configurar eventos de storage
+- [ ] Implementar eventos
+  - [ ] Configurar suscripciones GraphQL
+  - [ ] Configurar eventos en tiempo real
+- [ ] Configurar funciones serverless
+  - [ ] Implementar lógica de negocio
+  - [ ] Configurar triggers
+  - [ ] Configurar cron jobs
+- [ ] Implementar triggers
+  - [ ] Configurar triggers de base de datos
+  - [ ] Configurar triggers de autenticación
+  - [ ] Configurar triggers de storage
+
+## 🚢 Despliegue
+
+### Backend
+- [ ] Configurar Docker
+- [ ] Configurar CI/CD
+- [ ] Configurar monitoreo
+- [ ] Configurar logs
+- [ ] Configurar backups
+
+### Frontend
+- [ ] Configurar build
+- [ ] Optimizar assets
+- [ ] Configurar CDN
+- [ ] Implementar PWA
+- [ ] Configurar analytics
+
+### Nhost
+- [ ] Configurar entorno de producción
+  - [ ] Configurar variables de entorno
+  - [ ] Configurar secrets
+  - [ ] Configurar dominios
+- [ ] Configurar backups
+  - [ ] Configurar backup automático
+  - [ ] Configurar retención
+  - [ ] Configurar restauración
+- [ ] Configurar monitoreo
+  - [ ] Configurar métricas
+  - [ ] Configurar logs
+  - [ ] Configurar tracing
+- [ ] Configurar alertas
+  - [ ] Configurar umbrales
+  - [ ] Configurar notificaciones
+  - [ ] Configurar escalado
+- [ ] Configurar escalado
+  - [ ] Configurar auto-scaling
+  - [ ] Configurar recursos
+  - [ ] Configurar límites
+
+## 🧪 Testing
+
+### Backend
+- [ ] Implementar tests unitarios
+- [ ] Implementar tests de integración
+- [ ] Configurar coverage
+- [ ] Implementar mocks
+- [ ] Configurar CI
+
+### Frontend
+- [ ] Implementar tests unitarios
+- [ ] Implementar tests E2E
+- [ ] Configurar coverage
+- [ ] Implementar mocks
+- [ ] Configurar CI
+
+## 📚 Documentación
+
+- [ ] Documentar API
+- [ ] Documentar componentes
+- [ ] Documentar hooks
+- [ ] Documentar utils
+- [ ] Documentar despliegue
+- [ ] Documentar desarrollo
+- [ ] Documentar arquitectura
+
+## 🔒 Seguridad
+
+- [ ] Configurar HTTPS
+- [ ] Implementar CSP
+- [ ] Configurar CORS
+- [ ] Implementar rate limiting
+- [ ] Configurar headers de seguridad
+- [ ] Implementar validaciones
+- [ ] Configurar auditoría
+- [ ] Implementar logging de seguridad
+
+## 📈 Monitoreo y Analytics
+
+- [ ] Configurar error tracking
+- [ ] Implementar analytics
+- [ ] Configurar performance monitoring
+- [ ] Implementar user tracking
+- [ ] Configurar alertas
+- [ ] Implementar dashboards
+
+## 🚀 Optimización
+
+- [ ] Optimizar bundle size
+- [ ] Implementar code splitting
 - [ ] Optimizar imágenes
 - [ ] Implementar lazy loading
-- [ ] Optimizar rendimiento móvil
-- [ ] Implementar PWA
-
-## 🧪 Fase 5: Testing
-
-### Backend Testing
-- [ ] Implementar tests unitarios
-- [ ] Implementar tests de integración
-- [ ] Implementar tests de API
-- [ ] Implementar tests de seguridad
-- [ ] Implementar tests de rendimiento
-
-### Frontend Testing
-- [ ] Implementar tests unitarios
-- [ ] Implementar tests de componentes
-- [ ] Implementar tests de integración
-- [ ] Implementar tests E2E
-- [ ] Implementar tests de accesibilidad
-
-## 🚀 Fase 6: Despliegue
-
-### Preparación
-- [ ] Configurar CI/CD
-- [ ] Preparar documentación
-- [ ] Configurar monitoreo
-- [ ] Configurar backups
-- [ ] Preparar SSL
-
-### Despliegue
-- [ ] Desplegar backend
-- [ ] Desplegar frontend
-- [ ] Configurar dominios
-- [ ] Configurar CDN
-- [ ] Realizar pruebas de carga
-
-## 📈 Fase 7: Post-Lanzamiento
-
-### Monitoreo
-- [ ] Configurar analytics
-- [ ] Configurar error tracking
-- [ ] Configurar performance monitoring
-- [ ] Configurar user tracking
-- [ ] Configurar alertas
-
-### Mantenimiento
-- [ ] Planificar actualizaciones
-- [ ] Planificar backups
-- [ ] Planificar seguridad
-- [ ] Planificar escalabilidad
-- [ ] Planificar soporte
-
-## 📊 Métricas de Éxito
-
-### Técnicas
-- [ ] Tiempo de carga < 3s
-- [ ] Tasa de error < 0.1%
-- [ ] Cobertura de tests > 80%
-- [ ] Puntuación Lighthouse > 90
-- [ ] Tiempo de respuesta API < 200ms
-
-### Negocio
-- [ ] Tasa de conversión > 5%
-- [ ] Tasa de retención > 40%
-- [ ] NPS > 8
-- [ ] Tiempo promedio en app > 5min
-- [ ] Tasa de completitud de perfiles > 70% 
+- [ ] Optimizar queries
+- [ ] Implementar caching
+- [ ] Optimizar rendimiento
+- [ ] Implementar PWA 
