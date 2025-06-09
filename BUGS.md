@@ -1,0 +1,1 @@
+The gradients on the graphs disappear after any popup. 
