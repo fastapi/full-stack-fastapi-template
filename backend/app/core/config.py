@@ -1,6 +1,6 @@
 import secrets
 import warnings
-from typing import Annotated, Any, Literal
+from typing import Annotated, Any, Literal, Optional
 
 from pydantic import (
     AnyUrl,
@@ -14,6 +14,7 @@ from pydantic import (
 from pydantic_core import MultiHostUrl
 from pydantic_settings import BaseSettings, SettingsConfigDict
 from typing_extensions import Self
+from functools import lru_cache
 
 
 def parse_cors(v: Any) -> list[str] | str:
@@ -25,22 +26,40 @@ def parse_cors(v: Any) -> list[str] | str:
 
 
 class Settings(BaseSettings):
-    model_config = SettingsConfigDict(
-        # Use top level .env file (one level above ./backend/)
-        env_file="../.env",
-        env_ignore_empty=True,
-        extra="ignore",
-    )
+    # Configuración general
+    PROJECT_NAME: str = "Genius Industries Real Estate"
+    VERSION: str = "1.0.0"
     API_V1_STR: str = "/api/v1"
-    SECRET_KEY: str = secrets.token_urlsafe(32)
-    # 60 minutes * 24 hours * 8 days = 8 days
-    ACCESS_TOKEN_EXPIRE_MINUTES: int = 60 * 24 * 8
+    
+    # Configuración de Supabase
+    SUPABASE_URL: str
+    SUPABASE_KEY: str
+    
+    # Configuración de seguridad
+    SECRET_KEY: str
+    ACCESS_TOKEN_EXPIRE_MINUTES: int = 60 * 24 * 8  # 8 días
+    
+    # Configuración de CORS
+    BACKEND_CORS_ORIGINS: list[str] = ["*"]
+    
+    # Configuración de correo
+    SMTP_TLS: bool = True
+    SMTP_PORT: Optional[int] = None
+    SMTP_HOST: Optional[str] = None
+    SMTP_USER: Optional[str] = None
+    SMTP_PASSWORD: Optional[str] = None
+    EMAILS_FROM_EMAIL: Optional[str] = None
+    EMAILS_FROM_NAME: Optional[str] = None
+    
+    # Configuración de almacenamiento
+    STORAGE_BUCKET: str = "real-estate-assets"
+    
+    class Config:
+        case_sensitive = True
+        env_file = ".env"
+
     FRONTEND_HOST: str = "http://localhost:5173"
     ENVIRONMENT: Literal["local", "staging", "production"] = "local"
-
-    BACKEND_CORS_ORIGINS: Annotated[
-        list[AnyUrl] | str, BeforeValidator(parse_cors)
-    ] = []
 
     @computed_field  # type: ignore[prop-decorator]
     @property
@@ -49,7 +68,6 @@ class Settings(BaseSettings):
             self.FRONTEND_HOST
         ]
 
-    PROJECT_NAME: str
     SENTRY_DSN: HttpUrl | None = None
     POSTGRES_SERVER: str
     POSTGRES_PORT: int = 5432
@@ -68,15 +86,6 @@ class Settings(BaseSettings):
             port=self.POSTGRES_PORT,
             path=self.POSTGRES_DB,
         )
-
-    SMTP_TLS: bool = True
-    SMTP_SSL: bool = False
-    SMTP_PORT: int = 587
-    SMTP_HOST: str | None = None
-    SMTP_USER: str | None = None
-    SMTP_PASSWORD: str | None = None
-    EMAILS_FROM_EMAIL: EmailStr | None = None
-    EMAILS_FROM_NAME: EmailStr | None = None
 
     @model_validator(mode="after")
     def _set_default_emails_from(self) -> Self:
@@ -117,4 +126,8 @@ class Settings(BaseSettings):
         return self
 
 
-settings = Settings()  # type: ignore
+@lru_cache()
+def get_settings() -> Settings:
+    return Settings()
+
+settings = get_settings()

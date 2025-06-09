@@ -5,6 +5,7 @@ from starlette.middleware.cors import CORSMiddleware
 
 from app.api.main import api_router
 from app.core.config import settings
+from .api.routes import properties, users, transactions, credits, appraisals, management, advisory
 
 
 def custom_generate_unique_id(route: APIRoute) -> str:
@@ -16,6 +17,7 @@ if settings.SENTRY_DSN and settings.ENVIRONMENT != "local":
 
 app = FastAPI(
     title=settings.PROJECT_NAME,
+    version=settings.VERSION,
     openapi_url=f"{settings.API_V1_STR}/openapi.json",
     generate_unique_id_function=custom_generate_unique_id,
 )
@@ -30,4 +32,34 @@ if settings.all_cors_origins:
         allow_headers=["*"],
     )
 
+# Configuración de CORS
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=settings.BACKEND_CORS_ORIGINS,
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
+
 app.include_router(api_router, prefix=settings.API_V1_STR)
+
+# Incluir routers
+app.include_router(properties.router, prefix=settings.API_V1_STR)
+app.include_router(users.router, prefix=settings.API_V1_STR)
+app.include_router(transactions.router, prefix=settings.API_V1_STR)
+app.include_router(credits.router, prefix=settings.API_V1_STR)
+app.include_router(appraisals.router, prefix=settings.API_V1_STR)
+app.include_router(management.router, prefix=settings.API_V1_STR)
+app.include_router(advisory.router, prefix=settings.API_V1_STR)
+
+@app.get("/")
+async def root():
+    return {
+        "message": "Welcome to Genius Industries Real Estate API",
+        "version": settings.VERSION,
+        "docs_url": "/docs"
+    }
+
+@app.get("/health")
+async def health_check():
+    return {"status": "healthy"}

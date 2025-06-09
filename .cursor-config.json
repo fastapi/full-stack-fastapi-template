@@ -1,0 +1,25 @@
+{
+  "description": "Desarrollo guiado para LM_Mobile con Cursor AI",
+  "rules": [
+    {
+      "title": "Backend",
+      "content": "Usar solo Pydantic, sin ORM. Organizar endpoints en `api/routes`, lógica en `services`, modelos en `models.py`, configuración en `core/`."
+    },
+    {
+      "title": "Frontend",
+      "content": "Usar Expo, React Native, NativeWind. Mantener componentes en `components/`, pantallas en `screens/`, lógica externa en `services/`, utilidades en `utils/`, hooks en `hooks/`."
+    },
+    {
+      "title": "Flujo de comunicación",
+      "content": "Siempre seguir Frontend -> Backend -> Supabase. Nunca conectarse directamente del frontend a Supabase para escrituras."
+    },
+    {
+      "title": "Estilo de código",
+      "content": "Código limpio, modular, bien nombrado. No duplicar funciones. No mezclar capas (UI, lógica, datos)."
+    },
+    {
+      "title": "Prohibido",
+      "content": "No usar ORMs, no escribir directamente en Supabase desde el frontend excepto para realtime."
+    }
+  ]
+}
