@@ -6,12 +6,22 @@ import { router } from 'expo-router';
 import { usePersonalBests } from "@/hooks/usePersonalBests";
 import { Dialog } from '@/components/ui/Dialog';
 import { Button } from '@/components/ui/Button';
+import { useWorkout } from '@/contexts/WorkoutContext';
+import { BarChart } from 'react-native-chart-kit';
+import { useEffect } from 'react';
+import { ProgressChart } from 'react-native-chart-kit';
 
 const { width } = Dimensions.get('window');
 //console.log(" 1 HomeScreen about to be rendered rendered");
+
 const HomeScreen = () => {
-  //console.log("2 HomeScreen rendered");
+  const { workouts, getWorkouts } = useWorkout(); // <- include getWorkouts
   const { user } = useAuth();
+
+  useEffect(() => {
+    getWorkouts();
+  }, []);
+
   if (!user) {
     console.warn("User context is undefined");
     return null;
@@ -38,6 +48,59 @@ const HomeScreen = () => {
     return 'Obesity Class 3';
   }, [bmiValue]);
 
+  const range = '7'; // fixed
+
+  const getDateLabels = (days: number) => {
+    const labels = [];
+    for (let i = days - 1; i >= 0; i--) {
+      const d = new Date();
+      d.setDate(d.getDate() - i);
+  
+      // Skip every other label if days > 7
+      const skip = days === 14 ? 2 : days === 30 ? 3 : 1;
+      if (i % skip !== 0) {
+        labels.push('');
+      } else {
+        labels.push(d.toLocaleDateString('en-US', { month: 'short', day: 'numeric' }));
+      }
+    }
+    return labels;
+  };
+  
+  
+
+  const { labels, data } = useMemo(() => {
+    const nameToDuration: Record<string, number> = {};
+  
+    workouts
+      .filter(w => w.is_completed && w.name && (w.updated_at || w.completed_date))
+      .forEach(w => {
+        const end = new Date(w.updated_at ?? w.completed_date).getTime();
+        const start = new Date(w.created_at).getTime();
+        const duration = Math.round((end - start) / 60000); // in minutes
+  
+        const name = w.name.trim();
+        if (!nameToDuration[name]) {
+          nameToDuration[name] = 0;
+        }
+        nameToDuration[name] += duration;
+      });
+  
+    const sorted = Object.entries(nameToDuration)
+      .filter(([name, minutes]) => minutes > 0)
+      .sort((a, b) => b[1] - a[1]); // descending
+  
+    return {
+      labels: sorted.map(([name]) => name),
+      data: sorted.map(([, duration]) => duration),
+    };
+  }, [workouts]);
+  
+  
+  
+  
+  //console.log("workouts", JSON.stringify(workouts, null, 2));
+
   const [showBmiDialog, setShowBmiDialog] = useState(false);
 
   const workoutProgressData = [20, 40, 30, 60, 90, 80, 70];
@@ -50,8 +113,8 @@ const HomeScreen = () => {
   const { pbs, loading } = usePersonalBests();
   const testPbs = pbs.length === 0 ? [{ metric: "Deadlift", value: 315, date: "2025-05-27" }] : pbs;
   
-  console.log('PBS LOADED:', pbs);
-  console.log("Rendering personal bests section. pbs:", pbs, "loading:", loading);
+  //console.log('PBS LOADED:', pbs);
+  //console.log("Rendering personal bests section. pbs:", pbs, "loading:", loading);
 
   return (
     <SafeAreaView style={styles.container}>
@@ -90,68 +153,45 @@ const HomeScreen = () => {
 
         {/* Workout Progress */}
         <View style={styles.progressSection}>
-          <View style={styles.progressHeader}>
-            <Text style={styles.sectionTitle}>Workout Progress</Text>
-            <TouchableOpacity onPress={() => {/* toggle weekly/monthly */}}>
-              <Text style={styles.periodToggle}>Weekly ▼</Text>
-            </TouchableOpacity>
-          </View>
-          <LineChart
-            data={{
-              labels: workoutDays,
-              datasets: [
-                {
-                  data: workoutProgressData,
-                  color: () => '#B07FFD',
-                  strokeWidth: 2,
-                },
-              ],
-            }}
-            width={width - 64}
-            height={100}
-            chartConfig={{
-              backgroundGradientFrom: '#fff',
-              backgroundGradientTo: '#fff',
-              color: () => '#B07FFD',
-              strokeWidth: 2,
-            }}
-            bezier
-            style={styles.progressChart}
-          />
-          <View style={styles.daysRow}>
-            {workoutDays.map(day => (
-              <Text key={day} style={styles.dayText}>{day}</Text>
-            ))}
-          </View>
-        </View>
+  <View style={styles.progressHeader}>
+    <Text style={styles.sectionTitle}>Workout Minutes</Text>
+  </View>
 
-        {/* Latest Workout */}
-        <View style={[styles.latestSection, { backgroundColor: '#f0f0f0' }]}>
-          <View style={styles.sectionHeader}>
-            <Text style={styles.sectionTitle}>Latest Workout</Text>
-            <TouchableOpacity onPress={() => alert('Workout List not yet implemented')}>
-              <Text style={styles.seeMore}>See more</Text>
-            </TouchableOpacity>
-          </View>
-          {latestWorkouts.map(w => (
-            <TouchableOpacity key={w.id} style={styles.workoutItem} onPress={() => alert('Workout Details not yet implemented')}>
-              <Image source={w.icon} style={styles.workoutIcon} />
-              <View style={styles.workoutInfo}>
-                <Text style={styles.workoutType}>{w.type}</Text>
-                <Text style={styles.workoutMeta}>{w.calories} Calories Burn | {w.duration}</Text>
-              </View>
-              <Image source={require('../assets/images/arrow-right.png')} style={styles.arrowIcon} />
-            </TouchableOpacity>
-          ))}
-        </View>
+  <View style={{ alignItems: 'center' }}>
+  <BarChart
+    data={{ labels, datasets: [{ data }] }}
+    width={Math.max(width, labels.length * 60)}
+    height={220}
+    fromZero
+    showValuesOnTopOfBars
+    withInnerLines={true}
+    withHorizontalLabels={false} // Hide Y-axis labels only
+    chartConfig={{
+      backgroundGradientFrom: '#fff',
+      backgroundGradientTo: '#fff',
+      color: () => '#70A1FF',
+      decimalPlaces: 0,
+      barPercentage: 0.6,
+      propsForBackgroundLines: {
+        stroke: '#E0E0E0',
+      },
+      formatYLabel: (yValue) => `${yValue}m`,
+    }}
+    style={{
+      marginVertical: 8,
+      borderRadius: 16,
+    }}
+  />
+</View>
+
+
+
+  </View>
 
         {/* Personal Bests */}
         <View style={[styles.latestSection, { paddingBottom: 16 }]}>
           <View style={styles.sectionHeader}>
             <Text style={styles.sectionTitle}>Personal Bests</Text>
-            <TouchableOpacity onPress={() => alert('Full Personal Bests screen not implemented')}>
-              <Text style={styles.seeMore}>See more</Text>
-            </TouchableOpacity>
           </View>
 
           {loading ? (
