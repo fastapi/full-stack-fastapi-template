@@ -42,28 +42,36 @@ const SetRow = ({ set, setNumber, onUpdate, onRemove }: SetRowProps) => {
   return (
     <View style={styles.setRow}>
       <Text style={styles.setNumber}>{setNumber}</Text>
-      <TextInput
-        style={styles.setInput}
-        value={set.weight.toString()}
-        onChangeText={(text) => onUpdate({ weight: parseInt(text) || 0 })}
-        placeholder="Weight"
-        keyboardType="numeric"
-      />
-      <Text style={styles.inputLabel}>kg</Text>
-      <TextInput
-        style={styles.setInput}
-        value={set.reps.toString()}
-        onChangeText={(text) => onUpdate({ reps: parseInt(text) || 0 })}
-        placeholder="Reps"
-        keyboardType="numeric"
-      />
-      <Text style={styles.inputLabel}>reps</Text>
+
+      <View style={styles.inputGroup}>
+        <TextInput
+          style={styles.setInput}
+          value={set.weight.toString()}
+          onChangeText={(text) => onUpdate({ weight: parseInt(text) || 0 })}
+          placeholder="Weight"
+          keyboardType="numeric"
+        />
+        <Text style={styles.inputUnit}>kg</Text>
+      </View>
+
+      <View style={styles.inputGroup}>
+        <TextInput
+          style={styles.setInput}
+          value={set.reps.toString()}
+          onChangeText={(text) => onUpdate({ reps: parseInt(text) || 0 })}
+          placeholder="Reps"
+          keyboardType="numeric"
+        />
+        <Text style={styles.inputUnit}>reps</Text>
+      </View>
+
       <TouchableOpacity onPress={onRemove} style={styles.removeButton}>
         <Text style={styles.removeButtonText}>×</Text>
       </TouchableOpacity>
     </View>
   );
 };
+
 
 interface ExerciseCardProps {
   workoutExercise: any;
@@ -358,24 +366,6 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: '#E5F1FF',
   },
-  setNumber: {
-    fontSize: 16,
-    fontWeight: '600',
-    color: '#333',
-    width: 30,
-    textAlign: 'center',
-  },
-  setInput: {
-    borderWidth: 1,
-    borderColor: '#A3C9FD',
-    borderRadius: 8,
-    padding: 8,
-    marginHorizontal: 4,
-    textAlign: 'center',
-    fontSize: 16,
-    backgroundColor: 'white',
-    flex: 1,
-  },
   inputLabel: {
     fontSize: 12,
     color: '#666',
@@ -465,6 +455,53 @@ const styles = StyleSheet.create({
     paddingVertical: 4,
     borderRadius: 6,
   },
+  setRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingVertical: 8,
+    paddingHorizontal: 4,
+    marginBottom: 8,
+    backgroundColor: '#FFFFFF',
+    borderRadius: 8,
+    borderWidth: 1,
+    borderColor: '#E5F1FF',
+  },
+  
+  setNumber: {
+    width: 30,
+    fontSize: 16,
+    fontWeight: '600',
+    color: '#333',
+    textAlign: 'center',
+  },
+  
+  inputGroup: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginHorizontal: 4,
+    width: 100, // constrain width for layout stability
+  },
+  
+  setInput: {
+    width: 50, // fixed to prevent stretch
+    height: 36,
+    borderWidth: 1,
+    borderColor: '#A3C9FD',
+    borderRadius: 8,
+    paddingHorizontal: 8,
+    fontSize: 14,
+    textAlign: 'center',
+    backgroundColor: '#fff',
+  },
+  
+
+  inputUnit: {
+    fontSize: 12,
+    color: '#666',
+    marginLeft: 4,
+    alignSelf: 'center',
+  },
+  
 });
 
 export default WorkoutScreen; 
