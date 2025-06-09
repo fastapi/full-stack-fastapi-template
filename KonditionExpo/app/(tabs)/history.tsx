@@ -241,7 +241,19 @@ const WorkoutHistoryScreen = () => {
         ) : !Array.isArray(workouts) || workouts.length === 0 ? (
           renderEmptyState()
         ) : (
-          workouts.map(renderWorkoutItem)
+          [...workouts]
+        .sort((a, b) => {
+          // 1. Completed workouts first
+          if (a.is_completed !== b.is_completed) {
+            return b.is_completed ? 1 : -1;
+          }
+
+          // 2. Then sort by date (fallback to created_at if completed_date is missing)
+          const aDate = new Date(a.completed_date || a.created_at).getTime();
+          const bDate = new Date(b.completed_date || b.created_at).getTime();
+          return bDate - aDate;
+        })
+        .map(renderWorkoutItem)
         )}
       </ScrollView>
     </SafeAreaView>
