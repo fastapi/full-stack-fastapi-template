@@ -21,6 +21,7 @@
     "@react-navigation/native": "^7.1.6",
     "axios": "^1.9.0",
     "d3-shape": "^3.2.0",
+    "date-fns": "^4.1.0",
     "expo": "^53.0.9",
     "expo-blur": "~14.1.4",
     "expo-constants": "~17.1.6",

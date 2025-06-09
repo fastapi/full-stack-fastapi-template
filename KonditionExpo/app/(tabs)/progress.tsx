@@ -1,4 +1,6 @@
 import React, { useState, useEffect, useMemo } from 'react';
+import { format } from 'date-fns';
+
 import { 
   SafeAreaView, 
   View, 
@@ -17,35 +19,46 @@ import { Input } from '@/components/ui/Input';
 import { router } from 'expo-router';
 import { useAuth } from '@/contexts/AuthContext';
 const { width } = Dimensions.get('window');
-
+const formatDate = (date: Date) => {
+  return format(new Date(date), 'MMM d, yyyy'); // e.g. Jun 9, 2025
+};
 interface WorkoutItemProps {
   workout: Workout;
   onPress: () => void;
 }
 
 const WorkoutItem = ({ workout, onPress }: WorkoutItemProps) => {
-  const { workouts, currentWorkout, exerSets, exerReps, exerWeights, startWorkout, getWorkouts, getExercises, getExercises_2} = useWorkout();
+  const { getExercises } = useWorkout();
+  const [stats, setStats] = useState({ sets: 0, reps: 0, weight: 0 });
+  const { token, isAuthenticated, isLoading } = useAuth(); //token of user
+
+  useEffect(() => {
+    const loadStats = async () => {
+      await getExercises(workout.id); // this updates global `exercises`, which we can't reliably read here
+      const res = await fetch(`http://localhost:8000/api/v1/workouts/${workout.id}/exercises`, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "application/json",
+        },
+      });
+      const json = await res.json();
+      //console.log(json);
+      let sets = 0, reps = 0, weight = 0;
+      for (const ex of json) {
+        sets += ex.sets ?? 0;
+        reps += ex.reps ?? 0;
+        weight += ex.weight ?? 0;
+      }
+
+      setStats({ sets, reps, weight });
+    };
+
+    loadStats();
+  }, [workout.id]);
+
   const formatDate = (date: Date) => {
-    return date.toLocaleDateString('en-US', { 
-      month: 'short', 
-      day: 'numeric',
-      year: 'numeric' 
-    });
+    return format(new Date(date), 'MMM d, yyyy');
   };
-
-  //getWorkouts();
-  //console.log(workout.id);
-
-  //getExercises(workout.id); // Set the exercises
-  //console.log(getExercises_2()); // Get the exercises
-
-  //const exercises = getExercises_2();
-
-  //for (const exercise of exercises) {
-  //  exerSets += exercise.sets || 0;
-  //  exerReps += exercise.reps || 0;
-  //  exerWeight += exercise.weight || 0;
-  //}
 
   return (
     <TouchableOpacity style={styles.workoutItem} onPress={onPress}>
@@ -54,9 +67,9 @@ const WorkoutItem = ({ workout, onPress }: WorkoutItemProps) => {
         <Text style={styles.workoutDate}>{formatDate(workout.date)}</Text>
       </View>
       <View style={styles.workoutStats}>
-        <Text style={styles.workoutStat}>{exerSets} sets</Text>
-        <Text style={styles.workoutStat}>{exerReps} reps</Text>
-        <Text style={styles.workoutStat}>{exerWeights} weights</Text>
+        <Text style={styles.workoutStat}>{stats.sets} sets</Text>
+        <Text style={styles.workoutStat}>{stats.reps} reps</Text>
+        <Text style={styles.workoutStat}>{stats.weight} weights</Text>
       </View>
     </TouchableOpacity>
   );
