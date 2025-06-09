@@ -6,6 +6,7 @@ from starlette.middleware.cors import CORSMiddleware
 from app.api.main import api_router
 from app.core.config import settings
 from .api.routes import properties, users, transactions, credits, appraisals, management, advisory
+from app.core.db import create_db_and_tables
 
 
 def custom_generate_unique_id(route: APIRoute) -> str:
@@ -40,6 +41,10 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+@app.on_event("startup")
+def on_startup():
+    create_db_and_tables()
 
 app.include_router(api_router, prefix=settings.API_V1_STR)
 

@@ -1,11 +1,24 @@
-from sqlmodel import Session, create_engine, select
+from sqlmodel import SQLModel, create_engine, Session
 
 from app import crud
 from app.core.config import settings
 from app.models import User, UserCreate
 
-engine = create_engine(str(settings.SQLALCHEMY_DATABASE_URI))
+# Crear el engine de SQLAlchemy
+engine = create_engine(
+    settings.SQLALCHEMY_DATABASE_URI,
+    pool_pre_ping=True,
+    echo=True
+)
 
+# Crear todas las tablas
+def create_db_and_tables():
+    SQLModel.metadata.create_all(engine)
+
+# Obtener una sesión de base de datos
+def get_session():
+    with Session(engine) as session:
+        yield session
 
 # make sure all SQLModel models are imported (app.models) before initializing DB
 # otherwise, SQLModel might fail to initialize relationships properly
