@@ -59,6 +59,7 @@ interface WorkoutContextType {
   updateSet: (exerciseId: string, setId: string, updatedSet: Partial<WorkoutSet>) => void;
   getExercises: (workoutID: string) => void;
   getExercises_2: () => Exercise[];
+  completeWorkout: (workoutId: string) => void;
 }
 
 const WorkoutContext = createContext<WorkoutContextType | undefined>(undefined);
@@ -93,6 +94,24 @@ export const WorkoutProvider = ({ children }: { children: ReactNode }) => {
       weight: ex.sets.reduce((max, s) => Math.max(max, s.weight || 0), 0),
     })),
   });
+
+  const completeWorkout = async (workoutId: string) => {
+    try {
+      const response = await axios.put(
+        `http://localhost:8000/api/v1/workouts/${workoutId}/complete`,
+        {},
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+      console.log("Workout marked as complete:", response.data);
+      await getWorkouts(); // Refresh updated workouts
+    } catch (error) {
+      console.error("Failed to complete workout", error);
+    }
+  };
 
   const addWorkout = async (workout: Workout) => {
     try {
@@ -281,6 +300,7 @@ export const WorkoutProvider = ({ children }: { children: ReactNode }) => {
       updateSet,
       getWorkouts,
       getExercises,
+      completeWorkout
     }}>
       {children}
     </WorkoutContext.Provider>

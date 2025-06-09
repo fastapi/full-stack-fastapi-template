@@ -32,6 +32,7 @@ export type WorkoutResponse = {
   created_at: string;
   completed_date?: string;
   duration_minutes?: number;
+  scheduled_date?: number;
   exercises: Exercise[];  // <-- include this
 };
 
@@ -97,15 +98,25 @@ const WorkoutHistoryScreen = () => {
     });
   };
 
-  const formatDuration = (minutes?: number) => {
-    if (!minutes) return 'N/A';
-    const hours = Math.floor(minutes / 60);
-    const mins = minutes % 60;
-    if (hours > 0) {
-      return `${hours}h ${mins}m`;
-    }
-    return `${mins}m`;
+  const formatDuration = (workout: WorkoutResponse): string => {
+    if (!workout.is_completed) return 'N/A';
+  
+    const start = workout.scheduled_date ? new Date(workout.scheduled_date) : null;
+    const end = workout.completed_date ? new Date(workout.completed_date) : null;
+  
+    if (!start || !end || isNaN(start.getTime()) || isNaN(end.getTime())) return 'N/A';
+  
+    const diffMs = end.getTime() - start.getTime();
+    if (diffMs <= 0) return 'N/A';
+  
+    const totalSeconds = Math.floor(diffMs / 1000);
+    const hours = Math.floor(totalSeconds / 3600);
+    const minutes = Math.floor((totalSeconds % 3600) / 60);
+    const seconds = totalSeconds % 60;
+  
+    return `${String(hours).padStart(2, '0')}:${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
   };
+  
 
   const getCompletionStatus = (workout: WorkoutResponse) => {
     return workout.is_completed ? 'Completed' : 'Incomplete';
@@ -140,10 +151,10 @@ const WorkoutHistoryScreen = () => {
   
       {/* Workout Metadata */}
       <View style={styles.workoutDetails}>
-        <View style={styles.detailItem}>
-          <Text style={styles.detailLabel}>Duration</Text>
-          <Text style={styles.detailValue}>{formatDuration(workout.duration_minutes)}</Text>
-        </View>
+  <View style={styles.detailItem}>
+    <Text style={styles.detailLabel}>Duration</Text>
+    <Text style={styles.detailValue}>{formatDuration(workout)}</Text>
+  </View>
   
         <View style={styles.detailItem}>
           <Text style={styles.detailLabel}>Exercises</Text>

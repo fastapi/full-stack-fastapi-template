@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { 
   SafeAreaView, 
   View, 
@@ -65,7 +65,7 @@ const WorkoutItem = ({ workout, onPress }: WorkoutItemProps) => {
 
 
 const ProgressScreen = () => {
-  const { workouts, currentWorkout, startWorkout, getWorkouts, getExercises} = useWorkout();
+  const { workouts, currentWorkout, startWorkout, getWorkouts, getExercises, completeWorkout} = useWorkout();
   const { isAuthenticated, isLoading } = useAuth();
   const [showNewWorkoutModal, setShowNewWorkoutModal] = useState(false);
   const [newWorkoutName, setNewWorkoutName] = useState('');
@@ -136,6 +136,11 @@ const ProgressScreen = () => {
     const total = workouts.reduce((sum, w) => sum + w.duration, 0);
     return Math.round(total / workouts.length);
   };
+
+  const unfinishedCount = useMemo(
+    () => workouts.filter(w => !w.is_completed).length,
+    [workouts]
+  );
 
   const weeklyData = getWeeklyWorkouts();
   const weeklyLabels = getWeeklyLabels();
@@ -225,16 +230,15 @@ const ProgressScreen = () => {
           />
         </View>
 
-        {/*Finish Old Workout Button*/}
         <View style={styles.actionContainer}>
-        <Button
-          title="Finish Old Workout"
-          onPress={() => setShowFinishModal(true)}
-          size="lg"
-          fullWidth
-          style={{ backgroundColor: '#FFA07A' }}
-        />
-        </View>        
+  <Button
+    title={`Finish Old Workout (${unfinishedCount})`}
+    onPress={() => setShowFinishModal(true)}
+    size="lg"
+    fullWidth
+    style={{ backgroundColor: '#FFA07A' }}
+  />
+</View>      
 
         {/* Recent Workouts */}
         <View style={styles.workoutHistoryContainer}>
@@ -301,57 +305,65 @@ const ProgressScreen = () => {
         </View>
       </Modal>
 
-      {/* Finish Workout Modal*/}
-      <Modal
-      visible={showFinishModal}
-      transparent
-      animationType="slide"
-      onRequestClose={() => setShowFinishModal(false)}
-    >
-      <View style={styles.modalOverlay}>
-        <View style={[styles.modalContent, { backgroundColor }]}>
-          <Text style={[styles.modalTitle, { color: textColor }]}>
-            Unfinished Workouts
+{/* Finish Workout Modal */}
+<Modal
+  visible={showFinishModal}
+  transparent
+  animationType="slide"
+  onRequestClose={() => setShowFinishModal(false)}
+>
+  <View style={styles.modalOverlay}>
+    <View style={[styles.modalContent, { backgroundColor }]}>
+      <Text style={[styles.modalTitle, { color: textColor }]}>
+        Unfinished Workouts
+      </Text>
+
+      <ScrollView
+        style={{ maxHeight: 300, marginBottom: 12 }}
+        showsVerticalScrollIndicator={false}
+      >
+        {workouts.filter(w => !w.is_completed).length === 0 ? (
+          <Text style={{ textAlign: 'center', color: textColor }}>
+            No incomplete workouts.
           </Text>
-
-          {workouts.filter(w => !w.is_completed).length === 0 ? (
-            <Text style={{ textAlign: 'center', color: textColor }}>
-              No incomplete workouts.
+        ) : (
+          workouts
+            .filter(w => !w.is_completed)
+            .map((workout) => (
+          <TouchableOpacity
+            key={workout.id}
+            onPress={async () => {
+              await completeWorkout(workout.id);
+              setShowFinishModal(false);
+            }}
+            style={{
+              padding: 14,
+              backgroundColor: '#E5F1FF',
+              borderRadius: 10,
+              marginBottom: 10,
+              borderWidth: 1,
+              borderColor: '#D0E2FF',
+            }}
+          >
+            <Text style={{ color: '#333', fontWeight: '600' }}>{workout.name}</Text>
+            <Text style={{ fontSize: 12, color: '#666' }}>
+              {workout.date.toDateString?.() ?? '—'}
             </Text>
-          ) : (
-            workouts
-              .filter(w => !w.is_completed)
-              .map((workout) => (
-                <TouchableOpacity
-                  key={workout.id}
-                  onPress={() => {
-                    setShowFinishModal(false);
-                    router.push({
-                      pathname: '/finish',
-                      params: { workoutId: workout.id },
-                    });
-                  }}
-                  style={{
-                    padding: 12,
-                    backgroundColor: '#F5F8FF',
-                    borderRadius: 10,
-                    marginBottom: 10,
-                  }}
-                >
-                  <Text style={{ color: textColor }}>{workout.name}</Text>
-                </TouchableOpacity>
-              ))
-          )}
+          </TouchableOpacity>
 
-          <Button
-            title="Close"
-            onPress={() => setShowFinishModal(false)}
-            variant="outline"
-            style={{ marginTop: 10 }}
-          />
-        </View>
-      </View>
-    </Modal>
+            ))
+        )}
+      </ScrollView>
+
+      <Button
+        title="Close"
+        onPress={() => setShowFinishModal(false)}
+        variant="outline"
+        style={{ marginTop: 10 }}
+      />
+    </View>
+  </View>
+</Modal>
     </SafeAreaView>
   );
 };
