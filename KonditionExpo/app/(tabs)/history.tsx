@@ -222,9 +222,12 @@ const WorkoutHistoryScreen = () => {
       <View style={styles.header}>
         <Text style={styles.headerTitle}>Workout History</Text>
         <Text style={styles.headerSubtitle}>
-          {workouts.length} {workouts.length === 1 ? 'workout' : 'workouts'} completed
+          {workouts.length} Total —{" "}
+          {workouts.filter(w => !w.is_completed).length} In Progress —{" "}
+          {workouts.filter(w => w.is_completed).length} Finished
         </Text>
       </View>
+
 
       <ScrollView
         style={styles.scrollView}
