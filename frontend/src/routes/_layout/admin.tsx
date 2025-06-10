@@ -13,6 +13,8 @@ import {
   PaginationPrevTrigger,
   PaginationRoot,
 } from "@/components/ui/pagination.tsx"
+import { RouteGuard } from '@/components/Common/RouteGuard'
+import { CEODashboard } from '@/components/Admin/CEODashboard'
 
 const usersSearchSchema = z.object({
   page: z.number().catch(1),
@@ -29,7 +31,11 @@ function getUsersQueryOptions({ page }: { page: number }) {
 }
 
 export const Route = createFileRoute("/_layout/admin")({
-  component: Admin,
+  component: () => (
+    <RouteGuard requiredRole="ceo">
+      <CEODashboard />
+    </RouteGuard>
+  ),
   validateSearch: (search) => usersSearchSchema.parse(search),
 })
 

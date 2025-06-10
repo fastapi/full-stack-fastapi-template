@@ -113,27 +113,27 @@ Genius-Industries/
    - Docker
 
 2. **Instalación Backend**
-   ```bash
+```bash
    cd backend
    python -m venv .venv
    source .venv/bin/activate  # o .venv\Scripts\activate en Windows
    pip install -r requirements.txt
-   ```
+```
 
 3. **Instalación Frontend Web**
-   ```bash
+```bash
    cd frontend-web
    npm install
    ```
 
 4. **Instalación Frontend Móvil**
-   ```bash
+```bash
    cd frontend-mobile
    npm install
    ```
 
 5. **Desarrollo**
-   ```bash
+```bash
    # Backend
    cd backend
    uvicorn app.main:app --reload

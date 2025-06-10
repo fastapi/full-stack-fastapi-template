@@ -1,13 +1,20 @@
 # Stage 0, "build-stage", based on Node.js, to build and compile the frontend
-FROM node:20 AS build-stage
+FROM node:20-slim
 
 WORKDIR /app
 
-COPY package*.json /app/
-
+# Install dependencies
+COPY package*.json ./
 RUN npm install
 
-COPY ./ /app/
+# Copy application code
+COPY . .
+
+# Expose port
+EXPOSE 5173
+
+# Command to run the application
+CMD ["npm", "run", "dev", "--", "--host", "0.0.0.0"]
 
 ARG VITE_API_URL=${VITE_API_URL}
 

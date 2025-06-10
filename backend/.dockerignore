@@ -6,3 +6,25 @@ app.egg-info
 .coverage
 htmlcov
 .venv
+
+# Git
+.git
+.gitignore
+
+# Environment
+.env
+
+# Python
+*.pyo
+*.pyd
+.Python
+
+# IDEs
+.idea/
+.vscode/
+
+# Logs
+*.log
+
+# Test
+.pytest_cache/

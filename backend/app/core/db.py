@@ -1,8 +1,5 @@
 from sqlmodel import SQLModel, create_engine, Session
-
-from app import crud
 from app.core.config import settings
-from app.models import User, UserCreate
 
 # Crear el engine de SQLAlchemy
 engine = create_engine(
@@ -44,3 +41,4 @@ def init_db(session: Session) -> None:
             is_superuser=True,
         )
         user = crud.create_user(session=session, user_create=user_in)
+

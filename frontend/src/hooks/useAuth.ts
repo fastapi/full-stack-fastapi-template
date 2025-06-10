@@ -1,77 +1,90 @@
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
-import { useNavigate } from "@tanstack/react-router"
-import { useState } from "react"
+import { useCallback, useEffect, useState } from 'react'
+import { useNavigate } from '@tanstack/react-router'
+import { useNhostClient } from '@nhost/nextjs'
 
-import {
-  type Body_login_login_access_token as AccessToken,
-  type ApiError,
-  LoginService,
-  type UserPublic,
-  type UserRegister,
-  UsersService,
-} from "@/client"
-import { handleError } from "@/utils"
+export type UserRole = 'ceo' | 'manager' | 'supervisor' | 'hr' | 'support' | 'agent'
 
-const isLoggedIn = () => {
-  return localStorage.getItem("access_token") !== null
+interface UseAuthReturn {
+  isAuthenticated: boolean
+  user: any | null
+  role: UserRole | null
+  loading: boolean
+  error: Error | null
+  signOut: () => Promise<void>
+  checkRole: (requiredRole: UserRole | UserRole[]) => boolean
 }
 
-const useAuth = () => {
-  const [error, setError] = useState<string | null>(null)
+export const useAuth = (): UseAuthReturn => {
+  const nhost = useNhostClient()
   const navigate = useNavigate()
-  const queryClient = useQueryClient()
-  const { data: user } = useQuery<UserPublic | null, Error>({
-    queryKey: ["currentUser"],
-    queryFn: UsersService.readUserMe,
-    enabled: isLoggedIn(),
-  })
+  const [user, setUser] = useState<any | null>(null)
+  const [role, setRole] = useState<UserRole | null>(null)
+  const [loading, setLoading] = useState(true)
+  const [error, setError] = useState<Error | null>(null)
 
-  const signUpMutation = useMutation({
-    mutationFn: (data: UserRegister) =>
-      UsersService.registerUser({ requestBody: data }),
+  useEffect(() => {
+    const checkAuth = async () => {
+      try {
+        const session = await nhost.auth.getSession()
+        if (session) {
+          setUser(session.user)
+          // Obtener el rol del usuario desde los metadatos
+          const userRole = session.user?.metadata?.role as UserRole
+          setRole(userRole)
+        }
+      } catch (err) {
+        setError(err as Error)
+      } finally {
+        setLoading(false)
+      }
+    }
 
-    onSuccess: () => {
-      navigate({ to: "/login" })
-    },
-    onError: (err: ApiError) => {
-      handleError(err)
-    },
-    onSettled: () => {
-      queryClient.invalidateQueries({ queryKey: ["users"] })
-    },
-  })
+    checkAuth()
 
-  const login = async (data: AccessToken) => {
-    const response = await LoginService.loginAccessToken({
-      formData: data,
+    // Suscribirse a cambios en la autenticación
+    const { data: authListener } = nhost.auth.onAuthStateChanged((event, session) => {
+      if (event === 'SIGNED_IN' && session) {
+        setUser(session.user)
+        const userRole = session.user?.metadata?.role as UserRole
+        setRole(userRole)
+      } else if (event === 'SIGNED_OUT') {
+        setUser(null)
+        setRole(null)
+      }
     })
-    localStorage.setItem("access_token", response.access_token)
-  }
 
-  const loginMutation = useMutation({
-    mutationFn: login,
-    onSuccess: () => {
-      navigate({ to: "/" })
-    },
-    onError: (err: ApiError) => {
-      handleError(err)
-    },
-  })
+    return () => {
+      authListener?.unsubscribe()
+    }
+  }, [nhost])
 
-  const logout = () => {
-    localStorage.removeItem("access_token")
-    navigate({ to: "/login" })
-  }
+  const signOut = useCallback(async () => {
+    try {
+      await nhost.auth.signOut()
+      navigate({ to: '/login' })
+    } catch (err) {
+      setError(err as Error)
+    }
+  }, [nhost, navigate])
+
+  const checkRole = useCallback(
+    (requiredRole: UserRole | UserRole[]): boolean => {
+      if (!role) return false
+      if (Array.isArray(requiredRole)) {
+        return requiredRole.includes(role)
+      }
+      return role === requiredRole
+    },
+    [role]
+  )
 
   return {
-    signUpMutation,
-    loginMutation,
-    logout,
+    isAuthenticated: !!user,
     user,
+    role,
+    loading,
     error,
-    resetError: () => setError(null),
+    signOut,
+    checkRole,
   }
 }
-
-export { isLoggedIn }
-export default useAuth

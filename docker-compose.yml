@@ -1,102 +1,178 @@
-version: '3.6'
-
+# Nhost Core Services
 services:
-  # Nhost Services
+  # Database
   postgres:
-    image: postgres:14-alpine
+    image: postgres:14
     container_name: nhost_postgres
     restart: always
-    environment:
-      POSTGRES_DB: ${POSTGRES_DB}
-      POSTGRES_USER: ${POSTGRES_USER}
-      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
-    volumes:
-      - postgres_data:/var/lib/postgresql/data
-      - ./nhost/migrations:/docker-entrypoint-initdb.d
     ports:
       - "5432:5432"
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: postgres
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
     networks:
-      - nhost_network
+      - genius-network
 
+  # GraphQL Engine
   hasura:
     image: hasura/graphql-engine:v2.33.4
     container_name: nhost_hasura
     restart: always
-    depends_on:
-      - postgres
+    ports:
+      - "8080:8080"
     environment:
-      HASURA_GRAPHQL_DATABASE_URL: postgres://${POSTGRES_USER}:${POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DB}
+      HASURA_GRAPHQL_DATABASE_URL: postgres://postgres:postgres@postgres:5432/postgres
       HASURA_GRAPHQL_ENABLE_CONSOLE: "true"
       HASURA_GRAPHQL_DEV_MODE: "true"
       HASURA_GRAPHQL_ENABLED_LOG_TYPES: startup, http-log, webhook-log, websocket-log, query-log
-      HASURA_GRAPHQL_ADMIN_SECRET: ${NHOST_ADMIN_SECRET}
-      HASURA_GRAPHQL_JWT_SECRET: '{"type": "HS256", "key": "${NHOST_JWT_SECRET}"}'
-      HASURA_GRAPHQL_CORS_DOMAIN: "*"
-    ports:
-      - "8080:8080"
+      HASURA_GRAPHQL_ADMIN_SECRET: nhost-admin-secret
+      HASURA_GRAPHQL_JWT_SECRET: '{"type": "HS256", "key": "nhost-jwt-secret"}'
+    depends_on:
+      - postgres
     networks:
-      - nhost_network
+      - genius-network
 
+  # Authentication Service
   auth:
     image: nhost/hasura-auth:latest
     container_name: nhost_auth
     restart: always
-    depends_on:
-      - postgres
-    environment:
-      HASURA_GRAPHQL_JWT_SECRET: '{"type": "HS256", "key": "${NHOST_JWT_SECRET}"}'
-      HASURA_GRAPHQL_ADMIN_SECRET: ${NHOST_ADMIN_SECRET}
-      HASURA_GRAPHQL_API_URL: http://hasura:8080
-      DATABASE_URL: postgres://${POSTGRES_USER}:${POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DB}
-      SMTP_HOST: ${AUTH_SMTP_HOST}
-      SMTP_PORT: ${AUTH_SMTP_PORT}
-      SMTP_USER: ${AUTH_SMTP_USER}
-      SMTP_PASS: ${AUTH_SMTP_PASS}
-      SMTP_SENDER: ${AUTH_SMTP_SENDER}
     ports:
-      - "1337:1337"
+      - "4000:4000"
+    environment:
+      AUTH_PORT: 4000
+      AUTH_SERVER_URL: http://auth:4000
+      AUTH_API_URL: http://localhost:4000
+      AUTH_GRAPHQL_URL: http://localhost:8080/v1/graphql
+      AUTH_HASURA_GRAPHQL_URL: http://hasura:8080/v1/graphql
+      AUTH_HASURA_GRAPHQL_ADMIN_SECRET: nhost-admin-secret
+      AUTH_JWT_SECRET: nhost-jwt-secret
+      AUTH_ANONYMOUS_USERS_ENABLED: "true"
+      AUTH_EMAIL_SIGNIN_EMAIL_VERIFIED_REQUIRED: "false"
+      AUTH_ACCESS_TOKEN_EXPIRES_IN: 900
+      AUTH_REFRESH_TOKEN_EXPIRES_IN: 63072000
+      AUTH_SMTP_ADMIN_EMAIL: admin@example.com
+      AUTH_SMTP_HOST: mail
+      AUTH_SMTP_PORT: 2500
+      AUTH_SMTP_USER: fake_mail_user
+      AUTH_SMTP_PASS: fake_mail_password
+      AUTH_SMTP_SENDER_NAME: Nhost Auth
+    depends_on:
+      - hasura
     networks:
-      - nhost_network
+      - genius-network
 
+  # File Storage Service
   storage:
     image: nhost/hasura-storage:latest
     container_name: nhost_storage
     restart: always
-    environment:
-      HASURA_GRAPHQL_ADMIN_SECRET: ${NHOST_ADMIN_SECRET}
-      HASURA_GRAPHQL_API_URL: http://hasura:8080
-      STORAGE_BACKEND: file
-      FILE_STORAGE_BACKEND_PATH: /storage
-    volumes:
-      - storage_data:/storage
     ports:
-      - "1338:1338"
+      - "5000:5000"
+    environment:
+      STORAGE_BACKEND: file
+      STORAGE_FILE_BACKEND_PATH: /tmp/nhost/storage
+      STORAGE_HASURA_GRAPHQL_URL: http://hasura:8080/v1/graphql
+      STORAGE_HASURA_GRAPHQL_ADMIN_SECRET: nhost-admin-secret
+      STORAGE_JWT_SECRET: nhost-jwt-secret
+      STORAGE_S3_BUCKET: nhost
+      STORAGE_S3_ENDPOINT: minio:9000
+      STORAGE_S3_ACCESS_KEY: minioadmin
+      STORAGE_S3_SECRET_KEY: minioadmin
+      STORAGE_S3_REGION: us-east-1
+    volumes:
+      - storage_data:/tmp/nhost/storage
+    depends_on:
+      - hasura
     networks:
-      - nhost_network
+      - genius-network
 
-  # Nginx como reverse proxy
-  nginx:
-    image: nginx:alpine
-    container_name: nhost_nginx
+  # Development Support Services
+  mail:
+    image: mailhog/mailhog
+    container_name: nhost_mail
     restart: always
     ports:
-      - "80:80"
-      - "443:443"
+      - "1025:1025"
+      - "8025:8025"
+    networks:
+      - genius-network
+
+  minio:
+    image: minio/minio
+    container_name: nhost_minio
+    restart: always
+    ports:
+      - "9000:9000"
+      - "9001:9001"
+    environment:
+      MINIO_ROOT_USER: minioadmin
+      MINIO_ROOT_PASSWORD: minioadmin
     volumes:
-      - ./docker/nginx/nginx.conf:/etc/nginx/nginx.conf:ro
-      - ./docker/nginx/conf.d:/etc/nginx/conf.d:ro
-      - ./docker/nginx/ssl:/etc/nginx/ssl:ro
+      - minio_data:/data
+    command: server /data --console-address ":9001"
+    networks:
+      - genius-network
+
+  # Backend Service
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: genius_backend
+    restart: always
+    ports:
+      - "8000:8000"
+    environment:
+      - POSTGRES_SERVER=postgres
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=postgres
+      - POSTGRES_DB=postgres
+      - POSTGRES_PORT=5432
+      - BACKEND_CORS_ORIGINS=http://localhost,http://localhost:5173,https://localhost,https://localhost:5173
+      - NHOST_GRAPHQL_URL=http://hasura:8080/v1/graphql
+      - NHOST_AUTH_URL=http://auth:4000
+      - NHOST_STORAGE_URL=http://storage:5000
+    volumes:
+      - ./backend:/app
     depends_on:
+      - postgres
       - hasura
       - auth
       - storage
     networks:
-      - nhost_network
+      - genius-network
 
-networks:
-  nhost_network:
-    driver: bridge
+  # Frontend Service
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: genius_frontend
+    restart: always
+    ports:
+      - "5173:5173"
+    environment:
+      - VITE_API_URL=http://localhost:8000
+      - VITE_NHOST_GRAPHQL_URL=http://localhost:8080/v1/graphql
+      - VITE_NHOST_AUTH_URL=http://localhost:4000
+      - VITE_NHOST_STORAGE_URL=http://localhost:5000
+    volumes:
+      - ./frontend:/app
+      - /app/node_modules
+    depends_on:
+      - backend
+    networks:
+      - genius-network
 
 volumes:
   postgres_data:
-  storage_data: 
+  storage_data:
+  minio_data:
+
+networks:
+  genius-network:
+    driver: bridge 

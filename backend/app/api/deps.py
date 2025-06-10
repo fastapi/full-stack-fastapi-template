@@ -6,7 +6,7 @@ from fastapi import Depends, HTTPException, status
 from fastapi.security import OAuth2PasswordBearer
 from jwt.exceptions import InvalidTokenError
 from pydantic import ValidationError
-from sqlmodel import Session
+from sqlmodel import Session, select
 from jose import JWTError
 from datetime import datetime, timedelta
 
@@ -67,6 +67,7 @@ def get_financial_analysis_service(nhost_client: NhostClient = Depends(get_nhost
 
 async def get_current_user(
     token: str = Depends(reusable_oauth2),
+    session: Session = Depends(get_db),
     auth_service: AuthService = Depends(get_auth_service)
 ) -> User:
     """Obtener el usuario actual basado en el token JWT"""
@@ -88,9 +89,13 @@ async def get_current_user(
     except JWTError:
         raise credentials_exception
     
-    user = await auth_service.get_user_by_id(user_id)
+    # Intentar obtener el usuario de la base de datos local primero
+    user = session.exec(select(User).where(User.id == user_id)).first()
     if user is None:
-        raise credentials_exception
+        # Si no está en la base de datos local, intentar obtenerlo de Nhost
+        user = await auth_service.get_user_by_id(user_id)
+        if user is None:
+            raise credentials_exception
     
     return user
 
