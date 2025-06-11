@@ -37,7 +37,7 @@ services:
 
   # Authentication Service
   auth:
-    image: nhost/hasura-auth:latest
+    image: nhost/hasura-auth:v0.24.0
     container_name: nhost_auth
     restart: always
     ports:
@@ -67,7 +67,7 @@ services:
 
   # File Storage Service
   storage:
-    image: nhost/hasura-storage:latest
+    image: nhost/hasura-storage:v0.7.0
     container_name: nhost_storage
     restart: always
     ports:
@@ -92,7 +92,7 @@ services:
 
   # Development Support Services
   mail:
-    image: mailhog/mailhog
+    image: mailhog/mailhog:v1.0.1
     container_name: nhost_mail
     restart: always
     ports:
@@ -102,7 +102,7 @@ services:
       - genius-network
 
   minio:
-    image: minio/minio
+    image: minio/minio:RELEASE.2023-07-21T21-12-44Z
     container_name: nhost_minio
     restart: always
     ports:
@@ -167,6 +167,18 @@ services:
       - backend
     networks:
       - genius-network
+
+  nhost:
+    image: nhost/cli:latest
+    ports:
+      - "1337:1337"
+    environment:
+      - NHOST_ADMIN_SECRET=admin-secret
+      - NHOST_JWT_SECRET=jwt-secret
+      - NHOST_HASURA_GRAPHQL_ADMIN_SECRET=hasura-admin-secret
+    volumes:
+      - ./nhost:/app
+    command: dev
 
 volumes:
   postgres_data:

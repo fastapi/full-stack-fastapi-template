@@ -13,18 +13,23 @@
   "dependencies": {
     "@chakra-ui/react": "^3.8.0",
     "@emotion/react": "^11.14.0",
+    "@nhost/react": "^0.14.0",
+    "@nhost/react-auth": "^3.6.0",
     "@tanstack/react-query": "^5.28.14",
     "@tanstack/react-query-devtools": "^5.74.9",
     "@tanstack/react-router": "1.19.1",
     "axios": "1.9.0",
     "form-data": "4.0.2",
+    "framer-motion": "^12.17.0",
     "next-themes": "^0.4.6",
     "nhost": "^0.1.11",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
     "react-error-boundary": "^5.0.0",
     "react-hook-form": "7.49.3",
-    "react-icons": "^5.5.0"
+    "react-icons": "^5.5.0",
+    "react-intersection-observer": "^9.16.0",
+    "react-router-dom": "^6.22.3"
   },
   "devDependencies": {
     "@biomejs/biome": "1.9.4",

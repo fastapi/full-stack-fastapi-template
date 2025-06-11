@@ -19,8 +19,14 @@ import { Route as LayoutImport } from './routes/_layout'
 import { Route as LayoutIndexImport } from './routes/_layout/index'
 import { Route as ClientClientPortalImport } from './routes/client/ClientPortal'
 import { Route as LayoutSettingsImport } from './routes/_layout/settings'
+import { Route as LayoutLegalImport } from './routes/_layout/legal'
 import { Route as LayoutItemsImport } from './routes/_layout/items'
 import { Route as LayoutAdminImport } from './routes/_layout/admin'
+import { Route as LayoutAboutImport } from './routes/_layout/about'
+import { Route as LayoutLegalIndexImport } from './routes/_layout/legal/index'
+import { Route as LayoutLegalTemplatesImport } from './routes/_layout/legal/templates'
+import { Route as LayoutLegalGeneratorImport } from './routes/_layout/legal/generator'
+import { Route as LayoutLegalDocumentsImport } from './routes/_layout/legal/documents'
 
 // Create/Update Routes
 
@@ -64,6 +70,11 @@ const LayoutSettingsRoute = LayoutSettingsImport.update({
   getParentRoute: () => LayoutRoute,
 } as any)
 
+const LayoutLegalRoute = LayoutLegalImport.update({
+  path: '/legal',
+  getParentRoute: () => LayoutRoute,
+} as any)
+
 const LayoutItemsRoute = LayoutItemsImport.update({
   path: '/items',
   getParentRoute: () => LayoutRoute,
@@ -72,6 +83,31 @@ const LayoutItemsRoute = LayoutItemsImport.update({
 const LayoutAdminRoute = LayoutAdminImport.update({
   path: '/admin',
   getParentRoute: () => LayoutRoute,
+} as any)
+
+const LayoutAboutRoute = LayoutAboutImport.update({
+  path: '/about',
+  getParentRoute: () => LayoutRoute,
+} as any)
+
+const LayoutLegalIndexRoute = LayoutLegalIndexImport.update({
+  path: '/',
+  getParentRoute: () => LayoutLegalRoute,
+} as any)
+
+const LayoutLegalTemplatesRoute = LayoutLegalTemplatesImport.update({
+  path: '/templates',
+  getParentRoute: () => LayoutLegalRoute,
+} as any)
+
+const LayoutLegalGeneratorRoute = LayoutLegalGeneratorImport.update({
+  path: '/generator',
+  getParentRoute: () => LayoutLegalRoute,
+} as any)
+
+const LayoutLegalDocumentsRoute = LayoutLegalDocumentsImport.update({
+  path: '/documents',
+  getParentRoute: () => LayoutLegalRoute,
 } as any)
 
 // Populate the FileRoutesByPath interface
@@ -98,12 +134,20 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof SignupImport
       parentRoute: typeof rootRoute
     }
+    '/_layout/about': {
+      preLoaderRoute: typeof LayoutAboutImport
+      parentRoute: typeof LayoutImport
+    }
     '/_layout/admin': {
       preLoaderRoute: typeof LayoutAdminImport
       parentRoute: typeof LayoutImport
     }
     '/_layout/items': {
       preLoaderRoute: typeof LayoutItemsImport
+      parentRoute: typeof LayoutImport
+    }
+    '/_layout/legal': {
+      preLoaderRoute: typeof LayoutLegalImport
       parentRoute: typeof LayoutImport
     }
     '/_layout/settings': {
@@ -118,6 +162,22 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof LayoutIndexImport
       parentRoute: typeof LayoutImport
     }
+    '/_layout/legal/documents': {
+      preLoaderRoute: typeof LayoutLegalDocumentsImport
+      parentRoute: typeof LayoutLegalImport
+    }
+    '/_layout/legal/generator': {
+      preLoaderRoute: typeof LayoutLegalGeneratorImport
+      parentRoute: typeof LayoutLegalImport
+    }
+    '/_layout/legal/templates': {
+      preLoaderRoute: typeof LayoutLegalTemplatesImport
+      parentRoute: typeof LayoutLegalImport
+    }
+    '/_layout/legal/': {
+      preLoaderRoute: typeof LayoutLegalIndexImport
+      parentRoute: typeof LayoutLegalImport
+    }
   }
 }
 
@@ -125,8 +185,15 @@ declare module '@tanstack/react-router' {
 
 export const routeTree = rootRoute.addChildren([
   LayoutRoute.addChildren([
+    LayoutAboutRoute,
     LayoutAdminRoute,
     LayoutItemsRoute,
+    LayoutLegalRoute.addChildren([
+      LayoutLegalDocumentsRoute,
+      LayoutLegalGeneratorRoute,
+      LayoutLegalTemplatesRoute,
+      LayoutLegalIndexRoute,
+    ]),
     LayoutSettingsRoute,
     LayoutIndexRoute,
   ]),

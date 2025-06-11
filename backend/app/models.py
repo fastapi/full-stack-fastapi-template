@@ -772,4 +772,127 @@ class InvestmentLoan(InvestmentLoanBase):
     approval_date: Optional[datetime] = None
 
 
+# Legal Compliance System Models
+class LegalDocumentType(str, Enum):
+    SALE_CONTRACT = "sale_contract"
+    RENTAL_CONTRACT = "rental_contract"
+    LOAN_CONTRACT = "loan_contract"
+    INTERMEDIATION_CONTRACT = "intermediation_contract"
+    PRIVACY_POLICY = "privacy_policy"
+    TERMS_CONDITIONS = "terms_conditions"
+    MORTGAGE_CONTRACT = "mortgage_contract"
+    PROMISSORY_NOTE = "promissory_note"
+
+class LegalDocumentStatus(str, Enum):
+    DRAFT = "draft"
+    ACTIVE = "active"
+    INACTIVE = "inactive"
+    ARCHIVED = "archived"
+
+class LegalDocumentTemplate(SQLModel):
+    id: Optional[uuid.UUID] = None
+    template_name: str
+    document_type: LegalDocumentType
+    version: str
+    content: str  # HTML content with placeholders
+    variables: Dict[str, Any]  # Template variables definition
+    is_active: bool = True
+    created_by: uuid.UUID
+    created_at: Optional[datetime] = None
+    updated_at: Optional[datetime] = None
+
+class LegalDocumentTemplateCreate(SQLModel):
+    template_name: str
+    document_type: LegalDocumentType
+    version: str
+    content: str
+    variables: Dict[str, Any]
+    created_by: uuid.UUID
+
+class LegalDocumentTemplateUpdate(SQLModel):
+    template_name: Optional[str] = None
+    content: Optional[str] = None
+    variables: Optional[Dict[str, Any]] = None
+    is_active: Optional[bool] = None
+
+class GeneratedLegalDocument(SQLModel):
+    id: Optional[uuid.UUID] = None
+    template_id: uuid.UUID
+    document_number: str  # Auto-generated unique number
+    document_type: LegalDocumentType
+    title: str
+    content: str  # Generated HTML content
+    variables_used: Dict[str, Any]  # Values used for generation
+    status: LegalDocumentStatus = LegalDocumentStatus.DRAFT
+    client_id: Optional[uuid.UUID] = None
+    property_id: Optional[uuid.UUID] = None
+    loan_id: Optional[uuid.UUID] = None
+    agent_id: Optional[uuid.UUID] = None
+    generated_by: uuid.UUID
+    signed_by_client: Optional[bool] = False
+    signed_by_agent: Optional[bool] = False
+    signature_client_date: Optional[datetime] = None
+    signature_agent_date: Optional[datetime] = None
+    created_at: Optional[datetime] = None
+    updated_at: Optional[datetime] = None
+
+class GeneratedLegalDocumentCreate(SQLModel):
+    template_id: uuid.UUID
+    title: str
+    variables_used: Dict[str, Any]
+    client_id: Optional[uuid.UUID] = None
+    property_id: Optional[uuid.UUID] = None
+    loan_id: Optional[uuid.UUID] = None
+    agent_id: Optional[uuid.UUID] = None
+    generated_by: uuid.UUID
+
+class GeneratedLegalDocumentUpdate(SQLModel):
+    title: Optional[str] = None
+    status: Optional[LegalDocumentStatus] = None
+    signed_by_client: Optional[bool] = None
+    signed_by_agent: Optional[bool] = None
+
+class ComplianceAudit(SQLModel):
+    id: Optional[uuid.UUID] = None
+    audit_type: str  # "document_review", "process_compliance", "data_protection"
+    entity_type: str  # "contract", "loan", "property", "user"
+    entity_id: uuid.UUID
+    compliance_status: str  # "compliant", "non_compliant", "pending_review"
+    findings: List[str]
+    recommendations: List[str]
+    auditor_id: uuid.UUID
+    audit_date: datetime
+    next_audit_date: Optional[datetime] = None
+    created_at: Optional[datetime] = None
+
+class ComplianceAuditCreate(SQLModel):
+    audit_type: str
+    entity_type: str
+    entity_id: uuid.UUID
+    compliance_status: str
+    findings: List[str]
+    recommendations: List[str]
+    auditor_id: uuid.UUID
+    next_audit_date: Optional[datetime] = None
+
+class DataProtectionConsent(SQLModel):
+    id: Optional[uuid.UUID] = None
+    user_id: uuid.UUID
+    consent_type: str  # "data_processing", "marketing", "third_party_sharing"
+    consent_given: bool
+    consent_date: datetime
+    consent_version: str
+    ip_address: Optional[str] = None
+    user_agent: Optional[str] = None
+    withdrawn_date: Optional[datetime] = None
+    created_at: Optional[datetime] = None
+
+class DataProtectionConsentCreate(SQLModel):
+    user_id: uuid.UUID
+    consent_type: str
+    consent_given: bool
+    consent_version: str
+    ip_address: Optional[str] = None
+    user_agent: Optional[str] = None
+
 # Credit Models

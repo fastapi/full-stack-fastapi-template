@@ -1,5 +1,6 @@
 import { Box, Container, Text } from "@chakra-ui/react"
 import { createFileRoute } from "@tanstack/react-router"
+import HomePage from '../../pages/HomePage'
 
 import { useAuth } from '@/hooks/useAuth'
 import { RouteGuard } from '@/components/Common/RouteGuard'
@@ -10,35 +11,8 @@ import { HRDashboard } from '@/components/Admin/HRDashboard'
 import { SupportDashboard } from '@/components/Admin/SupportDashboard'
 import { AgentDashboard } from '@/components/Admin/AgentDashboard'
 
-export const Route = createFileRoute("/_layout/")({
-  component: () => {
-    const { role } = useAuth()
-
-    const renderDashboard = () => {
-      switch (role) {
-        case 'ceo':
-          return <CEODashboard />
-        case 'manager':
-          return <ManagerDashboard />
-        case 'supervisor':
-          return <SupervisorDashboard />
-        case 'hr':
-          return <HRDashboard />
-        case 'support':
-          return <SupportDashboard />
-        case 'agent':
-          return <AgentDashboard />
-        default:
-          return null
-      }
-    }
-
-    return (
-      <RouteGuard>
-        {renderDashboard()}
-      </RouteGuard>
-    )
-  },
+export const Route = createFileRoute('/_layout/')({
+  component: HomePage,
 })
 
 function Dashboard() {

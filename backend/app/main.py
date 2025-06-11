@@ -8,6 +8,8 @@ from app.core.config import settings
 from .api.routes import properties, users, transactions, credits, appraisals, management, advisory
 from app.core.db import create_db_and_tables
 
+# Import legal router
+from app.api.routes import legal
 
 def custom_generate_unique_id(route: APIRoute) -> str:
     return f"{route.tags[0]}-{route.name}"
@@ -56,6 +58,9 @@ app.include_router(credits.router, prefix=settings.API_V1_STR)
 app.include_router(appraisals.router, prefix=settings.API_V1_STR)
 app.include_router(management.router, prefix=settings.API_V1_STR)
 app.include_router(advisory.router, prefix=settings.API_V1_STR)
+
+# Include legal router
+app.include_router(legal.router, prefix=settings.API_V1_STR, tags=["Legal Compliance"])
 
 @app.get("/")
 async def root():
