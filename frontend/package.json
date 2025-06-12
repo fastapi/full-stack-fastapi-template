@@ -11,7 +11,7 @@
     "generate-client": "openapi-ts"
   },
   "dependencies": {
-    "@chakra-ui/react": "^3.8.0",
+    "@chakra-ui/react": "^3.21.0",
     "@emotion/react": "^11.14.0",
     "@tanstack/react-query": "^5.28.14",
     "@tanstack/react-query-devtools": "^5.74.9",
