@@ -3,43 +3,13 @@
   "type_definitions": [
     {
       "type": "user",
-      "relations": {}
+      "relations": {},
+      "metadata": null
     },
     {
-      "type": "group",
+      "type": "item",
       "relations": {
-        "member": {
-          "this": {}
-        }
-      },
-      "metadata": {
-        "relations": {
-          "member": {
-            "directly_related_user_types": [
-              {
-                "type": "user"
-              }
-            ]
-          }
-        }
-      }
-    },
-    {
-      "type": "folder",
-      "relations": {
-        "can_create_file": {
-          "computedUserset": {
-            "object": "",
-            "relation": "owner"
-          }
-        },
-        "owner": {
-          "this": {}
-        },
-        "parent": {
-          "this": {}
-        },
-        "viewer": {
+        "editor": {
           "union": {
             "child": [
               {
@@ -47,154 +17,49 @@
               },
               {
                 "computedUserset": {
-                  "object": "",
                   "relation": "owner"
                 }
+              }
+            ]
+          }
+        },
+        "completed": {
+          "union": {
+            "child": [
+              {
+                "this": {}
               },
               {
-                "tupleToUserset": {
-                  "tupleset": {
-                    "object": "",
-                    "relation": "parent"
-                  },
-                  "computedUserset": {
-                    "object": "",
-                    "relation": "viewer"
-                  }
+                "computedUserset": {
+                  "relation": "owner"
                 }
               }
             ]
           }
-        }
-      },
-      "metadata": {
-        "relations": {
-          "can_create_file": {
-            "directly_related_user_types": []
-          },
-          "owner": {
-            "directly_related_user_types": [
-              {
-                "type": "user"
-              }
-            ]
-          },
-          "parent": {
-            "directly_related_user_types": [
-              {
-                "type": "folder"
-              }
-            ]
-          },
-          "viewer": {
-            "directly_related_user_types": [
-              {
-                "type": "user"
-              },
-              {
-                "type": "user",
-                "wildcard": {}
-              },
-              {
-                "type": "group",
-                "relation": "member"
-              }
-            ]
-          }
-        }
-      }
-    },
-    {
-      "type": "doc",
-      "relations": {
-        "can_change_owner": {
-          "computedUserset": {
-            "object": "",
-            "relation": "owner"
-          }
+        },
+        "inprogress": {
+          "this": {}
         },
         "owner": {
           "this": {}
         },
-        "parent": {
+        "recommened": {
           "this": {}
         },
-        "can_read": {
-          "union": {
-            "child": [
-              {
-                "computedUserset": {
-                  "object": "",
-                  "relation": "viewer"
-                }
-              },
-              {
-                "computedUserset": {
-                  "object": "",
-                  "relation": "owner"
-                }
-              },
-              {
-                "tupleToUserset": {
-                  "tupleset": {
-                    "object": "",
-                    "relation": "parent"
-                  },
-                  "computedUserset": {
-                    "object": "",
-                    "relation": "viewer"
-                  }
-                }
-              }
-            ]
-          }
-        },
-        "can_share": {
-          "union": {
-            "child": [
-              {
-                "computedUserset": {
-                  "object": "",
-                  "relation": "owner"
-                }
-              },
-              {
-                "tupleToUserset": {
-                  "tupleset": {
-                    "object": "",
-                    "relation": "parent"
-                  },
-                  "computedUserset": {
-                    "object": "",
-                    "relation": "owner"
-                  }
-                }
-              }
-            ]
-          }
-        },
-        "viewer": {
+        "alternative": {
           "this": {}
         },
-        "can_write": {
+        "can_recommend": {
           "union": {
             "child": [
               {
                 "computedUserset": {
-                  "object": "",
-                  "relation": "owner"
+                  "relation": "completed"
                 }
               },
               {
-                "tupleToUserset": {
-                  "tupleset": {
-                    "object": "",
-                    "relation": "parent"
-                  },
-                  "computedUserset": {
-                    "object": "",
-                    "relation": "owner"
-                  }
+                "computedUserset": {
+                  "relation": "owner"
                 }
               }
             ]
@@ -203,8 +68,26 @@
       },
       "metadata": {
         "relations": {
-          "can_change_owner": {
-            "directly_related_user_types": []
+          "editor": {
+            "directly_related_user_types": [
+              {
+                "type": "user"
+              }
+            ]
+          },
+          "completed": {
+            "directly_related_user_types": [
+              {
+                "type": "user"
+              }
+            ]
+          },
+          "inprogress": {
+            "directly_related_user_types": [
+              {
+                "type": "user"
+              }
+            ]
           },
           "owner": {
             "directly_related_user_types": [
@@ -213,35 +96,21 @@
               }
             ]
           },
-          "parent": {
-            "directly_related_user_types": [
-              {
-                "type": "folder"
-              }
-            ]
-          },
-          "can_read": {
-            "directly_related_user_types": []
-          },
-          "can_share": {
-            "directly_related_user_types": []
-          },
-          "viewer": {
+          "recommened": {
             "directly_related_user_types": [
               {
                 "type": "user"
-              },
-              {
-                "type": "user",
-                "wildcard": {}
-              },
-              {
-                "type": "group",
-                "relation": "member"
               }
             ]
           },
-          "can_write": {
+          "alternative": {
+            "directly_related_user_types": [
+              {
+                "type": "item"
+              }
+            ]
+          },
+          "can_recommend": {
             "directly_related_user_types": []
           }
         }

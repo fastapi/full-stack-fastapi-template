@@ -60,6 +60,11 @@ class UsersPublic(SQLModel):
 class ItemBase(SQLModel):
     title: str = Field(min_length=1, max_length=255)
     description: str | None = Field(default=None, max_length=255)
+    location: str | None = Field(default=None, max_length=255)
+    price: str | None = Field(default=None, max_length=255)
+    difficulty: str | None = Field(default=None, max_length=255)
+    type: str | None = Field(default=None, max_length=255)
+    category: str | None = Field(default=None, max_length=255)
 
 
 # Properties to receive on item creation
