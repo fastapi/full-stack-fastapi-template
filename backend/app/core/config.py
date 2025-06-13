@@ -57,6 +57,10 @@ class Settings(BaseSettings):
     POSTGRES_PASSWORD: str = ""
     POSTGRES_DB: str = ""
 
+    OPENFGA_API_URL: HttpUrl
+    OPENFGA_STORE_ID: str
+    OPENFGA_AUTHORIZATION_MODEL_ID: str
+
     @computed_field  # type: ignore[prop-decorator]
     @property
     def SQLALCHEMY_DATABASE_URI(self) -> PostgresDsn:
@@ -67,7 +71,7 @@ class Settings(BaseSettings):
             host=self.POSTGRES_SERVER,
             port=self.POSTGRES_PORT,
             path=self.POSTGRES_DB,
-        )
+        ) # type: ignore
 
     SMTP_TLS: bool = True
     SMTP_SSL: bool = False
