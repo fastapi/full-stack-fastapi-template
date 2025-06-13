@@ -26,7 +26,25 @@ def login_access_token(
     session: SessionDep, form_data: Annotated[OAuth2PasswordRequestForm, Depends()]
 ) -> Token:
     """
-    OAuth2 compatible token login, get an access token for future requests
+    OAuth2 compatible token login.
+    
+    This endpoint authenticates a user and returns an access token for future requests.
+    
+    Parameters:
+    - **username**: Required. The user's email address
+    - **password**: Required. The user's password
+    
+    Returns an access token that should be included in the Authorization header
+    of subsequent requests as a Bearer token.
+    
+    Example:
+    ```
+    Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
+    ```
+    
+    Raises:
+    - 400: If the email or password is incorrect
+    - 400: If the user account is inactive
     """
     user = crud.authenticate(
         session=session, email=form_data.username, password=form_data.password
@@ -46,7 +64,15 @@ def login_access_token(
 @router.post("/login/test-token", response_model=UserPublic)
 def test_token(current_user: CurrentUser) -> Any:
     """
-    Test access token
+    Test access token validity.
+    
+    This endpoint verifies that the provided access token is valid and returns
+    the user's profile information.
+    
+    Returns the user profile associated with the provided token.
+    
+    Note: This endpoint can be used to validate tokens or to retrieve the current
+    user's information.
     """
     return current_user
 
@@ -54,7 +80,18 @@ def test_token(current_user: CurrentUser) -> Any:
 @router.post("/password-recovery/{email}")
 def recover_password(email: str, session: SessionDep) -> Message:
     """
-    Password Recovery
+    Initiate password recovery process.
+    
+    This endpoint sends a password recovery email to the specified email address
+    if it belongs to a registered user.
+    
+    Parameters:
+    - **email**: Required. The email address of the user requesting password recovery
+    
+    Returns a message indicating that the recovery email has been sent.
+    
+    Note: For security reasons, the same success message is returned even if the
+    email doesn't exist in the system.
     """
     user = crud.get_user_by_email(session=session, email=email)
 
@@ -78,7 +115,20 @@ def recover_password(email: str, session: SessionDep) -> Message:
 @router.post("/reset-password/")
 def reset_password(session: SessionDep, body: NewPassword) -> Message:
     """
-    Reset password
+    Reset user password using a token.
+    
+    This endpoint allows users to set a new password using a token received via email.
+    
+    Parameters:
+    - **token**: Required. The password reset token received via email
+    - **new_password**: Required. The new password to set
+    
+    Returns a success message if the password was updated successfully.
+    
+    Raises:
+    - 400: If the token is invalid
+    - 404: If the user associated with the token doesn't exist
+    - 400: If the user account is inactive
     """
     email = verify_password_reset_token(token=body.token)
     if not email:
@@ -105,7 +155,17 @@ def reset_password(session: SessionDep, body: NewPassword) -> Message:
 )
 def recover_password_html_content(email: str, session: SessionDep) -> Any:
     """
-    HTML Content for Password Recovery
+    Get HTML content for password recovery email.
+    
+    This endpoint generates and returns the HTML content that would be sent in a
+    password recovery email. This is primarily for testing and debugging purposes.
+    
+    Parameters:
+    - **email**: Required. The email address of the user
+    
+    Returns the HTML content of the password recovery email.
+    
+    Note: This endpoint is restricted to superusers only.
     """
     user = crud.get_user_by_email(session=session, email=email)
 
