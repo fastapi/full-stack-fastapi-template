@@ -12,31 +12,35 @@ router = APIRouter(prefix="/items", tags=["items"])
 
 @router.get("/", response_model=ItemsPublic)
 def read_items(
-    session: SessionDep, current_user: CurrentUser, skip: int = 0, limit: int = 100
+    session: SessionDep,
+    current_user: CurrentUser,
+    skip: int = 0,
+    limit: int = 100,
+    title: str | None = None,
+    keyword: str | None = None,
+    owner_id: uuid.UUID | None = None,
 ) -> Any:
-    """
-    Retrieve items.
-    """
+    statement = select(Item)
 
-    if current_user.is_superuser:
-        count_statement = select(func.count()).select_from(Item)
-        count = session.exec(count_statement).one()
-        statement = select(Item).offset(skip).limit(limit)
-        items = session.exec(statement).all()
-    else:
-        count_statement = (
-            select(func.count())
-            .select_from(Item)
-            .where(Item.owner_id == current_user.id)
+    if not current_user.is_superuser:
+        statement = statement.where(Item.owner_id == current_user.id)
+
+    if current_user.is_superuser and owner_id:
+        statement = statement.where(Item.owner_id == owner_id)
+
+    if title:
+        statement = statement.where(Item.title.ilike(f"%{title}%"))
+
+    if keyword:
+        statement = statement.where(
+            Item.title.ilike(f"%{keyword}%") |
+            Item.description.ilike(f"%{keyword}%")
         )
-        count = session.exec(count_statement).one()
-        statement = (
-            select(Item)
-            .where(Item.owner_id == current_user.id)
-            .offset(skip)
-            .limit(limit)
-        )
-        items = session.exec(statement).all()
+
+    count_statement = select(func.count()).select_from(statement.subquery())
+    count = session.exec(count_statement).one()
+
+    items = session.exec(statement.offset(skip).limit(limit)).all()
 
     return ItemsPublic(data=items, count=count)
 
