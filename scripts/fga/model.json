@@ -1,3 +1,251 @@
 {
-  "type_definitions": []
-} 
+  "schema_version": "1.1",
+  "type_definitions": [
+    {
+      "type": "user",
+      "relations": {}
+    },
+    {
+      "type": "group",
+      "relations": {
+        "member": {
+          "this": {}
+        }
+      },
+      "metadata": {
+        "relations": {
+          "member": {
+            "directly_related_user_types": [
+              {
+                "type": "user"
+              }
+            ]
+          }
+        }
+      }
+    },
+    {
+      "type": "folder",
+      "relations": {
+        "can_create_file": {
+          "computedUserset": {
+            "object": "",
+            "relation": "owner"
+          }
+        },
+        "owner": {
+          "this": {}
+        },
+        "parent": {
+          "this": {}
+        },
+        "viewer": {
+          "union": {
+            "child": [
+              {
+                "this": {}
+              },
+              {
+                "computedUserset": {
+                  "object": "",
+                  "relation": "owner"
+                }
+              },
+              {
+                "tupleToUserset": {
+                  "tupleset": {
+                    "object": "",
+                    "relation": "parent"
+                  },
+                  "computedUserset": {
+                    "object": "",
+                    "relation": "viewer"
+                  }
+                }
+              }
+            ]
+          }
+        }
+      },
+      "metadata": {
+        "relations": {
+          "can_create_file": {
+            "directly_related_user_types": []
+          },
+          "owner": {
+            "directly_related_user_types": [
+              {
+                "type": "user"
+              }
+            ]
+          },
+          "parent": {
+            "directly_related_user_types": [
+              {
+                "type": "folder"
+              }
+            ]
+          },
+          "viewer": {
+            "directly_related_user_types": [
+              {
+                "type": "user"
+              },
+              {
+                "type": "user",
+                "wildcard": {}
+              },
+              {
+                "type": "group",
+                "relation": "member"
+              }
+            ]
+          }
+        }
+      }
+    },
+    {
+      "type": "doc",
+      "relations": {
+        "can_change_owner": {
+          "computedUserset": {
+            "object": "",
+            "relation": "owner"
+          }
+        },
+        "owner": {
+          "this": {}
+        },
+        "parent": {
+          "this": {}
+        },
+        "can_read": {
+          "union": {
+            "child": [
+              {
+                "computedUserset": {
+                  "object": "",
+                  "relation": "viewer"
+                }
+              },
+              {
+                "computedUserset": {
+                  "object": "",
+                  "relation": "owner"
+                }
+              },
+              {
+                "tupleToUserset": {
+                  "tupleset": {
+                    "object": "",
+                    "relation": "parent"
+                  },
+                  "computedUserset": {
+                    "object": "",
+                    "relation": "viewer"
+                  }
+                }
+              }
+            ]
+          }
+        },
+        "can_share": {
+          "union": {
+            "child": [
+              {
+                "computedUserset": {
+                  "object": "",
+                  "relation": "owner"
+                }
+              },
+              {
+                "tupleToUserset": {
+                  "tupleset": {
+                    "object": "",
+                    "relation": "parent"
+                  },
+                  "computedUserset": {
+                    "object": "",
+                    "relation": "owner"
+                  }
+                }
+              }
+            ]
+          }
+        },
+        "viewer": {
+          "this": {}
+        },
+        "can_write": {
+          "union": {
+            "child": [
+              {
+                "computedUserset": {
+                  "object": "",
+                  "relation": "owner"
+                }
+              },
+              {
+                "tupleToUserset": {
+                  "tupleset": {
+                    "object": "",
+                    "relation": "parent"
+                  },
+                  "computedUserset": {
+                    "object": "",
+                    "relation": "owner"
+                  }
+                }
+              }
+            ]
+          }
+        }
+      },
+      "metadata": {
+        "relations": {
+          "can_change_owner": {
+            "directly_related_user_types": []
+          },
+          "owner": {
+            "directly_related_user_types": [
+              {
+                "type": "user"
+              }
+            ]
+          },
+          "parent": {
+            "directly_related_user_types": [
+              {
+                "type": "folder"
+              }
+            ]
+          },
+          "can_read": {
+            "directly_related_user_types": []
+          },
+          "can_share": {
+            "directly_related_user_types": []
+          },
+          "viewer": {
+            "directly_related_user_types": [
+              {
+                "type": "user"
+              },
+              {
+                "type": "user",
+                "wildcard": {}
+              },
+              {
+                "type": "group",
+                "relation": "member"
+              }
+            ]
+          },
+          "can_write": {
+            "directly_related_user_types": []
+          }
+        }
+      }
+    }
+  ]
+}
