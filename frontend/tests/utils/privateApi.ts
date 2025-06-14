@@ -18,5 +18,6 @@ export const createUser = async ({
       is_verified: true,
       full_name: "Test User",
     },
+    credentials: "include",
   })
 }
