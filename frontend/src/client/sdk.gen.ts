@@ -120,6 +120,29 @@ export class ItemsService {
   }
 
   /**
+   * Can Update Item
+   * Check if a user has permission to update an item.
+   * @param data The data for the request.
+   * @param data.id
+   * @returns boolean Successful Response
+   * @throws ApiError
+   */
+  public static canUpdateItem(
+    data: ItemsReadItemData,
+  ): CancelablePromise<boolean> {
+    return __request(OpenAPI, {
+      method: "GET",
+      url: "/api/v1/items/{id}/can-update",
+      path: {
+        id: data.id,
+      },
+      errors: {
+        422: "Validation Error",
+      },
+    })
+  }
+
+  /**
    * Update Item
    * Update an item.
    * @param data The data for the request.

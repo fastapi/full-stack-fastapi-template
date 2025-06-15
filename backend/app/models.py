@@ -65,6 +65,13 @@ class ItemBase(SQLModel):
     difficulty: str | None = Field(default=None, max_length=255)
     type: str | None = Field(default=None, max_length=255)
     category: str | None = Field(default=None, max_length=255)
+    tags: list[str] | None = Field(default=None, max_length=255)
+    link: str | None = Field(default=None, max_length=255)
+    picture: str | None = Field(default=None, max_length=255)
+    in_featured: bool = Field(default=False)
+    rating: float | None = Field(default=None)
+    tries: int | None = Field(default=None)
+    favorites: int | None = Field(default=None)
 
 
 # Properties to receive on item creation

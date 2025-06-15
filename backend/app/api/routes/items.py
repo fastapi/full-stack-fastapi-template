@@ -6,6 +6,9 @@ from sqlmodel import func, select
 
 from app.api.deps import CurrentUser, SessionDep
 from app.models import Item, ItemCreate, ItemPublic, ItemsPublic, ItemUpdate, Message
+from app.openfga.fgaMiddleware import fga_client
+from app.core.config import settings
+from app.openfga.fgaMiddleware import check_user_has_permission
 
 router = APIRouter(prefix="/items", tags=["items"])
 
@@ -17,7 +20,6 @@ def read_items(
     """
     Retrieve items.
     """
-
     if current_user.is_superuser:
         count_statement = select(func.count()).select_from(Item)
         count = session.exec(count_statement).one()
@@ -27,18 +29,18 @@ def read_items(
         count_statement = (
             select(func.count())
             .select_from(Item)
-            .where(Item.owner_id == current_user.id)
+            # .where(Item.owner_id == current_user.id) # only returns items that the user owns
         )
         count = session.exec(count_statement).one()
         statement = (
             select(Item)
-            .where(Item.owner_id == current_user.id)
+            # .where(Item.owner_id == current_user.id)
             .offset(skip)
             .limit(limit)
         )
         items = session.exec(statement).all()
 
-    return ItemsPublic(data=items, count=count)
+    return ItemsPublic(data=items, count=count) # type: ignore
 
 
 @router.get("/{id}", response_model=ItemPublic)
@@ -69,13 +71,15 @@ def create_item(
 
 
 @router.put("/{id}", response_model=ItemPublic)
-def update_item(
+async def update_item(
     *,
     session: SessionDep,
     current_user: CurrentUser,
     id: uuid.UUID,
     item_in: ItemUpdate,
 ) -> Any:
+    if not await check_user_has_permission(f"user:{current_user.id}", "update", f"item:{id}"):
+        raise HTTPException(status_code=400, detail="Not enough permissions")
     """
     Update an item.
     """
@@ -91,6 +95,15 @@ def update_item(
     session.refresh(item)
     return item
 
+@router.get("/{id}/can-update", response_model=bool)
+async def can_update_item(
+    *,
+    session: SessionDep,
+    current_user: CurrentUser,
+    id: uuid.UUID,
+):
+    has_permission = await check_user_has_permission(f"user:{current_user.id}", "update", f"item:{id}")
+    return has_permission
 
 @router.delete("/{id}")
 def delete_item(
