@@ -6,8 +6,7 @@ from sqlmodel import func, select
 
 from app.api.deps import CurrentUser, SessionDep
 from app.models import Item, ItemCreate, ItemPublic, ItemsPublic, ItemUpdate, Message
-from app.openfga.fgaMiddleware import fga_client
-from app.core.config import settings
+from app.openfga.fgaMiddleware import create_fga_tuple
 from app.openfga.fgaMiddleware import check_user_has_permission
 
 router = APIRouter(prefix="/items", tags=["items"])
@@ -57,7 +56,7 @@ def read_item(session: SessionDep, current_user: CurrentUser, id: uuid.UUID) -> 
 
 
 @router.post("/", response_model=ItemPublic)
-def create_item(
+async def create_item(
     *, session: SessionDep, current_user: CurrentUser, item_in: ItemCreate
 ) -> Any:
     """
@@ -67,6 +66,7 @@ def create_item(
     session.add(item)
     session.commit()
     session.refresh(item)
+    await create_fga_tuple([(f"user:{current_user.id}", "owner", f"item:{item.id}")])
     return item
 
 
