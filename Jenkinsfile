@@ -28,9 +28,15 @@ pipeline {
 
         script {
           if (BRANCH == 'Dev') {
-            sh 'cp backend/.env.dev backend/.env'
+            withCredentials([file(credentialsId: 'env-dev', variable: 'ENV_FILE')]) {
+              sh 'cp $ENV_FILE backend/.env'
+              echo "Development environment file copied from credentials"
+            }
           } else if (BRANCH == 'Main') {
-            sh 'cp backend/.env.prod backend/.env'
+            withCredentials([file(credentialsId: 'env-prod', variable: 'ENV_FILE')]) {
+              sh 'cp $ENV_FILE backend/.env'
+              echo "Production environment file copied from credentials"
+            }
           }
         }
 
