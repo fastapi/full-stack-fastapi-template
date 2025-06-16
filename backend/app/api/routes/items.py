@@ -6,8 +6,9 @@ from sqlmodel import func, select
 
 from app.api.deps import CurrentUser, SessionDep
 from app.models import Item, ItemCreate, ItemPublic, ItemsPublic, ItemUpdate, Message
-from app.openfga.fgaMiddleware import create_fga_tuple
+from app.openfga.fgaMiddleware import create_fga_tuple, delete_fga_tuple
 from app.openfga.fgaMiddleware import check_user_has_permission
+from openfga_sdk.client.models.tuple import ClientTuple
 
 router = APIRouter(prefix="/items", tags=["items"])
 
@@ -66,7 +67,7 @@ async def create_item(
     session.add(item)
     session.commit()
     session.refresh(item)
-    await create_fga_tuple([(f"user:{current_user.id}", "owner", f"item:{item.id}")])
+    await create_fga_tuple([ClientTuple(user=f"user:{current_user.id}", relation="owner", object=f"item:{item.id}")])
     return item
 
 
@@ -78,7 +79,7 @@ async def update_item(
     id: uuid.UUID,
     item_in: ItemUpdate,
 ) -> Any:
-    if not await check_user_has_permission(f"user:{current_user.id}", "update", f"item:{id}"):
+    if not await check_user_has_permission(ClientTuple(user=f"user:{current_user.id}", relation="update", object=f"item:{id}")):
         raise HTTPException(status_code=400, detail="Not enough permissions")
     """
     Update an item.
@@ -102,11 +103,11 @@ async def can_update_item(
     current_user: CurrentUser,
     id: uuid.UUID,
 ):
-    has_permission = await check_user_has_permission(f"user:{current_user.id}", "update", f"item:{id}")
+    has_permission = await check_user_has_permission(ClientTuple(user=f"user:{current_user.id}", relation="update", object=f"item:{id}"))
     return has_permission
 
 @router.delete("/{id}")
-def delete_item(
+async def delete_item(
     session: SessionDep, current_user: CurrentUser, id: uuid.UUID
 ) -> Message:
     """
@@ -119,4 +120,5 @@ def delete_item(
         raise HTTPException(status_code=400, detail="Not enough permissions")
     session.delete(item)
     session.commit()
+    await delete_fga_tuple([ClientTuple(user=f"user:{current_user.id}", relation="owner", object=f"item:{id}")])
     return Message(message="Item deleted successfully")

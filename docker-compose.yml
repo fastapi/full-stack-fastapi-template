@@ -107,6 +107,9 @@ services:
       - POSTGRES_USER=${POSTGRES_USER?Variable not set}
       - POSTGRES_PASSWORD=${POSTGRES_PASSWORD?Variable not set}
       - SENTRY_DSN=${SENTRY_DSN}
+      - OPENFGA_API_URL=${OPENFGA_API_URL}
+      - OPENFGA_STORE_ID=${OPENFGA_STORE_ID}
+      - OPENFGA_AUTHORIZATION_MODEL_ID=${OPENFGA_AUTHORIZATION_MODEL_ID}
     ports:
       - 8000:8000
 
@@ -170,12 +173,12 @@ services:
     container_name: openfga
     restart: always
     tty: true
-    command: run --experimentals enable-list-users
+    command: run --experimentals enable-list-users --http-addr 0.0.0.0:8085 --grpc-addr 0.0.0.0:8089
     networks:
       - fga-network
     ports:
-      - "8080:8080"
-      - "8081:8081"
+      - "8085:8085"
+      - "8089:8089"
       - "3000:3000"
 
   openfga-init:
@@ -185,15 +188,18 @@ services:
     depends_on:
       - openfga
     volumes:
-      - notebooks-hub_openfga:/home:rw
+      - my-app_openfga:/home:rw
       - ./scripts:/Scripts:rw
     networks:
       - fga-network
+    environment:
+      - OPENFGA_API_URL=${OPENFGA_API_URL}
+      - OPENFGA_STORE_ID=${OPENFGA_STORE_ID}
+      - OPENFGA_AUTHORIZATION_MODEL_ID=${OPENFGA_AUTHORIZATION_MODEL_ID}
 
 volumes:
   app-db-data:
-  notebooks-hub_openfga:
-    external: true
+  my-app_openfga:
 
 networks:
   default:

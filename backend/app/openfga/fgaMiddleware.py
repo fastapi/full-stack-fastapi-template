@@ -1,6 +1,8 @@
 from app.core.config import settings
 from fastapi import logger
-from openfga_sdk.client import ClientConfiguration, OpenFgaClient, ClientCheckRequest, ClientBatchCheckRequest, ClientWriteRequest # type: ignore
+from openfga_sdk.client import ClientConfiguration, OpenFgaClient, ClientCheckRequest
+from openfga_sdk.client.models import ClientBatchCheckRequest, ClientWriteRequest, ClientBatchCheckItem
+from openfga_sdk.client.models.tuple import ClientTuple
 
 configuration = ClientConfiguration(
     api_url=settings.OPENFGA_API_URL,
@@ -10,14 +12,23 @@ configuration = ClientConfiguration(
 
 fga_client = OpenFgaClient(configuration)
 
+async def initialize_fga_client() -> bool:
+    try:
+        await fga_client.read_authorization_models()
+        logger.info("FGA client initialized") # type: ignore
+        return True
+    except Exception as e:
+        logger.error(f"Error checking FGA connection: {e}") # type: ignore
+        return False
+
 # Check if a user has a permission on an object
-async def check_user_has_permission(user: str, relation: str, object: str) -> bool:
+async def check_user_has_permission(tuple: ClientTuple) -> bool:
     try:
         response = await fga_client.check(
-            ClientCheckRequest(
-                user=user,
-                relation=relation,
-                object=object
+            ClientCheckRequest( 
+                user=tuple.user,
+                relation=tuple.relation,
+                object=tuple.object
             )
         )
         return response.allowed # type: ignore
@@ -26,13 +37,24 @@ async def check_user_has_permission(user: str, relation: str, object: str) -> bo
         return False
     
 # Check if a user has a permission on multiple objects
-async def check_user_has_permission_batch(user: str, relation: str, object: str) -> bool:
+# Example list of ClientBatchCheckItem is:
+# [
+#     {
+#         "user": "user:123",
+#         "relation": "can_view",
+#         "object": "document:123"
+#     },
+#     {
+#         "user": "user:123",
+#         "relation": "can_view",
+#         "object": "document:123"
+#     }
+# ]
+async def check_user_has_permission_batch(tuples: list[ClientBatchCheckItem]) -> bool:
     try:
         response = await fga_client.batch_check(
             ClientBatchCheckRequest(
-                user=user,
-                relation=relation,
-                object=object
+                checks=tuples
             )
         )
         return response.allowed # type: ignore
@@ -41,7 +63,7 @@ async def check_user_has_permission_batch(user: str, relation: str, object: str)
         return False
     
 # Create a tuple
-# Here is what a 'tuple' looks like:
+# Example list of ClientTuple is:
 # [
 #     {
 #         "user": "user:123",
@@ -49,7 +71,7 @@ async def check_user_has_permission_batch(user: str, relation: str, object: str)
 #         "object": "document:123"
 #     }
 # ]
-async def create_fga_tuple(tuples: list[tuple[str, str, str]]) -> bool:
+async def create_fga_tuple(tuples: list[ClientTuple]) -> bool:
     try:
         response = await fga_client.write(
             ClientWriteRequest(
@@ -59,4 +81,18 @@ async def create_fga_tuple(tuples: list[tuple[str, str, str]]) -> bool:
         return response.allowed # type: ignore
     except Exception as e:
         logger.error(f"Error creating FGA tuple: {e}") # type: ignore
+        return False
+    
+# Delete a tuple
+async def delete_fga_tuple(tuples: list[ClientTuple]) -> bool:
+    # This is the opposite of the create_fga_tuple function
+    try:
+        response = await fga_client.write(
+            ClientWriteRequest(
+                deletes=tuples
+            )
+        )
+        return response.allowed # type: ignore
+    except Exception as e:
+        logger.error(f"Error deleting FGA tuple: {e}") # type: ignore
         return False
