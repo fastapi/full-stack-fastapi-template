@@ -81,6 +81,7 @@ services:
     networks:
       - traefik-public
       - default
+      - fga-network
     depends_on:
       db:
         condition: service_healthy
@@ -167,35 +168,6 @@ services:
 
     #   # Enable redirection for HTTP and HTTPS
     #   - traefik.http.routers.${STACK_NAME?Variable not set}-frontend-http.middlewares=https-redirect
-
-  openfga:
-    image: openfga/openfga:v1.8.0
-    container_name: openfga
-    restart: always
-    tty: true
-    command: run --experimentals enable-list-users --http-addr 0.0.0.0:8085 --grpc-addr 0.0.0.0:8089
-    networks:
-      - fga-network
-    ports:
-      - "8085:8085"
-      - "8089:8089"
-      - "3000:3000"
-
-  openfga-init:
-    build:
-      context: ./scripts
-      dockerfile: Dockerfile.openfga-init
-    depends_on:
-      - openfga
-    volumes:
-      - my-app_openfga:/home:rw
-      - ./scripts:/Scripts:rw
-    networks:
-      - fga-network
-    environment:
-      - OPENFGA_API_URL=${OPENFGA_API_URL}
-      - OPENFGA_STORE_ID=${OPENFGA_STORE_ID}
-      - OPENFGA_AUTHORIZATION_MODEL_ID=${OPENFGA_AUTHORIZATION_MODEL_ID}
 
 volumes:
   app-db-data:

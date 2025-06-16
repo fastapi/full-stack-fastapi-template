@@ -57,9 +57,9 @@ class Settings(BaseSettings):
     POSTGRES_PASSWORD: str = ""
     POSTGRES_DB: str = ""
 
-    OPENFGA_API_URL: HttpUrl
-    OPENFGA_STORE_ID: str
-    OPENFGA_AUTHORIZATION_MODEL_ID: str
+    OPENFGA_API_URL: str = ""
+    OPENFGA_STORE_ID: str = ""
+    OPENFGA_AUTHORIZATION_MODEL_ID: str = ""
 
     @computed_field  # type: ignore[prop-decorator]
     @property
