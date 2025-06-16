@@ -11,6 +11,8 @@ pipeline {
     DOCKER_HUB_CREDS = credentials('dockerhub-credentials')
     DOCKER_HUB_USERNAME = "${DOCKER_HUB_CREDS_USR}"
     DOCKER_IMAGE_PREFIX = "${DOCKER_HUB_USERNAME}"
+    // Adding GitHub credentials
+    GITHUB_TOKEN = credentials('github-token')
   }
 
   stages {
