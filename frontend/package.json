@@ -26,17 +26,17 @@
     "react-icons": "^5.4.0"
   },
   "devDependencies": {
-    "@biomejs/biome": "1.6.1",
+    "@biomejs/biome": "1.9.4",
     "@hey-api/openapi-ts": "^0.57.0",
-    "@playwright/test": "^1.45.2",
+    "@playwright/test": "^1.52.0",
     "@tanstack/router-devtools": "1.19.1",
     "@tanstack/router-vite-plugin": "1.19.0",
-    "@types/node": "^20.10.5",
+    "@types/node": "^22.15.3",
     "@types/react": "^18.2.37",
     "@types/react-dom": "^18.2.15",
-    "@vitejs/plugin-react-swc": "^3.5.0",
+    "@vitejs/plugin-react-swc": "^3.9.0",
     "dotenv": "^16.4.5",
     "typescript": "^5.2.2",
-    "vite": "^5.4.14"
+    "vite": "^6.3.4"
   }
 }
