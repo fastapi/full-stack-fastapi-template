@@ -1,10 +1,12 @@
+import { randomBytes } from "crypto";
+
 export const randomEmail = () =>
-  `test_${Math.random().toString(36).substring(7)}@example.com`
+  `test_${randomBytes(6).toString("base64url")}@example.com`
 
 export const randomTeamName = () =>
-  `Team ${Math.random().toString(36).substring(7)}`
+  `Team ${randomBytes(6).toString("base64url")}`
 
-export const randomPassword = () => `${Math.random().toString(36).substring(2)}`
+export const randomPassword = () => randomBytes(12).toString("base64url")
 
 export const slugify = (text: string) =>
   text
