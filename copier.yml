@@ -23,7 +23,7 @@ first_superuser:
 
 first_superuser_password:
   type: str
-  help: The password of the first superuser (in .env)
+  help: The password of the first superuser (in .env), must be 40 characters or less
   default: changethis
 
 smtp_host:
