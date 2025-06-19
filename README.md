@@ -140,6 +140,8 @@ You can (and should) pass these as environment variables from secrets.
 
 Read the [deployment.md](./deployment.md) docs for more details.
 
+Also note that the `.env` file is not included in `.gitignore` by default. See [development.md](./development.md#the-env-file) for more details.
+
 ### Generate Secret Keys
 
 Some environment variables in the `.env` file have a default value of `changethis`.
