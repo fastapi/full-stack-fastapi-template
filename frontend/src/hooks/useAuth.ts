@@ -46,7 +46,8 @@ const useAuth = () => {
       formData: {
         username: data.username,
         password: data.password,
-      })
+      },
+    })
     localStorage.setItem("access_token", response.access_token)
   }
 
