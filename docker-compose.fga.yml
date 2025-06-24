@@ -1,6 +1,6 @@
 services:
   openfga:
-    image: openfga/openfga:v1.8.0
+    image: openfga/openfga:latest
     container_name: openfga
     restart: always
     tty: true

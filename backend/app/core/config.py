@@ -117,6 +117,9 @@ class Settings(BaseSettings):
         self._check_default_secret(
             "FIRST_SUPERUSER_PASSWORD", self.FIRST_SUPERUSER_PASSWORD
         )
+        self._check_default_secret("OPENFGA_API_URL", self.OPENFGA_API_URL)
+        self._check_default_secret("OPENFGA_STORE_ID", self.OPENFGA_STORE_ID)
+        self._check_default_secret("OPENFGA_AUTHORIZATION_MODEL_ID", self.OPENFGA_AUTHORIZATION_MODEL_ID)
 
         return self
 
