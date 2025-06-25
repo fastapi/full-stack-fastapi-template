@@ -76,6 +76,7 @@ class ItemBase(SQLModel):
     rating: float | None = Field(default=None)
     tries: int | None = Field(default=None)
     favorites: int | None = Field(default=None)
+    duration: datetime.timedelta | None = Field(default=None)
 
 
 # Properties to receive on item creation
