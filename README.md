@@ -24,7 +24,7 @@
 - 🚢 Deployment instructions using Docker Compose, including how to set up a frontend Traefik proxy to handle automatic HTTPS certificates.
 - 🏭 CI (continuous integration) and CD (continuous deployment) based on GitHub Actions.
 
-### Dashboard Login
+### Dashboard - Login
 
 [![API docs](img/login.png)](https://github.com/fastapi/full-stack-fastapi-template)
 
