@@ -12,33 +12,56 @@ router = APIRouter(prefix="/items", tags=["items"])
 
 @router.get("/", response_model=ItemsPublic)
 def read_items(
-    session: SessionDep, current_user: CurrentUser, skip: int = 0, limit: int = 100
+    session: SessionDep, 
+    current_user: CurrentUser, 
+    skip: int = 0, 
+    limit: int = 100,
+    category: str | None = None
 ) -> Any:
     """
     Retrieve items.
     """
-
+    
+    # Base query
     if current_user.is_superuser:
-        count_statement = select(func.count()).select_from(Item)
-        count = session.exec(count_statement).one()
-        statement = select(Item).offset(skip).limit(limit)
-        items = session.exec(statement).all()
+        query = select(Item)
+        count_query = select(func.count()).select_from(Item)
     else:
-        count_statement = (
-            select(func.count())
-            .select_from(Item)
-            .where(Item.owner_id == current_user.id)
-        )
-        count = session.exec(count_statement).one()
-        statement = (
-            select(Item)
-            .where(Item.owner_id == current_user.id)
-            .offset(skip)
-            .limit(limit)
-        )
-        items = session.exec(statement).all()
+        query = select(Item).where(Item.owner_id == current_user.id)
+        count_query = select(func.count()).select_from(Item).where(Item.owner_id == current_user.id)
+    
+    # Apply category filter if provided
+    if category:
+        query = query.where(Item.category == category)
+        count_query = count_query.where(Item.category == category)
+    
+    # Apply pagination
+    query = query.offset(skip).limit(limit)
+    
+    # Execute queries
+    count = session.exec(count_query).one()
+    items = session.exec(query).all()
 
     return ItemsPublic(data=items, count=count)
+
+
+@router.get("/categories", response_model=list[str])
+def get_item_categories(
+    session: SessionDep, current_user: CurrentUser
+) -> Any:
+    """
+    Get all unique item categories.
+    """
+    if current_user.is_superuser:
+        statement = select(Item.category).distinct()
+    else:
+        statement = select(Item.category).where(
+            Item.owner_id == current_user.id
+        ).distinct()
+    
+    categories = session.exec(statement).all()
+    # Filter out None values and return unique non-empty categories
+    return [cat for cat in categories if cat]
 
 
 @router.get("/{id}", response_model=ItemPublic)
