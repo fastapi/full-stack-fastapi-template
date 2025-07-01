@@ -1,10 +1,10 @@
-import { Container, Heading, Text } from "@chakra-ui/react"
+import {  Heading, Text } from "@chakra-ui/react"
 
 import DeleteConfirmation from "./DeleteConfirmation"
 
 const DeleteAccount = () => {
   return (
-    <Container maxW="full">
+    <Box maxW="7xl" mx="auto" px={6}>
       <Heading size="sm" py={4}>
         Delete Account
       </Heading>
@@ -13,7 +13,7 @@ const DeleteAccount = () => {
         account.
       </Text>
       <DeleteConfirmation />
-    </Container>
+    </Box>
   )
 }
 export default DeleteAccount

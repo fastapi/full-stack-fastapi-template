@@ -1,5 +1,5 @@
 import { ReactNode } from 'react'
-import { Box, Container, Flex, Heading, Text } from '@chakra-ui/react'
+import { Box,  Flex, Heading, Text } from '@chakra-ui/react'
 import { useAuth } from '@/hooks/useAuth'
 
 interface RoleDashboardProps {
@@ -16,7 +16,7 @@ export const RoleDashboard = ({
   const { user, role } = useAuth()
 
   return (
-    <Container maxW="container.xl" py={8}>
+    <Box maxW="7xl" mx="auto" px={6}>
       <Flex direction="column" gap={6}>
         <Box>
           <Heading size="lg" color="primary.black">
@@ -43,6 +43,6 @@ export const RoleDashboard = ({
           {children}
         </Box>
       </Flex>
-    </Container>
+    </Box>
   )
 } 

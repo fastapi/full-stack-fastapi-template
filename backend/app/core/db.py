@@ -1,19 +1,34 @@
 from sqlmodel import SQLModel, create_engine, Session
 from app.core.config import settings
 
-# Crear el engine de SQLAlchemy
+# Configurar argumentos de conexión para PostgreSQL local (sin SSL)
+connect_args = {}
+if settings.ENVIRONMENT == "local":
+    connect_args = {
+        "sslmode": "disable",
+        "application_name": "genius_industries_backend"
+    }
+
+# 🚀 Railway PostgreSQL Engine con configuración optimizada
 engine = create_engine(
-    settings.SQLALCHEMY_DATABASE_URI,
-    pool_pre_ping=True,
-    echo=True
+    str(settings.SQLALCHEMY_DATABASE_URI),
+    connect_args=connect_args,
+    echo=settings.LOG_LEVEL == "DEBUG",  # Mostrar SQL queries en debug
+    pool_pre_ping=True,  # Verificar conexiones antes de usarlas
+    pool_recycle=settings.POSTGRES_POOL_RECYCLE,
+    pool_size=settings.POSTGRES_POOL_SIZE,
+    max_overflow=settings.POSTGRES_MAX_OVERFLOW,
+    pool_timeout=settings.POSTGRES_POOL_TIMEOUT
 )
 
-# Crear todas las tablas
+# Crear todas las tablas (usar solo para desarrollo)
 def create_db_and_tables():
+    """Crear base de datos y tablas"""
     SQLModel.metadata.create_all(engine)
 
 # Obtener una sesión de base de datos
 def get_session():
+    """Obtener sesión de base de datos"""
     with Session(engine) as session:
         yield session
 
@@ -23,22 +38,9 @@ def get_session():
 
 
 def init_db(session: Session) -> None:
+    """Initialize database - Simplified version"""
     # Tables should be created with Alembic migrations
-    # But if you don't want to use migrations, create
-    # the tables un-commenting the next lines
-    # from sqlmodel import SQLModel
-
-    # This works because the models are already imported and registered from app.models
-    # SQLModel.metadata.create_all(engine)
-
-    user = session.exec(
-        select(User).where(User.email == settings.FIRST_SUPERUSER)
-    ).first()
-    if not user:
-        user_in = UserCreate(
-            email=settings.FIRST_SUPERUSER,
-            password=settings.FIRST_SUPERUSER_PASSWORD,
-            is_superuser=True,
-        )
-        user = crud.create_user(session=session, user_create=user_in)
+    # Use: alembic upgrade head
+    print("✅ Database initialization - Use alembic upgrade head for migrations")
+    pass
 

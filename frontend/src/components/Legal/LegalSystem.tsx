@@ -1,26 +1,19 @@
 import React, { useState } from 'react';
 import {
   Box,
-  Container,
-  Tabs,
-  TabList,
-  TabPanels,
-  Tab,
-  TabPanel,
-  Icon,
+  Button,
   Flex,
+  Icon,
   VStack,
   Heading,
-  Text,
-  Divider,
-  useColorModeValue
+  Text
 } from '@chakra-ui/react';
 import {
   FiHome,
   FiFileText,
   FiEdit3,
   FiList,
-  FiBarChart3,
+  FiBarChart2,
   FiSettings
 } from 'react-icons/fi';
 
@@ -29,51 +22,70 @@ import DocumentGenerator from './DocumentGenerator';
 import TemplateManager from './TemplateManager';
 import DocumentsList from './DocumentsList';
 
+const LegalReports: React.FC = () => {
+  return (
+    <Box maxW="7xl" mx="auto" px={6}>
+      <Box textAlign="center">
+        <Icon as={FiBarChart2} w={16} h={16} color="gray.400" mb={4} />
+        <Heading size="lg" color="black" mb={2}>
+          Reportes y Estadísticas
+        </Heading>
+        <Text color="gray.600">
+          Módulo de reportes en desarrollo
+        </Text>
+        <Text fontSize="sm" color="gray.500" mt={2}>
+          Aquí se mostrarán análisis detallados de documentos generados, 
+          tendencias de uso de templates y métricas de cumplimiento legal.
+        </Text>
+      </Box>
+    </Box>
+  );
+};
+
+const tabs = [
+  {
+    label: 'Dashboard',
+    icon: FiHome,
+    component: <LegalDashboard />,
+    description: 'Vista general del sistema legal'
+  },
+  {
+    label: 'Generar Documento',
+    icon: FiFileText,
+    component: <DocumentGenerator />,
+    description: 'Crear nuevos documentos legales'
+  },
+  {
+    label: 'Gestionar Templates',
+    icon: FiEdit3,
+    component: <TemplateManager />,
+    description: 'Administrar plantillas de documentos'
+  },
+  {
+    label: 'Lista de Documentos',
+    icon: FiList,
+    component: <DocumentsList />,
+    description: 'Ver todos los documentos generados'
+  },
+  {
+    label: 'Reportes',
+    icon: FiBarChart2,
+    component: <LegalReports />,
+    description: 'Análisis y estadísticas legales'
+  }
+];
+
 const LegalSystem: React.FC = () => {
   const [activeTab, setActiveTab] = useState(0);
 
   // Theme colors
-  const tabBg = useColorModeValue('white', 'gray.800');
-  const activeBg = useColorModeValue('black', 'white');
-  const activeColor = useColorModeValue('white', 'black');
-  const inactiveColor = useColorModeValue('gray.600', 'gray.400');
-
-  const tabs = [
-    {
-      label: 'Dashboard',
-      icon: FiHome,
-      component: <LegalDashboard />,
-      description: 'Vista general del sistema legal'
-    },
-    {
-      label: 'Generar Documento',
-      icon: FiFileText,
-      component: <DocumentGenerator />,
-      description: 'Crear nuevos documentos legales'
-    },
-    {
-      label: 'Gestionar Templates',
-      icon: FiEdit3,
-      component: <TemplateManager />,
-      description: 'Administrar plantillas de documentos'
-    },
-    {
-      label: 'Lista de Documentos',
-      icon: FiList,
-      component: <DocumentsList />,
-      description: 'Ver todos los documentos generados'
-    },
-    {
-      label: 'Reportes',
-      icon: FiBarChart3,
-      component: <LegalReports />,
-      description: 'Análisis y estadísticas legales'
-    }
-  ];
+  const activeBg = "black";
+  const activeColor = "white";
+  const inactiveColor = "gray.600";
 
   return (
     <Box minH="100vh" bg="gray.50">
-      <Container maxW="8xl" py={4}>
+      <Box maxW="7xl" mx="auto" px={6}>
         {/* Header */}
         <Box mb={6}>
           <Flex align="center" mb={4}>
@@ -101,92 +113,43 @@ const LegalSystem: React.FC = () => {
               </Text>
             </VStack>
           </Flex>
-          <Divider borderColor="black" borderWidth="2px" />
+          <Box height="2px" bg="black" width="100%" />
         </Box>
 
-        {/* Navigation Tabs */}
-        <Tabs 
-          index={activeTab} 
-          onChange={setActiveTab}
-          variant="enclosed"
-          colorScheme="black"
-        >
-          <TabList 
-            bg={tabBg}
-            borderRadius="lg"
-            p={2}
-            mb={6}
-            overflowX="auto"
-            css={{
-              '&::-webkit-scrollbar': {
-                height: '4px',
-              },
-              '&::-webkit-scrollbar-track': {
-                background: 'transparent',
-              },
-              '&::-webkit-scrollbar-thumb': {
-                background: '#E2E8F0',
-                borderRadius: '2px',
-              },
-            }}
-          >
-            {tabs.map((tab, index) => (
-              <Tab
-                key={index}
-                _selected={{
-                  bg: activeBg,
-                  color: activeColor,
-                  borderColor: 'black',
-                  transform: 'translateY(-2px)',
-                  transition: 'all 0.2s'
-                }}
-                _hover={{
-                  bg: activeTab === index ? activeBg : 'gray.100',
-                  transform: 'translateY(-1px)',
-                  transition: 'all 0.2s'
-                }}
-                color={activeTab === index ? activeColor : inactiveColor}
-                fontWeight="semibold"
-                px={6}
-                py={3}
-                mr={2}
-                borderRadius="md"
-                border="1px solid"
-                borderColor={activeTab === index ? 'black' : 'gray.200'}
-                whiteSpace="nowrap"
-              >
-                <Flex align="center">
-                  <Icon 
-                    as={tab.icon} 
-                    w={5} 
-                    h={5} 
-                    mr={2}
-                    color={activeTab === index ? activeColor : inactiveColor}
-                  />
-                  {tab.label}
-                </Flex>
-              </Tab>
-            ))}
-          </TabList>
+        {/* Manual Tabs */}
+        <Flex mb={6} wrap="wrap" gap={2}>
+          {tabs.map((tab, index) => (
+            <Button
+              key={index}
+              leftIcon={<Icon as={tab.icon} />}
+              onClick={() => setActiveTab(index)}
+              bg={activeTab === index ? activeBg : "white"}
+              color={activeTab === index ? activeColor : inactiveColor}
+              border={"1px solid"}
+              borderColor={activeTab === index ? "black" : "gray.200"}
+              fontWeight="semibold"
+              px={6}
+              py={3}
+              borderRadius="md"
+              _hover={{ bg: activeTab === index ? activeBg : "gray.100" }}
+              transition="all 0.2s"
+            >
+              {tab.label}
+            </Button>
+          ))}
+        </Flex>
 
-          {/* Tab Panels */}
-          <TabPanels>
-            {tabs.map((tab, index) => (
-              <TabPanel key={index} p={0}>
-                <Box
-                  bg="white"
-                  borderRadius="lg"
-                  shadow="sm"
-                  border="1px solid"
-                  borderColor="gray.200"
-                  minH="600px"
-                >
-                  {tab.component}
-                </Box>
-              </TabPanel>
-            ))}
-          </TabPanels>
-        </Tabs>
+        {/* Tab Content */}
+        <Box
+          bg="white"
+          borderRadius="lg"
+          shadow="sm"
+          border="1px solid"
+          borderColor="gray.200"
+          minH="600px"
+        >
+          {tabs[activeTab].component}
+        </Box>
 
         {/* Footer */}
         <Box 
@@ -224,29 +187,8 @@ const LegalSystem: React.FC = () => {
             © 2024 GENIUS INDUSTRIES. Todos los derechos reservados.
           </Text>
         </Box>
-      </Container>
-    </Box>
-  );
-};
-
-// Placeholder component for Reports
-const LegalReports: React.FC = () => {
-  return (
-    <Container maxW="7xl" py={8}>
-      <Box textAlign="center">
-        <Icon as={FiBarChart3} w={16} h={16} color="gray.400" mb={4} />
-        <Heading size="lg" color="black" mb={2}>
-          Reportes y Estadísticas
-        </Heading>
-        <Text color="gray.600">
-          Módulo de reportes en desarrollo
-        </Text>
-        <Text fontSize="sm" color="gray.500" mt={2}>
-          Aquí se mostrarán análisis detallados de documentos generados, 
-          tendencias de uso de templates y métricas de cumplimiento legal.
-        </Text>
       </Box>
-    </Container>
+    </Box>
   );
 };
 

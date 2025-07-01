@@ -12,7 +12,7 @@ import {
   Select,
   Switch,
   HStack,
-  Divider,
+  
 } from '@chakra-ui/react';
 import { useForm } from 'react-hook-form';
 import { useQuery, useMutation } from '@tanstack/react-query';
@@ -189,7 +189,7 @@ export const ProfileSection: React.FC = () => {
               </FormControl>
             </HStack>
 
-            <Divider my={4} />
+            <Box height="1px" bg="gray.200" width="100%" />
 
             <Heading size="md">Preferencias de Notificación</Heading>
             

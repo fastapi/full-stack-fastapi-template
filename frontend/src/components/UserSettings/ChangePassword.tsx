@@ -1,4 +1,4 @@
-import { Box, Button, Container, Heading, VStack } from "@chakra-ui/react"
+import { Box, Button,  Heading, VStack } from "@chakra-ui/react"
 import { useMutation } from "@tanstack/react-query"
 import { type SubmitHandler, useForm } from "react-hook-form"
 import { FiLock } from "react-icons/fi"
@@ -43,7 +43,7 @@ const ChangePassword = () => {
 
   return (
     <>
-      <Container maxW="full">
+      <Box maxW="7xl" mx="auto" px={6}>
         <Heading size="sm" py={4}>
           Change Password
         </Heading>
@@ -81,7 +81,7 @@ const ChangePassword = () => {
             Save
           </Button>
         </Box>
-      </Container>
+      </Box>
     </>
   )
 }

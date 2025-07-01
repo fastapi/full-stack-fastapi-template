@@ -1,89 +1,74 @@
-from typing import List, Optional
-from fastapi import HTTPException, Depends
+from typing import Optional, List
+from fastapi import HTTPException, status, Depends
 from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
-from ..config import settings
-from ...models import User
-from ...services.nhost import nhost_client
+from enum import Enum
+
 
 security = HTTPBearer()
 
-class RoleMiddleware:
-    def __init__(self, allowed_roles: List[str]):
-        self.allowed_roles = allowed_roles
 
-    async def __call__(
-        self,
-        credentials: HTTPAuthorizationCredentials = Depends(security),
-        current_user: User = Depends(get_current_user)
-    ) -> User:
-        if not current_user:
-            raise HTTPException(
-                status_code=401,
-                detail="Not authenticated"
-            )
-        
-        if current_user.role not in self.allowed_roles:
-            raise HTTPException(
-                status_code=403,
-                detail=f"Role {current_user.role} not authorized for this endpoint"
-            )
-        
-        return current_user
+class UserRole(str, Enum):
+    """Enumeración de roles de usuario"""
+    CEO = "ceo"
+    MANAGER = "manager"
+    SUPERVISOR = "supervisor"
+    HR = "hr"
+    SUPPORT = "support"
+    AGENT = "agent"
+    CLIENT = "client"
+    USER = "user"
 
-# Roles específicos
+
+async def verify_clerk_token(credentials: HTTPAuthorizationCredentials = Depends(security)) -> dict:
+    """Verificar token de Clerk"""
+    if not credentials:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Token no proporcionado"
+        )
+    
+    # TODO: Implementar verificación real con Clerk
+    # Por ahora retornamos un usuario mock
+    return {
+        "id": "user_123",
+        "email": "user@example.com",
+        "role": "agent",
+        "metadata": {}
+    }
+
+
+def require_role(required_roles: List[str]):
+    """Decorador para requerir roles específicos"""
+    async def role_checker(user: dict = Depends(verify_clerk_token)) -> dict:
+        if user.get("role") not in required_roles:
+            raise HTTPException(
+                status_code=status.HTTP_403_FORBIDDEN,
+                detail="No tienes permisos suficientes"
+            )
+        return user
+    return role_checker
+
+
+def role_required(required_roles: List[str]):
+    """Alias para require_role para compatibilidad"""
+    return require_role(required_roles)
+
+
+# Funciones específicas para cada rol
 def ceo_role():
-    return RoleMiddleware(["CEO"])
+    return require_role(["ceo"])
 
 def manager_role():
-    return RoleMiddleware(["CEO", "Gerente"])
+    return require_role(["ceo", "manager"])
 
 def supervisor_role():
-    return RoleMiddleware(["CEO", "Gerente", "Supervisor"])
+    return require_role(["ceo", "manager", "supervisor"])
 
 def hr_role():
-    return RoleMiddleware(["CEO", "RRHH"])
+    return require_role(["ceo", "hr"])
 
 def support_role():
-    return RoleMiddleware(["CEO", "Atención al Cliente"])
+    return require_role(["ceo", "support"])
 
 def agent_role():
-    return RoleMiddleware(["CEO", "Gerente", "Supervisor", "Agente"])
-
-async def get_current_user(
-    credentials: HTTPAuthorizationCredentials = Depends(security)
-) -> Optional[User]:
-    try:
-        # Validar token con Nhost
-        session = await nhost_client.auth.getSession()
-        if not session:
-            return None
-
-        # Obtener usuario de la base de datos
-        user = await nhost_client.graphql.query(
-            """
-            query GetUser($id: uuid!) {
-                user(id: $id) {
-                    id
-                    email
-                    role
-                    metadata
-                }
-            }
-            """,
-            {"id": session.user.id}
-        )
-
-        if not user or not user.get("data", {}).get("user"):
-            return None
-
-        user_data = user["data"]["user"]
-        return User(
-            id=user_data["id"],
-            email=user_data["email"],
-            role=user_data["role"],
-            metadata=user_data.get("metadata", {})
-        )
-
-    except Exception as e:
-        print(f"Error getting current user: {e}")
-        return None 
+    return require_role(["ceo", "manager", "supervisor", "agent"])

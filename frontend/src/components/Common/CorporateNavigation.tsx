@@ -1,7 +1,7 @@
 import React from 'react';
 import {
   Box,
-  Container,
+  
   Flex,
   HStack,
   Button,
@@ -14,14 +14,13 @@ import {
   FiHome,
   FiUsers,
   FiMail,
-  FiBuilding,
   FiShield
 } from 'react-icons/fi';
 
 const CorporateNavigation: React.FC = () => {
   const location = useLocation();
-  const bg = useColorModeValue('white', 'gray.800');
-  const borderColor = useColorModeValue('gray.200', 'gray.600');
+  const bg = "white";
+  const borderColor = "gray.200";
 
   const navItems = [
     {
@@ -37,7 +36,7 @@ const CorporateNavigation: React.FC = () => {
     {
       label: 'Proyectos',
       path: '/projects',
-      icon: FiBuilding
+      icon: FiHome
     },
     {
       label: 'Contacto',
@@ -61,7 +60,7 @@ const CorporateNavigation: React.FC = () => {
       borderColor={borderColor}
       shadow="sm"
     >
-      <Container maxW="7xl">
+      <Box maxW="7xl" mx="auto" px={6}>
         <Flex align="center" justify="space-between" py={4}>
           {/* Logo */}
           <Flex align="center">
@@ -108,7 +107,7 @@ const CorporateNavigation: React.FC = () => {
             ))}
           </HStack>
         </Flex>
-      </Container>
+      </Box>
     </Box>
   );
 };

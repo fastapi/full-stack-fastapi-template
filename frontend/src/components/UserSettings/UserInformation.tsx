@@ -1,7 +1,7 @@
 import {
   Box,
   Button,
-  Container,
+  
   Flex,
   Heading,
   Input,
@@ -71,7 +71,7 @@ const UserInformation = () => {
 
   return (
     <>
-      <Container maxW="full">
+      <Box maxW="7xl" mx="auto" px={6}>
         <Heading size="sm" py={4}>
           User Information
         </Heading>
@@ -142,7 +142,7 @@ const UserInformation = () => {
             )}
           </Flex>
         </Box>
-      </Container>
+      </Box>
     </>
   )
 }

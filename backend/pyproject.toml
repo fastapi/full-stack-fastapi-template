@@ -14,7 +14,7 @@ dependencies = [
     "jinja2<4.0.0,>=3.1.4",
     "alembic<2.0.0,>=1.12.1",
     "httpx>=0.25.1,<1.0.0",
-    "psycopg[binary]<4.0.0,>=3.1.13",
+    "psycopg[binary]>=3.1.13,<4.0.0",
     "sqlmodel<1.0.0,>=0.0.21",
     # Pin bcrypt until passlib supports the latest
     "bcrypt==4.0.1",
@@ -22,6 +22,7 @@ dependencies = [
     "sentry-sdk[fastapi]<2.0.0,>=1.40.6",
     "pyjwt<3.0.0,>=2.8.0",
     "python-jose[cryptography]",
+    "psycopg2-binary>=2.9.10",
 ]
 
 [tool.uv]

@@ -1,30 +1,37 @@
-# Stage 0, "build-stage", based on Node.js, to build and compile the frontend
-FROM node:20-slim
+# Frontend Dockerfile para GENIUS INDUSTRIES
+FROM node:18-alpine AS builder
 
+# Directorio de trabajo
 WORKDIR /app
 
-# Install dependencies
+# Copiar archivos de dependencias
 COPY package*.json ./
-RUN npm install
 
-# Copy application code
+# Instalar dependencias
+RUN npm ci --only=production
+
+# Copiar código fuente
 COPY . .
 
-# Expose port
-EXPOSE 5173
-
-# Command to run the application
-CMD ["npm", "run", "dev", "--", "--host", "0.0.0.0"]
-
-ARG VITE_API_URL=${VITE_API_URL}
-
+# Build de producción
 RUN npm run build
 
+# Etapa de producción con Nginx
+FROM nginx:alpine
 
-# Stage 1, based on Nginx, to have only the compiled app, ready for production with Nginx
-FROM nginx:1
+# Copiar configuración personalizada de Nginx
+COPY nginx.conf /etc/nginx/nginx.conf
 
-COPY --from=build-stage /app/dist/ /usr/share/nginx/html
+# Copiar archivos build desde etapa anterior
+COPY --from=builder /app/dist /usr/share/nginx/html
 
-COPY ./nginx.conf /etc/nginx/conf.d/default.conf
-COPY ./nginx-backend-not-found.conf /etc/nginx/extra-conf.d/backend-not-found.conf
+# Copiar script de inicio
+COPY docker-entrypoint.sh /docker-entrypoint.sh
+RUN chmod +x /docker-entrypoint.sh
+
+# Exponer puerto
+EXPOSE 80
+
+# Comando de inicio
+ENTRYPOINT ["/docker-entrypoint.sh"]
+CMD ["nginx", "-g", "daemon off;"]

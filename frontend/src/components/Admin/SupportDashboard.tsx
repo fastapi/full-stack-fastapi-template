@@ -1,4 +1,4 @@
-import { Grid, GridItem, Stat, StatLabel, StatNumber, StatHelpText, Table, Thead, Tbody, Tr, Th, Td, Box, Heading, Badge, Button, HStack, Text } from '@chakra-ui/react'
+import { Grid, GridItem,     Table, Thead, Tbody, Tr, Th, Td, Box, Heading, Badge, Button, HStack, Text } from '@chakra-ui/react'
 import { RoleDashboard } from '../Common/RoleDashboard'
 
 export const SupportDashboard = () => {
@@ -9,25 +9,25 @@ export const SupportDashboard = () => {
     >
       <Grid templateColumns="repeat(3, 1fr)" gap={6} mb={8}>
         <GridItem>
-          <Stat>
-            <StatLabel>Tickets Abiertos</StatLabel>
-            <StatNumber>24</StatNumber>
-            <StatHelpText>5 Urgentes</StatHelpText>
-          </Stat>
+          <Box>
+            <Box>Tickets Abiertos</StatLabel>
+            <Box>24</StatNumber>
+            <Box>5 Urgentes</StatHelpText>
+          </Box>
         </GridItem>
         <GridItem>
-          <Stat>
-            <StatLabel>Tiempo Promedio</StatLabel>
-            <StatNumber>2.5h</StatNumber>
-            <StatHelpText>↓ 15% (30 días)</StatHelpText>
-          </Stat>
+          <Box>
+            <Box>Tiempo Promedio</StatLabel>
+            <Box>2.5h</StatNumber>
+            <Box>↓ 15% (30 días)</StatHelpText>
+          </Box>
         </GridItem>
         <GridItem>
-          <Stat>
-            <StatLabel>Satisfacción</StatLabel>
-            <StatNumber>4.8/5</StatNumber>
-            <StatHelpText>↑ 0.2 (30 días)</StatHelpText>
-          </Stat>
+          <Box>
+            <Box>Satisfacción</StatLabel>
+            <Box>4.8/5</StatNumber>
+            <Box>↑ 0.2 (30 días)</StatHelpText>
+          </Box>
         </GridItem>
       </Grid>
 

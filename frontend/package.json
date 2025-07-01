@@ -12,9 +12,13 @@
   },
   "dependencies": {
     "@chakra-ui/react": "^3.8.0",
+    "@clerk/clerk-react": "^5.32.3",
+    "@clerk/nextjs": "^6.23.2",
+    "@clerk/themes": "^2.2.53",
     "@emotion/react": "^11.14.0",
     "@nhost/react": "^0.14.0",
     "@nhost/react-auth": "^3.6.0",
+    "@tailwindcss/forms": "^0.5.10",
     "@tanstack/react-query": "^5.28.14",
     "@tanstack/react-query-devtools": "^5.74.9",
     "@tanstack/react-router": "1.19.1",
@@ -41,7 +45,10 @@
     "@types/react": "^18.2.37",
     "@types/react-dom": "^18.2.15",
     "@vitejs/plugin-react-swc": "^3.9.0",
+    "autoprefixer": "^10.4.21",
     "dotenv": "^16.4.5",
+    "postcss": "^8.5.6",
+    "tailwindcss": "^3.4.17",
     "typescript": "^5.2.2",
     "vite": "^6.3.4"
   }

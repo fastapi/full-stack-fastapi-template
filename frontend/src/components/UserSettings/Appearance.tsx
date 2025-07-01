@@ -1,4 +1,4 @@
-import { Container, Heading, Stack } from "@chakra-ui/react"
+import {  Heading, Stack } from "@chakra-ui/react"
 import { useTheme } from "next-themes"
 
 import { Radio, RadioGroup } from "@/components/ui/radio"
@@ -8,7 +8,7 @@ const Appearance = () => {
 
   return (
     <>
-      <Container maxW="full">
+      <Box maxW="7xl" mx="auto" px={6}>
         <Heading size="sm" py={4}>
           Appearance
         </Heading>
@@ -24,7 +24,7 @@ const Appearance = () => {
             <Radio value="dark">Dark Mode</Radio>
           </Stack>
         </RadioGroup>
-      </Container>
+      </Box>
     </>
   )
 }

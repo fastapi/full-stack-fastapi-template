@@ -1,24 +1,18 @@
 import React, { useState, useEffect } from 'react';
 import {
   Box,
-  Container,
+  
   Heading,
   Text,
   Grid,
   Card,
   CardBody,
-  Stat,
-  StatLabel,
-  StatNumber,
-  StatHelpText,
   Button,
   Icon,
   Flex,
   Badge,
-  useColorModeValue,
   HStack,
-  VStack,
-  Divider
+  VStack
 } from '@chakra-ui/react';
 import {
   FiFileText,
@@ -49,8 +43,8 @@ const LegalDashboard: React.FC = () => {
   const [recentDocuments, setRecentDocuments] = useState([]);
 
   // Corporate theme colors
-  const bgColor = useColorModeValue('white', 'gray.800');
-  const borderColor = useColorModeValue('gray.200', 'gray.600');
+  const bgColor = "white";
+  const borderColor = "gray.200";
   const accentColor = 'black';
   
   useEffect(() => {
@@ -95,7 +89,7 @@ const LegalDashboard: React.FC = () => {
   ];
 
   return (
-    <Container maxW="7xl" py={8}>
+    <Box maxW="7xl" mx="auto" px={6}>
       {/* Header */}
       <Box mb={8}>
         <Flex align="center" mb={4}>
@@ -122,7 +116,7 @@ const LegalDashboard: React.FC = () => {
             </Text>
           </VStack>
         </Flex>
-        <Divider borderColor="black" />
+        <Box height="1px" bg="black" width="100%" />
       </Box>
 
       {/* Stats Cards */}
@@ -138,21 +132,19 @@ const LegalDashboard: React.FC = () => {
           }}
         >
           <CardBody>
-            <Stat>
-              <Flex align="center" justify="space-between">
-                <Box>
-                  <StatLabel color="gray.600">Total Documentos</StatLabel>
-                  <StatNumber color="black" fontSize="2xl">
-                    {stats.totalDocuments}
-                  </StatNumber>
-                  <StatHelpText color="gray.500">
-                    <Icon as={FiFileText} mr={1} />
-                    Todos los documentos
-                  </StatHelpText>
-                </Box>
-                <Icon as={FiFileText} w={8} h={8} color="black" />
-              </Flex>
-            </Stat>
+            <Flex align="center" justify="space-between">
+              <Box>
+                <Text color="gray.600" fontSize="sm">Total Documentos</Text>
+                <Text color="black" fontSize="2xl" fontWeight="bold">
+                  {stats.totalDocuments}
+                </Text>
+                <Flex align="center" color="gray.500" fontSize="sm">
+                  <Icon as={FiFileText} mr={1} />
+                  <Text>Todos los documentos</Text>
+                </Flex>
+              </Box>
+              <Icon as={FiFileText} w={8} h={8} color="black" />
+            </Flex>
           </CardBody>
         </Card>
 
@@ -167,21 +159,19 @@ const LegalDashboard: React.FC = () => {
           }}
         >
           <CardBody>
-            <Stat>
-              <Flex align="center" justify="space-between">
-                <Box>
-                  <StatLabel color="gray.600">Templates Activos</StatLabel>
-                  <StatNumber color="black" fontSize="2xl">
-                    {stats.templatesActive}
-                  </StatNumber>
-                  <StatHelpText color="gray.500">
-                    <Icon as={FiEdit3} mr={1} />
-                    Plantillas disponibles
-                  </StatHelpText>
-                </Box>
-                <Icon as={FiEdit3} w={8} h={8} color="black" />
-              </Flex>
-            </Stat>
+            <Flex align="center" justify="space-between">
+              <Box>
+                <Text color="gray.600" fontSize="sm">Templates Activos</Text>
+                <Text color="black" fontSize="2xl" fontWeight="bold">
+                  {stats.templatesActive}
+                </Text>
+                <Flex align="center" color="gray.500" fontSize="sm">
+                  <Icon as={FiEdit3} mr={1} />
+                  <Text>Plantillas disponibles</Text>
+                </Flex>
+              </Box>
+              <Icon as={FiEdit3} w={8} h={8} color="black" />
+            </Flex>
           </CardBody>
         </Card>
 
@@ -196,21 +186,19 @@ const LegalDashboard: React.FC = () => {
           }}
         >
           <CardBody>
-            <Stat>
-              <Flex align="center" justify="space-between">
-                <Box>
-                  <StatLabel color="gray.600">Este Mes</StatLabel>
-                  <StatNumber color="black" fontSize="2xl">
-                    {stats.documentsThisMonth}
-                  </StatNumber>
-                  <StatHelpText color="green.500">
-                    <Icon as={FiTrendingUp} mr={1} />
-                    +23% vs mes anterior
-                  </StatHelpText>
-                </Box>
-                <Icon as={FiTrendingUp} w={8} h={8} color="green.500" />
-              </Flex>
-            </Stat>
+            <Flex align="center" justify="space-between">
+              <Box>
+                <Text color="gray.600" fontSize="sm">Este Mes</Text>
+                <Text color="black" fontSize="2xl" fontWeight="bold">
+                  {stats.documentsThisMonth}
+                </Text>
+                <Flex align="center" color="green.500" fontSize="sm">
+                  <Icon as={FiTrendingUp} mr={1} />
+                  <Text>+23% vs mes anterior</Text>
+                </Flex>
+              </Box>
+              <Icon as={FiTrendingUp} w={8} h={8} color="green.500" />
+            </Flex>
           </CardBody>
         </Card>
 
@@ -225,21 +213,19 @@ const LegalDashboard: React.FC = () => {
           }}
         >
           <CardBody>
-            <Stat>
-              <Flex align="center" justify="space-between">
-                <Box>
-                  <StatLabel color="gray.600">Pendientes</StatLabel>
-                  <StatNumber color="black" fontSize="2xl">
-                    {stats.pendingSignatures}
-                  </StatNumber>
-                  <StatHelpText color="orange.500">
-                    <Icon as={FiUsers} mr={1} />
-                    Firmas pendientes
-                  </StatHelpText>
-                </Box>
-                <Icon as={FiUsers} w={8} h={8} color="orange.500" />
-              </Flex>
-            </Stat>
+            <Flex align="center" justify="space-between">
+              <Box>
+                <Text color="gray.600" fontSize="sm">Pendientes</Text>
+                <Text color="black" fontSize="2xl" fontWeight="bold">
+                  {stats.pendingSignatures}
+                </Text>
+                <Flex align="center" color="orange.500" fontSize="sm">
+                  <Icon as={FiUsers} mr={1} />
+                  <Text>Firmas pendientes</Text>
+                </Flex>
+              </Box>
+              <Icon as={FiUsers} w={8} h={8} color="orange.500" />
+            </Flex>
           </CardBody>
         </Card>
       </Grid>
@@ -353,7 +339,7 @@ const LegalDashboard: React.FC = () => {
           </CardBody>
         </Card>
       </Box>
-    </Container>
+    </Box>
   );
 };
 

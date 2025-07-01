@@ -1,4 +1,4 @@
-import { Grid, GridItem, Stat, StatLabel, StatNumber, StatHelpText, Table, Thead, Tbody, Tr, Th, Td, Box, Heading, Progress, Text } from '@chakra-ui/react'
+import { Grid, GridItem,     Table, Thead, Tbody, Tr, Th, Td, Box, Heading, Progress, Text } from '@chakra-ui/react'
 import { RoleDashboard } from '../Common/RoleDashboard'
 
 export const SupervisorDashboard = () => {
@@ -9,25 +9,25 @@ export const SupervisorDashboard = () => {
     >
       <Grid templateColumns="repeat(3, 1fr)" gap={6} mb={8}>
         <GridItem>
-          <Stat>
-            <StatLabel>Ventas del Equipo</StatLabel>
-            <StatNumber>$123,456</StatNumber>
-            <StatHelpText>↑ 12.5% (30 días)</StatHelpText>
-          </Stat>
+          <Box>
+            <Box>Ventas del Equipo</StatLabel>
+            <Box>$123,456</StatNumber>
+            <Box>↑ 12.5% (30 días)</StatHelpText>
+          </Box>
         </GridItem>
         <GridItem>
-          <Stat>
-            <StatLabel>Propiedades Activas</StatLabel>
-            <StatNumber>28</StatNumber>
-            <StatHelpText>↑ 5% (30 días)</StatHelpText>
-          </Stat>
+          <Box>
+            <Box>Propiedades Activas</StatLabel>
+            <Box>28</StatNumber>
+            <Box>↑ 5% (30 días)</StatHelpText>
+          </Box>
         </GridItem>
         <GridItem>
-          <Stat>
-            <StatLabel>Visitas Programadas</StatLabel>
-            <StatNumber>45</StatNumber>
-            <StatHelpText>Esta semana</StatHelpText>
-          </Stat>
+          <Box>
+            <Box>Visitas Programadas</StatLabel>
+            <Box>45</StatNumber>
+            <Box>Esta semana</StatHelpText>
+          </Box>
         </GridItem>
       </Grid>
 

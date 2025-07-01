@@ -1,10 +1,10 @@
 import uuid
-from typing import Optional, List, Dict, Any
-from pydantic import EmailStr, Field, HttpUrl
-from sqlmodel import Relationship, SQLModel
 from datetime import datetime
-from enum import Enum
+from sqlmodel import Field, Relationship, SQLModel
+from typing import List, Optional, Dict, Any
+from pydantic import EmailStr, HttpUrl
 from decimal import Decimal
+from enum import Enum
 
 
 # Shared properties
@@ -45,8 +45,9 @@ class UpdatePassword(SQLModel):
 
 # Database model, database table inferred from class name
 class User(UserBase, table=True):
-    id: uuid.UUID = Field(default_factory=uuid.uuid4, primary_key=True)
-    hashed_password: str
+    id: Optional[uuid.UUID] = Field(default_factory=uuid.uuid4, primary_key=True)
+    clerk_id: Optional[str] = Field(default=None, unique=True, index=True)
+    hashed_password: str = Field(default="")
     items: List["Item"] = Relationship(back_populates="owner", sa_relationship_kwargs={"cascade": "all, delete-orphan"})
     phone: Optional[str] = None
     created_at: datetime = Field(default_factory=datetime.utcnow)
@@ -439,7 +440,7 @@ class AuditLog(SQLModel):
     entity_type: str
     entity_id: str
     changes: Dict[str, Any]
-    metadata: Optional[Dict[str, Any]] = None
+    audit_metadata: Optional[Dict[str, Any]] = None  # Renamed to avoid shadow warning
     created_at: datetime = Field(default_factory=datetime.utcnow)
     ip_address: Optional[str] = None
     user_agent: Optional[str] = None
@@ -451,7 +452,7 @@ class AuditLogCreate(SQLModel):
     entity_type: str
     entity_id: str
     changes: Dict[str, Any]
-    metadata: Optional[Dict[str, Any]] = None
+    audit_metadata: Optional[Dict[str, Any]] = None  # Renamed to avoid shadow warning
     ip_address: Optional[str] = None
     user_agent: Optional[str] = None
 
@@ -463,7 +464,7 @@ class AuditLogResponse(SQLModel):
     entity_type: str
     entity_id: str
     changes: Dict[str, Any]
-    metadata: Optional[Dict[str, Any]] = None
+    audit_metadata: Optional[Dict[str, Any]] = None  # Renamed to avoid shadow warning
     created_at: datetime
     ip_address: Optional[str] = None
     user_agent: Optional[str] = None

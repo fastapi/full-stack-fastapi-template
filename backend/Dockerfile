@@ -1,31 +1,38 @@
+# Backend Dockerfile para GENIUS INDUSTRIES
 FROM python:3.11-slim
 
+# Variables de entorno
+ENV PYTHONUNBUFFERED=1 \
+    PYTHONDONTWRITEBYTECODE=1 \
+    PIP_NO_CACHE_DIR=1 \
+    PIP_DISABLE_PIP_VERSION_CHECK=1
+
+# Directorio de trabajo
 WORKDIR /app
 
-# Install system dependencies
+# Instalar dependencias del sistema
 RUN apt-get update && apt-get install -y \
     build-essential \
-    libpq-dev \
     curl \
     && rm -rf /var/lib/apt/lists/*
 
-# Install uv
-RUN curl -LsSf https://astral.sh/uv/install.sh | sh
+# Copiar archivos de dependencias
+COPY requirements.txt pyproject.toml ./
 
-# Copy dependency files
-COPY pyproject.toml uv.lock ./
+# Instalar dependencias Python
+RUN pip install --upgrade pip && \
+    pip install -r requirements.txt
 
-# Install Python dependencies
-RUN uv pip install --system -r requirements.txt
+# Copiar código fuente
+COPY ./app ./app
 
-# Copy application code
-COPY . .
+# Crear usuario no-root
+RUN groupadd -r appuser && useradd -r -g appuser appuser
+RUN chown -R appuser:appuser /app
+USER appuser
 
-# Create necessary directories
-RUN mkdir -p /app/logs
-
-# Expose port
+# Exponer puerto
 EXPOSE 8000
 
-# Command to run the application
+# Comando por defecto
 CMD ["uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8000", "--reload"]

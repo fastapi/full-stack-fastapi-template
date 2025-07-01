@@ -122,49 +122,60 @@ services:
     build:
       context: ./backend
       dockerfile: Dockerfile
-    container_name: genius_backend
-    restart: always
+    container_name: genius-backend
+    restart: unless-stopped
     ports:
       - "8000:8000"
     environment:
-      - POSTGRES_SERVER=postgres
-      - POSTGRES_USER=postgres
-      - POSTGRES_PASSWORD=postgres
-      - POSTGRES_DB=postgres
-      - POSTGRES_PORT=5432
-      - BACKEND_CORS_ORIGINS=http://localhost,http://localhost:5173,https://localhost,https://localhost:5173
-      - NHOST_GRAPHQL_URL=http://hasura:8080/v1/graphql
-      - NHOST_AUTH_URL=http://auth:4000
-      - NHOST_STORAGE_URL=http://storage:5000
+      - DATABASE_URL=${DATABASE_URL}
+      - CLERK_SECRET_KEY=${CLERK_SECRET_KEY}
+      - CLERK_PUBLISHABLE_KEY=${CLERK_PUBLISHABLE_KEY}
+      - CLERK_WEBHOOK_SECRET=${CLERK_WEBHOOK_SECRET}
+      - SECRET_KEY=${SECRET_KEY}
+      - DOMAIN=geniusindustries.org
+      - FRONTEND_HOST=https://geniusindustries.org
+      - ENVIRONMENT=production
     volumes:
-      - ./backend:/app
-    depends_on:
-      - postgres
-      - hasura
-      - auth
-      - storage
+      - ./backend/app:/app/app:ro
     networks:
       - genius-network
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
 
   # Frontend Service
   frontend:
     build:
       context: ./frontend
       dockerfile: Dockerfile
-    container_name: genius_frontend
-    restart: always
+    container_name: genius-frontend
+    restart: unless-stopped
     ports:
-      - "5173:5173"
+      - "5174:80"
     environment:
-      - VITE_API_URL=http://localhost:8000
-      - VITE_NHOST_GRAPHQL_URL=http://localhost:8080/v1/graphql
-      - VITE_NHOST_AUTH_URL=http://localhost:4000
-      - VITE_NHOST_STORAGE_URL=http://localhost:5000
-    volumes:
-      - ./frontend:/app
-      - /app/node_modules
+      - API_URL=https://geniusindustries.org/api
+      - CLERK_PUBLISHABLE_KEY=${CLERK_PUBLISHABLE_KEY}
     depends_on:
       - backend
+    networks:
+      - genius-network
+
+  nginx:
+    image: nginx:alpine
+    container_name: genius-nginx
+    restart: unless-stopped
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./nginx/nginx.conf:/etc/nginx/nginx.conf:ro
+      - ./nginx/ssl:/etc/nginx/ssl:ro
+      - ./nginx/logs:/var/log/nginx
+    depends_on:
+      - backend
+      - frontend
     networks:
       - genius-network
 
@@ -184,6 +195,7 @@ volumes:
   postgres_data:
   storage_data:
   minio_data:
+  nginx_logs:
 
 networks:
   genius-network:

@@ -9,8 +9,9 @@ from ....models import (
 )
 from ....services.loans import LoanService
 from ....core.nhost import get_nhost_client
+from app.api.deps import CurrentUser, SessionDep
 
-router = APIRouter()
+router = APIRouter(prefix="/loans", tags=["loans"])
 
 # Mortgage Loan Endpoints
 @router.post("/mortgage", response_model=MortgageLoan)
@@ -129,4 +130,21 @@ async def assess_loan_risk(
         debt_to_income=debt_to_income,
         ltv_ratio=ltv_ratio,
         property_value=property_value
-    ) 
+    )
+
+@router.get("/")
+async def get_loans(current_user: CurrentUser, session: SessionDep):
+    """Obtener préstamos"""
+    return {
+        "message": "Loans endpoint",
+        "user": current_user,
+        "loans": []
+    }
+
+@router.post("/")
+async def create_loan(current_user: CurrentUser, session: SessionDep):
+    """Crear préstamo"""
+    return {
+        "message": "Create loan - Coming soon",
+        "user": current_user
+    } 

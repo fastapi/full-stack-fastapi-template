@@ -12,26 +12,34 @@
 
 import { Route as rootRoute } from './routes/__root'
 import { Route as SignupImport } from './routes/signup'
+import { Route as SignUpImport } from './routes/sign-up'
+import { Route as SignInImport } from './routes/sign-in'
 import { Route as ResetPasswordImport } from './routes/reset-password'
 import { Route as RecoverPasswordImport } from './routes/recover-password'
+import { Route as MarketplaceImport } from './routes/marketplace'
 import { Route as LoginImport } from './routes/login'
-import { Route as LayoutImport } from './routes/_layout'
-import { Route as LayoutIndexImport } from './routes/_layout/index'
-import { Route as ClientClientPortalImport } from './routes/client/ClientPortal'
-import { Route as LayoutSettingsImport } from './routes/_layout/settings'
-import { Route as LayoutLegalImport } from './routes/_layout/legal'
-import { Route as LayoutItemsImport } from './routes/_layout/items'
-import { Route as LayoutAdminImport } from './routes/_layout/admin'
-import { Route as LayoutAboutImport } from './routes/_layout/about'
-import { Route as LayoutLegalIndexImport } from './routes/_layout/legal/index'
-import { Route as LayoutLegalTemplatesImport } from './routes/_layout/legal/templates'
-import { Route as LayoutLegalGeneratorImport } from './routes/_layout/legal/generator'
-import { Route as LayoutLegalDocumentsImport } from './routes/_layout/legal/documents'
+import { Route as InvestmentbackupImport } from './routes/investment_backup'
+import { Route as InvestmentImport } from './routes/investment'
+import { Route as CreditsImport } from './routes/credits'
+import { Route as ContactImport } from './routes/contact'
+import { Route as ClientDashboardImport } from './routes/client-dashboard'
+import { Route as AboutImport } from './routes/about'
+import { Route as IndexImport } from './routes/index'
 
 // Create/Update Routes
 
 const SignupRoute = SignupImport.update({
   path: '/signup',
+  getParentRoute: () => rootRoute,
+} as any)
+
+const SignUpRoute = SignUpImport.update({
+  path: '/sign-up',
+  getParentRoute: () => rootRoute,
+} as any)
+
+const SignInRoute = SignInImport.update({
+  path: '/sign-in',
   getParentRoute: () => rootRoute,
 } as any)
 
@@ -45,81 +53,89 @@ const RecoverPasswordRoute = RecoverPasswordImport.update({
   getParentRoute: () => rootRoute,
 } as any)
 
+const MarketplaceRoute = MarketplaceImport.update({
+  path: '/marketplace',
+  getParentRoute: () => rootRoute,
+} as any)
+
 const LoginRoute = LoginImport.update({
   path: '/login',
   getParentRoute: () => rootRoute,
 } as any)
 
-const LayoutRoute = LayoutImport.update({
-  id: '/_layout',
+const InvestmentbackupRoute = InvestmentbackupImport.update({
+  path: '/investment_backup',
   getParentRoute: () => rootRoute,
 } as any)
 
-const LayoutIndexRoute = LayoutIndexImport.update({
-  path: '/',
-  getParentRoute: () => LayoutRoute,
-} as any)
-
-const ClientClientPortalRoute = ClientClientPortalImport.update({
-  path: '/client/ClientPortal',
+const InvestmentRoute = InvestmentImport.update({
+  path: '/investment',
   getParentRoute: () => rootRoute,
 } as any)
 
-const LayoutSettingsRoute = LayoutSettingsImport.update({
-  path: '/settings',
-  getParentRoute: () => LayoutRoute,
+const CreditsRoute = CreditsImport.update({
+  path: '/credits',
+  getParentRoute: () => rootRoute,
 } as any)
 
-const LayoutLegalRoute = LayoutLegalImport.update({
-  path: '/legal',
-  getParentRoute: () => LayoutRoute,
+const ContactRoute = ContactImport.update({
+  path: '/contact',
+  getParentRoute: () => rootRoute,
 } as any)
 
-const LayoutItemsRoute = LayoutItemsImport.update({
-  path: '/items',
-  getParentRoute: () => LayoutRoute,
+const ClientDashboardRoute = ClientDashboardImport.update({
+  path: '/client-dashboard',
+  getParentRoute: () => rootRoute,
 } as any)
 
-const LayoutAdminRoute = LayoutAdminImport.update({
-  path: '/admin',
-  getParentRoute: () => LayoutRoute,
-} as any)
-
-const LayoutAboutRoute = LayoutAboutImport.update({
+const AboutRoute = AboutImport.update({
   path: '/about',
-  getParentRoute: () => LayoutRoute,
+  getParentRoute: () => rootRoute,
 } as any)
 
-const LayoutLegalIndexRoute = LayoutLegalIndexImport.update({
+const IndexRoute = IndexImport.update({
   path: '/',
-  getParentRoute: () => LayoutLegalRoute,
-} as any)
-
-const LayoutLegalTemplatesRoute = LayoutLegalTemplatesImport.update({
-  path: '/templates',
-  getParentRoute: () => LayoutLegalRoute,
-} as any)
-
-const LayoutLegalGeneratorRoute = LayoutLegalGeneratorImport.update({
-  path: '/generator',
-  getParentRoute: () => LayoutLegalRoute,
-} as any)
-
-const LayoutLegalDocumentsRoute = LayoutLegalDocumentsImport.update({
-  path: '/documents',
-  getParentRoute: () => LayoutLegalRoute,
+  getParentRoute: () => rootRoute,
 } as any)
 
 // Populate the FileRoutesByPath interface
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
-    '/_layout': {
-      preLoaderRoute: typeof LayoutImport
+    '/': {
+      preLoaderRoute: typeof IndexImport
+      parentRoute: typeof rootRoute
+    }
+    '/about': {
+      preLoaderRoute: typeof AboutImport
+      parentRoute: typeof rootRoute
+    }
+    '/client-dashboard': {
+      preLoaderRoute: typeof ClientDashboardImport
+      parentRoute: typeof rootRoute
+    }
+    '/contact': {
+      preLoaderRoute: typeof ContactImport
+      parentRoute: typeof rootRoute
+    }
+    '/credits': {
+      preLoaderRoute: typeof CreditsImport
+      parentRoute: typeof rootRoute
+    }
+    '/investment': {
+      preLoaderRoute: typeof InvestmentImport
+      parentRoute: typeof rootRoute
+    }
+    '/investment_backup': {
+      preLoaderRoute: typeof InvestmentbackupImport
       parentRoute: typeof rootRoute
     }
     '/login': {
       preLoaderRoute: typeof LoginImport
+      parentRoute: typeof rootRoute
+    }
+    '/marketplace': {
+      preLoaderRoute: typeof MarketplaceImport
       parentRoute: typeof rootRoute
     }
     '/recover-password': {
@@ -130,53 +146,17 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ResetPasswordImport
       parentRoute: typeof rootRoute
     }
+    '/sign-in': {
+      preLoaderRoute: typeof SignInImport
+      parentRoute: typeof rootRoute
+    }
+    '/sign-up': {
+      preLoaderRoute: typeof SignUpImport
+      parentRoute: typeof rootRoute
+    }
     '/signup': {
       preLoaderRoute: typeof SignupImport
       parentRoute: typeof rootRoute
-    }
-    '/_layout/about': {
-      preLoaderRoute: typeof LayoutAboutImport
-      parentRoute: typeof LayoutImport
-    }
-    '/_layout/admin': {
-      preLoaderRoute: typeof LayoutAdminImport
-      parentRoute: typeof LayoutImport
-    }
-    '/_layout/items': {
-      preLoaderRoute: typeof LayoutItemsImport
-      parentRoute: typeof LayoutImport
-    }
-    '/_layout/legal': {
-      preLoaderRoute: typeof LayoutLegalImport
-      parentRoute: typeof LayoutImport
-    }
-    '/_layout/settings': {
-      preLoaderRoute: typeof LayoutSettingsImport
-      parentRoute: typeof LayoutImport
-    }
-    '/client/ClientPortal': {
-      preLoaderRoute: typeof ClientClientPortalImport
-      parentRoute: typeof rootRoute
-    }
-    '/_layout/': {
-      preLoaderRoute: typeof LayoutIndexImport
-      parentRoute: typeof LayoutImport
-    }
-    '/_layout/legal/documents': {
-      preLoaderRoute: typeof LayoutLegalDocumentsImport
-      parentRoute: typeof LayoutLegalImport
-    }
-    '/_layout/legal/generator': {
-      preLoaderRoute: typeof LayoutLegalGeneratorImport
-      parentRoute: typeof LayoutLegalImport
-    }
-    '/_layout/legal/templates': {
-      preLoaderRoute: typeof LayoutLegalTemplatesImport
-      parentRoute: typeof LayoutLegalImport
-    }
-    '/_layout/legal/': {
-      preLoaderRoute: typeof LayoutLegalIndexImport
-      parentRoute: typeof LayoutLegalImport
     }
   }
 }
@@ -184,24 +164,20 @@ declare module '@tanstack/react-router' {
 // Create and export the route tree
 
 export const routeTree = rootRoute.addChildren([
-  LayoutRoute.addChildren([
-    LayoutAboutRoute,
-    LayoutAdminRoute,
-    LayoutItemsRoute,
-    LayoutLegalRoute.addChildren([
-      LayoutLegalDocumentsRoute,
-      LayoutLegalGeneratorRoute,
-      LayoutLegalTemplatesRoute,
-      LayoutLegalIndexRoute,
-    ]),
-    LayoutSettingsRoute,
-    LayoutIndexRoute,
-  ]),
+  IndexRoute,
+  AboutRoute,
+  ClientDashboardRoute,
+  ContactRoute,
+  CreditsRoute,
+  InvestmentRoute,
+  InvestmentbackupRoute,
   LoginRoute,
+  MarketplaceRoute,
   RecoverPasswordRoute,
   ResetPasswordRoute,
+  SignInRoute,
+  SignUpRoute,
   SignupRoute,
-  ClientClientPortalRoute,
 ])
 
 /* prettier-ignore-end */

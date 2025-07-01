@@ -10,18 +10,6 @@ from pydantic import (
     PostgresDsn,
     computed_field,
     model_validator,
-import secrets
-import warnings
-from typing import Annotated, Any, Literal, Optional, List
-
-from pydantic import (
-    AnyUrl,
-    BeforeValidator,
-    EmailStr,
-    HttpUrl,
-    PostgresDsn,
-    computed_field,
-    model_validator,
     AnyHttpUrl,
     validator,
 )
@@ -67,21 +55,21 @@ class Settings(BaseSettings):
     SECRET_KEY: str
     ACCESS_TOKEN_EXPIRE_MINUTES: int = 11520
 
-    # Nhost
-    NHOST_URL: str
-    NHOST_ADMIN_SECRET: str
+    # Removed Nhost - Using Railway PostgreSQL only
 
-    # Postgres
-    POSTGRES_SERVER: str
-    POSTGRES_PORT: int
-    POSTGRES_DB: str
-    POSTGRES_USER: str
+    # Postgres (Development Configuration - Local PostgreSQL)
+    DATABASE_URL: Optional[str] = None
+    POSTGRES_SERVER: str = "127.0.0.1"
+    POSTGRES_PORT: int = 5432
+    POSTGRES_DB: str = "genius_dev"
+    POSTGRES_USER: str = "postgres"
     POSTGRES_PASSWORD: str
-
-    # Database
-    @property
-    def SQLALCHEMY_DATABASE_URI(self) -> str:
-        return f"postgresql://{self.POSTGRES_USER}:{self.POSTGRES_PASSWORD}@{self.POSTGRES_SERVER}:{self.POSTGRES_PORT}/{self.POSTGRES_DB}"
+    
+    # Connection Pooling for Railway
+    POSTGRES_POOL_SIZE: int = 10
+    POSTGRES_MAX_OVERFLOW: int = 20
+    POSTGRES_POOL_TIMEOUT: int = 30
+    POSTGRES_POOL_RECYCLE: int = 3600
 
     # Storage
     STORAGE_BUCKET: str
@@ -96,6 +84,11 @@ class Settings(BaseSettings):
 
     # Sentry
     SENTRY_DSN: Optional[str] = None
+    
+    # Clerk Configuration
+    CLERK_SECRET_KEY: Optional[str] = None
+    CLERK_PUBLISHABLE_KEY: Optional[str] = None  
+    CLERK_WEBHOOK_SECRET: Optional[str] = None
 
     # Docker Images
     DOCKER_IMAGE_BACKEND: str
@@ -135,15 +128,21 @@ class Settings(BaseSettings):
 
     @computed_field  # type: ignore[prop-decorator]
     @property
-    def SQLALCHEMY_DATABASE_URI(self) -> PostgresDsn:
-        return MultiHostUrl.build(
+    def SQLALCHEMY_DATABASE_URI(self) -> str:
+        # Priorizar DATABASE_URL de Railway si está disponible
+        if self.DATABASE_URL:
+            # Convertir postgresql:// a postgresql+psycopg:// para SQLAlchemy
+            return self.DATABASE_URL.replace("postgresql://", "postgresql+psycopg://")
+        
+        # Fallback a construcción manual
+        return str(MultiHostUrl.build(
             scheme="postgresql+psycopg",
             username=self.POSTGRES_USER,
             password=self.POSTGRES_PASSWORD,
             host=self.POSTGRES_SERVER,
             port=self.POSTGRES_PORT,
             path=self.POSTGRES_DB,
-        )
+        ))
 
     @model_validator(mode="after")
     def _set_default_emails_from(self) -> Self:
@@ -175,7 +174,7 @@ class Settings(BaseSettings):
     def _enforce_non_default_secrets(self) -> Self:
         self._check_default_secret("SECRET_KEY", self.SECRET_KEY)
         self._check_default_secret("POSTGRES_PASSWORD", self.POSTGRES_PASSWORD)
-        self._check_default_secret("NHOST_ADMIN_SECRET", self.NHOST_ADMIN_SECRET)
+        # Removed Nhost validation - Railway PostgreSQL only
         return self
 
 
