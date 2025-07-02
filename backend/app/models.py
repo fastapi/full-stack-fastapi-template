@@ -1,10 +1,67 @@
 import uuid
 from datetime import datetime
-from sqlmodel import Field, Relationship, SQLModel
+from sqlmodel import Field, Relationship, SQLModel, Column, Text
 from typing import List, Optional, Dict, Any
 from pydantic import EmailStr, HttpUrl
 from decimal import Decimal
 from enum import Enum
+import sqlalchemy as sa
+from sqlalchemy.dialects import postgresql
+
+# User and Item models defined below in this file
+# UserRole enum defined below
+
+# 🎯 ENUMS
+class UserRole(str, Enum):
+    CEO = "ceo"
+    MANAGER = "manager"
+    SUPERVISOR = "supervisor"
+    HR = "hr"
+    SUPPORT = "support"
+    AGENT = "agent"
+    CLIENT = "client"
+    USER = "user"
+
+
+# 👥 TABLA USUARIOS - TABLA REAL
+class User(SQLModel, table=True):
+    __tablename__ = "users"
+    
+    id: Optional[uuid.UUID] = Field(
+        default_factory=uuid.uuid4,
+        sa_column=Column(postgresql.UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
+    )
+    email: EmailStr = Field(unique=True, index=True, max_length=255)
+    clerk_id: Optional[str] = Field(default=None, unique=True, index=True)
+    hashed_password: str = Field(sa_column=Column(Text))
+    full_name: Optional[str] = Field(default=None, max_length=255)
+    phone: Optional[str] = Field(default=None, max_length=50)
+    role: UserRole = Field(default=UserRole.USER)
+    is_active: bool = Field(default=True)
+    is_superuser: bool = Field(default=False)
+    created_at: datetime = Field(default_factory=datetime.utcnow)
+    updated_at: Optional[datetime] = Field(default=None)
+    
+    # Relationships
+    items: List["Item"] = Relationship(back_populates="owner", sa_relationship_kwargs={"cascade": "all, delete-orphan"})
+
+
+# 📦 TABLA ITEMS - TABLA REAL
+class Item(SQLModel, table=True):
+    __tablename__ = "items"
+    
+    id: Optional[uuid.UUID] = Field(
+        default_factory=uuid.uuid4,
+        sa_column=Column(postgresql.UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
+    )
+    title: str = Field(min_length=1, max_length=255)
+    description: Optional[str] = Field(default=None, max_length=255)
+    owner_id: uuid.UUID = Field(foreign_key="users.id")
+    created_at: datetime = Field(default_factory=datetime.utcnow)
+    updated_at: Optional[datetime] = Field(default=None)
+    
+    # Relationships
+    owner: Optional[User] = Relationship(back_populates="items")
 
 
 # Shared properties
@@ -43,20 +100,6 @@ class UpdatePassword(SQLModel):
     new_password: str = Field(min_length=8, max_length=40)
 
 
-# Database model, database table inferred from class name
-class User(UserBase, table=True):
-    id: Optional[uuid.UUID] = Field(default_factory=uuid.uuid4, primary_key=True)
-    clerk_id: Optional[str] = Field(default=None, unique=True, index=True)
-    hashed_password: str = Field(default="")
-    items: List["Item"] = Relationship(back_populates="owner", sa_relationship_kwargs={"cascade": "all, delete-orphan"})
-    phone: Optional[str] = None
-    created_at: datetime = Field(default_factory=datetime.utcnow)
-    updated_at: Optional[datetime] = None
-
-    class Config:
-        from_attributes = True
-
-
 # Properties to return via API, id is always required
 class UserPublic(UserBase):
     id: uuid.UUID
@@ -81,18 +124,6 @@ class ItemCreate(ItemBase):
 # Properties to receive on item update
 class ItemUpdate(ItemBase):
     title: str | None = Field(default=None, min_length=1, max_length=255)  # type: ignore
-
-
-# Database model, database table inferred from class name
-class Item(ItemBase, table=True):
-    id: uuid.UUID = Field(default_factory=uuid.uuid4, primary_key=True)
-    owner_id: uuid.UUID = Field(foreign_key="user.id")
-    owner: Optional[User] = Relationship(back_populates="items")
-    created_at: datetime = Field(default_factory=datetime.utcnow)
-    updated_at: Optional[datetime] = None
-
-    class Config:
-        from_attributes = True
 
 
 # Properties to return via API, id is always required

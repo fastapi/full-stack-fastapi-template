@@ -738,7 +738,7 @@ function InvestmentPage() {
   );
 }
 
-export const Route = createFileRoute('/investment')({
+export const Route = createFileRoute('/investment-backup')({
   component: InvestmentPage,
 }); 
 

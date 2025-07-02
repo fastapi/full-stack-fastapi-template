@@ -1,6 +1,5 @@
 import React, { useEffect } from 'react';
-import { FaFacebook, FaTiktok, FaInstagram, FaLinkedin, FaPhone, FaEnvelope, FaMapMarkerAlt } from 'react-icons/fa';
-import logo from '../../../public/assets/images/GENIUS-INDUSTRIES.png';
+import { FaFacebook, FaTiktok, FaInstagram, FaLinkedin, FaPhone, FaEnvelope, FaMapMarkerAlt, FaWhatsapp } from 'react-icons/fa';
 
 // Declaración de tipos para window.chatwootSDK
 declare global {
@@ -104,7 +103,7 @@ const Footer: React.FC = () => {
           <div className="lg:col-span-1">
             <div className="flex items-center space-x-2 mb-4">
               <img 
-                src={logo} 
+                src="/assets/images/GENIUS-INDUSTRIES.png" 
                 alt="Genius Industries Logo" 
                 className="w-8 h-8 rounded-full object-cover"
               />
@@ -130,6 +129,10 @@ const Footer: React.FC = () => {
               <a href="https://linkedin.com/genius-industries-international" className="text-gray-400 hover:text-white transition-colors">
                 <FaLinkedin size={20} />
               </a>
+              <a href="https://whatsapp.com/channel/0029Vacz5n0CHDyglZc7a11X" className="text-gray-400 hover:text-white transition-colors">
+                <FaWhatsapp size={20} />
+              </a>
+
             </div>
           </div>
 

@@ -1,60 +1,143 @@
-# 🚀 GENIUS INDUSTRIES - Dockerfile para Dokploy
+# 🚀 GENIUS INDUSTRIES - Dockerfile Optimizado para Dokploy
 # Contenedor unificado: PostgreSQL + Backend + Frontend
+# Optimizado para rendimiento y seguridad
 
+# ==============================================================================
+# STAGE 1: Frontend Builder
+# ==============================================================================
 FROM node:18-alpine AS frontend-builder
 
-# Construir Frontend con variables de entorno de producción
+# Instalar dependencias del sistema para build
+RUN apk add --no-cache python3 make g++
+
+# Configurar directorio de trabajo
 WORKDIR /frontend
+
+# Copiar package files para aprovechar caché de Docker
 COPY frontend/package*.json ./
-RUN npm ci --only=production
 
-# Variables de entorno para build del frontend
-ENV VITE_API_URL=https://api.geniusindustries.org \
-    VITE_API_BASE_URL=https://api.geniusindustries.org \
-    VITE_FRONTEND_URL=https://geniusindustries.org \
-    VITE_BACKEND_URL=https://api.geniusindustries.org \
-    VITE_ENV=production \
-    NODE_ENV=production
+# Instalar dependencias con optimizaciones
+RUN npm ci --only=production --prefer-offline --no-audit
 
+# Variables de entorno para build
+ARG VITE_API_URL=https://api.geniusindustries.org
+ARG VITE_API_BASE_URL=https://api.geniusindustries.org
+ARG VITE_FRONTEND_URL=https://geniusindustries.org
+ARG VITE_BACKEND_URL=https://api.geniusindustries.org
+ARG VITE_ENV=production
+ARG NODE_ENV=production
+
+ENV VITE_API_URL=${VITE_API_URL} \
+    VITE_API_BASE_URL=${VITE_API_BASE_URL} \
+    VITE_FRONTEND_URL=${VITE_FRONTEND_URL} \
+    VITE_BACKEND_URL=${VITE_BACKEND_URL} \
+    VITE_ENV=${VITE_ENV} \
+    NODE_ENV=${NODE_ENV}
+
+# Copiar código fuente y construir
 COPY frontend/ ./
-RUN npm run build
+RUN npm run build && \
+    # Limpiar archivos innecesarios
+    rm -rf node_modules src public *.json *.js *.ts *.config.*
 
-# Imagen principal con Python + PostgreSQL + Nginx
-FROM python:3.11-slim
+# ==============================================================================
+# STAGE 2: Main Production Image
+# ==============================================================================
+FROM python:3.11-slim AS production
 
-# Variables de entorno
+# Metadatos
+LABEL maintainer="GENIUS INDUSTRIES" \
+      version="2.0" \
+      description="Full-stack app with PostgreSQL, FastAPI, React"
+
+# Variables de entorno base
 ENV PYTHONUNBUFFERED=1 \
     PYTHONDONTWRITEBYTECODE=1 \
-    DEBIAN_FRONTEND=noninteractive
+    PYTHONPATH="/app" \
+    DEBIAN_FRONTEND=noninteractive \
+    TZ=UTC
 
-# Instalar dependencias del sistema
-RUN apt-get update && apt-get install -y \
+# Crear usuario no-root desde el inicio
+RUN groupadd -r appuser && useradd -r -g appuser -s /bin/bash appuser
+
+# Instalar dependencias del sistema en una sola capa
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    # PostgreSQL
     postgresql-15 \
     postgresql-client-15 \
     postgresql-contrib-15 \
+    # Nginx
     nginx \
+    # Supervisor
     supervisor \
+    # Utilidades
     curl \
     build-essential \
-    && rm -rf /var/lib/apt/lists/*
+    gosu \
+    tzdata \
+    ca-certificates \
+    && rm -rf /var/lib/apt/lists/* \
+    && apt-get clean \
+    # Configurar timezone
+    && ln -snf /usr/share/zoneinfo/$TZ /etc/localtime && echo $TZ > /etc/timezone
 
-# Configurar PostgreSQL
+# ==============================================================================
+# POSTGRESQL CONFIGURATION
+# ==============================================================================
+# Configurar PostgreSQL como usuario postgres
 USER postgres
+
+# Crear cluster y configurar base de datos
 RUN /etc/init.d/postgresql start && \
     psql --command "CREATE USER genius WITH SUPERUSER PASSWORD 'KhloeMF0911$';" && \
-    createdb -O genius genius_dev
+    createdb -O genius genius_dev && \
+    /etc/init.d/postgresql stop
+
+# Configuración optimizada de PostgreSQL
+RUN echo "# Configuración optimizada PostgreSQL" > /etc/postgresql/15/main/postgresql.conf && \
+    echo "listen_addresses = '*'" >> /etc/postgresql/15/main/postgresql.conf && \
+    echo "port = 5432" >> /etc/postgresql/15/main/postgresql.conf && \
+    echo "max_connections = 100" >> /etc/postgresql/15/main/postgresql.conf && \
+    echo "shared_buffers = 256MB" >> /etc/postgresql/15/main/postgresql.conf && \
+    echo "effective_cache_size = 1GB" >> /etc/postgresql/15/main/postgresql.conf && \
+    echo "maintenance_work_mem = 64MB" >> /etc/postgresql/15/main/postgresql.conf && \
+    echo "checkpoint_completion_target = 0.9" >> /etc/postgresql/15/main/postgresql.conf && \
+    echo "wal_buffers = 16MB" >> /etc/postgresql/15/main/postgresql.conf && \
+    echo "default_statistics_target = 100" >> /etc/postgresql/15/main/postgresql.conf && \
+    echo "random_page_cost = 1.1" >> /etc/postgresql/15/main/postgresql.conf && \
+    echo "effective_io_concurrency = 200" >> /etc/postgresql/15/main/postgresql.conf && \
+    echo "work_mem = 4MB" >> /etc/postgresql/15/main/postgresql.conf && \
+    echo "min_wal_size = 1GB" >> /etc/postgresql/15/main/postgresql.conf && \
+    echo "max_wal_size = 4GB" >> /etc/postgresql/15/main/postgresql.conf
+
+# Configurar autenticación
+RUN echo "# Configuración de autenticación" > /etc/postgresql/15/main/pg_hba.conf && \
+    echo "local   all             postgres                                peer" >> /etc/postgresql/15/main/pg_hba.conf && \
+    echo "local   all             all                                     md5" >> /etc/postgresql/15/main/pg_hba.conf && \
+    echo "host    all             all             127.0.0.1/32            md5" >> /etc/postgresql/15/main/pg_hba.conf && \
+    echo "host    all             all             ::1/128                 md5" >> /etc/postgresql/15/main/pg_hba.conf && \
+    echo "host    all             all             0.0.0.0/0               md5" >> /etc/postgresql/15/main/pg_hba.conf
+
 USER root
 
+# ==============================================================================
+# BACKEND CONFIGURATION
+# ==============================================================================
 # Configurar backend Python
 WORKDIR /app
+
+# Copiar requirements primero para aprovechar caché
 COPY backend/requirements.txt backend/pyproject.toml ./
-RUN pip install --upgrade pip && \
-    pip install -r requirements.txt
+
+# Instalar dependencias Python con optimizaciones
+RUN pip install --upgrade pip setuptools wheel && \
+    pip install --no-cache-dir -r requirements.txt && \
+    pip cache purge
 
 # Copiar código del backend
 COPY backend/app ./app
 
-# Variables de entorno para producción con dominio específico
+# Variables de entorno para producción (con valores por defecto)
 ENV DATABASE_URL="postgresql://genius:KhloeMF0911$@localhost:5432/genius_dev" \
     POSTGRES_SERVER="localhost" \
     POSTGRES_PORT="5432" \
@@ -64,28 +147,96 @@ ENV DATABASE_URL="postgresql://genius:KhloeMF0911$@localhost:5432/genius_dev" \
     ENVIRONMENT="production" \
     DOMAIN="geniusindustries.org" \
     API_DOMAIN="api.geniusindustries.org" \
-    BACKEND_CORS_ORIGINS="https://geniusindustries.org,https://www.geniusindustries.org"
+    BACKEND_CORS_ORIGINS="https://geniusindustries.org,https://www.geniusindustries.org" \
+    SECRET_KEY="genius-industries-super-secret-key-2025" \
+    ACCESS_TOKEN_EXPIRE_MINUTES="43200" \
+    FIRST_SUPERUSER="ceo@geniusindustries.org" \
+    FIRST_SUPERUSER_PASSWORD="GeniusCEO2025!" \
+    CEO_USER="ceo@geniusindustries.org" \
+    CEO_USER_PASSWORD="GeniusCEO2025!" \
+    ADMIN_USER="ceo@geniusindustries.org" \
+    ADMIN_PASSWORD="GeniusCEO2025!"
 
-# Copiar frontend construido
+# ==============================================================================
+# FRONTEND CONFIGURATION
+# ==============================================================================
+# Copiar frontend construido desde stage anterior
 COPY --from=frontend-builder /frontend/dist /var/www/html
 
-# Configurar Nginx
+# Configurar permisos para nginx
+RUN chown -R www-data:www-data /var/www/html && \
+    chmod -R 755 /var/www/html
+
+# ==============================================================================
+# NGINX CONFIGURATION
+# ==============================================================================
+# Configurar Nginx con configuración optimizada
 COPY nginx/dokploy.conf /etc/nginx/sites-available/default
 
-# Configurar Supervisor para manejar múltiples procesos
+# Configuración adicional de nginx
+RUN echo "# Configuración optimizada Nginx" > /etc/nginx/nginx.conf && \
+    echo "user www-data;" >> /etc/nginx/nginx.conf && \
+    echo "worker_processes auto;" >> /etc/nginx/nginx.conf && \
+    echo "pid /run/nginx.pid;" >> /etc/nginx/nginx.conf && \
+    echo "events {" >> /etc/nginx/nginx.conf && \
+    echo "    worker_connections 1024;" >> /etc/nginx/nginx.conf && \
+    echo "    use epoll;" >> /etc/nginx/nginx.conf && \
+    echo "    multi_accept on;" >> /etc/nginx/nginx.conf && \
+    echo "}" >> /etc/nginx/nginx.conf && \
+    echo "http {" >> /etc/nginx/nginx.conf && \
+    echo "    include /etc/nginx/mime.types;" >> /etc/nginx/nginx.conf && \
+    echo "    default_type application/octet-stream;" >> /etc/nginx/nginx.conf && \
+    echo "    sendfile on;" >> /etc/nginx/nginx.conf && \
+    echo "    tcp_nopush on;" >> /etc/nginx/nginx.conf && \
+    echo "    tcp_nodelay on;" >> /etc/nginx/nginx.conf && \
+    echo "    keepalive_timeout 65;" >> /etc/nginx/nginx.conf && \
+    echo "    types_hash_max_size 2048;" >> /etc/nginx/nginx.conf && \
+    echo "    server_tokens off;" >> /etc/nginx/nginx.conf && \
+    echo "    include /etc/nginx/conf.d/*.conf;" >> /etc/nginx/nginx.conf && \
+    echo "    include /etc/nginx/sites-enabled/*;" >> /etc/nginx/nginx.conf && \
+    echo "}" >> /etc/nginx/nginx.conf
+
+# ==============================================================================
+# SUPERVISOR CONFIGURATION
+# ==============================================================================
+# Copiar configuración de supervisor optimizada
 COPY scripts/supervisord.conf /etc/supervisor/conf.d/supervisord.conf
 
-# Crear script de inicio
+# ==============================================================================
+# SCRIPTS AND PERMISSIONS
+# ==============================================================================
+# Copiar script de inicio optimizado
 COPY scripts/start-dokploy.sh /start-dokploy.sh
 RUN chmod +x /start-dokploy.sh
 
-# Crear usuario no-root
-RUN groupadd -r appuser && useradd -r -g appuser appuser
-RUN chown -R appuser:appuser /app
-RUN chown -R postgres:postgres /var/lib/postgresql
+# Crear directorios necesarios
+RUN mkdir -p /var/log/supervisor \
+             /var/log/genius \
+             /var/log/nginx \
+             /var/log/postgresql \
+             /var/run/postgresql \
+             /var/lib/postgresql/15/main
 
+# Configurar permisos
+RUN chown -R appuser:appuser /app && \
+    chown -R postgres:postgres /var/lib/postgresql && \
+    chown -R postgres:postgres /var/run/postgresql && \
+    chmod 755 /var/run/postgresql
+
+# Configurar healthcheck
+HEALTHCHECK --interval=30s --timeout=30s --start-period=5s --retries=3 \
+    CMD curl -f http://localhost/health || exit 1
+
+# ==============================================================================
+# FINAL CONFIGURATION
+# ==============================================================================
 # Exponer puertos
 EXPOSE 80 8000 5432
 
-# Comando de inicio
-CMD ["/start-dokploy.sh"] 
+# Usar ENTRYPOINT para mejor manejo de señales
+ENTRYPOINT ["/start-dokploy.sh"]
+
+# Metadata final
+LABEL org.opencontainers.image.source="https://github.com/genius-industries/genius-industries" \
+      org.opencontainers.image.documentation="https://geniusindustries.org/docs" \
+      org.opencontainers.image.licenses="MIT" 

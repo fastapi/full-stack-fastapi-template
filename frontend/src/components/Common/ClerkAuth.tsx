@@ -11,6 +11,23 @@ import { Box, Button, Flex, Text, VStack, HStack } from '@chakra-ui/react'
 import { useNavigate } from '@tanstack/react-router'
 import { useEffect } from 'react'
 
+// Función para obtener la URL de redirección basada en el rol
+function getRedirectUrlByRole(role?: string): string {
+  switch (role) {
+    case 'CEO':
+    case 'MANAGER':
+    case 'SUPERVISOR':
+    case 'HR':
+    case 'AGENT':
+    case 'SUPPORT':
+      return '/admin'
+    case 'CLIENT':
+      return '/client-dashboard'
+    default:
+      return '/client-dashboard' // Por defecto redirige a client dashboard
+  }
+}
+
 interface AuthWrapperProps {
   children: React.ReactNode
   requiredRole?: string[]
@@ -90,7 +107,7 @@ export function SignInPage() {
               }
             }}
             signUpUrl="/sign-up"
-            redirectUrl="/dashboard"
+            redirectUrl="/admin"
           />
         </VStack>
       </Box>
@@ -114,12 +131,39 @@ export function SignUpPage() {
         <VStack spacing={6}>
           <Box textAlign="center">
             <Text fontSize="2xl" fontWeight="bold" color="text">
-              Únete a GENIUS INDUSTRIES
+              Registro de Cliente - GENIUS INDUSTRIES
             </Text>
             <Text color="text.muted" mt={2}>
-              Crea tu cuenta para comenzar
+              Crea tu cuenta de cliente para acceder a nuestros servicios
             </Text>
+            
+            {/* Aviso importante sobre restricciones de registro */}
+            <Box 
+              mt={4} 
+              p={4} 
+              bg="blue.50" 
+              borderRadius="lg" 
+              border="1px solid" 
+              borderColor="blue.200"
+            >
+              <HStack spacing={2} justify="center" mb={2}>
+                <Text fontSize="sm" color="blue.700" fontWeight="bold">
+                  ℹ️ INFORMACIÓN IMPORTANTE
+                </Text>
+              </HStack>
+              <Text fontSize="sm" color="blue.700" textAlign="left">
+                <strong>Registro disponible únicamente para clientes.</strong>
+              </Text>
+              <Text fontSize="xs" color="blue.600" mt={2} textAlign="left">
+                Los usuarios corporativos (CEO, Manager, Supervisor, HR, Agentes, Soporte) 
+                son creados y gestionados exclusivamente por el administrador principal del sistema.
+              </Text>
+              <Text fontSize="xs" color="blue.600" mt={1} textAlign="left">
+                Si eres un empleado de GENIUS INDUSTRIES, contacta al CEO para obtener acceso.
+              </Text>
+            </Box>
           </Box>
+          
           <SignUp 
             appearance={{
               elements: {
@@ -128,8 +172,17 @@ export function SignUpPage() {
               }
             }}
             signInUrl="/sign-in"
-            redirectUrl="/dashboard"
+            redirectUrl="/client-dashboard"
           />
+          
+          <Box textAlign="center" pt={4} borderTop="1px solid" borderColor="border">
+            <Text fontSize="xs" color="text.muted">
+              ¿Ya tienes una cuenta? 
+              <Text as="span" color="blue.500" fontWeight="medium" ml={1}>
+                <a href="/sign-in">Inicia sesión aquí</a>
+              </Text>
+            </Text>
+          </Box>
         </VStack>
       </Box>
     </Flex>

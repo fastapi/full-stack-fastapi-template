@@ -3,26 +3,6 @@ import { createFileRoute } from '@tanstack/react-router';
 import { FiTrendingUp, FiShield, FiDollarSign, FiBarChart2, FiTarget, FiAward, FiBriefcase, FiGlobe, FiActivity, FiHome, FiArrowUpRight, FiClock, FiUsers, FiFileText, FiCheckCircle, FiInfo } from "react-icons/fi";
 import { PriceModals } from '../components/Investment/PriceModals';
 
-// Interfaces para las APIs de precios
-interface CryptoCurrency {
-  id: string;
-  symbol: string;
-  name: string;
-  current_price: number;
-  price_change_percentage_24h: number;
-  market_cap: number;
-  total_volume: number;
-  image: string;
-}
-
-interface ForexRate {
-  code: string;
-  name: string;
-  rate: number;
-  change: number;
-  flag: string;
-}
-
 const investmentServices = [
   { 
     icon: <FiHome className="text-white" size={32} />, 
@@ -67,36 +47,12 @@ const detailedOpportunities = [
     duration: "18-36 meses",
     status: "Disponible",
     image: "https://images.unsplash.com/photo-1545324418-cc1a3fa10c00?auto=format&fit=crop&w=400&q=80",
-    description: "Participación en proyectos inmobiliarios de alta gama en ubicaciones estratégicas de Bogotá, Medellín y Cali. Incluye desarrollos residenciales, comerciales e industriales con garantías jurídicas.",
+    description: "Participación en proyectos inmobiliarios de alta gama en ubicaciones estratégicas de Bogotá, Medellín y Cali.",
     features: [
       "Escrituración inmediata de la inversión",
       "Seguros de responsabilidad civil y todo riesgo", 
       "Avalúos independientes trimestrales",
-      "Opción de salida anticipada después de 12 meses",
-      "Participación en plusvalía del proyecto"
-    ],
-    requirements: [
-      "Inversión mínima: $50,000 USD",
-      "Perfil de riesgo: Conservador a moderado",
-      "Documentación: Declaración de renta último año",
-      "Origen de fondos: Certificación bancaria",
-      "Tiempo de vinculación: 18-36 meses"
-    ],
-    process: [
-      "1. Evaluación del perfil de inversión",
-      "2. Presentación de proyectos disponibles",
-      "3. Due diligence legal y técnico",
-      "4. Firma de contrato de participación",
-      "5. Desembolso y inicio de proyecto",
-      "6. Reportes mensuales de avance",
-      "7. Liquidación y distribución de utilidades"
-    ],
-    legalAspects: [
-      "Contrato de participación en fideicomiso",
-      "Póliza de cumplimiento del constructor",
-      "Licencias de construcción vigentes",
-      "Estudios de suelos y factibilidad",
-      "Seguros de todo riesgo del proyecto"
+      "Opción de salida anticipada después de 12 meses"
     ]
   },
   {
@@ -107,36 +63,12 @@ const detailedOpportunities = [
     duration: "12-24 meses",
     status: "Últimas plazas",
     image: "https://images.unsplash.com/photo-1611974789855-9c2a0a7236a3?auto=format&fit=crop&w=400&q=80",
-    description: "Portafolios diversificados en mercados internacionales con énfasis en empresas tecnológicas, energías renovables y consumo masivo. Gestión profesional con estrategias probadas.",
+    description: "Portafolios diversificados en mercados internacionales con énfasis en empresas tecnológicas.",
     features: [
       "Diversificación en +100 empresas globales",
       "Rebalanceo automático mensual del portafolio",
       "Acceso a mercados estadounidenses y europeos",
-      "Reportes detallados de performance mensual",
-      "Liquidez parcial trimestral (hasta 30%)"
-    ],
-    requirements: [
-      "Inversión mínima: $10,000 USD",
-      "Perfil de riesgo: Moderado a agresivo",
-      "Conocimiento del mercado de valores",
-      "Capacidad de pérdida del 15% anual",
-      "Horizonte de inversión mínimo: 12 meses"
-    ],
-    process: [
-      "1. Test de perfil de riesgo (MIFID II)",
-      "2. Selección de estrategia de inversión",
-      "3. Apertura de cuenta en custodia internacional",
-      "4. Transferencia de fondos y compra de participaciones",
-      "5. Monitoreo y reportes mensuales",
-      "6. Opción de reinversión de dividendos",
-      "7. Liquidación según términos acordados"
-    ],
-    legalAspects: [
-      "Regulación de la Superintendencia Financiera",
-      "Custodia en entidades internacionales AAA",
-      "Seguros de patrimonio autónomo",
-      "Auditorías independientes semestrales",
-      "Transparencia total en operaciones"
+      "Reportes detallados de performance mensual"
     ]
   },
   {
@@ -147,76 +79,28 @@ const detailedOpportunities = [
     duration: "6-18 meses",
     status: "Alta demanda",
     image: "https://images.unsplash.com/photo-1621761191319-c6fb62004040?auto=format&fit=crop&w=400&q=80",
-    description: "Estrategias algorítmicas en el mercado de criptomonedas con enfoque en Bitcoin, Ethereum y altcoins seleccionadas. Incluye staking, yield farming y arbitraje automatizado.",
+    description: "Estrategias algorítmicas en el mercado de criptomonedas con enfoque en Bitcoin, Ethereum y altcoins.",
     features: [
       "Trading algorítmico 24/7 con IA",
       "Diversificación en +20 criptomonedas",
       "Staking automático en protocolos DeFi",
-      "Arbitraje entre exchanges principales",
       "Stop-loss automático para protección"
-    ],
-    requirements: [
-      "Inversión mínima: $5,000 USD",
-      "Perfil de riesgo: Agresivo",
-      "Tolerancia alta a la volatilidad",
-      "Conocimiento básico de criptomonedas",
-      "Capacidad de pérdida del 30% anual"
-    ],
-    process: [
-      "1. Educación en fundamentos cripto",
-      "2. Evaluación de tolerancia al riesgo",
-      "3. Configuración de wallet institucional",
-      "4. Implementación de estrategias algorítmicas",
-      "5. Monitoreo en tiempo real 24/7",
-      "6. Reportes semanales de performance",
-      "7. Liquidación según mercado y términos"
-    ],
-    legalAspects: [
-      "Custodia en cold wallets multi-firma",
-      "Seguros contra hacks y robos",
-      "Compliance con regulaciones locales",
-      "Auditorías de smart contracts",
-      "Transparencia en operaciones blockchain"
     ]
   },
   {
     title: "Trading Profesional Forex",
     category: "Trading",
     roi: "8%-12%",
-    minInvestment: "$25,000 USD", 
+    minInvestment: "$25,000 USD",
     duration: "12-24 meses",
     status: "Disponible",
     image: "https://images.unsplash.com/photo-1590736969955-71cc94901144?auto=format&fit=crop&w=400&q=80",
-    description: "Operaciones en mercado Forex, commodities y derivados con tecnología de alta frecuencia. Gestión de riesgo avanzada y estrategias institucionales probadas.",
+    description: "Operaciones en mercado Forex, commodities y derivados con tecnología de alta frecuencia.",
     features: [
       "Trading de alta frecuencia (HFT)",
       "Análisis técnico y fundamental profesional",
       "Diversificación en múltiples pares de divisas",
-      "Risk management automático",
-      "Ejecución en microsegundos"
-    ],
-    requirements: [
-      "Inversión mínima: $25,000 USD",
-      "Perfil de riesgo: Moderado a agresivo",
-      "Experiencia previa en trading",
-      "Capacidad de drawdown del 12%",
-      "Comprensión del apalancamiento financiero"
-    ],
-    process: [
-      "1. Evaluación de experiencia en trading",
-      "2. Configuración de cuenta segregada",
-      "3. Implementación de algoritmos de trading",
-      "4. Ejecución automatizada de estrategias",
-      "5. Monitoreo de riesgo en tiempo real",
-      "6. Reportes diarios de operaciones",
-      "7. Liquidación y distribución de ganancias"
-    ],
-    legalAspects: [
-      "Regulación de brokers internacionales",
-      "Cuentas segregadas en bancos Tier 1",
-      "Seguros de responsabilidad profesional",
-      "Auditorías de estrategias de trading",
-      "Transparencia total en operaciones"
+      "Risk management automático"
     ]
   }
 ];
@@ -251,122 +135,10 @@ function InvestmentPage() {
   // Estados para los modales de precios
   const [showCryptoModal, setShowCryptoModal] = useState(false);
   const [showForexModal, setShowForexModal] = useState(false);
-  const [cryptoData, setCryptoData] = useState<CryptoCurrency[]>([]);
-  const [forexData, setForexData] = useState<ForexRate[]>([]);
-  const [cryptoLoading, setCryptoLoading] = useState(false);
-  const [forexLoading, setForexLoading] = useState(false);
-  const [lastCryptoUpdate, setLastCryptoUpdate] = useState<Date | null>(null);
-  const [lastForexUpdate, setLastForexUpdate] = useState<Date | null>(null);
 
   const whatsappNumber = "+573166827239";
   const whatsappMessage = "Hola, me interesa obtener asesoría sobre las oportunidades de inversión en GENIUS INDUSTRIES. ¿Podrían brindarme más información?";
   const whatsappUrl = `https://wa.me/${whatsappNumber}?text=${encodeURIComponent(whatsappMessage)}`;
-
-  // Función para obtener datos de criptomonedas (CoinGecko API)
-  const fetchCryptoData = async () => {
-    setCryptoLoading(true);
-    try {
-      const response = await fetch(
-        'https://api.coingecko.com/api/v3/coins/markets?vs_currency=usd&order=market_cap_desc&per_page=10&page=1&sparkline=false&price_change_percentage=24h'
-      );
-      const data = await response.json();
-      setCryptoData(data);
-      setLastCryptoUpdate(new Date());
-    } catch (error) {
-      console.error('Error fetching crypto data:', error);
-      // Datos de fallback si la API falla
-      setCryptoData([
-        {
-          id: 'bitcoin',
-          symbol: 'btc',
-          name: 'Bitcoin',
-          current_price: 43250.50,
-          price_change_percentage_24h: 2.45,
-          market_cap: 847920000000,
-          total_volume: 24680000000,
-          image: 'https://assets.coingecko.com/coins/images/1/small/bitcoin.png'
-        },
-        {
-          id: 'ethereum',
-          symbol: 'eth',
-          name: 'Ethereum',
-          current_price: 2650.80,
-          price_change_percentage_24h: -1.23,
-          market_cap: 318450000000,
-          total_volume: 15890000000,
-          image: 'https://assets.coingecko.com/coins/images/279/small/ethereum.png'
-        }
-      ]);
-    }
-    setCryptoLoading(false);
-  };
-
-  // Función para obtener datos de forex (ExchangeRate-API)
-  const fetchForexData = async () => {
-    setForexLoading(true);
-    try {
-      const response = await fetch('https://api.exchangerate-api.com/v4/latest/USD');
-      const data = await response.json();
-      
-      const currencies = [
-        { code: 'EUR', name: 'Euro', flag: '🇪🇺' },
-        { code: 'GBP', name: 'Libra Esterlina', flag: '🇬🇧' },
-        { code: 'JPY', name: 'Yen Japonés', flag: '🇯🇵' },
-        { code: 'CAD', name: 'Dólar Canadiense', flag: '🇨🇦' },
-        { code: 'AUD', name: 'Dólar Australiano', flag: '🇦🇺' },
-        { code: 'CHF', name: 'Franco Suizo', flag: '🇨🇭' },
-        { code: 'COP', name: 'Peso Colombiano', flag: '🇨🇴' },
-        { code: 'MXN', name: 'Peso Mexicano', flag: '🇲🇽' }
-      ];
-
-      const forexRates = currencies.map(currency => ({
-        ...currency,
-        rate: data.rates[currency.code] || 0,
-        change: Math.random() * 4 - 2 // Simulando cambio % (en una app real, esto vendría de otra API)
-      }));
-
-      setForexData(forexRates);
-      setLastForexUpdate(new Date());
-    } catch (error) {
-      console.error('Error fetching forex data:', error);
-      // Datos de fallback si la API falla
-      setForexData([
-        { code: 'EUR', name: 'Euro', flag: '🇪🇺', rate: 0.85, change: -0.12 },
-        { code: 'GBP', name: 'Libra Esterlina', flag: '🇬🇧', rate: 0.73, change: 0.08 },
-        { code: 'COP', name: 'Peso Colombiano', flag: '🇨🇴', rate: 4350.25, change: 0.45 }
-      ]);
-    }
-    setForexLoading(false);
-  };
-
-  // Formatear números
-  const formatCurrency = (value: number, currency = 'USD') => {
-    return new Intl.NumberFormat('en-US', {
-      style: 'currency',
-      currency: currency,
-      minimumFractionDigits: currency === 'USD' ? 2 : 0,
-      maximumFractionDigits: currency === 'USD' ? 2 : 0
-    }).format(value);
-  };
-
-  const formatMarketCap = (value: number) => {
-    if (value >= 1e12) return `$${(value / 1e12).toFixed(2)}T`;
-    if (value >= 1e9) return `$${(value / 1e9).toFixed(2)}B`;
-    if (value >= 1e6) return `$${(value / 1e6).toFixed(2)}M`;
-    return `$${value.toFixed(2)}`;
-  };
-
-  const getPriceChangeColor = (change: number) => {
-    if (change > 0) return 'text-green-500';
-    if (change < 0) return 'text-red-500';
-    return 'text-gray-400';
-  };
-
-  const getPriceChangeIcon = (change: number) => {
-    if (change > 0) return <FiArrowUp size={14} />;
-    if (change < 0) return <FiArrowDown size={14} />;
-    return <FiMinus size={14} />;
-  };
 
   const filteredOpportunities = selectedCategory === 'all' 
     ? detailedOpportunities 
@@ -422,13 +194,14 @@ function InvestmentPage() {
           </div>
 
           {/* Sección de novedades - Precios en tiempo real */}
-          <div className="bg-gray-900/50 rounded-2xl p-6 mb-8 border border-gray-700">
+          <div className="bg-gradient-to-r from-gray-900/80 to-gray-800/80 rounded-2xl p-6 mb-8 border border-gray-700 backdrop-blur-sm">
             <h3 className="text-2xl font-bold text-white mb-4 flex items-center justify-center gap-2">
               <FiBarChart2 size={24} />
-              📊 Novedades del Mercado
+              📊 Novedades del Mercado en Tiempo Real
             </h3>
-            <p className="text-gray-300 mb-6">
-              Mantente actualizado con los precios en tiempo real de criptomonedas y tipos de cambio forex
+            <p className="text-gray-300 mb-6 max-w-2xl mx-auto">
+              Mantente actualizado con los precios en tiempo real de las principales criptomonedas 
+              y tipos de cambio forex para tomar decisiones informadas
             </p>
             
             <div className="flex flex-wrap justify-center gap-4">
@@ -446,6 +219,10 @@ function InvestmentPage() {
                 <FiBarChart2 size={18} />
                 💱 Rates Forex en Vivo
               </button>
+            </div>
+            
+            <div className="mt-4 text-gray-400 text-sm">
+              ✨ Datos actualizados automáticamente desde APIs confiables
             </div>
           </div>
         </div>
@@ -480,13 +257,20 @@ function InvestmentPage() {
           </div>
         </div>
 
-        {/* Componente de modales de precios */}
-        <PriceModals 
-          showCryptoModal={showCryptoModal}
-          showForexModal={showForexModal}
-          onCloseCrypto={() => setShowCryptoModal(false)}
-          onCloseForex={() => setShowForexModal(false)}
-        />
+        {/* Benefits */}
+        <div className="grid md:grid-cols-4 gap-6 mb-16">
+          {benefits.map((benefit, index) => (
+            <div key={index} className="bg-gray-900 rounded-xl p-6 text-center border border-gray-700">
+              <div className="flex justify-center mb-4">
+                <div className="p-3 bg-gray-700 rounded-lg">
+                  {benefit.icon}
+                </div>
+              </div>
+              <h3 className="text-lg font-bold text-white mb-2">{benefit.title}</h3>
+              <p className="text-gray-400 text-sm">{benefit.desc}</p>
+            </div>
+          ))}
+        </div>
 
         {/* Detailed Opportunities Section */}
         {showOpportunities && (
@@ -524,7 +308,7 @@ function InvestmentPage() {
               </div>
 
               {/* Opportunities Grid */}
-              <div className="grid lg:grid-cols-2 xl:grid-cols-2 gap-8">
+              <div className="grid lg:grid-cols-2 gap-8">
                 {filteredOpportunities.map((opportunity, index) => (
                   <div key={index} className="bg-gray-800 rounded-2xl overflow-hidden shadow-xl border border-gray-700 hover:border-gray-600 transition-all duration-300 group">
                     <div className="relative overflow-hidden">
@@ -571,7 +355,6 @@ function InvestmentPage() {
                       <div className="mb-6">
                         <p className="text-gray-300 text-sm mb-4 leading-relaxed">{opportunity.description}</p>
                         
-                        {/* Features */}
                         <div className="mb-4">
                           <h4 className="text-white font-semibold mb-2 flex items-center gap-2">
                             <FiCheckCircle size={16} />
@@ -582,54 +365,6 @@ function InvestmentPage() {
                               <li key={i} className="text-gray-300 text-sm flex items-center gap-2">
                                 <div className="w-1.5 h-1.5 bg-green-500 rounded-full"></div>
                                 {feature}
-                              </li>
-                            ))}
-                          </ul>
-                        </div>
-
-                        {/* Requirements */}
-                        <div className="mb-4">
-                          <h4 className="text-white font-semibold mb-2 flex items-center gap-2">
-                            <FiFileText size={16} />
-                            Requisitos:
-                          </h4>
-                          <ul className="space-y-1">
-                            {opportunity.requirements.map((req, i) => (
-                              <li key={i} className="text-gray-300 text-sm flex items-center gap-2">
-                                <div className="w-1.5 h-1.5 bg-blue-500 rounded-full"></div>
-                                {req}
-                              </li>
-                            ))}
-                          </ul>
-                        </div>
-
-                        {/* Process */}
-                        <div className="mb-4">
-                          <h4 className="text-white font-semibold mb-2 flex items-center gap-2">
-                            <FiClock size={16} />
-                            Proceso de inversión:
-                          </h4>
-                          <ul className="space-y-1">
-                            {opportunity.process.map((step, i) => (
-                              <li key={i} className="text-gray-300 text-sm flex items-start gap-2">
-                                <div className="w-1.5 h-1.5 bg-yellow-500 rounded-full mt-2"></div>
-                                {step}
-                              </li>
-                            ))}
-                          </ul>
-                        </div>
-
-                        {/* Legal Aspects */}
-                        <div className="mb-4">
-                          <h4 className="text-white font-semibold mb-2 flex items-center gap-2">
-                            <FiShield size={16} />
-                            Aspectos legales y seguridad:
-                          </h4>
-                          <ul className="space-y-1">
-                            {opportunity.legalAspects.map((legal, i) => (
-                              <li key={i} className="text-gray-300 text-sm flex items-center gap-2">
-                                <div className="w-1.5 h-1.5 bg-purple-500 rounded-full"></div>
-                                {legal}
                               </li>
                             ))}
                           </ul>
@@ -656,38 +391,6 @@ function InvestmentPage() {
             </div>
           </div>
         )}
-
-        {/* Partners Carousel */}
-        <div className="mb-16">
-          <div className="text-center mb-8">
-            <h2 className="text-3xl font-bold text-white mb-4">Nuestros Aliados Estratégicos</h2>
-            <p className="text-gray-300">Trabajamos con las mejores instituciones financieras y tecnológicas del mundo</p>
-          </div>
-          
-          <div className="relative overflow-hidden py-8">
-            <div className="flex animate-scroll whitespace-nowrap">
-              {/* Primera fila de logos */}
-              <div className="flex items-center gap-16 shrink-0">
-                <div className="w-20 h-20 bg-white rounded-full flex items-center justify-center shadow-lg hover:scale-110 transition-transform duration-300">
-                  <span className="text-gray-800 font-bold text-sm text-center">Spedire365</span>
-                </div>
-                <div className="w-20 h-20 bg-white rounded-full flex items-center justify-center shadow-lg hover:scale-110 transition-transform duration-300">
-                  <span className="text-gray-800 font-bold text-sm text-center">GeniusLabs</span>
-                </div>
-              </div>
-              
-              {/* Segunda fila idéntica para el efecto infinito */}
-              <div className="flex items-center gap-16 shrink-0 ml-16">
-                <div className="w-20 h-20 bg-white rounded-full flex items-center justify-center shadow-lg hover:scale-110 transition-transform duration-300">
-                  <span className="text-gray-800 font-bold text-sm text-center">Spedire365</span>
-                </div>
-                <div className="w-20 h-20 bg-white rounded-full flex items-center justify-center shadow-lg hover:scale-110 transition-transform duration-300">
-                  <span className="text-gray-800 font-bold text-sm text-center">GeniusLabs</span>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
 
         {/* Why Choose Us */}
         <div className="bg-gray-900 rounded-2xl p-12 text-center border border-gray-700">
@@ -733,12 +436,19 @@ function InvestmentPage() {
             </button>
           </div>
         </div>
+
+        {/* Componente de modales de precios */}
+        <PriceModals 
+          showCryptoModal={showCryptoModal}
+          showForexModal={showForexModal}
+          onCloseCrypto={() => setShowCryptoModal(false)}
+          onCloseForex={() => setShowForexModal(false)}
+        />
       </div>
     </div>
   );
 }
 
-export const Route = createFileRoute('/investment')({
+export const Route = createFileRoute('/investment-simple')({
   component: InvestmentPage,
 }); 
-

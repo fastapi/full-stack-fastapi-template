@@ -1,0 +1,79 @@
+[supervisord]
+nodaemon=true
+user=root
+logfile=/var/log/supervisor/supervisord.log
+pidfile=/var/run/supervisord.pid
+childlogdir=/var/log/supervisor
+loglevel=info
+
+[program:postgresql]
+command=/usr/lib/postgresql/15/bin/postgres -D /var/lib/postgresql/15/main -c config_file=/etc/postgresql/15/main/postgresql.conf
+user=postgres
+autostart=true
+autorestart=true
+redirect_stderr=true
+stdout_logfile=/var/log/supervisor/postgresql.log
+stdout_logfile_maxbytes=50MB
+stdout_logfile_backups=10
+priority=10
+startsecs=10
+stopwaitsecs=30
+
+[program:backend]
+command=uvicorn app.main:app --host 0.0.0.0 --port 8000 --workers 1 --max-requests 1000
+directory=/app
+user=root
+autostart=true
+autorestart=true
+redirect_stderr=true
+stdout_logfile=/var/log/supervisor/backend.log
+stdout_logfile_maxbytes=50MB
+stdout_logfile_backups=10
+environment=
+    DATABASE_URL="postgresql://genius:KhloeMF0911$@localhost:5432/genius_dev",
+    POSTGRES_SERVER="localhost",
+    POSTGRES_PORT="5432",
+    POSTGRES_DB="genius_dev",
+    POSTGRES_USER="genius",
+    POSTGRES_PASSWORD="KhloeMF0911$",
+    ENVIRONMENT="production",
+    DOMAIN="geniusindustries.org",
+    API_DOMAIN="api.geniusindustries.org",
+    BACKEND_CORS_ORIGINS="https://geniusindustries.org,https://www.geniusindustries.org",
+    CEO_USER="ceo@geniusindustries.org",
+    CEO_USER_PASSWORD="GeniusCEO2025!",
+    ADMIN_USER="ceo@geniusindustries.org",
+    ADMIN_PASSWORD="GeniusCEO2025!",
+    SECRET_KEY="genius-industries-super-secret-key-2025",
+    ACCESS_TOKEN_EXPIRE_MINUTES="43200",
+    FIRST_SUPERUSER="ceo@geniusindustries.org",
+    FIRST_SUPERUSER_PASSWORD="GeniusCEO2025!"
+priority=20
+startsecs=10
+stopwaitsecs=30
+
+[program:nginx]
+command=/usr/sbin/nginx -g "daemon off;"
+autostart=true
+autorestart=true
+redirect_stderr=true
+stdout_logfile=/var/log/supervisor/nginx.log
+stdout_logfile_maxbytes=50MB
+stdout_logfile_backups=10
+priority=30
+startsecs=5
+stopwaitsecs=30
+
+[group:genius-industries]
+programs=postgresql,backend,nginx
+priority=999
+
+[unix_http_server]
+file=/var/run/supervisor.sock
+chmod=0700
+
+[supervisorctl]
+serverurl=unix:///var/run/supervisor.sock
+
+[rpcinterface:supervisor]
+supervisor.rpcinterface_factory = supervisor.rpcinterface:make_main_rpcinterface 

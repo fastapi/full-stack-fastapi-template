@@ -19,10 +19,13 @@ import { Route as RecoverPasswordImport } from './routes/recover-password'
 import { Route as MarketplaceImport } from './routes/marketplace'
 import { Route as LoginImport } from './routes/login'
 import { Route as InvestmentbackupImport } from './routes/investment_backup'
+import { Route as InvestmentSimpleImport } from './routes/investment-simple'
+import { Route as InvestmentBackupImport } from './routes/investment-backup'
 import { Route as InvestmentImport } from './routes/investment'
 import { Route as CreditsImport } from './routes/credits'
 import { Route as ContactImport } from './routes/contact'
 import { Route as ClientDashboardImport } from './routes/client-dashboard'
+import { Route as AdminImport } from './routes/admin'
 import { Route as AboutImport } from './routes/about'
 import { Route as IndexImport } from './routes/index'
 
@@ -68,6 +71,16 @@ const InvestmentbackupRoute = InvestmentbackupImport.update({
   getParentRoute: () => rootRoute,
 } as any)
 
+const InvestmentSimpleRoute = InvestmentSimpleImport.update({
+  path: '/investment-simple',
+  getParentRoute: () => rootRoute,
+} as any)
+
+const InvestmentBackupRoute = InvestmentBackupImport.update({
+  path: '/investment-backup',
+  getParentRoute: () => rootRoute,
+} as any)
+
 const InvestmentRoute = InvestmentImport.update({
   path: '/investment',
   getParentRoute: () => rootRoute,
@@ -85,6 +98,11 @@ const ContactRoute = ContactImport.update({
 
 const ClientDashboardRoute = ClientDashboardImport.update({
   path: '/client-dashboard',
+  getParentRoute: () => rootRoute,
+} as any)
+
+const AdminRoute = AdminImport.update({
+  path: '/admin',
   getParentRoute: () => rootRoute,
 } as any)
 
@@ -110,6 +128,10 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AboutImport
       parentRoute: typeof rootRoute
     }
+    '/admin': {
+      preLoaderRoute: typeof AdminImport
+      parentRoute: typeof rootRoute
+    }
     '/client-dashboard': {
       preLoaderRoute: typeof ClientDashboardImport
       parentRoute: typeof rootRoute
@@ -124,6 +146,14 @@ declare module '@tanstack/react-router' {
     }
     '/investment': {
       preLoaderRoute: typeof InvestmentImport
+      parentRoute: typeof rootRoute
+    }
+    '/investment-backup': {
+      preLoaderRoute: typeof InvestmentBackupImport
+      parentRoute: typeof rootRoute
+    }
+    '/investment-simple': {
+      preLoaderRoute: typeof InvestmentSimpleImport
       parentRoute: typeof rootRoute
     }
     '/investment_backup': {
@@ -166,10 +196,13 @@ declare module '@tanstack/react-router' {
 export const routeTree = rootRoute.addChildren([
   IndexRoute,
   AboutRoute,
+  AdminRoute,
   ClientDashboardRoute,
   ContactRoute,
   CreditsRoute,
   InvestmentRoute,
+  InvestmentBackupRoute,
+  InvestmentSimpleRoute,
   InvestmentbackupRoute,
   LoginRoute,
   MarketplaceRoute,

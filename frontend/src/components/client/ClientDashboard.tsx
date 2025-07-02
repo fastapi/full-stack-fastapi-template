@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { FiHome, FiDollarSign, FiTrendingUp, FiCreditCard, FiEye, FiHeart, FiCalendar, FiBarChart, FiPieChart, FiSettings, FiDownload, FiPlus, FiEdit3, FiTrash2, FiMapPin, FiUser, FiPhone, FiMail } from "react-icons/fi";
+import UserMenu from "../Common/UserMenu";
 
 interface Property {
   id: string;
@@ -226,9 +227,14 @@ const ClientDashboard: React.FC = () => {
     <div className="min-h-screen bg-gray-50 py-8 px-4">
       <div className="max-w-7xl mx-auto">
         {/* Header */}
-        <div className="mb-8">
-          <h1 className="text-3xl font-bold text-gray-900 mb-2">Dashboard Cliente</h1>
-          <p className="text-gray-600">Gestiona tus propiedades, créditos e inversiones</p>
+        <div className="mb-8 flex justify-between items-center">
+          <div>
+            <h1 className="text-3xl font-bold text-gray-900 mb-2">Dashboard Cliente</h1>
+            <p className="text-gray-600">Gestiona tus propiedades, créditos e inversiones</p>
+          </div>
+          <div className="shrink-0">
+            <UserMenu />
+          </div>
         </div>
 
         {/* Tabs Navigation */}

@@ -1,6 +1,7 @@
 import { ReactNode } from 'react'
-import { Box,  Flex, Heading, Text } from '@chakra-ui/react'
+import { Box, Flex, Heading, Text } from '@chakra-ui/react'
 import { useAuth } from '@/hooks/useAuth'
+import UserMenu from './UserMenu'
 
 interface RoleDashboardProps {
   children: ReactNode
@@ -18,19 +19,25 @@ export const RoleDashboard = ({
   return (
     <Box maxW="7xl" mx="auto" px={6}>
       <Flex direction="column" gap={6}>
-        <Box>
-          <Heading size="lg" color="primary.black">
-            {title}
-          </Heading>
-          {description && (
-            <Text mt={2} color="ui.text.secondary">
-              {description}
+        {/* Header with UserMenu */}
+        <Flex justify="space-between" align="center" pt={4}>
+          <Box>
+            <Heading size="lg" color="primary.black">
+              {title}
+            </Heading>
+            {description && (
+              <Text mt={2} color="ui.text.secondary">
+                {description}
+              </Text>
+            )}
+            <Text mt={1} fontSize="sm" color="ui.text.light">
+              {user?.email} • {role?.toUpperCase()}
             </Text>
-          )}
-          <Text mt={1} fontSize="sm" color="ui.text.light">
-            {user?.email} • {role?.toUpperCase()}
-          </Text>
-        </Box>
+          </Box>
+          
+          {/* User Menu in top right */}
+          <UserMenu />
+        </Flex>
 
         <Box
           bg="white"
