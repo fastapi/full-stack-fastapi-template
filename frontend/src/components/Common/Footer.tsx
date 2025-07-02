@@ -1,5 +1,6 @@
 import React, { useEffect } from 'react';
-import { FaFacebook, FaTwitter, FaInstagram, FaLinkedin, FaPhone, FaEnvelope, FaMapMarkerAlt } from 'react-icons/fa';
+import { FaFacebook, FaTiktok, FaInstagram, FaLinkedin, FaPhone, FaEnvelope, FaMapMarkerAlt } from 'react-icons/fa';
+import logo from '../../../public/assets/images/GENIUS-INDUSTRIES.png';
 
 // Declaración de tipos para window.chatwootSDK
 declare global {
@@ -88,9 +89,9 @@ const Footer: React.FC = () => {
     {
       title: 'Contacto',
       links: [
-        { name: '+57 300 123 4567', href: 'tel:+573001234567', icon: <FaPhone /> },
+        { name: '+57 316 682 7239', href: 'tel:+573166827239', icon: <FaPhone /> },
         { name: 'info@geniusindustries.org', href: 'mailto:info@geniusindustries.org', icon: <FaEnvelope /> },
-        { name: 'Bogotá, Colombia', href: '#', icon: <FaMapMarkerAlt /> },
+        { name: 'Medellin, Colombia', href: '#', icon: <FaMapMarkerAlt /> },
       ]
     }
   ];
@@ -102,7 +103,12 @@ const Footer: React.FC = () => {
           {/* Company Info */}
           <div className="lg:col-span-1">
             <div className="flex items-center space-x-2 mb-4">
-              <div className="w-8 h-8 bg-white rounded-full flex items-center justify-center">
+              <img 
+                src={logo} 
+                alt="Genius Industries Logo" 
+                className="w-8 h-8 rounded-full object-cover"
+              />
+              <div className="w-8 h-8 bg-white rounded-full flex items-center justify-center hidden">
                 <span className="text-black font-bold text-sm">GI</span>
               </div>
               <span className="text-xl font-bold">GENIUS INDUSTRIES</span>
@@ -112,16 +118,16 @@ const Footer: React.FC = () => {
               para la compra, venta y financiación de propiedades.
             </p>
             <div className="flex space-x-4">
-              <a href="https://facebook.com" className="text-gray-400 hover:text-white transition-colors">
+              <a href="https://facebook.com/geniusindustries1" className="text-gray-400 hover:text-white transition-colors">
                 <FaFacebook size={20} />
               </a>
-              <a href="https://twitter.com" className="text-gray-400 hover:text-white transition-colors">
-                <FaTwitter size={20} />
+              <a href="https://tiktok.com/@geniusindustries" className="text-gray-400 hover:text-white transition-colors">
+                <FaTiktok size={20} />
               </a>
-              <a href="https://instagram.com" className="text-gray-400 hover:text-white transition-colors">
+              <a href="https://instagram.com/geniu_industies_int" className="text-gray-400 hover:text-white transition-colors">
                 <FaInstagram size={20} />
               </a>
-              <a href="https://linkedin.com" className="text-gray-400 hover:text-white transition-colors">
+              <a href="https://linkedin.com/genius-industries-international" className="text-gray-400 hover:text-white transition-colors">
                 <FaLinkedin size={20} />
               </a>
             </div>
