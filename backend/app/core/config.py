@@ -51,7 +51,7 @@ class Settings(BaseSettings):
     API_V1_STR: str
 
     # Backend
-    BACKEND_CORS_ORIGINS: str = "http://localhost,http://localhost:5173,https://localhost,https://localhost:5173"
+    BACKEND_CORS_ORIGINS: str = "http://localhost,http://localhost:5173,https://localhost,https://localhost:5173,https://geniusindustries.org,https://www.api.geniusindustries.org"
     SECRET_KEY: str
     ACCESS_TOKEN_EXPIRE_MINUTES: int = 11520
 

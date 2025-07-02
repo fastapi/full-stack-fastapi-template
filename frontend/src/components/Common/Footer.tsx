@@ -1,170 +1,165 @@
 import React, { useEffect } from 'react';
-import { Link } from '@tanstack/react-router';
-import { FiFacebook, FiInstagram, FiLinkedin, FiMail, FiPhone } from 'react-icons/fi';
-import { FaTiktok, FaWhatsapp } from 'react-icons/fa';
+import { FaFacebook, FaTwitter, FaInstagram, FaLinkedin, FaPhone, FaEnvelope, FaMapMarkerAlt } from 'react-icons/fa';
 
-// Declaración de tipos para Chatwoot
+// Declaración de tipos para window.chatwootSDK
 declare global {
   interface Window {
-    chatwootSDK?: {
-      run: (config: { websiteToken: string; baseUrl: string }) => void;
-    };
+    chatwootSDK?: any;
+    chatwootSettings?: any;
   }
 }
 
-const Footer = () => {
-  const socialLinks = [
-    { name: 'Facebook', icon: FiFacebook, href: 'https://www.facebook.com/geniusindustries1' },
-    { name: 'Tiktok', icon: FaTiktok, href: 'https://www.tiktok.com/@geniusindustriesl' },
-    { name: 'Instagram', icon: FiInstagram, href: 'https://www.instagram.com/geniu_industries_int' },
-    { name: 'LinkedIn', icon: FiLinkedin, href: 'https://www.linkedin.com/company/genius-industries-international/' },
-    { name: 'Whatsapp', icon: FaWhatsapp, href: 'https://whatsapp.com/channel/0029Vacz5n0CHDyglZc7a11X' },
-  ];
+// Tipos para los links del footer
+interface FooterLink {
+  name: string;
+  href: string;
+  icon?: React.ReactElement;
+}
 
-  const quickLinks = [
-    { name: 'Nosotros', href: '/about' },
-    { name: 'Propiedades', href: '/marketplace' },
-    { name: 'Inversiones', href: '/investment' },
-    { name: 'Contacto', href: '/contact' }
-  ];
+interface FooterSection {
+  title: string;
+  links: FooterLink[];
+}
 
-  const legalLinks = [
-    { name: 'Políticas de Privacidad', href: '#' },
-    { name: 'Términos de Uso', href: '#' },
-    { name: 'Cookies', href: '#' }
-  ];
-
-  // Efecto para cargar el script de Chatwoot
+const Footer: React.FC = () => {
   useEffect(() => {
-    // Configuración de Chatwoot
-    const BASE_URL = "https://chat-geniusindustries.up.railway.app";
-    const websiteToken = 'D6zXewaMkYtWBpKL1fSjpCtb';
-
-    // Función para cargar Chatwoot
-    const loadChatwoot = () => {
-      // Verificar si ya existe el script
-      if (document.querySelector(`script[src="${BASE_URL}/packs/js/sdk.js"]`)) {
+    // Configurar Chatwoot
+    const initChatwoot = () => {
+      // Evitar duplicar el script
+      if (window.chatwootSDK) {
         return;
       }
 
-      // Crear y configurar el script
+      // Configuración de Chatwoot
+      window.chatwootSettings = {
+        hideMessageBubble: false,
+        position: 'right',
+        locale: 'es',
+        type: 'standard',
+      };
+
+      // Cargar script de Chatwoot
       const script = document.createElement('script');
-      script.src = `${BASE_URL}/packs/js/sdk.js`;
+      script.src = 'https://chat-geniusindustries.up.railway.app/packs/js/sdk.js';
       script.defer = true;
       script.async = true;
-
-      // Función onload del script
-      script.onload = function() {
+      
+      script.onload = () => {
         if (window.chatwootSDK) {
           window.chatwootSDK.run({
-            websiteToken: websiteToken,
-            baseUrl: BASE_URL
+            websiteToken: 'D6zXewaMkYtWBpKL1fSjpCtb',
+            baseUrl: 'https://chat-geniusindustries.up.railway.app'
           });
         }
       };
 
-      // Agregar el script al DOM
       document.head.appendChild(script);
     };
 
-    // Cargar Chatwoot
-    loadChatwoot();
+    initChatwoot();
 
-    // Cleanup function (opcional)
+    // Cleanup
     return () => {
-      // Si necesitas limpiar el script al desmontar el componente
-      const existingScript = document.querySelector(`script[src="${BASE_URL}/packs/js/sdk.js"]`);
-      if (existingScript) {
-        existingScript.remove();
+      if (window.chatwootSDK) {
+        // Cleanup si es necesario
       }
     };
-  }, []); // Array vacío significa que se ejecuta solo una vez al montar
+  }, []);
+
+  const footerLinks: FooterSection[] = [
+    {
+      title: 'Empresa',
+      links: [
+        { name: 'Acerca de', href: '/about' },
+        { name: 'Contacto', href: '/contact' },
+        { name: 'Marketplace', href: '/marketplace' },
+        { name: 'Inversiones', href: '/investment' },
+      ]
+    },
+    {
+      title: 'Servicios',
+      links: [
+        { name: 'Compra de Propiedades', href: '/marketplace' },
+        { name: 'Créditos Inmobiliarios', href: '/credits' },
+        { name: 'Inversiones', href: '/investment' },
+        { name: 'Asesoría Legal', href: '/contact' },
+      ]
+    },
+    {
+      title: 'Contacto',
+      links: [
+        { name: '+57 300 123 4567', href: 'tel:+573001234567', icon: <FaPhone /> },
+        { name: 'info@geniusindustries.org', href: 'mailto:info@geniusindustries.org', icon: <FaEnvelope /> },
+        { name: 'Bogotá, Colombia', href: '#', icon: <FaMapMarkerAlt /> },
+      ]
+    }
+  ];
 
   return (
     <footer className="bg-black text-white">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
           {/* Company Info */}
-          <div className="lg:col-span-2">
-            <div className="flex items-center space-x-3 mb-4">
-              <img
-                src="/assets/images/GENIUS-INDUSTRIES.png"
-                alt="GENIUS INDUSTRIES"
-                className="h-10 w-10 rounded-full object-cover"
-              />
+          <div className="lg:col-span-1">
+            <div className="flex items-center space-x-2 mb-4">
+              <div className="w-8 h-8 bg-white rounded-full flex items-center justify-center">
+                <span className="text-black font-bold text-sm">GI</span>
+              </div>
               <span className="text-xl font-bold">GENIUS INDUSTRIES</span>
             </div>
-            <p className="text-gray-400 mb-6 max-w-md">
-              Lideramos el mercado de bienes raíces e inversiones en Latinoamérica, 
-              ofreciendo soluciones inmobiliarias y gestión de activos de clase mundial.
+            <p className="text-gray-300 mb-6">
+              Líder en el mercado inmobiliario y financiero, ofreciendo soluciones integrales 
+              para la compra, venta y financiación de propiedades.
             </p>
-            <div className="space-y-2">
-              <div className="flex items-center space-x-2 text-gray-400">
-                <FiMail className="w-4 h-4" />
-                <span>info@geniusindustries.org</span>
-              </div>
-              <div className="flex items-center space-x-2 text-gray-400">
-                <FiPhone className="w-4 h-4" />
-                <span>+57 (316) 682 7239</span>
-              </div>
-            </div>
-          </div>
-
-          {/* Quick Links */}
-          <div>
-            <h3 className="text-lg font-semibold mb-4">Enlaces Rápidos</h3>
-            <ul className="space-y-2">
-              {quickLinks.map((link) => (
-                <li key={link.name}>
-                  <Link
-                    to={link.href}
-                    className="text-gray-400 hover:text-white transition-colors duration-200"
-                  >
-                    {link.name}
-                  </Link>
-                </li>
-              ))}
-            </ul>
-          </div>
-
-          {/* Social Media */}
-          <div>
-            <h3 className="text-lg font-semibold mb-4">Síguenos</h3>
             <div className="flex space-x-4">
-              {socialLinks.map((social) => {
-                const Icon = social.icon;
-                return (
-                  <a
-                    key={social.name}
-                    href={social.href}
-                    className="text-gray-400 hover:text-white transition-colors duration-200"
-                    aria-label={social.name}
-                  >
-                    <Icon className="w-6 h-6" />
-                  </a>
-                );
-              })}
+              <a href="https://facebook.com" className="text-gray-400 hover:text-white transition-colors">
+                <FaFacebook size={20} />
+              </a>
+              <a href="https://twitter.com" className="text-gray-400 hover:text-white transition-colors">
+                <FaTwitter size={20} />
+              </a>
+              <a href="https://instagram.com" className="text-gray-400 hover:text-white transition-colors">
+                <FaInstagram size={20} />
+              </a>
+              <a href="https://linkedin.com" className="text-gray-400 hover:text-white transition-colors">
+                <FaLinkedin size={20} />
+              </a>
             </div>
           </div>
+
+          {/* Footer Links */}
+          {footerLinks.map((section, index) => (
+            <div key={index}>
+              <h3 className="font-semibold text-lg mb-4">{section.title}</h3>
+              <ul className="space-y-2">
+                {section.links.map((link, linkIndex) => (
+                  <li key={linkIndex}>
+                    <a 
+                      href={link.href}
+                      className="text-gray-300 hover:text-white transition-colors flex items-center space-x-2"
+                    >
+                      {link.icon && <span>{link.icon}</span>}
+                      <span>{link.name}</span>
+                    </a>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          ))}
         </div>
 
         {/* Bottom Bar */}
-        <div className="border-t border-gray-800 mt-8 pt-8">
-          <div className="flex flex-col md:flex-row justify-between items-center">
-            <p className="text-gray-400 text-sm mb-4 md:mb-0">
-              © 2019 GENIUS INDUSTRIES. Todos los derechos reservados.
-            </p>
-            <div className="flex space-x-6">
-              {legalLinks.map((link) => (
-                <a
-                  key={link.name}
-                  href={link.href}
-                  className="text-gray-400 hover:text-white text-sm transition-colors duration-200"
-                >
-                  {link.name}
-                </a>
-              ))}
-            </div>
+        <div className="border-t border-gray-800 mt-8 pt-8 flex flex-col md:flex-row justify-between items-center">
+          <p className="text-gray-400 text-sm">
+            © {new Date().getFullYear()} GENIUS INDUSTRIES. Todos los derechos reservados.
+          </p>
+          <div className="flex space-x-6 mt-4 md:mt-0">
+            <a href="/privacy" className="text-gray-400 hover:text-white text-sm transition-colors">
+              Política de Privacidad
+            </a>
+            <a href="/terms" className="text-gray-400 hover:text-white text-sm transition-colors">
+              Términos de Servicio
+            </a>
           </div>
         </div>
       </div>

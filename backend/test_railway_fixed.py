@@ -19,30 +19,36 @@ print(f"👤 User: {USER}")
 print(f"🔒 Password: {'*' * len(PASSWORD)}")
 
 # Test both configurations
-configs = [
+RAILWAY_CONFIGS = [
     {
         "name": "Railway Proxy (CORRECTO)",
         "host": "trolley.proxy.rlwy.net",
         "port": 47731,
-        "sslmode": "require"
+        "database": "railway",
+        "user": "postgres", 
+        "password": "KhloeMF0911$"  # ✅ PASSWORD UNIFICADO
     },
     {
         "name": "Railway Internal (PARA DOCKER)",
-        "host": "postgres.railway.internal", 
+        "host": "postgres.railway.internal",
         "port": 5432,
-        "sslmode": "require"
+        "database": "railway",
+        "user": "postgres",
+        "password": "KhloeMF0911$"  # ✅ PASSWORD UNIFICADO
     },
     {
         "name": "Railway Public Domain (BACKUP)",
         "host": "postgres-production-bff4.up.railway.app",
         "port": 5432,
-        "sslmode": "require"
+        "database": "railway",
+        "user": "postgres",
+        "password": "KhloeMF0911$"  # ✅ PASSWORD UNIFICADO
     }
 ]
 
 successful_config = None
 
-for config in configs:
+for config in RAILWAY_CONFIGS:
     try:
         print(f"\n🔄 Testing: {config['name']}")
         print(f"   Host: {config['host']}:{config['port']}")
@@ -53,7 +59,7 @@ for config in configs:
             database=DATABASE,
             user=USER,
             password=PASSWORD,
-            sslmode=config['sslmode'],
+            sslmode="require",
             connect_timeout=10
         )
         

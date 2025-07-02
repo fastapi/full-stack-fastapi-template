@@ -1,0 +1,112 @@
+version: '3.8'
+
+services:
+  # PostgreSQL Database - Configuración idéntica a local
+  postgres:
+    image: postgres:15-alpine
+    container_name: genius-postgres-prod
+    environment:
+      POSTGRES_DB: genius_dev
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: KhloeMF0911$
+      POSTGRES_INITDB_ARGS: "--auth-host=scram-sha-256"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./backend/init-scripts:/docker-entrypoint-initdb.d
+    ports:
+      - "5432:5432"
+    networks:
+      - genius-network
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d genius_dev"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # Backend FastAPI
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: genius-backend-prod
+    environment:
+      - DATABASE_URL=postgresql://postgres:KhloeMF0911$@postgres:5432/genius_dev
+      - POSTGRES_SERVER=postgres
+      - POSTGRES_PORT=5432
+      - POSTGRES_DB=genius_dev
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=KhloeMF0911$
+      - ENVIRONMENT=production
+      - SECRET_KEY=${SECRET_KEY}
+      - CLERK_SECRET_KEY=${CLERK_SECRET_KEY}
+      - CLERK_PUBLISHABLE_KEY=${CLERK_PUBLISHABLE_KEY}
+      - FRONTEND_HOST=https://tu-dominio.com
+      - BACKEND_CORS_ORIGINS=https://tu-dominio.com,http://localhost:5173
+    ports:
+      - "8000:8000"
+    depends_on:
+      postgres:
+        condition: service_healthy
+    networks:
+      - genius-network
+    restart: unless-stopped
+    volumes:
+      - ./backend/logs:/app/logs
+
+  # Frontend React
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+      args:
+        - VITE_API_URL=https://api.tu-dominio.com
+        - VITE_CLERK_PUBLISHABLE_KEY=${CLERK_PUBLISHABLE_KEY}
+    container_name: genius-frontend-prod
+    ports:
+      - "3000:80"
+    networks:
+      - genius-network
+    restart: unless-stopped
+    depends_on:
+      - backend
+
+  # Nginx Reverse Proxy
+  nginx:
+    image: nginx:alpine
+    container_name: genius-nginx-prod
+    volumes:
+      - ./nginx/nginx.conf:/etc/nginx/nginx.conf
+      - ./nginx/ssl:/etc/nginx/ssl
+    ports:
+      - "80:80"
+      - "443:443"
+    depends_on:
+      - frontend
+      - backend
+    networks:
+      - genius-network
+    restart: unless-stopped
+
+  # Redis Cache (Opcional pero recomendado)
+  redis:
+    image: redis:7-alpine
+    container_name: genius-redis-prod
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    networks:
+      - genius-network
+    restart: unless-stopped
+    command: redis-server --appendonly yes
+
+volumes:
+  postgres_data:
+    driver: local
+  redis_data:
+    driver: local
+
+networks:
+  genius-network:
+    driver: bridge 

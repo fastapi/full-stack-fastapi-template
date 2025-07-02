@@ -2,7 +2,7 @@ from fastapi import APIRouter
 
 from app.api.routes import (
     items, login, private, users, utils, ceo, manager, supervisor, hr, support, agent, 
-    auth, properties, transactions, analytics, credits, financial_analysis, clerk_webhooks, legal
+    auth, properties, transactions, analytics, credits, financial_analysis, clerk_webhooks, legal, client_dashboard
 )
 from app.core.config import settings
 
@@ -35,6 +35,7 @@ api_router.include_router(analytics.router, prefix="/analytics", tags=["analytic
 api_router.include_router(credits.router, prefix="/credits", tags=["credits"])
 api_router.include_router(financial_analysis.router, prefix="/financial", tags=["financial"])
 api_router.include_router(legal.router, prefix="/legal", tags=["legal"])
+api_router.include_router(client_dashboard.router, prefix="/client", tags=["client"])
 
 if settings.ENVIRONMENT == "local":
     api_router.include_router(private.router)

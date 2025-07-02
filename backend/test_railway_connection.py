@@ -29,7 +29,7 @@ RAILWAY_CONFIG = {
     "port": 5432,
     "database": "railway",
     "user": "postgres",
-    "password": "TU_PASSWORD_AQUI"  # ⚠️ CAMBIAR POR TU PASSWORD REAL
+    "password": "KhloeMF0911$"  # ✅ PASSWORD ACTUALIZADO
 }
 
 DATABASE_URL = f"postgresql://{RAILWAY_CONFIG['user']}:{RAILWAY_CONFIG['password']}@{RAILWAY_CONFIG['host']}:{RAILWAY_CONFIG['port']}/{RAILWAY_CONFIG['database']}"

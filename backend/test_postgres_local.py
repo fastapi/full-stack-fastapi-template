@@ -9,7 +9,7 @@ HOST = "localhost"
 PORT = 5432
 DATABASE = "genius_dev"
 USER = "postgres"
-PASSWORD = "dev_password_123"
+PASSWORD = "KhloeMF0911$"
 
 print(f"🌐 Host: {HOST}")
 print(f"🚪 Port: {PORT}")
@@ -91,7 +91,7 @@ while retry_count < max_retries:
         
         print(f"\n🎉 LOCAL POSTGRESQL: FULLY FUNCTIONAL!")
         print(f"💡 Use this configuration for development:")
-        print(f"   DATABASE_URL=postgresql://postgres:dev_password_123@localhost:5432/genius_dev")
+        print(f"   DATABASE_URL=postgresql://postgres:KhloeMF0911$@localhost:5432/genius_dev")
         
         break
         
