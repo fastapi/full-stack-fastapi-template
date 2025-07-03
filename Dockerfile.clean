@@ -1,0 +1,157 @@
+# 🏢 GENIUS INDUSTRIES - Dockerfile Limpio
+FROM node:18-alpine AS frontend-builder
+WORKDIR /build
+COPY frontend/package*.json ./
+RUN npm ci
+COPY frontend/ ./
+RUN npm run build
+
+FROM python:3.11-slim AS backend-builder
+ENV PYTHONUNBUFFERED=1
+RUN apt-get update && apt-get install -y build-essential libpq-dev && rm -rf /var/lib/apt/lists/*
+RUN pip install uv
+WORKDIR /build
+COPY backend/pyproject.toml backend/uv.lock ./
+RUN uv sync --frozen
+
+FROM ubuntu:22.04
+ENV DEBIAN_FRONTEND=noninteractive \
+    PYTHONUNBUFFERED=1 \
+    PATH="/app/.venv/bin:$PATH"
+
+RUN apt-get update && apt-get install -y \
+    postgresql-14 \
+    postgresql-client-14 \
+    python3.11 \
+    python3-pip \
+    nginx \
+    supervisor \
+    curl \
+    libpq5 \
+    && apt-get clean \
+    && rm -rf /var/lib/apt/lists/* \
+    && groupadd -r appuser && useradd -r -g appuser appuser
+
+# Setup PostgreSQL directories
+RUN mkdir -p /var/lib/postgresql/14/main /var/log/postgresql /var/run/postgresql \
+    && chown -R postgres:postgres /var/lib/postgresql /var/log/postgresql /var/run/postgresql
+
+# Setup backend
+WORKDIR /app
+COPY --from=backend-builder /build/.venv /app/.venv
+COPY backend/app /app/app
+COPY backend/alembic.ini ./
+
+# Setup frontend
+COPY --from=frontend-builder /build/dist /var/www/html/
+RUN chown -R www-data:www-data /var/www/html
+
+# Configure Nginx
+RUN rm -f /etc/nginx/sites-enabled/default
+
+# Create nginx config file
+COPY <<'NGINX_EOF' /etc/nginx/sites-available/default
+server {
+    listen 8080;
+    server_name _;
+    
+    location /api/ {
+        proxy_pass http://127.0.0.1:8000/api/;
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+    }
+    
+    location ~ ^/(docs|openapi\.json|health)$ {
+        proxy_pass http://127.0.0.1:8000;
+        proxy_set_header Host $host;
+    }
+    
+    location / {
+        root /var/www/html;
+        try_files $uri $uri/ /index.html;
+    }
+    
+    location /nginx-health {
+        return 200 "OK";
+        add_header Content-Type text/plain;
+    }
+}
+NGINX_EOF
+
+RUN ln -sf /etc/nginx/sites-available/default /etc/nginx/sites-enabled/default
+
+# Configure Supervisor
+COPY <<'SUPERVISOR_EOF' /etc/supervisor/conf.d/supervisord.conf
+[supervisord]
+nodaemon=true
+user=root
+
+[program:postgresql]
+command=/usr/lib/postgresql/14/bin/postgres -D /var/lib/postgresql/14/main
+user=postgres
+autostart=true
+autorestart=true
+
+[program:backend]
+command=/app/.venv/bin/uvicorn app.main:app --host 0.0.0.0 --port 8000
+directory=/app
+user=appuser
+autostart=true
+autorestart=true
+environment=PATH="/app/.venv/bin:%(ENV_PATH)s"
+
+[program:nginx]
+command=/usr/sbin/nginx -g "daemon off;"
+autostart=true
+autorestart=true
+SUPERVISOR_EOF
+
+# Create startup script
+COPY <<'START_EOF' /start.sh
+#!/bin/bash
+set -e
+
+echo "🚀 Starting Genius Industries..."
+
+# Create log directories
+mkdir -p /var/log/supervisor /var/log/nginx /var/log/postgresql
+
+# Initialize PostgreSQL if needed
+if [ ! -d "/var/lib/postgresql/14/main/base" ]; then
+    echo "🐘 Initializing PostgreSQL..."
+    su - postgres -c "/usr/lib/postgresql/14/bin/initdb -D /var/lib/postgresql/14/main"
+    
+    # Basic PostgreSQL configuration
+    {
+        echo "listen_addresses = '*'"
+        echo "port = 5432"
+        echo "max_connections = 100"
+        echo "shared_buffers = 128MB"
+    } > /var/lib/postgresql/14/main/postgresql.conf
+    
+    {
+        echo "local   all             postgres                peer"
+        echo "local   all             all                     md5"
+        echo "host    all             all             127.0.0.1/32   md5"
+        echo "host    all             all             ::1/128        md5"
+    } > /var/lib/postgresql/14/main/pg_hba.conf
+    
+    chown postgres:postgres /var/lib/postgresql/14/main/postgresql.conf
+    chown postgres:postgres /var/lib/postgresql/14/main/pg_hba.conf
+fi
+
+echo "✅ Starting services..."
+exec /usr/bin/supervisord -c /etc/supervisor/conf.d/supervisord.conf
+START_EOF
+
+RUN chmod +x /start.sh
+
+EXPOSE 8080
+VOLUME ["/var/lib/postgresql/14/main"]
+
+HEALTHCHECK --interval=30s --timeout=10s --start-period=60s --retries=3 \
+    CMD curl -f http://localhost:8080/nginx-health || exit 1
+
+ENTRYPOINT ["/start.sh"]

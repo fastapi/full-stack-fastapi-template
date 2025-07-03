@@ -18,14 +18,14 @@ log() {
 log "🐘 Configurando PostgreSQL..."
 
 # Inicializar cluster si no existe
-if [ ! -d "/var/lib/postgresql/15/main" ]; then
+if [ ! -d "/var/lib/postgresql/14/main" ]; then
     log "🔧 Inicializando cluster PostgreSQL..."
-    su - postgres -c "/usr/lib/postgresql/15/bin/initdb -D /var/lib/postgresql/15/main"
+    su - postgres -c "/usr/lib/postgresql/14/bin/initdb -D /var/lib/postgresql/14/main"
 fi
 
 # Configurar PostgreSQL
-mkdir -p /etc/postgresql/15/main
-cat > /etc/postgresql/15/main/postgresql.conf << EOF
+mkdir -p /etc/postgresql/14/main
+cat > /etc/postgresql/14/main/postgresql.conf << EOF
 listen_addresses = '*'
 port = 5432
 max_connections = 100
@@ -41,7 +41,7 @@ lc_time = 'en_US.utf8'
 default_text_search_config = 'pg_catalog.english'
 EOF
 
-cat > /etc/postgresql/15/main/pg_hba.conf << EOF
+cat > /etc/postgresql/14/main/pg_hba.conf << EOF
 local   all             postgres                                peer
 local   all             all                                     md5
 host    all             all             127.0.0.1/32            md5
@@ -51,7 +51,7 @@ EOF
 
 # Iniciar PostgreSQL
 log "🐘 Iniciando PostgreSQL..."
-su - postgres -c "pg_ctl -D /var/lib/postgresql/15/main -l /var/log/postgresql/postgresql.log start"
+su - postgres -c "pg_ctl -D /var/lib/postgresql/14/main -l /var/log/postgresql/postgresql.log start"
 
 # Esperar a que PostgreSQL esté listo
 log "⏳ Esperando PostgreSQL..."

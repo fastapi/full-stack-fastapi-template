@@ -111,4 +111,120 @@ copier.yml
 
 # Nginx (ya no necesario)
 nginx/
-docker/ 
+docker/
+
+# Docker files
+**/Dockerfile*
+**/docker-compose*
+**/.dockerignore
+
+# Development files
+**/.env.local
+**/.env.development
+**/.env.test
+**/README.md
+**/CHANGELOG.md
+**/*.md
+
+# IDE and editors
+**/.vscode
+**/.idea
+**/*.swp
+**/*.swo
+**/*~
+
+# Logs
+**/logs
+**/*.log
+**/npm-debug.log*
+**/yarn-debug.log*
+**/yarn-error.log*
+**/lerna-debug.log*
+
+# Runtime data
+**/pids
+**/*.pid
+**/*.seed
+**/*.pid.lock
+
+# Coverage directory used by tools like istanbul
+**/coverage
+**/.nyc_output
+
+# Dependency directories
+**/node_modules/
+**/.npm
+**/.yarn/cache
+**/.yarn/unplugged
+**/.yarn/build-state.yml
+**/.yarn/install-state.gz
+**/.pnp.*
+
+# Backend specific
+backend/.venv/
+backend/__pycache__/
+backend/**/*.pyc
+backend/**/*.pyo
+backend/**/*.pyd
+backend/**/__pycache__/
+backend/**/*.so
+backend/.pytest_cache/
+backend/.coverage
+backend/htmlcov/
+backend/.tox/
+backend/.cache
+backend/nosetests.xml
+backend/coverage.xml
+backend/*.cover
+backend/.hypothesis/
+backend/.pytest_cache/
+
+# Frontend specific
+frontend/node_modules/
+frontend/.next/
+frontend/out/
+frontend/build/
+frontend/dist/
+frontend/.cache/
+frontend/.parcel-cache/
+frontend/.nuxt/
+frontend/.vuepress/dist/
+frontend/.serverless/
+frontend/.fusebox/
+frontend/.dynamodb/
+
+# OS generated files
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# Temporary files
+**/tmp/
+**/temp/
+**/*.tmp
+**/*.temp
+
+# Test files (keep only essential ones)
+**/test_*
+**/tests_*
+**/*_test.py
+**/*_test.ts
+**/*_test.js
+
+# Documentation
+**/docs/
+**/*.md
+
+# Include essential scripts
+!scripts/*.sh
+!scripts/supervisord.conf
+!scripts/start-dokploy.sh
+!backend/pyproject.toml
+!backend/uv.lock
+!backend/alembic.ini
+!frontend/package.json
+!frontend/package-lock.json 

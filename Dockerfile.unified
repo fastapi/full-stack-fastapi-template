@@ -1,0 +1,89 @@
+# 🏢 GENIUS INDUSTRIES - Dockerfile Unificado
+# Frontend (React) + Backend (FastAPI) en un solo contenedor
+
+# =============================================================================
+# ETAPA 1: Construir Frontend
+# =============================================================================
+FROM node:18-alpine AS frontend-builder
+
+WORKDIR /frontend
+
+# Copiar archivos de dependencias del frontend
+COPY frontend/package*.json ./
+
+# Instalar dependencias del frontend
+RUN npm ci --silent && npm cache clean --force
+
+# Copiar código fuente del frontend
+COPY frontend/ ./
+
+# Construir el frontend
+RUN npx vite build
+
+# =============================================================================
+# ETAPA 2: Construir Backend con Python
+# =============================================================================
+FROM python:3.11-slim AS backend-builder
+
+ENV PYTHONUNBUFFERED=1 \
+    PYTHONDONTWRITEBYTECODE=1
+
+# Instalar uv para gestión de dependencias
+RUN pip install uv
+
+WORKDIR /backend-build
+
+# Copiar archivos de configuración del backend
+COPY backend/pyproject.toml backend/uv.lock ./
+
+# Instalar dependencias del backend
+RUN uv sync --frozen --no-dev
+
+# =============================================================================
+# ETAPA 3: Imagen de Producción Unificada
+# =============================================================================
+FROM python:3.11-slim
+
+# Variables de entorno
+ENV PYTHONUNBUFFERED=1 \
+    PYTHONDONTWRITEBYTECODE=1 \
+    PATH="/app/.venv/bin:$PATH" \
+    VIRTUAL_ENV="/app/.venv"
+
+# Instalar dependencias del sistema
+RUN apt-get update && apt-get install -y \
+    libpq5 \
+    curl \
+    && rm -rf /var/lib/apt/lists/*
+
+# Crear usuario no-root
+RUN groupadd -r appuser && useradd -r -g appuser appuser
+
+# Directorio de trabajo
+WORKDIR /app
+
+# Copiar entorno virtual del backend desde builder
+COPY --from=backend-builder --chown=appuser:appuser /backend-build/.venv /app/.venv
+
+# Copiar código fuente del backend
+COPY --chown=appuser:appuser backend/app /app/app
+COPY --chown=appuser:appuser backend/alembic.ini ./
+
+# Copiar archivos estáticos del frontend desde builder
+COPY --from=frontend-builder --chown=appuser:appuser /frontend/dist /app/static
+
+# Crear directorio para logs
+RUN mkdir -p /app/logs && chown appuser:appuser /app/logs
+
+# Cambiar a usuario no-root
+USER appuser
+
+# Health check
+HEALTHCHECK --interval=30s --timeout=10s --start-period=30s --retries=3 \
+    CMD curl -f http://localhost:8000/health || exit 1
+
+# Exponer puerto
+EXPOSE 8000
+
+# Comando de inicio usando python -m uvicorn
+CMD ["python", "-m", "uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8000", "--workers", "1"] 

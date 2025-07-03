@@ -1,13 +1,94 @@
-.git
-.gitignore
-.env
-node_modules
-dist
-coverage
-.idea
-.vscode
-*.log
-.DS_Store
+# 🏢 GENIUS INDUSTRIES - Frontend Docker Ignore
+
+# Dependencies
+node_modules/
+jspm_packages/
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
+lerna-debug.log*
+.pnpm-debug.log*
+
+# Build outputs
+build/
+dist/
+.next/
+out/
+
+# Environment files
+.env*
+!.env.example
+
+# Logs
+logs/
+*.log
+
+# Runtime data
+pids/
+*.pid
+*.seed
+*.pid.lock
+
+# Coverage
+coverage/
+*.lcov
+.nyc_output
+
+# Cache
+.npm
+.eslintcache
+.cache
+.parcel-cache
+.vite-cache
+.rollup.cache
+
+# TypeScript
+*.tsbuildinfo
+
+# Testing
+.jest-cache/
+playwright-report/
+test-results/
+
+# IDEs
+.vscode/
+.idea/
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
+*.swp
+*.swo
+*~
+
+# OS
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# Git
+.git/
+.gitignore
+
+# Documentation
+*.md
+!README.md
+
+# Temporary files
+tmp/
+temp/
+*.tmp
+
+# Docker
+Dockerfile*
+docker-compose*
+.dockerignore
+
+# Misc
+*.tgz
+*.tar.gz

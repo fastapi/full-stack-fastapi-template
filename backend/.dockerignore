@@ -1,30 +1,100 @@
-# Python
-__pycache__
-app.egg-info
-*.pyc
-.mypy_cache
-.coverage
-htmlcov
-.venv
-
-# Git
-.git
-.gitignore
-
-# Environment
-.env
-
-# Python
-*.pyo
-*.pyd
-.Python
-
-# IDEs
-.idea/
-.vscode/
+# 🏢 GENIUS INDUSTRIES - Backend Docker Ignore
 
 # Logs
 *.log
+logs/
+app/logs/
 
-# Test
+# Environment files
+.env*
+!.env.example
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+share/python-wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+MANIFEST
+app.egg-info
+
+# Virtual environments
+venv/
+ENV/
+env/
+.venv/
+
+# Testing
+.coverage
 .pytest_cache/
+.tox/
+.nox/
+htmlcov/
+.coverage.*
+coverage.xml
+*.cover
+*.py,cover
+.hypothesis/
+.mypy_cache
+
+# IDEs
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# Git
+.git/
+.gitignore
+
+# Documentation
+docs/
+*.md
+!README.md
+
+# Development
+.pre-commit-config.yaml
+.editorconfig
+
+# Database
+*.db
+*.sqlite3
+
+# Temporary files
+tmp/
+temp/
+*.tmp
+
+# Node modules (si hay alguno)
+node_modules/
+
+# Docker
+Dockerfile*
+docker-compose*
+.dockerignore

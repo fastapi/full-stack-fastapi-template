@@ -14,16 +14,10 @@ import { dark } from '@clerk/themes'
 
 import { ApiError, OpenAPI } from "./client"
 import { CustomProvider } from "./components/ui/provider"
+import { envConfig } from "./env-check"
 
-// Configuración de OpenAPI
-OpenAPI.BASE = import.meta.env.VITE_API_URL
-
-// Clerk configuration
-const PUBLISHABLE_KEY = import.meta.env.VITE_CLERK_PUBLISHABLE_KEY
-
-if (!PUBLISHABLE_KEY) {
-  throw new Error("Falta la VITE_CLERK_PUBLISHABLE_KEY en el archivo .env")
-}
+// Configuración de OpenAPI usando variables verificadas
+OpenAPI.BASE = envConfig.VITE_API_URL
 
 // OpenAPI token ahora viene de Clerk
 OpenAPI.TOKEN = async () => {
@@ -59,7 +53,7 @@ declare module "@tanstack/react-router" {
 ReactDOM.createRoot(document.getElementById("root")!).render(
   <StrictMode>
     <ClerkProvider 
-      publishableKey={PUBLISHABLE_KEY}
+      publishableKey={envConfig.VITE_CLERK_PUBLISHABLE_KEY}
       appearance={{
         baseTheme: dark,
         variables: {
