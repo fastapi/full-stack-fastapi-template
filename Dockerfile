@@ -2,7 +2,7 @@
 FROM node:18-alpine AS frontend-builder
 WORKDIR /app
 COPY frontend/package*.json ./
-RUN npm ci --only=production
+RUN npm ci
 
 ENV VITE_API_URL=https://api.geniusindustries.org
 ENV VITE_API_BASE_URL=https://api.geniusindustries.org  
