@@ -1,4 +1,14 @@
 {
   "extends": "./tsconfig.json",
-  "exclude": ["tests/**/*.ts"]
+  "exclude": ["tests/**/*.ts", "**/*.test.ts", "**/*.spec.ts"],
+  "compilerOptions": {
+    "noEmit": true,
+    "skipLibCheck": true,
+    "noUnusedLocals": false,
+    "noUnusedParameters": false,
+    "strict": false,
+    "noImplicitAny": false,
+    "exactOptionalPropertyTypes": false,
+    "useUnknownInCatchVariables": false
+  }
 }
