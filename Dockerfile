@@ -43,11 +43,11 @@ USER root
 
 # Configurar backend con UV
 WORKDIR /app
+# Copiar configuración y código del backend
 COPY backend/pyproject.toml backend/uv.lock ./
-RUN uv sync --frozen --no-cache
-
-# Copiar el código del backend
 COPY backend/app ./app
+# Ahora sincronizar dependencias
+RUN uv sync --frozen --no-cache
 
 # Variables de entorno del backend
 ENV DATABASE_URL="postgresql://genius:KhloeMF0911\$@localhost:5432/genius_dev"
