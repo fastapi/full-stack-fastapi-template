@@ -111,3 +111,14 @@ class TokenPayload(SQLModel):
 class NewPassword(SQLModel):
     token: str
     new_password: str = Field(min_length=8, max_length=40)
+
+
+# class CsvRecord(SQLModel, table=True):
+#     id: int | None = Field(default=None, primary_key=True)
+#     COMMADDR: str
+#     上车UTC: str
+#     上车LAT: str
+#     上车LON: str
+#     下车UTC: str
+#     下车LAT: str
+#     下车LON: str
