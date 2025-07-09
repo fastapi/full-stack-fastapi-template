@@ -1,5 +1,6 @@
-import { Box, Container, Text } from "@chakra-ui/react"
+import { Box, Container, Text, Button, Stack } from "@chakra-ui/react"
 import { createFileRoute } from "@tanstack/react-router"
+import { useNavigate } from "@tanstack/react-router"
 
 import useAuth from "@/hooks/useAuth"
 
@@ -9,6 +10,7 @@ export const Route = createFileRoute("/_layout/")({
 
 function Dashboard() {
   const { user: currentUser } = useAuth()
+  const navigate = useNavigate()
 
   return (
     <>
@@ -19,6 +21,8 @@ function Dashboard() {
           </Text>
           <Text>Welcome back, nice to see you again!</Text>
         </Box>
+        <Stack direction={{ base: "column", md: "row" }} spacing={6} mt={8}>
+        </Stack>
       </Container>
     </>
   )

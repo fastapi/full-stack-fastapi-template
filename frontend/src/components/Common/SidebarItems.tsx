@@ -10,6 +10,9 @@ const items = [
   { icon: FiHome, title: "Dashboard", path: "/" },
   { icon: FiBriefcase, title: "Items", path: "/items" },
   { icon: FiSettings, title: "User Settings", path: "/settings" },
+  { icon: FiHome, title: "人脸识别", path: "/face-recognition" },
+  { icon: FiBriefcase, title: "路面检测", path: "/road-detection" },
+  { icon: FiSettings, title: "交通数据分析", path: "/traffic-analysis" },
 ]
 
 interface SidebarItemsProps {
