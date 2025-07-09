@@ -1,4 +1,4 @@
-import { Box, Container, Text, Button, Stack } from "@chakra-ui/react"
+import { Box, Container, Text, Stack } from "@chakra-ui/react"
 import { createFileRoute } from "@tanstack/react-router"
 import { useNavigate } from "@tanstack/react-router"
 

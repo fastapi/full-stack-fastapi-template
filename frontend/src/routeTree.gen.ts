@@ -18,6 +18,7 @@ import { Route as LoginImport } from './routes/login'
 import { Route as LayoutImport } from './routes/_layout'
 import { Route as LayoutIndexImport } from './routes/_layout/index'
 import { Route as LayoutTrafficAnalysisImport } from './routes/_layout/traffic-analysis'
+import { Route as LayoutStaticHeatmapImport } from './routes/_layout/static-heatmap'
 import { Route as LayoutSettingsImport } from './routes/_layout/settings'
 import { Route as LayoutRoadDetectionImport } from './routes/_layout/road-detection'
 import { Route as LayoutItemsImport } from './routes/_layout/items'
@@ -58,6 +59,11 @@ const LayoutIndexRoute = LayoutIndexImport.update({
 
 const LayoutTrafficAnalysisRoute = LayoutTrafficAnalysisImport.update({
   path: '/traffic-analysis',
+  getParentRoute: () => LayoutRoute,
+} as any)
+
+const LayoutStaticHeatmapRoute = LayoutStaticHeatmapImport.update({
+  path: '/static-heatmap',
   getParentRoute: () => LayoutRoute,
 } as any)
 
@@ -130,6 +136,10 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof LayoutSettingsImport
       parentRoute: typeof LayoutImport
     }
+    '/_layout/static-heatmap': {
+      preLoaderRoute: typeof LayoutStaticHeatmapImport
+      parentRoute: typeof LayoutImport
+    }
     '/_layout/traffic-analysis': {
       preLoaderRoute: typeof LayoutTrafficAnalysisImport
       parentRoute: typeof LayoutImport
@@ -150,6 +160,7 @@ export const routeTree = rootRoute.addChildren([
     LayoutItemsRoute,
     LayoutRoadDetectionRoute,
     LayoutSettingsRoute,
+    LayoutStaticHeatmapRoute,
     LayoutTrafficAnalysisRoute,
     LayoutIndexRoute,
   ]),
