@@ -6,3 +6,6 @@ app.egg-info
 htmlcov
 .cache
 .venv
+# 屏蔽所有csv文件
+*.csv
+**/*.csv

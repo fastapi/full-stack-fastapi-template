@@ -7,6 +7,7 @@ from pathlib import Path
 from fastapi.responses import JSONResponse
 from datetime import datetime, timedelta
 import csv
+from typing import Literal
 
 router = APIRouter(prefix="/analysis", tags=["analysis"])
 
@@ -153,3 +154,46 @@ def test_data_analysis():
         "data_points_found": len(data),
         "sample_data": data[:5] if data else []
     } 
+
+@router.get("/passenger-count-distribution")
+def passenger_count_distribution(
+    interval: Literal["15min", "1h"] = Query("15min", description="统计间隔，可选15min或1h")
+):
+    """
+    统计全量数据，按15分钟或1小时为间隔，统计每个时间段的乘客数量分布
+    """
+    csv_path = Path("/app/data/csv/pair_converted_jn0912.csv")
+    if not csv_path.exists():
+        return JSONResponse(status_code=404, content={"error": "数据文件不存在"})
+    # 设定时间间隔
+    delta = timedelta(minutes=15) if interval == "15min" else timedelta(hours=1)
+    # 读取所有UTC时间
+    time_counts = {}
+    with open(csv_path, encoding="utf-8") as f:
+        reader = csv.DictReader(f)
+        for row in reader:
+            utc = row.get("ONUTC", "")
+            if not utc:
+                continue
+            try:
+                dt = parse_utc_timestamp(utc)
+                # 计算该时间属于哪个区间
+                if interval == "15min":
+                    bucket = dt.replace(minute=(dt.minute // 15) * 15, second=0)
+                else:
+                    bucket = dt.replace(minute=0, second=0)
+                key = bucket.strftime("%Y%m%d%H%M%S")
+                time_counts[key] = time_counts.get(key, 0) + 1
+            except Exception:
+                continue
+    # 排序输出
+    result = []
+    for k in sorted(time_counts.keys()):
+        start_dt = parse_utc_timestamp(k)
+        end_dt = start_dt + delta
+        result.append({
+            "interval_start": k,
+            "interval_end": end_dt.strftime("%Y%m%d%H%M%S"),
+            "count": time_counts[k]
+        })
+    return result 
