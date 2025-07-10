@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { useQuery } from '@tanstack/react-query'
-import { Button, Flex } from '@chakra-ui/react'
+import { Button, Flex, Box, Grid, GridItem, Text } from '@chakra-ui/react'
 import { FiHome, FiBarChart2, FiUsers, FiTrendingUp, FiSettings } from 'react-icons/fi'
 import { RoleDashboard } from '../Common/RoleDashboard'
 import { PropertyCRM } from './PropertyCRM'
@@ -65,42 +65,42 @@ export const CEODashboard = () => {
         return <PropertyCRM />
       case 'analytics':
         return (
-          <div style={{ background: '#fff', padding: 24, borderRadius: 8, textAlign: 'center' }}>
-            <div style={{ fontSize: 18, color: '#666' }}>
+          <Box bg="bg.surface" p={6} borderRadius="lg" textAlign="center" border="1px" borderColor="border">
+            <Text fontSize="lg" color="text.muted">
               Módulo de Analytics Avanzado en desarrollo
-            </div>
-          </div>
+            </Text>
+          </Box>
         )
       case 'organization':
         return (
-          <div style={{ background: '#fff', padding: 24, borderRadius: 8, textAlign: 'center' }}>
-            <div style={{ fontSize: 18, color: '#666' }}>
+          <Box bg="bg.surface" p={6} borderRadius="lg" textAlign="center" border="1px" borderColor="border">
+            <Text fontSize="lg" color="text.muted">
               Módulo de Gestión Organizacional en desarrollo
-            </div>
-          </div>
+            </Text>
+          </Box>
         )
       case 'settings':
         return (
-          <div style={{ background: '#fff', padding: 24, borderRadius: 8, textAlign: 'center' }}>
-            <div style={{ fontSize: 18, color: '#666' }}>
+          <Box bg="bg.surface" p={6} borderRadius="lg" textAlign="center" border="1px" borderColor="border">
+            <Text fontSize="lg" color="text.muted">
               Módulo de Configuración del Sistema en desarrollo
-            </div>
-          </div>
+            </Text>
+          </Box>
         )
       default:
         if (isLoading) {
           return (
-            <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '200px' }}>
-              <div style={{ color: '#666' }}>Cargando datos del dashboard...</div>
-            </div>
+            <Box display="flex" justifyContent="center" alignItems="center" height="200px">
+              <Text color="text.muted">Cargando datos del dashboard...</Text>
+            </Box>
           )
         }
 
         if (error) {
           return (
-            <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '200px' }}>
-              <div style={{ color: '#dc3545' }}>Error cargando datos: {(error as Error).message}</div>
-            </div>
+            <Box display="flex" justifyContent="center" alignItems="center" height="200px">
+              <Text color="red.400">Error cargando datos: {(error as Error).message}</Text>
+            </Box>
           )
         }
 
@@ -108,77 +108,87 @@ export const CEODashboard = () => {
 
         return (
           <>
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(250px, 1fr))', gap: 24, marginBottom: 32 }}>
-              <div style={{ background: '#fff', borderRadius: 8, boxShadow: '0 1px 3px 0 rgba(0,0,0,0.1)', padding: 24 }}>
-                <div style={{ color: '#666', fontSize: 14, marginBottom: 4 }}>Ingresos Totales</div>
-                <div style={{ fontSize: 32, fontWeight: 700, color: '#000' }}>
-                  ${summary?.total_revenue?.toLocaleString() || '0'}
-                </div>
-                <div style={{ color: '#28A745', fontSize: 13, marginTop: 4 }}>
-                  ↑ {summary?.monthly_growth || 0}% (30 días)
-                </div>
-              </div>
+            <Grid templateColumns="repeat(auto-fit, minmax(250px, 1fr))" gap={6} mb={8}>
+              <GridItem>
+                <Box bg="bg.surface" borderRadius="lg" shadow="sm" p={6} border="1px" borderColor="border">
+                  <Text color="text.muted" fontSize="sm" mb={2}>Ingresos Totales</Text>
+                  <Text fontSize="3xl" fontWeight="bold" color="text">
+                    ${summary?.total_revenue?.toLocaleString() || '0'}
+                  </Text>
+                  <Text color="green.400" fontSize="sm" mt={2}>
+                    ↑ {summary?.monthly_growth || 0}% (30 días)
+                  </Text>
+                </Box>
+              </GridItem>
               
-              <div style={{ background: '#fff', borderRadius: 8, boxShadow: '0 1px 3px 0 rgba(0,0,0,0.1)', padding: 24 }}>
-                <div style={{ color: '#666', fontSize: 14, marginBottom: 4 }}>Propiedades Activas</div>
-                <div style={{ fontSize: 32, fontWeight: 700, color: '#000' }}>
-                  {summary?.total_properties || 0}
-                </div>
-                <div style={{ color: '#28A745', fontSize: 13, marginTop: 4 }}>↑ 12% (30 días)</div>
-              </div>
+              <GridItem>
+                <Box bg="bg.surface" borderRadius="lg" shadow="sm" p={6} border="1px" borderColor="border">
+                  <Text color="text.muted" fontSize="sm" mb={2}>Propiedades Activas</Text>
+                  <Text fontSize="3xl" fontWeight="bold" color="text">
+                    {summary?.total_properties || 0}
+                  </Text>
+                  <Text color="green.400" fontSize="sm" mt={2}>↑ 12% (30 días)</Text>
+                </Box>
+              </GridItem>
               
-              <div style={{ background: '#fff', borderRadius: 8, boxShadow: '0 1px 3px 0 rgba(0,0,0,0.1)', padding: 24 }}>
-                <div style={{ color: '#666', fontSize: 14, marginBottom: 4 }}>Agentes Activos</div>
-                <div style={{ fontSize: 32, fontWeight: 700, color: '#000' }}>
-                  {summary?.active_agents || 0}
-                </div>
-                <div style={{ color: '#28A745', fontSize: 13, marginTop: 4 }}>↑ 5% (30 días)</div>
-              </div>
+              <GridItem>
+                <Box bg="bg.surface" borderRadius="lg" shadow="sm" p={6} border="1px" borderColor="border">
+                  <Text color="text.muted" fontSize="sm" mb={2}>Agentes Activos</Text>
+                  <Text fontSize="3xl" fontWeight="bold" color="text">
+                    {summary?.active_agents || 0}
+                  </Text>
+                  <Text color="green.400" fontSize="sm" mt={2}>↑ 5% (30 días)</Text>
+                </Box>
+              </GridItem>
               
-              <div style={{ background: '#fff', borderRadius: 8, boxShadow: '0 1px 3px 0 rgba(0,0,0,0.1)', padding: 24 }}>
-                <div style={{ color: '#666', fontSize: 14, marginBottom: 4 }}>Usuarios Totales</div>
-                <div style={{ fontSize: 32, fontWeight: 700, color: '#000' }}>
-                  {summary?.total_users || 0}
-                </div>
-                <div style={{ color: '#17A2B8', fontSize: 13, marginTop: 4 }}>
-                  {summary?.active_users || 0} activos
-                </div>
-              </div>
-            </div>
+              <GridItem>
+                <Box bg="bg.surface" borderRadius="lg" shadow="sm" p={6} border="1px" borderColor="border">
+                  <Text color="text.muted" fontSize="sm" mb={2}>Usuarios Totales</Text>
+                  <Text fontSize="3xl" fontWeight="bold" color="text">
+                    {summary?.total_users || 0}
+                  </Text>
+                  <Text color="blue.400" fontSize="sm" mt={2}>
+                    {summary?.active_users || 0} activos
+                  </Text>
+                </Box>
+              </GridItem>
+            </Grid>
 
             {/* Información del usuario actual */}
             {data?.data?.current_user && (
-              <div style={{ background: '#f8f9fa', borderRadius: 8, padding: 16, marginTop: 24 }}>
-                <div style={{ fontSize: 14, color: '#666', marginBottom: 8 }}>Usuario actual:</div>
-                <div style={{ display: 'flex', alignItems: 'center', gap: 16 }}>
-                  <div>
-                    <div style={{ fontWeight: 600 }}>{data.data.current_user.full_name}</div>
-                    <div style={{ fontSize: 13, color: '#666' }}>{data.data.current_user.email}</div>
-                  </div>
-                  <div style={{ 
-                    background: '#28A745', 
-                    color: 'white', 
-                    padding: '4px 8px', 
-                    borderRadius: 4, 
-                    fontSize: 12,
-                    fontWeight: 600
-                  }}>
+              <Box bg="bg.muted" borderRadius="lg" p={4} mt={6} border="1px" borderColor="border.muted">
+                <Text fontSize="sm" color="text.muted" mb={2}>Usuario actual:</Text>
+                <Flex alignItems="center" gap={4}>
+                  <Box>
+                    <Text fontWeight="semibold" color="text">{data.data.current_user.full_name}</Text>
+                    <Text fontSize="sm" color="text.muted">{data.data.current_user.email}</Text>
+                  </Box>
+                  <Box 
+                    bg="green.500" 
+                    color="white" 
+                    px={2} 
+                    py={1} 
+                    borderRadius="md" 
+                    fontSize="xs"
+                    fontWeight="semibold"
+                  >
                     {data.data.current_user.role.toUpperCase()}
-                  </div>
+                  </Box>
                   {data.data.current_user.is_superuser && (
-                    <div style={{ 
-                      background: '#dc3545', 
-                      color: 'white', 
-                      padding: '4px 8px', 
-                      borderRadius: 4, 
-                      fontSize: 12,
-                      fontWeight: 600
-                    }}>
+                    <Box 
+                      bg="red.500" 
+                      color="white" 
+                      px={2} 
+                      py={1} 
+                      borderRadius="md" 
+                      fontSize="xs"
+                      fontWeight="semibold"
+                    >
                       SUPERUSER
-                    </div>
+                    </Box>
                   )}
-                </div>
-              </div>
+                </Flex>
+              </Box>
             )}
           </>
         )
@@ -195,12 +205,12 @@ export const CEODashboard = () => {
         {tabs.map((tab) => (
           <Button
             key={tab.id}
-            leftIcon={<tab.icon />}
             variant={activeTab === tab.id ? 'solid' : 'outline'}
             colorScheme={activeTab === tab.id ? 'blue' : 'gray'}
             size="sm"
             onClick={() => setActiveTab(tab.id)}
           >
+            <tab.icon style={{ marginRight: '8px' }} />
             {tab.label}
           </Button>
         ))}

@@ -22,16 +22,16 @@ export const RoleDashboard = ({
         {/* Header with UserMenu */}
         <Flex justify="space-between" align="center" pt={4}>
           <Box>
-            <Heading size="lg" color="primary.black">
+            <Heading size="lg" color="text">
               {title}
             </Heading>
             {description && (
-              <Text mt={2} color="ui.text.secondary">
+              <Text mt={2} color="text.muted">
                 {description}
               </Text>
             )}
-            <Text mt={1} fontSize="sm" color="ui.text.light">
-              {user?.email} • {role?.toUpperCase()}
+            <Text mt={1} fontSize="sm" color="text.subtle">
+              {user?.emailAddresses[0]?.emailAddress} • {role?.toUpperCase()}
             </Text>
           </Box>
           
@@ -40,12 +40,12 @@ export const RoleDashboard = ({
         </Flex>
 
         <Box
-          bg="white"
+          bg="bg.surface"
           borderRadius="lg"
           p={6}
           shadow="base"
           border="1px"
-          borderColor="ui.border"
+          borderColor="border"
         >
           {children}
         </Box>

@@ -129,20 +129,16 @@ export const FavoritesSection: React.FC = () => {
 
   if (!favorites?.length) {
     return (
-      <Box p={6} bg="white" borderRadius="lg" shadow="base">
-        <VStack spacing={4}>
-          <Heading size="md">No tienes propiedades favoritas</Heading>
-          <Text>Explora nuestro catálogo y guarda tus propiedades favoritas</Text>
-          <Button colorScheme="black" as="a" href="/properties">
-            Ver Propiedades
-          </Button>
-        </VStack>
+      <Box p={6} bg="bg.surface" borderRadius="lg" shadow="base" border="1px" borderColor="border">
+        <Text fontSize="lg" color="text.muted" textAlign="center">
+          No tienes propiedades en favoritos
+        </Text>
       </Box>
     );
   }
 
   return (
-    <Box p={6} bg="white" borderRadius="lg" shadow="base">
+    <Box p={6} bg="bg.surface" borderRadius="lg" shadow="base" border="1px" borderColor="border">
       <VStack spacing={6} align="stretch">
         <Heading size="lg">Propiedades Favoritas</Heading>
         

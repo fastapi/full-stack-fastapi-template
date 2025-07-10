@@ -458,8 +458,8 @@ export function PropertyCRM() {
   return (
     <Box p={6}>
       {/* Analytics Overview */}
-      <Box bg="white" p={6} borderRadius="12px" mb={6} boxShadow="0 2px 8px rgba(0,0,0,0.05)">
-        <Heading size="md" mb={4} color="#1a202c">
+      <Box bg="bg.surface" p={6} borderRadius="12px" mb={6} boxShadow="0 2px 8px rgba(0,0,0,0.05)" border="1px" borderColor="border">
+        <Heading size="md" mb={4} color="text">
           Dashboard de Analytics
         </Heading>
         <div style={{
@@ -645,10 +645,10 @@ export function PropertyCRM() {
       {/* Header */}
       <Flex justify="space-between" align="center" mb={6}>
         <Box>
-          <Heading size="lg" color="#1a202c">
+          <Heading size="lg" color="text">
             CRM de Propiedades
           </Heading>
-          <Text color="#666" mt={1}>
+          <Text color="text.muted" mt={1}>
             Gestión completa de propiedades inmobiliarias
           </Text>
         </Box>
@@ -673,7 +673,7 @@ export function PropertyCRM() {
       </Flex>
 
       {/* Filtros */}
-      <Box bg="white" p={4} borderRadius="12px" mb={6} boxShadow="0 2px 4px rgba(0,0,0,0.05)">
+      <Box bg="bg.surface" p={4} borderRadius="12px" mb={6} boxShadow="0 2px 4px rgba(0,0,0,0.05)" border="1px" borderColor="border">
         <div style={{ 
           display: 'grid', 
           gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', 
@@ -758,35 +758,35 @@ export function PropertyCRM() {
         gap: '16px',
         marginBottom: '24px'
       }}>
-        <div style={{ background: '#fff', padding: '20px', borderRadius: '12px', boxShadow: '0 2px 4px rgba(0,0,0,0.05)' }}>
-          <Text fontSize="sm" color="#666">Total Propiedades</Text>
-          <Text fontSize="2xl" fontWeight="700" color="#1a202c">{properties.length}</Text>
-        </div>
-        <div style={{ background: '#fff', padding: '20px', borderRadius: '12px', boxShadow: '0 2px 4px rgba(0,0,0,0.05)' }}>
-          <Text fontSize="sm" color="#666">Disponibles</Text>
-          <Text fontSize="2xl" fontWeight="700" color="#38a169">
+        <Box bg="bg.surface" p={5} borderRadius="12px" boxShadow="0 2px 4px rgba(0,0,0,0.05)" border="1px" borderColor="border">
+          <Text fontSize="sm" color="text.muted">Total Propiedades</Text>
+          <Text fontSize="2xl" fontWeight="700" color="text">{properties.length}</Text>
+        </Box>
+        <Box bg="bg.surface" p={5} borderRadius="12px" boxShadow="0 2px 4px rgba(0,0,0,0.05)" border="1px" borderColor="border">
+          <Text fontSize="sm" color="text.muted">Disponibles</Text>
+          <Text fontSize="2xl" fontWeight="700" color="green.400">
             {properties.filter(p => p.status === 'available').length}
           </Text>
-        </div>
-        <div style={{ background: '#fff', padding: '20px', borderRadius: '12px', boxShadow: '0 2px 4px rgba(0,0,0,0.05)' }}>
-          <Text fontSize="sm" color="#666">Vendidas/Arrendadas</Text>
-          <Text fontSize="2xl" fontWeight="700" color="#3182ce">
+        </Box>
+        <Box bg="bg.surface" p={5} borderRadius="12px" boxShadow="0 2px 4px rgba(0,0,0,0.05)" border="1px" borderColor="border">
+          <Text fontSize="sm" color="text.muted">Vendidas/Arrendadas</Text>
+          <Text fontSize="2xl" fontWeight="700" color="blue.400">
             {properties.filter(p => p.status === 'sold' || p.status === 'rented').length}
           </Text>
-        </div>
-        <div style={{ background: '#fff', padding: '20px', borderRadius: '12px', boxShadow: '0 2px 4px rgba(0,0,0,0.05)' }}>
-          <Text fontSize="sm" color="#666">Valor Inventario</Text>
-          <Text fontSize="2xl" fontWeight="700" color="#805ad5">
+        </Box>
+        <Box bg="bg.surface" p={5} borderRadius="12px" boxShadow="0 2px 4px rgba(0,0,0,0.05)" border="1px" borderColor="border">
+          <Text fontSize="sm" color="text.muted">Valor Inventario</Text>
+          <Text fontSize="2xl" fontWeight="700" color="purple.400">
             {formatPrice(
               { cop: properties.reduce((sum, p) => sum + p.price.cop, 0), usd: 0, eur: 0 },
               currentCurrency
             )}
           </Text>
-        </div>
+        </Box>
       </div>
 
       {/* Lista de propiedades */}
-      <Box bg="white" borderRadius="12px" p={6} boxShadow="0 2px 8px rgba(0,0,0,0.1)">
+      <Box bg="bg.surface" borderRadius="12px" p={6} boxShadow="0 2px 8px rgba(0,0,0,0.1)" border="1px" borderColor="border">
         <Flex justify="space-between" align="center" mb={4}>
           <Text fontSize="lg" fontWeight="600">
             Propiedades ({filteredProperties.length})

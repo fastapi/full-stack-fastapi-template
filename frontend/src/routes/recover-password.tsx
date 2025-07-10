@@ -1,23 +1,25 @@
-import { Box, Flex, Heading, Text } from "@chakra-ui/react"
-import { createFileRoute } from "@tanstack/react-router"
+import { createFileRoute } from '@tanstack/react-router'
+import { Box, Heading, Text } from '@chakra-ui/react'
 
-export const Route = createFileRoute("/recover-password")({
-  component: RecoverPassword,
+export const Route = createFileRoute('/recover-password')({
+  component: RecoverPasswordPage,
 })
 
-function RecoverPassword() {
+function RecoverPasswordPage() {
   return (
-    <Flex justify="center" align="center" h="100vh" bg="gray.50">
-      <Box maxW="md" mx="auto" p={8} bg="white" borderRadius="md" shadow="md">
-        <Heading size="lg" color="black" textAlign="center" mb={6}>
-          Recover Password
+    <Box minH="100vh" display="flex" alignItems="center" justifyContent="center" bg="bg" p={4}>
+      <Box maxW="md" mx="auto" p={8} bg="bg.surface" borderRadius="md" shadow="md" border="1px" borderColor="border">
+        <Heading size="lg" color="text" textAlign="center" mb={6}>
+          Recuperar Contraseña
         </Heading>
-        <Text color="gray.600" textAlign="center">
-          Password recovery form coming soon...
+        <Text color="text.muted" textAlign="center" mb={6}>
+          Te enviaremos un enlace para restablecer tu contraseña
+        </Text>
+        {/* Aquí iría el formulario de recuperación */}
+        <Text color="text.subtle" textAlign="center" fontSize="sm">
+          Funcionalidad en desarrollo
         </Text>
       </Box>
-    </Flex>
+    </Box>
   )
 }
-
-export default RecoverPassword

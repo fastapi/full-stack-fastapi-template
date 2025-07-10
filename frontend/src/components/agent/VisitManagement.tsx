@@ -252,7 +252,7 @@ export const VisitManagement: React.FC = () => {
   }
 
   return (
-    <Box p={6} bg="white" borderRadius="lg" shadow="base">
+          <Box p={6} bg="bg.surface" borderRadius="lg" shadow="base" border="1px" borderColor="border">
       <VStack spacing={6} align="stretch">
         <HStack justify="space-between">
           <Heading size="lg">Gestión de Visitas</Heading>

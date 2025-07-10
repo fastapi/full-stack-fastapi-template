@@ -95,25 +95,25 @@ const services = [
 
 const testimonials = [
   { 
-    name: "Juan Pérez", 
-    text: "GENIUS me ayudó a encontrar la casa de mis sueños en el mejor sector de Bogotá. El proceso fue transparente y profesional.", 
+    name: "Veronica Bello Rodriguez", 
+    text: "GENIUS me ayudó a encontrar la casa de mis sueños en el mejor sector de Medellin. El proceso fue transparente y profesional.", 
     rating: 5,
-    role: "Inversionista",
-    avatar: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=100&q=80"
+    role: "Secretaria",
+    avatar: "/assets/images/Secretaria_vero.jpg"
   },
   { 
-    name: "María López", 
-    text: "Mi portafolio inmobiliario ha crecido 180% en 2 años. La gestión de activos de GENIUS es excepcional.", 
+    name: "Davide Bombardelli ", 
+    text: "Mi portafolio inmobiliario ha crecido 32% en 2 años. La gestión de activos de GENIUS es excepcional.", 
     rating: 5,
-    role: "CEO Empresarial",
-    avatar: "https://images.unsplash.com/photo-1494790108755-2616b612b786?auto=format&fit=crop&w=100&q=80"
+    role: "CEO ",
+    avatar: "/assets/images/bombardelli_2.jpg"
   },
   { 
-    name: "Carlos Ruiz", 
-    text: "La asesoría personalizada marcó la diferencia. Ahora tengo un portafolio diversificado que genera ingresos pasivos.", 
+    name: "Spedire365", 
+    text: "La asesoría personalizada marcó la diferencia. En nuestro rumbo coorporativo frente a inversiones futuras para resguardar nuetsros intereses.", 
     rating: 5,
-    role: "Arquitecto",
-    avatar: "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?auto=format&fit=crop&w=100&q=80"
+    role: "Empresa de Logística y Transporte",
+    avatar: "/assets/images/spedire365.png"
   },
 ];
 

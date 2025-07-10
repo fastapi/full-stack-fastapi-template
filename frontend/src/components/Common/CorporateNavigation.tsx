@@ -79,8 +79,8 @@ const CorporateNavigation: React.FC = () => {
             >
               GI
             </Box>
-            <Text fontWeight="bold" fontSize="lg" color="black">
-              GENIUS INDUSTRIES
+            <Text fontWeight="bold" fontSize="lg" color="text">
+              Genius Industries
             </Text>
           </Flex>
 

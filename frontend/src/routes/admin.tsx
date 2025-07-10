@@ -1,6 +1,18 @@
 import { createFileRoute } from '@tanstack/react-router'
 import { useState } from 'react'
 import { FiUsers, FiSettings, FiBarChart2, FiHome, FiShield, FiTrendingUp, FiActivity, FiChevronRight, FiEye, FiHeadphones, FiUserCheck, FiPlus } from 'react-icons/fi'
+import {
+  Box,
+  VStack,
+  HStack,
+  Heading,
+  Text,
+  Button,
+  Grid,
+  Flex,
+  Icon,
+  Badge
+} from '@chakra-ui/react'
 
 // Import existing admin components
 import { CEODashboard } from '../components/Admin/CEODashboard'
@@ -25,19 +37,19 @@ function AdminDashboard() {
   }
 
   const quickActions = [
-    { icon: FiPlus, label: 'Agregar Usuario', action: () => setActiveSection('users'), color: '#28A745' },
-    { icon: FiHome, label: 'CRM Propiedades', action: () => setActiveSection('properties'), color: '#007BFF' },
-    { icon: FiBarChart2, label: 'Reportes', action: () => setActiveSection('ceo'), color: '#6F42C1' },
-    { icon: FiSettings, label: 'Configuración', action: () => {}, color: '#6C757D' }
+    { icon: FiPlus, label: 'Agregar Usuario', action: () => setActiveSection('users'), colorScheme: 'green' },
+    { icon: FiHome, label: 'CRM Propiedades', action: () => setActiveSection('properties'), colorScheme: 'blue' },
+    { icon: FiBarChart2, label: 'Reportes', action: () => setActiveSection('ceo'), colorScheme: 'purple' },
+    { icon: FiSettings, label: 'Configuración', action: () => {}, colorScheme: 'gray' }
   ]
 
   const roleManagement = [
-    { role: 'CEO', component: 'ceo', icon: FiShield, description: 'Vista ejecutiva general', users: 1 },
-    { role: 'Manager', component: 'manager', icon: FiUserCheck, description: 'Gestión operativa', users: 8 },
-    { role: 'HR', component: 'hr', icon: FiUsers, description: 'Recursos humanos', users: 3 },
-    { role: 'Agent', component: 'agent', icon: FiHome, description: 'Agentes inmobiliarios', users: 45 },
-    { role: 'Supervisor', component: 'supervisor', icon: FiEye, description: 'Supervisión y control', users: 12 },
-    { role: 'Support', component: 'support', icon: FiHeadphones, description: 'Atención al cliente', users: 15 }
+    { role: 'CEO', component: 'ceo', icon: FiShield, description: 'Vista ejecutiva general', users: 1, colorScheme: 'red' },
+    { role: 'Manager', component: 'manager', icon: FiUserCheck, description: 'Gestión operativa', users: 8, colorScheme: 'purple' },
+    { role: 'HR', component: 'hr', icon: FiUsers, description: 'Recursos humanos', users: 3, colorScheme: 'green' },
+    { role: 'Agent', component: 'agent', icon: FiHome, description: 'Agentes inmobiliarios', users: 45, colorScheme: 'orange' },
+    { role: 'Supervisor', component: 'supervisor', icon: FiEye, description: 'Supervisión y control', users: 12, colorScheme: 'blue' },
+    { role: 'Support', component: 'support', icon: FiHeadphones, description: 'Atención al cliente', users: 15, colorScheme: 'cyan' }
   ]
 
   const renderContent = () => {
@@ -60,271 +72,264 @@ function AdminDashboard() {
         return <PropertyCRM />
       default:
         return (
-          <div style={{ padding: '24px' }}>
-            <div style={{ marginBottom: '32px' }}>
-              <h1 style={{ fontSize: '32px', fontWeight: '700', color: '#1a202c', marginBottom: '8px' }}>
-                Panel de Administración GENIUS INDUSTRIES
-              </h1>
-              <p style={{ fontSize: '16px', color: '#666', marginBottom: '24px' }}>
-                Vista centralizada de todo el sistema inmobiliario
-              </p>
-              
-              <div style={{
-                background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
-                color: 'white',
-                padding: '16px 20px',
-                borderRadius: '12px',
-                display: 'flex',
-                alignItems: 'center',
-                gap: '16px'
-              }}>
-                <FiActivity size={24} />
-                <div>
-                  <div style={{ fontWeight: '600' }}>Sistema Operativo</div>
-                  <div style={{ fontSize: '14px', opacity: 0.9 }}>
-                    Uptime: {systemMetrics.systemUptime} • Última actualización: hace 2 min
-                  </div>
-                </div>
-              </div>
-            </div>
+          <Box p={6}>
+            <VStack gap={8} align="stretch">
+              {/* Header */}
+              <Box>
+                <Heading size="2xl" color="text" mb={2}>
+                  Panel de Administración GENIUS INDUSTRIES
+                </Heading>
+                <Text fontSize="lg" color="text.muted" mb={6}>
+                  Vista centralizada de todo el sistema inmobiliario
+                </Text>
+                
+                <Box
+                  bg="blue.500"
+                  color="white"
+                  p={4}
+                  borderRadius="xl"
+                  bgGradient="linear(135deg, blue.400, purple.500)"
+                >
+                  <HStack gap={4}>
+                    <Icon as={FiActivity} boxSize={6} />
+                    <Box>
+                      <Text fontWeight="600">Sistema Operativo</Text>
+                      <Text fontSize="sm" opacity={0.9}>
+                        Uptime: {systemMetrics.systemUptime} • Última actualización: hace 2 min
+                      </Text>
+                    </Box>
+                  </HStack>
+                </Box>
+              </Box>
 
-            <div style={{ 
-              display: 'grid', 
-              gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', 
-              gap: '24px',
-              marginBottom: '32px'
-            }}>
-              <div style={{ 
-                background: '#fff', 
-                borderRadius: '16px', 
-                boxShadow: '0 4px 6px -1px rgba(0,0,0,0.1)', 
-                padding: '24px',
-                border: '1px solid #e2e8f0'
-              }}>
-                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-                  <div>
-                    <div style={{ color: '#666', fontSize: '14px', marginBottom: '4px' }}>Usuarios Totales</div>
-                    <div style={{ fontSize: '36px', fontWeight: '700', color: '#1a202c' }}>
-                      {systemMetrics.totalUsers.toLocaleString()}
-                    </div>
-                    <div style={{ color: '#28A745', fontSize: '13px', marginTop: '4px' }}>
-                      ↑ 12% este mes
-                    </div>
-                  </div>
-                  <div style={{ 
-                    background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)', 
-                    borderRadius: '12px', 
-                    padding: '12px',
-                    color: 'white'
-                  }}>
-                    <FiUsers size={24} />
-                  </div>
-                </div>
-              </div>
+              {/* Metrics Cards */}
+              <Grid templateColumns="repeat(auto-fit, minmax(280px, 1fr))" gap={6}>
+                <Box
+                  bg="bg.surface"
+                  borderRadius="xl"
+                  p={6}
+                  border="1px"
+                  borderColor="border"
+                  shadow="md"
+                >
+                  <Flex justify="space-between" align="center">
+                    <Box>
+                      <Text color="text.muted" fontSize="sm" mb={1}>Usuarios Totales</Text>
+                      <Text fontSize="3xl" fontWeight="700" color="text">
+                        {systemMetrics.totalUsers.toLocaleString()}
+                      </Text>
+                      <Text color="green.400" fontSize="xs" mt={1}>
+                        ↑ 12% este mes
+                      </Text>
+                    </Box>
+                    <Box
+                      bg="blue.500"
+                      borderRadius="xl"
+                      p={3}
+                      color="white"
+                    >
+                      <Icon as={FiUsers} boxSize={6} />
+                    </Box>
+                  </Flex>
+                </Box>
 
-              <div style={{ 
-                background: '#fff', 
-                borderRadius: '16px', 
-                boxShadow: '0 4px 6px -1px rgba(0,0,0,0.1)', 
-                padding: '24px',
-                border: '1px solid #e2e8f0'
-              }}>
-                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-                  <div>
-                    <div style={{ color: '#666', fontSize: '14px', marginBottom: '4px' }}>Propiedades Activas</div>
-                    <div style={{ fontSize: '36px', fontWeight: '700', color: '#1a202c' }}>
-                      {systemMetrics.activeProperties.toLocaleString()}
-                    </div>
-                    <div style={{ color: '#28A745', fontSize: '13px', marginTop: '4px' }}>
-                      ↑ 8% este mes
-                    </div>
-                  </div>
-                  <div style={{ 
-                    background: 'linear-gradient(135deg, #ffecd2 0%, #fcb69f 100%)', 
-                    borderRadius: '12px', 
-                    padding: '12px',
-                    color: '#b7791f'
-                  }}>
-                    <FiHome size={24} />
-                  </div>
-                </div>
-              </div>
+                <Box
+                  bg="bg.surface"
+                  borderRadius="xl"
+                  p={6}
+                  border="1px"
+                  borderColor="border"
+                  shadow="md"
+                >
+                  <Flex justify="space-between" align="center">
+                    <Box>
+                      <Text color="text.muted" fontSize="sm" mb={1}>Propiedades Activas</Text>
+                      <Text fontSize="3xl" fontWeight="700" color="text">
+                        {systemMetrics.activeProperties.toLocaleString()}
+                      </Text>
+                      <Text color="green.400" fontSize="xs" mt={1}>
+                        ↑ 8% este mes
+                      </Text>
+                    </Box>
+                    <Box
+                      bg="orange.500"
+                      borderRadius="xl"
+                      p={3}
+                      color="white"
+                    >
+                      <Icon as={FiHome} boxSize={6} />
+                    </Box>
+                  </Flex>
+                </Box>
 
-              <div style={{ 
-                background: '#fff', 
-                borderRadius: '16px', 
-                boxShadow: '0 4px 6px -1px rgba(0,0,0,0.1)', 
-                padding: '24px',
-                border: '1px solid #e2e8f0'
-              }}>
-                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-                  <div>
-                    <div style={{ color: '#666', fontSize: '14px', marginBottom: '4px' }}>Ingresos Totales</div>
-                    <div style={{ fontSize: '36px', fontWeight: '700', color: '#1a202c' }}>
-                      ${(systemMetrics.totalRevenue / 1000000).toFixed(1)}M
-                    </div>
-                    <div style={{ color: '#28A745', fontSize: '13px', marginTop: '4px' }}>
-                      ↑ 23% este mes
-                    </div>
-                  </div>
-                  <div style={{ 
-                    background: 'linear-gradient(135deg, #a8edea 0%, #fed6e3 100%)', 
-                    borderRadius: '12px', 
-                    padding: '12px',
-                    color: '#0891b2'
-                  }}>
-                    <FiTrendingUp size={24} />
-                  </div>
-                </div>
-              </div>
-            </div>
+                <Box
+                  bg="bg.surface"
+                  borderRadius="xl"
+                  p={6}
+                  border="1px"
+                  borderColor="border"
+                  shadow="md"
+                >
+                  <Flex justify="space-between" align="center">
+                    <Box>
+                      <Text color="text.muted" fontSize="sm" mb={1}>Ingresos Totales</Text>
+                      <Text fontSize="3xl" fontWeight="700" color="text">
+                        ${(systemMetrics.totalRevenue / 1000000).toFixed(1)}M
+                      </Text>
+                      <Text color="green.400" fontSize="xs" mt={1}>
+                        ↑ 23% este mes
+                      </Text>
+                    </Box>
+                    <Box
+                      bg="cyan.500"
+                      borderRadius="xl"
+                      p={3}
+                      color="white"
+                    >
+                      <Icon as={FiTrendingUp} boxSize={6} />
+                    </Box>
+                  </Flex>
+                </Box>
+              </Grid>
 
-            <div style={{ marginBottom: '32px' }}>
-              <h2 style={{ fontSize: '24px', fontWeight: '600', color: '#1a202c', marginBottom: '16px' }}>
-                Acciones Rápidas
-              </h2>
-              <div style={{ 
-                display: 'grid', 
-                gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', 
-                gap: '16px'
-              }}>
-                {quickActions.map((action, index) => (
-                  <button
-                    key={index}
-                    onClick={action.action}
-                    style={{
-                      background: '#fff',
-                      border: '1px solid #e2e8f0',
-                      borderRadius: '12px',
-                      padding: '20px',
-                      display: 'flex',
-                      alignItems: 'center',
-                      gap: '12px',
-                      cursor: 'pointer',
-                      transition: 'all 0.2s',
-                      textAlign: 'left'
-                    }}
-                  >
-                    <div style={{ 
-                      background: action.color, 
-                      color: 'white', 
-                      borderRadius: '8px', 
-                      padding: '8px' 
-                    }}>
-                      <action.icon size={18} />
-                    </div>
-                    <span style={{ fontWeight: '500', color: '#1a202c' }}>{action.label}</span>
-                  </button>
-                ))}
-              </div>
-            </div>
+              {/* Quick Actions */}
+              <Box>
+                <Heading size="lg" color="text" mb={4}>
+                  Acciones Rápidas
+                </Heading>
+                <Grid templateColumns="repeat(auto-fit, minmax(200px, 1fr))" gap={4}>
+                  {quickActions.map((action, index) => (
+                    <Button
+                      key={index}
+                      onClick={action.action}
+                      variant="outline"
+                      borderColor="border"
+                      bg="bg.surface"
+                      color="text"
+                      p={5}
+                      h="auto"
+                      borderRadius="xl"
+                      justifyContent="flex-start"
+                      _hover={{
+                        bg: "bg.muted",
+                        transform: "translateY(-2px)",
+                        shadow: "lg"
+                      }}
+                      transition="all 0.2s"
+                    >
+                      <HStack gap={3}>
+                        <Box
+                          bg={`${action.colorScheme}.500`}
+                          color="white"
+                          borderRadius="lg"
+                          p={2}
+                        >
+                          <Icon as={action.icon} boxSize={4} />
+                        </Box>
+                        <Text fontWeight="500">{action.label}</Text>
+                      </HStack>
+                    </Button>
+                  ))}
+                </Grid>
+              </Box>
 
-            <div>
-              <h2 style={{ fontSize: '24px', fontWeight: '600', color: '#1a202c', marginBottom: '16px' }}>
-                Gestión por Roles
-              </h2>
-              <div style={{ 
-                display: 'grid', 
-                gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', 
-                gap: '16px'
-              }}>
-                {roleManagement.map((role, index) => (
-                  <button
-                    key={index}
-                    onClick={() => setActiveSection(role.component)}
-                    style={{
-                      background: '#fff',
-                      border: '1px solid #e2e8f0',
-                      borderRadius: '12px',
-                      padding: '20px',
-                      display: 'flex',
-                      alignItems: 'center',
-                      justifyContent: 'space-between',
-                      cursor: 'pointer',
-                      transition: 'all 0.2s',
-                      textAlign: 'left'
-                    }}
-                  >
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
-                      <div style={{ 
-                        background: '#f7fafc', 
-                        borderRadius: '10px', 
-                        padding: '12px',
-                        color: '#3182ce'
-                      }}>
-                        <role.icon size={24} />
-                      </div>
-                      <div>
-                        <div style={{ fontWeight: '600', color: '#1a202c', marginBottom: '4px' }}>
-                          {role.role} Dashboard
-                        </div>
-                        <div style={{ fontSize: '14px', color: '#666' }}>
-                          {role.description}
-                        </div>
-                        <div style={{ fontSize: '12px', color: '#3182ce', marginTop: '2px' }}>
-                          {role.users} usuarios activos
-                        </div>
-                      </div>
-                    </div>
-                    <FiChevronRight size={20} style={{ color: '#666' }} />
-                  </button>
-                ))}
-              </div>
-            </div>
-          </div>
+              {/* Role Management */}
+              <Box>
+                <Heading size="lg" color="text" mb={4}>
+                  Gestión por Roles
+                </Heading>
+                <Grid templateColumns="repeat(auto-fit, minmax(300px, 1fr))" gap={4}>
+                  {roleManagement.map((role, index) => (
+                    <Button
+                      key={index}
+                      onClick={() => setActiveSection(role.component)}
+                      variant="outline"
+                      borderColor="border"
+                      bg="bg.surface"
+                      color="text"
+                      p={5}
+                      h="auto"
+                      borderRadius="xl"
+                      justifyContent="space-between"
+                      _hover={{
+                        bg: "bg.muted",
+                        transform: "translateY(-2px)",
+                        shadow: "lg"
+                      }}
+                      transition="all 0.2s"
+                    >
+                      <HStack gap={4}>
+                        <Box
+                          bg="bg.muted"
+                          borderRadius="lg"
+                          p={3}
+                          color={`${role.colorScheme}.500`}
+                        >
+                          <Icon as={role.icon} boxSize={6} />
+                        </Box>
+                        <VStack align="start" gap={1}>
+                          <Text fontWeight="600" color="text">
+                            {role.role} Dashboard
+                          </Text>
+                          <Text fontSize="sm" color="text.muted">
+                            {role.description}
+                          </Text>
+                          <Badge colorScheme={role.colorScheme} size="sm">
+                            {role.users} usuarios activos
+                          </Badge>
+                        </VStack>
+                      </HStack>
+                      <Icon as={FiChevronRight} boxSize={5} color="text.muted" />
+                    </Button>
+                  ))}
+                </Grid>
+              </Box>
+            </VStack>
+          </Box>
         )
     }
   }
 
   return (
-    <div style={{ 
-      minHeight: '100vh', 
-      background: 'linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%)',
-      padding: '20px'
-    }}>
+    <Box minHeight="100vh" bg="bg.canvas" p={5}>
       {activeSection !== 'overview' && (
-        <div style={{
-          background: '#fff',
-          borderRadius: '12px',
-          padding: '16px 24px',
-          marginBottom: '20px',
-          boxShadow: '0 2px 4px rgba(0,0,0,0.1)',
-          display: 'flex',
-          alignItems: 'center',
-          gap: '16px'
-        }}>
-          <button
-            onClick={() => setActiveSection('overview')}
-            style={{
-              background: '#3182ce',
-              color: 'white',
-              border: 'none',
-              borderRadius: '8px',
-              padding: '8px 16px',
-              cursor: 'pointer',
-              fontSize: '14px',
-              fontWeight: '500'
-            }}
-          >
-            ← Volver al Panel Principal
-          </button>
-          <div style={{ color: '#666' }}>
-            {roleManagement.find(r => r.component === activeSection)?.role || 
-             (activeSection === 'users' ? 'Gestión de Usuarios' : 
-              activeSection === 'properties' ? 'CRM de Propiedades' : '')} Dashboard
-          </div>
-        </div>
+        <Box
+          bg="bg.surface"
+          borderRadius="xl"
+          p={4}
+          mb={5}
+          border="1px"
+          borderColor="border"
+          shadow="sm"
+        >
+          <HStack gap={4}>
+            <Button
+              onClick={() => setActiveSection('overview')}
+              colorScheme="blue"
+              size="sm"
+            >
+              ← Volver al Panel Principal
+            </Button>
+            <Text color="text.muted">
+              {roleManagement.find(r => r.component === activeSection)?.role || 
+               (activeSection === 'users' ? 'Gestión de Usuarios' : 
+                activeSection === 'properties' ? 'CRM de Propiedades' : '')} Dashboard
+            </Text>
+          </HStack>
+        </Box>
       )}
 
-      <div style={{
-        background: '#fff',
-        borderRadius: '16px',
-        boxShadow: '0 4px 6px -1px rgba(0,0,0,0.1)',
-        overflow: 'hidden'
-      }}>
+      <Box
+        bg="bg.surface"
+        borderRadius="xl"
+        border="1px"
+        borderColor="border"
+        shadow="lg"
+        overflow="hidden"
+      >
         {renderContent()}
-      </div>
-    </div>
+      </Box>
+    </Box>
   )
 }
 

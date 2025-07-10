@@ -1,137 +1,264 @@
-import React, { useState, useEffect } from 'react';
+import { useState } from 'react'
 import {
   Box,
+  VStack,
+  HStack,
   Heading,
   Text,
-  Grid,
-  Card,
-  CardBody,
-  CardHeader,
   Button,
-  Icon,
-  Flex,
+  Select,
+  Input,
+  Textarea,
+  FormControl,
+  FormLabel,
+  Divider,
   Badge,
-  HStack,
-  VStack,
-  Input
-} from '@chakra-ui/react';
-import { FiFileText, FiArrowLeft, FiArrowRight, FiEye, FiSave, FiDownload } from 'react-icons/fi';
+  useToast
+} from '@chakra-ui/react'
+import { FiDownload, FiSave, FiFileText, FiEdit3 } from 'react-icons/fi'
 
-const DocumentGenerator: React.FC = () => {
-  const [activeStep, setActiveStep] = useState(0);
-  const [isGenerating, setIsGenerating] = useState(false);
+interface Template {
+  id: string
+  name: string
+  category: string
+  variables: TemplateVariable[]
+}
 
-  const steps = [
-    { title: 'Seleccionar Template', description: 'Elige el tipo de documento' },
-    { title: 'Completar Datos', description: 'Llena la información requerida' },
-    { title: 'Vista Previa', description: 'Revisa el documento generado' },
-    { title: 'Finalizar', description: 'Guarda y descarga el documento' }
-  ];
+interface TemplateVariable {
+  key: string
+  label: string
+  type: 'text' | 'number' | 'date' | 'select'
+  required: boolean
+  options?: string[]
+}
+
+export const DocumentGenerator = () => {
+  const [selectedTemplate, setSelectedTemplate] = useState<Template | null>(null)
+  const [formData, setFormData] = useState<Record<string, any>>({})
+  const [isGenerating, setIsGenerating] = useState(false)
+  const toast = useToast()
+
+  const templates: Template[] = [
+    {
+      id: '1',
+      name: 'Contrato de Compraventa',
+      category: 'Ventas',
+      variables: [
+        { key: 'buyer_name', label: 'Nombre del Comprador', type: 'text', required: true },
+        { key: 'seller_name', label: 'Nombre del Vendedor', type: 'text', required: true },
+        { key: 'property_address', label: 'Dirección de la Propiedad', type: 'text', required: true },
+        { key: 'sale_price', label: 'Precio de Venta', type: 'number', required: true },
+        { key: 'contract_date', label: 'Fecha del Contrato', type: 'date', required: true }
+      ]
+    },
+    {
+      id: '2',
+      name: 'Contrato de Arrendamiento',
+      category: 'Arriendos',
+      variables: [
+        { key: 'tenant_name', label: 'Nombre del Arrendatario', type: 'text', required: true },
+        { key: 'landlord_name', label: 'Nombre del Arrendador', type: 'text', required: true },
+        { key: 'property_address', label: 'Dirección de la Propiedad', type: 'text', required: true },
+        { key: 'monthly_rent', label: 'Arriendo Mensual', type: 'number', required: true },
+        { key: 'contract_duration', label: 'Duración del Contrato', type: 'select', required: true, options: ['6 meses', '1 año', '2 años'] }
+      ]
+    }
+  ]
+
+  const handleTemplateChange = (templateId: string) => {
+    const template = templates.find(t => t.id === templateId)
+    setSelectedTemplate(template || null)
+    setFormData({})
+  }
+
+  const handleInputChange = (key: string, value: any) => {
+    setFormData(prev => ({
+      ...prev,
+      [key]: value
+    }))
+  }
+
+  const handleGenerate = async () => {
+    if (!selectedTemplate) return
+
+    setIsGenerating(true)
+    
+    // Simular generación del documento
+    setTimeout(() => {
+      setIsGenerating(false)
+      toast({
+        title: 'Documento generado',
+        description: 'El documento se ha generado exitosamente',
+        status: 'success',
+        duration: 3000,
+        isClosable: true,
+      })
+    }, 2000)
+  }
+
+  const isFormValid = () => {
+    if (!selectedTemplate) return false
+    
+    return selectedTemplate.variables
+      .filter(v => v.required)
+      .every(v => formData[v.key] && formData[v.key].toString().trim() !== '')
+  }
+
+  const renderFormField = (variable: TemplateVariable) => {
+    const commonProps = {
+      value: formData[variable.key] || '',
+      onChange: (e: any) => handleInputChange(variable.key, e.target.value),
+      isRequired: variable.required
+    }
+
+    switch (variable.type) {
+      case 'select':
+        return (
+          <Select placeholder={`Selecciona ${variable.label}`} {...commonProps}>
+            {variable.options?.map(option => (
+              <option key={option} value={option}>{option}</option>
+            ))}
+          </Select>
+        )
+      case 'number':
+        return <Input type="number" placeholder={variable.label} {...commonProps} />
+      case 'date':
+        return <Input type="date" {...commonProps} />
+      case 'text':
+      default:
+        return <Input placeholder={variable.label} {...commonProps} />
+    }
+  }
 
   return (
-    <Box maxW="7xl" mx="auto" px={6} py={8}>
-      <Box mb={8}>
-        <Flex align="center" mb={4}>
-          <Box 
-            w={12} 
-            h={12} 
-            bg="black" 
-            color="white" 
-            display="flex" 
-            alignItems="center" 
-            justifyContent="center" 
-            mr={4}
-            fontWeight="bold"
-            fontSize="sm"
-          >
-            GI
-          </Box>
-          <VStack align="start" spacing={0}>
-            <Heading size="lg" color="black">
-              Generador de Documentos
-            </Heading>
-            <Text color="gray.600" fontSize="sm">
-              GENIUS INDUSTRIES - Crea documentos legales profesionales
-            </Text>
-          </VStack>
-        </Flex>
-        <Box height="1px" bg="black" width="100%" />
-      </Box>
+    <Box p={6} maxW="4xl" mx="auto">
+      <VStack spacing={6} align="stretch">
+        {/* Header */}
+        <Box>
+          <Heading size="lg" color="text" mb={2}>
+            Generador de Documentos
+          </Heading>
+          <Text color="text.muted">
+            Genera documentos legales usando plantillas predefinidas
+          </Text>
+        </Box>
 
-      <Box mb={8}>
-        <HStack spacing={4} mb={6} justify="center">
-          {steps.map((step, index) => (
-            <VStack key={index} spacing={2}>
-              <Box 
-                w={8} 
-                h={8} 
-                borderRadius="full" 
-                bg={activeStep >= index ? "black" : "gray.200"} 
-                color={activeStep >= index ? "white" : "gray.600"}
-                display="flex" 
-                alignItems="center" 
-                justifyContent="center"
-                fontWeight="bold"
-                fontSize="sm"
+        <Divider borderColor="border" />
+
+        {/* Template Selection */}
+        <Box bg="bg.surface" p={6} borderRadius="lg" border="1px" borderColor="border">
+          <VStack spacing={4} align="stretch">
+            <Heading size="md" color="text">
+              1. Selecciona una Plantilla
+            </Heading>
+            
+            <FormControl>
+              <FormLabel color="text.muted">Tipo de Documento</FormLabel>
+              <Select
+                placeholder="Selecciona una plantilla..."
+                onChange={(e) => handleTemplateChange(e.target.value)}
               >
-                {activeStep > index ? "✓" : (index + 1)}
+                {templates.map(template => (
+                  <option key={template.id} value={template.id}>
+                    {template.name} ({template.category})
+                  </option>
+                ))}
+              </Select>
+            </FormControl>
+
+            {selectedTemplate && (
+              <Box p={4} bg="blue.50" borderRadius="md" border="1px" borderColor="blue.200">
+                <HStack justify="space-between">
+                  <VStack align="start" spacing={1}>
+                    <Text fontWeight="semibold" color="blue.800">
+                      {selectedTemplate.name}
+                    </Text>
+                    <Text fontSize="sm" color="blue.600">
+                      Categoría: {selectedTemplate.category}
+                    </Text>
+                  </VStack>
+                  <Badge colorScheme="blue">
+                    {selectedTemplate.variables.length} campos
+                  </Badge>
+                </HStack>
               </Box>
-              <Box textAlign="center">
-                <Text fontWeight="semibold" fontSize="sm">{step.title}</Text>
-                <Text fontSize="xs" color="gray.600">{step.description}</Text>
-              </Box>
+            )}
+          </VStack>
+        </Box>
+
+        {/* Form Fields */}
+        {selectedTemplate && (
+          <Box bg="bg.surface" p={6} borderRadius="lg" border="1px" borderColor="border">
+            <VStack spacing={4} align="stretch">
+              <Heading size="md" color="text">
+                2. Completa la Información
+              </Heading>
+
+              <VStack spacing={4}>
+                {selectedTemplate.variables.map(variable => (
+                  <FormControl key={variable.key} isRequired={variable.required}>
+                    <FormLabel color="text.muted">
+                      {variable.label}
+                      {variable.required && <Text as="span" color="red.400"> *</Text>}
+                    </FormLabel>
+                    {renderFormField(variable)}
+                  </FormControl>
+                ))}
+              </VStack>
             </VStack>
-          ))}
-        </HStack>
-      </Box>
-
-      <Box mb={8}>
-        <VStack spacing={6} align="stretch">
-          <Box textAlign="center">
-            <Heading size="lg" color="black" mb={2}>
-              Generador de Documentos Legales
-            </Heading>
-            <Text color="gray.600">
-              Herramienta para crear documentos profesionales
-            </Text>
           </Box>
-          
-          <Card>
-            <CardBody p={6}>
-              <Text color="gray.600" textAlign="center">
-                Componente en desarrollo...
-              </Text>
-            </CardBody>
-          </Card>
-        </VStack>
-      </Box>
+        )}
 
-      <Flex justify="space-between" align="center">
-        <Button 
-          leftIcon={<Icon as={FiArrowLeft} />}
-          variant="outline"
-          borderColor="black"
-          color="black"
-          _hover={{ bg: 'black', color: 'white' }}
-          onClick={() => setActiveStep(prev => Math.max(0, prev - 1))}
-          isDisabled={activeStep === 0}
-        >
-          Anterior
-        </Button>
+        {/* Actions */}
+        {selectedTemplate && (
+          <Box bg="bg.surface" p={6} borderRadius="lg" border="1px" borderColor="border">
+            <VStack spacing={4} align="stretch">
+              <Heading size="md" color="text">
+                3. Generar Documento
+              </Heading>
 
-        <Button 
-          rightIcon={<Icon as={FiArrowRight} />}
-          bg="black"
-          color="white"
-          _hover={{ bg: 'gray.800' }}
-          onClick={() => setActiveStep(prev => Math.min(steps.length - 1, prev + 1))}
-          isDisabled={activeStep === steps.length - 1}
-        >
-          Siguiente
-        </Button>
-      </Flex>
+              <HStack spacing={3}>
+                <Button
+                  colorScheme="blue"
+                  leftIcon={<FiFileText />}
+                  isLoading={isGenerating}
+                  loadingText="Generando..."
+                  isDisabled={!isFormValid()}
+                  onClick={handleGenerate}
+                >
+                  Generar Documento
+                </Button>
+
+                <Button
+                  variant="outline"
+                  borderColor="border"
+                  color="text"
+                  leftIcon={<FiSave />}
+                  isDisabled={!isFormValid()}
+                >
+                  Guardar Borrador
+                </Button>
+
+                <Button
+                  variant="outline"
+                  borderColor="border"
+                  color="text"
+                  leftIcon={<FiDownload />}
+                  isDisabled={!isFormValid()}
+                >
+                  Descargar
+                </Button>
+              </HStack>
+
+              {!isFormValid() && selectedTemplate && (
+                <Text fontSize="sm" color="orange.400">
+                  * Completa todos los campos requeridos para continuar
+                </Text>
+              )}
+            </VStack>
+          </Box>
+        )}
+      </VStack>
     </Box>
-  );
-};
-
-export default DocumentGenerator;
+  )
+}

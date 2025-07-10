@@ -1,222 +1,284 @@
-import React, { useState, useEffect } from 'react';
-import { Box, Flex, Heading, Text, Button } from '@chakra-ui/react';
-import { FaEdit, FaTrash, FaPlus, FaLock, FaUnlock } from 'react-icons/fa';
+import { useState } from 'react'
+import {
+  Box,
+  Flex,
+  Heading,
+  Button,
+  Input,
+  Select,
+  Table,
+  Badge,
+  useDisclosure,
+  Dialog,
+  Portal,
+  CloseButton,
+  Field,
+  Text,
+  HStack,
+  VStack,
+  IconButton
+} from '@chakra-ui/react'
+import { FiPlus, FiEdit2, FiTrash2, FiSearch, FiFilter } from 'react-icons/fi'
 
 interface User {
-  id: string;
-  email: string;
-  full_name: string;
-  role: string;
-  is_active: boolean;
-  is_superuser: boolean;
-  created_at: string;
-}
-
-interface ApiResponse {
-  data: User[];
-  count: number;
+  id: string
+  email: string
+  full_name: string
+  role: string
+  is_superuser: boolean
+  is_active: boolean
+  created_at: string
 }
 
 export const UserManagement = () => {
-  const [users, setUsers] = useState<User[]>([]);
-  const [loading, setLoading] = useState(true);
+  const [users, setUsers] = useState<User[]>([])
+  const [selectedUser, setSelectedUser] = useState<User | null>(null)
+  const [searchTerm, setSearchTerm] = useState('')
+  const [roleFilter, setRoleFilter] = useState('')
+  const { open, onOpen, onClose } = useDisclosure()
 
-  // Fetch users from API
-  const fetchUsers = async () => {
-    try {
-      setLoading(true);
-      const response = await fetch('http://localhost:8000/api/v1/users/', {
-        headers: {
-          'Authorization': Bearer ,
-          'Content-Type': 'application/json',
-        },
-      });
-      
-      if (response.ok) {
-        const data: ApiResponse = await response.json();
-        setUsers(data.data);
-      } else {
-        console.error('Error fetching users:', response.statusText);
-      }
-    } catch (error) {
-      console.error('Error fetching users:', error);
-    } finally {
-      setLoading(false);
-    }
-  };
+  const roles = [
+    { value: 'ceo', label: 'CEO' },
+    { value: 'manager', label: 'Gerente' },
+    { value: 'supervisor', label: 'Supervisor' },
+    { value: 'hr', label: 'Recursos Humanos' },
+    { value: 'support', label: 'Atención al Cliente' },
+    { value: 'agent', label: 'Agente' },
+    { value: 'client', label: 'Cliente' }
+  ]
 
-  useEffect(() => {
-    fetchUsers();
-  }, []);
+  const filteredUsers = users.filter(user => {
+    const matchesSearch = user.full_name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                         user.email.toLowerCase().includes(searchTerm.toLowerCase())
+    const matchesRole = !roleFilter || user.role === roleFilter
+    return matchesSearch && matchesRole
+  })
 
   const getRoleBadgeColor = (role: string) => {
-    const colors: { [key: string]: string } = {
-      ceo: '#dc3545',
-      manager: '#6f42c1',
-      hr: '#20c997',
-      agent: '#0d6efd',
-      supervisor: '#fd7e14',
-      support: '#198754',
-    };
-    return colors[role.toLowerCase()] || '#6c757d';
-  };
+    const colors = {
+      ceo: 'red',
+      manager: 'purple',
+      supervisor: 'blue',
+      hr: 'green',
+      support: 'orange',
+      agent: 'cyan',
+      client: 'gray'
+    }
+    return colors[role as keyof typeof colors] || 'gray'
+  }
 
-  if (loading) {
-    return (
-      <Box p={6}>
-        <Heading size="lg" mb={4}>Gestión de Usuarios</Heading>
-        <Text>Cargando usuarios...</Text>
-      </Box>
-    );
+  const handleEditUser = (user: User) => {
+    setSelectedUser(user)
+    onOpen()
+  }
+
+  const handleDeleteUser = (userId: string) => {
+    // Implementar eliminación
+    console.log('Usuario eliminado:', userId)
   }
 
   return (
     <Box p={6}>
-      <Flex justify="space-between" align="center" mb={6}>
-        <Box>
-          <Heading size="lg" color="gray.800">Gestión de Usuarios</Heading>
-          <Text color="gray.600" mt={1}>
-            Administra usuarios, roles y permisos del sistema
-          </Text>
-        </Box>
-        <Button leftIcon={<FaPlus />} colorScheme="blue" size="lg">
-          Agregar Usuario
-        </Button>
-      </Flex>
-
-      <Box 
-        bg="white" 
-        borderRadius="lg" 
-        overflow="hidden" 
-        boxShadow="sm"
-        border="1px"
-        borderColor="gray.200"
-      >
-        <Box overflowX="auto">
-          <table style={{ width: '100%', borderCollapse: 'collapse' }}>
-            <thead style={{ backgroundColor: '#f8f9fa' }}>
-              <tr>
-                <th style={{ padding: '12px', textAlign: 'left', fontWeight: 600, color: '#495057' }}>
-                  Usuario
-                </th>
-                <th style={{ padding: '12px', textAlign: 'left', fontWeight: 600, color: '#495057' }}>
-                  Rol
-                </th>
-                <th style={{ padding: '12px', textAlign: 'left', fontWeight: 600, color: '#495057' }}>
-                  Estado
-                </th>
-                <th style={{ padding: '12px', textAlign: 'center', fontWeight: 600, color: '#495057' }}>
-                  Acciones
-                </th>
-              </tr>
-            </thead>
-            <tbody>
-              {users.map((user, index) => (
-                <tr 
-                  key={user.id} 
-                  style={{ 
-                    backgroundColor: index % 2 === 0 ? '#ffffff' : '#f8f9fa',
-                    borderBottom: '1px solid #dee2e6'
-                  }}
-                >
-                  <td style={{ padding: '12px' }}>
-                    <Box>
-                      <Text fontWeight={600} color="gray.800">{user.full_name}</Text>
-                      <Text fontSize="sm" color="gray.500">{user.email}</Text>
-                    </Box>
-                  </td>
-                  <td style={{ padding: '12px' }}>
-                    <span style={{
-                      backgroundColor: getRoleBadgeColor(user.role),
-                      color: 'white',
-                      padding: '4px 8px',
-                      borderRadius: '4px',
-                      fontSize: '12px',
-                      fontWeight: 600,
-                      textTransform: 'uppercase'
-                    }}>
-                      {user.role}
-                    </span>
-                    {user.is_superuser && (
-                      <span style={{
-                        backgroundColor: '#dc3545',
-                        color: 'white',
-                        padding: '2px 6px',
-                        borderRadius: '4px',
-                        fontSize: '10px',
-                        marginLeft: '4px'
-                      }}>
-                        SUPER
-                      </span>
-                    )}
-                  </td>
-                  <td style={{ padding: '12px' }}>
-                    <span style={{
-                      backgroundColor: user.is_active ? '#d4edda' : '#f8d7da',
-                      color: user.is_active ? '#155724' : '#721c24',
-                      padding: '4px 8px',
-                      borderRadius: '4px',
-                      fontSize: '12px',
-                      fontWeight: 500
-                    }}>
-                      {user.is_active ? 'Activo' : 'Inactivo'}
-                    </span>
-                  </td>
-                  <td style={{ padding: '12px', textAlign: 'center' }}>
-                    <Flex gap={2} justify="center">
-                      <button
-                        style={{
-                          backgroundColor: '#0d6efd',
-                          color: 'white',
-                          border: 'none',
-                          borderRadius: '4px',
-                          padding: '6px',
-                          cursor: 'pointer'
-                        }}
-                        title="Editar usuario"
-                      >
-                        <FaEdit size={12} />
-                      </button>
-                      <button
-                        style={{
-                          backgroundColor: user.is_active ? '#fd7e14' : '#198754',
-                          color: 'white',
-                          border: 'none',
-                          borderRadius: '4px',
-                          padding: '6px',
-                          cursor: 'pointer'
-                        }}
-                        title={user.is_active ? 'Desactivar usuario' : 'Activar usuario'}
-                      >
-                        {user.is_active ? <FaLock size={12} /> : <FaUnlock size={12} />}
-                      </button>
-                      <button
-                        style={{
-                          backgroundColor: '#dc3545',
-                          color: 'white',
-                          border: 'none',
-                          borderRadius: '4px',
-                          padding: '6px',
-                          cursor: 'pointer'
-                        }}
-                        title="Eliminar usuario"
-                      >
-                        <FaTrash size={12} />
-                      </button>
-                    </Flex>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </Box>
-
-        {users.length === 0 && (
-          <Box p={8} textAlign="center">
-            <Text color="gray.500">No hay usuarios disponibles</Text>
+      <VStack gap={6} align="stretch">
+        {/* Header */}
+        <Flex justify="space-between" align="center">
+          <Box>
+            <Heading size="lg" color="text">
+              Gestión de Usuarios
+            </Heading>
+            <Text color="text.muted" mt={1}>
+              Administra usuarios y roles del sistema
+            </Text>
           </Box>
-        )}
-      </Box>
+          <Button colorScheme="blue" onClick={onOpen}>
+            <FiPlus style={{ marginRight: '8px' }} />
+            Nuevo Usuario
+          </Button>
+        </Flex>
+
+        {/* Filtros */}
+        <Box
+          bg="bg.surface"
+          p={4}
+          borderRadius="lg"
+          border="1px"
+          borderColor="border"
+        >
+          <HStack gap={4}>
+            <Box flex={1}>
+              <Field.Root>
+                <Field.Label color="text.muted" fontSize="sm">Buscar</Field.Label>
+                <Input
+                  placeholder="Buscar por nombre o email..."
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                />
+              </Field.Root>
+            </Box>
+            <Box minW="200px">
+              <Field.Root>
+                <Field.Label color="text.muted" fontSize="sm">Rol</Field.Label>
+                <Select
+                  placeholder="Todos los roles"
+                  value={roleFilter}
+                  onChange={(e) => setRoleFilter(e.target.value)}
+                >
+                  {roles.map(role => (
+                    <option key={role.value} value={role.value}>
+                      {role.label}
+                    </option>
+                  ))}
+                </Select>
+              </Field.Root>
+            </Box>
+            <Box pt={6}>
+              <Button variant="outline" borderColor="border" color="text">
+                <FiFilter style={{ marginRight: '8px' }} />
+                Filtrar
+              </Button>
+            </Box>
+          </HStack>
+        </Box>
+
+        {/* Tabla de usuarios */}
+        <Box
+          bg="bg.surface"
+          borderRadius="lg"
+          overflow="hidden"
+          border="1px"
+          borderColor="border"
+        >
+          <Table.Root variant="simple">
+            <Table.Header bg="bg.muted">
+              <Table.Row>
+                <Table.ColumnHeader color="text.muted" borderColor="border.muted">Usuario</Table.ColumnHeader>
+                <Table.ColumnHeader color="text.muted" borderColor="border.muted">Email</Table.ColumnHeader>
+                <Table.ColumnHeader color="text.muted" borderColor="border.muted">Rol</Table.ColumnHeader>
+                <Table.ColumnHeader color="text.muted" borderColor="border.muted">Estado</Table.ColumnHeader>
+                <Table.ColumnHeader color="text.muted" borderColor="border.muted">Fecha Registro</Table.ColumnHeader>
+                <Table.ColumnHeader color="text.muted" borderColor="border.muted">Acciones</Table.ColumnHeader>
+              </Table.Row>
+            </Table.Header>
+            <Table.Body>
+              {filteredUsers.map((user) => (
+                <Table.Row key={user.id}>
+                  <Table.Cell borderColor="border.muted">
+                    <VStack align="start" gap={1}>
+                      <Text color="text" fontWeight="medium">
+                        {user.full_name}
+                      </Text>
+                      {user.is_superuser && (
+                        <Badge colorScheme="red" size="sm">
+                          SUPERUSER
+                        </Badge>
+                      )}
+                    </VStack>
+                  </Table.Cell>
+                  <Table.Cell borderColor="border.muted">
+                    <Text color="text">{user.email}</Text>
+                  </Table.Cell>
+                  <Table.Cell borderColor="border.muted">
+                    <Badge colorScheme={getRoleBadgeColor(user.role)}>
+                      {roles.find(r => r.value === user.role)?.label || user.role}
+                    </Badge>
+                  </Table.Cell>
+                  <Table.Cell borderColor="border.muted">
+                    <Badge colorScheme={user.is_active ? 'green' : 'red'}>
+                      {user.is_active ? 'Activo' : 'Inactivo'}
+                    </Badge>
+                  </Table.Cell>
+                  <Table.Cell borderColor="border.muted">
+                    <Text color="text.muted" fontSize="sm">
+                      {new Date(user.created_at).toLocaleDateString()}
+                    </Text>
+                  </Table.Cell>
+                  <Table.Cell borderColor="border.muted">
+                    <HStack gap={2}>
+                      <IconButton
+                        aria-label="Editar usuario"
+                        size="sm"
+                        variant="outline"
+                        borderColor="border"
+                        color="text"
+                        onClick={() => handleEditUser(user)}
+                      >
+                        <FiEdit2 />
+                      </IconButton>
+                      <IconButton
+                        aria-label="Eliminar usuario"
+                        size="sm"
+                        variant="outline"
+                        borderColor="border"
+                        color="red.400"
+                        onClick={() => handleDeleteUser(user.id)}
+                      >
+                        <FiTrash2 />
+                      </IconButton>
+                    </HStack>
+                  </Table.Cell>
+                </Table.Row>
+              ))}
+            </Table.Body>
+          </Table.Root>
+
+          {filteredUsers.length === 0 && (
+            <Box p={8} textAlign="center">
+              <Text color="text.muted">No se encontraron usuarios</Text>
+            </Box>
+          )}
+        </Box>
+      </VStack>
+
+      {/* Modal para agregar/editar usuario */}
+      <Dialog.Root open={open} onOpenChange={(e) => e.open ? onOpen() : onClose()}>
+        <Portal>
+          <Dialog.Backdrop />
+          <Dialog.Positioner>
+            <Dialog.Content bg="bg.surface" border="1px" borderColor="border">
+              <Dialog.Header>
+                <Dialog.Title color="text">
+                  {selectedUser ? 'Editar Usuario' : 'Nuevo Usuario'}
+                </Dialog.Title>
+                <Dialog.CloseTrigger asChild>
+                  <CloseButton color="text" />
+                </Dialog.CloseTrigger>
+              </Dialog.Header>
+              <Dialog.Body>
+                <VStack gap={4}>
+                  <Field.Root>
+                    <Field.Label color="text.muted">Nombre Completo</Field.Label>
+                    <Input placeholder="Ingresa el nombre completo" />
+                  </Field.Root>
+                  <Field.Root>
+                    <Field.Label color="text.muted">Email</Field.Label>
+                    <Input type="email" placeholder="usuario@example.com" />
+                  </Field.Root>
+                  <Field.Root>
+                    <Field.Label color="text.muted">Rol</Field.Label>
+                    <Select placeholder="Selecciona un rol">
+                      {roles.map(role => (
+                        <option key={role.value} value={role.value}>
+                          {role.label}
+                        </option>
+                      ))}
+                    </Select>
+                  </Field.Root>
+                </VStack>
+              </Dialog.Body>
+              <Dialog.Footer>
+                <Dialog.ActionTrigger asChild>
+                  <Button variant="outline" borderColor="border" color="text" mr={3}>
+                    Cancelar
+                  </Button>
+                </Dialog.ActionTrigger>
+                <Button colorScheme="blue">
+                  {selectedUser ? 'Guardar Cambios' : 'Crear Usuario'}
+                </Button>
+              </Dialog.Footer>
+            </Dialog.Content>
+          </Dialog.Positioner>
+        </Portal>
+      </Dialog.Root>
     </Box>
-  );
-};
+  )
+}

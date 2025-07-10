@@ -3,10 +3,7 @@ import { createFileRoute } from '@tanstack/react-router';
 import { FiUsers, FiTarget, FiEye, FiAward, FiStar } from "react-icons/fi";
 
 const team = [
-  { name: "Ana Torres", role: "CEO & Founder", img: "https://randomuser.me/api/portraits/women/44.jpg" },
-  { name: "Carlos Gómez", role: "COO", img: "https://randomuser.me/api/portraits/men/32.jpg" },
-  { name: "Lucía Pérez", role: "CTO", img: "https://randomuser.me/api/portraits/women/65.jpg" },
-  { name: "Miguel Ruiz", role: "CFO", img: "https://randomuser.me/api/portraits/men/41.jpg" },
+  { name: "Jussepe Fernandez M.", role: "CEO & Founder", img: "/assets/images/CEO_FOUNDER-bg.png" },
 ];
 
 function AboutPage() {
@@ -36,8 +33,8 @@ function AboutPage() {
           </div>
         </div>
         <div className="bg-gray-800 rounded-2xl p-8 shadow-lg ">
-          <h2 className="text-2xl font-bold text-white mb-4">Nuestro Equipo</h2>
-          <p className="text-gray-400 mb-6">Contamos con profesionales expertos en bienes raíces, finanzas, tecnología y atención al cliente, comprometidos con tu éxito.</p>
+          <h2 className="text-2xl font-bold text-white mb-4">Nuestro Fundador</h2>
+          <p className="text-gray-400 mb-6">Se construyo un entorno completo y eficiente para la gestion de bienes raíces, finanzas, tecnología y atención al cliente, comprometidos con tu éxito.</p>
           <div className="flex flex-wrap justify-center gap-8">
             {team.map((member) => (
               <div key={member.name} className="flex flex-col items-center">

@@ -657,7 +657,7 @@ function InvestmentPage() {
           </div>
         )}
 
-        {/* Partners Carousel */}
+        {/* Partners Carousel 
         <div className="mb-16">
           <div className="text-center mb-8">
             <h2 className="text-3xl font-bold text-white mb-4">Nuestros Aliados Estratégicos</h2>
@@ -666,28 +666,58 @@ function InvestmentPage() {
           
           <div className="relative overflow-hidden py-8">
             <div className="flex animate-scroll whitespace-nowrap">
-              {/* Primera fila de logos */}
+              {/* Primera fila de logos solo avatar 
               <div className="flex items-center gap-16 shrink-0">
-                <div className="w-20 h-20 bg-white rounded-full flex items-center justify-center shadow-lg hover:scale-110 transition-transform duration-300">
-                  <span className="text-gray-800 font-bold text-sm text-center">Spedire365</span>
+                <div className="rounded-full flex items-center justify-center  hover:scale-110 transition-transform duration-300 overflow-hidden">
+                  <img
+                    src="/assets/images/spedire365.png"
+                    alt="Spedire365"
+                    className="w-20 h-20 rounded-full object-cover"
+                  />
                 </div>
-                <div className="w-20 h-20 bg-white rounded-full flex items-center justify-center shadow-lg hover:scale-110 transition-transform duration-300">
-                  <span className="text-gray-800 font-bold text-sm text-center">GeniusLabs</span>
+                <div className="w-20 h-20 rounded-full flex items-center justify-center shadow-lg hover:scale-110 transition-transform duration-300 overflow-hidden">
+                  <img
+                    src="/assets/images/spedire365.png"
+                    alt="GeniusLabs"
+                    className="w-20 h-20 rounded-full object-cover"
+                  />
+                </div>
+                <div className="rounded-full flex items-center justify-center shadow-lg hover:scale-110 transition-transform duration-300 overflow-hidden">
+                  <img
+                    src="/assets/images/spedire365.png"
+                    alt="Aliado Personalizado"
+                    className="w-20 h-20 rounded-full object-cover"
+                  />
                 </div>
               </div>
               
-              {/* Segunda fila idéntica para el efecto infinito */}
+              {/* Segunda fila idéntica para el efecto infinito solo avatar 
               <div className="flex items-center gap-16 shrink-0 ml-16">
-                <div className="w-20 h-20 bg-white rounded-full flex items-center justify-center shadow-lg hover:scale-110 transition-transform duration-300">
-                  <span className="text-gray-800 font-bold text-sm text-center">Spedire365</span>
+                <div className=" rounded-full flex items-center justify-center  hover:scale-110 transition-transform duration-300 overflow-hidden">
+                  <img
+                    src="/assets/images/spedire365.png"
+                    alt="Spedire365"
+                    className="w-20 h-20 rounded-full object-cover"
+                  />
                 </div>
-                <div className="w-20 h-20 bg-white rounded-full flex items-center justify-center shadow-lg hover:scale-110 transition-transform duration-300">
-                  <span className="text-gray-800 font-bold text-sm text-center">GeniusLabs</span>
+                <div className=" rounded-full flex items-center justify-center shadow-lg hover:scale-110 transition-transform duration-300 overflow-hidden">
+                  <img
+                    src="/assets/images/spedire365.png"
+                    alt="GeniusLabs"
+                    className="w-20 h-20 rounded-full object-cover"
+                  />
+                </div>
+                <div className=" rounded-full flex items-center justify-center shadow-lg hover:scale-110 transition-transform duration-300 overflow-hidden">
+                  <img
+                    src="/assets/images/spedire365.png"
+                    alt="Aliado Personalizado"
+                    className="w-20 h-20 rounded-full object-cover"
+                  />
                 </div>
               </div>
             </div>
           </div>
-        </div>
+        </div>*/}
 
         {/* Why Choose Us */}
         <div className="bg-gray-900 rounded-2xl p-12 text-center border border-gray-700">

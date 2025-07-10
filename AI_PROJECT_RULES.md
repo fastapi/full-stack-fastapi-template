@@ -76,7 +76,7 @@ No se permite que el frontend escriba directamente en Nhost excepto para Realtim
 
 ### Backend
 - ✅ Usar `uv` para gestión de dependencias
-- ✅ Comando: `uv pip install` para instalar
+- ✅ Comando: `uv add` para instalar
 - ✅ Comando: `uv sync` para sincronizar cambios
 - ✅ Activar entorno: `.venv\Scripts\activate`
 

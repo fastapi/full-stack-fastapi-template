@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { Grid, GridItem, Box, Heading, Button, Flex } from '@chakra-ui/react'
+import { Grid, GridItem, Box, Heading, Button, Flex, Text } from '@chakra-ui/react'
 import { FiHome, FiBarChart2, FiUsers } from 'react-icons/fi'
 import { RoleDashboard } from '../Common/RoleDashboard'
 import { PropertyCRM } from './PropertyCRM'
@@ -20,11 +20,11 @@ export const ManagerDashboard = () => {
       case 'team':
         return (
           <Box>
-            <Heading size="md" mb={4}>Gestión de Equipo</Heading>
-            <Box bg="white" p={6} borderRadius="lg" shadow="sm" border="1px" borderColor="gray.200">
-              <Box fontSize="lg" color="gray.600" textAlign="center">
+            <Heading size="md" mb={4} color="text">Gestión de Equipo</Heading>
+            <Box bg="bg.surface" p={6} borderRadius="lg" shadow="sm" border="1px" borderColor="border">
+              <Text fontSize="lg" color="text.muted" textAlign="center">
                 Módulo de gestión de equipo en desarrollo
-              </Box>
+              </Text>
             </Box>
           </Box>
         )
@@ -33,60 +33,60 @@ export const ManagerDashboard = () => {
           <>
             <Grid templateColumns="repeat(3, 1fr)" gap={6} mb={8}>
               <GridItem>
-                <Box p={6} bg="white" borderRadius="lg" shadow="sm" border="1px" borderColor="gray.200">
-                  <Box fontSize="sm" color="gray.600" mb={2}>Ventas del Mes</Box>
-                  <Box fontSize="2xl" fontWeight="bold" color="gray.900">$234,567</Box>
-                  <Box fontSize="sm" color="green.500" mt={1}>↑ 15.36% (30 días)</Box>
+                <Box p={6} bg="bg.surface" borderRadius="lg" shadow="sm" border="1px" borderColor="border">
+                  <Text fontSize="sm" color="text.muted" mb={2}>Ventas del Mes</Text>
+                  <Text fontSize="2xl" fontWeight="bold" color="text">$234,567</Text>
+                  <Text fontSize="sm" color="green.400" mt={1}>↑ 15.36% (30 días)</Text>
                 </Box>
               </GridItem>
               <GridItem>
-                <Box p={6} bg="white" borderRadius="lg" shadow="sm" border="1px" borderColor="gray.200">
-                  <Box fontSize="sm" color="gray.600" mb={2}>Propiedades Activas</Box>
-                  <Box fontSize="2xl" fontWeight="bold" color="gray.900">45</Box>
-                  <Box fontSize="sm" color="green.500" mt={1}>↑ 8% (30 días)</Box>
+                <Box p={6} bg="bg.surface" borderRadius="lg" shadow="sm" border="1px" borderColor="border">
+                  <Text fontSize="sm" color="text.muted" mb={2}>Propiedades Activas</Text>
+                  <Text fontSize="2xl" fontWeight="bold" color="text">45</Text>
+                  <Text fontSize="sm" color="green.400" mt={1}>↑ 8% (30 días)</Text>
                 </Box>
               </GridItem>
               <GridItem>
-                <Box p={6} bg="white" borderRadius="lg" shadow="sm" border="1px" borderColor="gray.200">
-                  <Box fontSize="sm" color="gray.600" mb={2}>Agentes Activos</Box>
-                  <Box fontSize="2xl" fontWeight="bold" color="gray.900">12</Box>
-                  <Box fontSize="sm" color="green.500" mt={1}>↑ 2% (30 días)</Box>
+                <Box p={6} bg="bg.surface" borderRadius="lg" shadow="sm" border="1px" borderColor="border">
+                  <Text fontSize="sm" color="text.muted" mb={2}>Agentes Activos</Text>
+                  <Text fontSize="2xl" fontWeight="bold" color="text">12</Text>
+                  <Text fontSize="sm" color="green.400" mt={1}>↑ 2% (30 días)</Text>
                 </Box>
               </GridItem>
             </Grid>
 
             <Box>
-              <Heading size="md" mb={4}>Rendimiento de Supervisores</Heading>
-              <Box bg="white" borderRadius="lg" overflow="hidden" border="1px" borderColor="gray.200">
+              <Heading size="md" mb={4} color="text">Rendimiento de Supervisores</Heading>
+              <Box bg="bg.surface" borderRadius="lg" overflow="hidden" border="1px" borderColor="border">
                 <Box as="table" w="100%" borderCollapse="collapse">
-                  <Box as="thead" bg="gray.50">
+                  <Box as="thead" bg="bg.muted">
                     <Box as="tr">
-                      <Box as="th" px={4} py={3} textAlign="left" fontSize="sm" fontWeight="medium" color="gray.700" borderBottom="1px" borderColor="gray.200">
+                      <Box as="th" px={4} py={3} textAlign="left" fontSize="sm" fontWeight="medium" color="text.muted" borderBottom="1px" borderColor="border.muted">
                         Supervisor
                       </Box>
-                      <Box as="th" px={4} py={3} textAlign="right" fontSize="sm" fontWeight="medium" color="gray.700" borderBottom="1px" borderColor="gray.200">
+                      <Box as="th" px={4} py={3} textAlign="right" fontSize="sm" fontWeight="medium" color="text.muted" borderBottom="1px" borderColor="border.muted">
                         Ventas
                       </Box>
-                      <Box as="th" px={4} py={3} textAlign="right" fontSize="sm" fontWeight="medium" color="gray.700" borderBottom="1px" borderColor="gray.200">
+                      <Box as="th" px={4} py={3} textAlign="right" fontSize="sm" fontWeight="medium" color="text.muted" borderBottom="1px" borderColor="border.muted">
                         Equipo
                       </Box>
-                      <Box as="th" px={4} py={3} textAlign="right" fontSize="sm" fontWeight="medium" color="gray.700" borderBottom="1px" borderColor="gray.200">
+                      <Box as="th" px={4} py={3} textAlign="right" fontSize="sm" fontWeight="medium" color="text.muted" borderBottom="1px" borderColor="border.muted">
                         Rendimiento
                       </Box>
                     </Box>
                   </Box>
                   <Box as="tbody">
                     <Box as="tr">
-                      <Box as="td" px={4} py={3} borderBottom="1px" borderColor="gray.200">Juan Pérez</Box>
-                      <Box as="td" px={4} py={3} textAlign="right" borderBottom="1px" borderColor="gray.200">$45,000</Box>
-                      <Box as="td" px={4} py={3} textAlign="right" borderBottom="1px" borderColor="gray.200">5</Box>
-                      <Box as="td" px={4} py={3} textAlign="right" borderBottom="1px" borderColor="gray.200">92%</Box>
+                      <Box as="td" px={4} py={3} borderBottom="1px" borderColor="border.muted" color="text">Juan Pérez</Box>
+                      <Box as="td" px={4} py={3} textAlign="right" borderBottom="1px" borderColor="border.muted" color="text">$45,000</Box>
+                      <Box as="td" px={4} py={3} textAlign="right" borderBottom="1px" borderColor="border.muted" color="text">5</Box>
+                      <Box as="td" px={4} py={3} textAlign="right" borderBottom="1px" borderColor="border.muted" color="text">92%</Box>
                     </Box>
                     <Box as="tr">
-                      <Box as="td" px={4} py={3}>María García</Box>
-                      <Box as="td" px={4} py={3} textAlign="right">$38,500</Box>
-                      <Box as="td" px={4} py={3} textAlign="right">4</Box>
-                      <Box as="td" px={4} py={3} textAlign="right">88%</Box>
+                      <Box as="td" px={4} py={3} color="text">María García</Box>
+                      <Box as="td" px={4} py={3} textAlign="right" color="text">$38,500</Box>
+                      <Box as="td" px={4} py={3} textAlign="right" color="text">4</Box>
+                      <Box as="td" px={4} py={3} textAlign="right" color="text">88%</Box>
                     </Box>
                   </Box>
                 </Box>
@@ -107,12 +107,12 @@ export const ManagerDashboard = () => {
         {tabs.map((tab) => (
           <Button
             key={tab.id}
-            leftIcon={<tab.icon />}
             variant={activeTab === tab.id ? 'solid' : 'outline'}
             colorScheme={activeTab === tab.id ? 'blue' : 'gray'}
             size="sm"
             onClick={() => setActiveTab(tab.id)}
           >
+            <tab.icon style={{ marginRight: '8px' }} />
             {tab.label}
           </Button>
         ))}

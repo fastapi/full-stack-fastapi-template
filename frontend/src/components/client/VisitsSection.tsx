@@ -143,11 +143,11 @@ export const VisitsSection: React.FC = () => {
 
   if (!visits?.length) {
     return (
-      <Box p={6} bg="white" borderRadius="lg" shadow="base">
+      <Box p={6} bg="bg.surface" borderRadius="lg" shadow="base" border="1px" borderColor="border">
         <VStack spacing={4}>
-          <Heading size="md">No tienes visitas programadas</Heading>
-          <Text>Explora nuestro catálogo y programa una visita</Text>
-          <Button colorScheme="black" as="a" href="/properties">
+          <Heading size="md" color="text">No tienes visitas programadas</Heading>
+          <Text color="text.muted">Explora nuestro catálogo y programa una visita</Text>
+          <Button colorScheme="blue" as="a" href="/properties">
             Ver Propiedades
           </Button>
         </VStack>
@@ -186,9 +186,9 @@ export const VisitsSection: React.FC = () => {
   };
 
   return (
-    <Box p={6} bg="white" borderRadius="lg" shadow="base">
+    <Box p={6} bg="bg.surface" borderRadius="lg" shadow="base" border="1px" borderColor="border">
       <VStack spacing={6} align="stretch">
-        <Heading size="lg">Visitas Programadas</Heading>
+        <Heading size="lg" color="text">Visitas Programadas</Heading>
         
         <Table variant="simple">
           <Thead>
