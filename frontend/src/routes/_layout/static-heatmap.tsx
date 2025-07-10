@@ -131,9 +131,8 @@ function StaticHeatmap() {
             style={{ padding: '6px 16px', borderRadius: 4, background: '#3182ce', color: 'white', border: 'none', cursor: 'pointer' }}
             onClick={async () => {
               try {
-                const res = await fetch(`http://localhost:8000/api/v1/csv/get-data?start_utc=${startUtc}&end_utc=${endUtc}`)
+                const res = await fetch(`http://localhost:8000/api/v1/data_analysis/get-data?start_utc=${startUtc}&end_utc=${endUtc}`)
                 const data = await res.json()
-                alert("success")
                 // 提取ONLAT和ONLON，count统一为100
                 const points = (Array.isArray(data) ? data : []).map((item: any) => ({
                   lng: parseFloat(item.ONLON),
