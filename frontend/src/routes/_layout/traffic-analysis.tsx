@@ -14,9 +14,9 @@ function TrafficAnalysis() {
       <Heading size="lg" pt={12}>交通数据分析</Heading>
       <Tabs.Root defaultValue="pickup-density" variant="subtle" mt={6}>
         <Tabs.List>
-          <Tabs.Trigger value="pickup-density">上客点密度分析</Tabs.Trigger>
+          <Tabs.Trigger value="pickup-density" onClick={() => navigate({ to: "/passenger_density_heat_map" })}>上客点密度分析</Tabs.Trigger>
           <Tabs.Trigger value="vehicle-trajectory">车辆轨迹可视化</Tabs.Trigger>
-          <Tabs.Trigger value="static-heatmap" onClick={() => navigate({ to: "/static-heatmap" })}>静态热力图</Tabs.Trigger>
+          <Tabs.Trigger value="static-heatmap">静态热力图</Tabs.Trigger>
         </Tabs.List>
         <Tabs.Content value="pickup-density">
           <Container maxW="full" mt={4}>

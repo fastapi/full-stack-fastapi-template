@@ -21,6 +21,9 @@ dependencies = [
     "pydantic-settings<3.0.0,>=2.2.1",
     "sentry-sdk[fastapi]<2.0.0,>=1.40.6",
     "pyjwt<3.0.0,>=2.8.0",
+    "scikit-learn<2.0.0,>=1.3.0",
+    "pandas<3.0.0,>=2.0.0",
+    "numpy<2.0.0,>=1.24.0",
 ]
 
 [tool.uv]

@@ -18,9 +18,9 @@ import { Route as LoginImport } from './routes/login'
 import { Route as LayoutImport } from './routes/_layout'
 import { Route as LayoutIndexImport } from './routes/_layout/index'
 import { Route as LayoutTrafficAnalysisImport } from './routes/_layout/traffic-analysis'
-import { Route as LayoutStaticHeatmapImport } from './routes/_layout/static-heatmap'
 import { Route as LayoutSettingsImport } from './routes/_layout/settings'
 import { Route as LayoutRoadDetectionImport } from './routes/_layout/road-detection'
+import { Route as LayoutPassengerdensityheatmapImport } from './routes/_layout/passenger_density_heat_map'
 import { Route as LayoutItemsImport } from './routes/_layout/items'
 import { Route as LayoutFaceRecognitionImport } from './routes/_layout/face-recognition'
 import { Route as LayoutAdminImport } from './routes/_layout/admin'
@@ -62,11 +62,6 @@ const LayoutTrafficAnalysisRoute = LayoutTrafficAnalysisImport.update({
   getParentRoute: () => LayoutRoute,
 } as any)
 
-const LayoutStaticHeatmapRoute = LayoutStaticHeatmapImport.update({
-  path: '/static-heatmap',
-  getParentRoute: () => LayoutRoute,
-} as any)
-
 const LayoutSettingsRoute = LayoutSettingsImport.update({
   path: '/settings',
   getParentRoute: () => LayoutRoute,
@@ -76,6 +71,12 @@ const LayoutRoadDetectionRoute = LayoutRoadDetectionImport.update({
   path: '/road-detection',
   getParentRoute: () => LayoutRoute,
 } as any)
+
+const LayoutPassengerdensityheatmapRoute =
+  LayoutPassengerdensityheatmapImport.update({
+    path: '/passenger_density_heat_map',
+    getParentRoute: () => LayoutRoute,
+  } as any)
 
 const LayoutItemsRoute = LayoutItemsImport.update({
   path: '/items',
@@ -128,16 +129,16 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof LayoutItemsImport
       parentRoute: typeof LayoutImport
     }
+    '/_layout/passenger_density_heat_map': {
+      preLoaderRoute: typeof LayoutPassengerdensityheatmapImport
+      parentRoute: typeof LayoutImport
+    }
     '/_layout/road-detection': {
       preLoaderRoute: typeof LayoutRoadDetectionImport
       parentRoute: typeof LayoutImport
     }
     '/_layout/settings': {
       preLoaderRoute: typeof LayoutSettingsImport
-      parentRoute: typeof LayoutImport
-    }
-    '/_layout/static-heatmap': {
-      preLoaderRoute: typeof LayoutStaticHeatmapImport
       parentRoute: typeof LayoutImport
     }
     '/_layout/traffic-analysis': {
@@ -158,9 +159,9 @@ export const routeTree = rootRoute.addChildren([
     LayoutAdminRoute,
     LayoutFaceRecognitionRoute,
     LayoutItemsRoute,
+    LayoutPassengerdensityheatmapRoute,
     LayoutRoadDetectionRoute,
     LayoutSettingsRoute,
-    LayoutStaticHeatmapRoute,
     LayoutTrafficAnalysisRoute,
     LayoutIndexRoute,
   ]),
