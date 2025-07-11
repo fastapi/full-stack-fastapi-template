@@ -2,6 +2,7 @@ import React from "react"
 import { Container, Heading, Tabs, Text } from "@chakra-ui/react"
 import { createFileRoute, useNavigate } from "@tanstack/react-router"
 import PassengerCountChart from '../../components/Traffic_analysis/PassengerCountChart'
+import VehicleTrajectory from '../../components/Traffic_analysis/VehicleTrajectory'
 
 export const Route = createFileRoute("/_layout/traffic-analysis")({
   component: TrafficAnalysis,
@@ -28,8 +29,7 @@ function TrafficAnalysis() {
         </Tabs.Content>
         <Tabs.Content value="vehicle-trajectory">
           <Container maxW="full" mt={4}>
-            <Text>这里是车辆轨迹可视化模块。</Text>
-            <Text mt={2}>可以展示车辆的实时轨迹和历史路径。</Text>
+            <VehicleTrajectory />
           </Container>
         </Tabs.Content>
         <Tabs.Content value="statistics">

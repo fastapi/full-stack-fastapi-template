@@ -113,12 +113,12 @@ class NewPassword(SQLModel):
     new_password: str = Field(min_length=8, max_length=40)
 
 
-# class CsvRecord(SQLModel, table=True):
-#     id: int | None = Field(default=None, primary_key=True)
-#     COMMADDR: str
-#     上车UTC: str
-#     上车LAT: str
-#     上车LON: str
-#     下车UTC: str
-#     下车LAT: str
-#     下车LON: str
+class GPSRecord(SQLModel, table=True):
+    id: int | None = Field(default=None, primary_key=True)
+    commaddr: str = Field(max_length=64)  # 车辆标识（车牌号）
+    utc: str = Field(max_length=32)       # 时间戳（UTC时间类型）
+    lat: float                            # 经度坐标
+    lon: float                            # 纬度坐标
+    head: float                           # 方向角
+    speed: float                          # 车辆速度（m/s）
+    tflag: int                            # 车辆状态（1为载客，0为空载）
