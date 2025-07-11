@@ -22,6 +22,7 @@ export default function VehicleTrajectory() {
   useEffect(() => {
     const initMap = () => {
       if (typeof window !== 'undefined' && window.BMap && mapRef.current) {
+        console.log('初始化百度地图...')
         const map = new window.BMap.Map(mapRef.current)
         mapInstanceRef.current = map
         // 设置济南市中心坐标
@@ -30,26 +31,42 @@ export default function VehicleTrajectory() {
         map.enableScrollWheelZoom(true)
         map.addControl(new window.BMap.NavigationControl())
         map.addControl(new window.BMap.ScaleControl())
+        console.log('百度地图初始化完成')
       }
     }
 
     const loadBaiduMap = () => {
       if (typeof window !== 'undefined' && !window.BMap) {
+        console.log('加载百度地图API...')
         const script = document.createElement('script')
         script.src = `https://api.map.baidu.com/api?v=3.0&ak=TtyedSKP6umaE86VQqLbcE1sHS0f65A8&callback=initBaiduMap`
         script.async = true
         document.head.appendChild(script)
         window.initBaiduMap = initMap
       } else {
+        console.log('百度地图API已存在，直接初始化')
         initMap()
       }
     }
-    loadBaiduMap()
+    
+    // 延迟加载地图，确保DOM已渲染
+    const timer = setTimeout(() => {
+      loadBaiduMap()
+    }, 100)
+    
+    return () => {
+      clearTimeout(timer)
+    }
   }, [])
 
   // 清空地图上的所有覆盖物
   const clearMap = () => {
-    if (!mapInstanceRef.current) return
+    if (!mapInstanceRef.current) {
+      console.log('地图实例不存在，无法清空')
+      return
+    }
+    
+    console.log('清空地图覆盖物...')
     
     // 清除之前的轨迹线
     if (polylineRef.current) {
@@ -170,6 +187,7 @@ export default function VehicleTrajectory() {
         ? `http://localhost:8000/api/v1/analysis/gps-records-corrected?commaddr=${commaddr}&start_utc=${startUtc}&end_utc=${endUtc}&coordinate_system=${coordinateSystem}`
         : `http://localhost:8000/api/v1/analysis/gps-records?commaddr=${commaddr}&start_utc=${startUtc}&end_utc=${endUtc}`
       
+      console.log('API URL:', apiUrl)
       const response = await fetch(apiUrl)
       const data = await response.json()
       
@@ -192,12 +210,15 @@ export default function VehicleTrajectory() {
       
       // 确保地图已初始化后再绘制轨迹
       if (mapInstanceRef.current && window.BMap) {
+        console.log('地图已初始化，开始绘制轨迹')
         // 延迟一点时间确保地图完全加载
         setTimeout(() => {
           drawTrajectoryOnMap(records)
-        }, 100)
+        }, 200)
       } else {
         console.error('地图未初始化，无法绘制轨迹')
+        console.log('mapInstanceRef.current:', mapInstanceRef.current)
+        console.log('window.BMap:', window.BMap)
       }
     } catch (error) {
       console.error('获取轨迹数据失败:', error)

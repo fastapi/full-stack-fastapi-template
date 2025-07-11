@@ -20,7 +20,6 @@ import { Route as LayoutIndexImport } from './routes/_layout/index'
 import { Route as LayoutTrafficAnalysisImport } from './routes/_layout/traffic-analysis'
 import { Route as LayoutSettingsImport } from './routes/_layout/settings'
 import { Route as LayoutRoadDetectionImport } from './routes/_layout/road-detection'
-import { Route as LayoutPassengerdensityheatmapImport } from './routes/_layout/passenger_density_heat_map'
 import { Route as LayoutItemsImport } from './routes/_layout/items'
 import { Route as LayoutFaceRecognitionImport } from './routes/_layout/face-recognition'
 import { Route as LayoutAdminImport } from './routes/_layout/admin'
@@ -71,12 +70,6 @@ const LayoutRoadDetectionRoute = LayoutRoadDetectionImport.update({
   path: '/road-detection',
   getParentRoute: () => LayoutRoute,
 } as any)
-
-const LayoutPassengerdensityheatmapRoute =
-  LayoutPassengerdensityheatmapImport.update({
-    path: '/passenger_density_heat_map',
-    getParentRoute: () => LayoutRoute,
-  } as any)
 
 const LayoutItemsRoute = LayoutItemsImport.update({
   path: '/items',
@@ -129,10 +122,6 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof LayoutItemsImport
       parentRoute: typeof LayoutImport
     }
-    '/_layout/passenger_density_heat_map': {
-      preLoaderRoute: typeof LayoutPassengerdensityheatmapImport
-      parentRoute: typeof LayoutImport
-    }
     '/_layout/road-detection': {
       preLoaderRoute: typeof LayoutRoadDetectionImport
       parentRoute: typeof LayoutImport
@@ -159,7 +148,6 @@ export const routeTree = rootRoute.addChildren([
     LayoutAdminRoute,
     LayoutFaceRecognitionRoute,
     LayoutItemsRoute,
-    LayoutPassengerdensityheatmapRoute,
     LayoutRoadDetectionRoute,
     LayoutSettingsRoute,
     LayoutTrafficAnalysisRoute,

@@ -1,14 +1,9 @@
 import React, { useEffect, useRef, useState } from "react"
 import { Box, Container, Heading, Text, Flex, IconButton, VStack, Input } from "@chakra-ui/react"
-import { createFileRoute } from "@tanstack/react-router"
 import { FiArrowLeft, FiMaximize2, FiMinimize2 } from "react-icons/fi"
 import { useNavigate } from "@tanstack/react-router"
 
-export const Route = createFileRoute("/_layout/passenger_density_heat_map")({
-  component: StaticHeatmap,
-})
-
-function StaticHeatmap() {
+export default function PassengerDensityHeatMap() {
   const mapRef = useRef<HTMLDivElement>(null)
   const navigate = useNavigate()
   const [startUtc, setStartUtc] = useState("20130912011417")
