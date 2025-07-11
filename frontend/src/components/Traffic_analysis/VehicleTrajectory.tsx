@@ -4,8 +4,8 @@ import { Field } from '../ui/field'
 
 export default function VehicleTrajectory() {
   const [commaddr, setCommaddr] = useState("")
-  const [startUtc, setStartUtc] = useState("20130912010000")
-  const [endUtc, setEndUtc] = useState("20130912020000")
+  const [startDateTime, setStartDateTime] = useState("2013-09-12T01:00:00")
+  const [endDateTime, setEndDateTime] = useState("2013-09-12T02:00:00")
   const [loading, setLoading] = useState(false)
   const [trajectoryData, setTrajectoryData] = useState<any[]>([])
   const mapRef = useRef<HTMLDivElement>(null)
@@ -13,10 +13,26 @@ export default function VehicleTrajectory() {
   const markersRef = useRef<any[]>([])
   const polylineRef = useRef<any>(null)
   
-  // 矫正功能状态
-  const [useCorrectedData, setUseCorrectedData] = useState(false)
-  const [coordinateSystem, setCoordinateSystem] = useState("BD09")
+  // 强制使用BD09坐标系转换
+  const coordinateSystem = "BD09"
   const [correctionInfo, setCorrectionInfo] = useState<any>(null)
+
+  // 新增：用于 datetime-local <-> utc 字符串转换
+  const formatDateTimeLocal = (utc: string) => {
+    if (!utc || utc.length !== 14) return ''
+    return `${utc.slice(0,4)}-${utc.slice(4,6)}-${utc.slice(6,8)}T${utc.slice(8,10)}:${utc.slice(10,12)}:${utc.slice(12,14)}`
+  }
+  const parseDateTimeLocal = (val: string) => {
+    if (!val) return ''
+    const d = val.replace(/[-:T]/g, '')
+    return d.length === 14 ? d : ''
+  }
+
+  // 新增转换函数
+  function dateTimeLocalToUtc(val: string) {
+    if (!val) return ""
+    return val.replace(/[-:T]/g, "")
+  }
 
   // 初始化百度地图
   useEffect(() => {
@@ -182,10 +198,8 @@ export default function VehicleTrajectory() {
     try {
       console.log('开始查询轨迹数据...')
       
-      // 根据是否使用矫正数据选择不同的API
-      const apiUrl = useCorrectedData 
-        ? `http://localhost:8000/api/v1/analysis/gps-records-corrected?commaddr=${commaddr}&start_utc=${startUtc}&end_utc=${endUtc}&coordinate_system=${coordinateSystem}`
-        : `http://localhost:8000/api/v1/analysis/gps-records?commaddr=${commaddr}&start_utc=${startUtc}&end_utc=${endUtc}`
+      // 强制使用矫正数据API
+      const apiUrl = `http://localhost:8000/api/v1/analysis/gps-records-corrected?commaddr=${commaddr}&start_utc=${dateTimeLocalToUtc(startDateTime)}&end_utc=${dateTimeLocalToUtc(endDateTime)}&coordinate_system=${coordinateSystem}`
       
       console.log('API URL:', apiUrl)
       const response = await fetch(apiUrl)
@@ -204,7 +218,7 @@ export default function VehicleTrajectory() {
       setTrajectoryData(records)
       
       // 保存矫正信息
-      if (useCorrectedData && data.correction_info) {
+      if (data.correction_info) {
         setCorrectionInfo(data.correction_info)
       }
       
@@ -245,61 +259,45 @@ export default function VehicleTrajectory() {
         <HStack gap={4}>
           <Field label="起始时间">
             <Input
-              value={startUtc}
-              onChange={(e) => setStartUtc(e.target.value)}
-              placeholder="YYYYMMDDHHMMSS"
+              type="datetime-local"
+              value={startDateTime}
+              onChange={e => setStartDateTime(e.target.value)}
+              height={8}
+              borderRadius={4}
+              border="1px solid #ccc"
+              px={2}
+              w={52}
             />
           </Field>
           <Field label="结束时间">
             <Input
-              value={endUtc}
-              onChange={(e) => setEndUtc(e.target.value)}
-              placeholder="YYYYMMDDHHMMSS"
+              type="datetime-local"
+              value={endDateTime}
+              onChange={e => setEndDateTime(e.target.value)}
+              height={8}
+              borderRadius={4}
+              border="1px solid #ccc"
+              px={2}
+              w={52}
             />
           </Field>
         </HStack>
         
-        {/* 坐标系转换选项 */}
+        {/* 坐标系说明 */}
         <Box border="1px solid" borderColor="gray.200" borderRadius="md" p={4}>
           <Text fontWeight="bold" mb={3}>坐标系转换</Text>
-          
-          <HStack gap={4}>
-            <Field label="使用BD09坐标系">
-              <input
-                type="checkbox"
-                checked={useCorrectedData}
-                onChange={(e) => setUseCorrectedData(e.target.checked)}
-              />
-            </Field>
-            
-            {useCorrectedData && (
-              <Field label="目标坐标系">
-                <select
-                  value={coordinateSystem}
-                  onChange={(e) => setCoordinateSystem(e.target.value)}
-                  style={{ padding: '4px', borderRadius: '4px' }}
-                >
-                  <option value="WGS84">WGS84</option>
-                  <option value="GCJ02">GCJ02</option>
-                  <option value="BD09">BD09 (百度地图)</option>
-                </select>
-              </Field>
-            )}
-          </HStack>
-          
-          {useCorrectedData && (
-            <Text fontSize="sm" color="gray.600" mt={2}>
-              推荐使用BD09坐标系，这样GPS数据就能与百度地图路网完美匹配
-            </Text>
-          )}
+          <Text fontSize="sm" color="gray.600">
+            自动使用BD09坐标系转换，确保GPS数据与百度地图路网完美匹配
+          </Text>
         </Box>
         
         <Button
           colorScheme="blue"
           onClick={fetchTrajectoryData}
-          disabled={loading}
+          loading={loading}
+          loadingText="查询中..."
         >
-          {loading ? "查询中..." : "查询轨迹"}
+          查询轨迹
         </Button>
       </VStack>
 

@@ -1,23 +1,22 @@
 import React, { useEffect, useRef, useState } from "react"
-import { Box, Container, Heading, Text, Flex, IconButton, VStack, Input } from "@chakra-ui/react"
-import { FiArrowLeft, FiMaximize2, FiMinimize2 } from "react-icons/fi"
-import { useNavigate } from "@tanstack/react-router"
+import { Box, Container, Heading, Text, Flex, VStack, HStack } from "@chakra-ui/react"
+import { Field } from '../ui/field'
+import { Button } from '../ui/button'
 
 export default function PassengerDensityHeatMap() {
   const mapRef = useRef<HTMLDivElement>(null)
-  const navigate = useNavigate()
   const [startUtc, setStartUtc] = useState("20130912011417")
   const [endUtc, setEndUtc] = useState("20130912042835")
-  // 新增：保存热力图实例
+  // 保存热力图实例
   const heatmapOverlayRef = useRef<any>(null)
   const mapInstanceRef = useRef<any>(null)
-  // 新增：分析状态提示
+  // 分析状态提示
   const [analyzing, setAnalyzing] = useState(false)
-  // 新增：日期时间选择器状态
+  // 日期时间选择器状态
   const [selectedDateTime, setSelectedDateTime] = useState("2013-09-12T01:14:17")
   const [selectedEndDateTime, setSelectedEndDateTime] = useState("2013-09-12T04:28:35")
 
-  // 新增：将日期时间转换为UTC时间戳
+  // 将日期时间转换为UTC时间戳
   const convertDateTimeToUtc = (dateTimeStr: string) => {
     try {
       const date = new Date(dateTimeStr)
@@ -34,14 +33,14 @@ export default function PassengerDensityHeatMap() {
     }
   }
 
-  // 新增：处理开始日期时间变化
+  // 处理开始日期时间变化
   const handleStartDateTimeChange = (value: string) => {
     setSelectedDateTime(value)
     const utcTimestamp = convertDateTimeToUtc(value)
     setStartUtc(utcTimestamp)
   }
 
-  // 新增：处理结束日期时间变化
+  // 处理结束日期时间变化
   const handleEndDateTimeChange = (value: string) => {
     setSelectedEndDateTime(value)
     const utcTimestamp = convertDateTimeToUtc(value)
@@ -96,158 +95,117 @@ export default function PassengerDensityHeatMap() {
     loadBaiduMap()
   }, [])
 
+  const handleAnalyze = async () => {
+    setAnalyzing(true)
+    try {
+      const res = await fetch(`http://localhost:8000/api/v1/analysis/dbscan-clustering?start_utc=${startUtc}&eps=0.03&min_samples=3`)
+      const data = await res.json()
+      // 使用热门上客点数据生成热力图
+      const hotSpots = data.hot_spots || []
+      const points = hotSpots.map((spot: any) => ({
+        lng: parseFloat(spot.lng),
+        lat: parseFloat(spot.lat),
+        count: parseInt(spot.count)+40
+      })).filter((p: any) => !isNaN(p.lng) && !isNaN(p.lat))
+      console.log('热门上客点数据:', points)
+      // 动态更新热力图
+      if (window.BMap && window.BMapLib && heatmapOverlayRef.current) {
+        heatmapOverlayRef.current.setDataSet({ data: [], max: 100 })
+        heatmapOverlayRef.current.setDataSet({
+          data: points,
+          max: 100
+        })
+      }
+    } catch (e) {
+      console.error('聚类分析失败:', e)
+    } finally {
+      setAnalyzing(false)
+    }
+  }
+
   return (
-    <Box 
-      w="100vw" 
-      h="100vh" 
-      bg="linear-gradient(135deg, #1a202c 0%, #2d3748 100%)"
-      position="relative"
-      overflow="hidden"
-    >
-      {/* 顶部导航栏 */}
-      <Flex 
-        position="absolute" 
-        top={0} 
-        left={0} 
-        right={0} 
-        zIndex={1000}
-        bg="rgba(0,0,0,0.8)" 
-        backdropFilter="blur(10px)"
-        p={4}
-        alignItems="center"
-        justifyContent="space-between"
-      >
-        <Flex alignItems="center" gap={4}>
-          <IconButton
-            aria-label="返回"
-            variant="ghost"
-            color="white"
-            _hover={{ bg: "rgba(255,255,255,0.1)" }}
-            onClick={() => navigate({ to: "/traffic-analysis" })}
-          />
-          <VStack align="start">
-            <Heading size="lg" color="white">上客点密度分析</Heading>
-            <Text color="gray.300" fontSize="sm">基于DBSCAN聚类的热门上客点分析</Text>
-          </VStack>
-        </Flex>
-        {/* 新增：起止时间戳输入框 */}
-        <Flex gap={2} alignItems="center">
-          <Text color="white">起始时间戳</Text>
-          <Input
-            type="datetime-local"
-            value={selectedDateTime}
-            onChange={(e) => handleStartDateTimeChange(e.target.value)}
-            style={{ padding: 4, borderRadius: 4, border: '1px solid #ccc', width: 140 }}
-          />
-          <Text color="white">结束时间戳</Text>
-          <Input
-            type="datetime-local"
-            value={selectedEndDateTime}
-            onChange={(e) => handleEndDateTimeChange(e.target.value)}
-            style={{ padding: 4, borderRadius: 4, border: '1px solid #ccc', width: 140 }}
-          />
-          {/* 新增：开始分析按钮 */}
-          <button
-            style={{ 
-              padding: '6px 16px', 
-              borderRadius: 4, 
-              background: analyzing ? '#666' : '#3182ce', 
-              color: 'white', 
-              border: 'none', 
-              cursor: analyzing ? 'not-allowed' : 'pointer',
-              opacity: analyzing ? 0.7 : 1
-            }}
-            disabled={analyzing}
-            onClick={async () => {
-              setAnalyzing(true)
-              try {
-                const res = await fetch(`http://localhost:8000/api/v1/analysis/dbscan-clustering?start_utc=${startUtc}&eps=0.03&min_samples=3`)
-                const data = await res.json()
-                // 使用热门上客点数据生成热力图
-                const hotSpots = data.hot_spots || []
-                const points = hotSpots.map((spot: any) => ({
-                  lng: parseFloat(spot.lng),
-                  lat: parseFloat(spot.lat),
-                  count: parseInt(spot.count)+40
-                })).filter((p: any) => !isNaN(p.lng) && !isNaN(p.lat))
-                console.log('热门上客点数据:', points)
-                // 动态更新热力图
-                if (window.BMap && window.BMapLib && heatmapOverlayRef.current) {
-                  heatmapOverlayRef.current.setDataSet({ data: [], max: 100 })
-                  heatmapOverlayRef.current.setDataSet({
-                    data: points,
-                    max: 100
-                  })
-                }
-              } catch (e) {
-                console.error('聚类分析失败:', e)
-              } finally {
-                setAnalyzing(false)
-              }
-            }}
-          >
-            {analyzing ? "分析中..." : "开始分析"}
-          </button>
-        </Flex>
-        <Flex gap={2}>
-          <IconButton
-            aria-label="全屏"
-            variant="ghost"
-            color="white"
-            _hover={{ bg: "rgba(255,255,255,0.1)" }}
-          />
-        </Flex>
-      </Flex>
+    <Container maxW="full">
+      <Heading size="md" mb={4}>上客点密度分析</Heading>
+      
+      {/* 查询条件 */}
+      <VStack gap={4} align="stretch" mb={6}>
+        <HStack gap={4}>
+          <Field label="起始时间">
+            <input
+              type="datetime-local"
+              value={selectedDateTime}
+              onChange={(e) => handleStartDateTimeChange(e.target.value)}
+              style={{ 
+                height: 32, 
+                borderRadius: 4, 
+                border: '1px solid #ccc', 
+                padding: '0 8px',
+                width: 200
+              }}
+            />
+          </Field>
+          
+          <Field label="结束时间">
+            <input
+              type="datetime-local"
+              value={selectedEndDateTime}
+              onChange={(e) => handleEndDateTimeChange(e.target.value)}
+              style={{ 
+                height: 32, 
+                borderRadius: 4, 
+                border: '1px solid #ccc', 
+                padding: '0 8px',
+                width: 200
+              }}
+            />
+          </Field>
+        </HStack>
+        
+        {/* 分析参数说明 */}
+        <Box border="1px solid" borderColor="gray.200" borderRadius="md" p={4}>
+          <Text fontWeight="bold" mb={3}>分析参数</Text>
+          <Text fontSize="sm" color="gray.600">
+            使用DBSCAN聚类算法分析热门上客点，eps=0.03，min_samples=3
+          </Text>
+        </Box>
+        
+        <Button
+          colorScheme="blue"
+          onClick={handleAnalyze}
+          loading={analyzing}
+          loadingText="分析中..."
+        >
+          开始分析
+        </Button>
+      </VStack>
 
       {/* 地图容器 */}
       <Box 
         ref={mapRef}
         w="100%" 
-        h="100%" 
-        position="absolute"
-        top={0}
-        left={0}
+        h="500px" 
+        border="1px solid" 
+        borderColor="gray.300" 
+        borderRadius="md"
+        mb={4}
       />
 
-      {/* 分析中提示 */}
-      {analyzing && (
-        <Box 
-          position="absolute" 
-          top="80px" 
-          left="50%" 
-          transform="translateX(-50%)" 
-          zIndex={2000} 
-          bg="blue.500" 
-          color="white" 
-          px={6} 
-          py={3} 
-          borderRadius="md" 
-          boxShadow="lg"
-        >
-          正在分析，请稍候...
-        </Box>
-      )}
-
-      {/* 右下角信息面板 */}
+      {/* 热力图说明 */}
       <Box
-        position="absolute"
-        bottom={6}
-        right={6}
-        bg="rgba(0,0,0,0.8)"
-        backdropFilter="blur(10px)"
-        borderRadius="lg"
+        bg="blue.50"
         p={4}
-        color="white"
-        minW="200px"
+        borderRadius="md"
+        border="1px solid"
+        borderColor="blue.200"
       >
         <Text fontWeight="bold" mb={2}>热力图说明</Text>
-        <Text fontSize="sm" color="gray.300">
-          红色区域：交通流量密集<br/>
-          黄色区域：交通流量中等<br/>
-          绿色区域：交通流量较少
+        <Text fontSize="sm" color="blue.700">
+          <strong>红色区域：</strong>交通流量密集，乘客上下车频繁<br/>
+          <strong>黄色区域：</strong>交通流量中等，有一定乘客活动<br/>
+          <strong>绿色区域：</strong>交通流量较少，乘客活动稀疏
         </Text>
       </Box>
-    </Box>
+    </Container>
   )
 }
 

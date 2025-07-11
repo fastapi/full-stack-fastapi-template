@@ -1,8 +1,9 @@
 import React, { useEffect, useState } from "react"
 import ReactECharts from 'echarts-for-react'
-import { Text, Flex } from "@chakra-ui/react"
+import { Text, Flex, Input } from "@chakra-ui/react"
 import { Field } from '../ui/field'
-import { RadioGroup } from '../ui/radio'
+import { RadioGroup, Radio } from '../ui/radio'
+import { Button } from '../ui/button'
 
 function formatDate(date: Date) {
   const y = date.getFullYear()
@@ -57,21 +58,21 @@ export default function PassengerCountChart() {
     <>
       <Flex align="center" gap={4} mb={2}>
         <Field label="选择日期">
-          <input
+          <Input
             type="date"
             value={date}
             onChange={e => setDate(e.target.value)}
-            style={{ height: 32, borderRadius: 4, border: '1px solid #ccc', padding: '0 8px' }}
+            height={8}
+            borderRadius={4}
+            border="1px solid #ccc"
+            px={2}
+            w={40}
           />
         </Field>
         <Field label="时间间隔">
-          <RadioGroup value={interval}>
-            <label style={{marginRight: 12}}>
-              <input type="radio" value="15min" checked={interval === '15min'} onChange={() => setInterval('15min')} /> 15分钟
-            </label>
-            <label>
-              <input type="radio" value="1h" checked={interval === '1h'} onChange={() => setInterval('1h')} /> 1小时
-            </label>
+          <RadioGroup value={interval} onValueChange={e => setInterval(e.value as '15min' | '1h')} direction="row">
+            <Radio value="15min">15分钟</Radio>
+            <Radio value="1h">1小时</Radio>
           </RadioGroup>
         </Field>
       </Flex>
