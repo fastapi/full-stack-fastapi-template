@@ -1,8 +1,7 @@
-from fastapi import APIRouter, HTTPException, Query
-from typing import Optional, List
+from fastapi import APIRouter, HTTPException, Query, Body
+from typing import Optional, List, Dict, Any
 from app.api.deps import CurrentUser, SessionDep
-import uuid
-from datetime import datetime
+from app.services.property_service import PropertyService
 import logging
 
 router = APIRouter(prefix="/properties", tags=["properties"])
@@ -21,72 +20,18 @@ async def get_properties(
     max_price: Optional[float] = Query(None),
     city: Optional[str] = Query(None)
 ):
-    """Obtener propiedades con filtros y paginación"""
+    """Obtener propiedades con filtros y paginación desde PostgreSQL"""
     try:
-        mock_properties = [
-            {
-                "id": str(uuid.uuid4()),
-                "title": "Apartamento Moderno en El Poblado",
-                "description": "Hermoso apartamento con vista panorámica",
-                "property_type": "apartment",
-                "status": "available",
-                "price": 850000000,
-                "currency": "COP",
-                "address": "Carrera 43A #15-30",
-                "city": "Medellín",
-                "state": "Antioquia",
-                "bedrooms": 3,
-                "bathrooms": 2,
-                "area": 120.0,
-                "features": ["Balcón", "Aire Acondicionado"],
-                "created_at": datetime.utcnow().isoformat(),
-                "views": 45,
-                "favorites": 12
-            },
-            {
-                "id": str(uuid.uuid4()),
-                "title": "Casa Campestre en La Calera",
-                "description": "Espectacular casa con jardín",
-                "property_type": "house",
-                "status": "reserved",
-                "price": 1200000000,
-                "currency": "COP",
-                "address": "Vereda El Salitre",
-                "city": "La Calera",
-                "state": "Cundinamarca",
-                "bedrooms": 4,
-                "bathrooms": 3,
-                "area": 250.0,
-                "features": ["Jardín", "BBQ"],
-                "created_at": datetime.utcnow().isoformat(),
-                "views": 32,
-                "favorites": 8
-            }
-        ]
-
-        # Aplicar filtros
-        filtered = mock_properties
-        if property_type:
-            filtered = [p for p in filtered if p["property_type"] == property_type]
-        if status:
-            filtered = [p for p in filtered if p["status"] == status]
-        if city:
-            filtered = [p for p in filtered if city.lower() in p["city"].lower()]
-        if min_price:
-            filtered = [p for p in filtered if p["price"] >= min_price]
-        if max_price:
-            filtered = [p for p in filtered if p["price"] <= max_price]
-
-        total = len(filtered)
-        properties_page = filtered[skip:skip + limit]
-
-        return {
-            "data": properties_page,
-            "total": total,
-            "page": (skip // limit) + 1,
-            "limit": limit,
-            "total_pages": (total + limit - 1) // limit
-        }
+        result = await PropertyService.get_properties(
+            skip=skip,
+            limit=limit,
+            property_type=property_type,
+            status=status,
+            min_price=min_price,
+            max_price=max_price,
+            city=city
+        )
+        return result
 
     except Exception as e:
         logger.error(f"Error getting properties: {str(e)}")
@@ -95,102 +40,95 @@ async def get_properties(
 
 @router.get("/{property_id}")
 async def get_property(property_id: str, current_user: CurrentUser, session: SessionDep):
-    """Obtener una propiedad específica"""
+    """Obtener una propiedad específica desde PostgreSQL"""
     try:
-        mock_property = {
-            "id": property_id,
-            "title": "Apartamento Moderno en El Poblado",
-            "description": "Hermoso apartamento completamente remodelado",
-            "property_type": "apartment",
-            "status": "available",
-            "price": 850000000,
-            "currency": "COP",
-            "address": "Carrera 43A #15-30",
-            "city": "Medellín",
-            "bedrooms": 3,
-            "bathrooms": 2,
-            "area": 120.0,
-            "features": ["Balcón", "Aire Acondicionado", "Cocina Integral"],
-            "created_at": datetime.utcnow().isoformat(),
-            "views": 45,
-            "favorites": 12
-        }
+        property_data = await PropertyService.get_property_by_id(property_id)
+        
+        if not property_data:
+            raise HTTPException(status_code=404, detail="Property not found")
+        
+        return {"data": property_data}
 
-        return {"data": mock_property}
-
+    except HTTPException:
+        raise
     except Exception as e:
         logger.error(f"Error getting property {property_id}: {str(e)}")
-        raise HTTPException(status_code=404, detail="Property not found")
+        raise HTTPException(status_code=500, detail="Error retrieving property")
 
 
 @router.post("/")
-async def create_property(current_user: CurrentUser, session: SessionDep):
-    """Crear una nueva propiedad"""
+async def create_property(
+    property_data: Dict[str, Any] = Body(...),
+    current_user: CurrentUser = None,
+    session: SessionDep = None
+):
+    """Crear una nueva propiedad en PostgreSQL"""
     try:
-        new_property = {
-            "id": str(uuid.uuid4()),
-            "title": "Nueva Propiedad",
-            "status": "available",
-            "created_at": datetime.utcnow().isoformat(),
-            "message": "Property created successfully"
-        }
-        return {"data": new_property}
+        new_property = await PropertyService.create_property(property_data, current_user)
+        return {"data": new_property, "message": "Property created successfully"}
 
     except Exception as e:
         logger.error(f"Error creating property: {str(e)}")
-        raise HTTPException(status_code=400, detail="Error creating property")
+        raise HTTPException(status_code=400, detail=f"Error creating property: {str(e)}")
 
 
 @router.patch("/{property_id}")
-async def update_property(property_id: str, current_user: CurrentUser, session: SessionDep):
-    """Actualizar una propiedad"""
+async def update_property(
+    property_id: str,
+    property_data: Dict[str, Any] = Body(...),
+    current_user: CurrentUser = None,
+    session: SessionDep = None
+):
+    """Actualizar una propiedad en PostgreSQL"""
     try:
-        updated_property = {
-            "id": property_id,
-            "message": "Property updated successfully",
-            "updated_at": datetime.utcnow().isoformat()
+        updated_property = await PropertyService.update_property(
+            property_id, property_data, current_user
+        )
+        
+        if not updated_property:
+            raise HTTPException(
+                status_code=404, 
+                detail="Property not found or you don't have permission to update it"
+            )
+        
+        return {
+            "data": updated_property,
+            "message": "Property updated successfully"
         }
-        return {"data": updated_property}
 
+    except HTTPException:
+        raise
     except Exception as e:
         logger.error(f"Error updating property {property_id}: {str(e)}")
-        raise HTTPException(status_code=404, detail="Property not found")
+        raise HTTPException(status_code=500, detail=f"Error updating property: {str(e)}")
 
 
 @router.delete("/{property_id}")
 async def delete_property(property_id: str, current_user: CurrentUser, session: SessionDep):
-    """Eliminar una propiedad"""
+    """Eliminar una propiedad de PostgreSQL"""
     try:
+        deleted = await PropertyService.delete_property(property_id, current_user)
+        
+        if not deleted:
+            raise HTTPException(
+                status_code=404,
+                detail="Property not found or you don't have permission to delete it"
+            )
+        
         return {"message": f"Property {property_id} deleted successfully"}
 
+    except HTTPException:
+        raise
     except Exception as e:
         logger.error(f"Error deleting property {property_id}: {str(e)}")
-        raise HTTPException(status_code=404, detail="Property not found")
+        raise HTTPException(status_code=500, detail=f"Error deleting property: {str(e)}")
 
 
 @router.get("/analytics/dashboard")
 async def get_property_analytics(current_user: CurrentUser, session: SessionDep):
-    """Obtener analytics de propiedades"""
+    """Obtener analytics reales de propiedades desde PostgreSQL"""
     try:
-        analytics = {
-            "total_properties": 1247,
-            "available_properties": 856,
-            "sold_properties": 234,
-            "rented_properties": 157,
-            "total_inventory_value": 45678900000,
-            "average_property_price": 680000000,
-            "total_sales_this_month": 12,
-            "commission_earned_this_month": 125000000,
-            "properties_by_city": [
-                {"city": "Medellín", "count": 523, "average_price": 650000000},
-                {"city": "Bogotá", "count": 412, "average_price": 780000000}
-            ],
-            "properties_by_type": [
-                {"type": "apartment", "count": 624, "percentage": 50.04},
-                {"type": "house", "count": 398, "percentage": 31.91}
-            ]
-        }
-
+        analytics = await PropertyService.get_property_analytics()
         return {"data": analytics}
 
     except Exception as e:

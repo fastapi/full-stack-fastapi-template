@@ -11,11 +11,12 @@
     "generate-client": "openapi-ts"
   },
   "dependencies": {
-    "@chakra-ui/react": "^3.8.0",
+    "@chakra-ui/react": "^3.22.0",
     "@clerk/clerk-react": "^5.32.3",
     "@clerk/nextjs": "^6.23.2",
     "@clerk/themes": "^2.2.53",
     "@emotion/react": "^11.14.0",
+    "@emotion/styled": "^11.14.1",
     "@nhost/react": "^0.14.0",
     "@nhost/react-auth": "^3.6.0",
     "@tailwindcss/forms": "^0.5.10",
@@ -24,7 +25,7 @@
     "@tanstack/react-router": "1.19.1",
     "axios": "1.9.0",
     "form-data": "4.0.2",
-    "framer-motion": "^12.17.0",
+    "framer-motion": "^12.23.3",
     "next-themes": "^0.4.6",
     "nhost": "^0.1.11",
     "react": "^18.2.0",

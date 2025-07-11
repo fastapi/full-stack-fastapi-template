@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+ teimport React, { useState } from 'react';
 import {
   Box,
   VStack,
@@ -32,47 +32,21 @@ import {
   TabPanels,
   Tab,
   TabPanel,
+  Flex,
 } from '@chakra-ui/react';
-import { FaEdit, FaTrash, FaEye, FaPlus, FaPhone, FaEnvelope } from 'react-icons/fa';
+import { FaEdit, FaTrash, FaEye, FaPlus, FaPhone, FaEnvelope, FaSave, FaSearch } from 'react-icons/fa';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { nhost } from '../../lib/nhost';
-
-interface Client {
-  id: string;
-  firstName: string;
-  lastName: string;
-  email: string;
-  phone: string;
-  type: 'buyer' | 'seller' | 'both';
-  status: 'active' | 'inactive';
-  notes: string;
-  createdAt: string;
-  updatedAt: string;
-  properties: {
-    id: string;
-    title: string;
-    type: 'sale' | 'rent';
-    status: string;
-  }[];
-  visits: {
-    id: string;
-    property: {
-      id: string;
-      title: string;
-    };
-    scheduledDate: string;
-    status: string;
-  }[];
-}
-
-interface ClientFormData {
-  firstName: string;
-  lastName: string;
-  email: string;
-  phone: string;
-  type: 'buyer' | 'seller' | 'both';
-  notes: string;
-}
+import {
+  getClients,
+  createClient,
+  updateClient,
+  deleteClient,
+  getClientTypeOptions,
+  getClientStatusOptions,
+  type Client,
+  type ClientData,
+  type ClientFilters
+} from '../../client/clientsApi';
 
 export const ClientManagement: React.FC = () => {
   const toast = useToast();
@@ -81,121 +55,177 @@ export const ClientManagement: React.FC = () => {
   const [selectedClient, setSelectedClient] = useState<Client | null>(null);
   const [isEditing, setIsEditing] = useState(false);
 
-  // Fetch clients
-  const { data: clients, isLoading } = useQuery({
-    queryKey: ['agentClients'],
-    queryFn: async () => {
-      const { data, error } = await nhost.graphql.request(`
-        query GetAgentClients {
-          clients(where: {agent_id: {_eq: $agentId}}) {
-            id
-            firstName
-            lastName
-            email
-            phone
-            type
-            status
-            notes
-            created_at
-            updated_at
-            properties {
-              id
-              title
-              type
-              status
-            }
-            visits {
-              id
-              property {
-                id
-                title
-              }
-              scheduled_date
-              status
-            }
-          }
-        }
-      `);
-      if (error) throw error;
-      return data.clients;
-    },
+  // Filtros y búsqueda
+  const [filters, setFilters] = useState<ClientFilters>({
+    skip: 0,
+    limit: 20,
+    client_type: '',
+    status: '',
+    search: ''
   });
 
-  // Create/Update client mutation
-  const saveClient = useMutation({
-    mutationFn: async (data: ClientFormData) => {
-      const mutation = isEditing
-        ? `
-          mutation UpdateClient($id: uuid!, $client: clients_set_input!) {
-            update_clients_by_pk(pk_columns: {id: $id}, _set: $client) {
-              id
-            }
-          }
-        `
-        : `
-          mutation CreateClient($client: clients_insert_input!) {
-            insert_clients_one(object: $client) {
-              id
-            }
-          }
-        `;
+  // Form data
+  const [formData, setFormData] = useState<ClientData>({
+    first_name: '',
+    last_name: '',
+    email: '',
+    phone: '',
+    client_type: 'buyer',
+    status: 'active',
+    notes: ''
+  });
 
-      const variables = isEditing
-        ? { id: selectedClient?.id, client: data }
-        : { client: data };
+  // Fetch clients
+  const { data: clientsResponse, isLoading, error, refetch } = useQuery({
+    queryKey: ['clients', filters],
+    queryFn: () => getClients(filters),
+    staleTime: 30000,
+  });
 
-      const { data: response, error } = await nhost.graphql.request(mutation, variables);
-      if (error) throw error;
-      return response;
-    },
+  // Fetch client type options
+  const { data: typeOptions } = useQuery({
+    queryKey: ['clientTypeOptions'],
+    queryFn: getClientTypeOptions,
+    staleTime: 300000, // Cache por 5 minutos
+  });
+
+  // Fetch client status options
+  const { data: statusOptions } = useQuery({
+    queryKey: ['clientStatusOptions'],
+    queryFn: getClientStatusOptions,
+    staleTime: 300000,
+  });
+
+  // Create client mutation
+  const createClientMutation = useMutation({
+    mutationFn: createClient,
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['agentClients'] });
+      queryClient.invalidateQueries({ queryKey: ['clients'] });
       toast({
-        title: isEditing ? 'Cliente actualizado' : 'Cliente creado',
+        title: 'Cliente creado',
+        description: 'El cliente se ha creado exitosamente',
         status: 'success',
         duration: 3000,
         isClosable: true,
       });
       onClose();
+      resetForm();
     },
-  });
-
-  // Delete client mutation
-  const deleteClient = useMutation({
-    mutationFn: async (clientId: string) => {
-      const { data, error } = await nhost.graphql.request(`
-        mutation DeleteClient($id: uuid!) {
-          delete_clients_by_pk(id: $id) {
-            id
-          }
-        }
-      `, {
-        id: clientId,
-      });
-      if (error) throw error;
-      return data;
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['agentClients'] });
+    onError: (error: any) => {
       toast({
-        title: 'Cliente eliminado',
-        status: 'success',
-        duration: 3000,
+        title: 'Error',
+        description: error?.response?.data?.detail || 'Error al crear el cliente',
+        status: 'error',
+        duration: 5000,
         isClosable: true,
       });
     },
   });
 
+  // Update client mutation
+  const updateClientMutation = useMutation({
+    mutationFn: ({ id, data }: { id: string; data: Partial<ClientData> }) =>
+      updateClient(id, data),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['clients'] });
+      toast({
+        title: 'Cliente actualizado',
+        description: 'El cliente se ha actualizado exitosamente',
+        status: 'success',
+        duration: 3000,
+        isClosable: true,
+      });
+      onClose();
+      setSelectedClient(null);
+      resetForm();
+    },
+    onError: (error: any) => {
+      toast({
+        title: 'Error',
+        description: error?.response?.data?.detail || 'Error al actualizar el cliente',
+        status: 'error',
+        duration: 5000,
+        isClosable: true,
+      });
+    },
+  });
+
+  // Delete client mutation
+  const deleteClientMutation = useMutation({
+    mutationFn: deleteClient,
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['clients'] });
+      toast({
+        title: 'Cliente eliminado',
+        description: 'El cliente se ha eliminado exitosamente',
+        status: 'success',
+        duration: 3000,
+        isClosable: true,
+      });
+    },
+    onError: (error: any) => {
+      toast({
+        title: 'Error',
+        description: error?.response?.data?.detail || 'Error al eliminar el cliente',
+        status: 'error',
+        duration: 5000,
+        isClosable: true,
+      });
+    },
+  });
+
+  const clients = clientsResponse?.data || [];
+  const totalClients = clientsResponse?.total || 0;
+
+  const resetForm = () => {
+    setFormData({
+      first_name: '',
+      last_name: '',
+      email: '',
+      phone: '',
+      client_type: 'buyer',
+      status: 'active',
+      notes: ''
+    });
+  };
+
   const handleEdit = (client: Client) => {
     setSelectedClient(client);
+    setFormData({
+      first_name: client.first_name,
+      last_name: client.last_name,
+      email: client.email,
+      phone: client.phone || '',
+      client_type: client.client_type,
+      status: client.status,
+      notes: client.notes || ''
+    });
     setIsEditing(true);
     onOpen();
   };
 
   const handleCreate = () => {
     setSelectedClient(null);
+    resetForm();
     setIsEditing(false);
     onOpen();
+  };
+
+  const handleSave = () => {
+    if (isEditing && selectedClient) {
+      updateClientMutation.mutate({
+        id: selectedClient.id,
+        data: formData
+      });
+    } else {
+      createClientMutation.mutate(formData);
+    }
+  };
+
+  const handleDelete = (clientId: string) => {
+    if (window.confirm('¿Está seguro de que desea eliminar este cliente?')) {
+      deleteClientMutation.mutate(clientId);
+    }
   };
 
   const getTypeColor = (type: string) => {
@@ -225,25 +255,93 @@ export const ClientManagement: React.FC = () => {
   };
 
   if (isLoading) {
-    return <Text>Cargando clientes...</Text>;
+    return (
+      <Box p={6}>
+        <Text>Cargando clientes...</Text>
+      </Box>
+    );
+  }
+
+  if (error) {
+    return (
+      <Box p={6}>
+        <Text color="red.500">Error cargando clientes</Text>
+        <Button onClick={() => refetch()} mt={4}>
+          Reintentar
+        </Button>
+      </Box>
+    );
   }
 
   return (
-          <Box p={6} bg="bg.surface" borderRadius="lg" shadow="base" border="1px" borderColor="border">
-      <VStack spacing={6} align="stretch">
-        <HStack justify="space-between">
+    <Box p={6} bg="bg.surface" borderRadius="lg" shadow="base" border="1px" borderColor="border">
+      {/* Header */}
+      <HStack justify="space-between" mb={6}>
+        <Box>
           <Heading size="lg">Gestión de Clientes</Heading>
-          <Button
-            leftIcon={<FaPlus />}
-            colorScheme="black"
-            onClick={handleCreate}
-          >
-            Nuevo Cliente
-          </Button>
-        </HStack>
+          <Text color="text.muted" mt={1}>
+            {totalClients} clientes registrados
+          </Text>
+        </Box>
+        <Button
+          leftIcon={<FaPlus />}
+          colorScheme="blue"
+          onClick={handleCreate}
+        >
+          Nuevo Cliente
+        </Button>
+      </HStack>
 
+      {/* Filtros */}
+      <Box bg="white" p={4} borderRadius="lg" mb={6} border="1px" borderColor="border">
+        <Flex gap={4} wrap="wrap" align="end">
+          <Box minW="200px">
+            <Text fontSize="sm" fontWeight="500" mb={2}>Buscar</Text>
+            <Input
+              placeholder="Nombre, apellido o email..."
+              value={filters.search}
+              onChange={(e) => setFilters({ ...filters, search: e.target.value })}
+              leftElement={<FaSearch />}
+            />
+          </Box>
+          <Box minW="150px">
+            <Text fontSize="sm" fontWeight="500" mb={2}>Tipo</Text>
+            <Select
+              value={filters.client_type}
+              onChange={(e) => setFilters({ ...filters, client_type: e.target.value })}
+            >
+              <option value="">Todos</option>
+              {typeOptions?.data.map(option => (
+                <option key={option.value} value={option.value}>
+                  {option.label}
+                </option>
+              ))}
+            </Select>
+          </Box>
+          <Box minW="150px">
+            <Text fontSize="sm" fontWeight="500" mb={2}>Estado</Text>
+            <Select
+              value={filters.status}
+              onChange={(e) => setFilters({ ...filters, status: e.target.value })}
+            >
+              <option value="">Todos</option>
+              {statusOptions?.data.map(option => (
+                <option key={option.value} value={option.value}>
+                  {option.label}
+                </option>
+              ))}
+            </Select>
+          </Box>
+          <Button colorScheme="blue" onClick={() => refetch()}>
+            Filtrar
+          </Button>
+        </Flex>
+      </Box>
+
+      {/* Tabla de clientes */}
+      <Box bg="white" borderRadius="lg" overflow="hidden" border="1px" borderColor="border">
         <Table variant="simple">
-          <Thead>
+          <Thead bg="gray.50">
             <Tr>
               <Th>Cliente</Th>
               <Th>Contacto</Th>
@@ -254,33 +352,37 @@ export const ClientManagement: React.FC = () => {
             </Tr>
           </Thead>
           <Tbody>
-            {clients?.map((client: Client) => (
-              <Tr key={client.id}>
+            {clients.map((client: Client) => (
+              <Tr key={client.id} _hover={{ bg: 'gray.50' }}>
                 <Td>
                   <VStack align="start" spacing={1}>
                     <Text fontWeight="bold">
-                      {client.firstName} {client.lastName}
+                      {client.first_name} {client.last_name}
                     </Text>
-                    <Text fontSize="sm" color="gray.600">
-                      {client.notes}
-                    </Text>
+                    {client.notes && (
+                      <Text fontSize="sm" color="gray.600" noOfLines={1}>
+                        {client.notes}
+                      </Text>
+                    )}
                   </VStack>
                 </Td>
                 <Td>
                   <VStack align="start" spacing={1}>
                     <HStack>
-                      <FaEnvelope />
+                      <FaEnvelope size={12} />
                       <Text fontSize="sm">{client.email}</Text>
                     </HStack>
-                    <HStack>
-                      <FaPhone />
-                      <Text fontSize="sm">{client.phone}</Text>
-                    </HStack>
+                    {client.phone && (
+                      <HStack>
+                        <FaPhone size={12} />
+                        <Text fontSize="sm">{client.phone}</Text>
+                      </HStack>
+                    )}
                   </VStack>
                 </Td>
                 <Td>
-                  <Badge colorScheme={getTypeColor(client.type)}>
-                    {getTypeText(client.type)}
+                  <Badge colorScheme={getTypeColor(client.client_type)}>
+                    {getTypeText(client.client_type)}
                   </Badge>
                 </Td>
                 <Td>
@@ -288,19 +390,25 @@ export const ClientManagement: React.FC = () => {
                     {client.status === 'active' ? 'Activo' : 'Inactivo'}
                   </Badge>
                 </Td>
-                <Td>{new Date(client.updatedAt).toLocaleDateString()}</Td>
+                <Td>{new Date(client.updated_at).toLocaleDateString('es-CO')}</Td>
                 <Td>
                   <HStack spacing={2}>
                     <IconButton
                       aria-label="Ver detalles"
                       icon={<FaEye />}
                       size="sm"
-                      onClick={() => setSelectedClient(client)}
+                      variant="outline"
+                      onClick={() => {
+                        setSelectedClient(client);
+                        // Implementar vista de detalles si es necesario
+                      }}
                     />
                     <IconButton
                       aria-label="Editar cliente"
                       icon={<FaEdit />}
                       size="sm"
+                      colorScheme="blue"
+                      variant="outline"
                       onClick={() => handleEdit(client)}
                     />
                     <IconButton
@@ -308,7 +416,9 @@ export const ClientManagement: React.FC = () => {
                       icon={<FaTrash />}
                       size="sm"
                       colorScheme="red"
-                      onClick={() => deleteClient.mutate(client.id)}
+                      variant="outline"
+                      onClick={() => handleDelete(client.id)}
+                      isLoading={deleteClientMutation.isPending}
                     />
                   </HStack>
                 </Td>
@@ -317,158 +427,124 @@ export const ClientManagement: React.FC = () => {
           </Tbody>
         </Table>
 
-        <Modal isOpen={isOpen} onClose={onClose} size="xl">
-          <ModalOverlay />
-          <ModalContent>
-            <ModalHeader>
-              {isEditing ? 'Editar Cliente' : 'Nuevo Cliente'}
-            </ModalHeader>
-            <ModalCloseButton />
-            <ModalBody pb={6}>
-              <Tabs>
-                <TabList>
-                  <Tab>Información</Tab>
-                  {selectedClient && (
-                    <>
-                      <Tab>Propiedades</Tab>
-                      <Tab>Visitas</Tab>
-                    </>
-                  )}
-                </TabList>
+        {clients.length === 0 && (
+          <Box p={8} textAlign="center">
+            <Text color="gray.500">No se encontraron clientes</Text>
+            <Button mt={4} onClick={handleCreate} colorScheme="blue">
+              Crear primer cliente
+            </Button>
+          </Box>
+        )}
+      </Box>
 
-                <TabPanels>
-                  <TabPanel>
-                    <VStack spacing={4}>
-                      <HStack spacing={4} width="100%">
-                        <FormControl isRequired>
-                          <FormLabel>Nombre</FormLabel>
-                          <Input
-                            defaultValue={selectedClient?.firstName}
-                            placeholder="Nombre"
-                          />
-                        </FormControl>
+      {/* Modal para crear/editar cliente */}
+      <Modal isOpen={isOpen} onClose={onClose} size="lg">
+        <ModalOverlay />
+        <ModalContent>
+          <ModalHeader>
+            {isEditing ? 'Editar Cliente' : 'Nuevo Cliente'}
+          </ModalHeader>
+          <ModalCloseButton />
+          <ModalBody pb={6}>
+            <VStack spacing={4}>
+              <HStack spacing={4} width="100%">
+                <FormControl isRequired>
+                  <FormLabel>Nombre</FormLabel>
+                  <Input
+                    value={formData.first_name}
+                    onChange={(e) => setFormData({ ...formData, first_name: e.target.value })}
+                    placeholder="Nombre"
+                  />
+                </FormControl>
 
-                        <FormControl isRequired>
-                          <FormLabel>Apellido</FormLabel>
-                          <Input
-                            defaultValue={selectedClient?.lastName}
-                            placeholder="Apellido"
-                          />
-                        </FormControl>
-                      </HStack>
+                <FormControl isRequired>
+                  <FormLabel>Apellido</FormLabel>
+                  <Input
+                    value={formData.last_name}
+                    onChange={(e) => setFormData({ ...formData, last_name: e.target.value })}
+                    placeholder="Apellido"
+                  />
+                </FormControl>
+              </HStack>
 
-                      <FormControl isRequired>
-                        <FormLabel>Email</FormLabel>
-                        <Input
-                          type="email"
-                          defaultValue={selectedClient?.email}
-                          placeholder="Email"
-                        />
-                      </FormControl>
+              <FormControl isRequired>
+                <FormLabel>Email</FormLabel>
+                <Input
+                  type="email"
+                  value={formData.email}
+                  onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+                  placeholder="Email"
+                />
+              </FormControl>
 
-                      <FormControl isRequired>
-                        <FormLabel>Teléfono</FormLabel>
-                        <Input
-                          type="tel"
-                          defaultValue={selectedClient?.phone}
-                          placeholder="Teléfono"
-                        />
-                      </FormControl>
+              <FormControl>
+                <FormLabel>Teléfono</FormLabel>
+                <Input
+                  type="tel"
+                  value={formData.phone}
+                  onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
+                  placeholder="Teléfono"
+                />
+              </FormControl>
 
-                      <FormControl isRequired>
-                        <FormLabel>Tipo</FormLabel>
-                        <Select defaultValue={selectedClient?.type}>
-                          <option value="buyer">Comprador</option>
-                          <option value="seller">Vendedor</option>
-                          <option value="both">Ambos</option>
-                        </Select>
-                      </FormControl>
+              <HStack spacing={4} width="100%">
+                <FormControl isRequired>
+                  <FormLabel>Tipo</FormLabel>
+                  <Select
+                    value={formData.client_type}
+                    onChange={(e) => setFormData({ ...formData, client_type: e.target.value as any })}
+                  >
+                    {typeOptions?.data.map(option => (
+                      <option key={option.value} value={option.value}>
+                        {option.label}
+                      </option>
+                    ))}
+                  </Select>
+                </FormControl>
 
-                      <FormControl>
-                        <FormLabel>Notas</FormLabel>
-                        <Textarea
-                          defaultValue={selectedClient?.notes}
-                          placeholder="Notas adicionales"
-                        />
-                      </FormControl>
+                <FormControl isRequired>
+                  <FormLabel>Estado</FormLabel>
+                  <Select
+                    value={formData.status}
+                    onChange={(e) => setFormData({ ...formData, status: e.target.value as any })}
+                  >
+                    {statusOptions?.data.map(option => (
+                      <option key={option.value} value={option.value}>
+                        {option.label}
+                      </option>
+                    ))}
+                  </Select>
+                </FormControl>
+              </HStack>
 
-                      <Button
-                        colorScheme="black"
-                        width="full"
-                        onClick={() => {
-                          // Implementar lógica de guardado
-                          saveClient.mutate({
-                            firstName: '',
-                            lastName: '',
-                            email: '',
-                            phone: '',
-                            type: 'buyer',
-                            notes: '',
-                          });
-                        }}
-                      >
-                        {isEditing ? 'Actualizar' : 'Crear'} Cliente
-                      </Button>
-                    </VStack>
-                  </TabPanel>
+              <FormControl>
+                <FormLabel>Notas</FormLabel>
+                <Textarea
+                  value={formData.notes}
+                  onChange={(e) => setFormData({ ...formData, notes: e.target.value })}
+                  placeholder="Notas adicionales sobre el cliente..."
+                  rows={3}
+                />
+              </FormControl>
 
-                  {selectedClient && (
-                    <>
-                      <TabPanel>
-                        <VStack spacing={4} align="stretch">
-                          {selectedClient.properties.map((property) => (
-                            <Box
-                              key={property.id}
-                              p={4}
-                              borderWidth="1px"
-                              borderRadius="md"
-                            >
-                              <HStack justify="space-between">
-                                <VStack align="start" spacing={1}>
-                                  <Text fontWeight="bold">{property.title}</Text>
-                                  <Badge colorScheme={property.type === 'sale' ? 'blue' : 'purple'}>
-                                    {property.type === 'sale' ? 'Venta' : 'Renta'}
-                                  </Badge>
-                                </VStack>
-                                <Badge colorScheme={property.status === 'available' ? 'green' : 'red'}>
-                                  {property.status === 'available' ? 'Disponible' : 'No Disponible'}
-                                </Badge>
-                              </HStack>
-                            </Box>
-                          ))}
-                        </VStack>
-                      </TabPanel>
-
-                      <TabPanel>
-                        <VStack spacing={4} align="stretch">
-                          {selectedClient.visits.map((visit) => (
-                            <Box
-                              key={visit.id}
-                              p={4}
-                              borderWidth="1px"
-                              borderRadius="md"
-                            >
-                              <VStack align="start" spacing={1}>
-                                <Text fontWeight="bold">{visit.property.title}</Text>
-                                <Text fontSize="sm">
-                                  Fecha: {new Date(visit.scheduledDate).toLocaleDateString()}
-                                </Text>
-                                <Badge colorScheme={visit.status === 'confirmed' ? 'green' : 'yellow'}>
-                                  {visit.status === 'confirmed' ? 'Confirmada' : 'Pendiente'}
-                                </Badge>
-                              </VStack>
-                            </Box>
-                          ))}
-                        </VStack>
-                      </TabPanel>
-                    </>
-                  )}
-                </TabPanels>
-              </Tabs>
-            </ModalBody>
-          </ModalContent>
-        </Modal>
-      </VStack>
+              <HStack spacing={3} width="100%" justify="end" pt={4}>
+                <Button variant="outline" onClick={onClose}>
+                  Cancelar
+                </Button>
+                <Button
+                  colorScheme="blue"
+                  leftIcon={<FaSave />}
+                  onClick={handleSave}
+                  isLoading={createClientMutation.isPending || updateClientMutation.isPending}
+                  isDisabled={!formData.first_name || !formData.last_name || !formData.email}
+                >
+                  {isEditing ? 'Actualizar' : 'Crear'} Cliente
+                </Button>
+              </HStack>
+            </VStack>
+          </ModalBody>
+        </ModalContent>
+      </Modal>
     </Box>
   );
 }; 

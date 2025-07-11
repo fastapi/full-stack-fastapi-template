@@ -22,8 +22,8 @@ Este proyecto se divide en:
 
 ### Flujo de comunicación
 ```
-Frontend → Backend → Nhost
-Nhost → Backend → Frontend
+Frontend → Backend → PostgreSQL
+PostgreSQL → Backend → Frontend
 ```
 No se permite que el frontend escriba directamente en Nhost excepto para Realtime.
 

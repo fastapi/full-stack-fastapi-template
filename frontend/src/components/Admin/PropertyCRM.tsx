@@ -1,6 +1,33 @@
 import React, { useState, useEffect } from 'react';
 import { Box, Flex, Heading, Text, Button, Badge, Input, Select } from '@chakra-ui/react';
-import { FiHome, FiMapPin, FiDollarSign, FiUser, FiPhone, FiMail, FiCalendar, FiEdit, FiTrash, FiPlus, FiFilter, FiDownload, FiEye, FiCamera } from 'react-icons/fi';
+import { FiHome, FiMapPin, FiDollarSign, FiUser, FiPhone, FiMail, FiCalendar, FiEdit, FiTrash, FiPlus, FiFilter, FiDownload, FiEye, FiCamera, FiSave } from 'react-icons/fi';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import axios from 'axios';
+import { toaster } from '../../components/ui/toaster';
+
+// Configuración de API
+const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:8000';
+
+const api = axios.create({
+  baseURL: `${API_BASE_URL}/api/v1`,
+  headers: {
+    'Content-Type': 'application/json',
+  },
+});
+
+// Interceptor para agregar token de autenticación
+api.interceptors.request.use(
+  (config) => {
+    const token = localStorage.getItem('auth_token');
+    if (token) {
+      config.headers.Authorization = `Bearer ${token}`;
+    }
+    return config;
+  },
+  (error) => {
+    return Promise.reject(error);
+  }
+);
 
 // Interfaces para el CRM de propiedades
 interface Owner {
@@ -12,7 +39,7 @@ interface Owner {
   document_type: string;
   document_number: string;
   address?: string;
-  commission_rate?: number; // Para propietarios terceros
+  commission_rate?: number;
 }
 
 interface Price {
@@ -25,36 +52,65 @@ interface Property {
   id: string;
   title: string;
   description: string;
-  type: 'apartment' | 'house' | 'commercial' | 'land' | 'office';
+  property_type: 'apartment' | 'house' | 'commercial' | 'land' | 'office';
   status: 'available' | 'reserved' | 'sold' | 'rented' | 'under_construction';
-  price: Price;
-  area: number; // m²
+  price: number;
+  currency: string;
+  area: number;
   bedrooms?: number;
   bathrooms?: number;
   parking_spaces?: number;
-  floor?: number;
-  stratum: number; // Estrato socioeconomico
   address: string;
-  neighborhood: string;
   city: string;
-  department: string;
-  coordinates?: {
-    lat: number;
-    lng: number;
-  };
-  owner: Owner;
-  agent_id: string;
-  images: string[];
+  state: string;
+  country: string;
+  zip_code?: string;
   features: string[];
+  amenities: string[];
+  images: string[];
+  latitude?: number;
+  longitude?: number;
+  year_built?: number;
+  condition?: string;
   created_at: string;
   updated_at: string;
-  visits_count: number;
-  inquiries_count: number;
-  last_activity: string;
-  construction_year?: number;
-  property_tax?: number; // Predial anual
-  admin_fee?: number; // Administración mensual
+  views: number;
+  favorites: number;
+  visits: number;
 }
+
+// API Functions
+const propertyAPI = {
+  getProperties: async (params: any = {}) => {
+    const response = await api.get('/properties', { params });
+    return response.data;
+  },
+  
+  getProperty: async (id: string) => {
+    const response = await api.get(`/properties/${id}`);
+    return response.data;
+  },
+  
+  createProperty: async (propertyData: any) => {
+    const response = await api.post('/properties', propertyData);
+    return response.data;
+  },
+  
+  updateProperty: async (id: string, propertyData: any) => {
+    const response = await api.patch(`/properties/${id}`, propertyData);
+    return response.data;
+  },
+  
+  deleteProperty: async (id: string) => {
+    const response = await api.delete(`/properties/${id}`);
+    return response.data;
+  },
+  
+  getAnalytics: async () => {
+    const response = await api.get('/properties/analytics/dashboard');
+    return response.data.data;
+  }
+};
 
 // Tasas de cambio ficticias (en una implementación real vendrían de una API)
 const EXCHANGE_RATES = {
@@ -64,186 +120,189 @@ const EXCHANGE_RATES = {
 };
 
 export function PropertyCRM() {
-  const [properties, setProperties] = useState<Property[]>([]);
-  const [filteredProperties, setFilteredProperties] = useState<Property[]>([]);
-  const [loading, setLoading] = useState(true);
   const [selectedProperty, setSelectedProperty] = useState<Property | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
   const [viewMode, setViewMode] = useState<'grid' | 'list' | 'map'>('grid');
   const [currentCurrency, setCurrentCurrency] = useState<'cop' | 'usd' | 'eur'>('cop');
+  const toast = toaster.create;
+  const queryClient = useQueryClient();
   
   // Filtros
   const [filters, setFilters] = useState({
-    type: '',
+    property_type: '',
     status: '',
     priceMin: '',
     priceMax: '',
     city: '',
-    neighborhood: '',
-    bedrooms: '',
-    bathrooms: '',
-    owner_type: '',
-    agent: ''
+    skip: 0,
+    limit: 20
   });
 
   // Form data para crear/editar propiedades
-  const [formData, setFormData] = useState<Partial<Property & { owner: Partial<Owner> }>>({
+  const [formData, setFormData] = useState({
     title: '',
     description: '',
-    type: 'apartment',
+    property_type: 'apartment',
     status: 'available',
-    price: { cop: 0, usd: 0, eur: 0 },
+    price: 0,
+    currency: 'COP',
     area: 0,
     bedrooms: 0,
     bathrooms: 0,
     parking_spaces: 0,
-    stratum: 1,
     address: '',
-    neighborhood: '',
     city: '',
-    department: '',
+    state: '',
+    country: 'Colombia',
+    zip_code: '',
     features: [],
-    owner: {
-      type: 'own',
-      name: '',
-      email: '',
-      phone: '',
-      document_type: 'CC',
-      document_number: ''
-    }
+    amenities: [],
+    images: [],
+    year_built: new Date().getFullYear(),
+    condition: 'good'
   });
 
+  // Query para obtener propiedades
+  const { data: propertiesData, isLoading, error, refetch } = useQuery({
+    queryKey: ['properties', filters],
+    queryFn: () => propertyAPI.getProperties({
+      skip: filters.skip,
+      limit: filters.limit,
+      property_type: filters.property_type || undefined,
+      status: filters.status || undefined,
+      min_price: filters.priceMin ? parseFloat(filters.priceMin) : undefined,
+      max_price: filters.priceMax ? parseFloat(filters.priceMax) : undefined,
+      city: filters.city || undefined
+    }),
+    staleTime: 30000, // Cache por 30 segundos
+  });
+
+  // Query para analytics
+  const { data: analytics } = useQuery({
+    queryKey: ['properties-analytics'],
+    queryFn: propertyAPI.getAnalytics,
+    staleTime: 60000, // Cache por 1 minuto
+  });
+
+  // Mutación para crear propiedad
+  const createPropertyMutation = useMutation({
+    mutationFn: propertyAPI.createProperty,
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['properties'] });
+      queryClient.invalidateQueries({ queryKey: ['properties-analytics'] });
+      toast({
+        title: 'Propiedad creada',
+        description: 'La propiedad se ha creado exitosamente',
+        status: 'success',
+        duration: 3000,
+        isClosable: true,
+      });
+      setIsModalOpen(false);
+      resetForm();
+    },
+    onError: (error: any) => {
+      toast({
+        title: 'Error',
+        description: error?.response?.data?.detail || 'Error al crear la propiedad',
+        status: 'error',
+        duration: 5000,
+        isClosable: true,
+      });
+    },
+  });
+
+  // Mutación para actualizar propiedad
+  const updatePropertyMutation = useMutation({
+    mutationFn: ({ id, data }: { id: string; data: any }) => 
+      propertyAPI.updateProperty(id, data),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['properties'] });
+      queryClient.invalidateQueries({ queryKey: ['properties-analytics'] });
+      toast({
+        title: 'Propiedad actualizada',
+        description: 'La propiedad se ha actualizado exitosamente',
+        status: 'success',
+        duration: 3000,
+        isClosable: true,
+      });
+      setIsModalOpen(false);
+      setSelectedProperty(null);
+      resetForm();
+    },
+    onError: (error: any) => {
+      toast({
+        title: 'Error',
+        description: error?.response?.data?.detail || 'Error al actualizar la propiedad',
+        status: 'error',
+        duration: 5000,
+        isClosable: true,
+      });
+    },
+  });
+
+  // Mutación para eliminar propiedad
+  const deletePropertyMutation = useMutation({
+    mutationFn: propertyAPI.deleteProperty,
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['properties'] });
+      queryClient.invalidateQueries({ queryKey: ['properties-analytics'] });
+      toast({
+        title: 'Propiedad eliminada',
+        description: 'La propiedad se ha eliminado exitosamente',
+        status: 'success',
+        duration: 3000,
+        isClosable: true,
+      });
+    },
+    onError: (error: any) => {
+      toast({
+        title: 'Error',
+        description: error?.response?.data?.detail || 'Error al eliminar la propiedad',
+        status: 'error',
+        duration: 5000,
+        isClosable: true,
+      });
+    },
+  });
+
+  const properties = propertiesData?.data || [];
+  const totalProperties = propertiesData?.total || 0;
+
   // Función para convertir precios
-  const convertPrice = (price: Price, toCurrency: 'cop' | 'usd' | 'eur'): number => {
+  const convertPrice = (price: number, currency: string, toCurrency: 'cop' | 'usd' | 'eur'): number => {
+    let priceInCOP = price;
+    
+    // Convertir a COP primero si no está en COP
+    if (currency === 'USD') {
+      priceInCOP = price * EXCHANGE_RATES.USD_TO_COP;
+    } else if (currency === 'EUR') {
+      priceInCOP = price * EXCHANGE_RATES.EUR_TO_COP;
+    }
+    
+    // Convertir de COP a la moneda objetivo
     switch (toCurrency) {
       case 'cop':
-        return price.cop;
+        return priceInCOP;
       case 'usd':
-        return price.usd || (price.cop / EXCHANGE_RATES.USD_TO_COP);
+        return priceInCOP / EXCHANGE_RATES.USD_TO_COP;
       case 'eur':
-        return price.eur || (price.cop / EXCHANGE_RATES.EUR_TO_COP);
+        return priceInCOP / EXCHANGE_RATES.EUR_TO_COP;
       default:
-        return price.cop;
+        return priceInCOP;
     }
   };
 
   // Función para formatear precio
-  const formatPrice = (price: Price, currency: 'cop' | 'usd' | 'eur'): string => {
-    const amount = convertPrice(price, currency);
+  const formatPrice = (price: number, currency: string): string => {
+    const convertedPrice = convertPrice(price, currency, currentCurrency);
     const symbols = { cop: '$', usd: 'US$', eur: '€' };
     
-    return `${symbols[currency]} ${amount.toLocaleString('es-CO', {
-      minimumFractionDigits: currency === 'cop' ? 0 : 2,
-      maximumFractionDigits: currency === 'cop' ? 0 : 2
+    return `${symbols[currentCurrency]} ${convertedPrice.toLocaleString('es-CO', {
+      minimumFractionDigits: currentCurrency === 'cop' ? 0 : 2,
+      maximumFractionDigits: currentCurrency === 'cop' ? 0 : 2
     })}`;
   };
-
-  // Datos de ejemplo
-  useEffect(() => {
-    // Simular carga de datos
-    setTimeout(() => {
-      const mockProperties: Property[] = [
-        {
-          id: '1',
-          title: 'Apartamento de Lujo en Zona Rosa',
-          description: 'Hermoso apartamento completamente remodelado con vista panorámica de la ciudad.',
-          type: 'apartment',
-          status: 'available',
-          price: { cop: 850000000, usd: 205000, eur: 186000 },
-          area: 120,
-          bedrooms: 3,
-          bathrooms: 2,
-          parking_spaces: 2,
-          floor: 15,
-          stratum: 6,
-          address: 'Carrera 15 #93-47',
-          neighborhood: 'Zona Rosa',
-          city: 'Bogotá',
-          department: 'Cundinamarca',
-          owner: {
-            id: 'owner1',
-            type: 'third_party',
-            name: 'María González',
-            email: 'maria.gonzalez@email.com',
-            phone: '+57 300 123 4567',
-            document_type: 'CC',
-            document_number: '52123456',
-            commission_rate: 3
-          },
-          agent_id: 'agent1',
-          images: ['url1', 'url2', 'url3'],
-          features: ['Balcón', 'Aire Acondicionado', 'Cocina Integral', 'Closets', 'Portería 24h'],
-          created_at: '2024-01-15T10:00:00Z',
-          updated_at: '2024-12-20T15:30:00Z',
-          visits_count: 25,
-          inquiries_count: 8,
-          last_activity: '2024-12-19T14:20:00Z',
-          construction_year: 2018,
-          property_tax: 2400000,
-          admin_fee: 320000
-        },
-        {
-          id: '2',
-          title: 'Casa Campestre en La Calera',
-          description: 'Espectacular casa con amplio jardín, perfecta para familias.',
-          type: 'house',
-          status: 'reserved',
-          price: { cop: 1200000000, usd: 289000, eur: 262000 },
-          area: 250,
-          bedrooms: 4,
-          bathrooms: 3,
-          parking_spaces: 3,
-          stratum: 5,
-          address: 'Vereda El Salitre, Km 2',
-          neighborhood: 'El Salitre',
-          city: 'La Calera',
-          department: 'Cundinamarca',
-          owner: {
-            id: 'owner2',
-            type: 'own',
-            name: 'GENIUS INDUSTRIES',
-            email: 'propiedades@geniusindustries.com',
-            phone: '+57 1 234 5678',
-            document_type: 'NIT',
-            document_number: '900123456-1'
-          },
-          agent_id: 'agent2',
-          images: ['url4', 'url5'],
-          features: ['Jardín', 'BBQ', 'Chimenea', 'Terraza', 'Zona de Juegos'],
-          created_at: '2024-02-10T08:00:00Z',
-          updated_at: '2024-12-18T12:00:00Z',
-          visits_count: 15,
-          inquiries_count: 12,
-          last_activity: '2024-12-18T11:45:00Z',
-          construction_year: 2020,
-          property_tax: 3200000,
-          admin_fee: 0
-        }
-      ];
-      setProperties(mockProperties);
-      setFilteredProperties(mockProperties);
-      setLoading(false);
-    }, 1000);
-  }, []);
-
-  // Aplicar filtros
-  useEffect(() => {
-    let filtered = properties.filter(property => {
-      return (
-        (!filters.type || property.type === filters.type) &&
-        (!filters.status || property.status === filters.status) &&
-        (!filters.city || property.city.toLowerCase().includes(filters.city.toLowerCase())) &&
-        (!filters.neighborhood || property.neighborhood.toLowerCase().includes(filters.neighborhood.toLowerCase())) &&
-        (!filters.bedrooms || property.bedrooms === parseInt(filters.bedrooms)) &&
-        (!filters.bathrooms || property.bathrooms === parseInt(filters.bathrooms)) &&
-        (!filters.owner_type || property.owner.type === filters.owner_type) &&
-        (!filters.priceMin || convertPrice(property.price, currentCurrency) >= parseFloat(filters.priceMin)) &&
-        (!filters.priceMax || convertPrice(property.price, currentCurrency) <= parseFloat(filters.priceMax))
-      );
-    });
-    setFilteredProperties(filtered);
-  }, [filters, properties, currentCurrency]);
 
   const getStatusColor = (status: string) => {
     const colors = {
@@ -278,35 +337,81 @@ export function PropertyCRM() {
     return labels[type as keyof typeof labels] || type;
   };
 
-  const openCreateModal = () => {
-    setIsEditing(false);
-    setSelectedProperty(null);
+  const resetForm = () => {
     setFormData({
       title: '',
       description: '',
-      type: 'apartment',
+      property_type: 'apartment',
       status: 'available',
-      price: { cop: 0, usd: 0, eur: 0 },
+      price: 0,
+      currency: 'COP',
       area: 0,
       bedrooms: 0,
       bathrooms: 0,
       parking_spaces: 0,
-      stratum: 1,
       address: '',
-      neighborhood: '',
       city: '',
-      department: '',
+      state: '',
+      country: 'Colombia',
+      zip_code: '',
       features: [],
-      owner: {
-        type: 'own',
-        name: '',
-        email: '',
-        phone: '',
-        document_type: 'CC',
-        document_number: ''
-      }
+      amenities: [],
+      images: [],
+      year_built: new Date().getFullYear(),
+      condition: 'good'
+    });
+  };
+
+  const openCreateModal = () => {
+    setIsEditing(false);
+    setSelectedProperty(null);
+    resetForm();
+    setIsModalOpen(true);
+  };
+
+  const openEditModal = (property: Property) => {
+    setIsEditing(true);
+    setSelectedProperty(property);
+    setFormData({
+      title: property.title,
+      description: property.description,
+      property_type: property.property_type,
+      status: property.status,
+      price: property.price,
+      currency: property.currency,
+      area: property.area,
+      bedrooms: property.bedrooms || 0,
+      bathrooms: property.bathrooms || 0,
+      parking_spaces: property.parking_spaces || 0,
+      address: property.address,
+      city: property.city,
+      state: property.state,
+      country: property.country,
+      zip_code: property.zip_code || '',
+      features: property.features,
+      amenities: property.amenities,
+      images: property.images,
+      year_built: property.year_built || new Date().getFullYear(),
+      condition: property.condition || 'good'
     });
     setIsModalOpen(true);
+  };
+
+  const handleSaveProperty = () => {
+    if (isEditing && selectedProperty) {
+      updatePropertyMutation.mutate({
+        id: selectedProperty.id,
+        data: formData
+      });
+    } else {
+      createPropertyMutation.mutate(formData);
+    }
+  };
+
+  const handleDeleteProperty = (propertyId: string) => {
+    if (window.confirm('¿Está seguro de que desea eliminar esta propiedad?')) {
+      deletePropertyMutation.mutate(propertyId);
+    }
   };
 
   const PropertyCard = ({ property }: { property: Property }) => (
@@ -349,7 +454,7 @@ export function PropertyCRM() {
             {property.title}
           </Text>
           <Text fontSize="xl" fontWeight="700" color="#3182ce" marginTop="4px">
-            {formatPrice(property.price, currentCurrency)}
+            {formatPrice(property.price, property.currency)}
           </Text>
         </div>
 
@@ -382,15 +487,7 @@ export function PropertyCRM() {
         <div style={{ display: 'flex', alignItems: 'center', gap: '6px', marginBottom: '12px' }}>
           <FiMapPin size={14} color="#666" />
           <Text fontSize="sm" color="#666" noOfLines={1}>
-            {property.neighborhood}, {property.city}
-          </Text>
-        </div>
-
-        {/* Propietario */}
-        <div style={{ display: 'flex', alignItems: 'center', gap: '6px', marginBottom: '12px' }}>
-          <FiUser size={14} color="#666" />
-          <Text fontSize="sm" color="#666">
-            {property.owner.type === 'own' ? 'Propio' : 'Tercero'}: {property.owner.name}
+            {property.city}, {property.state}
           </Text>
         </div>
 
@@ -402,9 +499,9 @@ export function PropertyCRM() {
           fontSize: '12px',
           color: '#666'
         }}>
-          <span>{property.visits_count} visitas</span>
-          <span>{property.inquiries_count} consultas</span>
-          <span>Estrato {property.stratum}</span>
+          <span>{property.views} visitas</span>
+          <span>{property.favorites} favoritos</span>
+          <span>{getTypeLabel(property.property_type)}</span>
         </div>
 
         {/* Acciones */}
@@ -424,28 +521,30 @@ export function PropertyCRM() {
               justifyContent: 'center',
               gap: '6px'
             }}
+            onClick={() => openEditModal(property)}
           >
             <FiEye size={14} />
-            Ver Detalles
+            Ver/Editar
           </button>
           <button
             style={{
               background: '#f7fafc',
-              color: '#4a5568',
+              color: '#e53e3e',
               border: '1px solid #e2e8f0',
               borderRadius: '6px',
               padding: '8px',
               cursor: 'pointer'
             }}
+            onClick={() => handleDeleteProperty(property.id)}
           >
-            <FiEdit size={14} />
+            <FiTrash size={14} />
           </button>
         </div>
       </div>
     </div>
   );
 
-  if (loading) {
+  if (isLoading) {
     return (
       <Box p={6}>
         <div style={{ textAlign: 'center', padding: '40px' }}>
@@ -455,192 +554,96 @@ export function PropertyCRM() {
     );
   }
 
+  if (error) {
+    return (
+      <Box p={6}>
+        <div style={{ textAlign: 'center', padding: '40px' }}>
+          <Text color="red.500">Error cargando propiedades</Text>
+          <Button onClick={() => refetch()} mt={4}>
+            Reintentar
+          </Button>
+        </div>
+      </Box>
+    );
+  }
+
   return (
     <Box p={6}>
       {/* Analytics Overview */}
-      <Box bg="bg.surface" p={6} borderRadius="12px" mb={6} boxShadow="0 2px 8px rgba(0,0,0,0.05)" border="1px" borderColor="border">
-        <Heading size="md" mb={4} color="text">
-          Dashboard de Analytics
-        </Heading>
-        <div style={{
-          display: 'grid',
-          gridTemplateColumns: 'repeat(auto-fit, minmax(250px, 1fr))',
-          gap: '20px'
-        }}>
-          {/* Total Properties */}
-          <div style={{
-            background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
-            color: 'white',
-            padding: '20px',
-            borderRadius: '12px',
-            textAlign: 'center'
-          }}>
-            <Text fontSize="sm" opacity={0.9}>Total Propiedades</Text>
-            <Text fontSize="3xl" fontWeight="bold" mt={2}>{properties.length}</Text>
-            <Text fontSize="xs" opacity={0.8} mt={1}>Inventario activo</Text>
-          </div>
-
-          {/* Available Properties */}
-          <div style={{
-            background: 'linear-gradient(135deg, #48bb78 0%, #38a169 100%)',
-            color: 'white',
-            padding: '20px',
-            borderRadius: '12px',
-            textAlign: 'center'
-          }}>
-            <Text fontSize="sm" opacity={0.9}>Disponibles</Text>
-            <Text fontSize="3xl" fontWeight="bold" mt={2}>
-              {properties.filter(p => p.status === 'available').length}
-            </Text>
-            <Text fontSize="xs" opacity={0.8} mt={1}>
-              {((properties.filter(p => p.status === 'available').length / properties.length) * 100).toFixed(1)}% del total
-            </Text>
-          </div>
-
-          {/* Total Value */}
-          <div style={{
-            background: 'linear-gradient(135deg, #ed8936 0%, #dd6b20 100%)',
-            color: 'white',
-            padding: '20px',
-            borderRadius: '12px',
-            textAlign: 'center'
-          }}>
-            <Text fontSize="sm" opacity={0.9}>Valor Total Inventario</Text>
-            <Text fontSize="2xl" fontWeight="bold" mt={2}>
-              {formatPrice(
-                {
-                  cop: properties.reduce((sum, p) => sum + p.price.cop, 0),
-                  usd: properties.reduce((sum, p) => sum + convertPrice(p.price, 'usd'), 0),
-                  eur: properties.reduce((sum, p) => sum + convertPrice(p.price, 'eur'), 0)
-                },
-                currentCurrency
-              )}
-            </Text>
-            <Text fontSize="xs" opacity={0.8} mt={1}>Valor de mercado</Text>
-          </div>
-
-          {/* Average Price */}
-          <div style={{
-            background: 'linear-gradient(135deg, #9f7aea 0%, #805ad5 100%)',
-            color: 'white',
-            padding: '20px',
-            borderRadius: '12px',
-            textAlign: 'center'
-          }}>
-            <Text fontSize="sm" opacity={0.9}>Precio Promedio</Text>
-            <Text fontSize="2xl" fontWeight="bold" mt={2}>
-              {formatPrice(
-                {
-                  cop: properties.reduce((sum, p) => sum + p.price.cop, 0) / properties.length,
-                  usd: properties.reduce((sum, p) => sum + convertPrice(p.price, 'usd'), 0) / properties.length,
-                  eur: properties.reduce((sum, p) => sum + convertPrice(p.price, 'eur'), 0) / properties.length
-                },
-                currentCurrency
-              )}
-            </Text>
-            <Text fontSize="xs" opacity={0.8} mt={1}>Por propiedad</Text>
-          </div>
-
-          {/* Recent Activity */}
-          <div style={{
-            background: 'linear-gradient(135deg, #38b2ac 0%, #319795 100%)',
-            color: 'white',
-            padding: '20px',
-            borderRadius: '12px',
-            textAlign: 'center'
-          }}>
-            <Text fontSize="sm" opacity={0.9}>Actividad Reciente</Text>
-            <Text fontSize="3xl" fontWeight="bold" mt={2}>
-              {properties.reduce((sum, p) => sum + p.visits_count, 0)}
-            </Text>
-            <Text fontSize="xs" opacity={0.8} mt={1}>Total visitas</Text>
-          </div>
-
-          {/* Performance Metrics */}
-          <div style={{
-            background: 'linear-gradient(135deg, #f56565 0%, #e53e3e 100%)',
-            color: 'white',
-            padding: '20px',
-            borderRadius: '12px',
-            textAlign: 'center'
-          }}>
-            <Text fontSize="sm" opacity={0.9}>Consultas</Text>
-            <Text fontSize="3xl" fontWeight="bold" mt={2}>
-              {properties.reduce((sum, p) => sum + p.inquiries_count, 0)}
-            </Text>
-            <Text fontSize="xs" opacity={0.8} mt={1}>
-              Tasa conversión: {(
-                (properties.reduce((sum, p) => sum + p.inquiries_count, 0) / 
-                properties.reduce((sum, p) => sum + p.visits_count, 0)) * 100
-              ).toFixed(1)}%
-            </Text>
-          </div>
-        </div>
-
-        {/* Property Distribution */}
-        <Box mt={6}>
-          <Heading size="sm" mb={3} color="#1a202c">
-            Distribución por Tipo y Estado
+      {analytics && (
+        <Box bg="bg.surface" p={6} borderRadius="12px" mb={6} boxShadow="0 2px 8px rgba(0,0,0,0.05)" border="1px" borderColor="border">
+          <Heading size="md" mb={4} color="text">
+            Dashboard de Analytics
           </Heading>
           <div style={{
             display: 'grid',
-            gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))',
-            gap: '16px'
+            gridTemplateColumns: 'repeat(auto-fit, minmax(250px, 1fr))',
+            gap: '20px'
           }}>
-            {/* Por Tipo */}
-            <div style={{ background: '#f7fafc', padding: '16px', borderRadius: '8px' }}>
-              <Text fontSize="sm" fontWeight="600" mb={2}>Por Tipo</Text>
-              {['apartment', 'house', 'commercial', 'land', 'office'].map(type => {
-                const count = properties.filter(p => p.type === type).length;
-                const percentage = (count / properties.length) * 100;
-                return count > 0 ? (
-                  <div key={type} style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '4px' }}>
-                    <Text fontSize="xs">{getTypeLabel(type)}</Text>
-                    <Text fontSize="xs" fontWeight="600">{count} ({percentage.toFixed(1)}%)</Text>
-                  </div>
-                ) : null;
-              })}
+            {/* Total Properties */}
+            <div style={{
+              background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+              color: 'white',
+              padding: '20px',
+              borderRadius: '12px',
+              textAlign: 'center'
+            }}>
+              <Text fontSize="sm" opacity={0.9}>Total Propiedades</Text>
+              <Text fontSize="3xl" fontWeight="bold" mt={2}>{analytics.total_properties}</Text>
+              <Text fontSize="xs" opacity={0.8} mt={1}>Inventario activo</Text>
             </div>
 
-            {/* Por Estado */}
-            <div style={{ background: '#f7fafc', padding: '16px', borderRadius: '8px' }}>
-              <Text fontSize="sm" fontWeight="600" mb={2}>Por Estado</Text>
-              {['available', 'reserved', 'sold', 'rented', 'under_construction'].map(status => {
-                const count = properties.filter(p => p.status === status).length;
-                const percentage = (count / properties.length) * 100;
-                return count > 0 ? (
-                  <div key={status} style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '4px' }}>
-                    <Text fontSize="xs">{getStatusLabel(status)}</Text>
-                    <Text fontSize="xs" fontWeight="600">{count} ({percentage.toFixed(1)}%)</Text>
-                  </div>
-                ) : null;
-              })}
+            {/* Available Properties */}
+            <div style={{
+              background: 'linear-gradient(135deg, #48bb78 0%, #38a169 100%)',
+              color: 'white',
+              padding: '20px',
+              borderRadius: '12px',
+              textAlign: 'center'
+            }}>
+              <Text fontSize="sm" opacity={0.9}>Disponibles</Text>
+              <Text fontSize="3xl" fontWeight="bold" mt={2}>
+                {analytics.available_properties}
+              </Text>
+              <Text fontSize="xs" opacity={0.8} mt={1}>
+                {analytics.total_properties > 0 ? 
+                  ((analytics.available_properties / analytics.total_properties) * 100).toFixed(1) 
+                  : 0}% del total
+              </Text>
             </div>
 
-            {/* Por Ciudad */}
-            <div style={{ background: '#f7fafc', padding: '16px', borderRadius: '8px' }}>
-              <Text fontSize="sm" fontWeight="600" mb={2}>Por Ciudad</Text>
-              {Array.from(new Set(properties.map(p => p.city))).map(city => {
-                const count = properties.filter(p => p.city === city).length;
-                const avgPrice = properties
-                  .filter(p => p.city === city)
-                  .reduce((sum, p) => sum + convertPrice(p.price, currentCurrency), 0) / count;
-                return (
-                  <div key={city} style={{ marginBottom: '8px' }}>
-                    <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-                      <Text fontSize="xs">{city}</Text>
-                      <Text fontSize="xs" fontWeight="600">{count}</Text>
-                    </div>
-                    <Text fontSize="xs" color="#666">
-                      Promedio: {formatPrice({ cop: avgPrice, usd: avgPrice, eur: avgPrice }, currentCurrency)}
-                    </Text>
-                  </div>
-                );
-              })}
+            {/* Total Value */}
+            <div style={{
+              background: 'linear-gradient(135deg, #ed8936 0%, #dd6b20 100%)',
+              color: 'white',
+              padding: '20px',
+              borderRadius: '12px',
+              textAlign: 'center'
+            }}>
+              <Text fontSize="sm" opacity={0.9}>Valor Total Inventario</Text>
+              <Text fontSize="xl" fontWeight="bold" mt={2}>
+                ${analytics.total_inventory_value.toLocaleString('es-CO')}
+              </Text>
+              <Text fontSize="xs" opacity={0.8} mt={1}>Valor de mercado</Text>
+            </div>
+
+            {/* Average Price */}
+            <div style={{
+              background: 'linear-gradient(135deg, #9f7aea 0%, #805ad5 100%)',
+              color: 'white',
+              padding: '20px',
+              borderRadius: '12px',
+              textAlign: 'center'
+            }}>
+              <Text fontSize="sm" opacity={0.9}>Precio Promedio</Text>
+              <Text fontSize="xl" fontWeight="bold" mt={2}>
+                ${analytics.average_property_price.toLocaleString('es-CO')}
+              </Text>
+              <Text fontSize="xs" opacity={0.8} mt={1}>Por propiedad</Text>
             </div>
           </div>
         </Box>
-      </Box>
+      )}
 
       {/* Header */}
       <Flex justify="space-between" align="center" mb={6}>
@@ -649,7 +652,7 @@ export function PropertyCRM() {
             CRM de Propiedades
           </Heading>
           <Text color="text.muted" mt={1}>
-            Gestión completa de propiedades inmobiliarias
+            Gestión completa de propiedades inmobiliarias - {totalProperties} propiedades
           </Text>
         </Box>
         <Flex gap={3}>
@@ -683,8 +686,8 @@ export function PropertyCRM() {
           <div>
             <Text fontSize="sm" fontWeight="500" mb={2}>Tipo de Propiedad</Text>
             <Select
-              value={filters.type}
-              onChange={(e) => setFilters({ ...filters, type: e.target.value })}
+              value={filters.property_type}
+              onChange={(e) => setFilters({ ...filters, property_type: e.target.value })}
               size="sm"
             >
               <option value="">Todos los tipos</option>
@@ -723,119 +726,231 @@ export function PropertyCRM() {
           </div>
 
           <div>
-            <Text fontSize="sm" fontWeight="500" mb={2}>Barrio</Text>
+            <Text fontSize="sm" fontWeight="500" mb={2}>Precio Mínimo</Text>
             <Input
-              value={filters.neighborhood}
-              onChange={(e) => setFilters({ ...filters, neighborhood: e.target.value })}
-              placeholder="Buscar barrio..."
+              type="number"
+              value={filters.priceMin}
+              onChange={(e) => setFilters({ ...filters, priceMin: e.target.value })}
+              placeholder="Precio mínimo"
               size="sm"
             />
           </div>
 
           <div>
-            <Text fontSize="sm" fontWeight="500" mb={2}>Propietario</Text>
-            <Select
-              value={filters.owner_type}
-              onChange={(e) => setFilters({ ...filters, owner_type: e.target.value })}
+            <Text fontSize="sm" fontWeight="500" mb={2}>Precio Máximo</Text>
+            <Input
+              type="number"
+              value={filters.priceMax}
+              onChange={(e) => setFilters({ ...filters, priceMax: e.target.value })}
+              placeholder="Precio máximo"
               size="sm"
-            >
-              <option value="">Todos</option>
-              <option value="own">Propias</option>
-              <option value="third_party">Terceros</option>
-            </Select>
+            />
           </div>
 
           <Button leftIcon={<FiFilter />} colorScheme="blue" size="sm">
-            Aplicar Filtros
+            Filtrar
           </Button>
         </div>
       </Box>
 
-      {/* Estadísticas rápidas */}
-      <div style={{ 
-        display: 'grid', 
-        gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', 
-        gap: '16px',
-        marginBottom: '24px'
+      {/* Grid de Propiedades */}
+      <div style={{
+        display: 'grid',
+        gridTemplateColumns: 'repeat(auto-fill, minmax(350px, 1fr))',
+        gap: '24px'
       }}>
-        <Box bg="bg.surface" p={5} borderRadius="12px" boxShadow="0 2px 4px rgba(0,0,0,0.05)" border="1px" borderColor="border">
-          <Text fontSize="sm" color="text.muted">Total Propiedades</Text>
-          <Text fontSize="2xl" fontWeight="700" color="text">{properties.length}</Text>
-        </Box>
-        <Box bg="bg.surface" p={5} borderRadius="12px" boxShadow="0 2px 4px rgba(0,0,0,0.05)" border="1px" borderColor="border">
-          <Text fontSize="sm" color="text.muted">Disponibles</Text>
-          <Text fontSize="2xl" fontWeight="700" color="green.400">
-            {properties.filter(p => p.status === 'available').length}
-          </Text>
-        </Box>
-        <Box bg="bg.surface" p={5} borderRadius="12px" boxShadow="0 2px 4px rgba(0,0,0,0.05)" border="1px" borderColor="border">
-          <Text fontSize="sm" color="text.muted">Vendidas/Arrendadas</Text>
-          <Text fontSize="2xl" fontWeight="700" color="blue.400">
-            {properties.filter(p => p.status === 'sold' || p.status === 'rented').length}
-          </Text>
-        </Box>
-        <Box bg="bg.surface" p={5} borderRadius="12px" boxShadow="0 2px 4px rgba(0,0,0,0.05)" border="1px" borderColor="border">
-          <Text fontSize="sm" color="text.muted">Valor Inventario</Text>
-          <Text fontSize="2xl" fontWeight="700" color="purple.400">
-            {formatPrice(
-              { cop: properties.reduce((sum, p) => sum + p.price.cop, 0), usd: 0, eur: 0 },
-              currentCurrency
-            )}
-          </Text>
-        </Box>
+        {properties.map((property: Property) => (
+          <PropertyCard key={property.id} property={property} />
+        ))}
       </div>
 
-      {/* Lista de propiedades */}
-      <Box bg="bg.surface" borderRadius="12px" p={6} boxShadow="0 2px 8px rgba(0,0,0,0.1)" border="1px" borderColor="border">
-        <Flex justify="space-between" align="center" mb={4}>
-          <Text fontSize="lg" fontWeight="600">
-            Propiedades ({filteredProperties.length})
-          </Text>
-          <div style={{ display: 'flex', gap: '8px' }}>
-            <button
-              onClick={() => setViewMode('grid')}
-              style={{
-                padding: '8px',
-                border: viewMode === 'grid' ? '2px solid #3182ce' : '1px solid #e2e8f0',
-                borderRadius: '6px',
-                background: viewMode === 'grid' ? '#ebf8ff' : '#fff',
-                cursor: 'pointer'
-              }}
-            >
-              Grid
-            </button>
-            <button
-              onClick={() => setViewMode('list')}
-              style={{
-                padding: '8px',
-                border: viewMode === 'list' ? '2px solid #3182ce' : '1px solid #e2e8f0',
-                borderRadius: '6px',
-                background: viewMode === 'list' ? '#ebf8ff' : '#fff',
-                cursor: 'pointer'
-              }}
-            >
-              Lista
-            </button>
-          </div>
-        </Flex>
-
-        {filteredProperties.length === 0 ? (
-          <div style={{ textAlign: 'center', padding: '40px' }}>
-            <FiHome size={48} color="#ccc" />
-            <Text color="#666" mt={4}>No se encontraron propiedades</Text>
-          </div>
-        ) : (
+      {/* Modal para crear/editar propiedad */}
+      {isModalOpen && (
+        <div style={{
+          position: 'fixed',
+          top: 0,
+          left: 0,
+          right: 0,
+          bottom: 0,
+          backgroundColor: 'rgba(0,0,0,0.5)',
+          zIndex: 1000,
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center'
+        }}>
           <div style={{
-            display: 'grid',
-            gridTemplateColumns: viewMode === 'grid' ? 'repeat(auto-fill, minmax(350px, 1fr))' : '1fr',
-            gap: '20px'
+            backgroundColor: 'white',
+            borderRadius: '12px',
+            padding: '24px',
+            maxWidth: '600px',
+            width: '90%',
+            maxHeight: '80vh',
+            overflow: 'auto'
           }}>
-            {filteredProperties.map((property) => (
-              <PropertyCard key={property.id} property={property} />
-            ))}
+            <Heading size="md" mb={4}>
+              {isEditing ? 'Editar Propiedad' : 'Nueva Propiedad'}
+            </Heading>
+
+            <div style={{ display: 'grid', gap: '16px' }}>
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px' }}>
+                <div>
+                  <Text fontSize="sm" fontWeight="500" mb={1}>Título *</Text>
+                  <Input
+                    value={formData.title}
+                    onChange={(e) => setFormData({ ...formData, title: e.target.value })}
+                    placeholder="Título de la propiedad"
+                  />
+                </div>
+                <div>
+                  <Text fontSize="sm" fontWeight="500" mb={1}>Tipo *</Text>
+                  <Select
+                    value={formData.property_type}
+                    onChange={(e) => setFormData({ ...formData, property_type: e.target.value as any })}
+                  >
+                    <option value="apartment">Apartamento</option>
+                    <option value="house">Casa</option>
+                    <option value="commercial">Comercial</option>
+                    <option value="land">Lote</option>
+                    <option value="office">Oficina</option>
+                  </Select>
+                </div>
+              </div>
+
+              <div>
+                <Text fontSize="sm" fontWeight="500" mb={1}>Descripción</Text>
+                <Input
+                  value={formData.description}
+                  onChange={(e) => setFormData({ ...formData, description: e.target.value })}
+                  placeholder="Descripción de la propiedad"
+                />
+              </div>
+
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '16px' }}>
+                <div>
+                  <Text fontSize="sm" fontWeight="500" mb={1}>Precio *</Text>
+                  <Input
+                    type="number"
+                    value={formData.price}
+                    onChange={(e) => setFormData({ ...formData, price: parseFloat(e.target.value) || 0 })}
+                    placeholder="Precio"
+                  />
+                </div>
+                <div>
+                  <Text fontSize="sm" fontWeight="500" mb={1}>Moneda</Text>
+                  <Select
+                    value={formData.currency}
+                    onChange={(e) => setFormData({ ...formData, currency: e.target.value })}
+                  >
+                    <option value="COP">COP</option>
+                    <option value="USD">USD</option>
+                    <option value="EUR">EUR</option>
+                  </Select>
+                </div>
+                <div>
+                  <Text fontSize="sm" fontWeight="500" mb={1}>Área (m²) *</Text>
+                  <Input
+                    type="number"
+                    value={formData.area}
+                    onChange={(e) => setFormData({ ...formData, area: parseFloat(e.target.value) || 0 })}
+                    placeholder="Área"
+                  />
+                </div>
+              </div>
+
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '16px' }}>
+                <div>
+                  <Text fontSize="sm" fontWeight="500" mb={1}>Habitaciones</Text>
+                  <Input
+                    type="number"
+                    value={formData.bedrooms}
+                    onChange={(e) => setFormData({ ...formData, bedrooms: parseInt(e.target.value) || 0 })}
+                    placeholder="Habitaciones"
+                  />
+                </div>
+                <div>
+                  <Text fontSize="sm" fontWeight="500" mb={1}>Baños</Text>
+                  <Input
+                    type="number"
+                    value={formData.bathrooms}
+                    onChange={(e) => setFormData({ ...formData, bathrooms: parseInt(e.target.value) || 0 })}
+                    placeholder="Baños"
+                  />
+                </div>
+                <div>
+                  <Text fontSize="sm" fontWeight="500" mb={1}>Parqueaderos</Text>
+                  <Input
+                    type="number"
+                    value={formData.parking_spaces}
+                    onChange={(e) => setFormData({ ...formData, parking_spaces: parseInt(e.target.value) || 0 })}
+                    placeholder="Parqueaderos"
+                  />
+                </div>
+              </div>
+
+              <div>
+                <Text fontSize="sm" fontWeight="500" mb={1}>Dirección *</Text>
+                <Input
+                  value={formData.address}
+                  onChange={(e) => setFormData({ ...formData, address: e.target.value })}
+                  placeholder="Dirección completa"
+                />
+              </div>
+
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '16px' }}>
+                <div>
+                  <Text fontSize="sm" fontWeight="500" mb={1}>Ciudad *</Text>
+                  <Input
+                    value={formData.city}
+                    onChange={(e) => setFormData({ ...formData, city: e.target.value })}
+                    placeholder="Ciudad"
+                  />
+                </div>
+                <div>
+                  <Text fontSize="sm" fontWeight="500" mb={1}>Departamento *</Text>
+                  <Input
+                    value={formData.state}
+                    onChange={(e) => setFormData({ ...formData, state: e.target.value })}
+                    placeholder="Departamento"
+                  />
+                </div>
+                <div>
+                  <Text fontSize="sm" fontWeight="500" mb={1}>Estado</Text>
+                  <Select
+                    value={formData.status}
+                    onChange={(e) => setFormData({ ...formData, status: e.target.value as any })}
+                  >
+                    <option value="available">Disponible</option>
+                    <option value="reserved">Reservada</option>
+                    <option value="sold">Vendida</option>
+                    <option value="rented">Arrendada</option>
+                    <option value="under_construction">En Construcción</option>
+                  </Select>
+                </div>
+              </div>
+            </div>
+
+            <Flex gap={3} mt={6} justify="end">
+              <Button 
+                variant="outline" 
+                onClick={() => {
+                  setIsModalOpen(false);
+                  resetForm();
+                }}
+              >
+                Cancelar
+              </Button>
+              <Button 
+                colorScheme="blue" 
+                leftIcon={<FiSave />}
+                isLoading={createPropertyMutation.isPending || updatePropertyMutation.isPending}
+                onClick={handleSaveProperty}
+              >
+                {isEditing ? 'Actualizar' : 'Crear'} Propiedad
+              </Button>
+            </Flex>
           </div>
-        )}
-      </Box>
+        </div>
+      )}
     </Box>
   );
 } 

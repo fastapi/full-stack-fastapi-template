@@ -3,9 +3,11 @@ from typing import Annotated
 
 from fastapi import Depends, HTTPException, status
 from sqlmodel import Session, select
+from fastapi.security import HTTPAuthorizationCredentials
+from fastapi import Request
 
 from app.core.db import engine
-from app.core.clerk_auth import get_current_user as clerk_get_current_user
+from app.core.clerk_auth import get_current_user as clerk_get_current_user, security
 from app.models import User
 
 
@@ -18,9 +20,12 @@ def get_db() -> Generator[Session, None, None]:
 SessionDep = Annotated[Session, Depends(get_db)]
 
 # Usar la función de Clerk para obtener el usuario actual
-def get_current_user(session: SessionDep) -> User:
+def get_current_user(
+    credentials: HTTPAuthorizationCredentials = Depends(security),
+    session: SessionDep = None
+) -> User:
     """Obtener el usuario actual desde Clerk JWT y base de datos"""
-    clerk_user = clerk_get_current_user()
+    clerk_user = clerk_get_current_user(credentials)
     user_id = clerk_user.get("sub") or clerk_user.get("id")
     
     if not user_id:

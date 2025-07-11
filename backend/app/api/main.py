@@ -2,7 +2,7 @@ from fastapi import APIRouter
 
 from app.api.routes import (
     items, login, private, users, utils, ceo, manager, supervisor, hr, support, agent, 
-    auth, properties, transactions, analytics, credits, financial_analysis, clerk_webhooks, legal, client_dashboard
+    auth, properties, clients, transactions, analytics, credits, financial_analysis, clerk_webhooks, legal, client_dashboard
 )
 from app.core.config import settings
 
@@ -30,6 +30,7 @@ api_router.include_router(agent.router)
 
 # Rutas de funcionalidad principales
 api_router.include_router(properties.router, prefix="/properties", tags=["properties"])
+api_router.include_router(clients.router, prefix="/clients", tags=["clients"])
 api_router.include_router(transactions.router, prefix="/transactions", tags=["transactions"])
 api_router.include_router(analytics.router, prefix="/analytics", tags=["analytics"])
 api_router.include_router(credits.router, prefix="/credits", tags=["credits"])
