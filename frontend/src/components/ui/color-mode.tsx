@@ -1,11 +1,30 @@
 "use client"
 
-import type { IconButtonProps, SpanProps } from "@chakra-ui/react"
-import { ClientOnly, IconButton, Skeleton, Span } from "@chakra-ui/react"
+import type { IconButtonProps, BoxProps } from "@chakra-ui/react"
+import { IconButton, Skeleton, Box } from "@chakra-ui/react"
 import { ThemeProvider, useTheme } from "next-themes"
 import type { ThemeProviderProps } from "next-themes"
 import * as React from "react"
 import { LuMoon, LuSun } from "react-icons/lu"
+
+// Implementación personalizada de ClientOnly para evitar problemas de hidratación
+const ClientOnly: React.FC<{ 
+  children: React.ReactNode | (() => React.ReactNode) 
+}> = ({ children }) => {
+  const [mounted, setMounted] = React.useState(false)
+
+  React.useEffect(() => {
+    setMounted(true)
+  }, [])
+
+  if (!mounted) return null
+
+  if (typeof children === 'function') {
+    return <>{children()}</>
+  }
+
+  return <>{children}</>
+}
 
 export interface ColorModeProviderProps extends ThemeProviderProps {}
 
@@ -52,32 +71,37 @@ export const ColorModeButton = React.forwardRef<
   ColorModeButtonProps
 >(function ColorModeButton(props, ref) {
   const { toggleColorMode } = useColorMode()
+  
+  // Usamos el ClientOnly personalizado para evitar problemas de hidratación
   return (
-    <ClientOnly fallback={<Skeleton boxSize="8" />}>
-      <IconButton
-        onClick={toggleColorMode}
-        variant="ghost"
-        aria-label="Toggle color mode"
-        size="sm"
-        ref={ref}
-        {...props}
-        css={{
-          _icon: {
-            width: "5",
-            height: "5",
-          },
-        }}
-      >
-        <ColorModeIcon />
-      </IconButton>
+    <ClientOnly>
+      {() => (
+        <IconButton
+          onClick={toggleColorMode}
+          variant="ghost"
+          aria-label="Toggle color mode"
+          size="sm"
+          ref={ref}
+          {...props}
+          css={{
+            _icon: {
+              width: "5",
+              height: "5",
+            },
+          }}
+        >
+          <ColorModeIcon />
+        </IconButton>
+      )}
     </ClientOnly>
   )
 })
 
-export const LightMode = React.forwardRef<HTMLSpanElement, SpanProps>(
+export const LightMode = React.forwardRef<HTMLDivElement, BoxProps>(
   function LightMode(props, ref) {
     return (
-      <Span
+      <Box
+        as="span"
         color="fg"
         display="contents"
         className="chakra-theme light"
@@ -90,10 +114,11 @@ export const LightMode = React.forwardRef<HTMLSpanElement, SpanProps>(
   },
 )
 
-export const DarkMode = React.forwardRef<HTMLSpanElement, SpanProps>(
+export const DarkMode = React.forwardRef<HTMLDivElement, BoxProps>(
   function DarkMode(props, ref) {
     return (
-      <Span
+      <Box
+        as="span"
         color="fg"
         display="contents"
         className="chakra-theme dark"

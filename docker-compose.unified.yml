@@ -37,6 +37,11 @@ services:
     restart: unless-stopped
     ports:
       - "8000:8000"
+      - "3000:3000"  # Puerto para desarrollo del frontend
+    volumes:
+      - ./frontend:/frontend
+      - /frontend/node_modules  # Evitar sobrescribir node_modules
+      - ./backend/app:/app/backend/app  # Montar el backend para desarrollo
     environment:
       # Database
       - DATABASE_URL=postgresql://postgres:KhloeMF0911$$@postgres:5432/genius_dev

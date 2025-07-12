@@ -6,19 +6,38 @@ import {
   Button,
   Input,
   Select,
-  Table,
   Badge,
   useDisclosure,
-  Dialog,
-  Portal,
-  CloseButton,
-  Field,
+  Modal,
+  ModalOverlay,
+  ModalContent,
+  ModalHeader,
+  ModalFooter,
+  ModalBody,
+  ModalCloseButton,
   Text,
   HStack,
   VStack,
   IconButton,
-  // useToast
+  FormControl,
+  FormLabel,
+  FormErrorMessage,
+  CloseButton,
+  Checkbox,
+  useToast
 } from '@chakra-ui/react'
+
+// Importar componentes de tabla desde @chakra-ui/table
+import {
+  Table,
+  Thead,
+  Tbody,
+  Td,
+  Th,
+  Tr
+} from '@chakra-ui/table'
+
+// useToast ya está importado desde @chakra-ui/react
 import { FiPlus, FiEdit2, FiTrash2, FiSearch, FiFilter, FiSave } from 'react-icons/fi'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import {
@@ -31,10 +50,10 @@ import {
   type UserUpdate,
   type UserFilters
 } from '../../client/usersApi'
-import { toaster } from '../../components/ui/toaster';
+// Importación de toast eliminada ya que ahora viene de @chakra-ui/react
 
 export const UserManagement = () => {
-  const toast = toaster;
+  const toast = useToast();
   const queryClient = useQueryClient()
   const [selectedUser, setSelectedUser] = useState<User | null>(null)
   const [searchTerm, setSearchTerm] = useState('')
@@ -81,7 +100,7 @@ export const UserManagement = () => {
     mutationFn: createUser,
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['users'] })
-      toast.create({
+      toast({
         title: 'Usuario creado',
         description: 'El usuario se ha creado exitosamente',
         status: 'success',
@@ -92,7 +111,7 @@ export const UserManagement = () => {
       resetForm()
     },
     onError: (error: any) => {
-      toast.create({
+      toast({
         title: 'Error',
         description: error?.response?.data?.detail || 'Error al crear el usuario',
         status: 'error',
@@ -108,7 +127,7 @@ export const UserManagement = () => {
       updateUser(id, data),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['users'] })
-      toast.create({
+      toast({
         title: 'Usuario actualizado',
         description: 'El usuario se ha actualizado exitosamente',
         status: 'success',
@@ -120,7 +139,7 @@ export const UserManagement = () => {
       resetForm()
     },
     onError: (error: any) => {
-      toast.create({
+      toast({
         title: 'Error',
         description: error?.response?.data?.detail || 'Error al actualizar el usuario',
         status: 'error',
@@ -135,7 +154,7 @@ export const UserManagement = () => {
     mutationFn: deleteUser,
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['users'] })
-      toast.create({
+      toast({
         title: 'Usuario eliminado',
         description: 'El usuario se ha eliminado exitosamente',
         status: 'success',
@@ -144,7 +163,7 @@ export const UserManagement = () => {
       })
     },
     onError: (error: any) => {
-      toast.create({
+      toast({
         title: 'Error',
         description: error?.response?.data?.detail || 'Error al eliminar el usuario',
         status: 'error',
@@ -330,23 +349,23 @@ export const UserManagement = () => {
           border="1px"
           borderColor="border"
         >
-          <Table.Root variant="simple">
-            <Table.Header bg="bg.muted">
-              <Table.Row>
-                <Table.ColumnHeader color="text.muted" borderColor="border.muted">Usuario</Table.ColumnHeader>
-                <Table.ColumnHeader color="text.muted" borderColor="border.muted">Email</Table.ColumnHeader>
-                <Table.ColumnHeader color="text.muted" borderColor="border.muted">Rol</Table.ColumnHeader>
-                <Table.ColumnHeader color="text.muted" borderColor="border.muted">Estado</Table.ColumnHeader>
-                <Table.ColumnHeader color="text.muted" borderColor="border.muted">Fecha Registro</Table.ColumnHeader>
-                <Table.ColumnHeader color="text.muted" borderColor="border.muted">Acciones</Table.ColumnHeader>
-              </Table.Row>
-            </Table.Header>
-            <Table.Body>
+          <Table variant="simple">
+            <Thead bg="gray.100">
+              <Tr>
+                <Th color="gray.600" borderColor="gray.200">Usuario</Th>
+                <Th color="gray.600" borderColor="gray.200">Email</Th>
+                <Th color="gray.600" borderColor="gray.200">Rol</Th>
+                <Th color="gray.600" borderColor="gray.200">Estado</Th>
+                <Th color="gray.600" borderColor="gray.200">Fecha Registro</Th>
+                <Th color="gray.600" borderColor="gray.200">Acciones</Th>
+              </Tr>
+            </Thead>
+            <Tbody>
               {filteredUsers.map((user) => (
-                <Table.Row key={user.id} _hover={{ bg: 'gray.50' }}>
-                  <Table.Cell borderColor="border.muted">
+                <Tr key={user.id} _hover={{ bg: 'gray.50' }}>
+                  <Td borderColor="gray.200">
                     <VStack align="start" gap={1}>
-                      <Text color="text" fontWeight="medium">
+                      <Text color="gray.900" fontWeight="medium">
                         {user.full_name}
                       </Text>
                       {user.is_superuser && (
@@ -355,54 +374,52 @@ export const UserManagement = () => {
                         </Badge>
                       )}
                     </VStack>
-                  </Table.Cell>
-                  <Table.Cell borderColor="border.muted">
-                    <Text color="text">{user.email}</Text>
-                  </Table.Cell>
-                  <Table.Cell borderColor="border.muted">
+                  </Td>
+                  <Td borderColor="gray.200">
+                    <Text color="gray.900">{user.email}</Text>
+                  </Td>
+                  <Td borderColor="gray.200">
                     <Badge colorScheme={getRoleBadgeColor(user.role)}>
                       {roles.find(r => r.value === user.role)?.label || user.role}
                     </Badge>
-                  </Table.Cell>
-                  <Table.Cell borderColor="border.muted">
+                  </Td>
+                  <Td borderColor="gray.200">
                     <Badge colorScheme={user.is_active ? 'green' : 'red'}>
                       {user.is_active ? 'Activo' : 'Inactivo'}
                     </Badge>
-                  </Table.Cell>
-                  <Table.Cell borderColor="border.muted">
-                    <Text color="text.muted" fontSize="sm">
+                  </Td>
+                  <Td borderColor="gray.200">
+                    <Text color="gray.600" fontSize="sm">
                       {new Date(user.created_at).toLocaleDateString('es-CO')}
                     </Text>
-                  </Table.Cell>
-                  <Table.Cell borderColor="border.muted">
+                  </Td>
+                  <Td borderColor="gray.200">
                     <HStack gap={2}>
                       <IconButton
                         aria-label="Editar usuario"
                         size="sm"
                         variant="outline"
-                        borderColor="border"
-                        color="text"
+                        borderColor="gray.200"
+                        color="gray.600"
                         onClick={() => handleEditUser(user)}
-                      >
-                        <FiEdit2 />
-                      </IconButton>
+                        icon={<FiEdit2 />}
+                      />
                       <IconButton
                         aria-label="Eliminar usuario"
                         size="sm"
                         variant="outline"
-                        borderColor="border"
-                        color="red.400"
+                        borderColor="gray.200"
+                        colorScheme="red"
                         onClick={() => handleDeleteUser(user.id)}
                         isLoading={deleteUserMutation.isPending}
-                      >
-                        <FiTrash2 />
-                      </IconButton>
+                        icon={<FiTrash2 />}
+                      />
                     </HStack>
-                  </Table.Cell>
-                </Table.Row>
+                  </Td>
+                </Tr>
               ))}
-            </Table.Body>
-          </Table.Root>
+            </Tbody>
+          </Table>
 
           {filteredUsers.length === 0 && (
             <Box p={8} textAlign="center">
@@ -416,111 +433,99 @@ export const UserManagement = () => {
       </VStack>
 
       {/* Modal para agregar/editar usuario */}
-      <Dialog.Root open={open} onOpenChange={(e) => e.open ? onOpen() : onClose()}>
-        <Portal>
-          <Dialog.Backdrop />
-          <Dialog.Positioner>
-            <Dialog.Content bg="bg.surface" border="1px" borderColor="border" maxW="md">
-              <Dialog.Header>
-                <Dialog.Title color="text">
-                  {selectedUser ? 'Editar Usuario' : 'Nuevo Usuario'}
-                </Dialog.Title>
-                <Dialog.CloseTrigger asChild>
-                  <CloseButton color="text" />
-                </Dialog.CloseTrigger>
-              </Dialog.Header>
-              <Dialog.Body>
-                <VStack gap={4}>
-                  <Field.Root>
-                    <Field.Label color="text.muted">Nombre Completo *</Field.Label>
-                    <Input 
-                      placeholder="Ingresa el nombre completo"
-                      value={formData.full_name}
-                      onChange={(e) => setFormData({ ...formData, full_name: e.target.value })}
-                    />
-                  </Field.Root>
-                  
-                  <Field.Root>
-                    <Field.Label color="text.muted">Email *</Field.Label>
-                    <Input 
-                      type="email" 
-                      placeholder="usuario@example.com"
-                      value={formData.email}
-                      onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-                    />
-                  </Field.Root>
-                  
-                  <Field.Root>
-                    <Field.Label color="text.muted">
-                      Contraseña {isEditing ? '(dejar vacío para mantener actual)' : '*'}
-                    </Field.Label>
-                    <Input 
-                      type="password" 
-                      placeholder={isEditing ? "Nueva contraseña (opcional)" : "Contraseña"}
-                      value={formData.password}
-                      onChange={(e) => setFormData({ ...formData, password: e.target.value })}
-                    />
-                  </Field.Root>
-                  
-                  <Field.Root>
-                    <Field.Label color="text.muted">Rol *</Field.Label>
-                    <Select 
-                      value={formData.role}
-                      onChange={(e) => setFormData({ ...formData, role: e.target.value })}
-                    >
-                      {roles.map(role => (
-                        <option key={role.value} value={role.value}>
-                          {role.label}
-                        </option>
-                      ))}
-                    </Select>
-                  </Field.Root>
-
-                  <HStack width="100%" justify="space-between">
-                    <Field.Root>
-                      <label style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                        <input
-                          type="checkbox"
-                          checked={formData.is_active}
-                          onChange={(e) => setFormData({ ...formData, is_active: e.target.checked })}
-                        />
-                        <Text color="text.muted">Usuario activo</Text>
-                      </label>
-                    </Field.Root>
-
-                    <Field.Root>
-                      <label style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                        <input
-                          type="checkbox"
-                          checked={formData.is_superuser}
-                          onChange={(e) => setFormData({ ...formData, is_superuser: e.target.checked })}
-                        />
-                        <Text color="text.muted">Superusuario</Text>
-                      </label>
-                    </Field.Root>
-                  </HStack>
-                </VStack>
-              </Dialog.Body>
-              <Dialog.Footer>
-                <Dialog.ActionTrigger asChild>
-                  <Button variant="outline" borderColor="border" color="text" mr={3}>
-                    Cancelar
-                  </Button>
-                </Dialog.ActionTrigger>
-                <Button 
-                  colorScheme="blue"
-                  onClick={handleSaveUser}
-                  isLoading={createUserMutation.isPending || updateUserMutation.isPending}
-                  leftIcon={<FiSave />}
-                  isDisabled={!formData.email || !formData.full_name || (!isEditing && !formData.password)}
+      <Modal isOpen={open} onClose={onClose} size="md">
+        <ModalOverlay />
+        <ModalContent>
+          <ModalHeader>
+            <Text color="gray.800" fontSize="lg" fontWeight="bold">
+              {selectedUser ? 'Editar Usuario' : 'Nuevo Usuario'}
+            </Text>
+            <ModalCloseButton />
+          </ModalHeader>
+          <ModalBody pb={6}>
+            <VStack spacing={4}>
+              <FormControl>
+                <FormLabel color="gray.600">Nombre Completo *</FormLabel>
+                <Input 
+                  placeholder="Ingresa el nombre completo"
+                  value={formData.full_name}
+                  onChange={(e) => setFormData({ ...formData, full_name: e.target.value })}
+                />
+              </FormControl>
+              
+              <FormControl>
+                <FormLabel color="gray.600">Email *</FormLabel>
+                <Input 
+                  type="email" 
+                  placeholder="usuario@example.com"
+                  value={formData.email}
+                  onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+                />
+              </FormControl>
+              
+              <FormControl>
+                <FormLabel color="gray.600">
+                  Contraseña {isEditing ? '(dejar vacío para mantener actual)' : '*'}
+                </FormLabel>
+                <Input 
+                  type="password" 
+                  placeholder={isEditing ? "Nueva contraseña (opcional)" : "Contraseña"}
+                  value={formData.password}
+                  onChange={(e) => setFormData({ ...formData, password: e.target.value })}
+                />
+              </FormControl>
+              
+              <FormControl>
+                <FormLabel color="gray.600">Rol *</FormLabel>
+                <Select 
+                  value={formData.role}
+                  onChange={(e) => setFormData({ ...formData, role: e.target.value })}
                 >
-                  {selectedUser ? 'Guardar Cambios' : 'Crear Usuario'}
-                </Button>
-              </Dialog.Footer>
-            </Dialog.Content>
-          </Dialog.Positioner>
-        </Portal>
-      </Dialog.Root>
+                  {roles.map(role => (
+                    <option key={role.value} value={role.value}>
+                      {role.label}
+                    </option>
+                  ))}
+                </Select>
+              </FormControl>
+
+              <HStack width="100%" justify="space-between">
+                <FormControl display="flex" alignItems="center">
+                  <Checkbox
+                    isChecked={formData.is_active}
+                    onChange={(e) => setFormData({ ...formData, is_active: e.target.checked })}
+                    mr={2}
+                  />
+                  <FormLabel mb={0} color="gray.600">Usuario activo</FormLabel>
+                </FormControl>
+
+                <FormControl display="flex" alignItems="center">
+                  <Checkbox
+                    isChecked={formData.is_superuser}
+                    onChange={(e) => setFormData({ ...formData, is_superuser: e.target.checked })}
+                    mr={2}
+                  />
+                  <FormLabel mb={0} color="gray.600">Superusuario</FormLabel>
+                </FormControl>
+              </HStack>
+            </VStack>
+          </ModalBody>
+          <ModalFooter>
+            <Button variant="outline" colorScheme="gray" mr={3} onClick={onClose}>
+              Cancelar
+            </Button>
+            <Button 
+              colorScheme="blue"
+              onClick={handleSaveUser}
+              isLoading={createUserMutation.isPending || updateUserMutation.isPending}
+              leftIcon={<FiSave />}
+              isDisabled={!formData.email || !formData.full_name || (!isEditing && !formData.password)}
+            >
+              {selectedUser ? 'Guardar Cambios' : 'Crear Usuario'}
+            </Button>
+          </ModalFooter>
+        </ModalContent>
+      </Modal>
     </Box>
   )
 }

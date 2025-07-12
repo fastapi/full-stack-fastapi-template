@@ -1,6 +1,6 @@
 import { Outlet, createRootRoute, useNavigate } from "@tanstack/react-router"
 import React, { Suspense, useEffect } from "react"
-import { useUser } from '@clerk/clerk-react'
+import { useAuth } from '@/hooks/useAuth'
 
 import NotFound from "@/components/Common/NotFound"
 import Navbar from "@/components/Common/Navbar"
@@ -26,17 +26,20 @@ const TanStackDevtools =
 
 function RootComponent() {
   const navigate = useNavigate()
-  const { isSignedIn, isLoaded } = useUser()
+  const { isLoaded, isSignedIn, role } = useAuth()
 
   useEffect(() => {
     // Solo redirigir si el usuario se acaba de loguear y está en una página pública
     if (isLoaded && isSignedIn) {
       const currentPath = window.location.pathname
       
-      // Si está en páginas de auth o homepage, redirigir al dashboard
+      // Si está en páginas de auth o homepage, redirigir al dashboard correspondiente
       const authPages = ['/sign-in', '/sign-up', '/login', '/signup', '/']
       if (authPages.includes(currentPath)) {
-        navigate({ to: '/client-dashboard' })
+        // Determinar el dashboard basado en el rol del usuario
+        const adminRoles = ['admin', 'ceo', 'manager', 'hr', 'agent', 'supervisor', 'support']
+        const targetPath = adminRoles.includes(role) ? '/admin' : '/client-dashboard'
+        navigate({ to: targetPath })
       }
     }
   }, [isSignedIn, isLoaded, navigate])

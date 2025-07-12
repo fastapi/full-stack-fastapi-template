@@ -1,0 +1,66 @@
+{
+    "description": "Desarrollo guiado para Genius Industries con reglas específicas de arquitectura y organización",
+    "rules": [
+      {
+        "title": "📦 Estructura del Proyecto",
+        "content": "Backend: `api/routes` (endpoints por dominio), `services` (lógica de negocio), `models.py` (modelos Pydantic), `core` (configuración). Frontend: `client` (API clients por dominio), `components` (UI por dominio), `routes` (páginas por dominio), `hooks` (hooks por dominio), `theme` (estilos Chakra UI), `utils` (utilidades por dominio)."
+      },
+      {
+        "title": "🧩 Flujo de Comunicación",
+        "content": "Siempre seguir Frontend → Backend → Nhost. Nhost → Backend → Frontend. No escribir directamente en Nhost desde frontend excepto para Realtime. Usar la arquitectura de 3 capas estrictamente."
+      },
+      {
+        "title": "🛠️ Backend - Tecnologías",
+        "content": "Usar solo Pydantic (❌ NO ORM como SQLAlchemy/Tortoise). FastAPI para endpoints. Async/await para operaciones asíncronas. Validación con Pydantic. Logging apropiado. Manejo consistente de errores. Gestión de dependencias con `uv`."
+      },
+      {
+        "title": "🎨 Frontend - Tecnologías", 
+        "content": "React con TypeScript. Chakra UI para estilos (mantener theme/ y theme.tsx). React Query para estado y caché. Lazy loading para rutas. Error boundaries. Componentes atómicos. Gestión de dependencias con `npm`."
+      },
+      {
+        "title": "👥 Sistema de Roles",
+        "content": "Roles: CEO (acceso total), Gerente (gestión sucursal), Supervisor (gestión agentes), HR (gestión empleados), Support (atención cliente), Agentes (propiedades/clientes). Implementar guardias de ruta, middleware de roles, validación de permisos en endpoints, UI adaptativa por rol."
+      },
+      {
+        "title": "📁 Organización por Dominio",
+        "content": "Cada módulo debe tener su propia carpeta con todos sus archivos relacionados. Backend: routes/[dominio].py, services/[dominio].py. Frontend: components/[Dominio]/, hooks/use[Dominio].ts, client/[dominio]Api.ts. Mantener separación de responsabilidades clara."
+      },
+      {
+        "title": "🧼 Buenas Prácticas",
+        "content": "Código limpio y modular. Nombres en inglés. No duplicar lógica entre capas. No mezclar UI con lógica de negocio. Documentar funciones públicas. Usar TypeScript estricto. Implementar error handling. Mantener estructura consistente."
+      },
+      {
+        "title": "⚡ Comandos de Desarrollo",
+        "content": "Backend: `uv add [package]` (instalar), `uv sync` (sincronizar), `.venv\\Scripts\\activate` (activar). Frontend: `npm install` (instalar), `npm run dev` (desarrollo), `npm run build` (producción). Usar estos comandos exclusivamente."
+      },
+      {
+        "title": "🚫 Prohibiciones Estrictas",
+        "content": "❌ NO usar ORMs en backend. ❌ NO acceder directamente a Nhost desde frontend (excepto Realtime). ❌ NO crear carpetas fuera del estándar. ❌ NO mezclar capas (UI/lógica/datos). ❌ NO duplicar código entre módulos. ❌ NO ignorar tipado TypeScript. ❌ NO omitir manejo de errores."
+      },
+      {
+        "title": "🔒 Seguridad y Permisos",
+        "content": "Implementar middleware de autenticación. Validar permisos en cada endpoint. Configurar políticas RLS por rol. Auditoría de acciones. Logging de cambios. Guardias de ruta en frontend. Componentes condicionales por rol. Validación de acciones por rol."
+      }
+    ],
+    "additional_context": {
+      "project_type": "Full-stack real estate management platform",
+      "auth_provider": "Clerk",
+      "database": "PostgreSQL + Nhost",
+      "styling": "Chakra UI",
+      "state_management": "React Query",
+      "build_tools": {
+        "backend": "uv (Python package manager)",
+        "frontend": "npm + Vite"
+      },
+      "key_domains": [
+        "authentication",
+        "properties", 
+        "clients",
+        "transactions",
+        "analytics",
+        "legal",
+        "hr",
+        "support"
+      ]
+    }
+  }

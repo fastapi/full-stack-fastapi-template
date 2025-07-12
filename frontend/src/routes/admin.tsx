@@ -1,17 +1,32 @@
-import { createFileRoute } from '@tanstack/react-router'
+import { createFileRoute, useNavigate } from '@tanstack/react-router'
 import { useState } from 'react'
-import { FiUsers, FiSettings, FiBarChart2, FiHome, FiShield, FiTrendingUp, FiActivity, FiChevronRight, FiEye, FiHeadphones, FiUserCheck, FiPlus } from 'react-icons/fi'
-import {
+import { useAuth, type UserRole } from '@/hooks/useAuth'
+import { 
+  FiUsers, 
+  FiSettings, 
+  FiBarChart2, 
+  FiHome, 
+  FiShield, 
+  FiTrendingUp, 
+  FiActivity, 
+  FiChevronRight, 
+  FiEye, 
+  FiHeadphones, 
+  FiUserCheck, 
+  FiPlus 
+} from 'react-icons/fi'
+import { 
   Box,
   VStack,
   HStack,
   Heading,
-  Text,
   Button,
   Grid,
   Flex,
   Icon,
-  Badge
+  Badge,
+  Spinner,
+  Text
 } from '@chakra-ui/react'
 
 // Import existing admin components
@@ -23,6 +38,8 @@ import { SupervisorDashboard } from '../components/Admin/SupervisorDashboard'
 import { SupportDashboard } from '../components/Admin/SupportDashboard'
 import { UserManagement } from '../components/Admin/UserManagement'
 import { PropertyCRM } from '../components/Admin/PropertyCRM'
+import Reports from '../components/Admin/Reports'
+import Settings from '../components/Admin/Settings'
 
 function AdminDashboard() {
   const [activeSection, setActiveSection] = useState('overview')
@@ -39,8 +56,8 @@ function AdminDashboard() {
   const quickActions = [
     { icon: FiPlus, label: 'Agregar Usuario', action: () => setActiveSection('users'), colorScheme: 'green' },
     { icon: FiHome, label: 'CRM Propiedades', action: () => setActiveSection('properties'), colorScheme: 'blue' },
-    { icon: FiBarChart2, label: 'Reportes', action: () => setActiveSection('ceo'), colorScheme: 'purple' },
-    { icon: FiSettings, label: 'Configuración', action: () => {}, colorScheme: 'gray' }
+    { icon: FiBarChart2, label: 'Reportes', action: () => setActiveSection('reports'), colorScheme: 'purple' },
+    { icon: FiSettings, label: 'Configuración', action: () => setActiveSection('settings'), colorScheme: 'gray' }
   ]
 
   const roleManagement = [
@@ -70,6 +87,10 @@ function AdminDashboard() {
         return <UserManagement />
       case 'properties':
         return <PropertyCRM />
+      case 'reports':
+        return <Reports />
+      case 'settings':
+        return <Settings />
       default:
         return (
           <Box p={6}>
@@ -333,6 +354,38 @@ function AdminDashboard() {
   )
 }
 
+// Definir los roles que pueden acceder al panel de administración
+const adminRoles: UserRole[] = ['admin', 'ceo', 'manager', 'hr', 'agent', 'supervisor', 'support']
+
 export const Route = createFileRoute('/admin')({
-  component: AdminDashboard,
+  component: () => {
+    const navigate = useNavigate()
+    const { isLoaded, isSignedIn, hasRole } = useAuth()
+    
+    // Si la autenticación está cargando, mostrar spinner
+    if (!isLoaded) {
+      return (
+        <VStack h="100vh" justify="center" align="center">
+          <Spinner size="xl" color="blue.500" />
+          <Text mt={4} color="gray.600">Cargando panel de administración...</Text>
+        </VStack>
+      )
+    }
+    
+    // Si el usuario no está autenticado, redirigir al login
+    if (!isSignedIn) {
+      navigate({ to: '/sign-in' })
+      return null
+    }
+    
+    // Verificar si el usuario tiene al menos uno de los roles de administrador
+    const hasAdminRole = adminRoles.some(role => hasRole(role))
+    if (!hasAdminRole) {
+      navigate({ to: '/client-dashboard' })
+      return null
+    }
+    
+    // Si el usuario tiene permiso, mostrar el panel de administración
+    return <AdminDashboard />
+  },
 })

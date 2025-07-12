@@ -13,7 +13,7 @@ from fastapi.responses import FileResponse
 from starlette.middleware.cors import CORSMiddleware
 
 # Importar solo módulos existentes
-from .api.routes import properties, users, transactions, credits
+from .api.routes import properties, users, transactions, credits, clerk_webhooks
 from .core.config import settings
 
 warnings.filterwarnings("ignore", message=".*Pydantic.*")
@@ -44,6 +44,9 @@ app.include_router(users.router, prefix=settings.API_V1_STR)
 app.include_router(properties.router, prefix=settings.API_V1_STR)
 app.include_router(transactions.router, prefix=settings.API_V1_STR)
 app.include_router(credits.router, prefix=settings.API_V1_STR)
+
+# Incluir router de webhooks de Clerk
+app.include_router(clerk_webhooks.router, prefix="/api")
 
 # Configurar archivos estáticos del frontend
 static_path = Path("/app/static")

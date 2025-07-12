@@ -1,9 +1,51 @@
 import React, { useState, useEffect } from 'react';
-import { Box, Flex, Heading, Text, Button, Badge, Input, Select } from '@chakra-ui/react';
+// Componentes de Chakra UI
+import { 
+  Box, 
+  Flex, 
+  Heading, 
+  Text, 
+  Button, 
+  Badge, 
+  Input, 
+  Select, 
+  Modal,
+  ModalOverlay,
+  ModalContent,
+  ModalHeader,
+  ModalFooter,
+  ModalBody,
+  ModalCloseButton,
+  FormControl,
+  FormLabel,
+  FormErrorMessage,
+  Textarea,
+  NumberInput,
+  NumberInputField,
+  NumberInputStepper,
+  NumberIncrementStepper,
+  NumberDecrementStepper,
+  SimpleGrid,
+  Tag,
+  TagLabel,
+  TagCloseButton,
+  Switch,
+  Tooltip,
+  IconButton,
+  VStack,
+  HStack,
+  Divider,
+  Progress
+} from '@chakra-ui/react';
+
+// Hooks de Chakra UI
+import { useDisclosure } from '@chakra-ui/hooks';
+import { useToast } from '@chakra-ui/toast';
+import { useColorModeValue } from '@chakra-ui/color-mode';
 import { FiHome, FiMapPin, FiDollarSign, FiUser, FiPhone, FiMail, FiCalendar, FiEdit, FiTrash, FiPlus, FiFilter, FiDownload, FiEye, FiCamera, FiSave } from 'react-icons/fi';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import axios from 'axios';
-import { toaster } from '../../components/ui/toaster';
+// useToast se importa desde @chakra-ui/react
 
 // Configuración de API
 const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:8000';
@@ -125,7 +167,7 @@ export function PropertyCRM() {
   const [isEditing, setIsEditing] = useState(false);
   const [viewMode, setViewMode] = useState<'grid' | 'list' | 'map'>('grid');
   const [currentCurrency, setCurrentCurrency] = useState<'cop' | 'usd' | 'eur'>('cop');
-  const toast = toaster.create;
+  const toast = useToast();
   const queryClient = useQueryClient();
   
   // Filtros

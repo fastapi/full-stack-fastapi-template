@@ -1,4 +1,4 @@
-# 🤖 Reglas de Desarrollo para Cursor IDE – GENIUS INDUSTRIES
+# 🤖 Reglas de Desarrollo – GENIUS INDUSTRIES
 
 ## 📦 Estructura del Proyecto
 
