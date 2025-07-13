@@ -11,4 +11,7 @@ export default defineConfig({
     },
   },
   plugins: [react(), TanStackRouterVite()],
+  server: {
+    allowedHosts: ["counselor-ai.cc", "www.counselor-ai.cc", "localhost", "127.0.0.1"],
+  },
 })

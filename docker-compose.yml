@@ -6,8 +6,8 @@ services:
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER} -d ${POSTGRES_DB}"]
       interval: 10s
-      retries: 5
-      start_period: 30s
+      retries: 10
+      start_period: 60s
       timeout: 10s
     volumes:
       - app-db-data:/var/lib/postgresql/data/pgdata
@@ -26,9 +26,12 @@ services:
       - traefik-public
       - default
     depends_on:
-      - db
+      db:
+        condition: service_healthy
+        restart: true
     environment:
       - ADMINER_DESIGN=pepa-linha-dark
+      - ADMINER_DEFAULT_SERVER=db
     labels:
       - traefik.enable=true
       - traefik.docker.network=traefik-public
@@ -87,6 +90,12 @@ services:
         restart: true
       prestart:
         condition: service_completed_successfully
+      redis:
+        condition: service_healthy
+        restart: true
+      qdrant:
+        condition: service_started
+        restart: true
     env_file:
       - .env
     environment:
@@ -107,12 +116,15 @@ services:
       - POSTGRES_USER=${POSTGRES_USER?Variable not set}
       - POSTGRES_PASSWORD=${POSTGRES_PASSWORD?Variable not set}
       - SENTRY_DSN=${SENTRY_DSN}
+      - QDRANT_URL=http://qdrant:6333
+      - REDIS_URL=redis://redis:6379
 
     healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:8000/api/v1/utils/health-check/"]
-      interval: 10s
-      timeout: 5s
+      test: ["CMD", "curl", "-f", "http://localhost:8000/api/utils/health-check/"]
+      interval: 30s
+      timeout: 10s
       retries: 5
+      start_period: 60s
 
     build:
       context: ./backend
@@ -123,10 +135,10 @@ services:
 
       - traefik.http.services.${STACK_NAME?Variable not set}-backend.loadbalancer.server.port=8000
 
-      - traefik.http.routers.${STACK_NAME?Variable not set}-backend-http.rule=Host(`api.${DOMAIN?Variable not set}`)
+      - traefik.http.routers.${STACK_NAME?Variable not set}-backend-http.rule=Host(`${DOMAIN?Variable not set}`) && PathPrefix(`/api`)
       - traefik.http.routers.${STACK_NAME?Variable not set}-backend-http.entrypoints=http
 
-      - traefik.http.routers.${STACK_NAME?Variable not set}-backend-https.rule=Host(`api.${DOMAIN?Variable not set}`)
+      - traefik.http.routers.${STACK_NAME?Variable not set}-backend-https.rule=Host(`${DOMAIN?Variable not set}`) && PathPrefix(`/api`)
       - traefik.http.routers.${STACK_NAME?Variable not set}-backend-https.entrypoints=https
       - traefik.http.routers.${STACK_NAME?Variable not set}-backend-https.tls=true
       - traefik.http.routers.${STACK_NAME?Variable not set}-backend-https.tls.certresolver=le
@@ -143,7 +155,7 @@ services:
     build:
       context: ./frontend
       args:
-        - VITE_API_URL=https://api.${DOMAIN?Variable not set}
+        - VITE_API_URL=http://${DOMAIN?Variable not set}:8010/api
         - NODE_ENV=production
     labels:
       - traefik.enable=true
@@ -152,18 +164,149 @@ services:
 
       - traefik.http.services.${STACK_NAME?Variable not set}-frontend.loadbalancer.server.port=80
 
-      - traefik.http.routers.${STACK_NAME?Variable not set}-frontend-http.rule=Host(`dashboard.${DOMAIN?Variable not set}`)
+      - traefik.http.routers.${STACK_NAME?Variable not set}-frontend-http.rule=Host(`${DOMAIN?Variable not set}`)
       - traefik.http.routers.${STACK_NAME?Variable not set}-frontend-http.entrypoints=http
 
-      - traefik.http.routers.${STACK_NAME?Variable not set}-frontend-https.rule=Host(`dashboard.${DOMAIN?Variable not set}`)
+      - traefik.http.routers.${STACK_NAME?Variable not set}-frontend-https.rule=Host(`${DOMAIN?Variable not set}`)
       - traefik.http.routers.${STACK_NAME?Variable not set}-frontend-https.entrypoints=https
       - traefik.http.routers.${STACK_NAME?Variable not set}-frontend-https.tls=true
       - traefik.http.routers.${STACK_NAME?Variable not set}-frontend-https.tls.certresolver=le
 
       # Enable redirection for HTTP and HTTPS
       - traefik.http.routers.${STACK_NAME?Variable not set}-frontend-http.middlewares=https-redirect
+
+
+
+  # Qdrant Vector Database for Enhanced RAG
+  qdrant:
+    image: qdrant/qdrant:latest
+    restart: always
+    networks:
+      - traefik-public
+      - default
+    volumes:
+      - qdrant-data:/qdrant/storage
+    ports:
+      - "6333:6333"
+      - "6334:6334"
+    environment:
+      - QDRANT__SERVICE__HTTP_PORT=6333
+      - QDRANT__SERVICE__GRPC_PORT=6334
+      - QDRANT__LOG_LEVEL=INFO
+
+
+  # Redis for caching and session management
+  redis:
+    image: redis:7-alpine
+    restart: always
+    networks:
+      - traefik-public
+      - default
+    volumes:
+      - redis-data:/data
+    ports:
+      - "6379:6379"
+    command: redis-server --appendonly yes --maxmemory 512mb --maxmemory-policy allkeys-lru
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 30s
+
+  # Celery Worker for background RAG processing
+  celery-worker:
+    image: '${DOCKER_IMAGE_BACKEND?Variable not set}:${TAG-latest}'
+    restart: always
+    networks:
+      - traefik-public
+      - default
+    depends_on:
+      db:
+        condition: service_healthy
+        restart: true
+      redis:
+        condition: service_healthy
+        restart: true
+      qdrant:
+        condition: service_started
+        restart: true
+    command: bash -c "cd /app && export PYTHONPATH=/app && celery -A app.celery_app worker --loglevel=info --concurrency=2"
+    env_file:
+      - .env
+    environment:
+      - DOMAIN=${DOMAIN}
+      - ENVIRONMENT=${ENVIRONMENT}
+      - POSTGRES_SERVER=db
+      - POSTGRES_PORT=${POSTGRES_PORT}
+      - POSTGRES_DB=${POSTGRES_DB}
+      - POSTGRES_USER=${POSTGRES_USER?Variable not set}
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD?Variable not set}
+      - REDIS_URL=redis://redis:6379/0
+      - QDRANT_URL=http://qdrant:6333
+    volumes:
+      - app-uploads:/app/uploads
+    build:
+      context: ./backend
+
+  # Celery Beat for scheduled tasks
+  celery-beat:
+    image: '${DOCKER_IMAGE_BACKEND?Variable not set}:${TAG-latest}'
+    restart: always
+    networks:
+      - traefik-public
+      - default
+    depends_on:
+      db:
+        condition: service_healthy
+        restart: true
+      redis:
+        condition: service_healthy
+        restart: true
+    command: bash -c "cd /app && export PYTHONPATH=/app && celery -A app.celery_app beat --loglevel=info"
+    env_file:
+      - .env
+    environment:
+      - DOMAIN=${DOMAIN}
+      - ENVIRONMENT=${ENVIRONMENT}
+      - POSTGRES_SERVER=db
+      - POSTGRES_PORT=${POSTGRES_PORT}
+      - POSTGRES_DB=${POSTGRES_DB}
+      - POSTGRES_USER=${POSTGRES_USER?Variable not set}
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD?Variable not set}
+      - REDIS_URL=redis://redis:6379/0
+      - QDRANT_URL=http://qdrant:6333
+    build:
+      context: ./backend
+
+  # Flower for Celery monitoring (optional)
+  flower:
+    image: '${DOCKER_IMAGE_BACKEND?Variable not set}:${TAG-latest}'
+    restart: always
+    networks:
+      - traefik-public
+      - default
+    depends_on:
+      redis:
+        condition: service_healthy
+        restart: true
+      celery-worker:
+        condition: service_started
+    command: bash -c "cd /app && export PYTHONPATH=/app && celery -A app.celery_app flower --port=5555"
+    ports:
+      - "5555:5555"
+    env_file:
+      - .env
+    environment:
+      - REDIS_URL=redis://redis:6379/0
+    build:
+      context: ./backend
+
 volumes:
   app-db-data:
+  qdrant-data:
+  redis-data:
+  app-uploads:
 
 networks:
   traefik-public:

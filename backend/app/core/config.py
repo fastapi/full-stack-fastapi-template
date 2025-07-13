@@ -51,7 +51,7 @@ class Settings(BaseSettings):
 
     PROJECT_NAME: str
     SENTRY_DSN: HttpUrl | None = None
-    POSTGRES_SERVER: str
+    POSTGRES_SERVER: str = "db"
     POSTGRES_PORT: int = 5432
     POSTGRES_USER: str
     POSTGRES_PASSWORD: str = ""
@@ -94,6 +94,38 @@ class Settings(BaseSettings):
     EMAIL_TEST_USER: EmailStr = "test@example.com"
     FIRST_SUPERUSER: EmailStr
     FIRST_SUPERUSER_PASSWORD: str
+
+    # OpenAI Configuration
+    OPENAI_API_KEY: str | None = None
+    
+    # Cohere Configuration
+    COHERE_API_KEY: str | None = None
+    COHERE_CHAT_MODEL: str = "command-r-plus"
+    COHERE_EMBED_MODEL: str = "embed-english-v3.0"
+
+    # Qdrant Configuration
+    QDRANT_URL: str = "http://qdrant:6333"
+
+    # Redis Configuration
+    REDIS_URL: str = "redis://redis:6379"
+
+    # File Upload Settings
+    MAX_FILE_SIZE_MB: int = 10
+    MAX_UPLOAD_SIZE: int = 10 * 1024 * 1024  # 10MB in bytes
+    UPLOAD_DIR: str = "./uploads"
+
+    # RAG Settings
+    CHUNK_SIZE: int = 1000
+    CHUNK_OVERLAP: int = 200
+    SIMILARITY_THRESHOLD: float = 0.7
+    MAX_CONTEXT_TOKENS: int = 8000
+
+    # Content Filtering
+    CONTENT_FILTER_ENABLED: bool = True
+    CRISIS_RESOURCES_ENABLED: bool = True
+
+    # Analytics
+    ANALYTICS_ENABLED: bool = True
 
     def _check_default_secret(self, var_name: str, value: str | None) -> None:
         if value == "changethis":

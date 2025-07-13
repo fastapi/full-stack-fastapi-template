@@ -12,7 +12,9 @@
   },
   "dependencies": {
     "@chakra-ui/react": "^3.8.0",
+    "@chakra-ui/toast": "^7.0.2",
     "@emotion/react": "^11.14.0",
+    "@radix-ui/react-dialog": "^1.1.14",
     "@tanstack/react-query": "^5.28.14",
     "@tanstack/react-query-devtools": "^5.74.9",
     "@tanstack/react-router": "1.19.1",

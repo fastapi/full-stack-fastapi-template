@@ -18,7 +18,7 @@ const usersSearchSchema = z.object({
   page: z.number().catch(1),
 })
 
-const PER_PAGE = 5
+const PER_PAGE = 15
 
 function getUsersQueryOptions({ page }: { page: number }) {
   return {
@@ -83,7 +83,7 @@ function UsersTable() {
                 {user.email}
               </Table.Cell>
               <Table.Cell>
-                {user.is_superuser ? "Superuser" : "User"}
+                {formatRole(user)}
               </Table.Cell>
               <Table.Cell>{user.is_active ? "Active" : "Inactive"}</Table.Cell>
               <Table.Cell>
@@ -116,12 +116,42 @@ function UsersTable() {
 function Admin() {
   return (
     <Container maxW="full">
-      <Heading size="lg" pt={12}>
+      <Heading size="lg" pt={12} mb={6}>
         Users Management
       </Heading>
 
-      <AddUser />
+      <Flex justify="space-between" align="center" mb={6}>
+        <AddUser />
+      </Flex>
+      
       <UsersTable />
     </Container>
   )
+}
+
+// Helper function to format role display
+const formatRole = (user: UserPublic) => {
+  // Check superuser first
+  if (user.is_superuser) {
+    return "Administrator"
+  }
+  
+  // Use the role field and properly capitalize it
+  const role = user.role || "user"
+  
+  // Handle special cases
+  switch (role.toLowerCase()) {
+    case "admin":
+    case "super_admin":
+      return "Administrator"
+    case "trainer":
+      return "Trainer"
+    case "counselor":
+      return "Counselor"
+    case "user":
+      return "User"
+    default:
+      // Fallback: capitalize first letter
+      return role.charAt(0).toUpperCase() + role.slice(1)
+  }
 }

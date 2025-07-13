@@ -1,0 +1,15 @@
+{
+  "dependencies": {
+    "@chakra-ui/icons": "^1.1.7",
+    "@chakra-ui/next-js": "^2.4.2",
+    "@chakra-ui/react": "^1.8.9",
+    "@chakra-ui/system": "^2.6.2",
+    "@chakra-ui/theme": "^3.3.1",
+    "@chakra-ui/theme-tools": "^2.2.6",
+    "@emotion/react": "^11.11.1",
+    "@emotion/styled": "^11.11.0",
+    "@types/react-router-dom": "^5.3.3",
+    "framer-motion": "^6.5.1",
+    "react-router-dom": "^7.6.3"
+  }
+}

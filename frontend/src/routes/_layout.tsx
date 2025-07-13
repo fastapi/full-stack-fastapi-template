@@ -1,32 +1,42 @@
-import { Flex } from "@chakra-ui/react"
+import { Box, Container } from "@chakra-ui/react"
 import { Outlet, createFileRoute, redirect } from "@tanstack/react-router"
-
-import Navbar from "@/components/Common/Navbar"
-import Sidebar from "@/components/Common/Sidebar"
-import { isLoggedIn } from "@/hooks/useAuth"
+import React from "react"
+import Navbar from "../components/Common/Navbar"
+import Sidebar from "../components/Common/Sidebar"
+import { isLoggedIn } from "../hooks/useAuth"
 
 export const Route = createFileRoute("/_layout")({
-  component: Layout,
-  beforeLoad: async () => {
+  beforeLoad: ({ location }: { location: any }) => {
     if (!isLoggedIn()) {
       throw redirect({
         to: "/login",
+        search: {
+          redirect: location.href,
+        },
       })
     }
   },
+  component: Layout,
 })
 
 function Layout() {
   return (
-    <Flex direction="column" h="100vh">
+    <Box minH="100vh" bg="gray.50" _dark={{ bg: "gray.900" }}>
       <Navbar />
-      <Flex flex="1" overflow="hidden">
+      <Box display="flex" pt="4rem">
         <Sidebar />
-        <Flex flex="1" direction="column" p={4} overflowY="auto">
-          <Outlet />
-        </Flex>
-      </Flex>
-    </Flex>
+        <Box
+          as="main"
+          flex="1"
+          ml={{ base: 0, md: "16rem" }}
+          transition=".3s ease"
+        >
+          <Container maxW="full" p={0}>
+            <Outlet />
+          </Container>
+        </Box>
+      </Box>
+    </Box>
   )
 }
 

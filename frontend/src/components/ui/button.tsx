@@ -16,9 +16,33 @@ export interface ButtonProps extends ChakraButtonProps, ButtonLoadingProps {}
 
 export const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
   function Button(props, ref) {
-    const { loading, disabled, loadingText, children, ...rest } = props
+    const {
+      loading,
+      disabled,
+      loadingText,
+      children,
+      variant = "solid",
+      colorScheme = "teal",
+      size = "md",
+      ...rest
+    } = props
+
     return (
-      <ChakraButton disabled={loading || disabled} ref={ref} {...rest}>
+      <ChakraButton
+        disabled={loading || disabled}
+        ref={ref}
+        variant={variant}
+        colorScheme={colorScheme}
+        size={size}
+        _hover={{
+          transform: "translateY(-1px)",
+        }}
+        _active={{
+          transform: "translateY(0)",
+        }}
+        transition="all 0.2s"
+        {...rest}
+      >
         {loading && !loadingText ? (
           <>
             <AbsoluteCenter display="inline-flex">
@@ -28,7 +52,7 @@ export const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
           </>
         ) : loading && loadingText ? (
           <>
-            <Spinner size="inherit" color="inherit" />
+            <Spinner size="inherit" color="inherit" mr={2} />
             {loadingText}
           </>
         ) : (

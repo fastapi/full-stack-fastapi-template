@@ -4,3 +4,13 @@ node_modules/
 /playwright-report/
 /blob-report/
 /playwright/.cache/
+scripts/
+.env
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+.env.development
+.env.test
+.env.production
+.DS_Store

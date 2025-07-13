@@ -1,3 +1,4 @@
+import { z } from "zod"
 import type { ApiError } from "./client"
 import useCustomToast from "./hooks/useCustomToast"
 
@@ -11,38 +12,24 @@ export const namePattern = {
   message: "Invalid name",
 }
 
-export const passwordRules = (isRequired = true) => {
-  const rules: any = {
-    minLength: {
-      value: 8,
-      message: "Password must be at least 8 characters",
-    },
-  }
+export const passwordRules = () => ({
+  required: "Password is required",
+  minLength: {
+    value: 8,
+    message: "Password must be at least 8 characters",
+  },
+  pattern: {
+    value: /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]+$/,
+    message:
+      "Password must contain at least one uppercase letter, one lowercase letter, one number and one special character",
+  },
+})
 
-  if (isRequired) {
-    rules.required = "Password is required"
-  }
-
-  return rules
-}
-
-export const confirmPasswordRules = (
-  getValues: () => any,
-  isRequired = true,
-) => {
-  const rules: any = {
-    validate: (value: string) => {
-      const password = getValues().password || getValues().new_password
-      return value === password ? true : "The passwords do not match"
-    },
-  }
-
-  if (isRequired) {
-    rules.required = "Password confirmation is required"
-  }
-
-  return rules
-}
+export const confirmPasswordRules = (getValues: any) => ({
+  required: "Please confirm your password",
+  validate: (value: string) =>
+    value === getValues("password") || "The passwords do not match",
+})
 
 export const handleError = (err: ApiError) => {
   const { showErrorToast } = useCustomToast()
@@ -52,4 +39,8 @@ export const handleError = (err: ApiError) => {
     errorMessage = errDetail[0].msg
   }
   showErrorToast(errorMessage)
+}
+
+export const isAdmin = (user: any) => {
+  return user?.is_superuser === true
 }

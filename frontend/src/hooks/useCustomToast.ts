@@ -1,25 +1,57 @@
 "use client"
 
-import { toaster } from "@/components/ui/toaster"
+import { useToast } from "@chakra-ui/toast"
+import type { UseToastOptions } from "@chakra-ui/toast"
 
-const useCustomToast = () => {
-  const showSuccessToast = (description: string) => {
-    toaster.create({
-      title: "Success!",
-      description,
-      type: "success",
-    })
+export function useCustomToast() {
+  const toast = useToast()
+
+  const defaultOptions: UseToastOptions = {
+    duration: 3000,
+    isClosable: true,
+    position: "top",
   }
 
-  const showErrorToast = (description: string) => {
-    toaster.create({
-      title: "Something went wrong!",
-      description,
-      type: "error",
+  const success = (message: string, options: UseToastOptions = {}) =>
+    toast({
+      ...defaultOptions,
+      ...options,
+      title: message,
+      status: "success",
     })
-  }
 
-  return { showSuccessToast, showErrorToast }
+  const error = (message: string, options: UseToastOptions = {}) =>
+    toast({
+      ...defaultOptions,
+      ...options,
+      title: message,
+      status: "error",
+    })
+
+  const warning = (message: string, options: UseToastOptions = {}) =>
+    toast({
+      ...defaultOptions,
+      ...options,
+      title: message,
+      status: "warning",
+    })
+
+  const info = (message: string, options: UseToastOptions = {}) =>
+    toast({
+      ...defaultOptions,
+      ...options,
+      title: message,
+      status: "info",
+    })
+
+  return {
+    success,
+    error,
+    warning,
+    info,
+    showSuccessToast: success,
+    showErrorToast: error,
+  }
 }
 
 export default useCustomToast

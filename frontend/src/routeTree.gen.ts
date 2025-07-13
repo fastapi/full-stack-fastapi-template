@@ -17,9 +17,18 @@ import { Route as RecoverPasswordImport } from './routes/recover-password'
 import { Route as LoginImport } from './routes/login'
 import { Route as LayoutImport } from './routes/_layout'
 import { Route as LayoutIndexImport } from './routes/_layout/index'
+import { Route as LayoutTrainingDocumentsImport } from './routes/_layout/training-documents'
+import { Route as LayoutTrainingImport } from './routes/_layout/training'
 import { Route as LayoutSettingsImport } from './routes/_layout/settings'
 import { Route as LayoutItemsImport } from './routes/_layout/items'
+import { Route as LayoutDocumentsImport } from './routes/_layout/documents'
+import { Route as LayoutCreateSoulImport } from './routes/_layout/create-soul'
+import { Route as LayoutCounselorImport } from './routes/_layout/counselor'
+import { Route as LayoutChatImport } from './routes/_layout/chat'
+import { Route as LayoutAiSoulsImport } from './routes/_layout/ai-souls'
+import { Route as LayoutAdvancedRagImport } from './routes/_layout/advanced-rag'
 import { Route as LayoutAdminImport } from './routes/_layout/admin'
+import { Route as LayoutAiSoulsEditIdImport } from './routes/_layout/ai-souls-edit.$id'
 
 // Create/Update Routes
 
@@ -53,6 +62,16 @@ const LayoutIndexRoute = LayoutIndexImport.update({
   getParentRoute: () => LayoutRoute,
 } as any)
 
+const LayoutTrainingDocumentsRoute = LayoutTrainingDocumentsImport.update({
+  path: '/training-documents',
+  getParentRoute: () => LayoutRoute,
+} as any)
+
+const LayoutTrainingRoute = LayoutTrainingImport.update({
+  path: '/training',
+  getParentRoute: () => LayoutRoute,
+} as any)
+
 const LayoutSettingsRoute = LayoutSettingsImport.update({
   path: '/settings',
   getParentRoute: () => LayoutRoute,
@@ -63,8 +82,43 @@ const LayoutItemsRoute = LayoutItemsImport.update({
   getParentRoute: () => LayoutRoute,
 } as any)
 
+const LayoutDocumentsRoute = LayoutDocumentsImport.update({
+  path: '/documents',
+  getParentRoute: () => LayoutRoute,
+} as any)
+
+const LayoutCreateSoulRoute = LayoutCreateSoulImport.update({
+  path: '/create-soul',
+  getParentRoute: () => LayoutRoute,
+} as any)
+
+const LayoutCounselorRoute = LayoutCounselorImport.update({
+  path: '/counselor',
+  getParentRoute: () => LayoutRoute,
+} as any)
+
+const LayoutChatRoute = LayoutChatImport.update({
+  path: '/chat',
+  getParentRoute: () => LayoutRoute,
+} as any)
+
+const LayoutAiSoulsRoute = LayoutAiSoulsImport.update({
+  path: '/ai-souls',
+  getParentRoute: () => LayoutRoute,
+} as any)
+
+const LayoutAdvancedRagRoute = LayoutAdvancedRagImport.update({
+  path: '/advanced-rag',
+  getParentRoute: () => LayoutRoute,
+} as any)
+
 const LayoutAdminRoute = LayoutAdminImport.update({
   path: '/admin',
+  getParentRoute: () => LayoutRoute,
+} as any)
+
+const LayoutAiSoulsEditIdRoute = LayoutAiSoulsEditIdImport.update({
+  path: '/ai-souls-edit/$id',
   getParentRoute: () => LayoutRoute,
 } as any)
 
@@ -96,6 +150,30 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof LayoutAdminImport
       parentRoute: typeof LayoutImport
     }
+    '/_layout/advanced-rag': {
+      preLoaderRoute: typeof LayoutAdvancedRagImport
+      parentRoute: typeof LayoutImport
+    }
+    '/_layout/ai-souls': {
+      preLoaderRoute: typeof LayoutAiSoulsImport
+      parentRoute: typeof LayoutImport
+    }
+    '/_layout/chat': {
+      preLoaderRoute: typeof LayoutChatImport
+      parentRoute: typeof LayoutImport
+    }
+    '/_layout/counselor': {
+      preLoaderRoute: typeof LayoutCounselorImport
+      parentRoute: typeof LayoutImport
+    }
+    '/_layout/create-soul': {
+      preLoaderRoute: typeof LayoutCreateSoulImport
+      parentRoute: typeof LayoutImport
+    }
+    '/_layout/documents': {
+      preLoaderRoute: typeof LayoutDocumentsImport
+      parentRoute: typeof LayoutImport
+    }
     '/_layout/items': {
       preLoaderRoute: typeof LayoutItemsImport
       parentRoute: typeof LayoutImport
@@ -104,8 +182,20 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof LayoutSettingsImport
       parentRoute: typeof LayoutImport
     }
+    '/_layout/training': {
+      preLoaderRoute: typeof LayoutTrainingImport
+      parentRoute: typeof LayoutImport
+    }
+    '/_layout/training-documents': {
+      preLoaderRoute: typeof LayoutTrainingDocumentsImport
+      parentRoute: typeof LayoutImport
+    }
     '/_layout/': {
       preLoaderRoute: typeof LayoutIndexImport
+      parentRoute: typeof LayoutImport
+    }
+    '/_layout/ai-souls-edit/$id': {
+      preLoaderRoute: typeof LayoutAiSoulsEditIdImport
       parentRoute: typeof LayoutImport
     }
   }
@@ -116,9 +206,18 @@ declare module '@tanstack/react-router' {
 export const routeTree = rootRoute.addChildren([
   LayoutRoute.addChildren([
     LayoutAdminRoute,
+    LayoutAdvancedRagRoute,
+    LayoutAiSoulsRoute,
+    LayoutChatRoute,
+    LayoutCounselorRoute,
+    LayoutCreateSoulRoute,
+    LayoutDocumentsRoute,
     LayoutItemsRoute,
     LayoutSettingsRoute,
+    LayoutTrainingRoute,
+    LayoutTrainingDocumentsRoute,
     LayoutIndexRoute,
+    LayoutAiSoulsEditIdRoute,
   ]),
   LoginRoute,
   RecoverPasswordRoute,

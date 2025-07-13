@@ -8,7 +8,8 @@ from app.core.config import settings
 
 
 def custom_generate_unique_id(route: APIRoute) -> str:
-    return f"{route.tags[0]}-{route.name}"
+    tag = route.tags[0] if route.tags else "untagged"
+    return f"{tag}-{route.name}"
 
 
 if settings.SENTRY_DSN and settings.ENVIRONMENT != "local":
@@ -29,5 +30,13 @@ if settings.all_cors_origins:
         allow_methods=["*"],
         allow_headers=["*"],
     )
+
+# Add health check endpoint
+@app.get("/api/utils/health-check/")
+async def health_check() -> dict:
+    """
+    Health check endpoint to verify the service is running.
+    """
+    return {"status": "ok"}
 
 app.include_router(api_router, prefix=settings.API_V1_STR)

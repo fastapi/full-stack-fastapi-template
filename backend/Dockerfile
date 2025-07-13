@@ -1,43 +1,33 @@
-FROM python:3.10
+FROM python:3.10 as dev
 
 ENV PYTHONUNBUFFERED=1
 
 WORKDIR /app/
 
-# Install uv
-# Ref: https://docs.astral.sh/uv/guides/integration/docker/#installing-uv
-COPY --from=ghcr.io/astral-sh/uv:0.5.11 /uv /uvx /bin/
+# Install build dependencies
+RUN apt-get update && apt-get install -y \
+    build-essential \
+    curl \
+    libpq-dev \
+    python3-dev \
+    && rm -rf /var/lib/apt/lists/*
 
-# Place executables in the environment at the front of the path
-# Ref: https://docs.astral.sh/uv/guides/integration/docker/#using-the-environment
-ENV PATH="/app/.venv/bin:$PATH"
+# Copy dependency files
+COPY ./pyproject.toml ./alembic.ini /app/
 
-# Compile bytecode
-# Ref: https://docs.astral.sh/uv/guides/integration/docker/#compiling-bytecode
-ENV UV_COMPILE_BYTECODE=1
+# Install pip and build tools
+RUN pip install --no-cache-dir pip setuptools wheel hatchling
 
-# uv Cache
-# Ref: https://docs.astral.sh/uv/guides/integration/docker/#caching
-ENV UV_LINK_MODE=copy
+# Copy application code
+COPY ./app /app/app
+COPY ./scripts /app/scripts
 
-# Install dependencies
-# Ref: https://docs.astral.sh/uv/guides/integration/docker/#intermediate-layers
-RUN --mount=type=cache,target=/root/.cache/uv \
-    --mount=type=bind,source=uv.lock,target=uv.lock \
-    --mount=type=bind,source=pyproject.toml,target=pyproject.toml \
-    uv sync --frozen --no-install-project
+# Install the package and its dependencies
+RUN pip install --no-cache-dir .
 
 ENV PYTHONPATH=/app
 
-COPY ./scripts /app/scripts
+# Make scripts executable
+RUN chmod +x /app/scripts/prestart.sh
 
-COPY ./pyproject.toml ./uv.lock ./alembic.ini /app/
-
-COPY ./app /app/app
-
-# Sync the project
-# Ref: https://docs.astral.sh/uv/guides/integration/docker/#intermediate-layers
-RUN --mount=type=cache,target=/root/.cache/uv \
-    uv sync
-
-CMD ["fastapi", "run", "--workers", "4", "app/main.py"]
+CMD ["uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8000", "--reload"]
