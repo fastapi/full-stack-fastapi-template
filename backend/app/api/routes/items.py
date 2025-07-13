@@ -2,7 +2,7 @@ import uuid
 from typing import Any
 
 from fastapi import APIRouter, HTTPException
-from sqlmodel import func, select
+from sqlmodel import func, select, or_
 
 from app.api.deps import CurrentUser, SessionDep
 from app.models import Item, ItemCreate, ItemPublic, ItemsPublic, ItemUpdate, Message
@@ -12,31 +12,45 @@ router = APIRouter(prefix="/items", tags=["items"])
 
 @router.get("/", response_model=ItemsPublic)
 def read_items(
-    session: SessionDep, current_user: CurrentUser, skip: int = 0, limit: int = 100
+    session: SessionDep,
+    current_user: CurrentUser,
+    skip: int = 0,
+    limit: int = 100,
+    search: str | None = None
 ) -> Any:
     """
     Retrieve items.
     """
 
     if current_user.is_superuser:
+        query = select(Item)
         count_statement = select(func.count()).select_from(Item)
-        count = session.exec(count_statement).one()
         statement = select(Item).offset(skip).limit(limit)
-        items = session.exec(statement).all()
     else:
+        query = select(Item).where(Item.owner_id == current_user.id)
         count_statement = (
             select(func.count())
             .select_from(Item)
             .where(Item.owner_id == current_user.id)
         )
-        count = session.exec(count_statement).one()
+        
         statement = (
             select(Item)
             .where(Item.owner_id == current_user.id)
             .offset(skip)
             .limit(limit)
         )
-        items = session.exec(statement).all()
+        
+    
+    if search:
+        search_filter = or_(
+            Item.title.contains(search, autoescape=True),
+            Item.description.contains(search, autoescape=True),
+        )
+        query = query.where(search_filter)
+        count_statement = count_statement.where(search_filter)
+    count = session.exec(count_statement).one()
+    items = session.exec(query.offset(skip).limit(limit)).all()
 
     return ItemsPublic(data=items, count=count)
 
