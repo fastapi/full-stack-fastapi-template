@@ -44,8 +44,8 @@ def read_items(
     
     if search:
         search_filter = or_(
-            Item.title.contains(search, autoescape=True),
-            Item.description.contains(search, autoescape=True),
+            Item.title.contains(search, autoescape=True), # type: ignore
+            Item.description.contains(search, autoescape=True), # type: ignore
         )
         query = query.where(search_filter)
         count_statement = count_statement.where(search_filter)
