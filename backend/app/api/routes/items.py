@@ -25,7 +25,6 @@ def read_items(
     if current_user.is_superuser:
         query = select(Item)
         count_statement = select(func.count()).select_from(Item)
-        statement = select(Item).offset(skip).limit(limit)
     else:
         query = select(Item).where(Item.owner_id == current_user.id)
         count_statement = (
@@ -33,19 +32,11 @@ def read_items(
             .select_from(Item)
             .where(Item.owner_id == current_user.id)
         )
-        
-        statement = (
-            select(Item)
-            .where(Item.owner_id == current_user.id)
-            .offset(skip)
-            .limit(limit)
-        )
-        
-    
+
     if search:
         search_filter = or_(
-            Item.title.contains(search, autoescape=True), # type: ignore
-            Item.description.contains(search, autoescape=True), # type: ignore
+            Item.title.contains(search, autoescape=True),  # type: ignore
+            Item.description.contains(search, autoescape=True),  # type: ignore
         )
         query = query.where(search_filter)
         count_statement = count_statement.where(search_filter)
