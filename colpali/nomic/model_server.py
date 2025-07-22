@@ -4,6 +4,7 @@ A FastAPI server that loads the ColQwen2.5 model once and provides embedding end
 This prevents the need to reload the model on every script execution.
 """
 
+import logging
 from contextlib import asynccontextmanager
 from fastapi import FastAPI, HTTPException
 from pydantic import BaseModel
@@ -16,6 +17,17 @@ import base64
 from io import BytesIO
 from PIL import Image
 
+# Configure logging
+logging.basicConfig(
+    level=logging.INFO,
+    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
+    handlers=[
+        logging.StreamHandler(),
+        logging.FileHandler('model_server.log')
+    ]
+)
+logger = logging.getLogger(__name__)
+
 # Global model variables
 colqwen_model = None
 colqwen_processor = None
@@ -26,24 +38,34 @@ async def lifespan(app: FastAPI) -> AsyncIterator[None]:
     global colqwen_model, colqwen_processor
     
     # Startup
-    print("Loading ColQwen2.5 model...")
-    colqwen_model = ColQwen2_5.from_pretrained(
-        "nomic-ai/colnomic-embed-multimodal-3b",
-        torch_dtype=torch.bfloat16,
-        device_map="cuda:0" if torch.cuda.is_available() else "cpu"
-    ).eval()
+    logger.info("Starting model server - Loading ColQwen2.5 model...")
+    device = "cuda:0" if torch.cuda.is_available() else "cpu"
+    logger.info(f"Using device: {device}")
     
-    colqwen_processor = ColQwen2_5_Processor.from_pretrained("nomic-ai/colnomic-embed-multimodal-3b")
-    print("Model loaded successfully!")
+    try:
+        colqwen_model = ColQwen2_5.from_pretrained(
+            "nomic-ai/colnomic-embed-multimodal-3b",
+            torch_dtype=torch.bfloat16,
+            device_map=device
+        ).eval()
+        
+        colqwen_processor = ColQwen2_5_Processor.from_pretrained("nomic-ai/colnomic-embed-multimodal-3b")
+        logger.info("Model loaded successfully!")
+    except Exception as e:
+        logger.error(f"Failed to load model: {str(e)}")
+        raise
     
     yield  # This is where the application runs
     
     # Shutdown
+    logger.info("Shutting down model server...")
     if colqwen_model is not None:
         del colqwen_model
         if torch.cuda.is_available():
             torch.cuda.empty_cache()
-    print("Model unloaded successfully!")
+        logger.info("Model unloaded successfully!")
+    else:
+        logger.warning("Model was not loaded during shutdown")
 
 app = FastAPI(
     title="ColNomic Model Server",
@@ -79,16 +101,28 @@ def base64_to_pil(base64_string: str) -> Image.Image:
 @app.get("/health")
 async def health_check():
     """Health check endpoint."""
-    return {
-        "status": "healthy",
-        "model_loaded": colqwen_model is not None,
+    logger.debug("Health check requested")
+    
+    model_loaded = colqwen_model is not None and colqwen_processor is not None
+    if not model_loaded:
+        logger.warning("Health check failed - model not loaded")
+    
+    response = {
+        "status": "healthy" if model_loaded else "unhealthy",
+        "model_loaded": model_loaded,
         "device": str(colqwen_model.device) if colqwen_model else None
     }
+    
+    logger.debug(f"Health check response: {response}")
+    return response
 
 @app.post("/embed/images", response_model=EmbedImagesResponse)
 async def embed_images(request: EmbedImagesRequest):
     """Embed images and return original embeddings plus mean pooled versions."""
+    logger.info(f"Processing image embedding request for {len(request.images)} images")
+    
     if colqwen_model is None or colqwen_processor is None:
+        logger.error("Model not loaded when trying to embed images")
         raise HTTPException(status_code=503, detail="Model not loaded")
     
     try:
@@ -130,6 +164,7 @@ async def embed_images(request: EmbedImagesRequest):
             pooled_by_rows_batch.append(pooled_by_rows_with_context.cpu().float().numpy().tolist())
             pooled_by_columns_batch.append(pooled_by_columns_with_context.cpu().float().numpy().tolist())
 
+        logger.info(f"Successfully processed {len(request.images)} images for embedding")
         return EmbedImagesResponse(
             original_embeddings=image_embeddings_batch,
             pooled_by_rows=pooled_by_rows_batch,
@@ -137,12 +172,16 @@ async def embed_images(request: EmbedImagesRequest):
         )
         
     except Exception as e:
+        logger.error(f"Error processing images: {str(e)}")
         raise HTTPException(status_code=500, detail=f"Error processing images: {str(e)}")
 
 @app.post("/embed/queries", response_model=EmbedQueriesResponse)
 async def embed_queries(request: EmbedQueriesRequest):
     """Embed text queries."""
+    logger.info(f"Processing query embedding request for {len(request.queries)} queries")
+    
     if colqwen_model is None or colqwen_processor is None:
+        logger.error("Model not loaded when trying to embed queries")
         raise HTTPException(status_code=503, detail="Model not loaded")
     
     try:
@@ -152,10 +191,13 @@ async def embed_queries(request: EmbedQueriesRequest):
         
         embeddings = query_embeddings_batch.cpu().float().numpy().tolist()
         
+        logger.info(f"Successfully processed {len(request.queries)} queries for embedding")
         return EmbedQueriesResponse(embeddings=embeddings)
         
     except Exception as e:
+        logger.error(f"Error processing queries: {str(e)}")
         raise HTTPException(status_code=500, detail=f"Error processing queries: {str(e)}")
 
 if __name__ == "__main__":
+    logger.info("Starting ColNomic Model Server on host=0.0.0.0, port=8001")
     uvicorn.run(app, host="0.0.0.0", port=8001)
