@@ -1,13 +1,10 @@
-# qdrant-client
-# datasets
-# huggingface_hub[hf_transfer]
-# streamlit
-# PyMuPDF
-# Pillow
 colpali_engine
 datasets
 huggingface_hub[hf_transfer]
 transformers
 qdrant-client
 ranx
+fastapi
+uvicorn[standard]
+requests
 # For newer Nvidia GPUs (e.g. RTX 5090) use uv pip install --pre torch torchvision torchaudio --index-url https://download.pytorch.org/whl/nightly/cu129
