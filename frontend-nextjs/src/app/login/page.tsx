@@ -4,22 +4,64 @@ import type React from "react"
 
 import { useState } from "react"
 import { motion } from "framer-motion"
-import { Eye, EyeOff } from "lucide-react"
+import { Eye, EyeOff, AlertCircle } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Card, CardContent, CardHeader } from "@/components/ui/card"
+import { Alert, AlertDescription } from "@/components/ui/alert"
 import Link from "next/link"
+import { useRouter } from "next/navigation"
+import { loginLoginAccessToken, type BodyLoginLoginAccessToken } from "@/lib/api-client"
 
 export default function LoginPage() {
   const [showPassword, setShowPassword] = useState(false)
   const [email, setEmail] = useState("")
   const [password, setPassword] = useState("")
+  const [isLoading, setIsLoading] = useState(false)
+  const [error, setError] = useState<string | null>(null)
+  const router = useRouter()
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
-    // Handle login logic here
-    console.log("Login attempt:", { email, password })
+    setIsLoading(true)
+    setError(null)
+
+    try {
+      const loginData: BodyLoginLoginAccessToken = {
+        username: email,
+        password: password,
+        grant_type: "password"
+      }
+
+      const response = await loginLoginAccessToken({
+        body: loginData
+      })
+
+      if (response.data?.access_token) {
+        // Store the access token in localStorage
+        localStorage.setItem("access_token", response.data.access_token)
+        
+        console.log("Login successful, redirecting to dashboard...")
+        // Redirect to dashboard page
+        router.push("/dashboard")
+      } else {
+        setError("Login failed: No access token received")
+      }
+    } catch (err: any) {
+      console.error("Login error:", err)
+      
+      // Handle different types of errors
+      if (err?.error?.detail) {
+        setError(err.error.detail)
+      } else if (err?.message) {
+        setError(err.message)
+      } else {
+        setError("Login failed. Please check your credentials and try again.")
+      }
+    } finally {
+      setIsLoading(false)
+    }
   }
 
   return (
@@ -47,6 +89,12 @@ export default function LoginPage() {
             </motion.div>
           </CardHeader>
           <CardContent>
+            {error && (
+              <Alert variant="destructive" className="mb-6">
+                <AlertCircle className="h-4 w-4" />
+                <AlertDescription>{error}</AlertDescription>
+              </Alert>
+            )}
             <form onSubmit={handleSubmit} className="space-y-6">
               <div className="space-y-2">
                 <Label htmlFor="email">Email</Label>
@@ -92,8 +140,12 @@ export default function LoginPage() {
                   Forgot password?
                 </Link>
               </div>
-              <Button type="submit" className="w-full h-12 bg-teal-600 hover:bg-teal-700 text-white font-medium">
-                Log In
+              <Button 
+                type="submit" 
+                className="w-full h-12 bg-teal-600 hover:bg-teal-700 text-white font-medium"
+                disabled={isLoading}
+              >
+                {isLoading ? "Logging in..." : "Log In"}
               </Button>
             </form>
           </CardContent>
