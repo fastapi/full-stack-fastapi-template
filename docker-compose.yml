@@ -21,7 +21,6 @@ services:
 
   qdrant:
     image: qdrant/qdrant:latest
-    # profiles: ["cpu"]
     ports:
       - 6333:6333  # HTTP API
       - 6334:6334  # gRPC API
@@ -56,6 +55,7 @@ services:
       - traefik.http.services.${STACK_NAME?Variable not set}-adminer.loadbalancer.server.port=8080
 
   prestart:
+    profiles: ["dev"]
     image: '${DOCKER_IMAGE_BACKEND?Variable not set}:${TAG-latest}'
     build:
       context: ./backend
@@ -89,6 +89,7 @@ services:
       - SENTRY_DSN=${SENTRY_DSN}
 
   backend:
+    profiles: ["dev"]
     image: '${DOCKER_IMAGE_BACKEND?Variable not set}:${TAG-latest}'
     restart: always
     networks:
@@ -148,6 +149,7 @@ services:
       - traefik.http.routers.${STACK_NAME?Variable not set}-backend-http.middlewares=https-redirect
 
   frontend:
+    profiles: ["dev"]  
     image: '${DOCKER_IMAGE_FRONTEND?Variable not set}:${TAG-latest}'
     restart: always
     networks:

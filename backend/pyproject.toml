@@ -25,7 +25,8 @@ dependencies = [
     "colpali-engine>=0.3.12",
     "qdrant-client>=1.15.0",
     # For latest Nvidia GPU support: use uv pip install --pre torch torchvision torchaudio --index-url https://download.pytorch.org/whl/nightly/cu128
-    "torch==2.9.0.dev20250722+cu129",    
+    #"torch==2.9.0.dev20250722+cu129",   
+    # Otherwise use this
     #"torch>=2.7.1",  
     "datasets>=4.0.0",
     "tqdm>=4.67.1",
