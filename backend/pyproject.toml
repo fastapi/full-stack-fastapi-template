@@ -21,6 +21,8 @@ dependencies = [
     "pydantic-settings<3.0.0,>=2.2.1",
     "sentry-sdk[fastapi]<2.0.0,>=1.40.6",
     "pyjwt<3.0.0,>=2.8.0",
+    "pandas>=2.3.1",
+    "loguru>=0.7.3",
 ]
 
 [tool.uv]
@@ -31,6 +33,7 @@ dev-dependencies = [
     "pre-commit<4.0.0,>=3.6.2",
     "types-passlib<2.0.0.0,>=1.7.7.20240106",
     "coverage<8.0.0,>=7.4.3",
+    "jupyter==1.1.1"
 ]
 
 [build-system]
