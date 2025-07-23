@@ -1,6 +1,6 @@
 import { AppLayout } from "@/components/layout/AppLayout"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { FiBox, FiUsers, FiSearch, FiActivity } from "react-icons/fi"
+import { Package, Users, Search, Activity } from "lucide-react"
 
 export default function Home() {
   return (
@@ -19,7 +19,7 @@ export default function Home() {
               <CardTitle className="text-sm font-medium">
                 Items
               </CardTitle>
-              <FiBox className="h-4 w-4 text-muted-foreground" />
+              <Package className="h-4 w-4 text-muted-foreground" />
             </CardHeader>
             <CardContent>
               <div className="text-2xl font-bold">--</div>
@@ -34,7 +34,7 @@ export default function Home() {
               <CardTitle className="text-sm font-medium">
                 Users
               </CardTitle>
-              <FiUsers className="h-4 w-4 text-muted-foreground" />
+              <Users className="h-4 w-4 text-muted-foreground" />
             </CardHeader>
             <CardContent>
               <div className="text-2xl font-bold">--</div>
@@ -49,7 +49,7 @@ export default function Home() {
               <CardTitle className="text-sm font-medium">
                 ColPali Search
               </CardTitle>
-              <FiSearch className="h-4 w-4 text-muted-foreground" />
+              <Search className="h-4 w-4 text-muted-foreground" />
             </CardHeader>
             <CardContent>
               <div className="text-2xl font-bold">Active</div>
@@ -64,7 +64,7 @@ export default function Home() {
               <CardTitle className="text-sm font-medium">
                 System Status
               </CardTitle>
-              <FiActivity className="h-4 w-4 text-muted-foreground" />
+              <Activity className="h-4 w-4 text-muted-foreground" />
             </CardHeader>
             <CardContent>
               <div className="text-2xl font-bold">Online</div>

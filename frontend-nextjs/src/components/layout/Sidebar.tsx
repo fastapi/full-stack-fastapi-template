@@ -5,21 +5,21 @@ import { usePathname } from "next/navigation"
 import { cn } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
 import { 
-  FiHome, 
-  FiBox, 
-  FiUsers, 
-  FiSettings, 
-  FiSearch,
-  FiLogOut 
-} from "react-icons/fi"
+  Home, 
+  Package, 
+  Users, 
+  Settings, 
+  Search,
+  LogOut 
+} from "lucide-react"
 import { useAuth } from "@/hooks/useAuth"
 
 const navigation = [
-  { name: "Dashboard", href: "/", icon: FiHome },
-  { name: "Items", href: "/items", icon: FiBox },
-  { name: "ColPali Search", href: "/colpali", icon: FiSearch },
-  { name: "Admin", href: "/admin", icon: FiUsers, adminOnly: true },
-  { name: "Settings", href: "/settings", icon: FiSettings },
+  { name: "Dashboard", href: "/", icon: Home },
+  { name: "Items", href: "/items", icon: Package },
+  { name: "ColPali Search", href: "/colpali", icon: Search },
+  { name: "Admin", href: "/admin", icon: Users, adminOnly: true },
+  { name: "Settings", href: "/settings", icon: Settings },
 ]
 
 export function Sidebar() {
@@ -79,7 +79,7 @@ export function Sidebar() {
               onClick={logout}
               className="h-8 w-8 p-0"
             >
-              <FiLogOut className="h-4 w-4" />
+              <LogOut className="h-4 w-4" />
             </Button>
           </div>
         </div>
