@@ -135,7 +135,7 @@ def upload_batch(original_batch, pooled_by_rows_batch, pooled_by_columns_batch, 
     except Exception as e:
         print(f"Error during upsert: {e}")
 
-batch_size = 4 #based on available compute
+batch_size = 1 #based on available compute
 dataset_source = ufo_dataset
 
 with tqdm(total=len(dataset), desc=f"Uploading progress of \"{dataset_source}\" dataset to \"{collection_name}\" collection") as pbar:
