@@ -111,3 +111,38 @@ class TokenPayload(SQLModel):
 class NewPassword(SQLModel):
     token: str
     new_password: str = Field(min_length=8, max_length=40)
+
+
+# ColPali models
+class ColPaliSearchRequest(SQLModel):
+    query: str = Field(min_length=1, max_length=1000, description="Search query for ColPali")
+    collection_name: str = Field(default="le-collection", description="Qdrant collection name")
+    search_limit: int = Field(default=20, ge=1, le=100, description="Number of results to return")
+    prefetch_limit: int = Field(default=200, ge=1, le=1000, description="Number of results to prefetch")
+
+
+class ColPaliSearchResult(SQLModel):
+    score: float = Field(description="Similarity score")
+    payload: dict = Field(description="Document metadata")
+    id: str = Field(description="Document ID")
+
+
+class ColPaliSearchResponse(SQLModel):
+    results: list[ColPaliSearchResult]
+    query: str
+    collection_name: str
+    total_results: int
+
+
+class ColPaliUploadRequest(SQLModel):
+    dataset_name: str = Field(description="Name of the dataset to upload")
+    collection_name: str = Field(default="le-collection", description="Qdrant collection name")
+    batch_size: int = Field(default=4, ge=1, le=16, description="Batch size for processing")
+
+
+class ColPaliUploadResponse(SQLModel):
+    message: str
+    collection_name: str
+    total_uploaded: int
+    total_items: int
+    success: bool

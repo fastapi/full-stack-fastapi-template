@@ -2,7 +2,7 @@
 name = "app"
 version = "0.1.0"
 description = ""
-requires-python = ">=3.10,<4.0"
+requires-python = ">=3.12,<4.0"
 dependencies = [
     "fastapi[standard]<1.0.0,>=0.114.2",
     "python-multipart<1.0.0,>=0.0.7",
@@ -21,6 +21,15 @@ dependencies = [
     "pydantic-settings<3.0.0,>=2.2.1",
     "sentry-sdk[fastapi]<2.0.0,>=1.40.6",
     "pyjwt<3.0.0,>=2.8.0",
+    # ColPali dependencies
+    "colpali-engine>=0.3.12",
+    "qdrant-client>=1.15.0",
+    # For latest Nvidia GPU support: use uv pip install --pre torch torchvision torchaudio --index-url https://download.pytorch.org/whl/nightly/cu128
+    "torch==2.9.0.dev20250722+cu129",    
+    #"torch>=2.7.1",  
+    "datasets>=4.0.0",
+    "tqdm>=4.67.1",
+    "numpy>=2.2.6",
 ]
 
 [tool.uv]
