@@ -1,49 +1,31 @@
-import type { Metadata, Viewport } from "next";
-import { Geist, Geist_Mono } from "next/font/google";
-import "./globals.css";
-import { Providers } from "@/lib/providers";
-import "@/lib/api"; // Initialize API client
+import type React from "react"
+import type { Metadata } from "next"
+import { Inter } from "next/font/google"
+import "./globals.css"
+import { ThemeProvider } from "@/components/theme-provider"
+import { Toaster } from "@/components/ui/toaster"
 
-const geistSans = Geist({
-  variable: "--font-geist-sans",
-  subsets: ["latin"],
-});
-
-const geistMono = Geist_Mono({
-  variable: "--font-geist-mono",
-  subsets: ["latin"],
-});
+const inter = Inter({ subsets: ["latin"] })
 
 export const metadata: Metadata = {
-  title: "FastAPI Full Stack Template",
-  description: "A modern full-stack application with FastAPI backend and Next.js frontend",
-  icons: {
-    icon: "/favicon.ico",
-  },
-};
-
-export const viewport: Viewport = {
-  themeColor: [
-    { media: '(prefers-color-scheme: light)', color: 'white' },
-    { media: '(prefers-color-scheme: dark)', color: 'black' },
-  ],
+  title: "FastAPI Dashboard",
+  description: "Modern admin dashboard for FastAPI applications",
+    generator: 'v0.dev'
 }
 
 export default function RootLayout({
   children,
-}: Readonly<{
-  children: React.ReactNode;
-}>) {
+}: {
+  children: React.ReactNode
+}) {
   return (
-    <html lang="en" suppressHydrationWarning className="h-full">
-      <body
-        className={`${geistSans.variable} ${geistMono.variable} font-sans antialiased min-h-screen bg-background text-foreground`}
-        suppressHydrationWarning
-      >
-        <Providers>
+    <html lang="en" suppressHydrationWarning>
+      <body className={inter.className}>
+        <ThemeProvider attribute="class" defaultTheme="light" enableSystem disableTransitionOnChange>
           {children}
-        </Providers>
+          <Toaster />
+        </ThemeProvider>
       </body>
     </html>
-  );
+  )
 }
