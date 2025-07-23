@@ -1,5 +1,3 @@
-# !pip install -q "qdrant-client" "colpali_engine>=0.3.1" "datasets" "huggingface_hub[hf_transfer]" "transformers>=4.45.0"
-
 from colpali_engine.models import ColQwen2_5, ColQwen2_5_Processor
 from datasets import load_dataset
 from qdrant_client import QdrantClient, models
@@ -8,6 +6,55 @@ from tqdm import tqdm
 import uuid
 import numpy as np
 import random
+
+def create_collection_if_not_exists(client, collection_name):
+    """Create a collection only if it doesn't already exist.
+    
+    Args:
+        client: QdrantClient instance
+        collection_name: Name of the collection to create
+        
+    Returns:
+        bool: True if collection was created, False if it already existed
+    """
+    collections = client.get_collections().collections
+    collection_names = [collection.name for collection in collections]
+    
+    if collection_name in collection_names:
+        print(f"Collection '{collection_name}' already exists.")
+        return False
+    
+    client.create_collection(
+        collection_name=collection_name,
+        vectors_config={
+            "original": models.VectorParams(
+                size=128,
+                distance=models.Distance.COSINE,
+                multivector_config=models.MultiVectorConfig(
+                    comparator=models.MultiVectorComparator.MAX_SIM
+                ),
+                hnsw_config=models.HnswConfigDiff(
+                    m=0  # switching off HNSW
+                )
+            ),
+            "mean_pooling_columns": models.VectorParams(
+                size=128,
+                distance=models.Distance.COSINE,
+                multivector_config=models.MultiVectorConfig(
+                    comparator=models.MultiVectorComparator.MAX_SIM
+                )
+            ),
+            "mean_pooling_rows": models.VectorParams(
+                size=128,
+                distance=models.Distance.COSINE,
+                multivector_config=models.MultiVectorConfig(
+                    comparator=models.MultiVectorComparator.MAX_SIM
+                )
+            )
+        }
+    )
+    print(f"Created collection '{collection_name}'")
+    return True
 
 client = QdrantClient(url="http://localhost:6333")
 collection_name = "le-collection"
@@ -20,44 +67,14 @@ colqwen_model = ColQwen2_5.from_pretrained(
 
 colqwen_processor = ColQwen2_5_Processor.from_pretrained("nomic-ai/colnomic-embed-multimodal-3b")
 
-client.create_collection(
-        collection_name=collection_name,
-        vectors_config={
-            "original":
-                models.VectorParams( #switch off HNSW
-                      size=128,
-                      distance=models.Distance.COSINE,
-                      multivector_config=models.MultiVectorConfig(
-                          comparator=models.MultiVectorComparator.MAX_SIM
-                      ),
-                      hnsw_config=models.HnswConfigDiff(
-                          m=0 #switching off HNSW
-                      )
-                ),
-            "mean_pooling_columns": models.VectorParams(
-                    size=128,
-                    distance=models.Distance.COSINE,
-                    multivector_config=models.MultiVectorConfig(
-                        comparator=models.MultiVectorComparator.MAX_SIM
-                    )
-                ),
-            "mean_pooling_rows": models.VectorParams(
-                    size=128,
-                    distance=models.Distance.COSINE,
-                    multivector_config=models.MultiVectorConfig(
-                        comparator=models.MultiVectorComparator.MAX_SIM
-                    )
-                )
-        }
-    )
+# Create collection if it doesn't exist
+create_collection_if_not_exists(client, collection_name)
 
 ufo_dataset = "davanstrien/ufo-ColPali"
 dataset = load_dataset(ufo_dataset, split="train")
 
 def get_patches(image_size, model_processor, model):
-    return model_processor.get_n_patches(image_size,
-                                             patch_size=model.patch_size,
-                                             spatial_merge_size=model.spatial_merge_size)
+    return model_processor.get_n_patches(image_size, spatial_merge_size=model.spatial_merge_size)
 
 
 def embed_and_mean_pool_batch(image_batch, model_processor, model):
@@ -108,8 +125,8 @@ def upload_batch(original_batch, pooled_by_rows_batch, pooled_by_columns_batch, 
         client.upload_collection(
             collection_name=collection_name,
             vectors={
-                "original": original_batch,
                 "mean_pooling_columns": pooled_by_columns_batch,
+                "original": original_batch,
                 "mean_pooling_rows": pooled_by_rows_batch
             },
             payload=payload_batch,
@@ -129,8 +146,7 @@ with tqdm(total=len(dataset), desc=f"Uploading progress of \"{dataset_source}\" 
         try:
             original_batch, pooled_by_rows_batch, pooled_by_columns_batch = embed_and_mean_pool_batch(image_batch,
                                                                                           colqwen_processor,
-                                                                                          colqwen_model,
-                                                                                          "colQwen")
+                                                                                          colqwen_model)
         except Exception as e:
             print(f"Error during embed: {e}")
             continue
@@ -194,6 +210,6 @@ def reranking_search_batch(query_batch,
         requests=search_queries
     )
 
-answer_colqwen = reranking_search_batch(colqwen_query, "colqwen_tutorial")
+answer_colqwen = reranking_search_batch(colqwen_query, "le-collection")
 
 dataset[answer_colqwen[0].points[0].payload['index']]['image']
