@@ -122,54 +122,62 @@ def embed_and_mean_pool_batch(image_batch, model_processor, model):
 
 def upload_batch(original_batch, pooled_by_rows_batch, pooled_by_columns_batch, payload_batch, collection_name):
     try:
+        # Convert to numpy arrays with explicit float32 dtype
+        vectors = {
+            "mean_pooling_columns": np.asarray(pooled_by_columns_batch, dtype=np.float32),
+            "original": np.asarray(original_batch, dtype=np.float32),
+            "mean_pooling_rows": np.asarray(pooled_by_rows_batch, dtype=np.float32)
+        }
+        
         client.upload_collection(
             collection_name=collection_name,
-            vectors={
-                "mean_pooling_columns": pooled_by_columns_batch,
-                "original": original_batch,
-                "mean_pooling_rows": pooled_by_rows_batch
-            },
+            vectors=vectors,
             payload=payload_batch,
-            ids=[str(uuid.uuid4()) for i in range(len(original_batch))]
+            ids=[str(uuid.uuid4()) for _ in range(len(original_batch))]
         )
+        return True
     except Exception as e:
         print(f"Error during upsert: {e}")
+        return False
 
-batch_size = 1 #based on available compute
+batch_size = 4 #based on available compute
 dataset_source = ufo_dataset
 
-with tqdm(total=len(dataset), desc=f"Uploading progress of \"{dataset_source}\" dataset to \"{collection_name}\" collection") as pbar:
+with tqdm(total=len(dataset), desc=f"Uploading \"{dataset_source}\" to \"{collection_name}\"") as pbar:
     for i in range(0, len(dataset), batch_size):
         batch = dataset[i : i + batch_size]
         image_batch = batch["image"]
         current_batch_size = len(image_batch)
+        successful_uploads = 0
         try:
-            original_batch, pooled_by_rows_batch, pooled_by_columns_batch = embed_and_mean_pool_batch(image_batch,
-                                                                                          colqwen_processor,
-                                                                                          colqwen_model)
-        except Exception as e:
-            print(f"Error during embed: {e}")
-            continue
-        try:
-            upload_batch(
-                np.asarray(original_batch, dtype=np.float32),
-                np.asarray(pooled_by_rows_batch, dtype=np.float32),
-                np.asarray(pooled_by_columns_batch, dtype=np.float32),
-                [
-                    {
-                        "source": dataset_source,
-                        "index": j
-                    }
-                    for j in range(i, i + current_batch_size)
-                ],
+            # Process batch
+            original_batch, pooled_by_rows_batch, pooled_by_columns_batch = embed_and_mean_pool_batch(
+                image_batch, colqwen_processor, colqwen_model
+            )
+            
+            # Create payload with source and index information
+            payload_batch = [{"source": dataset_source, "index": i + j} 
+                           for j in range(current_batch_size)]
+            
+            # Upload batch
+            success = upload_batch(
+                original_batch,
+                pooled_by_rows_batch,
+                pooled_by_columns_batch,
+                payload_batch,
                 collection_name
             )
+            
+            if success:
+                successful_uploads += current_batch_size
+                
         except Exception as e:
-            print(f"Error during upsert: {e}")
+            print(f"Error processing batch starting at index {i}: {e}")
             continue
-        # Update the progress bar
+            
         pbar.update(current_batch_size)
-print("Uploading complete!")
+
+print(f"\nUpload complete! Successfully uploaded {successful_uploads} out of {len(dataset)} items.")
 
 def batch_embed_query(query_batch, model_processor, model):
     with torch.no_grad():
@@ -210,6 +218,6 @@ def reranking_search_batch(query_batch,
         requests=search_queries
     )
 
-answer_colqwen = reranking_search_batch(colqwen_query, "le-collection")
+answer_colqwen = reranking_search_batch(colqwen_query, "le-collection-2")
 
 dataset[answer_colqwen[0].points[0].payload['index']]['image']
