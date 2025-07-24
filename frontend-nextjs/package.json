@@ -66,10 +66,11 @@
   },
   "devDependencies": {
     "@biomejs/biome": "1.9.4",
+    "@hey-api/openapi-ts": "^0.57.0",
     "@types/node": "^22",
     "@types/react": "^19",
-    "@types/react-dom": "^19",    
-    "@hey-api/openapi-ts": "^0.57.0",
+    "@types/react-dom": "^19",
+    "openapi-ts": "^0.3.4",
     "postcss": "^8.5",
     "tailwindcss": "^3.4.17",
     "typescript": "^5"
