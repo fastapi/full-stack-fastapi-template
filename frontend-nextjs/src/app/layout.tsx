@@ -8,9 +8,13 @@ import { Toaster } from "@/components/ui/toaster"
 const inter = Inter({ subsets: ["latin"] })
 
 export const metadata: Metadata = {
-  title: "FastAPI Dashboard",
-  description: "Modern admin dashboard for FastAPI applications",
-    generator: 'v0.dev'
+  title: "Full Stack FastAPI Project",
+  description: "A modern full-stack web application built with FastAPI and Next.js",
+  icons: {
+    icon: "/assets/images/favicon.png",
+    shortcut: "/assets/images/favicon.png",
+    apple: "/assets/images/favicon.png",
+  },
 }
 
 export default function RootLayout({

@@ -1,6 +1,6 @@
 "use client"
 
-import { Bell, User } from "lucide-react"
+import { Bell, User, LogOut, Settings } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import {
   DropdownMenu,
@@ -11,8 +11,25 @@ import {
 } from "@/components/ui/dropdown-menu"
 import { SidebarTrigger } from "@/components/ui/sidebar"
 import { ThemeToggle } from "@/components/theme-toggle"
+import Image from "next/image"
+import Link from "next/link"
+import { useRouter } from "next/navigation"
+import { clearAuthTokens } from "@/lib/auth"
 
 export function DashboardHeader() {
+  const router = useRouter()
+
+  const handleLogout = () => {
+    // Clear authentication tokens/data
+    clearAuthTokens()
+    // Redirect to login page
+    router.push('/login')
+  }
+
+  const handleProfile = () => {
+    router.push('/dashboard/settings')
+  }
+
   return (
     <header className="flex h-16 items-center justify-between border-b bg-white dark:bg-slate-900 px-6">
       <div className="flex items-center space-x-4">
@@ -21,11 +38,6 @@ export function DashboardHeader() {
 
       <div className="flex items-center space-x-4">
         <ThemeToggle />
-        <Button variant="ghost" size="icon" className="relative">
-          <Bell className="h-4 w-4" />
-          <span className="absolute -top-1 -right-1 h-3 w-3 bg-red-500 rounded-full text-xs"></span>
-        </Button>
-
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
             <Button variant="ghost" className="relative h-8 w-8 rounded-full">
@@ -35,12 +47,15 @@ export function DashboardHeader() {
             </Button>
           </DropdownMenuTrigger>
           <DropdownMenuContent className="w-56" align="end" forceMount>
-            <DropdownMenuItem>
-              <User className="mr-2 h-4 w-4" />
-              <span>Profile</span>
+            <DropdownMenuItem onClick={handleProfile}>
+              <Settings className="mr-2 h-4 w-4" />
+              <span>Profile Settings</span>
             </DropdownMenuItem>
             <DropdownMenuSeparator />
-            <DropdownMenuItem>Log out</DropdownMenuItem>
+            <DropdownMenuItem onClick={handleLogout}>
+              <LogOut className="mr-2 h-4 w-4" />
+              <span>Log out</span>
+            </DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>
       </div>
