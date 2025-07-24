@@ -6,7 +6,7 @@ from sqlalchemy import distinct
 from sqlmodel import func, select
 
 from app.api.deps import SessionDep
-from app.models import AbandonmentFeatures, MeaningfulFeatures, Session, SummaryFeatures
+from app.models import AbandonmentFeatures, Session, SummaryFeatures
 
 router = APIRouter(prefix="/dashboard", tags=["dashboard"])
 
@@ -62,43 +62,36 @@ def get_bot_completion_percentage(session: SessionDep) -> dict[str, Any]:
     for bot_name, completed_steps in results:
         if bot_name not in bot_stats:
             bot_stats[bot_name] = {
-                "total_sessions": 0,
-                "completed_sessions": 0,
-                "total_steps": TOTAL_NUMBER_OF_STEPS_FOR_BOT[bot_name],
+                "completion_percentage_per_session": [],
+                "number_of_total_steps": TOTAL_NUMBER_OF_STEPS_FOR_BOT[bot_name],
             }
 
-        bot_stats[bot_name]["total_sessions"] += 1
-
-        # Consider a session completed if completed_steps equals total_steps for that bot
-        if (
-            completed_steps is not None
-            and completed_steps >= TOTAL_NUMBER_OF_STEPS_FOR_BOT[bot_name]
-        ):
-            bot_stats[bot_name]["completed_sessions"] += 1
+        completion_percentage = (
+            completed_steps / TOTAL_NUMBER_OF_STEPS_FOR_BOT[bot_name]
+        )
+        bot_stats[bot_name]["completion_percentage_per_session"].append(
+            completion_percentage
+        )
 
     # Calculate completion percentages
     completion_stats = {}
     for bot_name, stats in bot_stats.items():
         completion_percentage = 0
-        if stats["total_sessions"] > 0:
-            completion_percentage = (
-                stats["completed_sessions"] / stats["total_sessions"]
-            ) * 100
+        if len(stats["completion_percentage_per_session"]) > 0:
+            completion_percentage = sum(
+                stats["completion_percentage_per_session"]
+            ) / len(stats["completion_percentage_per_session"])
 
         completion_stats[bot_name] = {
-            "total_sessions": stats["total_sessions"],
-            "completed_sessions": stats["completed_sessions"],
             "completion_percentage": round(completion_percentage, 2),
-            "total_steps_required": stats["total_steps"],
+            "number_of_total_steps": TOTAL_NUMBER_OF_STEPS_FOR_BOT[bot_name],
         }
 
     return {"bot_completion_stats": completion_stats}
 
 
 @router.get("/stats/top-human-values")
-def get_top_human_values(
-    session: SessionDep, limit: int = 10
-) -> dict[str, list[dict[str, Any]]]:
+def top_human_values(session: SessionDep, limit: int = 10) -> dict[str, Any]:
     """
     Get top human values across all sessions.
     """
@@ -116,6 +109,9 @@ def get_top_human_values(
             all_values.extend(human_values_list)
 
     all_values = [value for value in all_values if value != "none"]
+    all_values = [
+        value.lower().replace("_", " ").strip().title() for value in all_values
+    ]
 
     # Count occurrences and get top values
     value_counts = Counter(all_values)
@@ -131,16 +127,18 @@ def get_top_human_values(
         for value, count in top_values
     ]
 
-    return {
+    response = {
         "top_human_values": top_human_values,
         "total_values_analyzed": len(all_values),
     }
+
+    return response
 
 
 @router.get("/stats/top-chatbot-recommendations")
 def get_top_chatbot_recommendations(
     session: SessionDep, limit: int = 10
-) -> dict[str, list[dict[str, Any]]]:
+) -> dict[str, Any]:
     """
     Get top chatbot recommendations across all sessions.
     """
@@ -163,6 +161,11 @@ def get_top_chatbot_recommendations(
         if recommendation != "none"
     ]
 
+    all_recommendations = [
+        recommendation.lower().replace("_", " ").strip().title()
+        for recommendation in all_recommendations
+    ]
+
     # Count occurrences and get top recommendations
     recommendation_counts = Counter(all_recommendations)
     top_recommendations = recommendation_counts.most_common(limit)
@@ -180,40 +183,4 @@ def get_top_chatbot_recommendations(
     return {
         "top_chatbot_recommendations": top_chatbot_recommendations,
         "total_recommendations_analyzed": len(all_recommendations),
-    }
-
-
-@router.get("/stats/overview")
-def get_dashboard_overview(session: SessionDep) -> dict[str, Any]:
-    """
-    Get comprehensive dashboard overview with all key statistics.
-    """
-    # Get total sessions
-    total_sessions_result = get_total_sessions(session)
-
-    # Get bot completion stats
-    bot_completion_result = get_bot_completion_percentage(session)
-
-    # Get top human values (top 5 for overview)
-    top_human_values_result = get_top_human_values(session, limit=5)
-
-    # Get top chatbot recommendations (top 5 for overview)
-    top_recommendations_result = get_top_chatbot_recommendations(session, limit=5)
-
-    # Get meaningful sessions count
-    meaningful_count_statement = (
-        select(func.count())
-        .select_from(MeaningfulFeatures)
-        .where(MeaningfulFeatures.is_meaningful)
-    )
-    meaningful_sessions = session.exec(meaningful_count_statement).one()
-
-    return {
-        "total_sessions": total_sessions_result["total_sessions"],
-        "meaningful_sessions": meaningful_sessions,
-        "bot_completion_stats": bot_completion_result["bot_completion_stats"],
-        "top_human_values": top_human_values_result["top_human_values"],
-        "top_chatbot_recommendations": top_recommendations_result[
-            "top_chatbot_recommendations"
-        ],
     }

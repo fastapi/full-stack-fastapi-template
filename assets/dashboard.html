@@ -1,0 +1,752 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ConsciousInsights - Leadership Development Analytics</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .dashboard {
+            max-width: 1400px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+            overflow: hidden;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #2c3e50 0%, #3498db 100%);
+            color: white;
+            padding: 30px 40px;
+            text-align: center;
+        }
+
+        .header h1 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+            font-weight: 300;
+        }
+
+        .header p {
+            font-size: 1.1em;
+            opacity: 0.9;
+        }
+
+        .content {
+            padding: 40px;
+        }
+
+        .metrics-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 30px;
+            margin-bottom: 40px;
+        }
+
+        .metric-card {
+            background: #f8f9fa;
+            border-radius: 15px;
+            padding: 25px;
+            text-align: center;
+            border-left: 5px solid #3498db;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        .metric-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+        }
+
+        .metric-value {
+            font-size: 2.5em;
+            font-weight: bold;
+            color: #2c3e50;
+            margin-bottom: 10px;
+        }
+
+        .metric-label {
+            font-size: 1.1em;
+            color: #7f8c8d;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .section {
+            margin-bottom: 50px;
+        }
+
+        .section-title {
+            font-size: 1.8em;
+            color: #2c3e50;
+            margin-bottom: 25px;
+            border-bottom: 3px solid #3498db;
+            padding-bottom: 10px;
+        }
+
+        .bot-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 25px;
+            margin-bottom: 30px;
+        }
+
+        .bot-card {
+            background: white;
+            border-radius: 15px;
+            padding: 25px;
+            border: 2px solid #ecf0f1;
+            transition: all 0.3s ease;
+        }
+
+        .bot-card:hover {
+            border-color: #3498db;
+            transform: translateY(-3px);
+        }
+
+        .bot-name {
+            font-size: 1.3em;
+            font-weight: bold;
+            color: #2c3e50;
+            margin-bottom: 15px;
+        }
+
+        .completion-bar {
+            background: #ecf0f1;
+            height: 20px;
+            border-radius: 10px;
+            overflow: hidden;
+            margin-bottom: 10px;
+        }
+
+        .completion-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #27ae60, #2ecc71);
+            border-radius: 10px;
+            transition: width 0.8s ease;
+        }
+
+        .completion-text {
+            text-align: right;
+            font-weight: bold;
+            color: #27ae60;
+            font-size: 1.1em;
+        }
+
+        .topics-section {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 40px;
+            margin-bottom: 30px;
+        }
+
+        .topic-list, .challenge-list {
+            background: #f8f9fa;
+            border-radius: 15px;
+            padding: 25px;
+        }
+
+        .list-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 15px 0;
+            border-bottom: 1px solid #e9ecef;
+        }
+
+        .list-item:last-child {
+            border-bottom: none;
+        }
+
+        .item-name {
+            font-weight: 600;
+            color: #2c3e50;
+        }
+
+        .item-count {
+            background: #3498db;
+            color: white;
+            padding: 5px 12px;
+            border-radius: 20px;
+            font-size: 0.9em;
+            font-weight: bold;
+        }
+
+        .insights-section {
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+            color: white;
+            padding: 30px;
+            border-radius: 15px;
+            margin-top: 30px;
+        }
+
+        .insights-title {
+            font-size: 1.5em;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+
+        .insights-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 25px;
+        }
+
+        .insight-card {
+            background: rgba(255,255,255,0.1);
+            border-radius: 10px;
+            padding: 20px;
+            backdrop-filter: blur(10px);
+        }
+
+        .insight-card h4 {
+            margin-bottom: 15px;
+            font-size: 1.2em;
+        }
+
+        .insight-list {
+            list-style: none;
+        }
+
+        .insight-list li {
+            padding: 8px 0;
+            border-bottom: 1px solid rgba(255,255,255,0.2);
+        }
+
+        .insight-list li:last-child {
+            border-bottom: none;
+        }
+
+        .engagement-chart {
+            background: white;
+            border-radius: 15px;
+            padding: 25px;
+            margin-bottom: 30px;
+            border: 2px solid #ecf0f1;
+        }
+
+        .chart-placeholder {
+            height: 200px;
+            background: linear-gradient(45deg, #f8f9fa, #e9ecef);
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #7f8c8d;
+            font-size: 1.2em;
+            font-weight: bold;
+        }
+
+        .challenge-cards-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+            margin-bottom: 40px;
+        }
+
+        .challenge-card {
+            background: white;
+            border-radius: 15px;
+            padding: 20px;
+            border: 2px solid #ecf0f1;
+            transition: all 0.3s ease;
+            height: fit-content;
+        }
+
+        .challenge-card:hover {
+            border-color: #3498db;
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(0,0,0,0.1);
+        }
+
+        .challenge-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            gap: 10px;
+            margin-bottom: 15px;
+        }
+
+        .challenge-header-left {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            flex: 1;
+        }
+
+        .challenge-category {
+            background: #3498db;
+            color: white;
+            padding: 6px 12px;
+            border-radius: 15px;
+            font-size: 0.8em;
+            font-weight: 600;
+            width: fit-content;
+        }
+
+        .challenge-name {
+            font-size: 1.1em;
+            font-weight: bold;
+            color: #2c3e50;
+            line-height: 1.3;
+        }
+
+        .challenge-count {
+            background: #e74c3c;
+            color: white;
+            padding: 6px 12px;
+            border-radius: 15px;
+            font-size: 0.8em;
+            font-weight: bold;
+            width: fit-content;
+            flex-shrink: 0;
+        }
+
+        .challenge-details h5 {
+            color: #7f8c8d;
+            margin-bottom: 12px;
+            font-size: 1em;
+            font-weight: 600;
+        }
+
+        .challenge-bullets {
+            list-style: none;
+            padding: 0;
+        }
+
+        .challenge-bullets li {
+            padding: 8px 0;
+            color: #2c3e50;
+            line-height: 1.4;
+            position: relative;
+            padding-left: 20px;
+            font-size: 0.9em;
+        }
+
+        .challenge-bullets li:before {
+            content: "•";
+            color: #3498db;
+            font-size: 1.2em;
+            position: absolute;
+            left: 0;
+            top: 6px;
+        }
+
+        .value-item, .recommendation-item {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+
+        .value-item:last-child, .recommendation-item:last-child {
+            margin-bottom: 0;
+        }
+
+        .value-name, .recommendation-name {
+            font-weight: 600;
+            color: #2c3e50;
+            min-width: 120px;
+            font-size: 0.9em;
+        }
+
+        .value-bar, .recommendation-bar {
+            flex: 1;
+            height: 20px;
+            background: #ecf0f1;
+            border-radius: 10px;
+            overflow: hidden;
+        }
+
+        .value-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #9b59b6, #8e44ad);
+            border-radius: 10px;
+            transition: width 0.8s ease;
+        }
+
+        .recommendation-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #e67e22, #d35400);
+            border-radius: 10px;
+            transition: width 0.8s ease;
+        }
+
+        .value-count, .recommendation-count {
+            font-weight: bold;
+            color: #2c3e50;
+            min-width: 30px;
+            text-align: center;
+        }
+
+        .values-recommendations-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 40px;
+            margin-bottom: 30px;
+        }
+
+        @media (max-width: 768px) {
+            .challenge-cards-grid {
+                grid-template-columns: 1fr;
+                gap: 15px;
+            }
+
+            .challenge-card {
+                padding: 15px;
+            }
+
+            .challenge-header {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 10px;
+            }
+
+            .challenge-header-left {
+                gap: 6px;
+            }
+
+            .challenge-name {
+                font-size: 1em;
+            }
+
+            .challenge-category, .challenge-count {
+                font-size: 0.75em;
+                padding: 5px 10px;
+            }
+
+            .values-recommendations-grid {
+                grid-template-columns: 1fr;
+                gap: 20px;
+            }
+
+            .values-section, .recommendations-section {
+                margin-bottom: 20px;
+            }
+
+            .values-section h3, .recommendations-section h3 {
+                font-size: 1.2em;
+            }
+
+            .value-name, .recommendation-name {
+                min-width: 100px;
+                font-size: 0.85em;
+            }
+
+            .content {
+                padding: 20px;
+            }
+
+            .header {
+                padding: 20px;
+            }
+
+            .header h1 {
+                font-size: 2em;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="dashboard">
+        <div class="header">
+            <h1>Leadership Development Analytics</h1>
+            <p>Insights from ConsciousInsights AI Coaching Sessions</p>
+        </div>
+
+        <div class="content">
+            <!-- Key Metrics -->
+            <div class="metrics-grid">
+                <div class="metric-card">
+                    <div class="metric-value">191</div>
+                    <div class="metric-label">Active Users</div>
+                </div>
+                <div class="metric-card">
+                    <div class="metric-value">365</div>
+                    <div class="metric-label">Total Sessions</div>
+                </div>
+                <div class="metric-card">
+                    <div class="metric-value">72%</div>
+                    <div class="metric-label">Average Script Completion</div>
+                </div>
+                <div class="metric-card">
+                    <div class="metric-value">2.2</div>
+                    <div class="metric-label">Avg Sessions per User</div>
+                </div>
+            </div>
+
+            <!-- Bot Usage and Completion -->
+            <div class="section">
+                <h2 class="section-title">Bot Usage & Script Completion</h2>
+                <div class="bot-grid">
+                    <div class="bot-card">
+                        <div class="bot-name">Player Mindset Coach</div>
+                        <div style="display: flex; justify-content: space-between; margin-bottom: 10px;">
+                            <span style="color: #7f8c8d;">Unique Users:</span>
+                            <span style="font-weight: bold; color: #2c3e50;">100</span>
+                        </div>
+                        <div class="completion-bar">
+                            <div class="completion-fill" style="width: 65%"></div>
+                        </div>
+                        <div class="completion-text">65% Average Script Completion</div>
+                    </div>
+                    <div class="bot-card">
+                        <div class="bot-name">Action Plan Coach</div>
+                        <div style="display: flex; justify-content: space-between; margin-bottom: 10px;">
+                            <span style="color: #7f8c8d;">Unique Users:</span>
+                            <span style="font-weight: bold; color: #2c3e50;">127</span>
+                        </div>
+                        <div class="completion-bar">
+                            <div class="completion-fill" style="width: 78%"></div>
+                        </div>
+                        <div class="completion-text">78% Average Script Completion</div>
+                    </div>
+                    <div class="bot-card">
+                        <div class="bot-name">Assessment Debrief</div>
+                        <div style="display: flex; justify-content: space-between; margin-bottom: 10px;">
+                            <span style="color: #7f8c8d;">Unique Users:</span>
+                            <span style="font-weight: bold; color: #2c3e50;">138</span>
+                        </div>
+                        <div class="completion-bar">
+                            <div class="completion-fill" style="width: 82%"></div>
+                        </div>
+                        <div class="completion-text">82% Average Script Completion</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Challenge Analysis -->
+            <div class="section">
+                <h2 class="section-title">Leadership Challenges & Coaching Insights</h2>
+
+                <!-- Global Bot Filter -->
+                <div style="margin-bottom: 30px; padding: 20px; background: #f8f9fa; border-radius: 10px;">
+                    <h4 style="margin-bottom: 15px; color: #2c3e50;">Filter All Analytics by Coaching Bot:</h4>
+                    <div style="display: flex; gap: 15px; flex-wrap: wrap;">
+                        <label style="display: flex; align-items: center; gap: 8px; cursor: pointer;">
+                            <input type="checkbox" checked style="transform: scale(1.2);">
+                            <span>Player Mindset Coach</span>
+                        </label>
+                        <label style="display: flex; align-items: center; gap: 8px; cursor: pointer;">
+                            <input type="checkbox" checked style="transform: scale(1.2);">
+                            <span>Action Plan Coach</span>
+                        </label>
+                        <label style="display: flex; align-items: center; gap: 8px; cursor: pointer;">
+                            <input type="checkbox" checked style="transform: scale(1.2);">
+                            <span>Assessment Debrief</span>
+                        </label>
+                    </div>
+                </div>
+
+                <!-- Top 5 Challenges -->
+                <h3 style="margin-bottom: 20px; color: #2c3e50;">Top 5 Leadership Challenges</h3>
+                <!-- Challenge Cards -->
+                <div class="challenge-cards-grid" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 20px; margin-bottom: 40px;">
+                    <!-- Challenge 1 -->
+                    <div class="challenge-card">
+                        <div class="challenge-header">
+                            <div class="challenge-header-left">
+                                <div class="challenge-category">[Communication and Collaboration]</div>
+                                <div class="challenge-name">Miscommunication / Lack of Clarity</div>
+                            </div>
+                            <div class="challenge-count">16 conversations</div>
+                        </div>
+                        <div class="challenge-details">
+                            <h5>What people are bringing to this challenge:</h5>
+                            <ul class="challenge-bullets">
+                                <li>Unclear expectations from managers leading to repeated work and frustration</li>
+                                <li>Difficulty communicating complex technical concepts to non-technical stakeholders</li>
+                                <li>Inconsistent messaging across different teams causing confusion in projects</li>
+                                <li>Lack of clear communication channels for urgent vs. non-urgent matters</li>
+                                <li>Assumptions made in email communications that lead to misunderstandings</li>
+                            </ul>
+                        </div>
+                    </div>
+
+                    <!-- Challenge 2 -->
+                    <div class="challenge-card">
+                        <div class="challenge-header">
+                            <div class="challenge-header-left">
+                                <div class="challenge-category">[Task and Workload Management]</div>
+                                <div class="challenge-name">Overload / Time Pressure</div>
+                            </div>
+                            <div class="challenge-count">16 conversations</div>
+                        </div>
+                        <div class="challenge-details">
+                            <h5>What people are bringing to this challenge:</h5>
+                            <ul class="challenge-bullets">
+                                <li>Competing priorities from multiple stakeholders with no clear prioritization framework</li>
+                                <li>Unrealistic deadlines that compromise quality and increase stress levels</li>
+                                <li>Inability to say no to additional requests, leading to overcommitment</li>
+                                <li>Lack of time for strategic thinking due to constant firefighting</li>
+                                <li>Difficulty delegating tasks effectively to reduce personal workload</li>
+                            </ul>
+                        </div>
+                    </div>
+
+                    <!-- Challenge 3 -->
+                    <div class="challenge-card">
+                        <div class="challenge-header">
+                            <div class="challenge-header-left">
+                                <div class="challenge-category">[Communication and Collaboration]</div>
+                                <div class="challenge-name">Cross-functional Misalignment</div>
+                            </div>
+                            <div class="challenge-count">7 conversations</div>
+                        </div>
+                        <div class="challenge-details">
+                            <h5>What people are bringing to this challenge:</h5>
+                            <ul class="challenge-bullets">
+                                <li>Different departments working with conflicting goals and metrics</li>
+                                <li>Lack of visibility into other teams' processes and timelines</li>
+                                <li>Stakeholders not understanding the impact of their decisions on other areas</li>
+                                <li>Insufficient collaboration tools for cross-functional project management</li>
+                            </ul>
+                        </div>
+                    </div>
+
+                    <!-- Challenge 4 -->
+                    <div class="challenge-card">
+                        <div class="challenge-header">
+                            <div class="challenge-header-left">
+                                <div class="challenge-category">[Task and Workload Management]</div>
+                                <div class="challenge-name">Unclear Goals / Priorities</div>
+                            </div>
+                            <div class="challenge-count">5 conversations</div>
+                        </div>
+                        <div class="challenge-details">
+                            <h5>What people are bringing to this challenge:</h5>
+                            <ul class="challenge-bullets">
+                                <li>Shifting priorities from leadership without clear communication about changes</li>
+                                <li>Lack of connection between individual tasks and organizational strategy</li>
+                                <li>Difficulty determining which projects should take precedence</li>
+                                <li>Vague objectives that make it hard to measure success</li>
+                                <li>Conflicting direction from different managers or stakeholders</li>
+                            </ul>
+                        </div>
+                    </div>
+
+                    <!-- Challenge 5 -->
+                    <div class="challenge-card">
+                        <div class="challenge-header">
+                            <div class="challenge-header-left">
+                                <div class="challenge-category">[Management and Leadership]</div>
+                                <div class="challenge-name">Inconsistent or Absent Direction</div>
+                            </div>
+                            <div class="challenge-count">4 conversations</div>
+                        </div>
+                        <div class="challenge-details">
+                            <h5>What people are bringing to this challenge:</h5>
+                            <ul class="challenge-bullets">
+                                <li>Managers who change direction frequently without explanation</li>
+                                <li>Lack of regular check-ins and guidance from supervisors</li>
+                                <li>Inconsistent feedback that makes it difficult to improve performance</li>
+                                <li>Absence of clear leadership during critical project phases</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Values & Coaching Patterns -->
+                <h3 style="margin-bottom: 20px; color: #2c3e50;">Values & Coaching Patterns</h3>
+                <div class="values-recommendations-grid">
+                    <!-- Human Values -->
+                    <div class="values-section">
+                        <h3 style="margin-bottom: 20px; color: #2c3e50; text-align: center;">Top Human Values</h3>
+                        <div style="background: #f8f9fa; border-radius: 15px; padding: 25px;">
+                            <div class="value-item">
+                                <span class="value-name">Responsibility</span>
+                                <div class="value-bar">
+                                    <div class="value-fill" style="width: 100%"></div>
+                                </div>
+                                <span class="value-count">22</span>
+                            </div>
+                            <div class="value-item">
+                                <span class="value-name">Collaboration</span>
+                                <div class="value-bar">
+                                    <div class="value-fill" style="width: 55%"></div>
+                                </div>
+                                <span class="value-count">12</span>
+                            </div>
+                            <div class="value-item">
+                                <span class="value-name">Accountability</span>
+                                <div class="value-bar">
+                                    <div class="value-fill" style="width: 50%"></div>
+                                </div>
+                                <span class="value-count">11</span>
+                            </div>
+                            <div class="value-item">
+                                <span class="value-name">Honesty</span>
+                                <div class="value-bar">
+                                    <div class="value-fill" style="width: 36%"></div>
+                                </div>
+                                <span class="value-count">8</span>
+                            </div>
+                            <div class="value-item">
+                                <span class="value-name">Proactivity</span>
+                                <div class="value-bar">
+                                    <div class="value-fill" style="width: 27%"></div>
+                                </div>
+                                <span class="value-count">6</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Chatbot Recommendations -->
+                    <div class="recommendations-section">
+                        <h3 style="margin-bottom: 20px; color: #2c3e50; text-align: center;">Top AI Coaching Areas</h3>
+                        <div style="background: #f8f9fa; border-radius: 15px; padding: 25px;">
+                            <div class="recommendation-item">
+                                <span class="recommendation-name">Reflect on Personal Contribution</span>
+                                <div class="recommendation-bar">
+                                    <div class="recommendation-fill" style="width: 100%"></div>
+                                </div>
+                                <span class="recommendation-count">5</span>
+                            </div>
+                            <div class="recommendation-item">
+                                <span class="recommendation-name">Focus on Controllable Actions</span>
+                                <div class="recommendation-bar">
+                                    <div class="recommendation-fill" style="width: 60%"></div>
+                                </div>
+                                <span class="recommendation-count">3</span>
+                            </div>
+                            <div class="recommendation-item">
+                                <span class="recommendation-name">Set Clear Expectations</span>
+                                <div class="recommendation-bar">
+                                    <div class="recommendation-fill" style="width: 60%"></div>
+                                </div>
+                                <span class="recommendation-count">3</span>
+                            </div>
+                            <div class="recommendation-item">
+                                <span class="recommendation-name">Proactive Planning</span>
+                                <div class="recommendation-bar">
+                                    <div class="recommendation-fill" style="width: 40%"></div>
+                                </div>
+                                <span class="recommendation-count">2</span>
+                            </div>
+                            <div class="recommendation-item">
+                                <span class="recommendation-name">Consider Alternative Approaches</span>
+                                <div class="recommendation-bar">
+                                    <div class="recommendation-fill" style="width: 40%"></div>
+                                </div>
+                                <span class="recommendation-count">2</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>
