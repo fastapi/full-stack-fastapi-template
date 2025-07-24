@@ -3,7 +3,6 @@
 import { Home, Package, Settings, Shield, Search } from "lucide-react"
 import Link from "next/link"
 import { usePathname } from "next/navigation"
-import Image from "next/image"
 import {
   Sidebar,
   SidebarContent,
@@ -51,16 +50,11 @@ export function AppSidebar() {
     <Sidebar className="border-r bg-white dark:bg-slate-900">
       <SidebarHeader className="p-6">
         <Link href="/dashboard" className="flex items-center space-x-3">
-          <div className="w-8 h-8 flex items-center justify-center">
-            <Image
-              src="/assets/images/fastapi-logo.svg"
-              alt="FastAPI Logo"
-              width={32}
-              height={32}
-              className="w-8 h-8"
-              priority
-            />
-          </div>
+          <img
+            src="/assets/images/fastapi-logo.svg"
+            alt="FastAPI Logo"
+            style={{ width: "80%", height: "auto" }}
+          />
         </Link>        
       </SidebarHeader>
       <SidebarContent>

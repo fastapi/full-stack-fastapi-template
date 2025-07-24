@@ -36,11 +36,11 @@ export function DashboardHeader() {
         <SidebarTrigger />
       </div>
 
-      <div className="flex items-center space-x-4">
+      <div className="flex items-center">
         <ThemeToggle />
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
-            <Button variant="ghost" className="relative h-8 w-8 rounded-full">
+            <Button variant="ghost" className="relative rounded-full">
               <div className="h-8 w-8 rounded-full bg-teal-600 flex items-center justify-center">
                 <User className="h-4 w-4 text-white" />
               </div>
