@@ -96,17 +96,19 @@ services:
 
     build:
       context: ./backend
-  # frontend:
-  #   image: '${DOCKER_IMAGE_FRONTEND?Variable not set}:${TAG-latest}'
-  #   restart: always
-  #   networks:
-  #     - traefik-public
-  #     - default
-  #   build:
-  #     context: ./frontend
-  #     args:
-  #       - VITE_API_URL=https://api.${DOMAIN?Variable not set}
-  #       - NODE_ENV=production
+  frontend:
+    image: '${DOCKER_IMAGE_FRONTEND?Variable not set}:${TAG-latest}'
+    restart: always
+    networks:
+      - traefik-public
+      - default
+    build:
+      context: ./frontend
+    ports:
+      - "3000:3000"
+    environment:
+      - NODE_ENV=production
+      - NEXT_PUBLIC_API_URL=http://backend:8000
 volumes:
   app-db-data:
 
