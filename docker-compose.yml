@@ -193,9 +193,9 @@ services:
 
       # Enable redirection for HTTP and HTTPS
       - traefik.http.routers.${STACK_NAME?Variable not set}-frontend-nextjs-http.middlewares=https-redirect
-
-    volumes:
-      - app-db-data:
+    
+volumes:
+  - app-db-data:
 
 networks:
   traefik-public:
