@@ -113,8 +113,6 @@ services:
         - NEXT_PUBLIC_API_URL=${NEXT_PUBLIC_API_URL?Variable not set}
         - NEXTAUTH_SECRET=${NEXTAUTH_SECRET?Variable not set}
         - NODE_ENV=development
-      env_file:
-        - .env.local
 
   playwright:
     build:
