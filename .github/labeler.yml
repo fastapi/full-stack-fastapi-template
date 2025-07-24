@@ -5,6 +5,7 @@ docs:
         - '**/*.md'
       - all-globs-to-all-files:
         - '!frontend/**'
+        - '!frontend-nextjs/**'
         - '!backend/**'
         - '!.github/**'
         - '!scripts/**'
@@ -22,4 +23,5 @@ internal:
       - all-globs-to-all-files:
         - '!./**/*.md'
         - '!frontend/**'
+        - '!frontend-nextjs/**'        
         - '!backend/**'
