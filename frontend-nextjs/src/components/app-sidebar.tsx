@@ -1,6 +1,6 @@
 "use client"
 
-import { Home, Package, Settings, Shield } from "lucide-react"
+import { Home, Package, Settings, Shield, Search } from "lucide-react"
 import Link from "next/link"
 import { usePathname } from "next/navigation"
 import {
@@ -25,6 +25,11 @@ const menuItems = [
     title: "Items",
     url: "/dashboard/items",
     icon: Package,
+  },
+  {
+    title: "ColPali Search",
+    url: "/dashboard/colpali",
+    icon: Search,
   },
   {
     title: "User Settings",
