@@ -38,7 +38,7 @@ const menuItems = [
   },
   {
     title: "Admin",
-    url: "/dashboard/users",
+    url: "/dashboard/admin",
     icon: Shield,
   },
 ]
