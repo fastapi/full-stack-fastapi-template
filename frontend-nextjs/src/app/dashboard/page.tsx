@@ -6,7 +6,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Skeleton } from "@/components/ui/skeleton"
 import { Alert, AlertDescription } from "@/components/ui/alert"
-import { Users, Package, Settings, Activity, CheckCircle, XCircle, AlertCircle, Loader2 } from "lucide-react"
+import { Users, Package, Settings, Activity, CheckCircle, XCircle, AlertCircle } from "lucide-react"
 import { usersReadUsers, usersReadUserMe, itemsReadItems, utilsHealthCheck } from "@/lib/api-client"
 import type { UserPublic, ItemPublic } from "@/lib/api-client"
 
@@ -243,7 +243,7 @@ export default function DashboardPage() {
                 </div>
               ) : data?.users.length ? (
                 <div className="space-y-4">
-                  {data.users.slice(0, 5).map((user, index) => (
+                  {data.users.slice(0, 5).map((user) => (
                     <div key={user.id} className="flex items-center space-x-4">
                       <div className="w-8 h-8 bg-teal-600 rounded-full flex items-center justify-center">
                         <span className="text-white text-sm font-medium">
@@ -307,7 +307,7 @@ export default function DashboardPage() {
                 </div>
               ) : data?.items.length ? (
                 <div className="space-y-4">
-                  {data.items.slice(0, 5).map((item, index) => (
+                  {data.items.slice(0, 5).map((item) => (
                     <div key={item.id} className="flex items-center space-x-4">
                       <div className="w-8 h-8 bg-blue-600 rounded flex items-center justify-center">
                         <Package className="h-4 w-4 text-white" />

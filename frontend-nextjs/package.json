@@ -3,11 +3,12 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "build": "next build",
+    "build": "tsc -p tsconfig.build.json && next build",
     "dev": "next dev",
-    "lint": "next lint",
+    "lint": "biome check --apply-unsafe --no-errors-on-unmatched --files-ignore-unknown=true ./",
     "start": "next start",
-    "generate-client": "openapi-ts"
+    "generate-client": "openapi-ts",
+    "preview": "next preview"
   },
   "dependencies": {
     "@emotion/is-prop-valid": "latest",
@@ -64,6 +65,7 @@
     "zod": "^3.24.1"
   },
   "devDependencies": {
+    "@biomejs/biome": "1.9.4",
     "@types/node": "^22",
     "@types/react": "^19",
     "@types/react-dom": "^19",

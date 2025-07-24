@@ -11,8 +11,6 @@ import {
 } from "@/components/ui/dropdown-menu"
 import { SidebarTrigger } from "@/components/ui/sidebar"
 import { ThemeToggle } from "@/components/theme-toggle"
-import Image from "next/image"
-import Link from "next/link"
 import { useRouter } from "next/navigation"
 import { clearAuthTokens } from "@/lib/auth"
 

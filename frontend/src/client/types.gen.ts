@@ -9,72 +9,6 @@ export type Body_login_login_access_token = {
     client_secret?: (string | null);
 };
 
-export type ColPaliSearchRequest = {
-    /**
-     * Search query for ColPali
-     */
-    query: string;
-    /**
-     * Qdrant collection name
-     */
-    collection_name?: string;
-    /**
-     * Number of results to return
-     */
-    search_limit?: number;
-    /**
-     * Number of results to prefetch
-     */
-    prefetch_limit?: number;
-};
-
-export type ColPaliSearchResponse = {
-    results: Array<ColPaliSearchResult>;
-    query: string;
-    collection_name: string;
-    total_results: number;
-};
-
-export type ColPaliSearchResult = {
-    /**
-     * Similarity score
-     */
-    score: number;
-    /**
-     * Document metadata
-     */
-    payload: {
-        [key: string]: unknown;
-    };
-    /**
-     * Document ID
-     */
-    id: string;
-};
-
-export type ColPaliUploadRequest = {
-    /**
-     * Name of the dataset to upload
-     */
-    dataset_name: string;
-    /**
-     * Qdrant collection name
-     */
-    collection_name?: string;
-    /**
-     * Batch size for processing
-     */
-    batch_size?: number;
-};
-
-export type ColPaliUploadResponse = {
-    message: string;
-    collection_name: string;
-    total_uploaded: number;
-    total_items: number;
-    success: boolean;
-};
-
 export type HTTPValidationError = {
     detail?: Array<ValidationError>;
 };
@@ -172,40 +106,6 @@ export type ValidationError = {
     msg: string;
     type: string;
 };
-
-export type ColpaliSearchDocumentsData = {
-    requestBody: ColPaliSearchRequest;
-};
-
-export type ColpaliSearchDocumentsResponse = (ColPaliSearchResponse);
-
-export type ColpaliUploadDatasetData = {
-    requestBody: ColPaliUploadRequest;
-};
-
-export type ColpaliUploadDatasetResponse = (ColPaliUploadResponse);
-
-export type ColpaliListCollectionsResponse = (Array<(string)>);
-
-export type ColpaliGetCollectionInfoData = {
-    collectionName: string;
-};
-
-export type ColpaliGetCollectionInfoResponse = (unknown);
-
-export type ColpaliDeleteCollectionData = {
-    collectionName: string;
-};
-
-export type ColpaliDeleteCollectionResponse = (Message);
-
-export type ColpaliCreateCollectionData = {
-    collectionName: string;
-};
-
-export type ColpaliCreateCollectionResponse = (Message);
-
-export type ColpaliHealthCheckResponse = (unknown);
 
 export type ItemsReadItemsData = {
     limit?: number;

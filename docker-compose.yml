@@ -4,7 +4,7 @@ services:
     image: postgres:17
     restart: always
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER} -d ${POSTGRES_DB}"]
+      test: [ "CMD-SHELL", "pg_isready -U ${POSTGRES_USER} -d ${POSTGRES_DB}" ]
       interval: 10s
       retries: 5
       start_period: 30s
@@ -19,18 +19,6 @@ services:
       - POSTGRES_USER=${POSTGRES_USER?Variable not set}
       - POSTGRES_DB=${POSTGRES_DB?Variable not set}
 
-  qdrant:
-    image: qdrant/qdrant:latest
-    ports:
-      - 6333:6333  # HTTP API
-      - 6334:6334  # gRPC API
-    volumes:
-      - qdrant_data:/qdrant/storage
-    environment:
-      - QDRANT__STORAGE__PATH=/qdrant/storage
-      - QDRANT__SERVICE__GRPC_PORT=6334
-      - QDRANT__SERVICE__HTTP_PORT=6333
-    
   adminer:
     image: adminer
     restart: always
@@ -55,7 +43,6 @@ services:
       - traefik.http.services.${STACK_NAME?Variable not set}-adminer.loadbalancer.server.port=8080
 
   prestart:
-    profiles: ["dev"]
     image: '${DOCKER_IMAGE_BACKEND?Variable not set}:${TAG-latest}'
     build:
       context: ./backend
@@ -89,7 +76,6 @@ services:
       - SENTRY_DSN=${SENTRY_DSN}
 
   backend:
-    profiles: ["dev"]
     image: '${DOCKER_IMAGE_BACKEND?Variable not set}:${TAG-latest}'
     restart: always
     networks:
@@ -123,7 +109,7 @@ services:
       - SENTRY_DSN=${SENTRY_DSN}
 
     healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:8000/api/v1/utils/health-check/"]
+      test: [ "CMD", "curl", "-f", "http://localhost:8000/api/v1/utils/health-check/" ]
       interval: 10s
       timeout: 5s
       retries: 5
@@ -149,7 +135,6 @@ services:
       - traefik.http.routers.${STACK_NAME?Variable not set}-backend-http.middlewares=https-redirect
 
   frontend:
-    profiles: ["dev"]  
     image: '${DOCKER_IMAGE_FRONTEND?Variable not set}:${TAG-latest}'
     restart: always
     networks:
@@ -177,9 +162,40 @@ services:
 
       # Enable redirection for HTTP and HTTPS
       - traefik.http.routers.${STACK_NAME?Variable not set}-frontend-http.middlewares=https-redirect
-volumes:
-  app-db-data:
-  qdrant_data:
+
+  frontend-nextjs:
+    profiles: [ "nextjs" ]
+    image: '${DOCKER_IMAGE_FRONTEND_NEXTJS?Variable not set}:${TAG-latest}'
+    restart: always
+    networks:
+      - traefik-public
+      - default
+    build:
+      context: ./frontend-nextjs
+      args:
+        - NEXT_PUBLIC_API_URL=https://api.${DOMAIN?Variable not set}
+        - NEXTAUTH_SECRET=${NEXTAUTH_SECRET?Variable not set}
+        - NODE_ENV=production
+    labels:
+      - traefik.enable=true
+      - traefik.docker.network=traefik-public
+      - traefik.constraint-label=traefik-public
+
+      - traefik.http.services.${STACK_NAME?Variable not set}-frontend-nextjs.loadbalancer.server.port=80
+
+      - traefik.http.routers.${STACK_NAME?Variable not set}-frontend-nextjs-http.rule=Host(`dashboard.${DOMAIN?Variable not set}`)
+      - traefik.http.routers.${STACK_NAME?Variable not set}-frontend-nextjs-http.entrypoints=http
+
+      - traefik.http.routers.${STACK_NAME?Variable not set}-frontend-nextjs-https.rule=Host(`dashboard.${DOMAIN?Variable not set}`)
+      - traefik.http.routers.${STACK_NAME?Variable not set}-frontend-nextjs-https.entrypoints=https
+      - traefik.http.routers.${STACK_NAME?Variable not set}-frontend-nextjs-https.tls=true
+      - traefik.http.routers.${STACK_NAME?Variable not set}-frontend-nextjs-https.tls.certresolver=le
+
+      # Enable redirection for HTTP and HTTPS
+      - traefik.http.routers.${STACK_NAME?Variable not set}-frontend-nextjs-http.middlewares=https-redirect
+
+    volumes:
+      - app-db-data:
 
 networks:
   traefik-public:

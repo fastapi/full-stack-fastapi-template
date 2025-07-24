@@ -102,6 +102,20 @@ services:
         - VITE_API_URL=http://localhost:8000
         - NODE_ENV=development
 
+  frontend-nextjs:
+    profiles: [ "nextjs" ]
+    restart: "no"
+    ports:
+      - "3000:80"
+    build:
+      context: ./frontend-nextjs
+      args:
+        - NEXT_PUBLIC_API_URL=${NEXT_PUBLIC_API_URL?Variable not set}
+        - NEXTAUTH_SECRET=${NEXTAUTH_SECRET?Variable not set}
+        - NODE_ENV=development
+      env_file:
+        - .env.local
+
   playwright:
     build:
       context: ./frontend

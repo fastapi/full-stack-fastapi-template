@@ -27,11 +27,6 @@ const menuItems = [
     icon: Package,
   },
   {
-    title: "ColPali Search",
-    url: "/dashboard/colpali",
-    icon: Search,
-  },
-  {
     title: "User Settings",
     url: "/dashboard/settings",
     icon: Settings,
