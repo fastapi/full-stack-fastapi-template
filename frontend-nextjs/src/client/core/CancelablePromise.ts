@@ -1,7 +1,7 @@
 export class CancelError extends Error {
 	constructor(message: string) {
 		super(message);
-		this.name = 'CancelError';
+		this.name = "CancelError";
 	}
 
 	public get isCancelled(): boolean {
@@ -30,8 +30,8 @@ export class CancelablePromise<T> implements Promise<T> {
 		executor: (
 			resolve: (value: T | PromiseLike<T>) => void,
 			reject: (reason?: unknown) => void,
-			onCancel: OnCancel
-		) => void
+			onCancel: OnCancel,
+		) => void,
 	) {
 		this._isResolved = false;
 		this._isRejected = false;
@@ -64,15 +64,15 @@ export class CancelablePromise<T> implements Promise<T> {
 				this.cancelHandlers.push(cancelHandler);
 			};
 
-			Object.defineProperty(onCancel, 'isResolved', {
+			Object.defineProperty(onCancel, "isResolved", {
 				get: (): boolean => this._isResolved,
 			});
 
-			Object.defineProperty(onCancel, 'isRejected', {
+			Object.defineProperty(onCancel, "isRejected", {
 				get: (): boolean => this._isRejected,
 			});
 
-			Object.defineProperty(onCancel, 'isCancelled', {
+			Object.defineProperty(onCancel, "isCancelled", {
 				get: (): boolean => this._isCancelled,
 			});
 
@@ -86,13 +86,13 @@ export class CancelablePromise<T> implements Promise<T> {
 
 	public then<TResult1 = T, TResult2 = never>(
 		onFulfilled?: ((value: T) => TResult1 | PromiseLike<TResult1>) | null,
-		onRejected?: ((reason: unknown) => TResult2 | PromiseLike<TResult2>) | null
+		onRejected?: ((reason: unknown) => TResult2 | PromiseLike<TResult2>) | null,
 	): Promise<TResult1 | TResult2> {
 		return this.promise.then(onFulfilled, onRejected);
 	}
 
 	public catch<TResult = never>(
-		onRejected?: ((reason: unknown) => TResult | PromiseLike<TResult>) | null
+		onRejected?: ((reason: unknown) => TResult | PromiseLike<TResult>) | null,
 	): Promise<T | TResult> {
 		return this.promise.catch(onRejected);
 	}
@@ -112,12 +112,12 @@ export class CancelablePromise<T> implements Promise<T> {
 					cancelHandler();
 				}
 			} catch (error) {
-				console.warn('Cancellation threw an error', error);
+				console.warn("Cancellation threw an error", error);
 				return;
 			}
 		}
 		this.cancelHandlers.length = 0;
-		if (this._reject) this._reject(new CancelError('Request aborted'));
+		if (this._reject) this._reject(new CancelError("Request aborted"));
 	}
 
 	public get isCancelled(): boolean {
