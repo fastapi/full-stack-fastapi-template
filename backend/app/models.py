@@ -58,18 +58,20 @@ class UsersPublic(SQLModel):
 
 # Shared properties
 class DocumentBase(SQLModel):
-    title: str = Field(min_length=1, max_length=255)
-    description: str | None = Field(default=None, max_length=255)
+    filename: str = Field(min_length=1, max_length=255)
+    s3_url: str | None = Field(default=None, max_length=255)  # URL to the document in S3
+    content_type: str | None = Field(default=None, max_length=255)
+    size: int | None = Field(default=None, ge=0)  # Size in bytes
+
 
 
 # Properties to receive on document creation
 class DocumentCreate(DocumentBase):
     pass
 
-
 # Properties to receive on document update
 class DocumentUpdate(DocumentBase):
-    title: str | None = Field(default=None, min_length=1, max_length=255)  # type: ignore
+    filename: str | None = Field(default=None, min_length=1, max_length=255)  # type: ignore
 
 
 # Database model, database table inferred from class name
@@ -82,10 +84,17 @@ class Document(DocumentBase, table=True):
 
 
 # Properties to return via API, id is always required
+# class DocumentPublic(DocumentBase):
+#     id: uuid.UUID
+#     owner_id: uuid.UUID
+
 class DocumentPublic(DocumentBase):
     id: uuid.UUID
     owner_id: uuid.UUID
-
+    s3_url: str | None = None
+    filename: str | None = None
+    content_type: str | None = None
+    size: int | None = None
 
 class DocumentsPublic(SQLModel):
     data: list[DocumentPublic]
