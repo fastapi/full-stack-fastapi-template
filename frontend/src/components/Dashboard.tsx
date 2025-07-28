@@ -1,9 +1,10 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Progress } from '@/components/ui/progress'
 import { Checkbox } from '@/components/ui/checkbox'
+import { apiService, type HumanValue, type ChatbotRecommendation, type BotCompletionStats } from '@/lib/api'
 
 interface MetricCardProps {
   value: string
@@ -16,12 +17,6 @@ interface BotCardProps {
   completion: number
 }
 
-interface ChallengeCardProps {
-  category: string
-  name: string
-  count: number
-  details: string[]
-}
 
 interface ValueItemProps {
   name: string
@@ -42,10 +37,6 @@ const BotCard = ({ name, users, completion }: BotCardProps) => (
   <Card className="hover:border-blue-500 transition-all duration-300 hover:-translate-y-1">
     <CardContent className="pt-6">
       <h3 className="text-xl font-bold text-slate-800 mb-4">{name}</h3>
-      <div className="flex justify-between mb-3">
-        <span className="text-slate-600">Unique Users:</span>
-        <span className="font-bold text-slate-800">{users}</span>
-      </div>
       <Progress value={completion} className="mb-2" />
       <div className="text-right font-bold text-green-600 text-lg">
         {completion}% Average Script Completion
@@ -54,34 +45,6 @@ const BotCard = ({ name, users, completion }: BotCardProps) => (
   </Card>
 )
 
-const ChallengeCard = ({ category, name, count, details }: ChallengeCardProps) => (
-  <Card className="hover:border-blue-500 transition-all duration-300 hover:-translate-y-1 hover:shadow-lg">
-    <CardContent className="pt-6">
-      <div className="flex justify-between items-start gap-3 mb-4">
-        <div className="flex flex-col gap-2 flex-1">
-          <div className="bg-blue-500 text-white px-3 py-1 rounded-full text-xs font-semibold w-fit">
-            [{category}]
-          </div>
-          <h4 className="font-bold text-slate-800 text-lg leading-tight">{name}</h4>
-        </div>
-        <div className="bg-red-500 text-white px-3 py-1 rounded-full text-xs font-bold whitespace-nowrap">
-          {count} conversations
-        </div>
-      </div>
-      <div>
-        <h5 className="text-slate-600 mb-3 font-semibold">What people are bringing to this challenge:</h5>
-        <ul className="space-y-2">
-          {details.map((detail, index) => (
-            <li key={index} className="text-slate-700 text-sm leading-relaxed pl-4 relative">
-              <span className="absolute left-0 top-1 text-blue-500 text-lg">•</span>
-              {detail}
-            </li>
-          ))}
-        </ul>
-      </div>
-    </CardContent>
-  </Card>
-)
 
 const ValueItem = ({ name, count, maxCount }: ValueItemProps) => {
   const percentage = (count / maxCount) * 100
@@ -124,98 +87,116 @@ export default function Dashboard() {
     assessmentDebrief: true
   })
 
-  const metrics = [
-    { value: '191', label: 'Active Users' },
-    { value: '365', label: 'Total Sessions' },
-    { value: '72%', label: 'Average Script Completion' },
-    { value: '2.2', label: 'Avg Sessions per User' }
-  ]
+  // State for API data
+  const [totalSessions, setTotalSessions] = useState<number>(0)
+  const [activeUsers, setActiveUsers] = useState<number>(0)
+  const [botCompletionStats, setBotCompletionStats] = useState<Record<string, BotCompletionStats>>({})
+  const [humanValues, setHumanValues] = useState<HumanValue[]>([])
+  const [chatbotRecommendations, setChatbotRecommendations] = useState<ChatbotRecommendation[]>([])
+  const [loading, setLoading] = useState<boolean>(true)
+  const [error, setError] = useState<string | null>(null)
 
-  const bots = [
-    { name: 'Player Mindset Coach', users: 100, completion: 65 },
-    { name: 'Action Plan Coach', users: 127, completion: 78 },
-    { name: 'Assessment Debrief', users: 138, completion: 82 }
-  ]
+  // Fetch data on component mount
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        setLoading(true)
+        setError(null)
 
-  const challenges = [
-    {
-      category: 'Communication and Collaboration',
-      name: 'Miscommunication / Lack of Clarity',
-      count: 16,
-      details: [
-        'Unclear expectations from managers leading to repeated work and frustration',
-        'Difficulty communicating complex technical concepts to non-technical stakeholders',
-        'Inconsistent messaging across different teams causing confusion in projects',
-        'Lack of clear communication channels for urgent vs. non-urgent matters',
-        'Assumptions made in email communications that lead to misunderstandings'
-      ]
-    },
-    {
-      category: 'Task and Workload Management',
-      name: 'Overload / Time Pressure',
-      count: 16,
-      details: [
-        'Competing priorities from multiple stakeholders with no clear prioritization framework',
-        'Unrealistic deadlines that compromise quality and increase stress levels',
-        'Inability to say no to additional requests, leading to overcommitment',
-        'Lack of time for strategic thinking due to constant firefighting',
-        'Difficulty delegating tasks effectively to reduce personal workload'
-      ]
-    },
-    {
-      category: 'Communication and Collaboration',
-      name: 'Cross-functional Misalignment',
-      count: 7,
-      details: [
-        'Different departments working with conflicting goals and metrics',
-        'Lack of visibility into other teams\' processes and timelines',
-        'Stakeholders not understanding the impact of their decisions on other areas',
-        'Insufficient collaboration tools for cross-functional project management'
-      ]
-    },
-    {
-      category: 'Task and Workload Management',
-      name: 'Unclear Goals / Priorities',
-      count: 5,
-      details: [
-        'Shifting priorities from leadership without clear communication about changes',
-        'Lack of connection between individual tasks and organizational strategy',
-        'Difficulty determining which projects should take precedence',
-        'Vague objectives that make it hard to measure success',
-        'Conflicting direction from different managers or stakeholders'
-      ]
-    },
-    {
-      category: 'Management and Leadership',
-      name: 'Inconsistent or Absent Direction',
-      count: 4,
-      details: [
-        'Managers who change direction frequently without explanation',
-        'Lack of regular check-ins and guidance from supervisors',
-        'Inconsistent feedback that makes it difficult to improve performance',
-        'Absence of clear leadership during critical project phases'
-      ]
+        const [
+          totalSessionsData,
+          activeUsersData,
+          botCompletionData,
+          humanValuesData,
+          recommendationsData
+        ] = await Promise.all([
+          apiService.getTotalSessions(),
+          apiService.getActiveUsers(),
+          apiService.getBotCompletion(),
+          apiService.getTopHumanValues(5),
+          apiService.getTopChatbotRecommendations(5)
+        ])
+
+        setTotalSessions(totalSessionsData.total_sessions)
+        setActiveUsers(activeUsersData.active_users)
+        setBotCompletionStats(botCompletionData.bot_completion_stats)
+        setHumanValues(humanValuesData.top_human_values)
+        setChatbotRecommendations(recommendationsData.top_chatbot_recommendations)
+      } catch (err) {
+        setError(err instanceof Error ? err.message : 'An error occurred while fetching data')
+        console.error('Error fetching dashboard data:', err)
+      } finally {
+        setLoading(false)
+      }
     }
+
+    fetchData()
+  }, [])
+
+  // Calculate metrics from API data
+  const averageCompletion = Object.keys(botCompletionStats).length > 0
+    ? Math.round(
+        Object.values(botCompletionStats).reduce((sum, bot) => sum + bot.completion_percentage, 0) /
+        Object.keys(botCompletionStats).length * 100
+      )
+    : 0
+
+  const avgSessionsPerUser = activeUsers > 0 ? (totalSessions / activeUsers).toFixed(1) : '0'
+
+  const metrics = [
+    { value: activeUsers.toString(), label: 'Active Users' },
+    { value: totalSessions.toString(), label: 'Total Sessions' },
+    { value: `${averageCompletion}%`, label: 'Average Script Completion' },
+    { value: avgSessionsPerUser, label: 'Avg Sessions per User' }
   ]
 
-  const values = [
-    { name: 'Responsibility', count: 22 },
-    { name: 'Collaboration', count: 12 },
-    { name: 'Accountability', count: 11 },
-    { name: 'Honesty', count: 8 },
-    { name: 'Proactivity', count: 6 }
-  ]
+  // Map bot names from API to display names
+  const botNameMapping: Record<string, string> = {
+    'player_mindset_en': 'Player Mindset Coach',
+    'assessment_actionplan_en': 'Action Plan Coach',
+    'assessment_debrief_en': 'Assessment Debrief'
+  }
 
-  const recommendations = [
-    { name: 'Reflect on Personal Contribution', count: 5 },
-    { name: 'Focus on Controllable Actions', count: 3 },
-    { name: 'Set Clear Expectations', count: 3 },
-    { name: 'Proactive Planning', count: 2 },
-    { name: 'Consider Alternative Approaches', count: 2 }
-  ]
+  const bots = Object.entries(botCompletionStats).map(([botKey, stats]) => ({
+    name: botNameMapping[botKey] || botKey,
+    users: 0, // This data is not available from the current API
+    completion: Math.round(stats.completion_percentage * 100)
+  }))
 
-  const maxValueCount = Math.max(...values.map(v => v.count))
-  const maxRecommendationCount = Math.max(...recommendations.map(r => r.count))
+  const maxValueCount = humanValues.length > 0 ? Math.max(...humanValues.map(v => v.count)) : 1
+  const maxRecommendationCount = chatbotRecommendations.length > 0 ? Math.max(...chatbotRecommendations.map(r => r.count)) : 1
+
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-indigo-500 via-purple-500 to-purple-700 p-5 flex items-center justify-center">
+        <div className="bg-white rounded-3xl shadow-2xl p-8">
+          <div className="text-center">
+            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
+            <p className="text-slate-600">Loading dashboard data...</p>
+          </div>
+        </div>
+      </div>
+    )
+  }
+
+  if (error) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-indigo-500 via-purple-500 to-purple-700 p-5 flex items-center justify-center">
+        <div className="bg-white rounded-3xl shadow-2xl p-8">
+          <div className="text-center">
+            <div className="text-red-600 text-xl mb-4">Error Loading Dashboard</div>
+            <p className="text-slate-600 mb-4">{error}</p>
+            <button
+              onClick={() => window.location.reload()}
+              className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700"
+            >
+              Retry
+            </button>
+          </div>
+        </div>
+      </div>
+    )
+  }
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-indigo-500 via-purple-500 to-purple-700 p-5">
@@ -291,20 +272,6 @@ export default function Dashboard() {
               </CardContent>
             </Card>
 
-            {/* Top 5 Challenges */}
-            <h3 className="text-2xl font-semibold text-slate-800 mb-6">Top 5 Leadership Challenges</h3>
-            <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-6 mb-12">
-              {challenges.map((challenge, index) => (
-                <ChallengeCard
-                  key={index}
-                  category={challenge.category}
-                  name={challenge.name}
-                  count={challenge.count}
-                  details={challenge.details}
-                />
-              ))}
-            </div>
-
             {/* Values & Coaching Patterns */}
             <h3 className="text-2xl font-semibold text-slate-800 mb-6">Values & Coaching Patterns</h3>
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-10">
@@ -314,10 +281,10 @@ export default function Dashboard() {
                   <CardTitle className="text-center text-slate-800">Top Human Values</CardTitle>
                 </CardHeader>
                 <CardContent>
-                  {values.map((value, index) => (
+                  {humanValues.map((value, index) => (
                     <ValueItem
                       key={index}
-                      name={value.name}
+                      name={value.value}
                       count={value.count}
                       maxCount={maxValueCount}
                     />
@@ -331,10 +298,10 @@ export default function Dashboard() {
                   <CardTitle className="text-center text-slate-800">Top AI Coaching Areas</CardTitle>
                 </CardHeader>
                 <CardContent>
-                  {recommendations.map((recommendation, index) => (
+                  {chatbotRecommendations.map((recommendation, index) => (
                     <RecommendationItem
                       key={index}
-                      name={recommendation.name}
+                      name={recommendation.recommendation}
                       count={recommendation.count}
                       maxCount={maxRecommendationCount}
                     />
