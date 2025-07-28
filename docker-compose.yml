@@ -11,6 +11,8 @@ services:
       timeout: 10s
     volumes:
       - app-db-data:/var/lib/postgresql/data/pgdata
+    ports:
+      - ${POSTGRES_PORT}:5432
     env_file:
       - .env
     environment:
