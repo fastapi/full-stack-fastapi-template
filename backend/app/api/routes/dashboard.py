@@ -1,7 +1,7 @@
 from collections import Counter
 from typing import Any
 
-from fastapi import APIRouter
+from fastapi import APIRouter, Query
 from sqlalchemy import distinct
 from sqlmodel import func, select
 
@@ -188,15 +188,24 @@ def get_top_chatbot_recommendations(
 
 @router.get("/stats/top-leadership-challenges")
 def get_top_leadership_challenges(
-    session: SessionDep, limit: int = 6, num_summaries: int = 5
+    session: SessionDep,
+    bot_names: list[str] = Query(...),
+    limit: int = 6,
+    num_summaries: int = 5,
 ) -> dict[str, Any]:
     """
     Get top leadership challenges with their subcategories and challenge summaries.
     Returns top 5 subcategories and up to 5 challenge summaries for each subcategory.
+    Filters results to only include challenges from specified bot names.
     """
-    # Get all challenge analysis data
+    # Get challenge analysis data filtered by bot names
+    statement = (
+        select(ChallengeAnalysis)
+        .join(Session, ChallengeAnalysis.session_id == Session.session_id)
+        .where(Session.bot_name.in_(bot_names))
+    )
 
-    results = session.exec(select(ChallengeAnalysis)).all()
+    results = session.exec(statement).all()
 
     # Group by subcategory (challenge_name) and count occurrences
     subcategory_data = {}

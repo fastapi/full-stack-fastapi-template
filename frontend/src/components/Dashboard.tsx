@@ -133,12 +133,23 @@ export default function Dashboard() {
   const [loading, setLoading] = useState<boolean>(true)
   const [error, setError] = useState<string | null>(null)
 
-  // Fetch data on component mount
+  // Helper function to get selected bot names
+  const getSelectedBotNames = () => {
+    const botNames: string[] = []
+    if (botFilters.playerMindset) botNames.push('player_mindset_en')
+    if (botFilters.actionPlan) botNames.push('assessment_actionplan_en')
+    if (botFilters.assessmentDebrief) botNames.push('assessment_debrief_en')
+    return botNames
+  }
+
+  // Fetch initial data on component mount
   useEffect(() => {
-    const fetchData = async () => {
+    const fetchInitialData = async () => {
       try {
         setLoading(true)
         setError(null)
+
+        const selectedBotNames = getSelectedBotNames()
 
         const [
           totalSessionsData,
@@ -153,7 +164,7 @@ export default function Dashboard() {
           apiService.getBotCompletion(),
           apiService.getTopHumanValues(5),
           apiService.getTopChatbotRecommendations(5),
-          apiService.getTopLeadershipChallenges(6)
+          apiService.getTopLeadershipChallenges(selectedBotNames, 6)
         ])
 
         setTotalSessions(totalSessionsData.total_sessions)
@@ -170,8 +181,28 @@ export default function Dashboard() {
       }
     }
 
-    fetchData()
+    fetchInitialData()
   }, [])
+
+  // Fetch leadership challenges when bot filters change
+  useEffect(() => {
+    const fetchLeadershipChallenges = async () => {
+      try {
+        const selectedBotNames = getSelectedBotNames()
+        if (selectedBotNames.length === 0) {
+          setLeadershipChallenges([])
+          return
+        }
+
+        const leadershipChallengesData = await apiService.getTopLeadershipChallenges(selectedBotNames, 6)
+        setLeadershipChallenges(leadershipChallengesData.top_leadership_challenges)
+      } catch (err) {
+        console.error('Error fetching leadership challenges:', err)
+      }
+    }
+
+    fetchLeadershipChallenges()
+  }, [botFilters])
 
   // Calculate metrics from API data
   const averageCompletion = Object.keys(botCompletionStats).length > 0

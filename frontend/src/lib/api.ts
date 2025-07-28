@@ -81,8 +81,9 @@ class ApiService {
     return this.fetchData<TopChatbotRecommendationsResponse>(`/api/v1/dashboard/stats/top-chatbot-recommendations?limit=${limit}`);
   }
 
-  async getTopLeadershipChallenges(limit: number = 6, num_summaries: number = 4): Promise<TopLeadershipChallengesResponse> {
-    return this.fetchData<TopLeadershipChallengesResponse>(`/api/v1/dashboard/stats/top-leadership-challenges?limit=${limit}&num_summaries=${num_summaries}`);
+  async getTopLeadershipChallenges(botNames: string[], limit: number = 6, num_summaries: number = 4): Promise<TopLeadershipChallengesResponse> {
+    const botNamesParam = botNames.map(name => `bot_names=${encodeURIComponent(name)}`).join('&');
+    return this.fetchData<TopLeadershipChallengesResponse>(`/api/v1/dashboard/stats/top-leadership-challenges?${botNamesParam}&limit=${limit}&num_summaries=${num_summaries}`);
   }
 }
 
