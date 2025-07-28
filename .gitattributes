@@ -1,2 +1,7 @@
 * text=auto
 *.sh text eol=lf
+*.csv filter=lfs diff=lfs merge=lfs -text
+backend/dataset/analytics-csv/Summary[[:space:]]Merged[[:space:]]v1.csv filter=lfs diff=lfs merge=lfs -text
+backend/dataset/analytics-csv/Topic[[:space:]]and[[:space:]]Challenge[[:space:]]Analysis.csv filter=lfs diff=lfs merge=lfs -text
+backend/dataset/analytics-csv/Abandonment[[:space:]]Analysis[[:space:]]O3.csv filter=lfs diff=lfs merge=lfs -text
+backend/dataset/analytics-csv/Is[[:space:]]Meaningful.csv filter=lfs diff=lfs merge=lfs -text
