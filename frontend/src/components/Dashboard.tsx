@@ -4,7 +4,7 @@ import { useState, useEffect } from 'react'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Progress } from '@/components/ui/progress'
 import { Checkbox } from '@/components/ui/checkbox'
-import { apiService, type HumanValue, type ChatbotRecommendation, type BotCompletionStats } from '@/lib/api'
+import { apiService, type HumanValue, type ChatbotRecommendation, type BotCompletionStats, type LeadershipChallenge } from '@/lib/api'
 
 interface MetricCardProps {
   value: string
@@ -80,6 +80,42 @@ const RecommendationItem = ({ name, count, maxCount }: ValueItemProps) => {
   )
 }
 
+interface ChallengeCardProps {
+  challenge: LeadershipChallenge
+}
+
+const ChallengeCard = ({ challenge }: ChallengeCardProps) => (
+  <Card className="hover:border-blue-500 transition-all duration-300 hover:-translate-y-1 hover:shadow-lg h-fit">
+    <CardContent className="pt-6">
+      <div className="flex justify-between items-start gap-3 mb-4">
+        <div className="flex flex-col gap-2 flex-1">
+          <div className="bg-blue-500 text-white px-3 py-1 rounded-full text-xs font-semibold w-fit">
+            [{challenge.category}]
+          </div>
+          <h3 className="text-lg font-bold text-slate-800 leading-tight">
+            {challenge.challenge_name}
+          </h3>
+        </div>
+        <div className="bg-red-500 text-white px-3 py-1 rounded-full text-xs font-bold flex-shrink-0">
+          {challenge.count} conversations
+        </div>
+      </div>
+
+      <div className="mt-4">
+        <h5 className="text-slate-600 mb-3 font-semibold">What people are bringing to this challenge:</h5>
+        <ul className="space-y-2">
+          {challenge.summaries.map((summary, index) => (
+            <li key={index} className="text-slate-700 text-sm leading-relaxed pl-4 relative">
+              <span className="absolute left-0 top-2 w-1 h-1 bg-blue-500 rounded-full"></span>
+              {summary}
+            </li>
+          ))}
+        </ul>
+      </div>
+    </CardContent>
+  </Card>
+)
+
 export default function Dashboard() {
   const [botFilters, setBotFilters] = useState({
     playerMindset: true,
@@ -93,6 +129,7 @@ export default function Dashboard() {
   const [botCompletionStats, setBotCompletionStats] = useState<Record<string, BotCompletionStats>>({})
   const [humanValues, setHumanValues] = useState<HumanValue[]>([])
   const [chatbotRecommendations, setChatbotRecommendations] = useState<ChatbotRecommendation[]>([])
+  const [leadershipChallenges, setLeadershipChallenges] = useState<LeadershipChallenge[]>([])
   const [loading, setLoading] = useState<boolean>(true)
   const [error, setError] = useState<string | null>(null)
 
@@ -108,13 +145,15 @@ export default function Dashboard() {
           activeUsersData,
           botCompletionData,
           humanValuesData,
-          recommendationsData
+          recommendationsData,
+          leadershipChallengesData
         ] = await Promise.all([
           apiService.getTotalSessions(),
           apiService.getActiveUsers(),
           apiService.getBotCompletion(),
           apiService.getTopHumanValues(5),
-          apiService.getTopChatbotRecommendations(5)
+          apiService.getTopChatbotRecommendations(5),
+          apiService.getTopLeadershipChallenges(6)
         ])
 
         setTotalSessions(totalSessionsData.total_sessions)
@@ -122,6 +161,7 @@ export default function Dashboard() {
         setBotCompletionStats(botCompletionData.bot_completion_stats)
         setHumanValues(humanValuesData.top_human_values)
         setChatbotRecommendations(recommendationsData.top_chatbot_recommendations)
+        setLeadershipChallenges(leadershipChallengesData.top_leadership_challenges)
       } catch (err) {
         setError(err instanceof Error ? err.message : 'An error occurred while fetching data')
         console.error('Error fetching dashboard data:', err)
@@ -271,6 +311,14 @@ export default function Dashboard() {
                 </div>
               </CardContent>
             </Card>
+
+            {/* Top 5 Leadership Challenges */}
+            <h3 className="text-2xl font-semibold text-slate-800 mb-6">Top 5 Leadership Challenges</h3>
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-10">
+              {leadershipChallenges.map((challenge, index) => (
+                <ChallengeCard key={index} challenge={challenge} />
+              ))}
+            </div>
 
             {/* Values & Coaching Patterns */}
             <h3 className="text-2xl font-semibold text-slate-800 mb-6">Values & Coaching Patterns</h3>

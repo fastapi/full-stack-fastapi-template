@@ -6,7 +6,7 @@ from sqlalchemy import distinct
 from sqlmodel import func, select
 
 from app.api.deps import SessionDep
-from app.models import AbandonmentFeatures, Session, SummaryFeatures
+from app.models import AbandonmentFeatures, ChallengeAnalysis, Session, SummaryFeatures
 
 router = APIRouter(prefix="/dashboard", tags=["dashboard"])
 
@@ -183,4 +183,73 @@ def get_top_chatbot_recommendations(
     return {
         "top_chatbot_recommendations": top_chatbot_recommendations,
         "total_recommendations_analyzed": len(all_recommendations),
+    }
+
+
+@router.get("/stats/top-leadership-challenges")
+def get_top_leadership_challenges(
+    session: SessionDep, limit: int = 6, num_summaries: int = 5
+) -> dict[str, Any]:
+    """
+    Get top leadership challenges with their subcategories and challenge summaries.
+    Returns top 5 subcategories and up to 5 challenge summaries for each subcategory.
+    """
+    # Get all challenge analysis data
+
+    results = session.exec(select(ChallengeAnalysis)).all()
+
+    # Group by subcategory (challenge_name) and count occurrences
+    subcategory_data = {}
+    for item in results:
+        # Clean up the data
+        topic_name = item.high_level_topic_name
+        topic_name = topic_name.strip() if topic_name else "Unknown"
+
+        challenge_name = item.challenge_name
+        challenge_name = challenge_name.strip() if challenge_name else "Unknown"
+
+        challenge_summary = item.challenge_summary
+        challenge_summary = item.challenge_summary.strip() if challenge_summary else ""
+
+        if "Unknown" in topic_name or "Other" in topic_name:
+            continue
+
+        if challenge_name not in subcategory_data:
+            subcategory_data[challenge_name] = {
+                "category": topic_name,
+                "challenge_name": challenge_name,
+                "count": 0,
+                "summaries": [],
+            }
+
+        subcategory_data[challenge_name]["count"] += 1
+        if (
+            challenge_summary
+            and challenge_summary not in subcategory_data[challenge_name]["summaries"]
+        ):
+            subcategory_data[challenge_name]["summaries"].append(challenge_summary)
+
+    # Sort by count and get top subcategories
+    sorted_subcategories = sorted(
+        subcategory_data.values(), key=lambda x: x["count"], reverse=True
+    )[:limit]
+
+    # Format the response with up to 5 summaries per subcategory
+    top_challenges = []
+    for subcategory in sorted_subcategories:
+        # Limit to 5 summaries per subcategory
+        limited_summaries = subcategory["summaries"][:num_summaries]
+
+        top_challenges.append(
+            {
+                "category": subcategory["category"],
+                "challenge_name": subcategory["challenge_name"],
+                "count": subcategory["count"],
+                "summaries": limited_summaries,
+            }
+        )
+
+    return {
+        "top_leadership_challenges": top_challenges,
+        "total_challenges_analyzed": len(results),
     }

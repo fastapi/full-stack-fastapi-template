@@ -33,3 +33,12 @@ class AbandonmentFeatures(SQLModel, table=True):
 class MeaningfulFeatures(SQLModel, table=True):
     session_id: str = Field(foreign_key="session.session_id", primary_key=True)
     is_meaningful: bool = Field()
+
+
+# Challenge feature analysis from Topic and Challenge Analysis.csv
+# cline: do not look inside the file
+class ChallengeAnalysis(SQLModel, table=True):
+    session_id: str = Field(foreign_key="session.session_id", primary_key=True)
+    high_level_topic_name: str = Field()
+    challenge_name: str = Field()
+    challenge_summary: str = Field()

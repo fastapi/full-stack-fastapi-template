@@ -3,10 +3,15 @@ from pathlib import Path
 
 import pandas as pd
 from loguru import logger
-from sqlmodel import Session, SQLModel, create_engine, select
+from sqlmodel import Session, SQLModel, create_engine
 
 from app.core.config import settings
-from app.models import AbandonmentFeatures, MeaningfulFeatures, SummaryFeatures
+from app.models import (
+    AbandonmentFeatures,
+    ChallengeAnalysis,
+    MeaningfulFeatures,
+    SummaryFeatures,
+)
 from app.models import Session as SessionModel
 
 engine = create_engine(str(settings.SQLALCHEMY_DATABASE_URI))
@@ -136,8 +141,8 @@ def load_csv_data(session: Session) -> None:
         )
         session.merge(abandonment_features)
 
-        session.commit()
-        logger.info(f"Loaded {len(abandonment_df)} abandonment records")
+    session.commit()
+    logger.info(f"Loaded {len(abandonment_df)} abandonment records")
 
     # Load Is Meaningful data
     meaningful_file = dataset_path / "Is Meaningful.csv"
@@ -182,6 +187,57 @@ def load_csv_data(session: Session) -> None:
     session.commit()
     logger.info(f"Loaded {len(meaningful_df)} meaningful records")
 
+    # Load Topic and Challenge Analysis data
+    challenge_file = dataset_path / "Topic and Challenge Analysis.csv"
+    logger.info("Loading Topic and Challenge Analysis data...")
+    challenge_df = pd.read_csv(
+        challenge_file, converters={"outputs": json.loads, "run": json.loads}
+    )
+
+    # Extract features
+    challenge_df["high_level_topic_name"] = challenge_df["outputs"].apply(
+        lambda x: x.get("high_level_topic_name")
+    )
+    challenge_df["challenge_name"] = challenge_df["outputs"].apply(
+        lambda x: x.get("challenge_name")
+    )
+    challenge_df["challenge_summary"] = challenge_df["outputs"].apply(
+        lambda x: x.get("challenge_summary")
+    )
+    challenge_df["bot_name"] = challenge_df["run"].apply(
+        lambda x: x.get("extra", {}).get("metadata", {}).get("ls_example_bot_name")
+    )
+    challenge_df["session_id"] = challenge_df["run"].apply(
+        lambda x: x.get("extra", {}).get("metadata", {}).get("ls_example_session_id")
+    )
+    challenge_df["user_id"] = challenge_df["run"].apply(
+        lambda x: x.get("extra", {}).get("metadata", {}).get("ls_example_user_id")
+    )
+
+    # Insert sessions and challenge features
+    for _, row in challenge_df.iterrows():
+        # Insert or update session
+        existing_session = session.get(SessionModel, row["session_id"])
+        if not existing_session:
+            session_obj = SessionModel(
+                session_id=row["session_id"],
+                bot_name=row["bot_name"],
+                user_id=row["user_id"],
+            )
+            session.add(session_obj)
+
+        # Insert challenge features
+        challenge_features = ChallengeAnalysis(
+            session_id=row["session_id"],
+            high_level_topic_name=row["high_level_topic_name"],
+            challenge_name=row["challenge_name"],
+            challenge_summary=row["challenge_summary"],
+        )
+        session.merge(challenge_features)
+
+    session.commit()
+    logger.info(f"Loaded {len(challenge_df)} challenge analysis records")
+
 
 def init_db(session: Session) -> None:
     # Tables should be created with Alembic migrations
@@ -192,6 +248,4 @@ def init_db(session: Session) -> None:
     # This works because the models are already imported and registered from app.models
     SQLModel.metadata.create_all(engine)
 
-    session_model = session.exec(select(SessionModel)).first()
-    if not session_model:
-        load_csv_data(session)
+    load_csv_data(session)

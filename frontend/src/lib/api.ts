@@ -39,6 +39,18 @@ export interface TopChatbotRecommendationsResponse {
   total_recommendations_analyzed: number;
 }
 
+export interface LeadershipChallenge {
+  category: string;
+  challenge_name: string;
+  count: number;
+  summaries: string[];
+}
+
+export interface TopLeadershipChallengesResponse {
+  top_leadership_challenges: LeadershipChallenge[];
+  total_challenges_analyzed: number;
+}
+
 class ApiService {
   private async fetchData<T>(endpoint: string): Promise<T> {
     console.log(`API_BASE_URL: ${API_BASE_URL}, endpoint: ${endpoint}`);
@@ -67,6 +79,10 @@ class ApiService {
 
   async getTopChatbotRecommendations(limit: number = 10): Promise<TopChatbotRecommendationsResponse> {
     return this.fetchData<TopChatbotRecommendationsResponse>(`/api/v1/dashboard/stats/top-chatbot-recommendations?limit=${limit}`);
+  }
+
+  async getTopLeadershipChallenges(limit: number = 6, num_summaries: number = 4): Promise<TopLeadershipChallengesResponse> {
+    return this.fetchData<TopLeadershipChallengesResponse>(`/api/v1/dashboard/stats/top-leadership-challenges?limit=${limit}&num_summaries=${num_summaries}`);
   }
 }
 
