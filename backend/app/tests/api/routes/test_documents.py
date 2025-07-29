@@ -6,9 +6,10 @@ from unittest.mock import patch
 from app.core.config import settings
 from app.tests.utils.document import create_random_document
 import io
+import time
 
 
-def skip_test_create_document(
+def skip_test_create_document_real_s3(
     client: TestClient, superuser_token_headers: dict[str, str]
 ) -> None:
     '''Test creating a document with a file upload with the real S3 service.'''
@@ -25,10 +26,6 @@ def skip_test_create_document(
     assert response.status_code == 200
     content = response.json()
     assert "id" in content, "actual response: " + str(content)
-    # assert content["title"] == metadata["title"]
-    # assert content["description"] == metadata["description"]
-    # assert "id" in content
-    # assert "owner_id" in content
 
 def test_create_document(
     client: TestClient, superuser_token_headers: dict[str, str]

@@ -1,5 +1,6 @@
 from typing import Any
 from app.api.deps import CurrentUser, SessionDep
+from app.core.extractors import extract_text_and_save_to_db
 from app.models import Document, DocumentCreate, DocumentPublic
 from fastapi import APIRouter, BackgroundTasks, File, UploadFile, HTTPException
 from app.s3 import upload_file_to_s3, generate_s3_url
@@ -40,6 +41,5 @@ def create_document(
 
     # 3. Kick off background job
     print("Document created, starting background task...")
-    # background_tasks.add_task(generate_questions, document.id)
-
+    background_tasks.add_task(extract_text_and_save_to_db, url, document.id)
     return document
