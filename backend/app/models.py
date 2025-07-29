@@ -2,7 +2,7 @@ import uuid
 
 from pydantic import EmailStr
 from sqlmodel import Field, Relationship, SQLModel
-
+from sqlalchemy import Column, Text
 
 # Shared properties
 class UserBase(SQLModel):
@@ -81,7 +81,7 @@ class Document(DocumentBase, table=True):
         foreign_key="user.id", nullable=False, ondelete="CASCADE"
     )
     owner: User | None = Relationship(back_populates="documents")
-
+    extracted_text: str | None = Field(default=None, sa_column=Column(Text, nullable=True))
 
 # Properties to return via API, id is always required
 # class DocumentPublic(DocumentBase):
