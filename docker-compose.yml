@@ -37,6 +37,8 @@ services:
     networks:
       - traefik-public
       - default
+    volumes:
+      - ./backend/dataset:/app/dataset
     depends_on:
       db:
         condition: service_healthy
@@ -87,13 +89,11 @@ services:
       - POSTGRES_USER=${POSTGRES_USER?Variable not set}
       - POSTGRES_PASSWORD=${POSTGRES_PASSWORD?Variable not set}
       - SENTRY_DSN=${SENTRY_DSN}
-
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:8000/api/v1/utils/health-check/"]
       interval: 10s
       timeout: 5s
       retries: 5
-
     build:
       context: ./backend
   frontend:
@@ -108,7 +108,7 @@ services:
       - "3000:3000"
     environment:
       - NODE_ENV=production
-      - NEXT_PUBLIC_API_URL=http://backend:8000
+      - NEXT_PUBLIC_API_URL=${NEXT_PUBLIC_API_URL?Variable not set}
 volumes:
   app-db-data:
 
