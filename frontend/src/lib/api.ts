@@ -1,4 +1,4 @@
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL;
+const API_BASE_URL = "https://api.ar.boetus.com";
 
 export interface TotalSessionsResponse {
   total_sessions: number;
