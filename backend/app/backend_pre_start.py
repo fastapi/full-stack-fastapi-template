@@ -20,6 +20,7 @@ wait_seconds = 1
     after=after_log(logger, logging.WARN),
 )
 def init(db_engine: Engine) -> None:
+    logger.info("Calling init...")
     try:
         with Session(db_engine) as session:
             # Try to create session to check if DB is awake
