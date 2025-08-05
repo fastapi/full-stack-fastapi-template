@@ -91,7 +91,7 @@ class Document(DocumentBase, table=True):
 class DocumentPublic(DocumentBase):
     id: uuid.UUID
     owner_id: uuid.UUID
-    filename: str | None = None
+    filename: str
     content_type: str | None = None
     size: int | None = None
 
