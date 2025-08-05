@@ -59,9 +59,9 @@ class UsersPublic(SQLModel):
 # Shared properties
 class DocumentBase(SQLModel):
     filename: str = Field(min_length=1, max_length=255)
-    s3_url: str | None = Field(default=None, max_length=255)  # type: ignore  # URL to the document in S3
-    content_type: str | None = Field(default=None, max_length=255)  # type: ignore
-    size: int | None = Field(default=None, ge=0)   # type: ignore # Size in bytes
+    s3_url: str | None = Field(default=None, max_length=255) # URL to the document in S3
+    content_type: str | None = Field(default=None, max_length=255)
+    size: int | None = Field(default=None, ge=0) # Size in bytes
 
 
 
@@ -91,7 +91,6 @@ class Document(DocumentBase, table=True):
 class DocumentPublic(DocumentBase):
     id: uuid.UUID
     owner_id: uuid.UUID
-    s3_url: str | None = None
     filename: str | None = None
     content_type: str | None = None
     size: int | None = None
