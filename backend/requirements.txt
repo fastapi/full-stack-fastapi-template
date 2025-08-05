@@ -1,7 +1,6 @@
 alembic==1.15.2
 annotated-types==0.7.0
 anyio==4.6.0
--e file:///Users/monicasmith/Documents/personal-projects/study-assistant/backend
 bcrypt==4.3.0
 boto3==1.39.9
 botocore==1.39.9
