@@ -112,6 +112,10 @@ services:
       - POSTGRES_DB=${POSTGRES_DB}
       - POSTGRES_USER=${POSTGRES_USER?Variable not set}
       - POSTGRES_PASSWORD=${POSTGRES_PASSWORD?Variable not set}
+      - AWS_ACCESS_KEY_ID=${AWS_ACCESS_KEY_ID?Variable not set}
+      - AWS_SECRET_ACCESS_KEY=${AWS_SECRET_ACCESS_KEY?Variable not set}
+      - AWS_REGION=${AWS_REGION?Variable not set}
+      - S3_BUCKET=${S3_BUCKET?Variable not set}
       - SENTRY_DSN=${SENTRY_DSN}
 
     healthcheck:
