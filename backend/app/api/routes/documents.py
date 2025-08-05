@@ -46,5 +46,5 @@ def create_document(
 
     # 3. Kick off background job
     print("Document created, starting background task...")
-    background_tasks.add_task(extract_text_and_save_to_db, url, document.id)
+    background_tasks.add_task(extract_text_and_save_to_db, url, str(document.id))
     return document

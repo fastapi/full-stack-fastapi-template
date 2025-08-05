@@ -2,7 +2,7 @@ from unittest.mock import MagicMock, patch
 from app.core.extractors import extract_text_and_save_to_db
 from app.models import Document
 
-def test_extract_text_and_save_to_db_success():
+def test_extract_text_and_save_to_db_success() -> None:
     fake_text = "Extracted text content"
     fake_s3_url = "s3://bucket/path/to/file.pdf"
     fake_doc_id = "123e4567-e89b-12d3-a456-426614174000"
