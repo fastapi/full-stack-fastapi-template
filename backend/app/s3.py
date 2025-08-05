@@ -11,7 +11,7 @@ s3 = boto3.client(
 )
 
 def upload_file_to_s3(file: UploadFile, user_id: str) -> str:
-    extension = file.filename.split(".")[-1]
+    extension = file.filename.split(".")[-1] if "." in file.filename else ""
     bucket = settings.S3_BUCKET_NAME
     key = f"documents/{user_id}/{uuid.uuid4()}.{extension}"
 
