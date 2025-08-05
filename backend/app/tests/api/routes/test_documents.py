@@ -1,11 +1,10 @@
-import uuid
+
+import io
+from unittest.mock import patch
 
 from fastapi.testclient import TestClient
-from sqlmodel import Session
-from unittest.mock import patch
+
 from app.core.config import settings
-from app.tests.utils.document import create_random_document
-import io
 
 
 def skip_test_create_document(
@@ -45,7 +44,7 @@ def test_create_document(
             },
         )
 
-    assert response.status_code == 200, f"Unexpected response status code"
+    assert response.status_code == 200, "Unexpected response status code"
     content = response.json()
     assert "id" in content, "actual response: " + str(content)
     assert "document-slug" in content["s3_url"], "S3 URL should match mocked value"

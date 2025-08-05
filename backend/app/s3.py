@@ -1,6 +1,8 @@
-import boto3
 import uuid
+
+import boto3
 from fastapi import UploadFile
+
 from app.core.config import settings
 
 s3 = boto3.client(
