@@ -119,23 +119,3 @@ class TokenPayload(SQLModel):
 class NewPassword(SQLModel):
     token: str
     new_password: str = Field(min_length=8, max_length=40)
-
-#TODO: Delete Item later. Keep for now so frontend build passes.
-
-class ItemBase(SQLModel):
-    pass
-
-class ItemCreate(ItemBase):
-    pass
-
-class ItemUpdate(ItemBase):
-    pass
-
-class Item(ItemBase, table=True):
-    pass
-
-class ItemPublic(ItemBase):
-    pass
-
-class ItemsPublic(SQLModel):
-    pass
