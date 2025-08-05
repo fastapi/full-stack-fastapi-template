@@ -15,7 +15,7 @@ def create_document(
     key = None
     try:
         user_id = current_user.id
-        key = upload_file_to_s3(file, current_user.id)
+        key = upload_file_to_s3(file, str(current_user.id))
     except Exception as e:
         raise HTTPException(500, f"Failed to upload file: {key}. Error: {str(e)}")
 
