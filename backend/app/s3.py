@@ -12,6 +12,7 @@ s3 = boto3.client(
     region_name=settings.AWS_REGION,
 )
 
+
 def upload_file_to_s3(file: UploadFile, user_id: str) -> str:
     safe_filename = file.filename or ""
     extension = safe_filename.split(".")[-1] if "." in safe_filename else ""

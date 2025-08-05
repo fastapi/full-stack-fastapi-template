@@ -46,7 +46,9 @@ def authenticate(*, session: Session, email: str, password: str) -> User | None:
     return db_user
 
 
-def create_document(*, session: Session, document_in: DocumentCreate, owner_id: uuid.UUID) -> Document:
+def create_document(
+    *, session: Session, document_in: DocumentCreate, owner_id: uuid.UUID
+) -> Document:
     db_document = Document.model_validate(document_in, update={"owner_id": owner_id})
     session.add(db_document)
     session.commit()

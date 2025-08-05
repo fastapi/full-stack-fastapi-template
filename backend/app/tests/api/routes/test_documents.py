@@ -1,4 +1,3 @@
-
 import io
 from unittest.mock import patch
 
@@ -10,15 +9,13 @@ from app.core.config import settings
 def skip_test_create_document(
     client: TestClient, superuser_token_headers: dict[str, str]
 ) -> None:
-    '''Test creating a document with a file upload with the real S3 service.'''
+    """Test creating a document with a file upload with the real S3 service."""
     file_content = b"%PDF-1.4 test file content"
 
     response = client.post(
         f"{settings.API_V1_STR}/documents/",
         headers=superuser_token_headers,
-        files={
-            "file": ("example.pdf", io.BytesIO(file_content), "application/pdf")
-        },
+        files={"file": ("example.pdf", io.BytesIO(file_content), "application/pdf")},
     )
 
     assert response.status_code == 200
@@ -29,13 +26,16 @@ def skip_test_create_document(
     # assert "id" in content
     # assert "owner_id" in content
 
+
 def test_create_document(
     client: TestClient, superuser_token_headers: dict[str, str]
 ) -> None:
-    '''Test creating a document with a file upload using mocked S3.'''
+    """Test creating a document with a file upload using mocked S3."""
     file_content = b"%PDF-1.4 test file content"
 
-    with patch("app.api.routes.documents.upload_file_to_s3", return_value="document-slug"):
+    with patch(
+        "app.api.routes.documents.upload_file_to_s3", return_value="document-slug"
+    ):
         response = client.post(
             f"{settings.API_V1_STR}/documents/",
             headers=superuser_token_headers,

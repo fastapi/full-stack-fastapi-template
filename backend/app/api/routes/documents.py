@@ -8,11 +8,14 @@ from app.s3 import generate_s3_url, upload_file_to_s3
 
 router = APIRouter(prefix="/documents", tags=["documents"])
 
+
 @router.post("/", response_model=DocumentPublic)
 def create_document(
-    *, session: SessionDep, current_user: CurrentUser,
-      background_tasks: BackgroundTasks, # noqa: ARG001
-      file: UploadFile = File(...),
+    *,
+    session: SessionDep,
+    current_user: CurrentUser,
+    background_tasks: BackgroundTasks,  # noqa: ARG001
+    file: UploadFile = File(...),
 ) -> Any:
     key = None
     try:
@@ -32,8 +35,9 @@ def create_document(
         s3_url=url,
     )
 
-    document = Document.model_validate(document_in, update={"owner_id": current_user.id})
-
+    document = Document.model_validate(
+        document_in, update={"owner_id": current_user.id}
+    )
 
     session.add(document)
     session.commit()
