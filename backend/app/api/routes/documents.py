@@ -17,7 +17,7 @@ def create_document(
         user_id = current_user.id
         key = upload_file_to_s3(file, str(current_user.id))
     except Exception as e:
-        raise HTTPException(500, f"Failed to upload file: {key}. Error: {str(e)}")
+        raise HTTPException(500, f"Failed to upload file. Error: {str(e)}")
 
     try:
         url = generate_s3_url(key)
