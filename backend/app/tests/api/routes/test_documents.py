@@ -45,7 +45,7 @@ def test_create_document(
             },
         )
 
-    assert response.status_code == 200, f"Unexpected response: {response.content}"
+    assert response.status_code == 200, f"Unexpected response status code"
     content = response.json()
     assert "id" in content, "actual response: " + str(content)
     assert "document-slug" in content["s3_url"], "S3 URL should match mocked value"

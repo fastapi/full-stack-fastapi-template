@@ -11,7 +11,7 @@ def create_document(
     *, session: SessionDep, current_user: CurrentUser,
       background_tasks: BackgroundTasks,
       file: UploadFile = File(...), 
-):
+) -> Any:
     key = None
     try:
         user_id = current_user.id
