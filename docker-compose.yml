@@ -87,6 +87,9 @@ services:
     networks:
       - traefik-public
       - default
+  # TODO: Added port when i took out the frontend container
+  ports:
+  - "8000:8000"
     depends_on:
       db:
         condition: service_healthy
