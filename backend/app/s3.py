@@ -1,9 +1,12 @@
+import os
+import tempfile
 import uuid
 
 import boto3
 from fastapi import UploadFile
 
 from app.core.config import settings
+import textract
 
 s3 = boto3.client(
     "s3",
@@ -29,3 +32,12 @@ def upload_file_to_s3(file: UploadFile, user_id: str) -> str:
 
 def generate_s3_url(key: str) -> str:
     return f"https://{settings.S3_BUCKET_NAME}.s3.amazonaws.com/{key}"
+
+def extract_text_from_s3_file(bucket: str, key: str) -> str:
+    with tempfile.NamedTemporaryFile(delete=False, suffix=".pdf") as tmp_file:
+        s3.download_fileobj(bucket, key, tmp_file)
+        tmp_path = tmp_file.name
+
+    text = textract.process(tmp_path).decode("utf-8") or ""
+    os.remove(tmp_path)
+    return text
