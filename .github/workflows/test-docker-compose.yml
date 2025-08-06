@@ -25,6 +25,8 @@ jobs:
       - run: docker compose down -v --remove-orphans
       # TODO: Bring frontend back up when you fix the bug
       # - run: docker compose up -d --wait backend frontend adminer
+      - run: docker compose up -d --wait backend adminer
+
       - name: Test backend is up
         run: curl http://localhost:8000/api/v1/utils/health-check
       # - name: Test frontend is up
