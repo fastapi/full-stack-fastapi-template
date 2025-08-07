@@ -24,7 +24,7 @@ def test_extract_text_and_save_to_db_success() -> None:
         extract_text_and_save_to_db(fake_s3_key, fake_doc_id)
 
         # Assertions
-        extract_mock.assert_called_once_with(fake_s3_key)
+        extract_mock.assert_called_once_with(key=fake_s3_key)
         session_instance.exec.assert_called_once()
         assert mock_document.extracted_text == fake_text
         session_instance.commit.assert_called_once()
