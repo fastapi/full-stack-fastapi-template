@@ -4,7 +4,7 @@ from app.models import Document
 
 def test_extract_text_and_save_to_db_success() -> None:
     fake_text = "Extracted text content"
-    fake_s3_url = "s3://bucket/path/to/file.pdf"
+    fake_s3_key = "some-s3-key"
     fake_doc_id = "123e4567-e89b-12d3-a456-426614174000"
 
     mock_document = Document(id=fake_doc_id)
@@ -21,10 +21,10 @@ def test_extract_text_and_save_to_db_success() -> None:
         session_instance.exec.return_value = mock_exec_result
 
         # Run the function
-        extract_text_and_save_to_db(fake_s3_url, fake_doc_id)
+        extract_text_and_save_to_db(fake_s3_key, fake_doc_id)
 
         # Assertions
-        extract_mock.assert_called_once_with(fake_s3_url)
+        extract_mock.assert_called_once_with(fake_s3_key)
         session_instance.exec.assert_called_once()
         assert mock_document.extracted_text == fake_text
         session_instance.commit.assert_called_once()
