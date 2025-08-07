@@ -1,6 +1,7 @@
 import uuid
 
 from pydantic import EmailStr
+from sqlalchemy import Column, Text
 from sqlmodel import Field, Relationship, SQLModel
 
 
@@ -64,6 +65,7 @@ class DocumentBase(SQLModel):
     s3_url: str | None = Field(
         default=None, max_length=255
     )  # URL to the document in S3
+    s3_key: str | None = Field(default=None, max_length=1024)
     content_type: str | None = Field(default=None, max_length=255)
     size: int | None = Field(default=None, ge=0)  # Size in bytes
 
@@ -85,7 +87,7 @@ class Document(DocumentBase, table=True):
         foreign_key="user.id", nullable=False, ondelete="CASCADE"
     )
     owner: User | None = Relationship(back_populates="documents")
-
+    extracted_text: str | None = Field(default=None, sa_column=Column(Text, nullable=True))
 
 # Properties to return via API, id is always required
 # class DocumentPublic(DocumentBase):

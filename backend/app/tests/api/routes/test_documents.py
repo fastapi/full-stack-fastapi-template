@@ -6,7 +6,7 @@ from fastapi.testclient import TestClient
 from app.core.config import settings
 
 
-def skip_test_create_document(
+def skip_test_create_document_real_s3(
     client: TestClient, superuser_token_headers: dict[str, str]
 ) -> None:
     """Test creating a document with a file upload with the real S3 service."""

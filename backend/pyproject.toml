@@ -21,7 +21,8 @@ dependencies = [
     "boto3",
     "pydantic-settings<3.0.0,>=2.2.1",
     "sentry-sdk[fastapi]<2.0.0,>=1.40.6",
-    "pyjwt<3.0.0,>=2.8.0",
+    "pyjwt<3.0.0,>=2.8.0",    
+    "textract>=1.6.5",
     "boto3-stubs>=1.40.2",
 ]
 
@@ -33,6 +34,8 @@ dev-dependencies = [
     "pre-commit<4.0.0,>=3.6.2",
     "types-passlib<2.0.0.0,>=1.7.7.20240106",
     "coverage<8.0.0,>=7.4.3",
+    "types-requests >=2.32.4.20250611",
+    "types-boto3>=1.39.16"
 ]
 
 [build-system]
