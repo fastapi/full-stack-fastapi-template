@@ -64,6 +64,7 @@ class DocumentBase(SQLModel):
     s3_url: str | None = Field(
         default=None, max_length=255
     )  # URL to the document in S3
+    s3_key: str | None = Field(default=None, max_length=1024)
     content_type: str | None = Field(default=None, max_length=255)
     size: int | None = Field(default=None, ge=0)  # Size in bytes
 

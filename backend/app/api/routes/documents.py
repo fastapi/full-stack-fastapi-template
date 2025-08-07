@@ -34,6 +34,7 @@ def create_document(
         content_type=file.content_type,
         size=file.size,
         s3_url=url,
+        s3_key=key,
     )
 
     document = Document.model_validate(
