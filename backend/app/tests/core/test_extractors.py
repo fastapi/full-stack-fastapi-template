@@ -1,6 +1,8 @@
 from unittest.mock import MagicMock, patch
+
 from app.core.extractors import extract_text_and_save_to_db
 from app.models import Document
+
 
 def test_extract_text_and_save_to_db_success() -> None:
     fake_text = "Extracted text content"

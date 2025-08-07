@@ -1,8 +1,9 @@
 import uuid
 
 from pydantic import EmailStr
-from sqlmodel import Field, Relationship, SQLModel
 from sqlalchemy import Column, Text
+from sqlmodel import Field, Relationship, SQLModel
+
 
 # Shared properties
 class UserBase(SQLModel):

@@ -1,7 +1,9 @@
-from app.core.db import engine
 from sqlmodel import Session, select
+
+from app.core.db import engine
 from app.models import Document
 from app.s3 import extract_text_from_s3_file
+
 
 def extract_text_and_save_to_db(s3_key: str, document_id: str) -> None:
     try:
@@ -20,4 +22,3 @@ def extract_text_and_save_to_db(s3_key: str, document_id: str) -> None:
 
     except Exception as e:
         print(f"Failed to extract and chunk text for document {document_id}: {e}")
-    

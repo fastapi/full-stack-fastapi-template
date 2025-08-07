@@ -3,10 +3,10 @@ import tempfile
 import uuid
 
 import boto3
+import textract  # type: ignore
 from fastapi import UploadFile
 
 from app.core.config import settings
-import textract # type: ignore
 
 s3 = boto3.client(
     "s3",
