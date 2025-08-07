@@ -16,6 +16,7 @@ export type Body_login_login_access_token = {
 export type DocumentPublic = {
   filename: string
   s3_url?: string | null
+  s3_key?: string | null
   content_type?: string | null
   size?: number | null
   id: string
