@@ -53,7 +53,7 @@ export const Body_login_login_access_tokenSchema = {
   type: "object",
   required: ["username", "password"],
   title: "Body_login-login_access_token",
-} as const;
+} as const
 
 export const HTTPValidationErrorSchema = {
   properties: {
@@ -67,7 +67,7 @@ export const HTTPValidationErrorSchema = {
   },
   type: "object",
   title: "HTTPValidationError",
-} as const;
+} as const
 
 export const DocumentCreateSchema = {
   properties: {
@@ -129,7 +129,7 @@ export const DocumentCreateSchema = {
   type: "object",
   required: ["filename"],
   title: "DocumentCreate",
-} as const;
+} as const
 
 export const DocumentPublicSchema = {
   properties: {
@@ -201,7 +201,7 @@ export const DocumentPublicSchema = {
   type: "object",
   required: ["filename", "id", "owner_id"],
   title: "DocumentPublic",
-} as const;
+} as const
 
 export const DocumentUpdateSchema = {
   properties: {
@@ -269,7 +269,7 @@ export const DocumentUpdateSchema = {
   },
   type: "object",
   title: "DocumentUpdate",
-} as const;
+} as const
 
 export const DocumentsPublicSchema = {
   properties: {
@@ -288,7 +288,7 @@ export const DocumentsPublicSchema = {
   type: "object",
   required: ["data", "count"],
   title: "DocumentsPublic",
-} as const;
+} as const
 
 export const MessageSchema = {
   properties: {
@@ -300,7 +300,7 @@ export const MessageSchema = {
   type: "object",
   required: ["message"],
   title: "Message",
-} as const;
+} as const
 
 export const NewPasswordSchema = {
   properties: {
@@ -318,7 +318,7 @@ export const NewPasswordSchema = {
   type: "object",
   required: ["token", "new_password"],
   title: "NewPassword",
-} as const;
+} as const
 
 export const TokenSchema = {
   properties: {
@@ -335,7 +335,7 @@ export const TokenSchema = {
   type: "object",
   required: ["access_token"],
   title: "Token",
-} as const;
+} as const
 
 export const UpdatePasswordSchema = {
   properties: {
@@ -355,7 +355,7 @@ export const UpdatePasswordSchema = {
   type: "object",
   required: ["current_password", "new_password"],
   title: "UpdatePassword",
-} as const;
+} as const
 
 export const UserCreateSchema = {
   properties: {
@@ -397,7 +397,7 @@ export const UserCreateSchema = {
   type: "object",
   required: ["email", "password"],
   title: "UserCreate",
-} as const;
+} as const
 
 export const UserPublicSchema = {
   properties: {
@@ -438,7 +438,7 @@ export const UserPublicSchema = {
   type: "object",
   required: ["email", "id"],
   title: "UserPublic",
-} as const;
+} as const
 
 export const UserRegisterSchema = {
   properties: {
@@ -470,7 +470,7 @@ export const UserRegisterSchema = {
   type: "object",
   required: ["email", "password"],
   title: "UserRegister",
-} as const;
+} as const
 
 export const UserUpdateSchema = {
   properties: {
@@ -525,7 +525,7 @@ export const UserUpdateSchema = {
   },
   type: "object",
   title: "UserUpdate",
-} as const;
+} as const
 
 export const UserUpdateMeSchema = {
   properties: {
@@ -557,7 +557,7 @@ export const UserUpdateMeSchema = {
   },
   type: "object",
   title: "UserUpdateMe",
-} as const;
+} as const
 
 export const UsersPublicSchema = {
   properties: {
@@ -576,7 +576,7 @@ export const UsersPublicSchema = {
   type: "object",
   required: ["data", "count"],
   title: "UsersPublic",
-} as const;
+} as const
 
 export const ValidationErrorSchema = {
   properties: {
@@ -606,4 +606,4 @@ export const ValidationErrorSchema = {
   type: "object",
   required: ["loc", "msg", "type"],
   title: "ValidationError",
-} as const;
+} as const
