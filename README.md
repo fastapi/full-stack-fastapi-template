@@ -140,6 +140,8 @@ You can (and should) pass these as environment variables from secrets.
 
 Read the [deployment.md](./deployment.md) docs for more details.
 
+**Note**: The `.env` file is not included in `.gitignore` by default. See [development.md](./development.md#the-env-file) for more details.
+
 ### Generate Secret Keys
 
 Some environment variables in the `.env` file have a default value of `changethis`.
@@ -191,6 +193,8 @@ pipx run copier copy https://github.com/fastapi/full-stack-fastapi-template my-a
 ```
 
 **Note** the `--trust` option is necessary to be able to execute a [post-creation script](https://github.com/fastapi/full-stack-fastapi-template/blob/master/.copier/update_dotenv.py) that updates your `.env` files.
+
+**Note**: After generating the project, the `.copier/.copier-answers.yml` file contains the values you provided for the template variables, including secrets. If your project is public, you should remove this file and store it somewhere safe or add it to your `.gitignore` to avoid exposing sensitive information.
 
 ### Input Variables
 
