@@ -33,6 +33,7 @@ def upload_file_to_s3(file: UploadFile, user_id: str) -> str:
 def generate_s3_url(key: str) -> str:
     return f"https://{settings.S3_BUCKET_NAME}.s3.amazonaws.com/{key}"
 
+
 def extract_text_from_s3_file(key: str) -> str:
     with tempfile.NamedTemporaryFile(delete=False, suffix=".pdf") as tmp_file:
         s3.download_fileobj(settings.S3_BUCKET_NAME, key, tmp_file)
