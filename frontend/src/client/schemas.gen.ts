@@ -69,15 +69,15 @@ export const HTTPValidationErrorSchema = {
   title: "HTTPValidationError",
 } as const
 
-export const ItemCreateSchema = {
+export const DocumentCreateSchema = {
   properties: {
-    title: {
+    filename: {
       type: "string",
-      maxLength: 255,
       minLength: 1,
-      title: "Title",
+      maxLength: 255,
+      title: "Filename",
     },
-    description: {
+    s3_url: {
       anyOf: [
         {
           type: "string",
@@ -87,23 +87,59 @@ export const ItemCreateSchema = {
           type: "null",
         },
       ],
-      title: "Description",
+      title: "S3 Url",
+    },
+    s3_key: {
+      anyOf: [
+        {
+          type: "string",
+          maxLength: 1024,
+        },
+        {
+          type: "null",
+        },
+      ],
+      title: "S3 Key",
+    },
+    content_type: {
+      anyOf: [
+        {
+          type: "string",
+          maxLength: 255,
+        },
+        {
+          type: "null",
+        },
+      ],
+      title: "Content Type",
+    },
+    size: {
+      anyOf: [
+        {
+          type: "integer",
+          minimum: 0,
+        },
+        {
+          type: "null",
+        },
+      ],
+      title: "Size",
     },
   },
   type: "object",
-  required: ["title"],
-  title: "ItemCreate",
-} as const
+  required: ["filename"],
+  title: "DocumentCreate",
+} as const;
 
-export const ItemPublicSchema = {
+export const DocumentPublicSchema = {
   properties: {
-    title: {
+    filename: {
       type: "string",
-      maxLength: 255,
       minLength: 1,
-      title: "Title",
+      maxLength: 255,
+      title: "Filename",
     },
-    description: {
+    s3_url: {
       anyOf: [
         {
           type: "string",
@@ -113,7 +149,43 @@ export const ItemPublicSchema = {
           type: "null",
         },
       ],
-      title: "Description",
+      title: "S3 Url",
+    },
+    s3_key: {
+      anyOf: [
+        {
+          type: "string",
+          maxLength: 1024,
+        },
+        {
+          type: "null",
+        },
+      ],
+      title: "S3 Key",
+    },
+    content_type: {
+      anyOf: [
+        {
+          type: "string",
+          maxLength: 255,
+        },
+        {
+          type: "null",
+        },
+      ],
+      title: "Content Type",
+    },
+    size: {
+      anyOf: [
+        {
+          type: "integer",
+          minimum: 0,
+        },
+        {
+          type: "null",
+        },
+      ],
+      title: "Size",
     },
     id: {
       type: "string",
@@ -127,26 +199,26 @@ export const ItemPublicSchema = {
     },
   },
   type: "object",
-  required: ["title", "id", "owner_id"],
-  title: "ItemPublic",
-} as const
+  required: ["filename", "id", "owner_id"],
+  title: "DocumentPublic",
+} as const;
 
-export const ItemUpdateSchema = {
+export const DocumentUpdateSchema = {
   properties: {
-    title: {
+    filename: {
       anyOf: [
         {
           type: "string",
-          maxLength: 255,
           minLength: 1,
+          maxLength: 255,
         },
         {
           type: "null",
         },
       ],
-      title: "Title",
+      title: "Filename",
     },
-    description: {
+    s3_url: {
       anyOf: [
         {
           type: "string",
@@ -156,18 +228,54 @@ export const ItemUpdateSchema = {
           type: "null",
         },
       ],
-      title: "Description",
+      title: "S3 Url",
+    },
+    s3_key: {
+      anyOf: [
+        {
+          type: "string",
+          maxLength: 1024,
+        },
+        {
+          type: "null",
+        },
+      ],
+      title: "S3 Key",
+    },
+    content_type: {
+      anyOf: [
+        {
+          type: "string",
+          maxLength: 255,
+        },
+        {
+          type: "null",
+        },
+      ],
+      title: "Content Type",
+    },
+    size: {
+      anyOf: [
+        {
+          type: "integer",
+          minimum: 0,
+        },
+        {
+          type: "null",
+        },
+      ],
+      title: "Size",
     },
   },
   type: "object",
-  title: "ItemUpdate",
+  title: "DocumentUpdate",
 } as const
 
-export const ItemsPublicSchema = {
+export const DocumentsPublicSchema = {
   properties: {
     data: {
       items: {
-        $ref: "#/components/schemas/ItemPublic",
+        $ref: "#/components/schemas/DocumentPublic",
       },
       type: "array",
       title: "Data",
@@ -179,8 +287,9 @@ export const ItemsPublicSchema = {
   },
   type: "object",
   required: ["data", "count"],
-  title: "ItemsPublic",
+  title: "DocumentsPublic",
 } as const
+
 
 export const MessageSchema = {
   properties: {
