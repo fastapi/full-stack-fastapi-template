@@ -129,7 +129,7 @@ export const DocumentCreateSchema = {
   type: "object",
   required: ["filename"],
   title: "DocumentCreate",
-} as const;
+} as const
 
 export const DocumentPublicSchema = {
   properties: {
@@ -201,7 +201,7 @@ export const DocumentPublicSchema = {
   type: "object",
   required: ["filename", "id", "owner_id"],
   title: "DocumentPublic",
-} as const;
+} as const
 
 export const DocumentUpdateSchema = {
   properties: {
@@ -289,7 +289,6 @@ export const DocumentsPublicSchema = {
   required: ["data", "count"],
   title: "DocumentsPublic",
 } as const
-
 
 export const MessageSchema = {
   properties: {
