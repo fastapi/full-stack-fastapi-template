@@ -1,5 +1,5 @@
-import { createSystem, defaultConfig } from "@chakra-ui/react"
-import { buttonRecipe } from "./theme/button.recipe"
+import { createSystem, defaultConfig } from "@chakra-ui/react";
+import { buttonRecipe } from "./theme/button.recipe";
 
 export const system = createSystem(defaultConfig, {
   globalCss: {
@@ -28,4 +28,4 @@ export const system = createSystem(defaultConfig, {
       button: buttonRecipe,
     },
   },
-})
+});

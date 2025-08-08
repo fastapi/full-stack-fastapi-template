@@ -1,20 +1,20 @@
-import { Container, Flex, Image, Input, Text } from "@chakra-ui/react"
+import { Container, Flex, Image, Input, Text } from "@chakra-ui/react";
 import {
   Link as RouterLink,
   createFileRoute,
   redirect,
-} from "@tanstack/react-router"
-import { type SubmitHandler, useForm } from "react-hook-form"
-import { FiLock, FiUser } from "react-icons/fi"
+} from "@tanstack/react-router";
+import { type SubmitHandler, useForm } from "react-hook-form";
+import { FiLock, FiUser } from "react-icons/fi";
 
-import type { UserRegister } from "@/client"
-import { Button } from "@/components/ui/button"
-import { Field } from "@/components/ui/field"
-import { InputGroup } from "@/components/ui/input-group"
-import { PasswordInput } from "@/components/ui/password-input"
-import useAuth, { isLoggedIn } from "@/hooks/useAuth"
-import { confirmPasswordRules, emailPattern, passwordRules } from "@/utils"
-import Logo from "/assets/images/fastapi-logo.svg"
+import type { UserRegister } from "@/client";
+import { Button } from "@/components/ui/button";
+import { Field } from "@/components/ui/field";
+import { InputGroup } from "@/components/ui/input-group";
+import { PasswordInput } from "@/components/ui/password-input";
+import useAuth, { isLoggedIn } from "@/hooks/useAuth";
+import { confirmPasswordRules, emailPattern, passwordRules } from "@/utils";
+import Logo from "/assets/images/fastapi-logo.svg";
 
 export const Route = createFileRoute("/signup")({
   component: SignUp,
@@ -22,17 +22,17 @@ export const Route = createFileRoute("/signup")({
     if (isLoggedIn()) {
       throw redirect({
         to: "/",
-      })
+      });
     }
   },
-})
+});
 
 interface UserRegisterForm extends UserRegister {
-  confirm_password: string
+  confirm_password: string;
 }
 
 function SignUp() {
-  const { signUpMutation } = useAuth()
+  const { signUpMutation } = useAuth();
   const {
     register,
     handleSubmit,
@@ -47,11 +47,11 @@ function SignUp() {
       password: "",
       confirm_password: "",
     },
-  })
+  });
 
   const onSubmit: SubmitHandler<UserRegisterForm> = (data) => {
-    signUpMutation.mutate(data)
-  }
+    signUpMutation.mutate(data);
+  };
 
   return (
     <>
@@ -130,7 +130,7 @@ function SignUp() {
         </Container>
       </Flex>
     </>
-  )
+  );
 }
 
-export default SignUp
+export default SignUp;

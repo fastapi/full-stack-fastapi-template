@@ -11,9 +11,9 @@ def test_extract_text_and_save_to_db_success() -> None:
 
     mock_document = Document(id=fake_doc_id)
 
-    with patch("app.core.extractors.extract_text_from_s3_file", return_value=fake_text) as extract_mock, \
-         patch("app.core.extractors.Session") as session_class_mock:
-
+    with patch(
+        "app.core.extractors.extract_text_from_s3_file", return_value=fake_text
+    ) as extract_mock, patch("app.core.extractors.Session") as session_class_mock:
         # Mock session context manager
         session_instance = MagicMock()
         session_class_mock.return_value.__enter__.return_value = session_instance
