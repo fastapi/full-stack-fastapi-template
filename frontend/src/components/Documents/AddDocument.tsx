@@ -1,8 +1,11 @@
 import { useState } from "react";
-import { Button, VStack } from "@chakra-ui/react";
-import useCustomToast from "@/hooks/useCustomToast";
-import { Box, FileUpload, Icon } from "@chakra-ui/react";
+import { Button, VStack, Box, Icon, FileUpload } from "@chakra-ui/react";
+import { useMutation } from "@tanstack/react-query";
 import { LuUpload } from "react-icons/lu";
+import useCustomToast from "@/hooks/useCustomToast";
+import { ApiError, DocumentsService } from "@/client";
+import { handleError } from "@/utils";
+// import { uploadDocument } from "@/api/documents"; // <-- you'll write this
 
 const AddDocument = () => {
   const [files, setFiles] = useState<File[]>([]);
@@ -12,10 +15,30 @@ const AddDocument = () => {
     setFiles(files);
   };
 
+  const mutation = useMutation({
+    mutationFn: async (file: File) => {
+      // API call to upload file
+      DocumentsService.createDocument({
+        formData: { file },
+      });
+
+      //   return uploadDocument(formData);
+    },
+    onSuccess: () => {
+      showSuccessToast("Upload successful");
+      setFiles([]);
+    },
+    onError: (err: ApiError) => {
+      console.error(err.message);
+
+      handleError(err);
+    },
+  });
+
   const handleUpload = () => {
-    // Implement your upload logic here: API call etc.
-    showSuccessToast("Upload successful");
-    setFiles([]);
+    if (files.length > 0) {
+      mutation.mutate(files[0]); // if you want multiple, loop here
+    }
   };
 
   return (
@@ -37,7 +60,11 @@ const AddDocument = () => {
       </FileUpload.Root>
 
       {files.length > 0 && (
-        <Button colorScheme="blue" onClick={handleUpload}>
+        <Button
+          colorScheme="blue"
+          onClick={handleUpload}
+          loading={mutation.isPending}
+        >
           Upload Document
         </Button>
       )}
