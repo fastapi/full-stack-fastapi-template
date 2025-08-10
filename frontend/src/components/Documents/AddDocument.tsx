@@ -1,7 +1,8 @@
 import { useState } from "react";
 import { Button, VStack, Text } from "@chakra-ui/react";
-import { FileUpload } from "@chakra-ui/react";
 import useCustomToast from "@/hooks/useCustomToast";
+import { Box, FileUpload, Icon } from "@chakra-ui/react";
+import { LuUpload } from "react-icons/lu";
 
 const AddDocument = () => {
   const [files, setFiles] = useState<File[]>([]);
@@ -20,13 +21,20 @@ const AddDocument = () => {
   return (
     <VStack gap={6} maxW="md" mx="auto">
       <FileUpload.Root
-        maxFiles={1}
+        maxW="xl"
+        alignItems="stretch"
+        maxFiles={10}
         onFileChange={({ acceptedFiles }) => onFileChange(acceptedFiles)}
       >
         <FileUpload.HiddenInput />
         <FileUpload.Dropzone>
-          <Text>Drag and drop a file or click to select</Text>
+          <Icon as={LuUpload} boxSize="6" color="fg.muted" />
+          <FileUpload.DropzoneContent>
+            <Box>Drag and drop files here</Box>
+            <Box color="fg.muted">.pdf up to 5MB</Box>
+          </FileUpload.DropzoneContent>
         </FileUpload.Dropzone>
+        {/* <FileUpload.List /> */}
       </FileUpload.Root>
 
       {files.length > 0 && (
