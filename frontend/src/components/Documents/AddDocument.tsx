@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Button, VStack, Text } from "@chakra-ui/react";
+import { Button, VStack } from "@chakra-ui/react";
 import useCustomToast from "@/hooks/useCustomToast";
 import { Box, FileUpload, Icon } from "@chakra-ui/react";
 import { LuUpload } from "react-icons/lu";
@@ -34,7 +34,6 @@ const AddDocument = () => {
             <Box color="fg.muted">.pdf up to 5MB</Box>
           </FileUpload.DropzoneContent>
         </FileUpload.Dropzone>
-        {/* <FileUpload.List /> */}
       </FileUpload.Root>
 
       {files.length > 0 && (
