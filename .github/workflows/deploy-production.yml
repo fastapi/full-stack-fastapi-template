@@ -19,6 +19,7 @@ jobs:
       SECRET_KEY: ${{ secrets.SECRET_KEY }}
       FIRST_SUPERUSER: ${{ secrets.FIRST_SUPERUSER }}
       FIRST_SUPERUSER_PASSWORD: ${{ secrets.FIRST_SUPERUSER_PASSWORD }}
+      BACKEND_CORS_ORIGINS: ${{ secrets.BACKEND_CORS_ORIGINS_PRODUCTION }}
       SMTP_HOST: ${{ secrets.SMTP_HOST }}
       SMTP_USER: ${{ secrets.SMTP_USER }}
       SMTP_PASSWORD: ${{ secrets.SMTP_PASSWORD }}
@@ -28,5 +29,32 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
-      - run: docker compose -f docker-compose.yml --project-name ${{ secrets.STACK_NAME_PRODUCTION }} build
-      - run: docker compose -f docker-compose.yml --project-name ${{ secrets.STACK_NAME_PRODUCTION }} up -d
+      - name: Export environment variables and deploy
+        run: |
+          export ENVIRONMENT=production
+          export DOMAIN="${{ secrets.DOMAIN_PRODUCTION }}"
+          export STACK_NAME="${{ secrets.STACK_NAME_PRODUCTION }}"
+          export SECRET_KEY="${{ secrets.SECRET_KEY }}"
+          export FIRST_SUPERUSER="${{ secrets.FIRST_SUPERUSER }}"
+          export FIRST_SUPERUSER_PASSWORD="${{ secrets.FIRST_SUPERUSER_PASSWORD }}"
+          export BACKEND_CORS_ORIGINS="${{ secrets.BACKEND_CORS_ORIGINS_PRODUCTION }}"
+          export FRONTEND_HOST="${{ secrets.FRONTEND_HOST_PRODUCTION }}"
+          export PROJECT_NAME="${{ secrets.PROJECT_NAME }}"
+          export DOCKER_IMAGE_BACKEND="${{ secrets.DOCKER_IMAGE_BACKEND }}"
+          export DOCKER_IMAGE_FRONTEND="${{ secrets.DOCKER_IMAGE_FRONTEND }}"
+          export POSTGRES_SERVER="${{ secrets.POSTGRES_SERVER }}"
+          export POSTGRES_PORT="${{ secrets.POSTGRES_PORT }}"
+          export POSTGRES_USER="${{ secrets.POSTGRES_USER }}"
+          export POSTGRES_DB="${{ secrets.POSTGRES_DB }}"
+          export POSTGRES_PASSWORD="${{ secrets.POSTGRES_PASSWORD }}"
+          export SMTP_HOST="${{ secrets.SMTP_HOST }}"
+          export SMTP_USER="${{ secrets.SMTP_USER }}"
+          export SMTP_PASSWORD="${{ secrets.SMTP_PASSWORD }}"
+          export EMAILS_FROM_EMAIL="${{ secrets.EMAILS_FROM_EMAIL }}"
+          export SENTRY_DSN="${{ secrets.SENTRY_DSN }}"
+
+          echo "🏗️ Building containers..."
+          docker compose -f docker-compose.yml --project-name "${{ secrets.STACK_NAME_PRODUCTION }}" build
+
+          echo "🚀 Deploying containers..."
+          docker compose -f docker-compose.yml --project-name "${{ secrets.STACK_NAME_PRODUCTION }}" up -d
