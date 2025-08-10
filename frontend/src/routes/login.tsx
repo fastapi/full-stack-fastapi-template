@@ -94,7 +94,7 @@ function Login() {
           type="password"
           startElement={<FiLock />}
           {...register("password", passwordRules())}
-          placeholder="Password"
+          placeholder="Pazzword"
           errors={errors}
         />
         <RouterLink to="/recover-password" className="main-link">
