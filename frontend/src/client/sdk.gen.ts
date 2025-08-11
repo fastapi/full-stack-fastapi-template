@@ -6,6 +6,14 @@ import { request as __request } from "./core/request"
 import type {
   DocumentsCreateDocumentData,
   DocumentsCreateDocumentResponse,
+  DocumentsReadDocumentsData,
+  DocumentsReadDocumentsResponse,
+  DocumentsReadDocumentData,
+  DocumentsReadDocumentResponse,
+  DocumentsUpdateDocumentData,
+  DocumentsUpdateDocumentResponse,
+  DocumentsDeleteDocumentData,
+  DocumentsDeleteDocumentResponse,
   LoginLoginAccessTokenData,
   LoginLoginAccessTokenResponse,
   LoginTestTokenResponse,
@@ -56,6 +64,103 @@ export class DocumentsService {
       url: "/api/v1/documents/",
       formData: data.formData,
       mediaType: "multipart/form-data",
+      errors: {
+        422: "Validation Error",
+      },
+    })
+  }
+
+  /**
+   * Read Documents
+   * Retrieve documents.
+   * @param data The data for the request.
+   * @param data.skip
+   * @param data.limit
+   * @returns DocumentsPublic Successful Response
+   * @throws ApiError
+   */
+  public static readDocuments(
+    data: DocumentsReadDocumentsData = {},
+  ): CancelablePromise<DocumentsReadDocumentsResponse> {
+    return __request(OpenAPI, {
+      method: "GET",
+      url: "/api/v1/documents/",
+      query: {
+        skip: data.skip,
+        limit: data.limit,
+      },
+      errors: {
+        422: "Validation Error",
+      },
+    })
+  }
+
+  /**
+   * Read Document
+   * Get document by ID.
+   * @param data The data for the request.
+   * @param data.id
+   * @returns DocumentPublic Successful Response
+   * @throws ApiError
+   */
+  public static readDocument(
+    data: DocumentsReadDocumentData,
+  ): CancelablePromise<DocumentsReadDocumentResponse> {
+    return __request(OpenAPI, {
+      method: "GET",
+      url: "/api/v1/documents/{id}",
+      path: {
+        id: data.id,
+      },
+      errors: {
+        422: "Validation Error",
+      },
+    })
+  }
+
+  /**
+   * Update Document
+   * Update an document.
+   * @param data The data for the request.
+   * @param data.id
+   * @param data.requestBody
+   * @returns DocumentPublic Successful Response
+   * @throws ApiError
+   */
+  public static updateDocument(
+    data: DocumentsUpdateDocumentData,
+  ): CancelablePromise<DocumentsUpdateDocumentResponse> {
+    return __request(OpenAPI, {
+      method: "PUT",
+      url: "/api/v1/documents/{id}",
+      path: {
+        id: data.id,
+      },
+      body: data.requestBody,
+      mediaType: "application/json",
+      errors: {
+        422: "Validation Error",
+      },
+    })
+  }
+
+  /**
+   * Delete Document
+   * Delete an document.
+   * @param data The data for the request.
+   * @param data.id
+   * @returns Message Successful Response
+   * @throws ApiError
+   */
+  public static deleteDocument(
+    data: DocumentsDeleteDocumentData,
+  ): CancelablePromise<DocumentsDeleteDocumentResponse> {
+    return __request(OpenAPI, {
+      method: "DELETE",
+      url: "/api/v1/documents/{id}",
+      path: {
+        id: data.id,
+      },
       errors: {
         422: "Validation Error",
       },

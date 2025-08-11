@@ -8,7 +8,7 @@ import AddUser from "@/components/Admin/AddUser";
 import { UserActionsMenu } from "@/components/Common/UserActionsMenu";
 import PendingUsers from "@/components/Pending/PendingUsers";
 import {
-  PaginationItems,
+  PaginationDocuments,
   PaginationNextTrigger,
   PaginationPrevTrigger,
   PaginationRoot,
@@ -104,7 +104,7 @@ function UsersTable() {
         >
           <Flex>
             <PaginationPrevTrigger />
-            <PaginationItems />
+            <PaginationDocuments />
             <PaginationNextTrigger />
           </Flex>
         </PaginationRoot>

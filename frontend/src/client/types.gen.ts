@@ -21,6 +21,20 @@ export type DocumentPublic = {
   size?: number | null
   id: string
   owner_id: string
+  extracted_text?: string | null
+}
+
+export type DocumentsPublic = {
+  data: Array<DocumentPublic>
+  count: number
+}
+
+export type DocumentUpdate = {
+  filename?: string | null
+  s3_url?: string | null
+  s3_key?: string | null
+  content_type?: string | null
+  size?: number | null
 }
 
 export type HTTPValidationError = {
@@ -104,6 +118,32 @@ export type DocumentsCreateDocumentData = {
 }
 
 export type DocumentsCreateDocumentResponse = DocumentPublic
+
+export type DocumentsReadDocumentsData = {
+  limit?: number
+  skip?: number
+}
+
+export type DocumentsReadDocumentsResponse = DocumentsPublic
+
+export type DocumentsReadDocumentData = {
+  id: string
+}
+
+export type DocumentsReadDocumentResponse = DocumentPublic
+
+export type DocumentsUpdateDocumentData = {
+  id: string
+  requestBody: DocumentUpdate
+}
+
+export type DocumentsUpdateDocumentResponse = DocumentPublic
+
+export type DocumentsDeleteDocumentData = {
+  id: string
+}
+
+export type DocumentsDeleteDocumentResponse = Message
 
 export type LoginLoginAccessTokenData = {
   formData: Body_login_login_access_token
