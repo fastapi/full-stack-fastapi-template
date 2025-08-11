@@ -21,7 +21,6 @@ import {
   PaginationPrevTrigger,
   PaginationRoot,
 } from "@/components/ui/pagination.tsx";
-import React from "react";
 
 const documentsSearchSchema = z.object({
   page: z.number().catch(1),
@@ -92,8 +91,8 @@ function DocumentsTable() {
         <Table.Header>
           <Table.Row>
             <Table.ColumnHeader w="sm">ID</Table.ColumnHeader>
-            <Table.ColumnHeader w="sm">Title</Table.ColumnHeader>
-            <Table.ColumnHeader w="sm">Description</Table.ColumnHeader>
+            <Table.ColumnHeader w="sm">Name</Table.ColumnHeader>
+            <Table.ColumnHeader w="sm">Content Type</Table.ColumnHeader>
             <Table.ColumnHeader w="sm">Actions</Table.ColumnHeader>
           </Table.Row>
         </Table.Header>
@@ -104,14 +103,14 @@ function DocumentsTable() {
                 {document.id}
               </Table.Cell>
               <Table.Cell truncate maxW="sm">
-                {document.title}
+                {document.filename || "N/A"}
               </Table.Cell>
               <Table.Cell
                 color={!document.description ? "gray" : "inherit"}
                 truncate
                 maxW="30%"
               >
-                {document.description || "N/A"}
+                {document.content_type || "N/A"}
               </Table.Cell>
               <Table.Cell>
                 <DocumentActionsMenu document={document} />
