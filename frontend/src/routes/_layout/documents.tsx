@@ -106,7 +106,7 @@ function DocumentsTable() {
                 {document.filename || "N/A"}
               </Table.Cell>
               <Table.Cell
-                color={!document.description ? "gray" : "inherit"}
+                color={!document.filename ? "gray" : "inherit"}
                 truncate
                 maxW="30%"
               >
