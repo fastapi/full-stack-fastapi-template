@@ -64,6 +64,11 @@ const LayoutDocuments2Route = LayoutDocuments2Import.update({
   getParentRoute: () => LayoutRoute,
 } as any);
 
+const LayoutDocuments2Route = LayoutDocuments2Import.update({
+  path: "/documents2",
+  getParentRoute: () => LayoutRoute,
+} as any);
+
 const LayoutDocumentsRoute = LayoutDocumentsImport.update({
   path: "/documents",
   getParentRoute: () => LayoutRoute,
@@ -127,6 +132,7 @@ export const routeTree = rootRoute.addChildren([
   LayoutRoute.addChildren([
     LayoutAdminRoute,
     LayoutDocumentsRoute,
+    LayoutDocuments2Route,
     LayoutDocuments2Route,
     LayoutSettingsRoute,
     LayoutIndexRoute,
