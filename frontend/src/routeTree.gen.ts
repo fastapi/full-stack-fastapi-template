@@ -18,6 +18,7 @@ import { Route as LoginImport } from "./routes/login";
 import { Route as LayoutImport } from "./routes/_layout";
 import { Route as LayoutIndexImport } from "./routes/_layout/index";
 import { Route as LayoutSettingsImport } from "./routes/_layout/settings";
+import { Route as LayoutDocuments2Import } from "./routes/_layout/documents2";
 import { Route as LayoutDocumentsImport } from "./routes/_layout/documents";
 import { Route as LayoutAdminImport } from "./routes/_layout/admin";
 
@@ -55,6 +56,11 @@ const LayoutIndexRoute = LayoutIndexImport.update({
 
 const LayoutSettingsRoute = LayoutSettingsImport.update({
   path: "/settings",
+  getParentRoute: () => LayoutRoute,
+} as any);
+
+const LayoutDocuments2Route = LayoutDocuments2Import.update({
+  path: "/documents2",
   getParentRoute: () => LayoutRoute,
 } as any);
 
@@ -100,6 +106,10 @@ declare module "@tanstack/react-router" {
       preLoaderRoute: typeof LayoutDocumentsImport;
       parentRoute: typeof LayoutImport;
     };
+    "/_layout/documents2": {
+      preLoaderRoute: typeof LayoutDocuments2Import;
+      parentRoute: typeof LayoutImport;
+    };
     "/_layout/settings": {
       preLoaderRoute: typeof LayoutSettingsImport;
       parentRoute: typeof LayoutImport;
@@ -117,6 +127,7 @@ export const routeTree = rootRoute.addChildren([
   LayoutRoute.addChildren([
     LayoutAdminRoute,
     LayoutDocumentsRoute,
+    LayoutDocuments2Route,
     LayoutSettingsRoute,
     LayoutIndexRoute,
   ]),
