@@ -6,7 +6,13 @@ from sqlmodel import func, select
 
 from app.api.deps import CurrentUser, SessionDep
 from app.core.extractors import extract_text_and_save_to_db
-from app.models import Document, DocumentCreate, DocumentPublic, DocumentsPublic
+from app.models import (
+    Document,
+    DocumentCreate,
+    DocumentPublic,
+    DocumentsPublic,
+    DocumentUpdate,
+)
 from app.s3 import generate_s3_url, upload_file_to_s3
 
 router = APIRouter(prefix="/documents", tags=["documents"])
@@ -95,3 +101,27 @@ def read_documents(
         documents = session.exec(statement).all()
 
     return DocumentsPublic(data=documents, count=count)
+
+
+@router.put("/{id}", response_model=DocumentPublic)
+def update_document(
+    *,
+    session: SessionDep,
+    current_user: CurrentUser,
+    id: uuid.UUID,
+    document_in: DocumentUpdate,
+) -> Any:
+    """
+    Update an document.
+    """
+    document = session.get(Document, id)
+    if not document:
+        raise HTTPException(status_code=404, detail="Document not found")
+    if not current_user.is_superuser and (document.owner_id != current_user.id):
+        raise HTTPException(status_code=400, detail="Not enough permissions")
+    update_dict = document_in.model_dump(exclude_unset=True)
+    document.sqlmodel_update(update_dict)
+    session.add(document)
+    session.commit()
+    session.refresh(document)
+    return document

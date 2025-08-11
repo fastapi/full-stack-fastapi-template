@@ -84,3 +84,24 @@ def test_read_documents(
     assert response.status_code == 200
     content = response.json()
     assert len(content["data"]) >= 2
+
+
+def test_update_document(
+    client: TestClient, superuser_token_headers: dict[str, str], db: Session
+) -> None:
+    document = create_random_document(db)
+    data = {"s3_key": "UpdatedKey"}
+    response = client.put(
+        f"{settings.API_V1_STR}/documents/{document.id}",
+        headers=superuser_token_headers,
+        json=data,
+    )
+    assert response.status_code == 200
+    content = response.json()
+    assert content["size"] == document.size
+    assert content["filename"] == document.filename
+    assert content["content_type"] == document.content_type
+    assert content["s3_url"] == document.s3_url
+    assert content["s3_key"] == "UpdatedKey"
+    assert content["id"] == str(document.id)
+    assert content["owner_id"] == str(document.owner_id)
