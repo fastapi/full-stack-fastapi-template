@@ -49,3 +49,20 @@ def create_document(
     print("Document created, starting background task...")
     background_tasks.add_task(extract_text_and_save_to_db, key, str(document.id))
     return document
+
+
+@router.get("/{document_id}", response_model=DocumentPublic)
+def get_document(
+    *,
+    session: SessionDep,
+    document_id: str,
+    current_user: CurrentUser,
+) -> Any:
+    document = session.get(Document, document_id)
+    if not document:
+        raise HTTPException(404, "Document not found")
+
+    if document.owner_id != current_user.id:
+        raise HTTPException(403, "You do not have permission to access this document")
+
+    return document

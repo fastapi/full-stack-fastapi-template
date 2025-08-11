@@ -104,6 +104,7 @@ class DocumentPublic(DocumentBase):
     filename: str
     content_type: str | None = None
     size: int | None = None
+    extracted_text: str | None = None
 
 
 class DocumentsPublic(SQLModel):
