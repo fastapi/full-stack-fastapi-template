@@ -163,7 +163,9 @@ export const PaginationNextTrigger = React.forwardRef<
   );
 });
 
-export const PaginationItems = (props: React.HTMLAttributes<HTMLElement>) => {
+export const PaginationDocuments = (
+  props: React.HTMLAttributes<HTMLElement>,
+) => {
   return (
     <ChakraPagination.Context>
       {({ pages }) =>
