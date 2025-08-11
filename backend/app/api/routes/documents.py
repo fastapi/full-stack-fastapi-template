@@ -12,6 +12,7 @@ from app.models import (
     DocumentPublic,
     DocumentsPublic,
     DocumentUpdate,
+    Message,
 )
 from app.s3 import generate_s3_url, upload_file_to_s3
 
@@ -125,3 +126,20 @@ def update_document(
     session.commit()
     session.refresh(document)
     return document
+
+
+@router.delete("/{id}")
+def delete_document(
+    session: SessionDep, current_user: CurrentUser, id: uuid.UUID
+) -> Message:
+    """
+    Delete an document.
+    """
+    document = session.get(Document, id)
+    if not document:
+        raise HTTPException(status_code=404, detail="Document not found")
+    if not current_user.is_superuser and (document.owner_id != current_user.id):
+        raise HTTPException(status_code=400, detail="Not enough permissions")
+    session.delete(document)
+    session.commit()
+    return Message(message="Document deleted successfully")

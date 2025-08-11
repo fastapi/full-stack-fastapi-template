@@ -1,4 +1,5 @@
 import io
+import uuid
 from unittest.mock import patch
 
 from fastapi.testclient import TestClient
@@ -105,3 +106,41 @@ def test_update_document(
     assert content["s3_key"] == "UpdatedKey"
     assert content["id"] == str(document.id)
     assert content["owner_id"] == str(document.owner_id)
+
+
+def test_delete_document(
+    client: TestClient, superuser_token_headers: dict[str, str], db: Session
+) -> None:
+    document = create_random_document(db)
+    response = client.delete(
+        f"{settings.API_V1_STR}/documents/{document.id}",
+        headers=superuser_token_headers,
+    )
+    assert response.status_code == 200
+    content = response.json()
+    assert content["message"] == "Document deleted successfully"
+
+
+def test_delete_document_not_found(
+    client: TestClient, superuser_token_headers: dict[str, str]
+) -> None:
+    response = client.delete(
+        f"{settings.API_V1_STR}/documents/{uuid.uuid4()}",
+        headers=superuser_token_headers,
+    )
+    assert response.status_code == 404
+    content = response.json()
+    assert content["detail"] == "Document not found"
+
+
+def test_delete_document_not_enough_permissions(
+    client: TestClient, normal_user_token_headers: dict[str, str], db: Session
+) -> None:
+    document = create_random_document(db)
+    response = client.delete(
+        f"{settings.API_V1_STR}/documents/{document.id}",
+        headers=normal_user_token_headers,
+    )
+    assert response.status_code == 400
+    content = response.json()
+    assert content["detail"] == "Not enough permissions"
