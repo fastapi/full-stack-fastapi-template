@@ -47,6 +47,9 @@ class User(UserBase, table=True):
     documents: list["Document"] = Relationship(
         back_populates="owner", cascade_delete=True
     )
+    questions: list["Question"] = Relationship(
+        back_populates="owner", cascade_delete=True
+    )
 
 
 # Properties to return via API, id is always required
@@ -57,6 +60,19 @@ class UserPublic(UserBase):
 class UsersPublic(SQLModel):
     data: list[UserPublic]
     count: int
+
+
+class QuestionBase(SQLModel):
+    question: str = Field(min_length=1, max_length=255)
+    answer: str | None = Field(default=None, max_length=1000)
+
+
+class Question(QuestionBase, table=True):
+    id: uuid.UUID = Field(default_factory=uuid.uuid4, primary_key=True)
+    owner_id: uuid.UUID = Field(
+        foreign_key="user.id", nullable=False, ondelete="CASCADE"
+    )
+    owner: User | None = Relationship(back_populates="questions")
 
 
 # Shared properties
@@ -92,12 +108,6 @@ class Document(DocumentBase, table=True):
     )
 
 
-# Properties to return via API, id is always required
-# class DocumentPublic(DocumentBase):
-#     id: uuid.UUID
-#     owner_id: uuid.UUID
-
-
 class DocumentPublic(DocumentBase):
     id: uuid.UUID
     owner_id: uuid.UUID
@@ -110,6 +120,12 @@ class DocumentPublic(DocumentBase):
 class DocumentsPublic(SQLModel):
     data: list[DocumentPublic]
     count: int
+
+
+# Questions model
+class QuestionBase(SQLModel):
+    question: str = Field(min_length=1, max_length=255)
+    answer: str | None = Field(default=None, max_length=1000)
 
 
 # Generic message
