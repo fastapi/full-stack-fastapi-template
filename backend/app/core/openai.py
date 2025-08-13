@@ -5,21 +5,23 @@ from sqlalchemy import select
 from sqlmodel import Session
 
 from app.core.config import settings
-from app.core.db import engine
 from app.models import Document
 
 openai.api_key = settings.OPENAI_API_KEY
 
 
-def get_documents_from_db(session: Session, document_ids: list[str]) -> list[Document]:
-    document_ids = [UUID(d) for d in document_ids]
+def get_document_texts_from_db(session: Session, document_ids: list[UUID]) -> list[str]:
     try:
-        with Session(engine) as session:
-            document_query = select(Document).where(Document.id.in_(document_ids))
-            documents = session.exec(document_query).all()
-            if not documents:
-                raise Exception("No documents found with the provided IDs")
-            return documents
+        # document_query = select(Document).where(Document.id.in_(document_ids))
+        # documents_texts = session.exec(document_query).all()
+
+        stmt = select(Document.extracted_text).where(
+            Document.id.in_(document_ids),
+        )
+        document_texts = session.exec(stmt).all()
+        if not document_texts:
+            raise Exception("No documents found with the provided IDs")
+        return document_texts
     except Exception as e:
         print(f"Failed to extract and chunk text for documents {document_ids}: {e}")
         return []
@@ -32,17 +34,20 @@ async def generate_questions_from_documents(
     Sends document texts to OpenAI to generate practice questions.
     Returns a list of question strings.
     """
-    questions = []
+    questions: list[str] = []
     try:
         document_texts = [
-            (doc.extracted_text or "")
-            for doc in get_documents_from_db(session, document_ids)
+            extracted_text or ""
+            for extracted_text in get_document_texts_from_db(session, document_ids)
         ]
+        if not document_texts:
+            return []
+
         prompt = "Generate practice questions based on the following documents:\n\n"
         prompt += "\n\n---\n\n".join(document_texts)
         prompt += "\n\nPlease provide a list of questions."
 
-        response = await openai.chat.completions.create(
+        response = openai.chat.completions.create(
             model="gpt-4o-mini",
             messages=[
                 {
