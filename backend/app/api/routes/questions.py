@@ -35,6 +35,7 @@ async def generate_questions(
             question_in=question_create,
             owner_id=current_user.id,
         )
+
         saved_questions.append(db_question)
 
-    return saved_questions
+    return [Question.model_validate(q) for q in saved_questions]
