@@ -1,3 +1,5 @@
+from uuid import UUID
+
 import openai
 from sqlalchemy import select
 from sqlmodel import Session
@@ -9,18 +11,23 @@ from app.models import Document
 openai.api_key = settings.OPENAI_API_KEY
 
 
-def get_documents_from_db(document_ids: list[str]) -> list[Document]:
+def get_documents_from_db(session: Session, document_ids: list[str]) -> list[Document]:
+    document_ids = [UUID(d) for d in document_ids]
     try:
         with Session(engine) as session:
             document_query = select(Document).where(Document.id.in_(document_ids))
             documents = session.exec(document_query).all()
             if not documents:
                 raise Exception("No documents found with the provided IDs")
+            return documents
     except Exception as e:
         print(f"Failed to extract and chunk text for documents {document_ids}: {e}")
+        return []
 
 
-async def generate_questions_from_documents(document_ids: list[str]) -> list[str]:
+async def generate_questions_from_documents(
+    session: Session, document_ids: list[UUID]
+) -> list[str]:
     """
     Sends document texts to OpenAI to generate practice questions.
     Returns a list of question strings.
@@ -28,13 +35,14 @@ async def generate_questions_from_documents(document_ids: list[str]) -> list[str
     questions = []
     try:
         document_texts = [
-            doc.extracted_text for doc in get_documents_from_db(document_ids)
+            (doc.extracted_text or "")
+            for doc in get_documents_from_db(session, document_ids)
         ]
         prompt = "Generate practice questions based on the following documents:\n\n"
         prompt += "\n\n---\n\n".join(document_texts)
         prompt += "\n\nPlease provide a list of questions."
 
-        response = await openai.ChatCompletion.acreate(
+        response = await openai.chat.completions.create(
             model="gpt-4o-mini",
             messages=[
                 {
@@ -54,3 +62,4 @@ async def generate_questions_from_documents(document_ids: list[str]) -> list[str
         return questions
     except Exception as e:
         print(f"Failed to generate questions from documents {document_ids}: {e}")
+    return questions

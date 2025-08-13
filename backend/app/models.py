@@ -137,12 +137,6 @@ class DocumentsPublic(SQLModel):
     count: int
 
 
-# Questions model
-class QuestionBase(SQLModel):
-    question: str = Field(min_length=1, max_length=255)
-    answer: str | None = Field(default=None, max_length=1000)
-
-
 # Generic message
 class Message(SQLModel):
     message: str
