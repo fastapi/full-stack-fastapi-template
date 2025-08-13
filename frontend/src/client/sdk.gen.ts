@@ -304,7 +304,7 @@ export class QuestionsService {
    * Generate Questions
    * @param data The data for the request.
    * @param data.requestBody
-   * @returns QuestionPublic Successful Response
+   * @returns Question Successful Response
    * @throws ApiError
    */
   public static generateQuestions(
