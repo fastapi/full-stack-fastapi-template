@@ -77,7 +77,6 @@ def test_read_documents(
     client: TestClient, superuser_token_headers: dict[str, str], db: Session
 ) -> None:
     create_random_document(db)
-    create_random_document(db)
     response = client.get(
         f"{settings.API_V1_STR}/documents/",
         headers=superuser_token_headers,

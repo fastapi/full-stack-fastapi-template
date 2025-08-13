@@ -64,7 +64,7 @@ class UsersPublic(SQLModel):
 
 class QuestionBase(SQLModel):
     question: str = Field(min_length=1, max_length=255)
-    answer: str | None = Field(default=None, max_length=1000)
+    answer: str | None = Field(default=None, nullable=True, max_length=1000)
 
 
 class Question(QuestionBase, table=True):
@@ -73,6 +73,21 @@ class Question(QuestionBase, table=True):
         foreign_key="user.id", nullable=False, ondelete="CASCADE"
     )
     owner: User | None = Relationship(back_populates="questions")
+
+
+# Properties to receive on document creation
+class QuestionCreate(QuestionBase):
+    pass
+
+
+class GenerateQuestionsRequest(SQLModel):
+    document_ids: list[uuid.UUID]
+    # maybe add difficulty, number of questions, etc.
+
+
+# Define response model for a question
+class QuestionPublic(QuestionBase):
+    id: uuid.UUID
 
 
 # Shared properties

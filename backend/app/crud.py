@@ -4,7 +4,15 @@ from typing import Any
 from sqlmodel import Session, select
 
 from app.core.security import get_password_hash, verify_password
-from app.models import Document, DocumentCreate, User, UserCreate, UserUpdate
+from app.models import (
+    Document,
+    DocumentCreate,
+    Question,
+    QuestionCreate,
+    User,
+    UserCreate,
+    UserUpdate,
+)
 
 
 def create_user(*, session: Session, user_create: UserCreate) -> User:
@@ -54,3 +62,13 @@ def create_document(
     session.commit()
     session.refresh(db_document)
     return db_document
+
+
+def create_question(
+    *, session: Session, question_in: QuestionCreate, owner_id: uuid.UUID
+) -> Question:
+    db_question = Question.model_validate(question_in, update={"owner_id": owner_id})
+    session.add(db_question)
+    session.commit()
+    session.refresh(db_question)
+    return db_question
