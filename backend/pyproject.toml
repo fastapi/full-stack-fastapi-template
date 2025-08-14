@@ -24,6 +24,7 @@ dependencies = [
     "pyjwt<3.0.0,>=2.8.0",
     "textract>=1.6.5",
     "boto3-stubs>=1.40.2",
+    "openai>=1.99.9",
 ]
 
 [tool.uv]

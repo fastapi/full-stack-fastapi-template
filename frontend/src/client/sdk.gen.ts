@@ -25,6 +25,8 @@ import type {
   LoginRecoverPasswordHtmlContentResponse,
   PrivateCreateUserData,
   PrivateCreateUserResponse,
+  QuestionsGenerateQuestionsData,
+  QuestionsGenerateQuestionsResponse,
   UsersReadUsersData,
   UsersReadUsersResponse,
   UsersCreateUserData,
@@ -288,6 +290,29 @@ export class PrivateService {
     return __request(OpenAPI, {
       method: "POST",
       url: "/api/v1/private/users/",
+      body: data.requestBody,
+      mediaType: "application/json",
+      errors: {
+        422: "Validation Error",
+      },
+    })
+  }
+}
+
+export class QuestionsService {
+  /**
+   * Generate Questions
+   * @param data The data for the request.
+   * @param data.requestBody
+   * @returns Question Successful Response
+   * @throws ApiError
+   */
+  public static generateQuestions(
+    data: QuestionsGenerateQuestionsData,
+  ): CancelablePromise<QuestionsGenerateQuestionsResponse> {
+    return __request(OpenAPI, {
+      method: "POST",
+      url: "/api/v1/questions/generate",
       body: data.requestBody,
       mediaType: "application/json",
       errors: {

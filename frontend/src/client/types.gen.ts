@@ -37,6 +37,10 @@ export type DocumentUpdate = {
   size?: number | null
 }
 
+export type GenerateQuestionsRequest = {
+  document_ids: Array<string>
+}
+
 export type HTTPValidationError = {
   detail?: Array<ValidationError>
 }
@@ -55,6 +59,13 @@ export type PrivateUserCreate = {
   password: string
   full_name: string
   is_verified?: boolean
+}
+
+export type Question = {
+  question: string
+  answer?: string | null
+  id?: string
+  owner_id: string
 }
 
 export type Token = {
@@ -176,6 +187,12 @@ export type PrivateCreateUserData = {
 }
 
 export type PrivateCreateUserResponse = UserPublic
+
+export type QuestionsGenerateQuestionsData = {
+  requestBody: GenerateQuestionsRequest
+}
+
+export type QuestionsGenerateQuestionsResponse = Array<Question>
 
 export type UsersReadUsersData = {
   limit?: number
