@@ -20,7 +20,7 @@ def get_document_texts_from_db(session: Session, document_ids: list[UUID]) -> li
         # db_documents = session.exec(document_query).all()
         # document_texts = [doc.extracted_text for doc in db_documents if doc.extracted_text]
         stmt = select(Document.extracted_text).where(
-            cast(InstrumentedAttribute, Document.id).in_(document_ids)
+            cast(InstrumentedAttribute[UUID], Document.id).in_(document_ids)
         )
         document_texts: list[str] = [
             text for (text,) in session.exec(stmt).all() if text
