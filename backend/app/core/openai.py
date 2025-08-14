@@ -1,9 +1,7 @@
-from typing import cast
 from uuid import UUID
 
 import openai
 from sqlalchemy import select
-from sqlalchemy.orm.attributes import InstrumentedAttribute
 from sqlmodel import Session
 
 from app.core.config import settings
@@ -14,13 +12,11 @@ openai.api_key = settings.OPENAI_API_KEY
 
 def get_document_texts_from_db(session: Session, document_ids: list[UUID]) -> list[str]:
     try:
-        stmt = select(Document).where(
-            cast(InstrumentedAttribute[UUID], Document.id).in_(document_ids)
-        )
-        db_documents = session.exec(stmt).all()
+        stmt = select(Document).where(Document.id.in_(document_ids))
+        db_documents: list[Document] = session.exec(stmt).all()
         document_texts = [
             doc.extracted_text for doc in db_documents if doc.extracted_text
-        ]  # type: ignore
+        ]
 
         if not document_texts:
             raise Exception("No documents found with the provided IDs")
