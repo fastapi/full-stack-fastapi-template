@@ -12,7 +12,7 @@ def test_generate_questions(
 ) -> None:
     """Test generating questions from documents using mocked OpenAI."""
     documents = create_random_documents(db)
-    document_ids = [str(doc.id) for doc in documents]
+    document_ids = [doc.id for doc in documents]
     payload = {
         "document_ids": document_ids,
     }
