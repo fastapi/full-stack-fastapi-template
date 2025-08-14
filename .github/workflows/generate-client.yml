@@ -13,9 +13,9 @@ jobs:
     runs-on: ubuntu-latest
     steps:
     # For PRs from forks
-    - uses: actions/checkout@v4
+    - uses: actions/checkout@v5
     # For PRs from the same repo
-    - uses: actions/checkout@v4
+    - uses: actions/checkout@v5
       if: ( github.event_name != 'pull_request' || github.secret_source == 'Actions' )
       with:
         ref: ${{ github.head_ref }}
