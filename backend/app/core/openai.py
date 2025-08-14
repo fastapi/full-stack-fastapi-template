@@ -12,7 +12,7 @@ openai.api_key = settings.OPENAI_API_KEY
 
 def get_document_texts_from_db(session: Session, document_ids: list[UUID]) -> list[str]:
     try:
-        stmt = select(Document.extracted_text).where(Document.id.in_(document_ids))  # type: ignore[attr-defined]
+        stmt = select(Document.extracted_text).where(Document.id.in_(document_ids))  # type: ignore[call-overload]
         results = session.exec(stmt).all()
         document_texts = [text for (text,) in results if text]
         if not document_texts:
