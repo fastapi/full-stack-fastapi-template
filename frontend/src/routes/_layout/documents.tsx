@@ -1,4 +1,5 @@
 import {
+  Checkbox,
   Container,
   EmptyState,
   Flex,
@@ -21,6 +22,7 @@ import {
   PaginationPrevTrigger,
   PaginationRoot,
 } from "@/components/ui/pagination.tsx";
+import { useState } from "react";
 
 const documentsSearchSchema = z.object({
   page: z.number().catch(1),
@@ -47,6 +49,7 @@ export const Route = createFileRoute("/_layout/documents")({
 function DocumentsTable() {
   const navigate = useNavigate({ from: Route.fullPath });
   const { page } = Route.useSearch();
+  const [selectedDocuments, setSelectedDocuments] = useState<Document[]>([]);
 
   const { data, isLoading, isPlaceholderData } = useQuery({
     ...getDocumentsQueryOptions({ page }),
@@ -60,6 +63,9 @@ function DocumentsTable() {
 
   const documents = data?.data.slice(0, PER_PAGE) ?? [];
   const count = data?.count ?? 0;
+
+  const indeterminate =
+    selectedDocuments.length > 0 && selectedDocuments.length < documents.length;
 
   if (isLoading) {
     return <PendingDocuments />;
@@ -90,6 +96,22 @@ function DocumentsTable() {
       <Table.Root size={{ base: "sm", md: "md" }}>
         <Table.Header>
           <Table.Row>
+            <Table.ColumnHeader w="6">
+              <Checkbox.Root
+                size="sm"
+                mt="0.5"
+                aria-label="Select all rows"
+                checked={selectedDocuments.length === documents.length}
+                indeterminate={indeterminate}
+                onCheckedChange={(changes) =>
+                  setSelectedDocuments(changes.checked ? [...documents] : [])
+                }
+              >
+                <Checkbox.HiddenInput />
+                <Checkbox.Control />
+              </Checkbox.Root>
+            </Table.ColumnHeader>
+
             <Table.ColumnHeader w="sm">ID</Table.ColumnHeader>
             <Table.ColumnHeader w="sm">Name</Table.ColumnHeader>
             <Table.ColumnHeader w="sm">Content Type</Table.ColumnHeader>
@@ -98,7 +120,31 @@ function DocumentsTable() {
         </Table.Header>
         <Table.Body>
           {documents?.map((document) => (
-            <Table.Row key={document.id} opacity={isPlaceholderData ? 0.5 : 1}>
+            <Table.Row
+              key={document.id}
+              data-selected={
+                selectedDocuments.includes(document) ? "" : undefined
+              }
+              opacity={isPlaceholderData ? 0.5 : 1}
+            >
+              <Table.Cell>
+                <Checkbox.Root
+                  size="sm"
+                  mt="0.5"
+                  checked={selectedDocuments.includes(document)}
+                  onCheckedChange={(changes) => {
+                    setSelectedDocuments((prev) =>
+                      changes.checked
+                        ? [...prev, document]
+                        : prev.filter((d) => d.id !== document.id),
+                    );
+                  }}
+                >
+                  <Checkbox.HiddenInput />
+                  <Checkbox.Control />
+                </Checkbox.Root>
+              </Table.Cell>
+
               <Table.Cell truncate maxW="sm">
                 {document.id}
               </Table.Cell>
