@@ -14,17 +14,13 @@ openai.api_key = settings.OPENAI_API_KEY
 
 def get_document_texts_from_db(session: Session, document_ids: list[UUID]) -> list[str]:
     try:
-        # document_query = select(Document).where(
-        #     cast(InstrumentedAttribute, Document.id).in_(document_ids)
-        # )
-        # db_documents = session.exec(document_query).all()
-        # document_texts = [doc.extracted_text for doc in db_documents if doc.extracted_text]
-        stmt = select(Document.extracted_text).where(
+        stmt = select(Document).where(
             cast(InstrumentedAttribute[UUID], Document.id).in_(document_ids)
         )
-        document_texts: list[str] = [
-            text for (text,) in session.exec(stmt).all() if text
-        ]
+        db_documents = session.exec(stmt).all()
+        document_texts = [
+            doc.extracted_text for doc in db_documents if doc.extracted_text
+        ]  # type: ignore
 
         if not document_texts:
             raise Exception("No documents found with the provided IDs")
