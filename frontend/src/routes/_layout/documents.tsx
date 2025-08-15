@@ -15,7 +15,7 @@ import { FiSearch } from "react-icons/fi";
 import { z } from "zod";
 import { useState } from "react";
 
-import { DocumentsService } from "@/client";
+import { DocumentsService, DocumentPublic } from "@/client";
 import { DocumentActionsMenu } from "@/components/Common/DocumentActionsMenu";
 import AddDocument from "@/components/Documents/AddDocument";
 import PendingDocuments from "@/components/Pending/PendingDocuments";
@@ -74,9 +74,9 @@ function SelectAllCheckbox({
   documents,
   setSelectedDocuments,
 }: {
-  selectedDocuments: Document[];
-  documents: Document[];
-  setSelectedDocuments: (docs: Document[]) => void;
+  selectedDocuments: DocumentPublic[];
+  documents: DocumentPublic[];
+  setSelectedDocuments: (docs: DocumentPublic[]) => void;
 }) {
   const indeterminate =
     selectedDocuments.length > 0 && selectedDocuments.length < documents.length;
@@ -105,9 +105,9 @@ function DocumentRow({
   setSelectedDocuments,
   isPlaceholderData,
 }: {
-  document: Document;
-  selectedDocuments: Document[];
-  setSelectedDocuments: (docs: Document[]) => void;
+  document: DocumentPublic;
+  selectedDocuments: DocumentPublic[];
+  setSelectedDocuments: (docs: DocumentPublic[]) => void;
   isPlaceholderData: boolean;
 }) {
   return (
@@ -125,7 +125,7 @@ function DocumentRow({
             setSelectedDocuments((prev) =>
               changes.checked
                 ? [...prev, document]
-                : prev.filter((d) => d.id !== document.id),
+                : prev.filter((d: DocumentPublic) => d.id !== document.id),
             )
           }
         >
@@ -145,7 +145,7 @@ function DocumentRow({
         truncate
         maxW="30%"
       >
-        {document.content_type || "N/A"}
+        {document.contentType || "N/A"}
       </Table.Cell>
       <Table.Cell>
         <DocumentActionsMenu document={document} />
@@ -158,8 +158,8 @@ function DocumentsTable({
   selectedDocuments,
   setSelectedDocuments,
 }: {
-  selectedDocuments: Document[];
-  setSelectedDocuments: (docs: Document[]) => void;
+  selectedDocuments: DocumentPublic[];
+  setSelectedDocuments: (docs: DocumentPublic[]) => void;
 }) {
   const navigate = useNavigate({ from: Route.fullPath });
   const { page } = Route.useSearch();
@@ -230,7 +230,9 @@ function DocumentsTable({
 
 // ------------------- Page -------------------
 function Documents() {
-  const [selectedDocuments, setSelectedDocuments] = useState<Document[]>([]);
+  const [selectedDocuments, setSelectedDocuments] = useState<DocumentPublic[]>(
+    [],
+  );
 
   return (
     <Container maxW="full">
