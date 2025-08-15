@@ -63,7 +63,7 @@ class UsersPublic(SQLModel):
 
 
 class QuestionBase(SQLModel):
-    question: str | None = Field(default=None, sa_column=Column(Text, nullable=False))
+    question: str = Field(sa_column=Column(Text, nullable=False))
     answer: str | None = Field(default=None, sa_column=Column(Text, nullable=True))
 
 
