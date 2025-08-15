@@ -13,7 +13,7 @@ import { useQuery } from "@tanstack/react-query";
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { FiSearch } from "react-icons/fi";
 import { z } from "zod";
-import { useState } from "react";
+import { Dispatch, SetStateAction, useState } from "react";
 
 import { DocumentsService, DocumentPublic } from "@/client";
 import { DocumentActionsMenu } from "@/components/Common/DocumentActionsMenu";
@@ -76,7 +76,7 @@ function SelectAllCheckbox({
 }: {
   selectedDocuments: DocumentPublic[];
   documents: DocumentPublic[];
-  setSelectedDocuments: (docs: DocumentPublic[]) => void;
+  setSelectedDocuments: Dispatch<SetStateAction<DocumentPublic[]>>;
 }) {
   return (
     <Checkbox.Root
@@ -103,7 +103,7 @@ function DocumentRow({
 }: {
   document: DocumentPublic;
   selectedDocuments: DocumentPublic[];
-  setSelectedDocuments: (docs: DocumentPublic[]) => void;
+  setSelectedDocuments: Dispatch<SetStateAction<DocumentPublic[]>>;
   isPlaceholderData: boolean;
 }) {
   return (
@@ -155,7 +155,7 @@ function DocumentsTable({
   setSelectedDocuments,
 }: {
   selectedDocuments: DocumentPublic[];
-  setSelectedDocuments: (docs: DocumentPublic[]) => void;
+  setSelectedDocuments: Dispatch<SetStateAction<DocumentPublic[]>>;
 }) {
   const navigate = useNavigate({ from: Route.fullPath });
   const { page } = Route.useSearch();
