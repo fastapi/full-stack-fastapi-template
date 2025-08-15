@@ -62,7 +62,7 @@ export type PrivateUserCreate = {
 }
 
 export type Question = {
-  question: string
+  question?: string | null
   answer?: string | null
   id?: string
   owner_id: string
