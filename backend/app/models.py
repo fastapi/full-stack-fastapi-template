@@ -63,8 +63,8 @@ class UsersPublic(SQLModel):
 
 
 class QuestionBase(SQLModel):
-    question: str = Field(min_length=1, max_length=255)
-    answer: str | None = Field(default=None, nullable=True, max_length=1000)
+    question: str = Field(sa_column=Column(Text, nullable=False))
+    answer: str | None = Field(default=None, sa_column=Column(Text, nullable=True))
 
 
 class Question(QuestionBase, table=True):
