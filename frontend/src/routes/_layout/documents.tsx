@@ -13,25 +13,24 @@ import { useQuery } from "@tanstack/react-query";
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { FiSearch } from "react-icons/fi";
 import { z } from "zod";
+import { useState } from "react";
 
 import { DocumentsService } from "@/client";
 import { DocumentActionsMenu } from "@/components/Common/DocumentActionsMenu";
 import AddDocument from "@/components/Documents/AddDocument";
 import PendingDocuments from "@/components/Pending/PendingDocuments";
+import GenerateQuestions from "@/components/Documents/GenerateQuestions";
 import {
   PaginationDocuments,
   PaginationNextTrigger,
   PaginationPrevTrigger,
   PaginationRoot,
 } from "@/components/ui/pagination.tsx";
-import { useState } from "react";
 
 // ------------------- Constants & Schemas -------------------
-
 const documentsSearchSchema = z.object({
   page: z.number().catch(1),
 });
-
 const PER_PAGE = 5;
 
 function getDocumentsQueryOptions({ page }: { page: number }) {
@@ -46,14 +45,12 @@ function getDocumentsQueryOptions({ page }: { page: number }) {
 }
 
 // ------------------- Route -------------------
-
 export const Route = createFileRoute("/_layout/documents")({
   component: Documents,
   validateSearch: (search) => documentsSearchSchema.parse(search),
 });
 
 // ------------------- Components -------------------
-
 function EmptyDocuments() {
   return (
     <EmptyState.Root>
@@ -97,6 +94,7 @@ function SelectAllCheckbox({
     >
       <Checkbox.HiddenInput />
       <Checkbox.Control />
+      <Checkbox.Label>Select All</Checkbox.Label>
     </Checkbox.Root>
   );
 }
@@ -156,10 +154,15 @@ function DocumentRow({
   );
 }
 
-function DocumentsTable() {
+function DocumentsTable({
+  selectedDocuments,
+  setSelectedDocuments,
+}: {
+  selectedDocuments: Document[];
+  setSelectedDocuments: (docs: Document[]) => void;
+}) {
   const navigate = useNavigate({ from: Route.fullPath });
   const { page } = Route.useSearch();
-  const [selectedDocuments, setSelectedDocuments] = useState<Document[]>([]);
 
   const { data, isLoading, isPlaceholderData } = useQuery({
     ...getDocumentsQueryOptions({ page }),
@@ -226,15 +229,22 @@ function DocumentsTable() {
 }
 
 // ------------------- Page -------------------
-
 function Documents() {
+  const [selectedDocuments, setSelectedDocuments] = useState<Document[]>([]);
+
   return (
     <Container maxW="full">
       <Heading size="lg" pt={12}>
         Documents Management
       </Heading>
       <AddDocument />
-      <DocumentsTable />
+      <GenerateQuestions selectedDocuments={selectedDocuments} />
+      <DocumentsTable
+        selectedDocuments={selectedDocuments}
+        setSelectedDocuments={setSelectedDocuments}
+      />
     </Container>
   );
 }
+
+export default Documents;
