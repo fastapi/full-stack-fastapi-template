@@ -2,7 +2,7 @@ import { Button } from "@chakra-ui/react";
 import { FaPlus } from "react-icons/fa";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 
-import { QuestionsService } from "@/client";
+import { QuestionsService, DocumentPublic } from "@/client";
 import type { ApiError } from "@/client/core/ApiError";
 import useCustomToast from "@/hooks/useCustomToast";
 import { handleError } from "@/utils";
@@ -10,7 +10,7 @@ import { handleError } from "@/utils";
 const GenerateQuestions = ({
   selectedDocuments,
 }: {
-  selectedDocuments: Document[];
+  selectedDocuments: DocumentPublic[];
 }) => {
   const queryClient = useQueryClient();
   const { showSuccessToast } = useCustomToast();
@@ -43,7 +43,7 @@ const GenerateQuestions = ({
       variant="solid"
       onClick={handleClick}
       disabled={selectedDocuments.length === 0}
-      isLoading={mutation.isPending}
+      loading={mutation.isPending}
     >
       <FaPlus fontSize="16px" />
       Generate Questions from selected Documents

@@ -78,16 +78,12 @@ function SelectAllCheckbox({
   documents: DocumentPublic[];
   setSelectedDocuments: (docs: DocumentPublic[]) => void;
 }) {
-  const indeterminate =
-    selectedDocuments.length > 0 && selectedDocuments.length < documents.length;
-
   return (
     <Checkbox.Root
       size="sm"
       mt="0.5"
       aria-label="Select all rows"
       checked={selectedDocuments.length === documents.length}
-      indeterminate={indeterminate}
       onCheckedChange={(changes) =>
         setSelectedDocuments(changes.checked ? [...documents] : [])
       }
@@ -122,7 +118,7 @@ function DocumentRow({
           mt="0.5"
           checked={selectedDocuments.includes(document)}
           onCheckedChange={(changes) =>
-            setSelectedDocuments((prev) =>
+            setSelectedDocuments((prev: DocumentPublic[]) =>
               changes.checked
                 ? [...prev, document]
                 : prev.filter((d: DocumentPublic) => d.id !== document.id),
@@ -145,7 +141,7 @@ function DocumentRow({
         truncate
         maxW="30%"
       >
-        {document.contentType || "N/A"}
+        {document.content_type || "N/A"}
       </Table.Cell>
       <Table.Cell>
         <DocumentActionsMenu document={document} />
