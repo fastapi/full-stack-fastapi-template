@@ -16,7 +16,7 @@ logger = logging.getLogger(__name__)
 router = APIRouter(prefix="/questions", tags=["questions"])
 
 
-@router.post("/generate", response_model=list[Question])
+@router.post("/generate", response_model=list[QuestionPublic])
 async def generate_questions(
     *,
     session: SessionDep,
@@ -44,3 +44,4 @@ async def generate_questions(
         logger.error(
             f"Failed to generate questions: {e} Saved questions: {saved_questions}"
         )
+        raise
