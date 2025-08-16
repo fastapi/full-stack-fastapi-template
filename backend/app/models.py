@@ -1,8 +1,10 @@
 import uuid
+from enum import Enum
 
 from pydantic import EmailStr
 from sqlalchemy import Column, Text
-from sqlmodel import JSON, Enum, Field, Relationship, SQLModel
+from sqlmodel import JSON, Field, Relationship, SQLModel
+from sqlmodel import Enum as SAEnum
 
 
 # Shared properties
@@ -81,7 +83,7 @@ class Question(QuestionBase, table=True):
     )
     type: QuestionType = Field(
         default=QuestionType.SHORT_ANSWER,
-        sa_column=Column(Enum(QuestionType), nullable=False),
+        sa_column=Column(SAEnum(QuestionType), nullable=False),
     )
     owner: User | None = Relationship(back_populates="questions")
     options: list[str] = Field(default_factory=list, sa_column=Column(JSON))
