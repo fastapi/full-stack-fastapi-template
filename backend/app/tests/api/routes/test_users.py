@@ -1,6 +1,7 @@
 import uuid
 from unittest.mock import patch
 
+import pytest
 from fastapi.testclient import TestClient
 from sqlmodel import Session, select
 
@@ -8,6 +9,7 @@ from app import crud
 from app.core.config import settings
 from app.core.security import verify_password
 from app.models import User, UserCreate
+from app.tests.utils.user import create_random_user, user_authentication_headers
 from app.tests.utils.utils import random_email, random_lower_string
 
 
@@ -56,7 +58,7 @@ def test_create_user_new_email(
         assert user.email == created_user["email"]
 
 
-def test_get_existing_user(
+def test_get_existing_user_as_superuser(
     client: TestClient, superuser_token_headers: dict[str, str], db: Session
 ) -> None:
     username = random_email()
@@ -75,21 +77,32 @@ def test_get_existing_user(
     assert existing_user.email == api_user["email"]
 
 
-def test_get_existing_user_current_user(client: TestClient, db: Session) -> None:
+def test_get_non_existing_user_as_superuser(
+    client: TestClient, superuser_token_headers: dict[str, str]
+) -> None:
+    r = client.get(
+        f"{settings.API_V1_STR}/users/{uuid.uuid4()}",
+        headers=superuser_token_headers,
+    )
+    assert r.status_code == 404
+    assert r.json() == {"detail": "User not found"}
+
+
+@pytest.mark.parametrize(
+    "is_superuser", (True, False), ids=lambda x: "superuser" if x else "normal user"
+)
+def test_get_existing_user_current_user(
+    client: TestClient, db: Session, is_superuser: bool
+) -> None:
     username = random_email()
     password = random_lower_string()
-    user_in = UserCreate(email=username, password=password)
+    user_in = UserCreate(email=username, password=password, is_superuser=is_superuser)
     user = crud.create_user(session=db, user_create=user_in)
     user_id = user.id
 
-    login_data = {
-        "username": username,
-        "password": password,
-    }
-    r = client.post(f"{settings.API_V1_STR}/login/access-token", data=login_data)
-    tokens = r.json()
-    a_token = tokens["access_token"]
-    headers = {"Authorization": f"Bearer {a_token}"}
+    headers = user_authentication_headers(
+        client=client, email=username, password=password
+    )
 
     r = client.get(
         f"{settings.API_V1_STR}/users/{user_id}",
@@ -102,11 +115,22 @@ def test_get_existing_user_current_user(client: TestClient, db: Session) -> None
     assert existing_user.email == api_user["email"]
 
 
+@pytest.mark.parametrize(
+    "exists", (True, False), ids=lambda x: "Existing user" if x else "No user"
+)
 def test_get_existing_user_permissions_error(
-    client: TestClient, normal_user_token_headers: dict[str, str]
+    db: Session,
+    client: TestClient,
+    normal_user_token_headers: dict[str, str],
+    exists: bool,
 ) -> None:
+    if exists:
+        user = create_random_user(db)
+        user_id = user.id
+    else:
+        user_id = uuid.uuid4()
     r = client.get(
-        f"{settings.API_V1_STR}/users/{uuid.uuid4()}",
+        f"{settings.API_V1_STR}/users/{user_id}",
         headers=normal_user_token_headers,
     )
     assert r.status_code == 403
