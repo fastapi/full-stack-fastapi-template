@@ -7,7 +7,6 @@ from app.api.deps import CurrentUser, SessionDep
 from app.core.openai import generate_questions_from_documents
 from app.models import (
     GenerateQuestionsRequest,
-    Question,
     QuestionPublic,
 )
 
@@ -22,7 +21,7 @@ async def generate_questions(
     session: SessionDep,
     payload: GenerateQuestionsRequest,
     current_user: CurrentUser,
-) -> list[Question]:
+) -> list[QuestionPublic]:
     # 1. Validate documents belong to user or are accessible
 
     # 2. Call your AI question generation function, passing document_ids or text
