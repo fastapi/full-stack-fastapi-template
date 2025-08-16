@@ -66,7 +66,11 @@ export type Question = {
   answer?: string | null
   id?: string
   owner_id: string
+  type?: QuestionType
+  options?: Array<string>
 }
+
+export type QuestionType = "multiple_choice" | "true_false" | "short_answer"
 
 export type Token = {
   access_token: string
