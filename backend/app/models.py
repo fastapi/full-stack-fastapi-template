@@ -92,13 +92,16 @@ class Question(QuestionBase, table=True):
 # Define response model for a question
 class QuestionPublic(QuestionBase):
     id: uuid.UUID
+    owner_id: uuid.UUID
+
     type: QuestionType
     options: list[str] = []  # optional, only for multiple choice
 
 
 # Properties to receive on document creation
 class QuestionCreate(QuestionBase):
-    pass
+    type: QuestionType
+    options: list[str] = []  # optional, only for multiple choice
 
 
 class GenerateQuestionsRequest(SQLModel):

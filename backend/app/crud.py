@@ -69,11 +69,16 @@ def create_document(
     return DocumentPublic.model_validate(db_document)
 
 
-# --- Question ---
 def create_question(
     *, session: Session, question_in: QuestionCreate, owner_id: UUID
 ) -> QuestionPublic:
-    db_question = Question.model_validate(question_in, update={"owner_id": owner_id})
+    db_question = Question(
+        question=question_in.question,
+        answer=question_in.answer,
+        type=question_in.type,
+        options=question_in.options or [],
+        owner_id=owner_id,
+    )
     session.add(db_question)
     session.commit()
     session.refresh(db_question)
