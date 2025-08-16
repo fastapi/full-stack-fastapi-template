@@ -61,12 +61,16 @@ export type PrivateUserCreate = {
   is_verified?: boolean
 }
 
-export type Question = {
+export type QuestionPublic = {
   question: string
   answer?: string | null
-  id?: string
+  id: string
   owner_id: string
+  type: QuestionType
+  options?: Array<string>
 }
+
+export type QuestionType = "multiple_choice" | "true_false" | "short_answer"
 
 export type Token = {
   access_token: string
@@ -192,7 +196,7 @@ export type QuestionsGenerateQuestionsData = {
   requestBody: GenerateQuestionsRequest
 }
 
-export type QuestionsGenerateQuestionsResponse = Array<Question>
+export type QuestionsGenerateQuestionsResponse = Array<QuestionPublic>
 
 export type UsersReadUsersData = {
   limit?: number

@@ -1,8 +1,10 @@
 import uuid
+from enum import Enum
 
 from pydantic import EmailStr
 from sqlalchemy import Column, Text
-from sqlmodel import Field, Relationship, SQLModel
+from sqlmodel import JSON, Field, Relationship, SQLModel
+from sqlmodel import Enum as SAEnum
 
 
 # Shared properties
@@ -62,8 +64,15 @@ class UsersPublic(SQLModel):
     count: int
 
 
+class QuestionType(str, Enum):
+    MULTIPLE_CHOICE = "multiple_choice"
+    TRUE_FALSE = "true_false"
+    SHORT_ANSWER = "short_answer"
+
+
 class QuestionBase(SQLModel):
     question: str = Field(sa_column=Column(Text, nullable=False))
+    # TODO: Get the answer from generated questions for test grading
     answer: str | None = Field(default=None, sa_column=Column(Text, nullable=True))
 
 
@@ -72,22 +81,32 @@ class Question(QuestionBase, table=True):
     owner_id: uuid.UUID = Field(
         foreign_key="user.id", nullable=False, ondelete="CASCADE"
     )
+    type: QuestionType = Field(
+        default=QuestionType.SHORT_ANSWER,
+        sa_column=Column(SAEnum(QuestionType), nullable=False),
+    )
     owner: User | None = Relationship(back_populates="questions")
-
-
-# Properties to receive on document creation
-class QuestionCreate(QuestionBase):
-    pass
-
-
-class GenerateQuestionsRequest(SQLModel):
-    document_ids: list[uuid.UUID]
-    # maybe add difficulty, number of questions, etc.
+    options: list[str] = Field(default_factory=list, sa_column=Column(JSON))
 
 
 # Define response model for a question
 class QuestionPublic(QuestionBase):
     id: uuid.UUID
+    owner_id: uuid.UUID
+
+    type: QuestionType
+    options: list[str] = []  # optional, only for multiple choice
+
+
+# Properties to receive on document creation
+class QuestionCreate(QuestionBase):
+    type: QuestionType
+    options: list[str] = []  # optional, only for multiple choice
+
+
+class GenerateQuestionsRequest(SQLModel):
+    document_ids: list[uuid.UUID]
+    # maybe add difficulty, number of questions, etc.
 
 
 # Shared properties
