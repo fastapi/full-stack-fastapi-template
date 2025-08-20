@@ -2,7 +2,7 @@ from unittest.mock import MagicMock, Mock, patch
 
 from sqlmodel import select
 
-import app.tests_pre_start
+import app.tests_pre_start  # noqa: F401
 from app.tests_pre_start import init, logger
 
 
