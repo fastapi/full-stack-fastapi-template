@@ -1,5 +1,5 @@
 from collections.abc import Generator
-from typing import Annotated
+from typing import Annotated, TypeAlias
 
 import jwt
 from fastapi import Depends, HTTPException, status
@@ -23,8 +23,8 @@ def get_db() -> Generator[Session, None, None]:
         yield session
 
 
-SessionDep = Annotated[Session, Depends(get_db)]
-TokenDep = Annotated[str, Depends(reusable_oauth2)]
+SessionDep: TypeAlias = Annotated[Session, Depends(get_db)]
+TokenDep: TypeAlias = Annotated[str, Depends(reusable_oauth2)]
 
 
 def get_current_user(session: SessionDep, token: TokenDep) -> User:
@@ -46,7 +46,7 @@ def get_current_user(session: SessionDep, token: TokenDep) -> User:
     return user
 
 
-CurrentUser = Annotated[User, Depends(get_current_user)]
+CurrentUser: TypeAlias = Annotated[User, Depends(get_current_user)]
 
 
 def get_current_active_superuser(current_user: CurrentUser) -> User:
