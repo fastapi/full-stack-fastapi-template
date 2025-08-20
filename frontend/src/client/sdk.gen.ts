@@ -14,6 +14,8 @@ import type {
   DocumentsUpdateDocumentResponse,
   DocumentsDeleteDocumentData,
   DocumentsDeleteDocumentResponse,
+  ExamsGenerateExamData,
+  ExamsGenerateExamResponse,
   LoginLoginAccessTokenData,
   LoginLoginAccessTokenResponse,
   LoginTestTokenResponse,
@@ -25,8 +27,6 @@ import type {
   LoginRecoverPasswordHtmlContentResponse,
   PrivateCreateUserData,
   PrivateCreateUserResponse,
-  QuestionsGenerateQuestionsData,
-  QuestionsGenerateQuestionsResponse,
   UsersReadUsersData,
   UsersReadUsersResponse,
   UsersCreateUserData,
@@ -170,6 +170,29 @@ export class DocumentsService {
   }
 }
 
+export class ExamsService {
+  /**
+   * Generate Exam
+   * @param data The data for the request.
+   * @param data.requestBody
+   * @returns ExamPublic Successful Response
+   * @throws ApiError
+   */
+  public static generateExam(
+    data: ExamsGenerateExamData,
+  ): CancelablePromise<ExamsGenerateExamResponse> {
+    return __request(OpenAPI, {
+      method: "POST",
+      url: "/api/v1/exams/generate",
+      body: data.requestBody,
+      mediaType: "application/json",
+      errors: {
+        422: "Validation Error",
+      },
+    })
+  }
+}
+
 export class LoginService {
   /**
    * Login Access Token
@@ -290,29 +313,6 @@ export class PrivateService {
     return __request(OpenAPI, {
       method: "POST",
       url: "/api/v1/private/users/",
-      body: data.requestBody,
-      mediaType: "application/json",
-      errors: {
-        422: "Validation Error",
-      },
-    })
-  }
-}
-
-export class QuestionsService {
-  /**
-   * Generate Questions
-   * @param data The data for the request.
-   * @param data.requestBody
-   * @returns QuestionPublic Successful Response
-   * @throws ApiError
-   */
-  public static generateQuestions(
-    data: QuestionsGenerateQuestionsData,
-  ): CancelablePromise<QuestionsGenerateQuestionsResponse> {
-    return __request(OpenAPI, {
-      method: "POST",
-      url: "/api/v1/questions/generate",
       body: data.requestBody,
       mediaType: "application/json",
       errors: {

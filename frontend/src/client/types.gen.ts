@@ -37,6 +37,16 @@ export type DocumentUpdate = {
   size?: number | null
 }
 
+export type ExamPublic = {
+  title: string
+  description?: string | null
+  duration_minutes?: number | null
+  is_published?: boolean
+  id: string
+  owner_id: string
+  questions?: Array<QuestionPublic>
+}
+
 export type GenerateQuestionsRequest = {
   document_ids: Array<string>
 }
@@ -65,7 +75,6 @@ export type QuestionPublic = {
   question: string
   answer?: string | null
   id: string
-  owner_id: string
   type: QuestionType
   options?: Array<string>
 }
@@ -160,6 +169,12 @@ export type DocumentsDeleteDocumentData = {
 
 export type DocumentsDeleteDocumentResponse = Message
 
+export type ExamsGenerateExamData = {
+  requestBody: GenerateQuestionsRequest
+}
+
+export type ExamsGenerateExamResponse = ExamPublic
+
 export type LoginLoginAccessTokenData = {
   formData: Body_login_login_access_token
 }
@@ -191,12 +206,6 @@ export type PrivateCreateUserData = {
 }
 
 export type PrivateCreateUserResponse = UserPublic
-
-export type QuestionsGenerateQuestionsData = {
-  requestBody: GenerateQuestionsRequest
-}
-
-export type QuestionsGenerateQuestionsResponse = Array<QuestionPublic>
 
 export type UsersReadUsersData = {
   limit?: number
