@@ -2,6 +2,7 @@ import uuid
 from enum import Enum
 
 from pydantic import EmailStr
+from pydantic import Field as PydanticField
 from sqlalchemy import Column, Text
 from sqlmodel import JSON, Field, Relationship, SQLModel
 from sqlmodel import Enum as SAEnum
@@ -26,7 +27,6 @@ class UserRegister(SQLModel):
     full_name: str | None = Field(default=None, max_length=255)
 
 
-# Properties to receive via API on update, all are optional
 class UserUpdate(UserBase):
     email: EmailStr | None = Field(default=None, max_length=255)  # type: ignore
     password: str | None = Field(default=None, min_length=8, max_length=40)
@@ -49,8 +49,8 @@ class User(UserBase, table=True):
     documents: list["Document"] = Relationship(
         back_populates="owner", cascade_delete=True
     )
-    questions: list["Question"] = Relationship(
-        back_populates="owner", cascade_delete=True
+    exams: list["Exam"] = Relationship(
+        back_populates="owner", sa_relationship_kwargs={"cascade": "all, delete-orphan"}
     )
 
 
@@ -62,6 +62,43 @@ class UserPublic(UserBase):
 class UsersPublic(SQLModel):
     data: list[UserPublic]
     count: int
+
+
+class ExamBase(SQLModel):
+    title: str = Field(sa_column=Column(Text, nullable=False))
+    description: str | None = Field(default=None, sa_column=Column(Text))
+    duration_minutes: int | None = Field(default=None)
+    is_published: bool = Field(default=False)
+
+
+class Exam(ExamBase, table=True):
+    id: uuid.UUID = Field(default_factory=uuid.uuid4, primary_key=True)
+    owner_id: uuid.UUID = Field(foreign_key="user.id", nullable=False)
+    owner: User | None = Relationship(back_populates="exams")
+    questions: list["Question"] = Relationship(
+        back_populates="exam", sa_relationship_kwargs={"cascade": "all, delete-orphan"}
+    )
+
+
+class ExamPublic(ExamBase):
+    id: uuid.UUID
+    owner_id: uuid.UUID
+    questions: list["QuestionPublic"] = PydanticField(default_factory=list)
+
+
+class ExamCreate(ExamBase):
+    title: str = Field(min_length=1, max_length=255)
+    description: str | None = Field(default=None, max_length=1000)
+    duration_minutes: int | None = Field(
+        default=None, ge=1
+    )  # Must be at least 1 minute
+
+
+class ExamUpdate(SQLModel):
+    title: str | None = Field(default=None, max_length=255)
+    description: str | None = Field(default=None, max_length=1000)
+    duration_minutes: int | None = Field(default=None, ge=1)
+    is_published: bool | None = None
 
 
 class QuestionType(str, Enum):
@@ -78,22 +115,18 @@ class QuestionBase(SQLModel):
 
 class Question(QuestionBase, table=True):
     id: uuid.UUID = Field(default_factory=uuid.uuid4, primary_key=True)
-    owner_id: uuid.UUID = Field(
-        foreign_key="user.id", nullable=False, ondelete="CASCADE"
-    )
     type: QuestionType = Field(
         default=QuestionType.SHORT_ANSWER,
         sa_column=Column(SAEnum(QuestionType), nullable=False),
     )
-    owner: User | None = Relationship(back_populates="questions")
     options: list[str] = Field(default_factory=list, sa_column=Column(JSON))
+    exam_id: uuid.UUID = Field(foreign_key="exam.id", nullable=False)  # <--- add this
+    exam: Exam | None = Relationship(back_populates="questions")
 
 
 # Define response model for a question
 class QuestionPublic(QuestionBase):
     id: uuid.UUID
-    owner_id: uuid.UUID
-
     type: QuestionType
     options: list[str] = []  # optional, only for multiple choice
 
