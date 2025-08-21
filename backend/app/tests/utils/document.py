@@ -19,9 +19,13 @@ def create_random_document(db: Session, user: User | None = None) -> DocumentPub
         s3_url=f"https://example-bucket.s3.amazonaws.com/{title}.pdf",
         s3_key=f"{owner_id}/{title}.pdf",
         title=title,
+    )
+    return crud.create_document(
+        session=db,
+        document_in=document_in,
+        owner_id=owner_id,
         extracted_text=extracted_text,
     )
-    return crud.create_document(session=db, document_in=document_in, owner_id=owner_id)
 
 
 def create_random_documents(db: Session) -> list[DocumentPublic]:

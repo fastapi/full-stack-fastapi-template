@@ -2,7 +2,7 @@ import { Button } from "@chakra-ui/react";
 import { FaPlus } from "react-icons/fa";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 
-import { DocumentPublic } from "@/client";
+import { DocumentPublic, ExamsService } from "@/client";
 import type { ApiError } from "@/client/core/ApiError";
 import useCustomToast from "@/hooks/useCustomToast";
 import { handleError } from "@/utils";
@@ -17,6 +17,7 @@ const GenerateQuestions = ({
 
   const mutation = useMutation({
     mutationFn: async (documentIds: string[]) => {
+      ExamsService.generateExam({ requestBody: { document_ids: documentIds } });
       console.log("Generating questions for documents:", documentIds);
     },
     onSuccess: (data) => {

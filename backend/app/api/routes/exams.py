@@ -2,7 +2,7 @@ from fastapi import APIRouter
 
 from app import crud
 from app.api.deps import CurrentUser, SessionDep
-from app.core.openai import generate_questions_from_documents
+from app.core.ai.openai import generate_questions_from_documents
 from app.models import ExamCreate, ExamPublic, GenerateQuestionsRequest, QuestionCreate
 
 router = APIRouter(prefix="/exams", tags=["exams"])
