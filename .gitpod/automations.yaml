@@ -1,0 +1,216 @@
+services:
+  database:
+    name: PostgreSQL Database
+    description: Development database server
+    triggeredBy:
+      - manual
+    commands:
+      start: |
+        # Clean up any existing container first
+        docker rm -f postgres-dev 2>/dev/null || true
+        # Start postgres in foreground mode
+        docker run --rm \
+          --name postgres-dev \
+          -e POSTGRES_USER=postgres \
+          -e POSTGRES_PASSWORD=changethis \
+          -e POSTGRES_DB=app \
+          -p 5432:5432 \
+          postgres:17
+      ready: sleep 15 && docker exec postgres-dev pg_isready -U postgres -d app
+      stop: docker stop postgres-dev
+
+
+  backend:
+    name: FastAPI Backend
+    description: Backend API server
+    triggeredBy:
+      - manual
+    commands:
+      start: |
+        cd backend && \
+        export POSTGRES_SERVER=localhost && \
+        export POSTGRES_PORT=5432 && \
+        export POSTGRES_DB=app && \
+        export POSTGRES_USER=postgres && \
+        export POSTGRES_PASSWORD=changethis && \
+        export SECRET_KEY=changethis && \
+        export FIRST_SUPERUSER=admin@example.com && \
+        export FIRST_SUPERUSER_PASSWORD=changethis && \
+        export BACKEND_CORS_ORIGINS="http://localhost,http://localhost:5173,https://localhost,https://localhost:5173,https://5173--${GITPOD_ENVIRONMENT_ID}.eu-runner.flex.doptig.cloud" && \
+        export ENVIRONMENT=local && \
+        export SMTP_HOST="localhost" && \
+        export SMTP_USER="dev" && \
+        export SMTP_PASSWORD="dev" && \
+        export EMAILS_FROM_EMAIL="noreply@example.com" && \
+        uv run alembic upgrade head && \
+        uv run python app/initial_data.py && \
+        uv run fastapi dev app/main.py --host 0.0.0.0 --port 8000
+      ready: sleep 20 && curl -f http://localhost:8000/api/v1/utils/health-check/ >/dev/null 2>&1
+
+  frontend:
+    name: React Frontend
+    description: Frontend development server
+    triggeredBy:
+      - manual
+    commands:
+      start: |
+        cd frontend && \
+        export VITE_API_URL=https://8000--${GITPOD_ENVIRONMENT_ID}.eu-runner.flex.doptig.cloud && \
+        npm run dev -- --host 0.0.0.0 --port 5173
+      ready: sleep 10 && curl -f http://localhost:5173 >/dev/null 2>&1
+
+tasks:
+  open-ports:
+    name: Open Required Ports
+    description: Open ports for frontend preview and backend API access
+    triggeredBy:
+      - postEnvironmentStart
+    command: |
+      echo "Opening required ports for external access..."
+
+      # Open frontend port for preview
+      gitpod environment port open 5173 --name "Frontend Preview" || echo "Port 5173 already open"
+
+      # Open backend port for API access
+      gitpod environment port open 8000 --name "Backend API" || echo "Port 8000 already open"
+
+
+      echo "Ports opened successfully"
+
+  setup:
+    name: Setup Development Environment
+    description: Install dependencies and configure environment
+    command: |
+      echo "Setting up development environment..."
+
+      # Install UV if not present
+      if ! command -v uv &> /dev/null; then
+        curl -LsSf https://astral.sh/uv/install.sh | sh
+        export PATH="$HOME/.cargo/bin:$PATH"
+      fi
+
+      # Install backend dependencies
+      echo "Installing backend dependencies..."
+      cd backend && uv sync --dev && cd ..
+
+      # Install frontend dependencies
+      echo "Installing frontend dependencies..."
+      cd frontend && npm ci && cd ..
+
+      # Set up pre-commit hooks
+      echo "Setting up pre-commit hooks..."
+      cd backend && uv run pre-commit install && cd ..
+
+      # Make scripts executable
+      chmod +x scripts/*.sh
+
+      echo "Setup complete! Run 'gitpod automations service start database' to start services"
+
+  lint:
+    name: Lint Code
+    description: Run linting on backend and frontend code
+    command: |
+      echo "Linting backend..."
+      cd backend && uv run ruff check . && uv run mypy .
+      echo "Linting frontend..."
+      cd frontend && npm run lint
+
+  test-backend:
+    name: Test Backend
+    description: Run backend unit tests
+    command: |
+      cd backend && \
+      export POSTGRES_SERVER=localhost && \
+      export POSTGRES_PORT=5432 && \
+      export POSTGRES_DB=app && \
+      export POSTGRES_USER=postgres && \
+      export POSTGRES_PASSWORD=changethis && \
+      export SECRET_KEY=changethis && \
+      export FIRST_SUPERUSER=admin@example.com && \
+      export FIRST_SUPERUSER_PASSWORD=changethis && \
+      uv run pytest
+
+  test-frontend:
+    name: Test Frontend
+    description: Build frontend to verify it compiles
+    command: |
+      cd frontend && npm run build
+
+  test-e2e:
+    name: End-to-End Tests
+    description: Run Playwright end-to-end tests
+    command: |
+      cd frontend && \
+      export VITE_API_URL=http://localhost:8000 && \
+      npx playwright test
+
+  build:
+    name: Build Application
+    description: Build both backend and frontend for production
+    command: |
+      echo "Building backend..."
+      cd backend && uv build
+      echo "Building frontend..."
+      cd frontend && npm run build
+
+  generate-client:
+    name: Generate API Client
+    description: Generate TypeScript client from OpenAPI spec
+    command: |
+      cd frontend && npm run generate-client
+
+  db-migrate:
+    name: Run Database Migrations
+    description: Apply database migrations
+    command: |
+      cd backend && \
+      export POSTGRES_SERVER=localhost && \
+      export POSTGRES_PORT=5432 && \
+      export POSTGRES_DB=app && \
+      export POSTGRES_USER=postgres && \
+      export POSTGRES_PASSWORD=changethis && \
+      uv run alembic upgrade head
+
+  db-reset:
+    name: Reset Database
+    description: Reset database to clean state with initial data
+    command: |
+      cd backend && \
+      export POSTGRES_SERVER=localhost && \
+      export POSTGRES_PORT=5432 && \
+      export POSTGRES_DB=app && \
+      export POSTGRES_USER=postgres && \
+      export POSTGRES_PASSWORD=changethis && \
+      uv run alembic downgrade base && \
+      uv run alembic upgrade head && \
+      uv run python app/initial_data.py
+
+  start-all:
+    name: Start All Services
+    description: Start database, backend, and frontend services in correct order
+    command: |
+      echo "Starting all services in correct order..."
+
+      echo "1. Starting database..."
+      gitpod automations service start database
+      sleep 10
+
+      echo "2. Starting backend..."
+      gitpod automations service start backend
+      sleep 15
+
+      echo "3. Starting frontend..."
+      gitpod automations service start frontend
+
+      echo "All services started!"
+      echo "Frontend: https://5173--${GITPOD_ENVIRONMENT_ID}.eu-runner.flex.doptig.cloud"
+      echo "Backend API: https://8000--${GITPOD_ENVIRONMENT_ID}.eu-runner.flex.doptig.cloud"
+
+  logs:
+    name: View Service Logs
+    description: Display logs from running services
+    command: |
+      echo "=== Database Logs ==="
+      docker logs postgres-dev --tail 50 2>/dev/null || echo "Database not running"
+      echo -e "\n=== Adminer Logs ==="
+      docker logs adminer-dev --tail 50 2>/dev/null || echo "Adminer not running"

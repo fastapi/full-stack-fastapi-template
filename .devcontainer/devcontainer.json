@@ -1,0 +1,109 @@
+{
+	"name": "Full Stack FastAPI + React",
+	"image": "mcr.microsoft.com/devcontainers/universal:3.0.3",
+	"features": {
+		"ghcr.io/devcontainers/features/docker-in-docker": {
+			"moby": false,
+			"dockerDashComposeVersion": "v2"
+		},
+		"ghcr.io/devcontainers/features/node": {
+			"version": "24"
+		},
+		"ghcr.io/devcontainers/features/python": {
+			"version": "3.12"
+		},
+		"ghcr.io/devcontainers/features/common-utils": {
+			"installZsh": true,
+			"configureZshAsDefaultShell": true,
+			"installOhMyZsh": true,
+			"upgradePackages": true
+		}
+	},2:37:21 PM
+everything's installed!
+2:37:21 PM
+Installing backend dependencies...
+2:37:21 PM
+Resolved 82 packages in 1ms
+2:37:21 PM
+   Building app @ file:///workspaces/full-stack-fastapi-template/backend
+2:37:21 PM
+      Built app @ file:///workspaces/full-stack-fastapi-template/backend
+2:37:21 PM
+Prepared 1 package in 297ms
+2:37:21 PM
+Uninstalled 1 package in 0.33ms
+2:37:21 PM
+warning: Failed to hardlink files; falling back to full copy. This may lead to degraded performance.
+2:37:21 PM
+         If the cache and target directories are on different filesystems, hardlinking may not be supported.
+2:37:21 PM
+         If this is intentional, set `export UV_LINK_MODE=copy` or use `--link-mode=copy` to suppress this warning.
+2:37:21 PM
+Installed 1 package in 0.49ms
+2:37:21 PM
+ ~ app==0.1.0 (from file:///workspaces/full-stack-fastapi-template/backend)
+2:37:21 PM
+Installing frontend dependencies...
+2:37:29 PM
+postCreateCommand from devcontainer.json failed with exit code 137. Skipping any further user-provided commands.
+2:37:29 PM
+Running dev container background commands failed err=postCreateCommand from devcontainer.json failed. Command failed: /bin/sh -c bash .devcontainer/setup.sh
+	"customizations": {
+		"vscode": {
+			"extensions": [
+				"ms-python.python",
+				"ms-python.mypy-type-checker",
+				"charliermarsh.ruff",
+				"bradlc.vscode-tailwindcss",
+				"esbenp.prettier-vscode",
+				"biomejs.biome",
+				"ms-vscode.vscode-typescript-next",
+				"ms-vscode.vscode-json",
+				"ms-vscode-remote.remote-containers",
+				"ms-azuretools.vscode-docker"
+			],
+			"settings": {
+				"python.defaultInterpreterPath": "/usr/local/python/current/bin/python",
+				"python.linting.enabled": true,
+				"python.linting.pylintEnabled": false,
+				"python.linting.mypyEnabled": true,
+				"python.formatting.provider": "none",
+				"[python]": {
+					"editor.defaultFormatter": "charliermarsh.ruff",
+					"editor.codeActionsOnSave": {
+						"source.organizeImports": "explicit"
+					}
+				},
+				"[typescript]": {
+					"editor.defaultFormatter": "biomejs.biome"
+				},
+				"[typescriptreact]": {
+					"editor.defaultFormatter": "biomejs.biome"
+				},
+				"[javascript]": {
+					"editor.defaultFormatter": "biomejs.biome"
+				},
+				"[javascriptreact]": {
+					"editor.defaultFormatter": "biomejs.biome"
+				}
+			}
+		}
+	},
+	"forwardPorts": [5173, 8000, 5432],
+	"portsAttributes": {
+		"5173": {
+			"label": "Frontend (React)",
+			"onAutoForward": "notify"
+		},
+		"8000": {
+			"label": "Backend (FastAPI)",
+			"onAutoForward": "notify"
+		},
+		"5432": {
+			"label": "PostgreSQL",
+			"onAutoForward": "silent"
+		}
+	},
+	"postCreateCommand": "bash .devcontainer/setup.sh",
+	"remoteUser": "codespace"
+}

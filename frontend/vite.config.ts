@@ -11,4 +11,32 @@ export default defineConfig({
     },
   },
   plugins: [react(), TanStackRouterVite()],
+  server: {
+    host: "0.0.0.0",
+    port: 5173,
+    strictPort: true,
+    allowedHosts: [
+      "localhost",
+      ".gitpod.io",
+      ".doptig.cloud",
+      /^.*--.*\..*\.doptig\.cloud$/,
+      /^.*--.*\..*\.gitpod\.io$/
+    ],
+    hmr: {
+      port: 5173,
+      host: "localhost"
+    }
+  },
+  preview: {
+    host: "0.0.0.0",
+    port: 5173,
+    strictPort: true,
+    allowedHosts: [
+      "localhost",
+      ".gitpod.io",
+      ".doptig.cloud",
+      /^.*--.*\..*\.doptig\.cloud$/,
+      /^.*--.*\..*\.gitpod\.io$/
+    ]
+  }
 })
