@@ -1,4 +1,5 @@
 import logging
+import os
 from typing import Any
 from uuid import UUID
 
@@ -16,6 +17,7 @@ llm = ChatOpenAI(
     model="gpt-4o-mini",
     temperature=0.7,
     max_completion_tokens=500,
+    api_key=os.environ.get("OPENAI_API_KEY"),
 )
 
 structured_llm = llm.with_structured_output(QuestionOutput)
