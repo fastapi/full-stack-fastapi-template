@@ -34,6 +34,7 @@ jobs:
           echo "AWS_REGION=$AWS_REGION" >> backend/.env
           echo "S3_BUCKET=$S3_BUCKET" >> backend/.env
           echo "OPENAI_API_KEY=$OPENAI_API_KEY" >> backend/.env
+          echo "STACK_NAME=study-assistant" >> backend/.env
 
 
       - run: docker compose --env-file backend/.env build
