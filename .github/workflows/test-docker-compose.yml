@@ -19,13 +19,21 @@ jobs:
       AWS_REGION: ${{ secrets.AWS_REGION }}
       S3_BUCKET: ${{ secrets.S3_BUCKET }}
       OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+
     steps:
       - name: Checkout
         uses: actions/checkout@v4
       - name: Create .env for Docker Compose
         run: |
-
-          echo "OPENAI_API_KEY=${OPENAI_API_KEY}" >> backend/.env
+          echo "POSTGRES_USER=$POSTGRES_USER" >> backend/.env
+          echo "POSTGRES_PASSWORD=$POSTGRES_PASSWORD" >> backend/.env
+          echo "POSTGRES_DB=$POSTGRES_DB" >> backend/.env
+          echo "POSTGRES_PORT=$POSTGRES_PORT" >> backend/.env
+          echo "AWS_ACCESS_KEY_ID=$AWS_ACCESS_KEY_ID" >> backend/.env
+          echo "AWS_SECRET_ACCESS_KEY=$AWS_SECRET_ACCESS_KEY" >> backend/.env
+          echo "AWS_REGION=$AWS_REGION" >> backend/.env
+          echo "S3_BUCKET=$S3_BUCKET" >> backend/.env
+          echo "OPENAI_API_KEY=$OPENAI_API_KEY" >> backend/.env
 
 
       - run: docker compose --env-file backend/.env build
