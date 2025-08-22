@@ -61,10 +61,17 @@ def authenticate(*, session: Session, email: str, password: str) -> User | None:
 
 # --- Document ---
 def create_document(
-    *, session: Session, document_in: DocumentCreate, owner_id: UUID
+    *,
+    session: Session,
+    document_in: DocumentCreate,
+    owner_id: UUID,
+    extracted_text: str | None = None,
 ) -> DocumentPublic:
     # Validate input and attach owner_id
-    db_document = Document.model_validate(document_in, update={"owner_id": owner_id})
+    update: dict[str, str] = {"owner_id": str(owner_id)}
+    if extracted_text is not None:
+        update["extracted_text"] = extracted_text
+    db_document = Document.model_validate(document_in, update=update)
     session.add(db_document)
     session.commit()
     session.refresh(db_document)

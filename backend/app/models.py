@@ -1,6 +1,7 @@
 import uuid
 from enum import Enum
 
+from pydantic import BaseModel as PydanticBaseModel
 from pydantic import EmailStr
 from pydantic import Field as PydanticField
 from sqlalchemy import Column, Text
@@ -208,3 +209,17 @@ class TokenPayload(SQLModel):
 class NewPassword(SQLModel):
     token: str
     new_password: str = Field(min_length=8, max_length=40)
+
+
+# Pydantic models for question items and outputs here:
+
+
+class QuestionItem(PydanticBaseModel):
+    question: str
+    answer: str | None
+    type: str
+    options: list[str] | None = None
+
+
+class QuestionOutput(PydanticBaseModel):
+    questions: list[QuestionItem]

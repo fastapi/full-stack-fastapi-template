@@ -52,3 +52,38 @@ def test_generate_exam(
     assert len(content["questions"]) == len(
         mock_questions
     ), "Number of questions in exam should match generated questions"
+
+
+def skip_test_generate_exam_real(
+    client: TestClient, superuser_token_headers: dict[str, str], db: Session
+) -> None:
+    """Test generating questions from documents using real OpenAI."""
+
+    # Create some test documents
+    documents = create_random_documents(db)
+    document_ids = [str(doc.id) for doc in documents]
+
+    assert documents[
+        0
+    ].extracted_text, f"Documents should have extracted text. documents: {documents}"
+
+    payload = {"document_ids": document_ids}
+
+    response = client.post(
+        f"{settings.API_V1_STR}/exams/generate",
+        headers=superuser_token_headers,
+        json=payload,
+    )
+
+    # Response should now contain ExamPublic object with id and owner_id
+    assert response.status_code == 200, "Unexpected response status code"
+    content = response.json()
+    assert len(content) > 0, "Should generate at least one exam"
+    # The route attaches owner_id and id
+
+    # assert "id" in content[0], "Generated exam should have an ID"
+    # assert "owner_id" in content[0], "Generated exam should have an owner ID"
+
+    assert (
+        len(content["questions"]) == 4
+    ), f"Number of questions in exam should match generated questions. content: {content}"

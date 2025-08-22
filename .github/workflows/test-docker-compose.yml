@@ -18,14 +18,28 @@ jobs:
       AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
       AWS_REGION: ${{ secrets.AWS_REGION }}
       S3_BUCKET: ${{ secrets.S3_BUCKET }}
+      OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+
     steps:
       - name: Checkout
         uses: actions/checkout@v4
-      - run: docker compose build
-      - run: docker compose down -v --remove-orphans
-      # TODO: Bring frontend back up when you fix the bug
-      # - run: docker compose up -d --wait backend frontend adminer
-      - run: docker compose up -d --wait backend adminer
+      - name: Create .env for Docker Compose
+        run: |
+          echo "POSTGRES_USER=$POSTGRES_USER" >> backend/.env
+          echo "POSTGRES_PASSWORD=$POSTGRES_PASSWORD" >> backend/.env
+          echo "POSTGRES_DB=$POSTGRES_DB" >> backend/.env
+          echo "POSTGRES_PORT=$POSTGRES_PORT" >> backend/.env
+          echo "AWS_ACCESS_KEY_ID=$AWS_ACCESS_KEY_ID" >> backend/.env
+          echo "AWS_SECRET_ACCESS_KEY=$AWS_SECRET_ACCESS_KEY" >> backend/.env
+          echo "AWS_REGION=$AWS_REGION" >> backend/.env
+          echo "S3_BUCKET=$S3_BUCKET" >> backend/.env
+          echo "OPENAI_API_KEY=$OPENAI_API_KEY" >> backend/.env
+          echo "STACK_NAME=study-assistant" >> backend/.env
+
+
+      - run: docker compose --env-file backend/.env build
+      - run: docker compose --env-file backend/.env down -v --remove-orphans
+      - run: docker compose --env-file backend/.env up -d --wait backend adminer
 
       - name: Test backend is up
         run: curl http://localhost:8000/api/v1/utils/health-check
