@@ -1,9 +1,8 @@
 import logging
 from uuid import UUID
 
-import openai
 from langchain_openai import ChatOpenAI
-from pydantic import ValidationError
+from pydantic import SecretStr, ValidationError
 from sqlalchemy import select
 from sqlmodel import Session
 
@@ -13,13 +12,11 @@ from app.models import Document, QuestionCreate, QuestionOutput, QuestionType
 # Initialize logging
 logger = logging.getLogger(__name__)
 
-openai.api_key = settings.OPENAI_API_KEY
-
 llm = ChatOpenAI(
     model="gpt-4o-mini",
     temperature=0.7,
-    max_tokens=500,
-    api_key=settings.OPENAI_API_KEY,
+    max_completion_tokens=500,
+    api_key=SecretStr(settings.OPENAI_API_KEY),
 )
 
 structured_llm = llm.with_structured_output(QuestionOutput)
