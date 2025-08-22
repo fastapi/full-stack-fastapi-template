@@ -24,10 +24,7 @@ jobs:
         uses: actions/checkout@v4
       - name: Create .env for Docker Compose
         run: |
-          echo "AWS_ACCESS_KEY_ID=${AWS_ACCESS_KEY_ID}" >> backend/.env
-          echo "AWS_SECRET_ACCESS_KEY=${AWS_SECRET_ACCESS_KEY}" >> backend/.env
-          echo "AWS_REGION=${AWS_REGION}" >> backend/.env
-          echo "S3_BUCKET=${S3_BUCKET}" >> backend/.env
+
           echo "OPENAI_API_KEY=${OPENAI_API_KEY}" >> backend/.env
 
 
