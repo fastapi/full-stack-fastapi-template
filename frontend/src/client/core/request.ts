@@ -178,6 +178,8 @@ export const getHeaders = async <T>(
   } else if (options.formData !== undefined) {
     if (options.mediaType) {
       headers["Content-Type"] = options.mediaType
+    } else {
+      headers["Content-Type"] = "application/x-www-form-urlencoded"
     }
   }
 
@@ -203,15 +205,31 @@ export const sendRequest = async <T>(
 ): Promise<AxiosResponse<T>> => {
   const controller = new AbortController()
 
+  let data = body;
+  
+  // If we have formData but it's not a FormData instance,
+  // and Content-Type is application/x-www-form-urlencoded
+  if (options.formData && !isFormData(options.formData) && 
+      headers["Content-Type"] === "application/x-www-form-urlencoded") {
+    const params = new URLSearchParams();
+    Object.entries(options.formData).forEach(([key, value]) => {
+      if (value !== undefined && value !== null) {
+        params.append(key, String(value));
+      }
+    });
+    data = params;
+  } else {
+    data = body ?? formData;
+  }
+
   let requestConfig: AxiosRequestConfig = {
-    data: body ?? formData,
+    data: data,
     headers,
     method: options.method,
     signal: controller.signal,
     url,
-    withCredentials: config.WITH_CREDENTIALS,
+    withCredentials: options.withCredentials ?? config.WITH_CREDENTIALS,
   }
-
   onCancel(() => controller.abort())
 
   for (const fn of config.interceptors.request._fns) {
@@ -367,7 +385,6 @@ export const request = <T>(
         if (options.responseTransformer && isSuccess(response.status)) {
           transformedBody = await options.responseTransformer(responseBody)
         }
-
         const result: ApiResult = {
           url,
           ok: isSuccess(response.status),
@@ -375,7 +392,6 @@ export const request = <T>(
           statusText: response.statusText,
           body: responseHeader ?? transformedBody,
         }
-
         catchErrorCodes(options, result)
 
         resolve(result.body)
