@@ -17,7 +17,7 @@ const GenerateQuestions = ({
 
   const mutation = useMutation({
     mutationFn: async (documentIds: string[]) => {
-      ExamsService.generateExam({ requestBody: { document_ids: documentIds } });
+      return ExamsService.generateExam({ requestBody: { document_ids: documentIds } });
       console.log("Generating questions for documents:", documentIds);
     },
     onSuccess: (data) => {
