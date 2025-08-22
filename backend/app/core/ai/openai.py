@@ -1,12 +1,12 @@
 import logging
+from typing import Any
 from uuid import UUID
 
 from langchain_openai import ChatOpenAI
-from pydantic import SecretStr, ValidationError
+from pydantic import ValidationError
 from sqlalchemy import select
 from sqlmodel import Session
 
-from app.core.config import settings
 from app.models import Document, QuestionCreate, QuestionOutput, QuestionType
 
 # Initialize logging
@@ -16,7 +16,6 @@ llm = ChatOpenAI(
     model="gpt-4o-mini",
     temperature=0.7,
     max_completion_tokens=500,
-    api_key=SecretStr(settings.OPENAI_API_KEY),
 )
 
 structured_llm = llm.with_structured_output(QuestionOutput)
@@ -31,8 +30,7 @@ def get_document_texts_from_db(session: Session, document_ids: list[UUID]) -> li
             raise Exception("No documents found with the provided IDs")
         return document_texts
     except Exception as e:
-        print(f"Failed to extract and chunk text for documents {document_ids}: {e}")
-        return []
+        raise Exception(f"Error fetching document texts: {e}")
 
 
 def generate_questions_prompt(text: str, num_questions: int = 5) -> str:
@@ -57,38 +55,32 @@ def fetch_document_texts(session: Session, document_ids: list[UUID]) -> list[str
         results = session.exec(stmt).all()
         texts = [text for (text,) in results if text]
         if not texts:
-            logger.warning(f"No text found for document IDs: {document_ids}")
+            raise ValueError(f"No extracted texts found for documents: {document_ids}")
         return texts
     except Exception as e:
         logger.error(f"Failed to fetch document texts for {document_ids}: {e}")
-        return []
+        raise
 
 
-def validate_and_convert_question_item(q) -> QuestionCreate | None:
+def validate_and_convert_question_item(q: Any) -> QuestionCreate | None:
     """Validate LLM question item and convert to QuestionCreate."""
-    if not getattr(q, "question", None) or not getattr(q, "type", None):
-        logger.warning(f"Skipping invalid question: {q}")
-        return None
+    try:
+        return QuestionCreate(
+            question=q.question,
+            answer=getattr(q, "answer", None),
+            type=QuestionType(q.type),
+            options=getattr(q, "options", []) or [],
+        )
+    except ValidationError as ve:
+        logger.error(f"Validation error for question item {q}: {ve}")
+        raise
 
-    return QuestionCreate(
-        question=q.question,
-        answer=getattr(q, "answer", None),
-        type=QuestionType(q.type),
-        options=getattr(q, "options", []) or [],
-    )
 
-
-def parse_llm_output(llm_output) -> list[QuestionCreate]:
+def parse_llm_output(llm_output: Any) -> list[QuestionCreate]:
     """Parse LLM structured output into QuestionCreate list."""
     questions: list[QuestionCreate] = []
 
-    if not hasattr(llm_output, "questions") or not isinstance(
-        llm_output.questions, list
-    ):
-        logger.error(f"LLM returned unexpected output: {llm_output}")
-        return questions
-
-    for q in llm_output.questions:
+    for q in llm_output.get("questions", []):
         qc = validate_and_convert_question_item(q)
         if qc:
             questions.append(qc)

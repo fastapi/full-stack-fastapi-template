@@ -68,7 +68,7 @@ def create_document(
     extracted_text: str | None = None,
 ) -> DocumentPublic:
     # Validate input and attach owner_id
-    update = {"owner_id": owner_id}
+    update: dict[str, str] = {"owner_id": str(owner_id)}
     if extracted_text is not None:
         update["extracted_text"] = extracted_text
     db_document = Document.model_validate(document_in, update=update)
