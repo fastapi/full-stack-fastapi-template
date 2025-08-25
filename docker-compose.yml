@@ -1,7 +1,7 @@
 services:
 
   db:
-    image: postgres:17
+    image: pgvector/pgvector:pg17
     restart: always
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER} -d ${POSTGRES_DB}"]
@@ -11,6 +11,7 @@ services:
       timeout: 10s
     volumes:
       - app-db-data:/var/lib/postgresql/data/pgdata
+      - ./scripts/init-db.sql:/docker-entrypoint-initdb.d/init-db.sql
     ports:
       - ${POSTGRES_PORT}:5432
     env_file:
