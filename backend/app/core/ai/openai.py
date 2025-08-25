@@ -23,18 +23,6 @@ llm = ChatOpenAI(
 structured_llm = llm.with_structured_output(QuestionOutput)
 
 
-def get_document_texts_from_db(session: Session, document_ids: list[UUID]) -> list[str]:
-    try:
-        stmt = select(Document.extracted_text).where(Document.id.in_(document_ids))  # type: ignore[attr-defined, call-overload]
-        results = session.exec(stmt).all()
-        document_texts: list[str] = [text for (text,) in results if text]
-        if not document_texts:
-            raise Exception("No documents found with the provided IDs")
-        return document_texts
-    except Exception as e:
-        raise Exception(f"Error fetching document texts: {e}")
-
-
 def generate_questions_prompt(text: str, num_questions: int = 5) -> str:
     return f"""
 Generate {num_questions} questions from the following document text.
