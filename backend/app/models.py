@@ -1,6 +1,7 @@
 import uuid
 from enum import Enum
 
+from pgvector.sqlalchemy import Vector
 from pydantic import BaseModel as PydanticBaseModel
 from pydantic import EmailStr
 from pydantic import Field as PydanticField
@@ -174,6 +175,7 @@ class Document(DocumentBase, table=True):
     extracted_text: str | None = Field(
         default=None, sa_column=Column(Text, nullable=True)
     )
+    chunks: list["DocumentChunk"] = Relationship(back_populates="document")
 
 
 class DocumentPublic(DocumentBase):
@@ -188,6 +190,17 @@ class DocumentPublic(DocumentBase):
 class DocumentsPublic(SQLModel):
     data: list[DocumentPublic]
     count: int
+
+
+class DocumentChunkBase(SQLModel):
+    text: str
+    vector: list[float] | None = Field(default=None, sa_column=Column(Vector(1536)))
+
+
+class DocumentChunk(DocumentChunkBase, table=True):
+    id: uuid.UUID = Field(default_factory=uuid.uuid4, primary_key=True)
+    document_id: uuid.UUID = Field(foreign_key="document.id", nullable=False)
+    document: Document | None = Relationship(back_populates="chunks")
 
 
 # Generic message
