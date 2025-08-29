@@ -49,6 +49,7 @@ cp automations.yaml .gitpod/automations.yaml
 echo "Opening required ports..."
 gitpod environment port open 5173 --name "Frontend Preview" 2>/dev/null || echo "Port 5173 already open or not available"
 gitpod environment port open 8000 --name "Backend API" 2>/dev/null || echo "Port 8000 already open or not available"
+gitpod environment port open 8080 --name "Adminer DB Admin" 2>/dev/null || echo "Port 8080 already open or not available"
 
 echo "Development environment setup complete!"
 echo "All dependencies installed and configured."
