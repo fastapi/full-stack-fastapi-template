@@ -21,6 +21,11 @@ updates:
       interval: daily
     commit-message:
       prefix: ⬆
+    groups:
+      playwright:
+        patterns:
+          - "@playwright/*"
+          - "playwright"
   # Docker
   - package-ecosystem: docker
     directories:
@@ -30,6 +35,10 @@ updates:
       interval: weekly
     commit-message:
       prefix: ⬆
+    groups:
+      playwright:
+        patterns:
+          - "mcr.microsoft.com/playwright*"
   # Docker Compose
   - package-ecosystem: docker-compose
     directory: /
