@@ -18,9 +18,7 @@ from typing_extensions import Self
 
 def parse_cors(v: Any) -> list[str] | str:
     if isinstance(v, str) and not v.startswith("["):
-        if not v.strip():
-            return []
-        return [i.strip() for i in v.split(",")]
+        return [i.strip() for i in v.split(",") if i.strip()]
     elif isinstance(v, list | str):
         return v
     raise ValueError(v)
