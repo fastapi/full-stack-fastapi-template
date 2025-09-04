@@ -50,7 +50,7 @@ def test_create_user_new_email(
             headers=superuser_token_headers,
             json=data,
         )
-        assert 200 <= r.status_code < 300
+        assert status.HTTP_200_OK <= r.status_code < status.HTTP_300_MULTIPLE_CHOICES
         created_user = r.json()
         user = crud.get_user_by_email(session=db, email=username)
         assert user
@@ -69,7 +69,7 @@ def test_get_existing_user(
         f"{settings.API_V1_STR}/users/{user_id}",
         headers=superuser_token_headers,
     )
-    assert 200 <= r.status_code < 300
+    assert status.HTTP_200_OK <= r.status_code < status.HTTP_300_MULTIPLE_CHOICES
     api_user = r.json()
     existing_user = crud.get_user_by_email(session=db, email=username)
     assert existing_user
@@ -96,7 +96,7 @@ def test_get_existing_user_current_user(client: TestClient, db: Session) -> None
         f"{settings.API_V1_STR}/users/{user_id}",
         headers=headers,
     )
-    assert 200 <= r.status_code < 300
+    assert status.HTTP_200_OK <= r.status_code < status.HTTP_300_MULTIPLE_CHOICES
     api_user = r.json()
     existing_user = crud.get_user_by_email(session=db, email=username)
     assert existing_user
