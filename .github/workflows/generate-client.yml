@@ -20,7 +20,7 @@ jobs:
       with:
         ref: ${{ github.head_ref }}
         token: ${{ secrets.FULL_STACK_FASTAPI_TEMPLATE_REPO_TOKEN }}
-    - uses: actions/setup-node@v4
+    - uses: actions/setup-node@v5
       with:
         node-version: lts/*
     - uses: actions/setup-python@v5
