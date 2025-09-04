@@ -96,7 +96,7 @@ def test_reset_password(client: TestClient, db: Session) -> None:
         json=data,
     )
 
-    assert r.status_code == 200
+    assert r.status_code == status.HTTP_200_OK
     assert r.json() == {"message": "Password updated successfully"}
 
     db.refresh(user)
