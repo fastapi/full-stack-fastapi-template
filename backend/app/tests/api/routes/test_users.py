@@ -114,20 +114,28 @@ def test_get_existing_user_current_user(client: TestClient, db: Session) -> None
     assert existing_user.email == api_user["email"]
 
 
-@pytest.mark.parametrize(
-    "exists", (True, False), ids=lambda x: "Existing user" if x else "No user"
-)
 def test_get_existing_user_permissions_error(
     db: Session,
     client: TestClient,
     normal_user_token_headers: dict[str, str],
-    exists: bool,
 ) -> None:
-    if exists:
-        user = create_random_user(db)
-        user_id = user.id
-    else:
-        user_id = uuid.uuid4()
+    user = create_random_user(db)
+    user_id = user.id
+
+    r = client.get(
+        f"{settings.API_V1_STR}/users/{user_id}",
+        headers=normal_user_token_headers,
+    )
+    assert r.status_code == 403
+    assert r.json() == {"detail": "The user doesn't have enough privileges"}
+
+
+def test_get_non_existing_user_permissions_error(
+    client: TestClient,
+    normal_user_token_headers: dict[str, str],
+) -> None:
+    user_id = uuid.uuid4()
+
     r = client.get(
         f"{settings.API_V1_STR}/users/{user_id}",
         headers=normal_user_token_headers,
