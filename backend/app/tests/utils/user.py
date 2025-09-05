@@ -4,7 +4,7 @@ from sqlmodel import Session
 from app import crud
 from app.core.config import settings
 from app.models import User, UserCreate, UserUpdate
-from app.tests.utils.utils import random_email, random_lower_string
+from app.tests.utils.utils import extract_cookies, random_email, random_lower_string
 
 
 def user_authentication_headers(
@@ -13,10 +13,8 @@ def user_authentication_headers(
     data = {"username": email, "password": password}
 
     r = client.post(f"{settings.API_V1_STR}/login/access-token", data=data)
-    response = r.json()
-    auth_token = response["access_token"]
-    headers = {"Authorization": f"Bearer {auth_token}"}
-    return headers
+    print(f"user_authentication_headers: {r}")
+    return extract_cookies(r)
 
 
 def create_random_user(db: Session) -> User:
