@@ -20,6 +20,13 @@
 
 ### Internal
 
+* ⬆ Bump node from 20 to 24 in /frontend. PR [#1621](https://github.com/fastapi/full-stack-fastapi-template/pull/1621) by [@dependabot[bot]](https://github.com/apps/dependabot).
+* ⬆ Bump actions/labeler from 5 to 6. PR [#1839](https://github.com/fastapi/full-stack-fastapi-template/pull/1839) by [@dependabot[bot]](https://github.com/apps/dependabot).
+* ⬆ Bump actions/setup-python from 5 to 6. PR [#1835](https://github.com/fastapi/full-stack-fastapi-template/pull/1835) by [@dependabot[bot]](https://github.com/apps/dependabot).
+* ⬆ Bump actions/setup-node from 4 to 5. PR [#1836](https://github.com/fastapi/full-stack-fastapi-template/pull/1836) by [@dependabot[bot]](https://github.com/apps/dependabot).
+* 👷 Detect and label merge conflicts on PRs automatically. PR [#1838](https://github.com/fastapi/full-stack-fastapi-template/pull/1838) by [@svlandeg](https://github.com/svlandeg).
+* 🔧 Add frontend linter pre-commit hook. PR [#1791](https://github.com/fastapi/full-stack-fastapi-template/pull/1791) by [@alexrockhill](https://github.com/alexrockhill).
+* ⬆ Bump form-data from 4.0.2 to 4.0.4 in /frontend. PR [#1725](https://github.com/fastapi/full-stack-fastapi-template/pull/1725) by [@dependabot[bot]](https://github.com/apps/dependabot).
 * ⬆ Bump actions/checkout from 4 to 5. PR [#1768](https://github.com/fastapi/full-stack-fastapi-template/pull/1768) by [@dependabot[bot]](https://github.com/apps/dependabot).
 * ⬆ Bump actions/download-artifact from 4 to 5. PR [#1754](https://github.com/fastapi/full-stack-fastapi-template/pull/1754) by [@dependabot[bot]](https://github.com/apps/dependabot).
 * ⬆ Bump tiangolo/latest-changes from 0.3.2 to 0.4.0. PR [#1744](https://github.com/fastapi/full-stack-fastapi-template/pull/1744) by [@dependabot[bot]](https://github.com/apps/dependabot).
