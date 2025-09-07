@@ -14,8 +14,22 @@
 * 🎨 Add minor UI tweaks in Skeletons and other components. PR [#1507](https://github.com/fastapi/full-stack-fastapi-template/pull/1507) by [@alejsdev](https://github.com/alejsdev).
 * 🎨 Add minor UI tweaks. PR [#1506](https://github.com/fastapi/full-stack-fastapi-template/pull/1506) by [@alejsdev](https://github.com/alejsdev).
 
+### Docs
+
+* ✏️ Fix small typo in `deployment.md`. PR [#1679](https://github.com/fastapi/full-stack-fastapi-template/pull/1679) by [@cassmtnr](https://github.com/cassmtnr).
+
 ### Internal
 
+* ⬆ Bump actions/labeler from 5 to 6. PR [#1839](https://github.com/fastapi/full-stack-fastapi-template/pull/1839) by [@dependabot[bot]](https://github.com/apps/dependabot).
+* ⬆ Bump actions/setup-python from 5 to 6. PR [#1835](https://github.com/fastapi/full-stack-fastapi-template/pull/1835) by [@dependabot[bot]](https://github.com/apps/dependabot).
+* ⬆ Bump actions/setup-node from 4 to 5. PR [#1836](https://github.com/fastapi/full-stack-fastapi-template/pull/1836) by [@dependabot[bot]](https://github.com/apps/dependabot).
+* 👷 Detect and label merge conflicts on PRs automatically. PR [#1838](https://github.com/fastapi/full-stack-fastapi-template/pull/1838) by [@svlandeg](https://github.com/svlandeg).
+* 🔧 Add frontend linter pre-commit hook. PR [#1791](https://github.com/fastapi/full-stack-fastapi-template/pull/1791) by [@alexrockhill](https://github.com/alexrockhill).
+* ⬆ Bump form-data from 4.0.2 to 4.0.4 in /frontend. PR [#1725](https://github.com/fastapi/full-stack-fastapi-template/pull/1725) by [@dependabot[bot]](https://github.com/apps/dependabot).
+* ⬆ Bump actions/checkout from 4 to 5. PR [#1768](https://github.com/fastapi/full-stack-fastapi-template/pull/1768) by [@dependabot[bot]](https://github.com/apps/dependabot).
+* ⬆ Bump actions/download-artifact from 4 to 5. PR [#1754](https://github.com/fastapi/full-stack-fastapi-template/pull/1754) by [@dependabot[bot]](https://github.com/apps/dependabot).
+* ⬆ Bump tiangolo/latest-changes from 0.3.2 to 0.4.0. PR [#1744](https://github.com/fastapi/full-stack-fastapi-template/pull/1744) by [@dependabot[bot]](https://github.com/apps/dependabot).
+* ⬆ Bump bcrypt from 4.0.1 to 4.3.0 in /backend. PR [#1601](https://github.com/fastapi/full-stack-fastapi-template/pull/1601) by [@dependabot[bot]](https://github.com/apps/dependabot).
 * ⬆ Bump react-error-boundary from 4.0.13 to 5.0.0 in /frontend. PR [#1602](https://github.com/fastapi/full-stack-fastapi-template/pull/1602) by [@dependabot[bot]](https://github.com/apps/dependabot).
 * ⬆ Bump vite from 6.3.3 to 6.3.4 in /frontend. PR [#1608](https://github.com/fastapi/full-stack-fastapi-template/pull/1608) by [@dependabot[bot]](https://github.com/apps/dependabot).
 * ⬆ Bump @playwright/test from 1.45.2 to 1.52.0 in /frontend. PR [#1586](https://github.com/fastapi/full-stack-fastapi-template/pull/1586) by [@dependabot[bot]](https://github.com/apps/dependabot).
