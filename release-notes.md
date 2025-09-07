@@ -27,6 +27,7 @@
 
 ### Internal
 
+* ⬆ Bump alembic from 1.15.2 to 1.16.5 in /backend. PR [#1847](https://github.com/fastapi/full-stack-fastapi-template/pull/1847) by [@dependabot[bot]](https://github.com/apps/dependabot).
 * ⬆ Bump email-validator from 2.2.0 to 2.3.0 in /backend. PR [#1850](https://github.com/fastapi/full-stack-fastapi-template/pull/1850) by [@dependabot[bot]](https://github.com/apps/dependabot).
 * ⬆ Bump pydantic-settings from 2.9.1 to 2.10.1 in /backend. PR [#1851](https://github.com/fastapi/full-stack-fastapi-template/pull/1851) by [@dependabot[bot]](https://github.com/apps/dependabot).
 * ⬆ Bump react-error-boundary from 5.0.0 to 6.0.0 in /frontend. PR [#1849](https://github.com/fastapi/full-stack-fastapi-template/pull/1849) by [@dependabot[bot]](https://github.com/apps/dependabot).
