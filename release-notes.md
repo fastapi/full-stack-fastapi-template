@@ -27,6 +27,7 @@
 
 ### Internal
 
+* ⬆ Bump pydantic-settings from 2.9.1 to 2.10.1 in /backend. PR [#1851](https://github.com/fastapi/full-stack-fastapi-template/pull/1851) by [@dependabot[bot]](https://github.com/apps/dependabot).
 * ⬆ Bump react-error-boundary from 5.0.0 to 6.0.0 in /frontend. PR [#1849](https://github.com/fastapi/full-stack-fastapi-template/pull/1849) by [@dependabot[bot]](https://github.com/apps/dependabot).
 * ⬆ Bump @tanstack/react-query-devtools from 5.74.9 to 5.87.1 in /frontend. PR [#1848](https://github.com/fastapi/full-stack-fastapi-template/pull/1848) by [@dependabot[bot]](https://github.com/apps/dependabot).
 * ⬆ Bump dotenv from 16.4.5 to 17.2.2 in /frontend. PR [#1846](https://github.com/fastapi/full-stack-fastapi-template/pull/1846) by [@dependabot[bot]](https://github.com/apps/dependabot).
