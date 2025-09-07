@@ -27,6 +27,7 @@
 
 ### Internal
 
+* ⬆ Bump dotenv from 16.4.5 to 17.2.2 in /frontend. PR [#1846](https://github.com/fastapi/full-stack-fastapi-template/pull/1846) by [@dependabot[bot]](https://github.com/apps/dependabot).
 * ⬆ Bump node from 20 to 24 in /frontend. PR [#1621](https://github.com/fastapi/full-stack-fastapi-template/pull/1621) by [@dependabot[bot]](https://github.com/apps/dependabot).
 * ⬆ Bump actions/labeler from 5 to 6. PR [#1839](https://github.com/fastapi/full-stack-fastapi-template/pull/1839) by [@dependabot[bot]](https://github.com/apps/dependabot).
 * ⬆ Bump actions/setup-python from 5 to 6. PR [#1835](https://github.com/fastapi/full-stack-fastapi-template/pull/1835) by [@dependabot[bot]](https://github.com/apps/dependabot).
