@@ -20,6 +20,7 @@
 
 ### Internal
 
+* ⬆ Bump node from 20 to 24 in /frontend. PR [#1621](https://github.com/fastapi/full-stack-fastapi-template/pull/1621) by [@dependabot[bot]](https://github.com/apps/dependabot).
 * ⬆ Bump actions/labeler from 5 to 6. PR [#1839](https://github.com/fastapi/full-stack-fastapi-template/pull/1839) by [@dependabot[bot]](https://github.com/apps/dependabot).
 * ⬆ Bump actions/setup-python from 5 to 6. PR [#1835](https://github.com/fastapi/full-stack-fastapi-template/pull/1835) by [@dependabot[bot]](https://github.com/apps/dependabot).
 * ⬆ Bump actions/setup-node from 4 to 5. PR [#1836](https://github.com/fastapi/full-stack-fastapi-template/pull/1836) by [@dependabot[bot]](https://github.com/apps/dependabot).
