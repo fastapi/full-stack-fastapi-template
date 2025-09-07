@@ -76,7 +76,6 @@ const ChangePassword = () => {
             mt={4}
             type="submit"
             loading={isSubmitting}
-            disabled={!isValid}
           >
             Save
           </Button>
