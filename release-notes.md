@@ -9,10 +9,15 @@
 
 ### Refactors
 
+* ♻️ Remove disabled attribute from Save button in ChangePassword component. PR [#1844](https://github.com/fastapi/full-stack-fastapi-template/pull/1844) by [@alejsdev](https://github.com/alejsdev).
 * 👷🏻‍♀️  Update CI for client generation. PR [#1573](https://github.com/fastapi/full-stack-fastapi-template/pull/1573) by [@alejsdev](https://github.com/alejsdev).
 * ♻️ Remove redundant field in inherited class. PR [#1520](https://github.com/fastapi/full-stack-fastapi-template/pull/1520) by [@tzway](https://github.com/tzway).
 * 🎨 Add minor UI tweaks in Skeletons and other components. PR [#1507](https://github.com/fastapi/full-stack-fastapi-template/pull/1507) by [@alejsdev](https://github.com/alejsdev).
 * 🎨 Add minor UI tweaks. PR [#1506](https://github.com/fastapi/full-stack-fastapi-template/pull/1506) by [@alejsdev](https://github.com/alejsdev).
+
+### Upgrades
+
+* ⬆️ Upgrade React and related dependencies. PR [#1843](https://github.com/fastapi/full-stack-fastapi-template/pull/1843) by [@alejsdev](https://github.com/alejsdev).
 
 ### Docs
 
@@ -20,6 +25,12 @@
 
 ### Internal
 
+* ⬆ Bump node from 20 to 24 in /frontend. PR [#1621](https://github.com/fastapi/full-stack-fastapi-template/pull/1621) by [@dependabot[bot]](https://github.com/apps/dependabot).
+* ⬆ Bump actions/labeler from 5 to 6. PR [#1839](https://github.com/fastapi/full-stack-fastapi-template/pull/1839) by [@dependabot[bot]](https://github.com/apps/dependabot).
+* ⬆ Bump actions/setup-python from 5 to 6. PR [#1835](https://github.com/fastapi/full-stack-fastapi-template/pull/1835) by [@dependabot[bot]](https://github.com/apps/dependabot).
+* ⬆ Bump actions/setup-node from 4 to 5. PR [#1836](https://github.com/fastapi/full-stack-fastapi-template/pull/1836) by [@dependabot[bot]](https://github.com/apps/dependabot).
+* 👷 Detect and label merge conflicts on PRs automatically. PR [#1838](https://github.com/fastapi/full-stack-fastapi-template/pull/1838) by [@svlandeg](https://github.com/svlandeg).
+* 🔧 Add frontend linter pre-commit hook. PR [#1791](https://github.com/fastapi/full-stack-fastapi-template/pull/1791) by [@alexrockhill](https://github.com/alexrockhill).
 * ⬆ Bump form-data from 4.0.2 to 4.0.4 in /frontend. PR [#1725](https://github.com/fastapi/full-stack-fastapi-template/pull/1725) by [@dependabot[bot]](https://github.com/apps/dependabot).
 * ⬆ Bump actions/checkout from 4 to 5. PR [#1768](https://github.com/fastapi/full-stack-fastapi-template/pull/1768) by [@dependabot[bot]](https://github.com/apps/dependabot).
 * ⬆ Bump actions/download-artifact from 4 to 5. PR [#1754](https://github.com/fastapi/full-stack-fastapi-template/pull/1754) by [@dependabot[bot]](https://github.com/apps/dependabot).
