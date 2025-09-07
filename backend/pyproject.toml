@@ -21,6 +21,8 @@ dependencies = [
     "pydantic-settings<3.0.0,>=2.2.1",
     "sentry-sdk[fastapi]<2.0.0,>=1.40.6",
     "pyjwt<3.0.0,>=2.8.0",
+    "sqlacodegen>=3.1.1",
+    "psycopg2>=2.9.10",
 ]
 
 [tool.uv]
