@@ -21,8 +21,6 @@ updates:
       interval: daily
     commit-message:
       prefix: ⬆
-    ignore:
-      - dependency-name: "@hey-api/openapi-ts"
   # Docker
   - package-ecosystem: docker
     directories:

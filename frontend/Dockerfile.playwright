@@ -1,10 +1,12 @@
-FROM mcr.microsoft.com/playwright:v1.55.0-noble
+FROM node:24
 
 WORKDIR /app
 
 COPY package*.json /app/
 
 RUN npm install
+
+RUN npx -y playwright install --with-deps
 
 COPY ./ /app/
 
