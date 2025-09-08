@@ -52,8 +52,8 @@ function ItemsTable() {
 
   const setPage = (page: number) => {
     navigate({
-      to: "/_layout/items",
-      search: { page: page },
+      to: "/items",
+      search: (prev) => ({ ...prev, page }),
     })
   }
 
