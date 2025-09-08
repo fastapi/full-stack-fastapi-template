@@ -32,6 +32,7 @@
 
 ### Internal
 
+* ⬆ Bump vite from 6.3.4 to 7.1.5 in /frontend. PR [#1857](https://github.com/fastapi/full-stack-fastapi-template/pull/1857) by [@dependabot[bot]](https://github.com/apps/dependabot).
 * ⬆ Bump @types/node from 22.15.3 to 24.3.1 in /frontend. PR [#1854](https://github.com/fastapi/full-stack-fastapi-template/pull/1854) by [@dependabot[bot]](https://github.com/apps/dependabot).
 * ⬆ Bump @vitejs/plugin-react-swc from 3.9.0 to 4.0.1 in /frontend. PR [#1856](https://github.com/fastapi/full-stack-fastapi-template/pull/1856) by [@dependabot[bot]](https://github.com/apps/dependabot).
 * ⬆ Bump axios from 1.9.0 to 1.11.0 in /frontend. PR [#1855](https://github.com/fastapi/full-stack-fastapi-template/pull/1855) by [@dependabot[bot]](https://github.com/apps/dependabot).
