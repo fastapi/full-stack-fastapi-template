@@ -7,8 +7,10 @@
       "!**/dist/**/*",
       "!**/node_modules",
       "!**/src/routeTree.gen.ts",
-      "!**/playwright.config.ts",
-      "!**/playwright-report"
+      "!**/src/client",
+      "!**/src/components/ui",
+      "!**/playwright-report",
+      "!**/playwright.config.ts"
     ]
   },
   "linter": {
@@ -28,8 +30,7 @@
         "useSelfClosingElements": "error",
         "noUselessElse": "error"
       }
-    },
-    "includes": ["**", "!**/src/client/**", "!**/src/components/ui/**"]
+    }
   },
   "formatter": {
     "indentStyle": "space"
