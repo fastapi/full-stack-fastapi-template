@@ -42,46 +42,39 @@ const ChangePassword = () => {
   }
 
   return (
-    <>
-      <Container maxW="full">
-        <Heading size="sm" py={4}>
-          Change Password
-        </Heading>
-        <Box as="form" onSubmit={handleSubmit(onSubmit)}>
-          <VStack gap={4} w={{ base: "100%", md: "sm" }}>
-            <PasswordInput
-              type="current_password"
-              startElement={<FiLock />}
-              {...register("current_password", passwordRules())}
-              placeholder="Current Password"
-              errors={errors}
-            />
-            <PasswordInput
-              type="new_password"
-              startElement={<FiLock />}
-              {...register("new_password", passwordRules())}
-              placeholder="New Password"
-              errors={errors}
-            />
-            <PasswordInput
-              type="confirm_password"
-              startElement={<FiLock />}
-              {...register("confirm_password", confirmPasswordRules(getValues))}
-              placeholder="Confirm Password"
-              errors={errors}
-            />
-          </VStack>
-          <Button
-            variant="solid"
-            mt={4}
-            type="submit"
-            loading={isSubmitting}
-          >
-            Save
-          </Button>
-        </Box>
-      </Container>
-    </>
+    <Container maxW="full">
+      <Heading size="sm" py={4}>
+        Change Password
+      </Heading>
+      <Box as="form" onSubmit={handleSubmit(onSubmit)}>
+        <VStack gap={4} w={{ base: "100%", md: "sm" }}>
+          <PasswordInput
+            type="current_password"
+            startElement={<FiLock />}
+            {...register("current_password", passwordRules())}
+            placeholder="Current Password"
+            errors={errors}
+          />
+          <PasswordInput
+            type="new_password"
+            startElement={<FiLock />}
+            {...register("new_password", passwordRules())}
+            placeholder="New Password"
+            errors={errors}
+          />
+          <PasswordInput
+            type="confirm_password"
+            startElement={<FiLock />}
+            {...register("confirm_password", confirmPasswordRules(getValues))}
+            placeholder="Confirm Password"
+            errors={errors}
+          />
+        </VStack>
+        <Button variant="solid" mt={4} type="submit" loading={isSubmitting}>
+          Save
+        </Button>
+      </Box>
+    </Container>
   )
 }
 export default ChangePassword

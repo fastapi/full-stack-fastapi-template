@@ -4,9 +4,9 @@ import type { ButtonProps, TextProps } from "@chakra-ui/react"
 import {
   Button,
   Pagination as ChakraPagination,
+  createContext,
   IconButton,
   Text,
-  createContext,
   usePaginationContext,
 } from "@chakra-ui/react"
 import * as React from "react"
