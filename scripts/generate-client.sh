@@ -9,4 +9,4 @@ cd ..
 mv openapi.json frontend/
 cd frontend
 npm run generate-client
-npm run biome-check
+npm run lint
