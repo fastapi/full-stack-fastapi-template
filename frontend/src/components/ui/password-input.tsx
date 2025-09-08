@@ -11,8 +11,8 @@ import {
   HStack,
   IconButton,
   Input,
-  mergeRefs,
   Stack,
+  mergeRefs,
   useControllableState,
 } from "@chakra-ui/react"
 import { forwardRef, useRef } from "react"
