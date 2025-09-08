@@ -46,8 +46,8 @@ function UsersTable() {
 
   const setPage = (page: number) => {
     navigate({
-      to: "/_layout/admin",
-      search: { page: page },
+      to: "/admin",
+      search: (prev) => ({ ...prev, page }),
     })
   }
 
