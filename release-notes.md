@@ -17,6 +17,7 @@
 
 ### Upgrades
 
+* ⬆️ Update TansTack Router dependencies. PR [#1853](https://github.com/fastapi/full-stack-fastapi-template/pull/1853) by [@alejsdev](https://github.com/alejsdev).
 * ⬆️ Bump @tanstack/react-query from 5.28.14 to 5.87.1. PR [#1852](https://github.com/fastapi/full-stack-fastapi-template/pull/1852) by [@alejsdev](https://github.com/alejsdev).
 * ⬆ Bump @chakra-ui/react from 3.8.0 to 3.26.0 in /frontend. PR [#1796](https://github.com/fastapi/full-stack-fastapi-template/pull/1796) by [@dependabot[bot]](https://github.com/apps/dependabot).
 * ⬆️ Update @hey-api/openapi-ts dependency version and update dependabot config. PR [#1845](https://github.com/fastapi/full-stack-fastapi-template/pull/1845) by [@alejsdev](https://github.com/alejsdev).
