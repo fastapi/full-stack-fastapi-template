@@ -1,5 +1,5 @@
 import path from "node:path"
-import tanstackRouter from "@tanstack/router-plugin/vite"
+import { tanstackRouter } from '@tanstack/router-plugin/vite'
 import react from "@vitejs/plugin-react-swc"
 import { defineConfig } from "vite"
 
