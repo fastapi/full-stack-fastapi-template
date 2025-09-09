@@ -1,10 +1,9 @@
 import { IconButton } from "@chakra-ui/react"
 import { BsThreeDotsVertical } from "react-icons/bs"
-import { MenuContent, MenuRoot, MenuTrigger } from "../ui/menu"
-
 import type { ItemPublic } from "@/client"
 import DeleteItem from "../Items/DeleteItem"
 import EditItem from "../Items/EditItem"
+import { MenuContent, MenuRoot, MenuTrigger } from "../ui/menu"
 
 interface ItemActionsMenuProps {
   item: ItemPublic

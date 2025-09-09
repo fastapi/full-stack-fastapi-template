@@ -1,5 +1,5 @@
 import { Flex } from "@chakra-ui/react"
-import { Outlet, createFileRoute, redirect } from "@tanstack/react-router"
+import { createFileRoute, Outlet, redirect } from "@tanstack/react-router"
 
 import Navbar from "@/components/Common/Navbar"
 import Sidebar from "@/components/Common/Sidebar"

@@ -7,25 +7,23 @@ const Appearance = () => {
   const { theme, setTheme } = useTheme()
 
   return (
-    <>
-      <Container maxW="full">
-        <Heading size="sm" py={4}>
-          Appearance
-        </Heading>
+    <Container maxW="full">
+      <Heading size="sm" py={4}>
+        Appearance
+      </Heading>
 
-        <RadioGroup
-          onValueChange={(e) => setTheme(e.value ?? "system")}
-          value={theme}
-          colorPalette="teal"
-        >
-          <Stack>
-            <Radio value="system">System</Radio>
-            <Radio value="light">Light Mode</Radio>
-            <Radio value="dark">Dark Mode</Radio>
-          </Stack>
-        </RadioGroup>
-      </Container>
-    </>
+      <RadioGroup
+        onValueChange={(e) => setTheme(e.value ?? "system")}
+        value={theme}
+        colorPalette="teal"
+      >
+        <Stack>
+          <Radio value="system">System</Radio>
+          <Radio value="light">Light Mode</Radio>
+          <Radio value="dark">Dark Mode</Radio>
+        </Stack>
+      </RadioGroup>
+    </Container>
   )
 }
 export default Appearance

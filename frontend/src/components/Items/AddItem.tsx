@@ -1,6 +1,3 @@
-import { useMutation, useQueryClient } from "@tanstack/react-query"
-import { type SubmitHandler, useForm } from "react-hook-form"
-
 import {
   Button,
   DialogActionTrigger,
@@ -9,7 +6,9 @@ import {
   Text,
   VStack,
 } from "@chakra-ui/react"
+import { useMutation, useQueryClient } from "@tanstack/react-query"
 import { useState } from "react"
+import { type SubmitHandler, useForm } from "react-hook-form"
 import { FaPlus } from "react-icons/fa"
 
 import { type ItemCreate, ItemsService } from "@/client"
@@ -93,7 +92,6 @@ const AddItem = () => {
                 label="Title"
               >
                 <Input
-                  id="title"
                   {...register("title", {
                     required: "Title is required.",
                   })}
@@ -108,7 +106,6 @@ const AddItem = () => {
                 label="Description"
               >
                 <Input
-                  id="description"
                   {...register("description")}
                   placeholder="Description"
                   type="text"

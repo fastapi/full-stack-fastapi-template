@@ -1,4 +1,4 @@
-import { type Page, expect, test } from "@playwright/test"
+import { expect, type Page, test } from "@playwright/test"
 import { firstSuperuser, firstSuperuserPassword } from "./config.ts"
 import { randomPassword } from "./utils/random.ts"
 

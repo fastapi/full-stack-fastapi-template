@@ -6,7 +6,7 @@
   "scripts": {
     "dev": "vite",
     "build": "tsc -p tsconfig.build.json && vite build",
-    "lint": "biome check --apply-unsafe --no-errors-on-unmatched --files-ignore-unknown=true ./",
+    "lint": "biome check --write --unsafe --no-errors-on-unmatched --files-ignore-unknown=true ./",
     "preview": "vite preview",
     "generate-client": "openapi-ts"
   },
@@ -26,7 +26,7 @@
     "react-icons": "^5.5.0"
   },
   "devDependencies": {
-    "@biomejs/biome": "1.9.4",
+    "@biomejs/biome": "^2.2.3",
     "@hey-api/openapi-ts": "0.73.0",
     "@playwright/test": "^1.55.0",
     "@tanstack/router-devtools": "^1.131.36",
