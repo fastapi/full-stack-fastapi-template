@@ -55,6 +55,7 @@ select = [
     "C4",  # flake8-comprehensions
     "UP",  # pyupgrade
     "ARG001", # unused arguments in functions
+    "T201",   # print statements are not allowed
 ]
 ignore = [
     "E501",  # line too long, handled by black
