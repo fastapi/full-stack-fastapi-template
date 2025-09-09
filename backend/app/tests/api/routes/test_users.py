@@ -120,10 +120,9 @@ def test_get_existing_user_permissions_error(
     normal_user_token_headers: dict[str, str],
 ) -> None:
     user = create_random_user(db)
-    user_id = user.id
 
     r = client.get(
-        f"{settings.API_V1_STR}/users/{user_id}",
+        f"{settings.API_V1_STR}/users/{user.id}",
         headers=normal_user_token_headers,
     )
     assert r.status_code == 403
