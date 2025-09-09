@@ -79,7 +79,6 @@ function Login() {
       >
         <InputGroup w="100%" startElement={<FiMail />}>
           <Input
-            id="username"
             {...register("username", {
               required: "Username is required",
               pattern: emailPattern,

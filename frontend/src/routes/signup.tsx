@@ -79,7 +79,6 @@ function SignUp() {
         >
           <InputGroup w="100%" startElement={<FiUser />}>
             <Input
-              id="full_name"
               minLength={3}
               {...register("full_name", {
                 required: "Full Name is required",
@@ -93,7 +92,6 @@ function SignUp() {
         <Field invalid={!!errors.email} errorText={errors.email?.message}>
           <InputGroup w="100%" startElement={<FiUser />}>
             <Input
-              id="email"
               {...register("email", {
                 required: "Email is required",
                 pattern: emailPattern,

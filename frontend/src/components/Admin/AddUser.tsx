@@ -105,7 +105,6 @@ const AddUser = () => {
                 label="Email"
               >
                 <Input
-                  id="email"
                   {...register("email", {
                     required: "Email is required",
                     pattern: emailPattern,
@@ -121,7 +120,6 @@ const AddUser = () => {
                 label="Full Name"
               >
                 <Input
-                  id="name"
                   {...register("full_name")}
                   placeholder="Full name"
                   type="text"
@@ -135,7 +133,6 @@ const AddUser = () => {
                 label="Set Password"
               >
                 <Input
-                  id="password"
                   {...register("password", {
                     required: "Password is required",
                     minLength: {
@@ -155,7 +152,6 @@ const AddUser = () => {
                 label="Confirm Password"
               >
                 <Input
-                  id="confirm_password"
                   {...register("confirm_password", {
                     required: "Please confirm your password",
                     validate: (value) =>

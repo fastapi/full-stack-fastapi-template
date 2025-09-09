@@ -101,7 +101,6 @@ const EditItem = ({ item }: EditItemProps) => {
                 label="Title"
               >
                 <Input
-                  id="title"
                   {...register("title", {
                     required: "Title is required",
                   })}
@@ -116,7 +115,6 @@ const EditItem = ({ item }: EditItemProps) => {
                 label="Description"
               >
                 <Input
-                  id="description"
                   {...register("description")}
                   placeholder="Description"
                   type="text"

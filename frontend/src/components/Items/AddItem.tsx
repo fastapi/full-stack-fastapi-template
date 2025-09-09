@@ -92,7 +92,6 @@ const AddItem = () => {
                 label="Title"
               >
                 <Input
-                  id="title"
                   {...register("title", {
                     required: "Title is required.",
                   })}
@@ -107,7 +106,6 @@ const AddItem = () => {
                 label="Description"
               >
                 <Input
-                  id="description"
                   {...register("description")}
                   placeholder="Description"
                   type="text"

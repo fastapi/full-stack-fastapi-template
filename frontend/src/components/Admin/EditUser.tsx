@@ -104,7 +104,6 @@ const EditUser = ({ user }: EditUserProps) => {
                 label="Email"
               >
                 <Input
-                  id="email"
                   {...register("email", {
                     required: "Email is required",
                     pattern: emailPattern,
@@ -120,7 +119,6 @@ const EditUser = ({ user }: EditUserProps) => {
                 label="Full Name"
               >
                 <Input
-                  id="name"
                   {...register("full_name")}
                   placeholder="Full name"
                   type="text"
@@ -133,7 +131,6 @@ const EditUser = ({ user }: EditUserProps) => {
                 label="Set Password"
               >
                 <Input
-                  id="password"
                   {...register("password", {
                     minLength: {
                       value: 8,
@@ -151,7 +148,6 @@ const EditUser = ({ user }: EditUserProps) => {
                 label="Confirm Password"
               >
                 <Input
-                  id="confirm_password"
                   {...register("confirm_password", {
                     validate: (value) =>
                       value === getValues().password ||
