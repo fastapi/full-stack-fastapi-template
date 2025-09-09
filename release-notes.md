@@ -32,6 +32,7 @@
 
 ### Internal
 
+* 🔧 Add T201 rule to ruff linting configuration to disallow print statements. PR [#1865](https://github.com/fastapi/full-stack-fastapi-template/pull/1865) by [@alejsdev](https://github.com/alejsdev).
 * ⬆ Bump @tanstack/react-query-devtools from 5.87.1 to 5.87.3 in /frontend. PR [#1863](https://github.com/fastapi/full-stack-fastapi-template/pull/1863) by [@dependabot[bot]](https://github.com/apps/dependabot).
 * ⬆ Bump vite from 6.3.4 to 7.1.5 in /frontend. PR [#1857](https://github.com/fastapi/full-stack-fastapi-template/pull/1857) by [@dependabot[bot]](https://github.com/apps/dependabot).
 * ⬆ Bump @types/node from 22.15.3 to 24.3.1 in /frontend. PR [#1854](https://github.com/fastapi/full-stack-fastapi-template/pull/1854) by [@dependabot[bot]](https://github.com/apps/dependabot).
