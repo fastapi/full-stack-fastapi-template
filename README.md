@@ -140,6 +140,25 @@ You can (and should) pass these as environment variables from secrets.
 
 Read the [deployment.md](./deployment.md) docs for more details.
 
+### Testing Environment
+
+This project supports running in a test environment using a separate `.env.test` file.  
+It allows isolating the testing database from the development one to prevent data collisions.
+
+The test configuration sets:
+
+- `ENVIRONMENT=test`
+- `POSTGRES_DB=app_test`
+
+The application automatically detects this environment and uses a separate database configuration.  
+You can run tests with:
+
+```bash
+ENVIRONMENT=test pytest
+```
+You can also create a dedicated PostgreSQL service or volume for testing if needed.
+See config.py for the environment-specific logic.
+
 ### Generate Secret Keys
 
 Some environment variables in the `.env` file have a default value of `changethis`.
