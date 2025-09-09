@@ -5,10 +5,10 @@
     "includes": [
       "**",
       "!**/dist/**/*",
-      "!**/node_modules",
+      "!**/node_modules/**/*",
       "!**/src/routeTree.gen.ts",
-      "!**/src/client",
-      "!**/src/components/ui",
+      "!**/src/client/**/*",
+      "!**/src/components/ui/**/*",
       "!**/playwright-report",
       "!**/playwright.config.ts"
     ]
@@ -17,9 +17,6 @@
     "enabled": true,
     "rules": {
       "recommended": true,
-      "correctness": {
-        "useUniqueElementIds": "off"
-      },
       "suspicious": {
         "noExplicitAny": "off",
         "noArrayIndexKey": "off"
