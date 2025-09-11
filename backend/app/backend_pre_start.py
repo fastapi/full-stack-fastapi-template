@@ -1,3 +1,4 @@
+"""Backend pre-start script to ensure database connectivity."""
 import logging
 
 from sqlalchemy import Engine
@@ -20,16 +21,18 @@ wait_seconds = 1
     after=after_log(logger, logging.WARNING),
 )
 def init(db_engine: Engine) -> None:
+    """Initialize database connection with retry logic."""
     try:
         with Session(db_engine) as session:
             # Try to create session to check if DB is awake
             session.exec(select(1))
-    except Exception as e:
-        logger.error(e)
-        raise e
+    except Exception:
+        logger.exception("Database connection failed")
+        raise
 
 
 def main() -> None:
+    """Initialize database connectivity check."""
     logger.info("Initializing service")
     init(engine)
     logger.info("Service finished initializing")

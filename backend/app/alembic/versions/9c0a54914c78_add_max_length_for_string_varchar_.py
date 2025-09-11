@@ -1,4 +1,4 @@
-"""Add max length for string(varchar) fields in User and Items models
+"""Add max length for string(varchar) fields in User and Items models.
 
 Revision ID: 9c0a54914c78
 Revises: e2412789c190
@@ -17,6 +17,7 @@ depends_on: str | None = None
 
 
 def upgrade() -> None:
+    """Upgrade database schema."""
     # Adjust the length of the email field in the User table
     op.alter_column(
         "user",
@@ -55,6 +56,7 @@ def upgrade() -> None:
 
 
 def downgrade() -> None:
+    """Downgrade database schema."""
     # Revert the length of the email field in the User table
     op.alter_column(
         "user",

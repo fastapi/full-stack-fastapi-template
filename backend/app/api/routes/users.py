@@ -1,3 +1,5 @@
+"""User management API endpoints."""
+
 import uuid
 
 # Removed unused Any import
@@ -32,7 +34,6 @@ router = APIRouter(prefix="/users", tags=["users"])
 @router.get(
     "/",
     dependencies=[Depends(get_current_active_superuser)],
-    response_model=UsersPublic,
 )
 def read_users(session: SessionDep, skip: int = 0, limit: int = 100) -> UsersPublic:
     """Retrieve users."""
@@ -48,7 +49,6 @@ def read_users(session: SessionDep, skip: int = 0, limit: int = 100) -> UsersPub
 @router.post(
     "/",
     dependencies=[Depends(get_current_active_superuser)],
-    response_model=UserPublic,
 )
 def create_user(*, session: SessionDep, user_in: UserCreate) -> UserPublic:
     """Create new user."""
@@ -74,7 +74,7 @@ def create_user(*, session: SessionDep, user_in: UserCreate) -> UserPublic:
     return UserPublic.model_validate(user)
 
 
-@router.patch("/me", response_model=UserPublic)
+@router.patch("/me")
 def update_user_me(
     *,
     session: SessionDep,
@@ -97,7 +97,7 @@ def update_user_me(
     return UserPublic.model_validate(current_user)
 
 
-@router.patch("/me/password", response_model=Message)
+@router.patch("/me/password")
 def update_password_me(
     *,
     session: SessionDep,
@@ -119,13 +119,13 @@ def update_password_me(
     return Message(message="Password updated successfully")
 
 
-@router.get("/me", response_model=UserPublic)
+@router.get("/me")
 def read_user_me(current_user: CurrentUser) -> UserPublic:
     """Get current user."""
     return UserPublic.model_validate(current_user)
 
 
-@router.delete("/me", response_model=Message)
+@router.delete("/me")
 def delete_user_me(session: SessionDep, current_user: CurrentUser) -> Message:
     """Delete own user."""
     if current_user.is_superuser:
@@ -138,7 +138,7 @@ def delete_user_me(session: SessionDep, current_user: CurrentUser) -> Message:
     return Message(message="User deleted successfully")
 
 
-@router.post("/signup", response_model=UserPublic)
+@router.post("/signup")
 def register_user(session: SessionDep, user_in: UserRegister) -> UserPublic:
     """Create new user without the need to be logged in."""
     user = crud.get_user_by_email(session=session, email=user_in.email)
@@ -152,7 +152,7 @@ def register_user(session: SessionDep, user_in: UserRegister) -> UserPublic:
     return UserPublic.model_validate(user)
 
 
-@router.get("/{user_id}", response_model=UserPublic)
+@router.get("/{user_id}")
 def read_user_by_id(
     user_id: uuid.UUID,
     session: SessionDep,
@@ -175,7 +175,6 @@ def read_user_by_id(
 @router.patch(
     "/{user_id}",
     dependencies=[Depends(get_current_active_superuser)],
-    response_model=UserPublic,
 )
 def update_user(
     *,

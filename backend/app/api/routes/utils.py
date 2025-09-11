@@ -1,3 +1,5 @@
+"""Utility API endpoints."""
+
 from fastapi import APIRouter, Depends
 from pydantic.networks import EmailStr
 
@@ -26,4 +28,5 @@ def test_email(email_to: EmailStr) -> Message:
 
 @router.get("/health-check/")
 async def health_check() -> bool:
+    """Health check endpoint."""
     return True

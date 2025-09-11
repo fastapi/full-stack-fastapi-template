@@ -1,3 +1,5 @@
+"""Private API endpoints."""
+
 # Removed unused Any import
 
 from fastapi import APIRouter
@@ -14,13 +16,15 @@ router = APIRouter(tags=["private"], prefix="/private")
 
 
 class PrivateUserCreate(BaseModel):  # type: ignore[explicit-any]
+    """Private user creation model."""
+
     email: str
     password: str
     full_name: str
     is_verified: bool = False
 
 
-@router.post("/users/", response_model=UserPublic)
+@router.post("/users/")
 def create_user(user_in: PrivateUserCreate, session: SessionDep) -> UserPublic:
     """Create a new user."""
     user = User(

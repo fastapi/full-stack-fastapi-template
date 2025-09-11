@@ -1,3 +1,5 @@
+"""Item management API endpoints."""
+
 import uuid
 
 # Removed unused Any import
@@ -10,7 +12,7 @@ from app.models import Item, ItemCreate, ItemPublic, ItemsPublic, ItemUpdate, Me
 router = APIRouter(prefix="/items", tags=["items"])
 
 
-@router.get("/", response_model=ItemsPublic)
+@router.get("/")
 def read_items(
     session: SessionDep,
     current_user: CurrentUser,
@@ -41,12 +43,12 @@ def read_items(
     return ItemsPublic(data=items, count=count)
 
 
-@router.get("/{id}", response_model=ItemPublic)
+@router.get("/{item_id}")
 def read_item(
-    session: SessionDep, current_user: CurrentUser, id: uuid.UUID,
+    session: SessionDep, current_user: CurrentUser, item_id: uuid.UUID,
 ) -> ItemPublic:
     """Get item by ID."""
-    item = session.get(Item, id)
+    item = session.get(Item, item_id)
     if not item:
         raise HTTPException(status_code=404, detail="Item not found")
     if not current_user.is_superuser and (item.owner_id != current_user.id):
@@ -54,7 +56,7 @@ def read_item(
     return ItemPublic.model_validate(item)
 
 
-@router.post("/", response_model=ItemPublic)
+@router.post("/")
 def create_item(
     *,
     session: SessionDep,
@@ -69,16 +71,16 @@ def create_item(
     return ItemPublic.model_validate(item)
 
 
-@router.put("/{id}", response_model=ItemPublic)
+@router.put("/{item_id}")
 def update_item(
     *,
     session: SessionDep,
     current_user: CurrentUser,
-    id: uuid.UUID,
+    item_id: uuid.UUID,
     item_in: ItemUpdate,
 ) -> ItemPublic:
     """Update an item."""
-    item = session.get(Item, id)
+    item = session.get(Item, item_id)
     if not item:
         raise HTTPException(status_code=404, detail="Item not found")
     if not current_user.is_superuser and (item.owner_id != current_user.id):
@@ -91,14 +93,14 @@ def update_item(
     return ItemPublic.model_validate(item)
 
 
-@router.delete("/{id}")
+@router.delete("/{item_id}")
 def delete_item(
     session: SessionDep,
     current_user: CurrentUser,
-    id: uuid.UUID,
+    item_id: uuid.UUID,
 ) -> Message:
     """Delete an item."""
-    item = session.get(Item, id)
+    item = session.get(Item, item_id)
     if not item:
         raise HTTPException(status_code=404, detail="Item not found")
     if not current_user.is_superuser and (item.owner_id != current_user.id):

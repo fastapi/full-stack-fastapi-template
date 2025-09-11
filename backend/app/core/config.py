@@ -1,3 +1,4 @@
+"""Application configuration settings."""
 import secrets
 import warnings
 from typing import Annotated, Literal, Self
@@ -15,6 +16,7 @@ from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
 def parse_cors(v: str | list[str]) -> list[str] | str:
+    """Parse CORS configuration from string or list."""
     if isinstance(v, str) and not v.startswith("["):
         return [i.strip() for i in v.split(",")]
     if isinstance(v, (list, str)):
@@ -23,6 +25,8 @@ def parse_cors(v: str | list[str]) -> list[str] | str:
 
 
 class Settings(BaseSettings):  # type: ignore[explicit-any]
+    """Application settings configuration."""
+
     model_config = SettingsConfigDict(
         # Use top level .env file (one level above ./backend/)
         env_file="../.env",
@@ -44,6 +48,7 @@ class Settings(BaseSettings):  # type: ignore[explicit-any]
     @computed_field  # type: ignore[prop-decorator]
     @property
     def all_cors_origins(self) -> list[str]:
+        """Get all CORS origins."""
         return [str(origin).rstrip("/") for origin in self.BACKEND_CORS_ORIGINS] + [
             self.FRONTEND_HOST,
         ]
@@ -59,6 +64,7 @@ class Settings(BaseSettings):  # type: ignore[explicit-any]
     @computed_field  # type: ignore[prop-decorator]
     @property
     def SQLALCHEMY_DATABASE_URI(self) -> PostgresDsn:  # noqa: N802
+        """Build database URI from configuration."""
         return PostgresDsn.build(
             scheme="postgresql+psycopg",
             username=self.POSTGRES_USER,
@@ -88,6 +94,7 @@ class Settings(BaseSettings):  # type: ignore[explicit-any]
     @computed_field  # type: ignore[prop-decorator]
     @property
     def emails_enabled(self) -> bool:
+        """Check if email configuration is enabled."""
         return bool(self.SMTP_HOST and self.EMAILS_FROM_EMAIL)
 
     EMAIL_TEST_USER: EmailStr = "test@example.com"

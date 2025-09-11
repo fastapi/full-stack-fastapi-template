@@ -1,4 +1,4 @@
-"""Edit replace id integers in all models to use UUID instead
+"""Edit replace id integers in all models to use UUID instead.
 
 Revision ID: d98dd8ec85a3
 Revises: 9c0a54914c78
@@ -18,6 +18,7 @@ depends_on: str | None = None
 
 
 def upgrade() -> None:
+    """Upgrade database schema."""
     # Ensure uuid-ossp extension is available
     op.execute('CREATE EXTENSION IF NOT EXISTS "uuid-ossp"')
 
@@ -39,14 +40,18 @@ def upgrade() -> None:
         ),
     )
     op.add_column(
-        "item", sa.Column("new_owner_id", postgresql.UUID(as_uuid=True), nullable=True),
+        "item",
+        sa.Column(
+            "new_owner_id", postgresql.UUID(as_uuid=True), nullable=True,
+        ),
     )
 
     # Populate the new columns with UUIDs
     op.execute('UPDATE "user" SET new_id = uuid_generate_v4()')
     op.execute("UPDATE item SET new_id = uuid_generate_v4()")
     op.execute(
-        'UPDATE item SET new_owner_id = (SELECT new_id FROM "user" WHERE "user".id = item.owner_id)',
+        'UPDATE item SET new_owner_id = '
+        '(SELECT new_id FROM "user" WHERE "user".id = item.owner_id)',
     )
 
     # Set the new_id as not nullable
@@ -69,10 +74,13 @@ def upgrade() -> None:
     op.create_primary_key("item_pkey", "item", ["id"])
 
     # Recreate foreign key constraint
-    op.create_foreign_key("item_owner_id_fkey", "item", "user", ["owner_id"], ["id"])
+    op.create_foreign_key(
+        "item_owner_id_fkey", "item", "user", ["owner_id"], ["id"],
+    )
 
 
 def downgrade() -> None:
+    """Downgrade database schema."""
     # Reverse the upgrade process
     op.add_column("user", sa.Column("old_id", sa.Integer, autoincrement=True))
     op.add_column("item", sa.Column("old_id", sa.Integer, autoincrement=True))
@@ -81,22 +89,28 @@ def downgrade() -> None:
     # Populate the old columns with default values
     # Generate sequences for the integer IDs if not exist
     op.execute(
-        'CREATE SEQUENCE IF NOT EXISTS user_id_seq AS INTEGER OWNED BY "user".old_id',
+        'CREATE SEQUENCE IF NOT EXISTS user_id_seq AS INTEGER '
+        'OWNED BY "user".old_id',
     )
     op.execute(
-        "CREATE SEQUENCE IF NOT EXISTS item_id_seq AS INTEGER OWNED BY item.old_id",
+        "CREATE SEQUENCE IF NOT EXISTS item_id_seq AS INTEGER "
+        "OWNED BY item.old_id",
     )
 
     op.execute(
-        "SELECT setval('user_id_seq', COALESCE((SELECT MAX(old_id) + 1 FROM \"user\"), 1), false)",
+        "SELECT setval('user_id_seq', "
+        'COALESCE((SELECT MAX(old_id) + 1 FROM "user"), 1), false)',
     )
     op.execute(
-        "SELECT setval('item_id_seq', COALESCE((SELECT MAX(old_id) + 1 FROM item), 1), false)",
+        "SELECT setval('item_id_seq', "
+        "COALESCE((SELECT MAX(old_id) + 1 FROM item), 1), false)",
     )
 
     op.execute("UPDATE \"user\" SET old_id = nextval('user_id_seq')")
     op.execute(
-        'UPDATE item SET old_id = nextval(\'item_id_seq\'), old_owner_id = (SELECT old_id FROM "user" WHERE "user".id = item.owner_id)',
+        'UPDATE item SET old_id = nextval(\'item_id_seq\'), '
+        'old_owner_id = (SELECT old_id FROM "user" '
+        'WHERE "user".id = item.owner_id)',
     )
 
     # Drop new columns and rename old columns back
@@ -115,4 +129,6 @@ def downgrade() -> None:
     op.create_primary_key("item_pkey", "item", ["id"])
 
     # Recreate foreign key constraint
-    op.create_foreign_key("item_owner_id_fkey", "item", "user", ["owner_id"], ["id"])
+    op.create_foreign_key(
+        "item_owner_id_fkey", "item", "user", ["owner_id"], ["id"],
+    )

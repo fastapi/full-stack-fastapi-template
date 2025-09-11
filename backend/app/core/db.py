@@ -1,3 +1,5 @@
+"""Database configuration and initialization."""
+
 from sqlmodel import Session, create_engine, select
 
 from app import crud
@@ -13,6 +15,7 @@ engine = create_engine(str(settings.SQLALCHEMY_DATABASE_URI))
 
 
 def init_db(session: Session) -> None:
+    """Initialize database with default data."""
     user = session.exec(
         select(User).where(User.email == settings.FIRST_SUPERUSER),
     ).first()

@@ -1,3 +1,5 @@
+"""API dependency functions."""
+
 from collections.abc import Generator
 from typing import Annotated
 
@@ -19,6 +21,7 @@ reusable_oauth2 = OAuth2PasswordBearer(
 
 
 def get_db() -> Generator[Session]:
+    """Get database session."""
     with Session(engine) as session:
         yield session
 
@@ -28,6 +31,7 @@ TokenDep = Annotated[str, Depends(reusable_oauth2)]
 
 
 def get_current_user(session: SessionDep, token: TokenDep) -> User:
+    """Get current user from JWT token."""
     try:
         payload = jwt.decode(
             token,
@@ -39,7 +43,7 @@ def get_current_user(session: SessionDep, token: TokenDep) -> User:
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,
             detail="Could not validate credentials",
-        )
+        ) from None
     user = session.get(User, token_data.sub)
     if not user:
         raise HTTPException(status_code=404, detail="User not found")
@@ -52,6 +56,7 @@ CurrentUser = Annotated[User, Depends(get_current_user)]
 
 
 def get_current_active_superuser(current_user: CurrentUser) -> User:
+    """Get current active superuser."""
     if not current_user.is_superuser:
         raise HTTPException(
             status_code=403,

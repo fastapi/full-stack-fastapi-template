@@ -1,7 +1,11 @@
+"""Alembic configuration for database migrations."""
 from logging.config import fileConfig
 
 from alembic import context
 from sqlalchemy import engine_from_config, pool
+from sqlmodel import SQLModel
+
+from app.core.config import settings
 
 # this is the Alembic Config object, which provides
 # access to the values within the .ini file in use.
@@ -12,14 +16,11 @@ config = context.config
 if config.config_file_name:
     fileConfig(config.config_file_name)
 
-
-from app.core.config import settings  # noqa
-from sqlmodel import SQLModel
-
 target_metadata = SQLModel.metadata
 
 
 def get_url() -> str:
+    """Get database URL from settings."""
     return str(settings.SQLALCHEMY_DATABASE_URI)
 
 
