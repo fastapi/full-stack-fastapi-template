@@ -19,6 +19,7 @@
 
 ### Upgrades
 
+* ⬆ Bump @tanstack/react-router from 1.131.36 to 1.131.37 in /frontend. PR [#1872](https://github.com/fastapi/full-stack-fastapi-template/pull/1872) by [@dependabot[bot]](https://github.com/apps/dependabot).
 * ⬆️ Upgrade Biome to the latest version. PR [#1861](https://github.com/fastapi/full-stack-fastapi-template/pull/1861) by [@alejsdev](https://github.com/alejsdev).
 * ⬆️ Update TansTack Router dependencies. PR [#1853](https://github.com/fastapi/full-stack-fastapi-template/pull/1853) by [@alejsdev](https://github.com/alejsdev).
 * ⬆️ Bump @tanstack/react-query from 5.28.14 to 5.87.1. PR [#1852](https://github.com/fastapi/full-stack-fastapi-template/pull/1852) by [@alejsdev](https://github.com/alejsdev).
