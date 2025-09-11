@@ -8,7 +8,10 @@ from app.tests.utils.utils import random_email, random_lower_string
 
 
 def user_authentication_headers(
-    *, client: TestClient, email: str, password: str
+    *,
+    client: TestClient,
+    email: str,
+    password: str,
 ) -> dict[str, str]:
     data = {"username": email, "password": password}
 
@@ -28,10 +31,12 @@ def create_random_user(db: Session) -> User:
 
 
 def authentication_token_from_email(
-    *, client: TestClient, email: str, db: Session
+    *,
+    client: TestClient,
+    email: str,
+    db: Session,
 ) -> dict[str, str]:
-    """
-    Return a valid token for the user with given email.
+    """Return a valid token for the user with given email.
 
     If the user doesn't exist it is created first.
     """
@@ -42,7 +47,7 @@ def authentication_token_from_email(
         user = crud.create_user(session=db, user_create=user_in_create)
     else:
         user_in_update = UserUpdate(password=password)
-        if not user.id:
+        if user.id is None:
             raise Exception("User id not set")
         user = crud.update_user(session=db, db_user=user, user_in=user_in_update)
 

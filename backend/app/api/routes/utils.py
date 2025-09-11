@@ -14,9 +14,7 @@ router = APIRouter(prefix="/utils", tags=["utils"])
     status_code=201,
 )
 def test_email(email_to: EmailStr) -> Message:
-    """
-    Test emails.
-    """
+    """Test emails."""
     email_data = generate_test_email(email_to=email_to)
     send_email(
         email_to=email_to,
