@@ -13,11 +13,11 @@ import sqlmodel.sql.sqltypes
 # revision identifiers, used by Alembic.
 revision = '9c0a54914c78'
 down_revision = 'e2412789c190'
-branch_labels = None
-depends_on = None
+branch_labels: str | None = None
+depends_on: str | None = None
 
 
-def upgrade():
+def upgrade() -> None:
     # Adjust the length of the email field in the User table
     op.alter_column('user', 'email',
                existing_type=sa.String(),
@@ -43,7 +43,7 @@ def upgrade():
                existing_nullable=True)
 
 
-def downgrade():
+def downgrade() -> None:
     # Revert the length of the email field in the User table
     op.alter_column('user', 'email',
                existing_type=sa.String(length=255),

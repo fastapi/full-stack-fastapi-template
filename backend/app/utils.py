@@ -4,7 +4,7 @@ from datetime import datetime, timedelta, timezone
 from pathlib import Path
 from typing import Any
 
-import emails  # type: ignore
+import emails  # type: ignore[import-untyped]
 import jwt
 from jinja2 import Template
 from jwt.exceptions import InvalidTokenError
@@ -22,7 +22,7 @@ class EmailData:
     subject: str
 
 
-def render_email_template(*, template_name: str, context: dict[str, Any]) -> str:
+def render_email_template(*, template_name: str, context: dict[str, str | int]) -> str:
     template_str = (
         Path(__file__).parent / "email-templates" / "build" / template_name
     ).read_text()

@@ -14,11 +14,11 @@ from sqlalchemy.dialects import postgresql
 # revision identifiers, used by Alembic.
 revision = 'd98dd8ec85a3'
 down_revision = '9c0a54914c78'
-branch_labels = None
-depends_on = None
+branch_labels: str | None = None
+depends_on: str | None = None
 
 
-def upgrade():
+def upgrade() -> None:
     # Ensure uuid-ossp extension is available
     op.execute('CREATE EXTENSION IF NOT EXISTS "uuid-ossp"')
 
@@ -54,7 +54,7 @@ def upgrade():
     # Recreate foreign key constraint
     op.create_foreign_key('item_owner_id_fkey', 'item', 'user', ['owner_id'], ['id'])
 
-def downgrade():
+def downgrade() -> None:
     # Reverse the upgrade process
     op.add_column('user', sa.Column('old_id', sa.Integer, autoincrement=True))
     op.add_column('item', sa.Column('old_id', sa.Integer, autoincrement=True))
