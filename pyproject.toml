@@ -1,0 +1,68 @@
+[project]
+name = "fastapi-moscow-python-demo"
+version = "0.1.0"
+description = "Add your description here"
+readme = "README.md"
+requires-python = ">=3.12"
+dependencies = [
+    "alembic>=1.16.5",
+    "bandit>=1.8.6",
+    "fastapi>=0.116.1",
+    "flake8>=7.3.0",
+    "jinja2>=3.1.6",
+    "mypy>=1.17.1",
+    "passlib>=1.7.4",
+    "pydantic-settings>=2.10.1",
+    "pyjwt>=2.10.1",
+    "pytest>=8.4.2",
+    "radon>=6.0.1",
+    "ruff>=0.13.0",
+    "sqlalchemy>=2.0.43",
+    "sqlmodel>=0.0.24",
+    "tenacity>=9.1.2",
+    "types-passlib>=1.7.7.20250602",
+    "wemake-python-styleguide>=1.4.0",
+]
+
+[tool.mypy]
+# Core strictness
+strict = true
+extra_checks = true                # opt-in stricter checks beyond --strict
+warn_unreachable = true            # not included in --strict; catch dead/ redundant code
+implicit_reexport = false          # require explicit re-exports (no implicit module exports)
+local_partial_types = true         # force annotations for top-level/class partial types
+strict_equality = true             # prohibit always-false/true comparisons
+
+# Be ruthless about Any
+disallow_any_unimported = true
+disallow_any_expr = true
+disallow_any_decorated = true
+disallow_any_explicit = true
+disallow_any_generics = true
+disallow_subclassing_any = true
+
+# No untyped or half-typed defs/calls
+disallow_untyped_calls = true
+disallow_untyped_defs = true
+disallow_incomplete_defs = true
+
+# Hygiene & signal
+warn_return_any = true
+warn_redundant_casts = true
+warn_unused_ignores = true
+show_error_codes = true
+
+# Optional error codes that make reviews sharper
+enable_error_code = [
+  "ignore-without-code",   # every `# type: ignore` must be specific
+  "redundant-expr",        # flag obviously redundant boolean logic
+  "possibly-undefined",    # variables not defined on all paths
+  "truthy-bool",           # questionable truthiness checks
+  "truthy-iterable",       # questionable truthiness checks on iterables
+  "deprecated",            # use of @deprecated (PEP 702 / typing_extensions)
+  "exhaustive-match"       # non-exhaustive `match` on enums / unions (where supported)
+]
+
+# Optional: make the default on recent mypy explicit (safer across versions)
+implicit_optional = false
+
