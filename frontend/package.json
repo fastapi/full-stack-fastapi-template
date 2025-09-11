@@ -29,7 +29,7 @@
     "@biomejs/biome": "^2.2.4",
     "@hey-api/openapi-ts": "0.73.0",
     "@playwright/test": "^1.55.0",
-    "@tanstack/router-devtools": "^1.131.36",
+    "@tanstack/router-devtools": "^1.131.40",
     "@tanstack/router-plugin": "^1.131.39",
     "@types/node": "^24.3.1",
     "@types/react": "^19.1.12",
