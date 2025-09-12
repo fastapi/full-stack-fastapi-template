@@ -11,14 +11,14 @@ updates:
   - package-ecosystem: uv
     directory: /backend
     schedule:
-      interval: daily
+      interval: weekly
     commit-message:
       prefix: ⬆
   # npm
   - package-ecosystem: npm
     directory: /frontend
     schedule:
-      interval: daily
+      interval: weekly
     commit-message:
       prefix: ⬆
     ignore:
