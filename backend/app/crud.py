@@ -104,30 +104,26 @@ def create_wallet(
     existing_wallets = session.exec(
         select(Wallet).where(Wallet.user_id == user_id)
     ).all()
-    
+
     if len(existing_wallets) >= MAX_WALLETS_PER_USER:
         raise HTTPException(
-            status_code=400,
-            detail="User cannot have more than 3 wallets"
+            status_code=400, detail="User cannot have more than 3 wallets"
         )
-    
+
     # Check if user already has wallet with this currency
     existing_currency_wallet = session.exec(
         select(Wallet).where(
-            Wallet.user_id == user_id,
-            Wallet.currency == wallet_in.currency
+            Wallet.user_id == user_id, Wallet.currency == wallet_in.currency
         )
     ).first()
-    
+
     if existing_currency_wallet:
         raise HTTPException(
-            status_code=400,
-            detail=f"User already has a {wallet_in.currency} wallet"
+            status_code=400, detail=f"User already has a {wallet_in.currency} wallet"
         )
-    
+
     db_wallet = Wallet.model_validate(
-        wallet_in,
-        update={"user_id": user_id, "balance": Decimal("0.00")}
+        wallet_in, update={"user_id": user_id, "balance": Decimal("0.00")}
     )
     session.add(db_wallet)
     session.commit()
@@ -142,99 +138,85 @@ def get_wallet_by_id(*, session: Session, wallet_id: uuid.UUID) -> Wallet | None
 
 def get_user_wallets(*, session: Session, user_id: uuid.UUID) -> list[Wallet]:
     """Get all wallets for a user."""
-    return session.exec(
-        select(Wallet).where(Wallet.user_id == user_id)
-    ).all()
+    return session.exec(select(Wallet).where(Wallet.user_id == user_id)).all()
 
 
 # Transaction CRUD operations
 
 
 def convert_currency(
-    amount: Decimal, 
-    from_currency: CurrencyEnum, 
-    to_currency: CurrencyEnum
+    amount: Decimal, from_currency: CurrencyEnum, to_currency: CurrencyEnum
 ) -> tuple[Decimal, Decimal]:
     """Convert amount between currencies and return (converted_amount, fee)."""
     if from_currency == to_currency:
         return amount, Decimal("0.00")
-    
+
     rate_key = (from_currency.value, to_currency.value)
     if rate_key not in EXCHANGE_RATES:
         raise HTTPException(
             status_code=400,
-            detail=f"Exchange rate not available for {from_currency} to {to_currency}"
+            detail=f"Exchange rate not available for {from_currency} to {to_currency}",
         )
-    
+
     rate = EXCHANGE_RATES[rate_key]
     converted_amount = amount * rate
     fee = converted_amount * CONVERSION_FEE_RATE
     final_amount = converted_amount - fee
-    
+
     return final_amount, fee
 
 
 def create_transaction(
-    *,
-    session: Session,
-    transaction_in: TransactionCreate,
-    user_id: uuid.UUID
+    *, session: Session, transaction_in: TransactionCreate, user_id: uuid.UUID
 ) -> Transaction:
     """Create a new transaction."""
     # Get the wallet
     wallet = session.get(Wallet, transaction_in.wallet_id)
     if not wallet:
         raise HTTPException(status_code=404, detail="Wallet not found")
-    
+
     # Check if wallet belongs to user
     if wallet.user_id != user_id:
         raise HTTPException(
-            status_code=403,
-            detail="Not authorized to access this wallet"
+            status_code=403, detail="Not authorized to access this wallet"
         )
-    
+
     # Convert currency if needed
     transaction_amount = transaction_in.amount
     if transaction_in.currency != wallet.currency:
         converted_amount, _ = convert_currency(
-            transaction_in.amount,
-            transaction_in.currency,
-            wallet.currency
+            transaction_in.amount, transaction_in.currency, wallet.currency
         )
         transaction_amount = converted_amount
-    
+
     # Calculate new balance
     if transaction_in.type == TransactionTypeEnum.CREDIT:
         new_balance = wallet.balance + transaction_amount
     else:  # DEBIT
         new_balance = wallet.balance - transaction_amount
-        
+
         # Check for negative balance
         if new_balance < 0:
             raise HTTPException(
                 status_code=400,
-                detail="Insufficient funds: transaction would result in negative balance"
+                detail="Insufficient funds: transaction would result in negative balance",
             )
-    
+
     # Create transaction
     db_transaction = Transaction.model_validate(transaction_in)
     session.add(db_transaction)
-    
+
     # Update wallet balance
     wallet.balance = new_balance
     session.add(wallet)
-    
+
     session.commit()
     session.refresh(db_transaction)
     return db_transaction
 
 
 def get_wallet_transactions(
-    *,
-    session: Session,
-    wallet_id: uuid.UUID,
-    skip: int = 0,
-    limit: int = 100
+    *, session: Session, wallet_id: uuid.UUID, skip: int = 0, limit: int = 100
 ) -> list[Transaction]:
     """Get transactions for a wallet."""
     return session.exec(
