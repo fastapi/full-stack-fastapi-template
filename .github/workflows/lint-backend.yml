@@ -4,10 +4,39 @@ on:
   push:
     branches:
       - master
+    paths-ignore:
+      - 'release-notes.md'
+      - renovate.json
+      - development.md
+      - deployment.md
+      - SECURITY.md
+      - README.md
+      - LICENSE
+      - .pre-commit-config.yaml
+      - .gitignore
+      - .gitattributes
+      - .editorconfig
+      - '.better-commits.json'
+      - img/*
+      - hooks/*
+      - .copier/*
   pull_request:
     types:
       - opened
       - synchronize
+    paths-ignore:
+      - 'release-notes.md'
+      - development.md
+      - deployment.md
+      - SECURITY.md
+      - README.md
+      - LICENSE
+      - .pre-commit-config.yaml
+      - .gitignore
+      - .gitattributes
+      - img/*
+      - hooks/*
+      - .copier/*
 
 jobs:
   lint-backend:
