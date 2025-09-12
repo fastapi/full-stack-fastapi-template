@@ -30,14 +30,20 @@ class UserBase(SQLModel):
 class UserCreate(UserBase):
     """User creation model."""
 
-    password: str = Field(min_length=PASSWORD_MIN_LENGTH, max_length=PASSWORD_MAX_LENGTH)
+    password: str = Field(
+        min_length=PASSWORD_MIN_LENGTH,
+        max_length=PASSWORD_MAX_LENGTH,
+    )
 
 
 class UserRegister(SQLModel):
     """User registration model."""
 
     email: EmailStr = Field(max_length=EMAIL_MAX_LENGTH)
-    password: str = Field(min_length=PASSWORD_MIN_LENGTH, max_length=PASSWORD_MAX_LENGTH)
+    password: str = Field(
+        min_length=PASSWORD_MIN_LENGTH,
+        max_length=PASSWORD_MAX_LENGTH,
+    )
     full_name: str | None = Field(default=None, max_length=STRING_MAX_LENGTH)
 
 
@@ -46,7 +52,11 @@ class UserUpdate(UserBase):
     """User update model."""
 
     email: EmailStr | None = Field(default=None, max_length=STRING_MAX_LENGTH)  # type: ignore[assignment]
-    password: str | None = Field(default=None, min_length=PASSWORD_MIN_LENGTH, max_length=PASSWORD_MAX_LENGTH)
+    password: str | None = Field(
+        default=None,
+        min_length=PASSWORD_MIN_LENGTH,
+        max_length=PASSWORD_MAX_LENGTH,
+    )
 
 
 class UserUpdateMe(SQLModel):
@@ -59,8 +69,14 @@ class UserUpdateMe(SQLModel):
 class UpdatePassword(SQLModel):
     """Password update model."""
 
-    current_password: str = Field(min_length=PASSWORD_MIN_LENGTH, max_length=PASSWORD_MAX_LENGTH)
-    new_password: str = Field(min_length=PASSWORD_MIN_LENGTH, max_length=PASSWORD_MAX_LENGTH)
+    current_password: str = Field(
+        min_length=PASSWORD_MIN_LENGTH,
+        max_length=PASSWORD_MAX_LENGTH,
+    )
+    new_password: str = Field(
+        min_length=PASSWORD_MIN_LENGTH,
+        max_length=PASSWORD_MAX_LENGTH,
+    )
 
 
 # Database model, database table inferred from class name
@@ -99,7 +115,6 @@ class ItemCreate(ItemBase):
     """Item creation model."""
 
 
-
 # Properties to receive on item update
 class ItemUpdate(ItemBase):
     """Item update model."""
@@ -108,7 +123,7 @@ class ItemUpdate(ItemBase):
 
 
 # Database model, database table inferred from class name
-class Item(ItemBase, table=True):
+class Item(ItemBase, table=True):  # noqa: WPS110
     """Database item model."""
 
     id: uuid.UUID = Field(default_factory=uuid.uuid4, primary_key=True)
@@ -161,4 +176,7 @@ class NewPassword(SQLModel):
     """New password model."""
 
     token: str
-    new_password: str = Field(min_length=PASSWORD_MIN_LENGTH, max_length=PASSWORD_MAX_LENGTH)
+    new_password: str = Field(
+        min_length=PASSWORD_MIN_LENGTH,
+        max_length=PASSWORD_MAX_LENGTH,
+    )

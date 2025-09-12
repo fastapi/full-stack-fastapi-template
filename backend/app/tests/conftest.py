@@ -8,8 +8,8 @@ from app.core.config import settings
 from app.core.db import engine, init_db
 from app.main import app
 from app.models import Item, User
-from app.tests.utils.user import authentication_token_from_email
 from app.tests.utils.test_helpers import get_superuser_token_headers
+from app.tests.utils.user import authentication_token_from_email
 
 
 @pytest.fixture(scope="session", autouse=True)

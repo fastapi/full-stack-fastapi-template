@@ -11,12 +11,11 @@ from pydantic import ValidationError
 from sqlmodel import Session
 
 from app import constants
-from app.core import security
-from app.core import config, db
+from app.core import config, db, security
 from app.models import TokenPayload, User
 
 reusable_oauth2 = OAuth2PasswordBearer(
-    tokenUrl=f"{config.settings.API_V1_STR}/login/access-token",
+    tokenUrl=f"{config.settings.API_V1_STR}/login/access-token",  # noqa: WPS237
 )
 
 
@@ -57,9 +56,15 @@ def get_current_user(session: SessionDep, token: TokenDep) -> User:
     token_data = _validate_token(token)
     user = session.get(User, token_data.sub)
     if not user:
-        raise HTTPException(status_code=constants.NOT_FOUND_CODE, detail="User not found")
+        raise HTTPException(
+            status_code=constants.NOT_FOUND_CODE,
+            detail="User not found",
+        )
     if not user.is_active:
-        raise HTTPException(status_code=constants.BAD_REQUEST_CODE, detail="Inactive user")
+        raise HTTPException(
+            status_code=constants.BAD_REQUEST_CODE,
+            detail="Inactive user",
+        )
     return user
 
 

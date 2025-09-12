@@ -53,7 +53,9 @@ def read_item(
     if not db_item:
         raise HTTPException(status_code=NOT_FOUND_CODE, detail="Item not found")
     if not current_user.is_superuser and (db_item.owner_id != current_user.id):
-        raise HTTPException(status_code=BAD_REQUEST_CODE, detail="Not enough permissions")
+        raise HTTPException(
+            status_code=BAD_REQUEST_CODE, detail="Not enough permissions",
+        )
     return ItemPublic.model_validate(db_item)
 
 
@@ -85,7 +87,9 @@ def update_item(
     if not db_item:
         raise HTTPException(status_code=NOT_FOUND_CODE, detail="Item not found")
     if not current_user.is_superuser and (db_item.owner_id != current_user.id):
-        raise HTTPException(status_code=BAD_REQUEST_CODE, detail="Not enough permissions")
+        raise HTTPException(
+            status_code=BAD_REQUEST_CODE, detail="Not enough permissions",
+        )
     update_dict = item_in.model_dump(exclude_unset=True)
     db_item.sqlmodel_update(update_dict)
     session.add(db_item)
@@ -105,7 +109,9 @@ def delete_item(
     if not db_item:
         raise HTTPException(status_code=NOT_FOUND_CODE, detail="Item not found")
     if not current_user.is_superuser and (db_item.owner_id != current_user.id):
-        raise HTTPException(status_code=BAD_REQUEST_CODE, detail="Not enough permissions")
+        raise HTTPException(
+            status_code=BAD_REQUEST_CODE, detail="Not enough permissions",
+        )
     session.delete(db_item)
     session.commit()
     return Message(message="Item deleted successfully")

@@ -9,6 +9,7 @@ from app.constants import (
     OK_CODE,
 )
 from app.core.config import settings
+from app.models import Item
 from app.tests.utils.item import create_random_item
 
 # Constants for commonly used strings
@@ -18,8 +19,8 @@ ITEMS_ENDPOINT = "/items/"
 ERROR_DETAIL_KEY = "detail"
 
 
-def _create_test_item(db: Session):
-    """Helper to create a test item and reduce expression reuse."""
+def _create_test_item(db: Session) -> Item:
+    """Create a test item and reduce expression reuse."""
     return create_random_item(db)
 
 
@@ -109,7 +110,10 @@ def test_update_item(
     db: Session,
 ) -> None:
     test_item = _create_test_item(db)
-    update_data = {TEST_ITEM_TITLE: "Updated title", TEST_ITEM_DESCRIPTION: "Updated description"}
+    update_data = {
+        TEST_ITEM_TITLE: "Updated title",
+        TEST_ITEM_DESCRIPTION: "Updated description",
+    }
     response = client.put(
         f"{settings.API_V1_STR}{ITEMS_ENDPOINT}{test_item.id}",
         headers=superuser_token_headers,
@@ -127,7 +131,10 @@ def test_update_item_not_found(
     client: TestClient,
     superuser_token_headers: dict[str, str],
 ) -> None:
-    update_data = {TEST_ITEM_TITLE: "Updated title", TEST_ITEM_DESCRIPTION: "Updated description"}
+    update_data = {
+        TEST_ITEM_TITLE: "Updated title",
+        TEST_ITEM_DESCRIPTION: "Updated description",
+    }
     response = client.put(
         f"{settings.API_V1_STR}{ITEMS_ENDPOINT}{uuid.uuid4()}",
         headers=superuser_token_headers,
@@ -144,7 +151,10 @@ def test_update_item_not_enough_permissions(
     db: Session,
 ) -> None:
     test_item = _create_test_item(db)
-    update_data = {TEST_ITEM_TITLE: "Updated title", TEST_ITEM_DESCRIPTION: "Updated description"}
+    update_data = {
+        TEST_ITEM_TITLE: "Updated title",
+        TEST_ITEM_DESCRIPTION: "Updated description",
+    }
     response = client.put(
         f"{settings.API_V1_STR}{ITEMS_ENDPOINT}{test_item.id}",
         headers=normal_user_token_headers,

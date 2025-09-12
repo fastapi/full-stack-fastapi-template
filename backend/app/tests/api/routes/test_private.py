@@ -10,17 +10,17 @@ def test_create_user(client: TestClient, db: Session) -> None:
     # Create user data
     user_data = {
         "email": "pollo@listo.com",
-        "password": "password123", 
+        "password": "password123",
         "full_name": "Pollo Listo",
     }
-    
+
     # Make request
     response = client.post(f"{settings.API_V1_STR}/private/users/", json=user_data)
     assert response.status_code == OK_CODE
-    
+
     # Get response data
     response_data = response.json()
-    
+
     # Verify user was created in database
     created_user = db.exec(select(User).where(User.id == response_data["id"])).first()
     assert created_user

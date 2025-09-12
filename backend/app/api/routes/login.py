@@ -12,13 +12,13 @@ from app.api.deps import CurrentUser, SessionDep, get_current_active_superuser
 from app.constants import BAD_REQUEST_CODE, NOT_FOUND_CODE
 from app.core import security
 from app.core.config import settings
-from app.models import Message, NewPassword, Token, UserPublic
 from app.email_utils import (
     generate_password_reset_token,
     generate_reset_password_email,
     send_email,
     verify_password_reset_token,
 )
+from app.models import Message, NewPassword, Token, UserPublic
 
 router = APIRouter(tags=["login"])
 
@@ -35,7 +35,9 @@ def login_access_token(
         password=form_data.password,
     )
     if not user:
-        raise HTTPException(status_code=BAD_REQUEST_CODE, detail="Incorrect email or password")
+        raise HTTPException(
+            status_code=BAD_REQUEST_CODE, detail="Incorrect email or password",
+        )
     if not user.is_active:
         raise HTTPException(status_code=BAD_REQUEST_CODE, detail="Inactive user")
     access_token_expires = timedelta(minutes=settings.ACCESS_TOKEN_EXPIRE_MINUTES)

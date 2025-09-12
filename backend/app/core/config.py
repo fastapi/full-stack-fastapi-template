@@ -37,11 +37,13 @@ class Settings(BaseSettings):  # type: ignore[explicit-any]
         env_ignore_empty=True,
         extra="ignore",
     )
-    
+
     # API Settings
     API_V1_STR: str = "/api/v1"
     SECRET_KEY: str = secrets.token_urlsafe(TOKEN_LENGTH)
-    ACCESS_TOKEN_EXPIRE_MINUTES: int = 60 * 24 * 8  # 60 minutes * 24 hours * 8 days = 8 days
+    ACCESS_TOKEN_EXPIRE_MINUTES: int = (
+        60 * 24 * 8
+    )  # 60 minutes * 24 hours * 8 days = 8 days
     FRONTEND_HOST: str = "http://localhost:5173"
     ENVIRONMENT: Literal["local", "staging", "production"] = "local"
 
@@ -54,14 +56,14 @@ class Settings(BaseSettings):  # type: ignore[explicit-any]
     # Project Settings
     PROJECT_NAME: str
     SENTRY_DSN: HttpUrl | None = None
-    
+
     # Database Settings
     POSTGRES_SERVER: str
     POSTGRES_PORT: int = 5432
     POSTGRES_USER: str
     POSTGRES_PASSWORD: str = ""
     POSTGRES_DB: str = ""
-    
+
     # Email Settings
     SMTP_TLS: bool = True
     SMTP_SSL: bool = False
@@ -72,14 +74,14 @@ class Settings(BaseSettings):  # type: ignore[explicit-any]
     EMAILS_FROM_EMAIL: EmailStr | None = None
     EMAILS_FROM_NAME: EmailStr | None = None
     EMAIL_RESET_TOKEN_EXPIRE_HOURS: int = 48
-    
+
     # Test Settings
     EMAIL_TEST_USER: EmailStr = "test@example.com"
     FIRST_SUPERUSER: EmailStr
     FIRST_SUPERUSER_PASSWORD: str
 
     @property
-    @computed_field  # type: ignore[prop-decorator]
+    @computed_field
     def all_cors_origins(self) -> list[str]:
         """Get all CORS origins."""
         return [str(origin).rstrip("/") for origin in self.BACKEND_CORS_ORIGINS] + [
@@ -87,7 +89,7 @@ class Settings(BaseSettings):  # type: ignore[explicit-any]
         ]
 
     @property
-    @computed_field  # type: ignore[prop-decorator]
+    @computed_field
     def SQLALCHEMY_DATABASE_URI(self) -> PostgresDsn:  # noqa: N802
         """Build database URI from configuration."""
         return PostgresDsn.build(
@@ -100,13 +102,13 @@ class Settings(BaseSettings):  # type: ignore[explicit-any]
         )
 
     @property
-    @computed_field  # type: ignore[prop-decorator]
+    @computed_field
     def emails_enabled(self) -> bool:
         """Check if email configuration is enabled."""
         return bool(self.SMTP_HOST and self.EMAILS_FROM_EMAIL)
 
     def _check_default_secret(self, var_name: str, secret_value: str | None) -> None:
-        if secret_value == "changethis":
+        if secret_value == "changethis":  # noqa: S105
             message = (
                 f'The value of {var_name} is "changethis", '
                 "for security, please change it, at least for deployments."

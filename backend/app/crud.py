@@ -1,4 +1,5 @@
 """CRUD operations for database models."""
+
 import uuid
 
 from sqlmodel import Session, select
@@ -23,8 +24,7 @@ def update_user(*, session: Session, db_user: User, user_in: UserUpdate) -> User
     """Update an existing user."""
     user_data = user_in.model_dump(exclude_unset=True)
     extra_data = {}
-    if "password" in user_data:
-        password = user_data.get("password")
+    if password := user_data.get("password"):
         hashed_password = get_password_hash(password)
         extra_data["hashed_password"] = hashed_password
     db_user.sqlmodel_update(user_data, update=extra_data)

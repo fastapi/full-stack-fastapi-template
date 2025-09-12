@@ -19,7 +19,7 @@ from app.tests.utils.test_helpers import random_email, random_lower_string
 
 
 # Helper functions to reduce complexity
-def create_test_user_data():
+def create_test_user_data() -> dict[str, str]:
     """Create random user data for testing."""
     return {
         "username": random_email(),
@@ -27,7 +27,11 @@ def create_test_user_data():
     }
 
 
-def create_user_in_db(db: Session, username: str = None, password: str = None):
+def create_user_in_db(
+    db: Session,
+    username: str | None = None,
+    password: str | None = None,
+) -> User:
     """Create a user in the database and return it."""
     if username is None:
         username = random_email()
@@ -37,7 +41,11 @@ def create_user_in_db(db: Session, username: str = None, password: str = None):
     return crud.create_user(session=db, user_create=user_in)
 
 
-def authenticate_user(client: TestClient, username: str, password: str):
+def authenticate_user(
+    client: TestClient,
+    username: str,
+    password: str,
+) -> dict[str, str]:
     """Authenticate a user and return headers."""
     login_data = {"username": username, USER_PASSWORD_KEY: password}
     response = client.post(f"{settings.API_V1_STR}/login/access-token", data=login_data)
@@ -45,15 +53,16 @@ def authenticate_user(client: TestClient, username: str, password: str):
     access_token = response_data["access_token"]
     return {"Authorization": f"Bearer {access_token}"}
 
+
 # Constants for commonly used strings
 USER_EMAIL_KEY = "email"
-USER_PASSWORD_KEY = "password"
+USER_PASSWORD_KEY = "password"  # noqa: S105
 USER_FULL_NAME_KEY = "full_name"
-USER_CURRENT_PASSWORD_KEY = "current_password"
-USER_NEW_PASSWORD_KEY = "new_password"
+USER_CURRENT_PASSWORD_KEY = "current_password"  # noqa: S105
+USER_NEW_PASSWORD_KEY = "new_password"  # noqa: S105
 USERS_ME_ENDPOINT = "/users/me"
 USERS_ENDPOINT = "/users/"
-USERS_ME_PASSWORD_ENDPOINT = "/users/me/password"
+USERS_ME_PASSWORD_ENDPOINT = "/users/me/password"  # noqa: S105
 USERS_SIGNUP_ENDPOINT = "/users/signup"
 USERS_BASE_ENDPOINT = "/users/"  # For constructing /users/{id} endpoints
 ERROR_DETAIL_KEY = "detail"
@@ -64,7 +73,10 @@ def test_get_users_superuser_me(
     client: TestClient,
     superuser_token_headers: dict[str, str],
 ) -> None:
-    response = client.get(f"{settings.API_V1_STR}{USERS_ME_ENDPOINT}", headers=superuser_token_headers)
+    response = client.get(
+        f"{settings.API_V1_STR}{USERS_ME_ENDPOINT}",
+        headers=superuser_token_headers,
+    )
     current_user = response.json()
     assert current_user
     assert current_user["is_active"] is True
@@ -76,7 +88,10 @@ def test_get_users_normal_user_me(
     client: TestClient,
     normal_user_token_headers: dict[str, str],
 ) -> None:
-    response = client.get(f"{settings.API_V1_STR}{USERS_ME_ENDPOINT}", headers=normal_user_token_headers)
+    response = client.get(
+        f"{settings.API_V1_STR}{USERS_ME_ENDPOINT}",
+        headers=normal_user_token_headers,
+    )
     current_user = response.json()
     assert current_user
     assert current_user["is_active"] is True
@@ -95,7 +110,10 @@ def test_create_user_new_email(
         patch("app.core.config.settings.SMTP_USER", "admin@example.com"),
     ):
         test_data = create_test_user_data()
-        user_data = {USER_EMAIL_KEY: test_data["username"], USER_PASSWORD_KEY: test_data["password"]}
+        user_data = {
+            USER_EMAIL_KEY: test_data["username"],
+            USER_PASSWORD_KEY: test_data["password"],
+        }
         response = client.post(
             f"{settings.API_V1_STR}{USERS_ENDPOINT}",
             headers=superuser_token_headers,
@@ -150,7 +168,9 @@ def test_get_existing_user_permissions_error(
         headers=normal_user_token_headers,
     )
     assert response.status_code == FORBIDDEN_CODE
-    assert response.json() == {ERROR_DETAIL_KEY: "The user doesn't have enough privileges"}
+    assert response.json() == {
+        ERROR_DETAIL_KEY: "The user doesn't have enough privileges",
+    }
 
 
 def test_create_user_existing_username(
@@ -160,7 +180,10 @@ def test_create_user_existing_username(
 ) -> None:
     test_data = create_test_user_data()
     create_user_in_db(db, test_data["username"], test_data["password"])
-    user_data = {USER_EMAIL_KEY: test_data["username"], USER_PASSWORD_KEY: test_data["password"]}
+    user_data = {
+        USER_EMAIL_KEY: test_data["username"],
+        USER_PASSWORD_KEY: test_data["password"],
+    }
     response = client.post(
         f"{settings.API_V1_STR}{USERS_ENDPOINT}",
         headers=superuser_token_headers,
@@ -194,7 +217,10 @@ def test_retrieve_users(
     create_user_in_db(db)
     create_user_in_db(db)
 
-    response = client.get(f"{settings.API_V1_STR}{USERS_ENDPOINT}", headers=superuser_token_headers)
+    response = client.get(
+        f"{settings.API_V1_STR}{USERS_ENDPOINT}",
+        headers=superuser_token_headers,
+    )
     all_users = response.json()
 
     assert len(all_users["data"]) > 1
@@ -261,7 +287,7 @@ def _revert_superuser_password(
     superuser_token_headers: dict[str, str],
     new_password: str,
 ) -> None:
-    """Helper to revert superuser password for test consistency."""
+    """Revert superuser password for test consistency."""
     revert_data = {
         USER_CURRENT_PASSWORD_KEY: new_password,
         USER_NEW_PASSWORD_KEY: settings.FIRST_SUPERUSER_PASSWORD,
@@ -323,7 +349,8 @@ def test_update_password_me_same_password_error(
     assert response.status_code == BAD_REQUEST_CODE
     updated_user = response.json()
     assert (
-        updated_user[ERROR_DETAIL_KEY] == "New password cannot be the same as the current one"
+        updated_user[ERROR_DETAIL_KEY]
+        == "New password cannot be the same as the current one"
     )
 
 
@@ -333,7 +360,7 @@ def test_register_user(client: TestClient, db: Session) -> None:
     signup_data = {
         USER_EMAIL_KEY: test_data["username"],
         USER_PASSWORD_KEY: test_data["password"],
-        USER_FULL_NAME_KEY: full_name
+        USER_FULL_NAME_KEY: full_name,
     }
     response = client.post(
         f"{settings.API_V1_STR}{USERS_SIGNUP_ENDPOINT}",
@@ -365,7 +392,10 @@ def test_register_user_already_exists_error(client: TestClient) -> None:
         json=signup_data,
     )
     assert response.status_code == BAD_REQUEST_CODE
-    assert response.json()[ERROR_DETAIL_KEY] == "The user with this email already exists in the system"
+    assert (
+        response.json()[ERROR_DETAIL_KEY]
+        == "The user with this email already exists in the system"
+    )
 
 
 def test_update_user(
@@ -404,7 +434,10 @@ def test_update_user_not_exists(
         json=update_data,
     )
     assert response.status_code == NOT_FOUND_CODE
-    assert response.json()[ERROR_DETAIL_KEY] == "The user with this id does not exist in the system"
+    assert (
+        response.json()[ERROR_DETAIL_KEY]
+        == "The user with this id does not exist in the system"
+    )
 
 
 def test_update_user_email_exists(
@@ -437,7 +470,7 @@ def test_delete_user_me(client: TestClient, db: Session) -> None:
     assert response.status_code == OK_CODE
     deleted_user = response.json()
     assert deleted_user["message"] == "User deleted successfully"
-    
+
     # Verify user is deleted
     deleted_user_check = db.exec(select(User).where(User.id == user.id)).first()
     assert deleted_user_check is None
@@ -453,7 +486,10 @@ def test_delete_user_me_as_superuser(
     )
     assert response.status_code == FORBIDDEN_CODE
     response_content = response.json()
-    assert response_content[ERROR_DETAIL_KEY] == "Super users are not allowed to delete themselves"
+    assert (
+        response_content[ERROR_DETAIL_KEY]
+        == "Super users are not allowed to delete themselves"
+    )
 
 
 def test_delete_user_super_user(
@@ -499,7 +535,10 @@ def test_delete_user_current_super_user_error(
         headers=superuser_token_headers,
     )
     assert response.status_code == FORBIDDEN_CODE
-    assert response.json()[ERROR_DETAIL_KEY] == "Super users are not allowed to delete themselves"
+    assert (
+        response.json()[ERROR_DETAIL_KEY]
+        == "Super users are not allowed to delete themselves"
+    )
 
 
 def test_delete_user_without_privileges(
@@ -514,4 +553,6 @@ def test_delete_user_without_privileges(
         headers=normal_user_token_headers,
     )
     assert response.status_code == FORBIDDEN_CODE
-    assert response.json()[ERROR_DETAIL_KEY] == "The user doesn't have enough privileges"
+    assert (
+        response.json()[ERROR_DETAIL_KEY] == "The user doesn't have enough privileges"
+    )

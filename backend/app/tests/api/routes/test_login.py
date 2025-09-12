@@ -11,13 +11,13 @@ from app.constants import (
 from app.core.config import settings
 from app.core.security import verify_password
 from app.crud import create_user
-from app.models import UserCreate
-from app.tests.utils.user import user_authentication_headers
-from app.tests.utils.test_helpers import random_email, random_lower_string
 from app.email_utils import generate_password_reset_token
+from app.models import User, UserCreate
+from app.tests.utils.test_helpers import random_email, random_lower_string
+from app.tests.utils.user import user_authentication_headers
 
 
-def _create_test_user_with_credentials(db: Session):
+def _create_test_user_with_credentials(db: Session) -> tuple[User, str, str]:
     """Create a test user and return user data and credentials."""
     email = random_email()
     password = random_lower_string()
@@ -98,7 +98,7 @@ def test_recovery_password_user_not_exits(
 def test_reset_password(client: TestClient, db: Session) -> None:
     user, email, password = _create_test_user_with_credentials(db)
     new_password = random_lower_string()
-    
+
     token = generate_password_reset_token(email=email)
     headers = user_authentication_headers(client=client, email=email, password=password)
     reset_data = {"new_password": new_password, "token": token}
