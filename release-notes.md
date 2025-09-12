@@ -19,6 +19,7 @@
 
 ### Upgrades
 
+* ⬆ Bump axios from 1.11.0 to 1.12.0 in /frontend. PR [#1878](https://github.com/fastapi/full-stack-fastapi-template/pull/1878) by [@dependabot[bot]](https://github.com/apps/dependabot).
 * ⬆ Bump @tanstack/router-devtools from 1.131.40 to 1.131.41 in /frontend. PR [#1877](https://github.com/fastapi/full-stack-fastapi-template/pull/1877) by [@dependabot[bot]](https://github.com/apps/dependabot).
 * ⬆ Bump @tanstack/react-router from 1.131.40 to 1.131.41 in /frontend. PR [#1875](https://github.com/fastapi/full-stack-fastapi-template/pull/1875) by [@dependabot[bot]](https://github.com/apps/dependabot).
 * ⬆ Bump @tanstack/router-devtools from 1.131.36 to 1.131.37 in /frontend. PR [#1871](https://github.com/fastapi/full-stack-fastapi-template/pull/1871) by [@dependabot[bot]](https://github.com/apps/dependabot).
