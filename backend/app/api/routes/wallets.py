@@ -7,11 +7,7 @@ from fastapi import APIRouter, HTTPException
 from app.api.deps import CurrentUser, SessionDep
 from app.constants import BAD_REQUEST_CODE, NOT_FOUND_CODE
 from app.crud import create_wallet, get_user_wallets, get_wallet_by_id
-from app.models import (
-    WalletCreate,
-    WalletPublic,
-    WalletsPublic,
-)
+from app.models import WalletCreate, WalletPublic, WalletsPublic
 
 router = APIRouter(prefix="/wallets", tags=["wallets"])
 
@@ -53,11 +49,11 @@ def read_wallet(
     wallet = get_wallet_by_id(session=session, wallet_id=wallet_id)
     if not wallet:
         raise HTTPException(status_code=NOT_FOUND_CODE, detail="Wallet not found")
-    
+
     if wallet.user_id != current_user.id and not current_user.is_superuser:
         raise HTTPException(
             status_code=BAD_REQUEST_CODE,
             detail="Not enough permissions",
         )
-    
+
     return WalletPublic.model_validate(wallet)

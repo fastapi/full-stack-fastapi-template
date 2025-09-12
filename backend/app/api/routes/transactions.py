@@ -7,11 +7,7 @@ from fastapi import APIRouter, HTTPException
 from app.api.deps import CurrentUser, SessionDep
 from app.constants import NOT_FOUND_CODE
 from app.crud import create_transaction, get_wallet_by_id, get_wallet_transactions
-from app.models import (
-    TransactionCreate,
-    TransactionPublic,
-    TransactionsPublic,
-)
+from app.models import TransactionCreate, TransactionPublic, TransactionsPublic
 
 router = APIRouter(prefix="/transactions", tags=["transactions"])
 
