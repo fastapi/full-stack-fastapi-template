@@ -9,14 +9,19 @@ dependencies = [
     "bandit>=1.8.6",
     "fastapi>=0.116.1",
     "flake8>=7.3.0",
+    "ipykernel>=6.30.1",
     "jinja2>=3.1.6",
+    "matplotlib>=3.10.6",
     "mypy>=1.17.1",
+    "numpy>=2.3.3",
+    "pandas>=2.3.2",
     "passlib>=1.7.4",
     "pydantic-settings>=2.10.1",
     "pyjwt>=2.10.1",
     "pytest>=8.4.2",
     "radon>=6.0.1",
     "ruff>=0.13.0",
+    "seaborn>=0.13.2",
     "sqlalchemy>=2.0.43",
     "sqlmodel>=0.0.24",
     "tenacity>=9.1.2",
@@ -94,3 +99,6 @@ per-file-ignores = [
   "backend/app/tests/*.py: WPS432",
   "backend/app/alembic/**/*.py: WPS",
 ]
+
+[tool.bandit]
+exclude_dirs = ["app/tests"]
