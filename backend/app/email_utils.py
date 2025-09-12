@@ -132,6 +132,6 @@ def verify_password_reset_token(token: str) -> str | None:
             settings.SECRET_KEY,
             algorithms=[security.ALGORITHM],
         )
-        return str(decoded_token["sub"])
     except InvalidTokenError:
         return None
+    return str(decoded_token["sub"])

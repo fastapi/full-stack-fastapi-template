@@ -91,5 +91,6 @@ ignore = [
 
 [tool.flake8]
 per-file-ignores = [
-  "backend/app/tests/**/*.py: WPS432",
+  "backend/app/tests/*.py: WPS432",
+  "backend/app/alembic/**/*.py: WPS",
 ]

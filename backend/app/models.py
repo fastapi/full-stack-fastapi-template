@@ -5,6 +5,13 @@ import uuid
 from pydantic import EmailStr
 from sqlmodel import Field, Relationship, SQLModel
 
+from app.constants import (
+    EMAIL_MAX_LENGTH,
+    PASSWORD_MAX_LENGTH,
+    PASSWORD_MIN_LENGTH,
+    STRING_MAX_LENGTH,
+)
+
 # Token type constant to avoid hardcoded string
 TOKEN_TYPE_BEARER = "bearer"  # noqa: S105
 
@@ -13,47 +20,47 @@ TOKEN_TYPE_BEARER = "bearer"  # noqa: S105
 class UserBase(SQLModel):
     """Base user model with shared fields."""
 
-    email: EmailStr = Field(unique=True, index=True, max_length=255)
+    email: EmailStr = Field(unique=True, index=True, max_length=EMAIL_MAX_LENGTH)
     is_active: bool = True
     is_superuser: bool = False
-    full_name: str | None = Field(default=None, max_length=255)
+    full_name: str | None = Field(default=None, max_length=STRING_MAX_LENGTH)
 
 
 # Properties to receive via API on creation
 class UserCreate(UserBase):
     """User creation model."""
 
-    password: str = Field(min_length=8, max_length=40)
+    password: str = Field(min_length=PASSWORD_MIN_LENGTH, max_length=PASSWORD_MAX_LENGTH)
 
 
 class UserRegister(SQLModel):
     """User registration model."""
 
-    email: EmailStr = Field(max_length=255)
-    password: str = Field(min_length=8, max_length=40)
-    full_name: str | None = Field(default=None, max_length=255)
+    email: EmailStr = Field(max_length=EMAIL_MAX_LENGTH)
+    password: str = Field(min_length=PASSWORD_MIN_LENGTH, max_length=PASSWORD_MAX_LENGTH)
+    full_name: str | None = Field(default=None, max_length=STRING_MAX_LENGTH)
 
 
 # Properties to receive via API on update, all are optional
 class UserUpdate(UserBase):
     """User update model."""
 
-    email: EmailStr | None = Field(default=None, max_length=255)  # type: ignore[assignment]
-    password: str | None = Field(default=None, min_length=8, max_length=40)
+    email: EmailStr | None = Field(default=None, max_length=STRING_MAX_LENGTH)  # type: ignore[assignment]
+    password: str | None = Field(default=None, min_length=PASSWORD_MIN_LENGTH, max_length=PASSWORD_MAX_LENGTH)
 
 
 class UserUpdateMe(SQLModel):
     """User self-update model."""
 
-    full_name: str | None = Field(default=None, max_length=255)
-    email: EmailStr | None = Field(default=None, max_length=255)
+    full_name: str | None = Field(default=None, max_length=STRING_MAX_LENGTH)
+    email: EmailStr | None = Field(default=None, max_length=STRING_MAX_LENGTH)
 
 
 class UpdatePassword(SQLModel):
     """Password update model."""
 
-    current_password: str = Field(min_length=8, max_length=40)
-    new_password: str = Field(min_length=8, max_length=40)
+    current_password: str = Field(min_length=PASSWORD_MIN_LENGTH, max_length=PASSWORD_MAX_LENGTH)
+    new_password: str = Field(min_length=PASSWORD_MIN_LENGTH, max_length=PASSWORD_MAX_LENGTH)
 
 
 # Database model, database table inferred from class name
@@ -62,7 +69,7 @@ class User(UserBase, table=True):
 
     id: uuid.UUID = Field(default_factory=uuid.uuid4, primary_key=True)
     hashed_password: str
-    items: list["Item"] = Relationship(back_populates="owner", cascade_delete=True)
+    item_list: list["Item"] = Relationship(back_populates="owner", cascade_delete=True)
 
 
 # Properties to return via API, id is always required
@@ -75,7 +82,7 @@ class UserPublic(UserBase):
 class UsersPublic(SQLModel):
     """Collection of public users."""
 
-    data: list[UserPublic]
+    user_data: list[UserPublic]
     count: int
 
 
@@ -83,8 +90,8 @@ class UsersPublic(SQLModel):
 class ItemBase(SQLModel):
     """Base item model with shared fields."""
 
-    title: str = Field(min_length=1, max_length=255)
-    description: str | None = Field(default=None, max_length=255)
+    title: str = Field(min_length=1, max_length=STRING_MAX_LENGTH)
+    description: str | None = Field(default=None, max_length=STRING_MAX_LENGTH)
 
 
 # Properties to receive on item creation
@@ -97,7 +104,7 @@ class ItemCreate(ItemBase):
 class ItemUpdate(ItemBase):
     """Item update model."""
 
-    title: str | None = Field(default=None, min_length=1, max_length=255)  # type: ignore[assignment]
+    title: str | None = Field(default=None, min_length=1, max_length=STRING_MAX_LENGTH)  # type: ignore[assignment]
 
 
 # Database model, database table inferred from class name
@@ -110,7 +117,7 @@ class Item(ItemBase, table=True):
         nullable=False,
         ondelete="CASCADE",
     )
-    owner: User | None = Relationship(back_populates="items")
+    owner: User | None = Relationship(back_populates="item_list")
 
 
 # Properties to return via API, id is always required
@@ -124,7 +131,7 @@ class ItemPublic(ItemBase):
 class ItemsPublic(SQLModel):
     """Collection of public items."""
 
-    data: list[ItemPublic]
+    item_data: list[ItemPublic]
     count: int
 
 
@@ -154,4 +161,4 @@ class NewPassword(SQLModel):
     """New password model."""
 
     token: str
-    new_password: str = Field(min_length=8, max_length=40)
+    new_password: str = Field(min_length=PASSWORD_MIN_LENGTH, max_length=PASSWORD_MAX_LENGTH)
