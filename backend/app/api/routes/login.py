@@ -36,7 +36,8 @@ def login_access_token(
     )
     if not user:
         raise HTTPException(
-            status_code=BAD_REQUEST_CODE, detail="Incorrect email or password",
+            status_code=BAD_REQUEST_CODE,
+            detail="Incorrect email or password",
         )
     if not user.is_active:
         raise HTTPException(status_code=BAD_REQUEST_CODE, detail="Inactive user")

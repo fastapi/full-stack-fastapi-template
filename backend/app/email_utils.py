@@ -1,4 +1,5 @@
 """Utility functions for email, authentication, and template rendering."""
+
 import logging
 from dataclasses import dataclass
 from datetime import UTC, datetime, timedelta

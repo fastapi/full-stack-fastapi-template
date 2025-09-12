@@ -46,7 +46,9 @@ def read_items(
 
 @router.get("/{item_id}")
 def read_item(
-    session: SessionDep, current_user: CurrentUser, item_id: uuid.UUID,
+    session: SessionDep,
+    current_user: CurrentUser,
+    item_id: uuid.UUID,
 ) -> ItemPublic:
     """Get item by ID."""
     db_item = session.get(Item, item_id)
@@ -54,7 +56,8 @@ def read_item(
         raise HTTPException(status_code=NOT_FOUND_CODE, detail="Item not found")
     if not current_user.is_superuser and (db_item.owner_id != current_user.id):
         raise HTTPException(
-            status_code=BAD_REQUEST_CODE, detail="Not enough permissions",
+            status_code=BAD_REQUEST_CODE,
+            detail="Not enough permissions",
         )
     return ItemPublic.model_validate(db_item)
 
@@ -88,7 +91,8 @@ def update_item(
         raise HTTPException(status_code=NOT_FOUND_CODE, detail="Item not found")
     if not current_user.is_superuser and (db_item.owner_id != current_user.id):
         raise HTTPException(
-            status_code=BAD_REQUEST_CODE, detail="Not enough permissions",
+            status_code=BAD_REQUEST_CODE,
+            detail="Not enough permissions",
         )
     update_dict = item_in.model_dump(exclude_unset=True)
     db_item.sqlmodel_update(update_dict)
@@ -110,7 +114,8 @@ def delete_item(
         raise HTTPException(status_code=NOT_FOUND_CODE, detail="Item not found")
     if not current_user.is_superuser and (db_item.owner_id != current_user.id):
         raise HTTPException(
-            status_code=BAD_REQUEST_CODE, detail="Not enough permissions",
+            status_code=BAD_REQUEST_CODE,
+            detail="Not enough permissions",
         )
     session.delete(db_item)
     session.commit()

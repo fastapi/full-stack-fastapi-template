@@ -26,7 +26,9 @@ def upgrade() -> None:
         sa.Column("is_active", sa.Boolean(), nullable=False),
         sa.Column("is_superuser", sa.Boolean(), nullable=False),
         sa.Column(
-            "full_name", sqlmodel.sql.sqltypes.AutoString(), nullable=True,
+            "full_name",
+            sqlmodel.sql.sqltypes.AutoString(),
+            nullable=True,
         ),
         sa.Column("id", sa.Integer(), nullable=False),
         sa.Column(
@@ -40,7 +42,9 @@ def upgrade() -> None:
     op.create_table(
         "item",
         sa.Column(
-            "description", sqlmodel.sql.sqltypes.AutoString(), nullable=True,
+            "description",
+            sqlmodel.sql.sqltypes.AutoString(),
+            nullable=True,
         ),
         sa.Column("id", sa.Integer(), nullable=False),
         sa.Column("title", sqlmodel.sql.sqltypes.AutoString(), nullable=False),

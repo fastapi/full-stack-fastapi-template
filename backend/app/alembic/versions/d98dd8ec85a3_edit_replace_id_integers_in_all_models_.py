@@ -42,7 +42,9 @@ def upgrade() -> None:
     op.add_column(
         "item",
         sa.Column(
-            "new_owner_id", postgresql.UUID(as_uuid=True), nullable=True,
+            "new_owner_id",
+            postgresql.UUID(as_uuid=True),
+            nullable=True,
         ),
     )
 
@@ -50,7 +52,7 @@ def upgrade() -> None:
     op.execute('UPDATE "user" SET new_id = uuid_generate_v4()')
     op.execute("UPDATE item SET new_id = uuid_generate_v4()")
     op.execute(
-        'UPDATE item SET new_owner_id = '
+        "UPDATE item SET new_owner_id = "
         '(SELECT new_id FROM "user" WHERE "user".id = item.owner_id)',
     )
 
@@ -75,7 +77,11 @@ def upgrade() -> None:
 
     # Recreate foreign key constraint
     op.create_foreign_key(
-        "item_owner_id_fkey", "item", "user", ["owner_id"], ["id"],
+        "item_owner_id_fkey",
+        "item",
+        "user",
+        ["owner_id"],
+        ["id"],
     )
 
 
@@ -89,12 +95,10 @@ def downgrade() -> None:
     # Populate the old columns with default values
     # Generate sequences for the integer IDs if not exist
     op.execute(
-        'CREATE SEQUENCE IF NOT EXISTS user_id_seq AS INTEGER '
-        'OWNED BY "user".old_id',
+        'CREATE SEQUENCE IF NOT EXISTS user_id_seq AS INTEGER OWNED BY "user".old_id',
     )
     op.execute(
-        "CREATE SEQUENCE IF NOT EXISTS item_id_seq AS INTEGER "
-        "OWNED BY item.old_id",
+        "CREATE SEQUENCE IF NOT EXISTS item_id_seq AS INTEGER OWNED BY item.old_id",
     )
 
     op.execute(
@@ -108,7 +112,7 @@ def downgrade() -> None:
 
     op.execute("UPDATE \"user\" SET old_id = nextval('user_id_seq')")
     op.execute(
-        'UPDATE item SET old_id = nextval(\'item_id_seq\'), '
+        "UPDATE item SET old_id = nextval('item_id_seq'), "
         'old_owner_id = (SELECT old_id FROM "user" '
         'WHERE "user".id = item.owner_id)',
     )
@@ -130,5 +134,9 @@ def downgrade() -> None:
 
     # Recreate foreign key constraint
     op.create_foreign_key(
-        "item_owner_id_fkey", "item", "user", ["owner_id"], ["id"],
+        "item_owner_id_fkey",
+        "item",
+        "user",
+        ["owner_id"],
+        ["id"],
     )

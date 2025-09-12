@@ -1,4 +1,5 @@
 """Pre-start tests to ensure database connectivity."""
+
 import logging
 
 from sqlalchemy import Engine

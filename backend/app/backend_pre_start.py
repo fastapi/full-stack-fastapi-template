@@ -1,4 +1,5 @@
 """Backend pre-start script to ensure database connectivity."""
+
 import logging
 
 from sqlalchemy import Engine
