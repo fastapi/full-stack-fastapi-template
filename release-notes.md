@@ -19,6 +19,7 @@
 
 ### Upgrades
 
+* ⬆ Bump @types/node from 24.3.1 to 24.4.0 in /frontend. PR [#1886](https://github.com/fastapi/full-stack-fastapi-template/pull/1886) by [@dependabot[bot]](https://github.com/apps/dependabot).
 * ⬆ Bump @tanstack/router-devtools from 1.131.41 to 1.131.42 in /frontend. PR [#1881](https://github.com/fastapi/full-stack-fastapi-template/pull/1881) by [@dependabot[bot]](https://github.com/apps/dependabot).
 * ⬆ Bump @tanstack/router-plugin from 1.131.39 to 1.131.41 in /frontend. PR [#1879](https://github.com/fastapi/full-stack-fastapi-template/pull/1879) by [@dependabot[bot]](https://github.com/apps/dependabot).
 * ⬆ Bump @tanstack/react-query-devtools from 5.87.3 to 5.87.4 in /frontend. PR [#1876](https://github.com/fastapi/full-stack-fastapi-template/pull/1876) by [@dependabot[bot]](https://github.com/apps/dependabot).
