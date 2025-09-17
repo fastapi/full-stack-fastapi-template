@@ -1,6 +1,8 @@
 from collections.abc import Generator
+from contextlib import nullcontext
 
 import pytest
+from _pytest.fixtures import FixtureRequest
 from fastapi.testclient import TestClient
 from sqlmodel import Session, delete
 
@@ -12,34 +14,52 @@ from app.tests.utils.user import authentication_token_from_email
 from app.tests.utils.utils import get_superuser_token_headers, patch_password_hashing
 
 
-@pytest.fixture(scope="session")
-def disable_password_hashing() -> Generator[None, None, None]:
-    with patch_password_hashing("app.core.security"):
+@pytest.fixture(scope="module", autouse=True)
+def disable_password_hashing(request: FixtureRequest) -> Generator[None, None, None]:
+    """Fixture disabling password hashing
+
+    Password hashing can be enabled on module level by marking the module with `pytest.mark.enable_password_hashing`.
+    """
+
+    with (
+        patch_password_hashing("app.core.security")
+        if all(m.name != "enable_password_hashing" for m in request.node.iter_markers())
+        else nullcontext()
+    ):
         yield
 
 
-@pytest.fixture(scope="session", autouse=True)
-def db(
-    disable_password_hashing: Generator[None, None, None],  # noqa: ARG001
-) -> Generator[Session, None, None]:
+@pytest.fixture(scope="session")
+def db() -> Generator[Session, None, None]:
+    """
+    Module scoped fixture providing a database session initialized with `init_db`.
+    """
     with Session(engine) as session:
-        # cleanup db to prevent interferences with tests
-        # all existing data will be deleted anyway after the tests run
-        session.execute(delete(User))
+        yield session
+        # Cleanup test database
         session.execute(delete(Item))
+        session.execute(delete(User))
         session.commit()
 
-        init_db(session)
-        yield session
-        statement = delete(Item)
-        session.execute(statement)
-        statement = delete(User)
-        session.execute(statement)
-        session.commit()
+
+@pytest.fixture(scope="module", autouse=True)
+def init_db_fixture(db: Session) -> None:
+    # note: deleting all users here is required to enable or disable password hashing per test module.
+    # If we don't delete all users here, the users created during `init_db` will not be re-created and the password will stay (un)hashed,
+    # leading to possibly failing tests relying on the created user for authentication.
+    db.execute(delete(Item))
+    db.execute(delete(User))
+    init_db(db)
+    db.commit()
 
 
 @pytest.fixture(scope="module")
-def client() -> Generator[TestClient, None, None]:
+def client(db: Session) -> Generator[TestClient, None, None]:  # noqa: ARG001
+    """
+    Module scoped fixture providing a `TestClient` instance.
+
+    NOTE: This fixture uses the `db` fixture WITHOUT hashing passwords!
+    """
     with TestClient(app) as c:
         yield c
 
