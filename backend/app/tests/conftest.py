@@ -31,7 +31,7 @@ def disable_password_hashing(request: FixtureRequest) -> Generator[bool, None, N
         yield False  # Don't patch if `enable_password_hashing` marker is set
 
 
-@pytest.fixture(scope="module")
+@pytest.fixture(scope="module", autouse=True)
 def db(disable_password_hashing: bool) -> Generator[Session, None, None]:  # noqa: ARG001
     with Session(engine) as session:
         session.execute(  # Recreate user for every module, with\without pwd hashing
@@ -47,7 +47,7 @@ def db(disable_password_hashing: bool) -> Generator[Session, None, None]:  # noq
 
 
 @pytest.fixture(scope="module")
-def client(db: Session) -> Generator[TestClient, None, None]:  # noqa: ARG001
+def client() -> Generator[TestClient, None, None]:
     with TestClient(app) as c:
         yield c
 
