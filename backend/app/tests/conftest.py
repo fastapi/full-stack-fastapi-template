@@ -15,7 +15,7 @@ from app.tests.utils.utils import get_superuser_token_headers
 
 
 @pytest.fixture(scope="module")
-def disable_password_hashing(request: FixtureRequest) -> Generator[None, None, None]:
+def disable_password_hashing(request: FixtureRequest) -> Generator[bool, None, None]:
     """
     Disable password hashing if no `enable_password_hashing` marker set for module.
     """
@@ -32,7 +32,7 @@ def disable_password_hashing(request: FixtureRequest) -> Generator[None, None, N
 
 
 @pytest.fixture(scope="module")
-def db(disable_password_hashing) -> Generator[Session, None, None]:  # noqa: ARG001
+def db(disable_password_hashing: bool) -> Generator[Session, None, None]:  # noqa: ARG001
     with Session(engine) as session:
         session.execute(  # Recreate user for every module, with\without pwd hashing
             delete(User)
