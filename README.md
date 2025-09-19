@@ -1,1 +1,1 @@
-Mosaic, a project for CS4800 Software Engineering
+Mosaic, a project for CS4800 Software Engineering.
