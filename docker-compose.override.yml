@@ -50,11 +50,6 @@ services:
     ports:
       - "5432:5432"
 
-  adminer:
-    restart: "no"
-    ports:
-      - "8080:8080"
-
   backend:
     restart: "no"
     ports:
