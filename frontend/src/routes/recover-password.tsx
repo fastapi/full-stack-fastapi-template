@@ -77,7 +77,6 @@ function RecoverPassword() {
       <Field invalid={!!errors.email} errorText={errors.email?.message}>
         <InputGroup w="100%" startElement={<FiMail />}>
           <Input
-            id="email"
             {...register("email", {
               required: "Email is required",
               pattern: emailPattern,
