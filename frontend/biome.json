@@ -1,14 +1,16 @@
 {
-  "$schema": "https://biomejs.dev/schemas/1.6.1/schema.json",
-  "organizeImports": {
-    "enabled": true
-  },
+  "$schema": "https://biomejs.dev/schemas/2.2.3/schema.json",
+  "assist": { "actions": { "source": { "organizeImports": "on" } } },
   "files": {
-    "ignore": [
-      "node_modules",
-      "src/routeTree.gen.ts",
-      "playwright.config.ts",
-      "playwright-report"
+    "includes": [
+      "**",
+      "!**/dist/**/*",
+      "!**/node_modules/**/*",
+      "!**/src/routeTree.gen.ts",
+      "!**/src/client/**/*",
+      "!**/src/components/ui/**/*",
+      "!**/playwright-report",
+      "!**/playwright.config.ts"
     ]
   },
   "linter": {
@@ -20,7 +22,10 @@
         "noArrayIndexKey": "off"
       },
       "style": {
-        "noNonNullAssertion": "off"
+        "noNonNullAssertion": "off",
+        "noParameterAssign": "error",
+        "useSelfClosingElements": "error",
+        "noUselessElse": "error"
       }
     }
   },
