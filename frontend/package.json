@@ -30,7 +30,7 @@
     "@hey-api/openapi-ts": "0.73.0",
     "@playwright/test": "^1.55.0",
     "@tanstack/router-devtools": "^1.131.42",
-    "@tanstack/router-plugin": "^1.131.44",
+    "@tanstack/router-plugin": "^1.131.50",
     "@types/node": "^24.4.0",
     "@types/react": "^19.1.13",
     "@types/react-dom": "^19.1.9",
