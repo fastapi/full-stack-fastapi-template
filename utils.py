@@ -359,10 +359,10 @@ def initialize_claude_code(model_id: str, session_id: str) -> bool:
     if session_dirs:
         # Use the most recent session directory
         session_dir = max(session_dirs, key=lambda d: d.stat().st_mtime)
-        transcript_file = session_dir / "claude_transcript.txt"
+        transcript_file = session_dir / "claude_transcript.log"
     else:
         # Fallback to current directory
-        transcript_file = Path("claude_transcript.txt")
+        transcript_file = Path("claude_transcript.log")
     
     # Launch Claude Code and capture output
     try:
@@ -382,11 +382,12 @@ def initialize_claude_code(model_id: str, session_id: str) -> bool:
         
         # Use script command to capture terminal session including user input
         claude_cmd = ["claude", "--model", model_id]
+        script_cmd = ["script", "-q", str(transcript_file)] + claude_cmd
         
         # Try with script command first (captures full terminal session)
         try:
             result = subprocess.run(
-                claude_cmd,
+                script_cmd,
                 cwd=os.getcwd(),
                 env=env
             )

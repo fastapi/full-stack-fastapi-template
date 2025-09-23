@@ -113,6 +113,11 @@ def main():
         session_a_id = session_a_dir.name
         
         print(f"📁 Found Model A session: {session_a_id}")
+
+        transcript_file = session_a_dir / "claude_transcript.log"
+    
+        if not transcript_file.exists():
+            raise Exception(f"Claude transcript file not found: {transcript_file}.")
         
         # Load session metadata
         session_a_metadata = load_session_metadata(str(session_a_dir))
@@ -240,14 +245,14 @@ def main():
             print("3. Use the SAME task prompt as Model A")
             print("4. Enter the prompt directly in Claude Code")
             print("5. Complete the task with Model B")
-            print("6. Exit Claude Code when done")
-            print("7. Run script3_model_b_capture.py when ready")
+            print(f"6. Export the transcript to: {session_b_dir}/claude_transcript.log")
+            print("7. Exit Claude Code when done")
+            print("8. Run script3_model_b_capture.py when ready")
             print("=" * 50)
         
         print(f"\n✅ Script 2 completed successfully!")
         print(f"📁 Model A session: {session_a_dir}")
         print(f"📁 Model B session: {session_b_dir}")
-        print(f"\n🔄 Repository reset complete - ready for Model B!")
         
         return 0
         

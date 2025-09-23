@@ -145,6 +145,11 @@ def main():
         
         print(f"📁 Found Model A session: {session_a_id}")
         print(f"📁 Found Model B session: {session_b_id}")
+
+        transcript_file = session_b_dir / "claude_transcript.log"
+    
+        if not transcript_file.exists():
+            raise Exception(f"Claude transcript file not found: {transcript_file}.")
         
         # Load Model B session metadata
         session_b_metadata = load_session_metadata(str(session_b_dir))
