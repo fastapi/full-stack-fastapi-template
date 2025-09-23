@@ -1,3 +1,6 @@
+from datetime import datetime
+import platform
+import sys
 from fastapi import APIRouter, Depends
 from pydantic.networks import EmailStr
 
@@ -29,3 +32,30 @@ def test_email(email_to: EmailStr) -> Message:
 @router.get("/health-check/")
 async def health_check() -> bool:
     return True
+
+
+@router.get("/system-info/")
+async def get_system_info() -> dict:
+    """
+    Get interesting system information including current time, platform details, and Python version.
+    """
+    return {
+        "message": "System information retrieved successfully",
+        "timestamp": datetime.now().isoformat(),
+        "platform": {
+            "system": platform.system(),
+            "release": platform.release(),
+            "version": platform.version(),
+            "machine": platform.machine(),
+            "processor": platform.processor(),
+        },
+        "python": {
+            "version": sys.version,
+            "version_info": {
+                "major": sys.version_info.major,
+                "minor": sys.version_info.minor,
+                "micro": sys.version_info.micro,
+            }
+        },
+        "fun_fact": "This API endpoint was created as part of CS4800 team project exercise!"
+    }
