@@ -52,6 +52,7 @@
 
 ### Internal
 
+* ⬆ Bump vite from 7.1.5 to 7.1.7 in /frontend. PR [#1893](https://github.com/fastapi/full-stack-fastapi-template/pull/1893) by [@dependabot[bot]](https://github.com/apps/dependabot).
 * ⬆ Bump @tanstack/react-query from 5.87.4 to 5.90.1 in /frontend. PR [#1896](https://github.com/fastapi/full-stack-fastapi-template/pull/1896) by [@dependabot[bot]](https://github.com/apps/dependabot).
 * ⬆ Bump @tanstack/react-router from 1.131.44 to 1.131.50 in /frontend. PR [#1894](https://github.com/fastapi/full-stack-fastapi-template/pull/1894) by [@dependabot[bot]](https://github.com/apps/dependabot).
 * 🔧 Update dependabot intervals for uv and npm dependencies to weekly. PR [#1880](https://github.com/fastapi/full-stack-fastapi-template/pull/1880) by [@alejsdev](https://github.com/alejsdev).
