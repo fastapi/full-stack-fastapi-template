@@ -19,4 +19,3 @@ EOF
 chmod +x .claude/anthropic_key.sh
 
 echo "Claude API key helper configured successfully."
-
