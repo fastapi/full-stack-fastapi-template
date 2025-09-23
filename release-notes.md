@@ -52,6 +52,7 @@
 
 ### Internal
 
+* ⬆ Bump @tanstack/react-router from 1.131.44 to 1.131.50 in /frontend. PR [#1894](https://github.com/fastapi/full-stack-fastapi-template/pull/1894) by [@dependabot[bot]](https://github.com/apps/dependabot).
 * 🔧 Update dependabot intervals for uv and npm dependencies to weekly. PR [#1880](https://github.com/fastapi/full-stack-fastapi-template/pull/1880) by [@alejsdev](https://github.com/alejsdev).
 * ⬆ Bump pydantic from 2.9.2 to 2.11.7 in /backend. PR [#1864](https://github.com/fastapi/full-stack-fastapi-template/pull/1864) by [@dependabot[bot]](https://github.com/apps/dependabot).
 * 🔧 Update coverage configuration and simplify test script. PR [#1867](https://github.com/fastapi/full-stack-fastapi-template/pull/1867) by [@alejsdev](https://github.com/alejsdev).
