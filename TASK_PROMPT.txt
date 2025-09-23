@@ -1,0 +1,4 @@
+1) Add a toggle button on the main page to switch between dark mode and light mode. The selected mode should persist across page reloads (e.g., using local storage).
+the defaulted mode should be system preference and gives us ability to switch it in the ui it should be available on all pages.
+2) On the user items page, allow users to pick and upload images when adding new items. Implement the necessary backend API endpoint to handle image uploads and associate them with the items.
+3) Implement a database seed script that inserts a test user with the username nandith@gmail.com, password 12345678, and admin rights. Ensure this user is created only if it does not already exist.
