@@ -1,5 +1,4 @@
 from collections.abc import Generator
-from unittest.mock import patch
 
 import pytest
 from _pytest.fixtures import FixtureRequest
@@ -11,7 +10,7 @@ from app.core.db import engine, init_db
 from app.main import app
 from app.models import Item, User
 from app.tests.utils.user import authentication_token_from_email
-from app.tests.utils.utils import get_superuser_token_headers
+from app.tests.utils.utils import get_superuser_token_headers, patch_password_hashing
 
 
 @pytest.fixture(scope="module")
@@ -22,10 +21,7 @@ def disable_password_hashing(request: FixtureRequest) -> Generator[bool, None, N
 
     module = request.node.getparent(pytest.Module)
     if not module.get_closest_marker("enable_password_hashing"):
-        with (
-            patch("app.core.security.pwd_context.verify", lambda x, y: x == y),
-            patch("app.core.security.pwd_context.hash", lambda x: x),
-        ):
+        with patch_password_hashing("app.core.security"):
             yield True
     else:
         yield False  # Don't patch if `enable_password_hashing` marker is set
