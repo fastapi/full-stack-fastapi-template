@@ -50,10 +50,12 @@ function ItemsTable() {
     placeholderData: (prevData) => prevData,
   })
 
-  const setPage = (page: number) =>
+  const setPage = (page: number) => {
     navigate({
-      search: (prev: { [key: string]: string }) => ({ ...prev, page }),
+      to: "/items",
+      search: (prev) => ({ ...prev, page }),
     })
+  }
 
   const items = data?.data.slice(0, PER_PAGE) ?? []
   const count = data?.count ?? 0

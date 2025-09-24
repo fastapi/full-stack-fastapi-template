@@ -1,6 +1,3 @@
-import { useMutation, useQueryClient } from "@tanstack/react-query"
-import { Controller, type SubmitHandler, useForm } from "react-hook-form"
-
 import {
   Button,
   DialogActionTrigger,
@@ -11,10 +8,12 @@ import {
   Text,
   VStack,
 } from "@chakra-ui/react"
+import { useMutation, useQueryClient } from "@tanstack/react-query"
 import { useState } from "react"
+import { Controller, type SubmitHandler, useForm } from "react-hook-form"
 import { FaExchangeAlt } from "react-icons/fa"
 
-import { type UserPublic, type UserUpdate, UsersService } from "@/client"
+import { type UserPublic, UsersService, type UserUpdate } from "@/client"
 import type { ApiError } from "@/client/core/ApiError"
 import useCustomToast from "@/hooks/useCustomToast"
 import { emailPattern, handleError } from "@/utils"
@@ -105,7 +104,6 @@ const EditUser = ({ user }: EditUserProps) => {
                 label="Email"
               >
                 <Input
-                  id="email"
                   {...register("email", {
                     required: "Email is required",
                     pattern: emailPattern,
@@ -121,7 +119,6 @@ const EditUser = ({ user }: EditUserProps) => {
                 label="Full Name"
               >
                 <Input
-                  id="name"
                   {...register("full_name")}
                   placeholder="Full name"
                   type="text"
@@ -134,7 +131,6 @@ const EditUser = ({ user }: EditUserProps) => {
                 label="Set Password"
               >
                 <Input
-                  id="password"
                   {...register("password", {
                     minLength: {
                       value: 8,
@@ -152,7 +148,6 @@ const EditUser = ({ user }: EditUserProps) => {
                 label="Confirm Password"
               >
                 <Input
-                  id="confirm_password"
                   {...register("confirm_password", {
                     validate: (value) =>
                       value === getValues().password ||
