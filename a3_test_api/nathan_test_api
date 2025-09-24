@@ -1,0 +1,12 @@
+from fastapi import FastAPI
+import time
+app = FastAPI()
+
+
+@app.get("/")
+async def root():
+    return {"message": "Hello World"}
+
+@app.get("/nathan_ping"):
+async def nathan_ping():
+    return {"message": f"Nathan says hi to you at {time.ctime()}"}
