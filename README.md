@@ -230,6 +230,23 @@ General development docs: [development.md](./development.md).
 
 This includes using Docker Compose, custom local domains, `.env` configurations, etc.
 
+### Docker Development
+
+For Docker-specific development workflow:
+
+- **Quick start**: Use the helper scripts in `scripts/` directory
+- **Troubleshooting**: See [DOCKER_TROUBLESHOOTING.md](./DOCKER_TROUBLESHOOTING.md) for common issues
+- **Helper scripts**: See [scripts/README.md](./scripts/README.md) for available commands
+
+**Quick setup:**
+```bash
+# Linux/Mac
+./scripts/docker-dev.sh setup
+
+# Windows
+scripts\docker-dev.bat setup
+```
+
 ## Release Notes
 
 Check the file [release-notes.md](./release-notes.md).
