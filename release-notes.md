@@ -52,6 +52,7 @@
 
 ### Internal
 
+* ⬆ Bump @tanstack/react-query from 5.90.1 to 5.90.2 in /frontend. PR [#1905](https://github.com/fastapi/full-stack-fastapi-template/pull/1905) by [@dependabot[bot]](https://github.com/apps/dependabot).
 * ⬆ Bump @types/node from 24.4.0 to 24.5.2 in /frontend. PR [#1903](https://github.com/fastapi/full-stack-fastapi-template/pull/1903) by [@dependabot[bot]](https://github.com/apps/dependabot).
 * ⬆ Bump vite from 7.1.5 to 7.1.7 in /frontend. PR [#1893](https://github.com/fastapi/full-stack-fastapi-template/pull/1893) by [@dependabot[bot]](https://github.com/apps/dependabot).
 * ⬆ Bump @tanstack/react-query from 5.87.4 to 5.90.1 in /frontend. PR [#1896](https://github.com/fastapi/full-stack-fastapi-template/pull/1896) by [@dependabot[bot]](https://github.com/apps/dependabot).
