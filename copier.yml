@@ -55,7 +55,7 @@ postgres_password:
   default: changethis
 validate: |
   {% if postgres_password|length < 8 %}
-  Password must have at least 8 characters
+  Password must have at least 8 characters. Try again
   {% endif %}
 
 sentry_dsn:
