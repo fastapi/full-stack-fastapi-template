@@ -52,6 +52,7 @@
 
 ### Internal
 
+* ⬆ Bump @types/react from 19.1.13 to 19.1.15 in /frontend. PR [#1906](https://github.com/fastapi/full-stack-fastapi-template/pull/1906) by [@dependabot[bot]](https://github.com/apps/dependabot).
 * ⬆ Bump pydantic-settings from 2.10.1 to 2.11.0 in /backend. PR [#1907](https://github.com/fastapi/full-stack-fastapi-template/pull/1907) by [@dependabot[bot]](https://github.com/apps/dependabot).
 * ⬆ Bump @tanstack/react-query from 5.90.1 to 5.90.2 in /frontend. PR [#1905](https://github.com/fastapi/full-stack-fastapi-template/pull/1905) by [@dependabot[bot]](https://github.com/apps/dependabot).
 * ⬆ Bump @types/node from 24.4.0 to 24.5.2 in /frontend. PR [#1903](https://github.com/fastapi/full-stack-fastapi-template/pull/1903) by [@dependabot[bot]](https://github.com/apps/dependabot).
