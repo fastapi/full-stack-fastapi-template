@@ -13,7 +13,7 @@ secret_key:
   help: |
     'The secret key for the project, used for security,
     stored in .env, you can generate one with:
-    python -c "import secrets; print(secrets.token_urlsafe(32))"'
+    python -c "import secrets; print(secrets.token_urlsafe(32)[:40])"'
   default: changethis
 
 first_superuser:
@@ -51,7 +51,7 @@ postgres_password:
   help: |
     'The password for the PostgreSQL database, stored in .env,
     you can generate one with:
-    python -c "import secrets; print(secrets.token_urlsafe(32))"'
+    python -c "import secrets; print(secrets.token_urlsafe(32)[:40])"'
   default: changethis
 
 sentry_dsn:
