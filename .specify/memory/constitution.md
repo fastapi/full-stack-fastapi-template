@@ -43,12 +43,16 @@ All new features MUST implement secure defaults: JWT authentication, password ha
 - Integration tests MUST verify API endpoints and database interactions
 - End-to-end tests MUST validate complete user workflows
 - Contract tests MUST ensure API schema consistency
+- ERD generation MUST have unit tests, integration tests, and performance tests
+- ERD validation MUST include syntax validation and relationship verification
 
 ### Documentation Standards
 - All new features MUST include API documentation via OpenAPI/Swagger
 - User-facing features MUST have updated README sections
 - Complex business logic MUST include inline documentation
 - Deployment changes MUST update deployment.md
+- Database schema changes MUST automatically update Entity Relationship Diagrams (ERD)
+- ERD documentation MUST be generated from SQLModel definitions and kept in sync
 
 ## Quality Standards
 
@@ -57,6 +61,7 @@ All new features MUST implement secure defaults: JWT authentication, password ha
 - Frontend pages MUST load within 2 seconds
 - Database queries MUST be optimized and indexed appropriately
 - Docker containers MUST start within 30 seconds
+- ERD generation MUST complete within 30 seconds for schemas with up to 20 tables and 100 fields
 
 ### Accessibility Standards
 - All UI components MUST meet WCAG 2.1 AA standards

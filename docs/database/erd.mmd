@@ -1,0 +1,22 @@
+%% Database ERD Diagram
+%% Generated: 2025-10-03T15:16:11.880836
+%% Version: Unknown
+%% Entities: 2
+%% Relationships: 1
+%% Status: invalid
+
+%% This diagram is automatically generated from SQLModel definitions
+
+erDiagram
+
+USER {
+    uuid id PK
+    string hashed_password
+}
+
+ITEM {
+    uuid id PK
+    uuid owner_id FK NOT NULL
+}
+
+USER ||--o{ ITEM : items

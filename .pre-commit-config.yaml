@@ -32,6 +32,17 @@ repos:
         language: system
         types: [text]
         files: ^frontend/
+      - id: erd-generation
+        name: ERD generation
+        entry: bash -c 'cd backend && python scripts/generate_erd.py --validate --verbose --force'
+        language: system
+        types: [python]
+        files: ^backend/app/.*\.py$
+        stages: [pre-commit]
+        always_run: false
+        pass_filenames: true
+        require_serial: false
+        description: "Generate and validate ERD diagrams from SQLModel definitions (Mermaid format)"
 
 ci:
   autofix_commit_msg: 🎨 [pre-commit.ci] Auto format from pre-commit.com hooks

@@ -15,7 +15,7 @@ dependencies = [
     "alembic<2.0.0,>=1.12.1",
     "httpx<1.0.0,>=0.25.1",
     "psycopg[binary]<4.0.0,>=3.1.13",
-    "sqlmodel<1.0.0,>=0.0.21",
+    "sqlmodel>=0.0.21,<1.0.0",
     # Pin bcrypt until passlib supports the latest
     "bcrypt==4.3.0",
     "pydantic-settings<3.0.0,>=2.2.1",
@@ -25,12 +25,14 @@ dependencies = [
 
 [tool.uv]
 dev-dependencies = [
-    "pytest<8.0.0,>=7.4.3",
+    "pytest>=7.4.3,<8.0.0",
     "mypy<2.0.0,>=1.8.0",
-    "ruff<1.0.0,>=0.2.2",
-    "pre-commit<4.0.0,>=3.6.2",
+    "ruff>=0.2.2,<1.0.0",
+    "pre-commit>=3.6.2,<4.0.0",
     "types-passlib<2.0.0.0,>=1.7.7.20240106",
     "coverage<8.0.0,>=7.4.3",
+    "pytest-cov>=6.3.0",
+    "black>=25.9.0",
 ]
 
 [build-system]

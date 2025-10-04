@@ -6,3 +6,10 @@ app.egg-info
 .coverage
 htmlcov
 .venv
+
+# ERD Package (development/documentation only)
+erd/
+scripts/generate_erd.py
+tests/unit/erd_tests/
+tests/performance/test_erd_*.py
+tests/integration/test_erd_*.py

@@ -52,6 +52,7 @@
 **Auto-Generated Client**: Will API changes require frontend client regeneration?
 **Docker-First**: Does the feature work in containerized environment?
 **Security by Default**: Are authentication, validation, and security considerations included?
+**ERD Documentation**: Will database schema changes require ERD updates and validation?
 
 ## Project Structure
 
