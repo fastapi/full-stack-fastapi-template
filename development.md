@@ -34,6 +34,31 @@ To check the logs of a specific service, add the name of the service, e.g.:
 docker compose logs backend
 ```
 
+## Dev Container Development
+
+Run `Dev Containers: Rebuild Container` command to build and open the workspace in the dev container.
+
+> [!IMPORTANT]
+> As Dev Container does not support a part of its features in a multi-devcontainer environment, use the backend container for both backend and frontend servers.
+
+To start the server for the frontend, run:
+```bash
+cd frontend
+make dev
+# or use commands:
+# npm install
+# npm run dev --loglevel silly -- --host 0.0.0.0
+```
+
+To start the server for the backend, run:
+```bash
+cd backend
+make dev
+# or use commands:
+# uv sync
+# uv run fastapi dev app/main.py --host 0.0.0.0 --reload
+```
+
 ## Local Development
 
 The Docker Compose files are configured so that each of the services is available in a different port in `localhost`.
