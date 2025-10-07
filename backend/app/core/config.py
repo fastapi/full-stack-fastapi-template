@@ -58,7 +58,7 @@ class Settings(BaseSettings):
     AWS_ACCESS_KEY_ID: str = ""
     AWS_SECRET_ACCESS_KEY: str = ""
     AWS_REGION: str = "us-east-1"
-    S3_BUCKET: str = ""
+    S3_BUCKET: str = "test-bucket"
 
     OPENAI_API_KEY: str = ""
 
