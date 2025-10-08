@@ -3,7 +3,7 @@
 import type { CancelablePromise } from './core/CancelablePromise';
 import { OpenAPI } from './core/OpenAPI';
 import { request as __request } from './core/request';
-import type { DocumentsCreateDocumentData, DocumentsCreateDocumentResponse, DocumentsReadDocumentsData, DocumentsReadDocumentsResponse, DocumentsReadDocumentData, DocumentsReadDocumentResponse, DocumentsUpdateDocumentData, DocumentsUpdateDocumentResponse, DocumentsDeleteDocumentData, DocumentsDeleteDocumentResponse, ExamsGenerateExamData, ExamsGenerateExamResponse, ExamsReadExamData, ExamsReadExamResponse, ExamsUpdateExamData, ExamsUpdateExamResponse, ExamsDeleteExamData, ExamsDeleteExamResponse, ExamsReadExamsData, ExamsReadExamsResponse, ItemsReadItemsData, ItemsReadItemsResponse, ItemsCreateItemData, ItemsCreateItemResponse, ItemsReadItemData, ItemsReadItemResponse, ItemsUpdateItemData, ItemsUpdateItemResponse, ItemsDeleteItemData, ItemsDeleteItemResponse, LoginLoginAccessTokenData, LoginLoginAccessTokenResponse, LoginTestTokenResponse, LoginRecoverPasswordData, LoginRecoverPasswordResponse, LoginResetPasswordData, LoginResetPasswordResponse, LoginRecoverPasswordHtmlContentData, LoginRecoverPasswordHtmlContentResponse, PrivateCreateUserData, PrivateCreateUserResponse, UsersReadUsersData, UsersReadUsersResponse, UsersCreateUserData, UsersCreateUserResponse, UsersReadUserMeResponse, UsersDeleteUserMeResponse, UsersUpdateUserMeData, UsersUpdateUserMeResponse, UsersUpdatePasswordMeData, UsersUpdatePasswordMeResponse, UsersRegisterUserData, UsersRegisterUserResponse, UsersReadUserByIdData, UsersReadUserByIdResponse, UsersUpdateUserData, UsersUpdateUserResponse, UsersDeleteUserData, UsersDeleteUserResponse, UtilsTestEmailData, UtilsTestEmailResponse, UtilsHealthCheckResponse } from './types.gen';
+import type { DocumentsCreateDocumentData, DocumentsCreateDocumentResponse, DocumentsReadDocumentsData, DocumentsReadDocumentsResponse, DocumentsReadDocumentData, DocumentsReadDocumentResponse, DocumentsUpdateDocumentData, DocumentsUpdateDocumentResponse, DocumentsDeleteDocumentData, DocumentsDeleteDocumentResponse, ExamAttemptsCreateExamAttemptData, ExamAttemptsCreateExamAttemptResponse, ExamAttemptsReadExamAttemptData, ExamAttemptsReadExamAttemptResponse, ExamAttemptsUpdateExamAttemptData, ExamAttemptsUpdateExamAttemptResponse, ExamsGenerateExamData, ExamsGenerateExamResponse, ExamsReadExamData, ExamsReadExamResponse, ExamsUpdateExamData, ExamsUpdateExamResponse, ExamsDeleteExamData, ExamsDeleteExamResponse, ExamsReadExamsData, ExamsReadExamsResponse, ItemsReadItemsData, ItemsReadItemsResponse, ItemsCreateItemData, ItemsCreateItemResponse, ItemsReadItemData, ItemsReadItemResponse, ItemsUpdateItemData, ItemsUpdateItemResponse, ItemsDeleteItemData, ItemsDeleteItemResponse, LoginLoginAccessTokenData, LoginLoginAccessTokenResponse, LoginTestTokenResponse, LoginRecoverPasswordData, LoginRecoverPasswordResponse, LoginResetPasswordData, LoginResetPasswordResponse, LoginRecoverPasswordHtmlContentData, LoginRecoverPasswordHtmlContentResponse, PrivateCreateUserData, PrivateCreateUserResponse, UsersReadUsersData, UsersReadUsersResponse, UsersCreateUserData, UsersCreateUserResponse, UsersReadUserMeResponse, UsersDeleteUserMeResponse, UsersUpdateUserMeData, UsersUpdateUserMeResponse, UsersUpdatePasswordMeData, UsersUpdatePasswordMeResponse, UsersRegisterUserData, UsersRegisterUserResponse, UsersReadUserByIdData, UsersReadUserByIdResponse, UsersUpdateUserData, UsersUpdateUserResponse, UsersDeleteUserData, UsersDeleteUserResponse, UtilsTestEmailData, UtilsTestEmailResponse, UtilsHealthCheckResponse } from './types.gen';
 
 export class DocumentsService {
     /**
@@ -108,6 +108,74 @@ export class DocumentsService {
             path: {
                 id: data.id
             },
+            errors: {
+                422: 'Validation Error'
+            }
+        });
+    }
+}
+
+export class ExamAttemptsService {
+    /**
+     * Create Exam Attempt
+     * Create a new exam attempt for a specific exam.
+     * @param data The data for the request.
+     * @param data.requestBody
+     * @returns ExamAttemptPublic Successful Response
+     * @throws ApiError
+     */
+    public static createExamAttempt(data: ExamAttemptsCreateExamAttemptData): CancelablePromise<ExamAttemptsCreateExamAttemptResponse> {
+        return __request(OpenAPI, {
+            method: 'POST',
+            url: '/api/v1/exam-attempts/',
+            body: data.requestBody,
+            mediaType: 'application/json',
+            errors: {
+                422: 'Validation Error'
+            }
+        });
+    }
+    
+    /**
+     * Read Exam Attempt
+     * Get ExamAttempt by ID.
+     * @param data The data for the request.
+     * @param data.id
+     * @returns ExamAttemptPublic Successful Response
+     * @throws ApiError
+     */
+    public static readExamAttempt(data: ExamAttemptsReadExamAttemptData): CancelablePromise<ExamAttemptsReadExamAttemptResponse> {
+        return __request(OpenAPI, {
+            method: 'GET',
+            url: '/api/v1/exam-attempts/{id}',
+            path: {
+                id: data.id
+            },
+            errors: {
+                422: 'Validation Error'
+            }
+        });
+    }
+    
+    /**
+     * Update Exam Attempt
+     * Update an exam attempt with answers.
+     * If `is_complete=True`, compute the score.
+     * @param data The data for the request.
+     * @param data.attemptId
+     * @param data.requestBody
+     * @returns ExamAttemptPublic Successful Response
+     * @throws ApiError
+     */
+    public static updateExamAttempt(data: ExamAttemptsUpdateExamAttemptData): CancelablePromise<ExamAttemptsUpdateExamAttemptResponse> {
+        return __request(OpenAPI, {
+            method: 'PATCH',
+            url: '/api/v1/exam-attempts/{attempt_id}',
+            path: {
+                attempt_id: data.attemptId
+            },
+            body: data.requestBody,
+            mediaType: 'application/json',
             errors: {
                 422: 'Validation Error'
             }
