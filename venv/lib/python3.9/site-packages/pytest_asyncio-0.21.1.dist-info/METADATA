@@ -1,0 +1,91 @@
+Metadata-Version: 2.1
+Name: pytest-asyncio
+Version: 0.21.1
+Summary: Pytest support for asyncio
+Home-page: https://github.com/pytest-dev/pytest-asyncio
+Author: Tin Tvrtković <tinchester@gmail.com>
+Author-email: tinchester@gmail.com
+License: Apache 2.0
+Project-URL: Documentation, https://pytest-asyncio.readthedocs.io
+Project-URL: Changelog, https://pytest-asyncio.readthedocs.io/en/latest/reference/changelog.html
+Project-URL: Source Code, https://github.com/pytest-dev/pytest-asyncio
+Project-URL: Bug Tracker, https://github.com/pytest-dev/pytest-asyncio/issues
+Classifier: Development Status :: 4 - Beta
+Classifier: Intended Audience :: Developers
+Classifier: License :: OSI Approved :: Apache Software License
+Classifier: Programming Language :: Python :: 3.7
+Classifier: Programming Language :: Python :: 3.8
+Classifier: Programming Language :: Python :: 3.9
+Classifier: Programming Language :: Python :: 3.10
+Classifier: Programming Language :: Python :: 3.11
+Classifier: Topic :: Software Development :: Testing
+Classifier: Framework :: AsyncIO
+Classifier: Framework :: Pytest
+Classifier: Typing :: Typed
+Requires-Python: >=3.7
+Description-Content-Type: text/x-rst
+License-File: LICENSE
+Requires-Dist: pytest (>=7.0.0)
+Requires-Dist: typing-extensions (>=3.7.2) ; python_version < "3.8"
+Provides-Extra: docs
+Requires-Dist: sphinx (>=5.3) ; extra == 'docs'
+Requires-Dist: sphinx-rtd-theme (>=1.0) ; extra == 'docs'
+Provides-Extra: testing
+Requires-Dist: coverage (>=6.2) ; extra == 'testing'
+Requires-Dist: hypothesis (>=5.7.1) ; extra == 'testing'
+Requires-Dist: flaky (>=3.5.0) ; extra == 'testing'
+Requires-Dist: mypy (>=0.931) ; extra == 'testing'
+Requires-Dist: pytest-trio (>=0.7.0) ; extra == 'testing'
+
+pytest-asyncio
+==============
+
+.. image:: https://img.shields.io/pypi/v/pytest-asyncio.svg
+    :target: https://pypi.python.org/pypi/pytest-asyncio
+.. image:: https://github.com/pytest-dev/pytest-asyncio/workflows/CI/badge.svg
+    :target: https://github.com/pytest-dev/pytest-asyncio/actions?workflow=CI
+.. image:: https://codecov.io/gh/pytest-dev/pytest-asyncio/branch/main/graph/badge.svg
+    :target: https://codecov.io/gh/pytest-dev/pytest-asyncio
+.. image:: https://img.shields.io/pypi/pyversions/pytest-asyncio.svg
+    :target: https://github.com/pytest-dev/pytest-asyncio
+    :alt: Supported Python versions
+.. image:: https://img.shields.io/badge/code%20style-black-000000.svg
+    :target: https://github.com/ambv/black
+
+`pytest-asyncio <https://pytest-asyncio.readthedocs.io/en/latest/>`_ is a `pytest <https://docs.pytest.org/en/latest/contents.html>`_ plugin. It facilitates testing of code that uses the `asyncio <https://docs.python.org/3/library/asyncio.html>`_ library.
+
+Specifically, pytest-asyncio provides support for coroutines as test functions. This allows users to *await* code inside their tests. For example, the following code is executed as a test item by pytest:
+
+.. code-block:: python
+
+    @pytest.mark.asyncio
+    async def test_some_asyncio_code():
+        res = await library.do_something()
+        assert b"expected result" == res
+
+More details can be found in the `documentation <https://pytest-asyncio.readthedocs.io/en/latest/>`_.
+
+Note that test classes subclassing the standard `unittest <https://docs.python.org/3/library/unittest.html>`__ library are not supported. Users
+are advised to use `unittest.IsolatedAsyncioTestCase <https://docs.python.org/3/library/unittest.html#unittest.IsolatedAsyncioTestCase>`__
+or an async framework such as `asynctest <https://asynctest.readthedocs.io/en/latest>`__.
+
+
+pytest-asyncio is available under the `Apache License 2.0 <https://github.com/pytest-dev/pytest-asyncio/blob/main/LICENSE>`_.
+
+
+Installation
+------------
+
+To install pytest-asyncio, simply:
+
+.. code-block:: bash
+
+    $ pip install pytest-asyncio
+
+This is enough for pytest to pick up pytest-asyncio.
+
+
+Contributing
+------------
+Contributions are very welcome. Tests can be run with ``tox``, please ensure
+the coverage at least stays the same before you submit a pull request.
