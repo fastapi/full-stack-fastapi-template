@@ -52,6 +52,10 @@
 
 ### Internal
 
+* ⬆ Bump vite from 7.1.7 to 7.1.9 in /frontend. PR [#1919](https://github.com/fastapi/full-stack-fastapi-template/pull/1919) by [@dependabot[bot]](https://github.com/apps/dependabot).
+* ⬆ Bump @tanstack/router-plugin from 1.131.44 to 1.132.41 in /frontend. PR [#1920](https://github.com/fastapi/full-stack-fastapi-template/pull/1920) by [@dependabot[bot]](https://github.com/apps/dependabot).
+* ⬆ Bump @tanstack/react-query-devtools from 5.87.4 to 5.90.2 in /frontend. PR [#1921](https://github.com/fastapi/full-stack-fastapi-template/pull/1921) by [@dependabot[bot]](https://github.com/apps/dependabot).
+* ⬆ Bump pydantic from 2.11.9 to 2.11.10 in /backend. PR [#1922](https://github.com/fastapi/full-stack-fastapi-template/pull/1922) by [@dependabot[bot]](https://github.com/apps/dependabot).
 * ⬆ Bump tiangolo/issue-manager from 0.5.1 to 0.6.0. PR [#1912](https://github.com/fastapi/full-stack-fastapi-template/pull/1912) by [@dependabot[bot]](https://github.com/apps/dependabot).
 * ⬆ Bump @types/react from 19.1.13 to 19.1.15 in /frontend. PR [#1906](https://github.com/fastapi/full-stack-fastapi-template/pull/1906) by [@dependabot[bot]](https://github.com/apps/dependabot).
 * ⬆ Bump pydantic-settings from 2.10.1 to 2.11.0 in /backend. PR [#1907](https://github.com/fastapi/full-stack-fastapi-template/pull/1907) by [@dependabot[bot]](https://github.com/apps/dependabot).

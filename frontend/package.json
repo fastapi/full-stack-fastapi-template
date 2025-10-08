@@ -14,7 +14,7 @@
     "@chakra-ui/react": "^3.27.0",
     "@emotion/react": "^11.14.0",
     "@tanstack/react-query": "^5.90.2",
-    "@tanstack/react-query-devtools": "^5.87.4",
+    "@tanstack/react-query-devtools": "^5.90.2",
     "@tanstack/react-router": "^1.131.50",
     "axios": "1.12.2",
     "form-data": "4.0.4",
@@ -30,13 +30,13 @@
     "@hey-api/openapi-ts": "0.73.0",
     "@playwright/test": "^1.55.0",
     "@tanstack/router-devtools": "^1.131.42",
-    "@tanstack/router-plugin": "^1.131.44",
+    "@tanstack/router-plugin": "^1.132.41",
     "@types/node": "^24.5.2",
     "@types/react": "^19.1.16",
     "@types/react-dom": "^19.1.9",
     "@vitejs/plugin-react-swc": "^4.0.1",
     "dotenv": "^17.2.2",
     "typescript": "^5.2.2",
-    "vite": "^7.1.7"
+    "vite": "^7.1.9"
   }
 }
