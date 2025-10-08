@@ -1,7 +1,7 @@
 import uuid
 from typing import Any
 
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, BackgroundTasks, Depends, HTTPException
 from sqlmodel import col, delete, func, select
 
 from app import crud
@@ -51,7 +51,9 @@ def read_users(session: SessionDep, skip: int = 0, limit: int = 100) -> Any:
 @router.post(
     "/", dependencies=[Depends(get_current_active_superuser)], response_model=UserPublic
 )
-def create_user(*, session: SessionDep, user_in: UserCreate) -> Any:
+def create_user(
+    *, session: SessionDep, user_in: UserCreate, background_tasks: BackgroundTasks
+) -> Any:
     """
     Create new user.
     """
@@ -67,7 +69,8 @@ def create_user(*, session: SessionDep, user_in: UserCreate) -> Any:
         email_data = generate_new_account_email(
             email_to=user_in.email, username=user_in.email, password=user_in.password
         )
-        send_email(
+        background_tasks.add_task(
+            send_email,
             email_to=user_in.email,
             subject=email_data.subject,
             html_content=email_data.html_content,
