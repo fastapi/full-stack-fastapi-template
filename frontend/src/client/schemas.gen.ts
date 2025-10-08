@@ -234,6 +234,151 @@ export const DocumentsPublicSchema = {
     title: 'DocumentsPublic'
 } as const;
 
+export const ExamPublicSchema = {
+    properties: {
+        title: {
+            type: 'string',
+            title: 'Title'
+        },
+        description: {
+            anyOf: [
+                {
+                    type: 'string'
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Description'
+        },
+        duration_minutes: {
+            anyOf: [
+                {
+                    type: 'integer'
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Duration Minutes'
+        },
+        is_published: {
+            type: 'boolean',
+            title: 'Is Published',
+            default: false
+        },
+        id: {
+            type: 'string',
+            format: 'uuid',
+            title: 'Id'
+        },
+        owner_id: {
+            type: 'string',
+            format: 'uuid',
+            title: 'Owner Id'
+        },
+        questions: {
+            items: {
+                '$ref': '#/components/schemas/QuestionPublic'
+            },
+            type: 'array',
+            title: 'Questions'
+        }
+    },
+    type: 'object',
+    required: ['title', 'id', 'owner_id'],
+    title: 'ExamPublic'
+} as const;
+
+export const ExamUpdateSchema = {
+    properties: {
+        title: {
+            anyOf: [
+                {
+                    type: 'string',
+                    maxLength: 255
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Title'
+        },
+        description: {
+            anyOf: [
+                {
+                    type: 'string',
+                    maxLength: 1000
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Description'
+        },
+        duration_minutes: {
+            anyOf: [
+                {
+                    type: 'integer',
+                    minimum: 1
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Duration Minutes'
+        },
+        is_published: {
+            anyOf: [
+                {
+                    type: 'boolean'
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Is Published'
+        }
+    },
+    type: 'object',
+    title: 'ExamUpdate'
+} as const;
+
+export const ExamsPublicSchema = {
+    properties: {
+        data: {
+            items: {
+                '$ref': '#/components/schemas/ExamPublic'
+            },
+            type: 'array',
+            title: 'Data'
+        },
+        count: {
+            type: 'integer',
+            title: 'Count'
+        }
+    },
+    type: 'object',
+    required: ['data', 'count'],
+    title: 'ExamsPublic'
+} as const;
+
+export const GenerateQuestionsRequestSchema = {
+    properties: {
+        document_ids: {
+            items: {
+                type: 'string',
+                format: 'uuid'
+            },
+            type: 'array',
+            title: 'Document Ids'
+        }
+    },
+    type: 'object',
+    required: ['document_ids'],
+    title: 'GenerateQuestionsRequest'
+} as const;
+
 export const HTTPValidationErrorSchema = {
     properties: {
         detail: {
@@ -414,6 +559,51 @@ export const PrivateUserCreateSchema = {
     type: 'object',
     required: ['email', 'password', 'full_name'],
     title: 'PrivateUserCreate'
+} as const;
+
+export const QuestionPublicSchema = {
+    properties: {
+        question: {
+            type: 'string',
+            title: 'Question'
+        },
+        answer: {
+            anyOf: [
+                {
+                    type: 'string'
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Answer'
+        },
+        id: {
+            type: 'string',
+            format: 'uuid',
+            title: 'Id'
+        },
+        type: {
+            '$ref': '#/components/schemas/QuestionType'
+        },
+        options: {
+            items: {
+                type: 'string'
+            },
+            type: 'array',
+            title: 'Options',
+            default: []
+        }
+    },
+    type: 'object',
+    required: ['question', 'id', 'type'],
+    title: 'QuestionPublic'
+} as const;
+
+export const QuestionTypeSchema = {
+    type: 'string',
+    enum: ['multiple_choice', 'true_false', 'short_answer'],
+    title: 'QuestionType'
 } as const;
 
 export const TokenSchema = {

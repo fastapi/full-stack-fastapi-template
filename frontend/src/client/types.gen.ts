@@ -37,6 +37,32 @@ export type DocumentUpdate = {
     size?: (number | null);
 };
 
+export type ExamPublic = {
+    title: string;
+    description?: (string | null);
+    duration_minutes?: (number | null);
+    is_published?: boolean;
+    id: string;
+    owner_id: string;
+    questions?: Array<QuestionPublic>;
+};
+
+export type ExamsPublic = {
+    data: Array<ExamPublic>;
+    count: number;
+};
+
+export type ExamUpdate = {
+    title?: (string | null);
+    description?: (string | null);
+    duration_minutes?: (number | null);
+    is_published?: (boolean | null);
+};
+
+export type GenerateQuestionsRequest = {
+    document_ids: Array<(string)>;
+};
+
 export type HTTPValidationError = {
     detail?: Array<ValidationError>;
 };
@@ -78,6 +104,16 @@ export type PrivateUserCreate = {
     full_name: string;
     is_verified?: boolean;
 };
+
+export type QuestionPublic = {
+    question: string;
+    answer?: (string | null);
+    id: string;
+    type: QuestionType;
+    options?: Array<(string)>;
+};
+
+export type QuestionType = 'multiple_choice' | 'true_false' | 'short_answer';
 
 export type Token = {
     access_token: string;
@@ -166,6 +202,38 @@ export type DocumentsDeleteDocumentData = {
 };
 
 export type DocumentsDeleteDocumentResponse = (Message);
+
+export type ExamsGenerateExamData = {
+    requestBody: GenerateQuestionsRequest;
+};
+
+export type ExamsGenerateExamResponse = (ExamPublic);
+
+export type ExamsReadExamData = {
+    id: string;
+};
+
+export type ExamsReadExamResponse = (ExamPublic);
+
+export type ExamsUpdateExamData = {
+    id: string;
+    requestBody: ExamUpdate;
+};
+
+export type ExamsUpdateExamResponse = (ExamPublic);
+
+export type ExamsDeleteExamData = {
+    id: string;
+};
+
+export type ExamsDeleteExamResponse = (Message);
+
+export type ExamsReadExamsData = {
+    limit?: number;
+    skip?: number;
+};
+
+export type ExamsReadExamsResponse = (ExamsPublic);
 
 export type ItemsReadItemsData = {
     limit?: number;
