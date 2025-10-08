@@ -116,3 +116,40 @@ def test_reset_password_invalid_token(
     assert "detail" in response
     assert r.status_code == 400
     assert response["detail"] == "Invalid token"
+
+
+# Arthur Nguyen, Assignment 6: added test for SQL injection protection
+def test_login_sql_injection_protection(client: TestClient) -> None:
+    """
+    Test that login endpoint is protected against SQL injection attacks.
+    Verifies that malicious SQL commands in username/password don't compromise security.
+    """
+    # Common SQL injection attack patterns
+    sql_injection_attempts = [
+        "admin' OR '1'='1",
+        "admin'--",
+        "admin' OR '1'='1'--",
+        "'; DROP TABLE users--",
+        "admin' OR 1=1#",
+        "' UNION SELECT NULL--",
+    ]
+    
+    for malicious_input in sql_injection_attempts:
+        login_data = {
+            "username": malicious_input,
+            "password": "anypassword",
+        }
+        r = client.post(f"{settings.API_V1_STR}/login/access-token", data=login_data)
+        
+        # Should return authentication error, not SQL error or success
+        assert r.status_code == 400
+        response_data = r.json()
+        assert "access_token" not in response_data
+        
+        # Also test in password field
+        login_data = {
+            "username": settings.FIRST_SUPERUSER,
+            "password": malicious_input,
+        }
+        r = client.post(f"{settings.API_V1_STR}/login/access-token", data=login_data)
+        assert r.status_code == 400
