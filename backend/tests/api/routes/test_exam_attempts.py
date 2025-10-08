@@ -163,7 +163,7 @@ def test_update_exam_attempt_success(client: TestClient, db: Session) -> None:
     assert response.status_code == 200
 
 
-def flaky_test_update_exam_attempt_locked(client: TestClient, db: Session) -> None:
+def test_update_exam_attempt_locked(client: TestClient, db: Session) -> None:
     """Test updating a completed exam attempt."""
     # 1️⃣ Create a random user and their token
     user, password = create_random_user_with_password(db)
@@ -202,7 +202,7 @@ def flaky_test_update_exam_attempt_locked(client: TestClient, db: Session) -> No
     assert response.json()["detail"] == "Exam attempt is already completed"
 
 
-def flaky_test_update_exam_attempt_not_found(
+def test_update_exam_attempt_not_found(
     client: TestClient,
     superuser_token_headers: dict[str, str],
 ) -> None:
@@ -219,7 +219,7 @@ def flaky_test_update_exam_attempt_not_found(
     assert response.json()["detail"] == "Exam attempt not found"
 
 
-def flaky_test_update_exam_attempt_not_enough_permissions(
+def test_update_exam_attempt_not_enough_permissions(
     client: TestClient,
     normal_user_token_headers: dict[str, str],
     db: Session,
