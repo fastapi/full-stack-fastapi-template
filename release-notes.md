@@ -52,6 +52,7 @@
 
 ### Internal
 
+* ⬆ Bump pydantic from 2.11.9 to 2.11.10 in /backend. PR [#1922](https://github.com/fastapi/full-stack-fastapi-template/pull/1922) by [@dependabot[bot]](https://github.com/apps/dependabot).
 * ⬆ Bump tiangolo/issue-manager from 0.5.1 to 0.6.0. PR [#1912](https://github.com/fastapi/full-stack-fastapi-template/pull/1912) by [@dependabot[bot]](https://github.com/apps/dependabot).
 * ⬆ Bump @types/react from 19.1.13 to 19.1.15 in /frontend. PR [#1906](https://github.com/fastapi/full-stack-fastapi-template/pull/1906) by [@dependabot[bot]](https://github.com/apps/dependabot).
 * ⬆ Bump pydantic-settings from 2.10.1 to 2.11.0 in /backend. PR [#1907](https://github.com/fastapi/full-stack-fastapi-template/pull/1907) by [@dependabot[bot]](https://github.com/apps/dependabot).
