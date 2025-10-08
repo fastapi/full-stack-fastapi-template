@@ -1,8 +1,15 @@
 import uuid
+from datetime import datetime, timezone
+from enum import Enum
 
+from pydantic import BaseModel as PydanticBaseModel
+
+# from pgvector.sqlalchemy import Vector  # type: ignore
 from pydantic import EmailStr
+from pydantic import Field as PydanticField
 from sqlalchemy import Column, Text
-from sqlmodel import Field, Relationship, SQLModel
+from sqlmodel import JSON, Field, Relationship, SQLModel
+from sqlmodel import Enum as SAEnum
 
 
 # Shared properties
@@ -48,6 +55,9 @@ class User(UserBase, table=True):
     documents: list["Document"] = Relationship(
         back_populates="owner", cascade_delete=True
     )
+    exams: list["Exam"] = Relationship(
+        back_populates="owner", sa_relationship_kwargs={"cascade": "all, delete-orphan"}
+    )
 
 
 # Properties to return via API, id is always required
@@ -74,6 +84,168 @@ class ItemCreate(ItemBase):
 # Properties to receive on item update
 class ItemUpdate(ItemBase):
     title: str | None = Field(default=None, min_length=1, max_length=255)  # type: ignore
+
+
+class ExamBase(SQLModel):
+    title: str = Field(sa_column=Column(Text, nullable=False))
+    description: str | None = Field(default=None, sa_column=Column(Text))
+    duration_minutes: int | None = Field(default=None)
+    is_published: bool = Field(default=False)
+
+
+class Exam(ExamBase, table=True):
+    id: uuid.UUID = Field(default_factory=uuid.uuid4, primary_key=True)
+    owner_id: uuid.UUID = Field(foreign_key="user.id", nullable=False)
+    owner: User | None = Relationship(back_populates="exams")
+    questions: list["Question"] = Relationship(
+        back_populates="exam", sa_relationship_kwargs={"cascade": "all, delete-orphan"}
+    )
+    exam_attempts: list["ExamAttempt"] = Relationship(
+        back_populates="exam", sa_relationship_kwargs={"cascade": "all, delete-orphan"}
+    )
+
+
+class ExamPublic(ExamBase):
+    id: uuid.UUID
+    owner_id: uuid.UUID
+    questions: list["QuestionPublic"] = PydanticField(default_factory=list)
+
+
+class ExamsPublic(SQLModel):
+    data: list[ExamPublic]
+    count: int
+
+
+class ExamCreate(ExamBase):
+    title: str = Field(min_length=1, max_length=255)
+    description: str | None = Field(default=None, max_length=1000)
+    duration_minutes: int | None = Field(
+        default=None, ge=1
+    )  # Must be at least 1 minute
+
+
+class ExamUpdate(SQLModel):
+    title: str | None = Field(default=None, max_length=255)
+    description: str | None = Field(default=None, max_length=1000)
+    duration_minutes: int | None = Field(default=None, ge=1)
+    is_published: bool | None = None
+
+
+class QuestionType(str, Enum):
+    MULTIPLE_CHOICE = "multiple_choice"
+    TRUE_FALSE = "true_false"
+    SHORT_ANSWER = "short_answer"
+
+
+class QuestionBase(SQLModel):
+    question: str = Field(sa_column=Column(Text, nullable=False))
+    # TODO: Get the answer from generated questions for test grading
+    answer: str | None = Field(default=None, sa_column=Column(Text, nullable=True))
+
+
+class Question(QuestionBase, table=True):
+    id: uuid.UUID = Field(default_factory=uuid.uuid4, primary_key=True)
+    type: QuestionType = Field(
+        default=QuestionType.SHORT_ANSWER,
+        sa_column=Column(SAEnum(QuestionType), nullable=False),
+    )
+    options: list[str] = Field(default_factory=list, sa_column=Column(JSON))
+    exam_id: uuid.UUID = Field(foreign_key="exam.id", nullable=False)
+    exam: Exam | None = Relationship(back_populates="questions")
+    answers: list["Answer"] = Relationship(
+        back_populates="question",
+        sa_relationship_kwargs={"cascade": "all, delete-orphan"},
+    )
+
+
+# Define response model for a question
+class QuestionPublic(QuestionBase):
+    id: uuid.UUID
+    type: QuestionType
+    options: list[str] = []  # optional, only for multiple choice
+
+
+# Properties to receive on document creation
+class QuestionCreate(QuestionBase):
+    type: QuestionType
+    options: list[str] = []  # optional, only for multiple choice
+
+
+class GenerateQuestionsRequest(SQLModel):
+    document_ids: list[uuid.UUID]
+    # maybe add difficulty, number of questions, etc.
+
+
+class ExamAttemptBase(SQLModel):
+    score: float | None = None
+    is_complete: bool = Field(default=False)
+
+
+class AnswerBase(SQLModel):
+    response: str
+    is_correct: bool | None = None
+    explanation: str | None = None
+
+
+class AnswerPublic(AnswerBase):
+    id: uuid.UUID
+    question_id: uuid.UUID
+    created_at: datetime
+    updated_at: datetime
+
+
+class AnswerUpdate(SQLModel):
+    id: uuid.UUID
+    response: str
+
+
+class ExamAttemptPublic(ExamAttemptBase):
+    id: uuid.UUID
+    exam_id: uuid.UUID
+    completed_at: datetime | None = None
+    created_at: datetime
+    updated_at: datetime
+
+
+class ExamAttemptCreate(ExamAttemptBase):
+    exam_id: uuid.UUID
+
+
+class ExamAttemptUpdate(SQLModel):
+    is_complete: bool | None = None
+    answers: list["AnswerUpdate"] | None = None
+
+
+class ExamAttempt(ExamAttemptBase, table=True):
+    id: uuid.UUID = Field(default_factory=uuid.uuid4, primary_key=True)
+    exam_id: uuid.UUID = Field(
+        foreign_key="exam.id", nullable=False, ondelete="CASCADE"
+    )
+    owner_id: uuid.UUID = Field(
+        foreign_key="user.id", nullable=False, ondelete="CASCADE"
+    )
+    exam: Exam | None = Relationship(back_populates="exam_attempts")
+    answers: list["Answer"] = Relationship(back_populates="exam_attempt")
+
+    completed_at: datetime | None = None
+    created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
+    updated_at: datetime = Field(
+        default_factory=lambda: datetime.now(timezone.utc),
+        sa_column_kwargs={"onupdate": lambda: datetime.now(timezone.utc)},
+    )
+
+
+class Answer(AnswerBase, table=True):
+    id: uuid.UUID = Field(default_factory=uuid.uuid4, primary_key=True)
+    attempt_id: uuid.UUID = Field(foreign_key="examattempt.id", nullable=False)
+    exam_attempt: "ExamAttempt" = Relationship(back_populates="answers")
+    question: "Question" = Relationship(back_populates="answers")
+    question_id: uuid.UUID = Field(foreign_key="question.id", nullable=False)
+    created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
+    updated_at: datetime = Field(
+        default_factory=lambda: datetime.now(timezone.utc),
+        sa_column_kwargs={"onupdate": lambda: datetime.now(timezone.utc)},
+    )
 
 
 # Shared properties
@@ -180,3 +352,25 @@ class TokenPayload(SQLModel):
 class NewPassword(SQLModel):
     token: str
     new_password: str = Field(min_length=8, max_length=40)
+
+
+# Pydantic models for question items and outputs here:
+
+
+class QuestionItem(PydanticBaseModel):
+    question: str
+    answer: str | None
+    type: str
+    options: list[str] | None = None
+
+
+class QuestionOutput(PydanticBaseModel):
+    questions: list[QuestionItem]
+
+
+# Fix forward references for all Pydantic/SQLModel models
+AnswerUpdate.model_rebuild()
+ExamAttemptUpdate.model_rebuild()
+Answer.model_rebuild()
+ExamAttempt.model_rebuild()
+Question.model_rebuild()
