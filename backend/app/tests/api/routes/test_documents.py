@@ -6,7 +6,7 @@ from fastapi.testclient import TestClient
 from sqlmodel import Session
 
 from app.core.config import settings
-from app.tests.utils.document import create_random_document
+from tests.utils.document import create_random_document
 
 
 def skip_test_create_document_real_s3(
