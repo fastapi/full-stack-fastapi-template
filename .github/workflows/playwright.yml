@@ -18,6 +18,12 @@ on:
 jobs:
   changes:
     runs-on: ubuntu-latest
+    env:
+      AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+      AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+      AWS_REGION: ${{ secrets.AWS_REGION }}
+      S3_BUCKET: ${{ secrets.S3_BUCKET }}
+      # OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
     # Set job outputs to values from filter step
     outputs:
       changed: ${{ steps.filter.outputs.changed }}
@@ -41,6 +47,12 @@ jobs:
     if: ${{ needs.changes.outputs.changed == 'true' }}
     timeout-minutes: 60
     runs-on: ubuntu-latest
+    env:
+      AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+      AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+      AWS_REGION: ${{ secrets.AWS_REGION }}
+      S3_BUCKET: ${{ secrets.S3_BUCKET }}
+      # OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
     strategy:
       matrix:
         shardIndex: [1, 2, 3, 4]
@@ -92,6 +104,12 @@ jobs:
     # Merge reports after playwright-tests, even if some shards have failed
     if: ${{ !cancelled() && needs.changes.outputs.changed == 'true' }}
     runs-on: ubuntu-latest
+    env:
+      AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+      AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+      AWS_REGION: ${{ secrets.AWS_REGION }}
+      S3_BUCKET: ${{ secrets.S3_BUCKET }}
+      # OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
     steps:
     - uses: actions/checkout@v5
     - uses: actions/setup-node@v5
@@ -123,6 +141,12 @@ jobs:
     needs:
       - test-playwright
     runs-on: ubuntu-latest
+    env:
+      AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+      AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+      AWS_REGION: ${{ secrets.AWS_REGION }}
+      S3_BUCKET: ${{ secrets.S3_BUCKET }}
+      # OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
     steps:
       - name: Decide whether the needed jobs succeeded or failed
         uses: re-actors/alls-green@release/v1

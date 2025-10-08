@@ -4,7 +4,16 @@ from typing import Any
 from sqlmodel import Session, select
 
 from app.core.security import get_password_hash, verify_password
-from app.models import Item, ItemCreate, User, UserCreate, UserUpdate
+from app.models import (
+    Document,
+    DocumentCreate,
+    DocumentPublic,
+    Item,
+    ItemCreate,
+    User,
+    UserCreate,
+    UserUpdate,
+)
 
 
 def create_user(*, session: Session, user_create: UserCreate) -> User:
@@ -52,3 +61,23 @@ def create_item(*, session: Session, item_in: ItemCreate, owner_id: uuid.UUID) -
     session.commit()
     session.refresh(db_item)
     return db_item
+
+
+# --- Document ---
+def create_document(
+    *,
+    session: Session,
+    document_in: DocumentCreate,
+    owner_id: uuid.UUID,
+    extracted_text: str | None = None,
+) -> DocumentPublic:
+    # Validate input and attach owner_id
+    update: dict[str, str] = {"owner_id": str(owner_id)}
+    if extracted_text is not None:
+        update["extracted_text"] = extracted_text
+    db_document = Document.model_validate(document_in, update=update)
+    session.add(db_document)
+    session.commit()
+    session.refresh(db_document)
+    # Return Public model for API
+    return DocumentPublic.model_validate(db_document)

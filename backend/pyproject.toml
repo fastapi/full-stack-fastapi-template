@@ -21,6 +21,10 @@ dependencies = [
     "pydantic-settings<3.0.0,>=2.2.1",
     "sentry-sdk[fastapi]<2.0.0,>=1.40.6",
     "pyjwt<3.0.0,>=2.8.0",
+    "langchain-text-splitters>=0.3.11",
+    "boto3>=1.40.47",
+    "textract>=1.6.5",
+    "types-boto3>=1.40.47",
 ]
 
 [tool.uv]
