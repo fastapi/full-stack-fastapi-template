@@ -141,7 +141,7 @@ def test_read_exam_attempt_not_enough_permissions(
     assert response.json()["detail"] == "Not enough permissions"
 
 
-def flaky_test_update_exam_attempt_success(client: TestClient, db: Session) -> None:
+def test_update_exam_attempt_success(client: TestClient, db: Session) -> None:
     """Test updating an existing exam attempt."""
     user, password = create_random_user_with_password(db)
     login_data = {"username": user.email, "password": password}
