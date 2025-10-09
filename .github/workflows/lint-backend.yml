@@ -6,7 +6,6 @@ on:
       - master
     paths-ignore:
       - 'release-notes.md'
-      - renovate.json
       - development.md
       - deployment.md
       - SECURITY.md
@@ -15,8 +14,6 @@ on:
       - .pre-commit-config.yaml
       - .gitignore
       - .gitattributes
-      - .editorconfig
-      - '.better-commits.json'
       - img/*
       - hooks/*
       - .copier/*
