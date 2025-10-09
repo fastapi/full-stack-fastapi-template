@@ -1,4 +1,4 @@
-import { type Page, expect, test } from "@playwright/test"
+import { expect, type Page, test } from "@playwright/test"
 import { firstSuperuser, firstSuperuserPassword } from "./config.ts"
 import { randomPassword } from "./utils/random.ts"
 
@@ -114,4 +114,14 @@ test("Logged-out user cannot access protected routes", async ({ page }) => {
 
   await page.goto("/settings")
   await page.waitForURL("/login")
+})
+
+test("Redirects to /login when token is wrong", async ({ page }) => {
+  await page.goto("/settings")
+  await page.evaluate(() => {
+    localStorage.setItem("access_token", "invalid_token")
+  })
+  await page.goto("/settings")
+  await page.waitForURL("/login")
+  await expect(page).toHaveURL("/login")
 })

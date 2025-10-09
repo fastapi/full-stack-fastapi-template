@@ -26,21 +26,21 @@ jobs:
     runs-on: ubuntu-latest
     steps:
     # For PRs from forks
-    - uses: actions/checkout@v4
+    - uses: actions/checkout@v5
     # For PRs from the same repo
-    - uses: actions/checkout@v4
+    - uses: actions/checkout@v5
       if: ( github.event_name != 'pull_request' || github.secret_source == 'Actions' )
       with:
         ref: ${{ github.head_ref }}
         token: ${{ secrets.FULL_STACK_FASTAPI_TEMPLATE_REPO_TOKEN }}
-    - uses: actions/setup-node@v4
+    - uses: actions/setup-node@v5
       with:
         node-version: lts/*
-    - uses: actions/setup-python@v5
+    - uses: actions/setup-python@v6
       with:
         python-version: "3.10"
     - name: Install uv
-      uses: astral-sh/setup-uv@v3
+      uses: astral-sh/setup-uv@v6
       with:
         version: "0.4.15"
         enable-cache: true
@@ -52,6 +52,9 @@ jobs:
     - run: uv run bash scripts/generate-client.sh
       env:
         VIRTUAL_ENV: backend/.venv
+        SECRET_KEY: just-for-generating-client
+        POSTGRES_PASSWORD: just-for-generating-client
+        FIRST_SUPERUSER_PASSWORD: just-for-generating-client
     - name: Add changes to git
       run: |
         git config --local user.email "github-actions@github.com"
