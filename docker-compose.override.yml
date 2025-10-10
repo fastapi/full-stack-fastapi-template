@@ -74,6 +74,7 @@ services:
           target: /app
           ignore:
             - ./backend/.venv
+            - app/alembic
             - .venv
         - path: ./backend/pyproject.toml
           action: rebuild
