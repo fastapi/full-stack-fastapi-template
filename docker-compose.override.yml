@@ -73,7 +73,7 @@ services:
           action: sync
           target: /app
           ignore:
-            - app/alembic
+            - app/alembic/versions
             - .venv
         - path: ./backend/pyproject.toml
           action: rebuild
