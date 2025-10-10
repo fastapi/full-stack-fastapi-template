@@ -1,19 +1,35 @@
-import { ChakraProvider } from "@chakra-ui/react"
-import { QueryClient, QueryClientProvider } from "@tanstack/react-query"
-import { RouterProvider, createRouter } from "@tanstack/react-router"
-import ReactDOM from "react-dom/client"
-import { routeTree } from "./routeTree.gen"
-
+import {
+  MutationCache,
+  QueryCache,
+  QueryClient,
+  QueryClientProvider,
+} from "@tanstack/react-query"
+import { createRouter, RouterProvider } from "@tanstack/react-router"
 import { StrictMode } from "react"
-import { OpenAPI } from "./client"
-import theme from "./theme"
+import ReactDOM from "react-dom/client"
+import { ApiError, OpenAPI } from "./client"
+import { CustomProvider } from "./components/ui/provider"
+import { routeTree } from "./routeTree.gen"
 
 OpenAPI.BASE = import.meta.env.VITE_API_URL
 OpenAPI.TOKEN = async () => {
   return localStorage.getItem("access_token") || ""
 }
 
-const queryClient = new QueryClient()
+const handleApiError = (error: Error) => {
+  if (error instanceof ApiError && [401, 403].includes(error.status)) {
+    localStorage.removeItem("access_token")
+    window.location.href = "/login"
+  }
+}
+const queryClient = new QueryClient({
+  queryCache: new QueryCache({
+    onError: handleApiError,
+  }),
+  mutationCache: new MutationCache({
+    onError: handleApiError,
+  }),
+})
 
 const router = createRouter({ routeTree })
 declare module "@tanstack/react-router" {
@@ -24,10 +40,10 @@ declare module "@tanstack/react-router" {
 
 ReactDOM.createRoot(document.getElementById("root")!).render(
   <StrictMode>
-    <ChakraProvider theme={theme}>
+    <CustomProvider>
       <QueryClientProvider client={queryClient}>
         <RouterProvider router={router} />
       </QueryClientProvider>
-    </ChakraProvider>
+    </CustomProvider>
   </StrictMode>,
 )
