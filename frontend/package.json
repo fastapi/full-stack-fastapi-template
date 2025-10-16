@@ -1,12 +1,14 @@
 {
-  "name": "free-nextjs-admin-dashboard",
-  "version": "2.0.2",
+  "name": "frontend",
   "private": true,
+  "version": "0.0.0",
+  "type": "module",
   "scripts": {
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "next lint"
+    "lint": "next lint",
+    "generate-client": "openapi-ts"
   },
   "dependencies": {
     "@fullcalendar/core": "^6.1.15",
@@ -34,6 +36,7 @@
   },
   "devDependencies": {
     "@eslint/eslintrc": "^3",
+    "@hey-api/openapi-ts": "^0.85.2",
     "@svgr/webpack": "^8.1.0",
     "@types/node": "^20",
     "@types/react": "^19",
