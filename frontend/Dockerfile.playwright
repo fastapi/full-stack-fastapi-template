@@ -1,0 +1,11 @@
+FROM mcr.microsoft.com/playwright:v1.55.0-noble
+
+WORKDIR /app
+
+COPY package*.json /app/
+
+RUN npm install
+
+COPY ./ /app/
+
+ARG VITE_API_URL=${VITE_API_URL}
