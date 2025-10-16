@@ -1,6 +1,4 @@
-import uuid
 from typing import Any
-
 from fastapi import APIRouter, HTTPException
 from sqlmodel import func, select
 
@@ -17,7 +15,6 @@ def read_items(
     """
     Retrieve items.
     """
-
     if current_user.is_superuser:
         count_statement = select(func.count()).select_from(Item)
         count = session.exec(count_statement).one()
@@ -42,7 +39,7 @@ def read_items(
 
 
 @router.get("/{id}", response_model=ItemPublic)
-def read_item(session: SessionDep, current_user: CurrentUser, id: uuid.UUID) -> Any:
+def read_item(session: SessionDep, current_user: CurrentUser, id: str) -> Any:
     """
     Get item by ID.
     """
@@ -73,7 +70,7 @@ def update_item(
     *,
     session: SessionDep,
     current_user: CurrentUser,
-    id: uuid.UUID,
+    id: str,
     item_in: ItemUpdate,
 ) -> Any:
     """
@@ -92,9 +89,9 @@ def update_item(
     return item
 
 
-@router.delete("/{id}")
+@router.delete("/{id}", response_model=Message)
 def delete_item(
-    session: SessionDep, current_user: CurrentUser, id: uuid.UUID
+    session: SessionDep, current_user: CurrentUser, id: str
 ) -> Message:
     """
     Delete an item.

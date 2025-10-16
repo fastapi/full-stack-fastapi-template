@@ -6,3 +6,8 @@ app.egg-info
 htmlcov
 .cache
 .venv
+
+app/alembic/*
+alembic.ini
+app.db
+app/alembic/versions*

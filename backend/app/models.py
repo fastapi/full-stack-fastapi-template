@@ -1,8 +1,10 @@
 import uuid
-
 from pydantic import EmailStr
 from sqlmodel import Field, Relationship, SQLModel
 
+# ===========================
+# USER MODELS
+# ===========================
 
 # Shared properties
 class UserBase(SQLModel):
@@ -39,16 +41,16 @@ class UpdatePassword(SQLModel):
     new_password: str = Field(min_length=8, max_length=40)
 
 
-# Database model, database table inferred from class name
+# Database model (UUIDs stored as string for SQLite)
 class User(UserBase, table=True):
-    id: uuid.UUID = Field(default_factory=uuid.uuid4, primary_key=True)
+    id: str = Field(default_factory=lambda: str(uuid.uuid4()), primary_key=True)
     hashed_password: str
     items: list["Item"] = Relationship(back_populates="owner", cascade_delete=True)
 
 
-# Properties to return via API, id is always required
+# Properties to return via API
 class UserPublic(UserBase):
-    id: uuid.UUID
+    id: str
 
 
 class UsersPublic(SQLModel):
@@ -56,35 +58,33 @@ class UsersPublic(SQLModel):
     count: int
 
 
-# Shared properties
+# ===========================
+# ITEM MODELS
+# ===========================
+
 class ItemBase(SQLModel):
     title: str = Field(min_length=1, max_length=255)
     description: str | None = Field(default=None, max_length=255)
 
 
-# Properties to receive on item creation
 class ItemCreate(ItemBase):
     pass
 
 
-# Properties to receive on item update
 class ItemUpdate(ItemBase):
     title: str | None = Field(default=None, min_length=1, max_length=255)  # type: ignore
 
 
-# Database model, database table inferred from class name
+# Database model (UUIDs stored as string)
 class Item(ItemBase, table=True):
-    id: uuid.UUID = Field(default_factory=uuid.uuid4, primary_key=True)
-    owner_id: uuid.UUID = Field(
-        foreign_key="user.id", nullable=False, ondelete="CASCADE"
-    )
+    id: str = Field(default_factory=lambda: str(uuid.uuid4()), primary_key=True)
+    owner_id: str = Field(foreign_key="user.id", nullable=False, ondelete="CASCADE")
     owner: User | None = Relationship(back_populates="items")
 
 
-# Properties to return via API, id is always required
 class ItemPublic(ItemBase):
-    id: uuid.UUID
-    owner_id: uuid.UUID
+    id: str
+    owner_id: str
 
 
 class ItemsPublic(SQLModel):
@@ -92,18 +92,19 @@ class ItemsPublic(SQLModel):
     count: int
 
 
-# Generic message
+# ===========================
+# AUTH / TOKEN MODELS
+# ===========================
+
 class Message(SQLModel):
     message: str
 
 
-# JSON payload containing access token
 class Token(SQLModel):
     access_token: str
     token_type: str = "bearer"
 
 
-# Contents of JWT token
 class TokenPayload(SQLModel):
     sub: str | None = None
 
