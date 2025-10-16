@@ -23,6 +23,7 @@
     "@tailwindcss/postcss": "^4.0.9",
     "apexcharts": "^4.3.0",
     "autoprefixer": "^10.4.20",
+    "axios": "^1.12.2",
     "flatpickr": "^4.6.13",
     "next": "15.2.3",
     "react": "^19.0.0",
