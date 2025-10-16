@@ -1,154 +1,173 @@
-# FastAPI Project - Frontend
+# TailAdmin Next.js - Free Next.js Tailwind Admin Dashboard Template
 
-The frontend is built with [Vite](https://vitejs.dev/), [React](https://reactjs.org/), [TypeScript](https://www.typescriptlang.org/), [TanStack Query](https://tanstack.com/query), [TanStack Router](https://tanstack.com/router) and [Chakra UI](https://chakra-ui.com/).
+TailAdmin is a free and open-source admin dashboard template built on **Next.js and Tailwind CSS** providing developers with everything they need to create a feature-rich and data-driven: back-end, dashboard, or admin panel solution for any sort of web project.
 
-## Frontend development
+![TailAdmin - Next.js Dashboard Preview](./banner.png)
 
-Before you begin, ensure that you have either the Node Version Manager (nvm) or Fast Node Manager (fnm) installed on your system.
+With TailAdmin Next.js, you get access to all the necessary dashboard UI components, elements, and pages required to build a high-quality and complete dashboard or admin panel. Whether you're building a dashboard or admin panel for a complex web application or a simple website.
 
-* To install fnm follow the [official fnm guide](https://github.com/Schniz/fnm#installation). If you prefer nvm, you can install it using the [official nvm guide](https://github.com/nvm-sh/nvm#installing-and-updating).
+TailAdmin utilizes the powerful features of **Next.js 15** and common features of Next.js such as server-side rendering (SSR), static site generation (SSG), and seamless API route integration. Combined with the advancements of **React 19** and the robustness of **TypeScript**, TailAdmin is the perfect solution to help get your project up and running quickly.
 
-* After installing either nvm or fnm, proceed to the `frontend` directory:
+## Overview
 
-```bash
-cd frontend
-```
-* If the Node.js version specified in the `.nvmrc` file isn't installed on your system, you can install it using the appropriate command:
+TailAdmin provides essential UI components and layouts for building feature-rich, data-driven admin dashboards and control panels. It's built on:
 
-```bash
-# If using fnm
-fnm install
+- Next.js 15.x
+- React 19
+- TypeScript
+- Tailwind CSS V4
 
-# If using nvm
-nvm install
-```
+### Quick Links
+- [✨ Visit Website](https://tailadmin.com)
+- [📄 Documentation](https://tailadmin.com/docs)
+- [⬇️ Download](https://tailadmin.com/download)
+- [🖌️ Figma Design File (Community Edition)](https://www.figma.com/community/file/1463141366275764364)
+- [⚡ Get PRO Version](https://tailadmin.com/pricing)
 
-* Once the installation is complete, switch to the installed version:
+### Demos
+- [Free Version](https://nextjs-free-demo.tailadmin.com)
+- [Pro Version](https://nextjs-demo.tailadmin.com)
 
-```bash
-# If using fnm
-fnm use
+### Other Versions
+- [HTML Version](https://github.com/TailAdmin/tailadmin-free-tailwind-dashboard-template)
+- [React Version](https://github.com/TailAdmin/free-react-tailwind-admin-dashboard)
+- [Vue.js Version](https://github.com/TailAdmin/vue-tailwind-admin-dashboard)
 
-# If using nvm
-nvm use
-```
+## Installation
 
-* Within the `frontend` directory, install the necessary NPM packages:
+### Prerequisites
+To get started with TailAdmin, ensure you have the following prerequisites installed and set up:
 
-```bash
-npm install
-```
+- Node.js 18.x or later (recommended to use Node.js 20.x or later)
 
-* And start the live server with the following `npm` script:
-
-```bash
-npm run dev
-```
-
-* Then open your browser at http://localhost:5173/.
-
-Notice that this live server is not running inside Docker, it's for local development, and that is the recommended workflow. Once you are happy with your frontend, you can build the frontend Docker image and start it, to test it in a production-like environment. But building the image at every change will not be as productive as running the local development server with live reload.
-
-Check the file `package.json` to see other available options.
-
-### Removing the frontend
-
-If you are developing an API-only app and want to remove the frontend, you can do it easily:
-
-* Remove the `./frontend` directory.
-
-* In the `docker-compose.yml` file, remove the whole service / section `frontend`.
-
-* In the `docker-compose.override.yml` file, remove the whole service / section `frontend` and `playwright`.
-
-Done, you have a frontend-less (api-only) app. 🤓
-
----
-
-If you want, you can also remove the `FRONTEND` environment variables from:
-
-* `.env`
-* `./scripts/*.sh`
-
-But it would be only to clean them up, leaving them won't really have any effect either way.
-
-## Generate Client
-
-### Automatically
-
-* Activate the backend virtual environment.
-* From the top level project directory, run the script:
+### Cloning the Repository
+Clone the repository using the following command:
 
 ```bash
-./scripts/generate-client.sh
+git clone https://github.com/TailAdmin/free-nextjs-admin-dashboard.git
 ```
 
-* Commit the changes.
+> Windows Users: place the repository near the root of your drive if you face issues while cloning.
 
-### Manually
+1. Install dependencies:
+    ```bash
+    npm install
+    # or
+    yarn install
+    ```
+    > Use `--legacy-peer-deps` flag if you face peer-dependency error during installation.
 
-* Start the Docker Compose stack.
+2. Start the development server:
+    ```bash
+    npm run dev
+    # or
+    yarn dev
+    ```
 
-* Download the OpenAPI JSON file from `http://localhost/api/v1/openapi.json` and copy it to a new file `openapi.json` at the root of the `frontend` directory.
+## Components
 
-* To generate the frontend client, run:
+TailAdmin is a pre-designed starting point for building a web-based dashboard using Next.js and Tailwind CSS. The template includes:
 
-```bash
-npm run generate-client
-```
+- Sophisticated and accessible sidebar
+- Data visualization components
+- Profile management and custom 404 page
+- Tables and Charts(Line and Bar)
+- Authentication forms and input elements
+- Alerts, Dropdowns, Modals, Buttons and more
+- Can't forget Dark Mode 🕶️
 
-* Commit the changes.
+All components are built with React and styled using Tailwind CSS for easy customization.
 
-Notice that everytime the backend changes (changing the OpenAPI schema), you should follow these steps again to update the frontend client.
+## Feature Comparison
 
-## Using a Remote API
+### Free Version
+- 1 Unique Dashboard
+- 30+ dashboard components
+- 50+ UI elements
+- Basic Figma design files
+- Community support
 
-If you want to use a remote API, you can set the environment variable `VITE_API_URL` to the URL of the remote API. For example, you can set it in the `frontend/.env` file:
+### Pro Version
+- 5 Unique Dashboards: Analytics, Ecommerce, Marketing, CRM, Stocks (more coming soon)
+- 400+ dashboard components and UI elements
+- Complete Figma design file
+- Email support
 
-```env
-VITE_API_URL=https://api.my-domain.example.com
-```
+To learn more about pro version features and pricing, visit our [pricing page](https://tailadmin.com/pricing).
 
-Then, when you run the frontend, it will use that URL as the base URL for the API.
+## Changelog
 
-## Code Structure
+### Version 2.0.2 - [March 25, 2025]
 
-The frontend code is structured as follows:
+- Upgraded to Next v15.2.3 for [CVE-2025-29927](https://nextjs.org/blog/cve-2025-29927) concerns
+- Included overrides vectormap for packages to prevent peer dependency errors during installation.
+- Migrated from react-flatpickr to flatpickr package for React 19 support
 
-* `frontend/src` - The main frontend code.
-* `frontend/src/assets` - Static assets.
-* `frontend/src/client` - The generated OpenAPI client.
-* `frontend/src/components` -  The different components of the frontend.
-* `frontend/src/hooks` - Custom hooks.
-* `frontend/src/routes` - The different routes of the frontend which include the pages.
-* `theme.tsx` - The Chakra UI custom theme.
+### Version 2.0.1 - [February 27, 2025]
 
-## End-to-End Testing with Playwright
+#### Update Overview
 
-The frontend includes initial end-to-end tests using Playwright. To run the tests, you need to have the Docker Compose stack running. Start the stack with the following command:
+- Upgraded to Tailwind CSS v4 for better performance and efficiency.
+- Updated class usage to match the latest syntax and features.
+- Replaced deprecated class and optimized styles.
 
-```bash
-docker compose up -d --wait backend
-```
+#### Next Steps
 
-Then, you can run the tests with the following command:
+- Run npm install or yarn install to update dependencies.
+- Check for any style changes or compatibility issues.
+- Refer to the Tailwind CSS v4 [Migration Guide](https://tailwindcss.com/docs/upgrade-guide) on this release. if needed.
+- This update keeps the project up to date with the latest Tailwind improvements. 🚀
 
-```bash
-npx playwright test
-```
+### v2.0.0 (February 2025)
+A major update focused on Next.js 15 implementation and comprehensive redesign.
 
-You can also run your tests in UI mode to see the browser and interact with it running:
+#### Major Improvements
+- Complete redesign using Next.js 15 App Router and React Server Components
+- Enhanced user interface with Next.js-optimized components
+- Improved responsiveness and accessibility
+- New features including collapsible sidebar, chat screens, and calendar
+- Redesigned authentication using Next.js App Router and server actions
+- Updated data visualization using ApexCharts for React
 
-```bash
-npx playwright test --ui
-```
+#### Breaking Changes
 
-To stop and remove the Docker Compose stack and clean the data created in tests, use the following command:
+- Migrated from Next.js 14 to Next.js 15
+- Chart components now use ApexCharts for React
+- Authentication flow updated to use Server Actions and middleware
 
-```bash
-docker compose down -v
-```
+[Read more](https://tailadmin.com/docs/update-logs/nextjs) on this release.
 
-To update the tests, navigate to the tests directory and modify the existing test files or add new ones as needed.
+#### Breaking Changes
+- Migrated from Next.js 14 to Next.js 15
+- Chart components now use ApexCharts for React
+- Authentication flow updated to use Server Actions and middleware
 
-For more information on writing and running Playwright tests, refer to the official [Playwright documentation](https://playwright.dev/docs/intro).
+### v1.3.4 (July 01, 2024)
+- Fixed JSvectormap rendering issues
+
+### v1.3.3 (June 20, 2024)
+- Fixed build error related to Loader component
+
+### v1.3.2 (June 19, 2024)
+- Added ClickOutside component for dropdown menus
+- Refactored sidebar components
+- Updated Jsvectormap package
+
+### v1.3.1 (Feb 12, 2024)
+- Fixed layout naming consistency
+- Updated styles
+
+### v1.3.0 (Feb 05, 2024)
+- Upgraded to Next.js 14
+- Added Flatpickr integration
+- Improved form elements
+- Enhanced multiselect functionality
+- Added default layout component
+
+## License
+
+TailAdmin Next.js Free Version is released under the MIT License.
+
+## Support
+
+If you find this project helpful, please consider giving it a star on GitHub. Your support helps us continue developing and maintaining this template.

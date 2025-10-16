@@ -6,7 +6,7 @@ export type AnswerUpdate = {
 };
 
 export type Body_documents_create_document = {
-    file: (Blob | File);
+    file: Blob | File;
 };
 
 export type Body_login_login_access_token = {
@@ -86,7 +86,7 @@ export type ExamUpdate = {
 };
 
 export type GenerateQuestionsRequest = {
-    document_ids: Array<(string)>;
+    document_ids: Array<string>;
 };
 
 export type HTTPValidationError = {
@@ -136,7 +136,7 @@ export type QuestionPublic = {
     answer?: (string | null);
     id: string;
     type: QuestionType;
-    options?: Array<(string)>;
+    options?: Array<string>;
 };
 
 export type QuestionType = 'multiple_choice' | 'true_false' | 'short_answer';

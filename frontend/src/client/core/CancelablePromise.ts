@@ -80,7 +80,7 @@ export class CancelablePromise<T> implements Promise<T> {
 		});
 	}
 
-	get [Symbol.toStringTag]() {
+	get [Symbol.toStringTag](): string {
 		return "Cancellable Promise";
 	}
 
