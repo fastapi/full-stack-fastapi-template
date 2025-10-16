@@ -10,6 +10,9 @@ const compat = new FlatCompat({
 });
 
 const eslintConfig = [
+  {
+    ignores: ["src/client/**"], // ✅ Ignore generated OpenAPI client
+  },
   ...compat.extends("next/core-web-vitals", "next/typescript"),
 ];
 
