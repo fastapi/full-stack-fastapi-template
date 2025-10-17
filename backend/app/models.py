@@ -1,20 +1,41 @@
 import uuid
+from datetime import datetime, timezone
+from typing import Optional, List
+
 from pydantic import EmailStr
 from sqlmodel import Field, Relationship, SQLModel
 
-# ===========================
-# USER MODELS
-# ===========================
 
-# Shared properties
+# =====================================================
+# ✅ Common Base Models
+# =====================================================
+
+class BaseModel(SQLModel):
+    """Base for all database models."""
+    id: str = Field(default_factory=lambda: str(uuid.uuid4()), primary_key=True)
+    is_active: bool = Field(default=True, nullable=False)
+    created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc), nullable=False)
+    updated_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc), nullable=False)
+
+
+class BasePublic(SQLModel):
+    """Base for all response (public) models."""
+    id: str
+    is_active: bool
+    created_at: datetime
+    updated_at: datetime
+
+
+# =====================================================
+# ✅ USER MODELS
+# =====================================================
+
 class UserBase(SQLModel):
     email: EmailStr = Field(unique=True, index=True, max_length=255)
-    is_active: bool = True
     is_superuser: bool = False
-    full_name: str | None = Field(default=None, max_length=255)
+    full_name: Optional[str] = Field(default=None, max_length=255)
 
 
-# Properties to receive via API on creation
 class UserCreate(UserBase):
     password: str = Field(min_length=8, max_length=40)
 
@@ -22,14 +43,13 @@ class UserCreate(UserBase):
 class UserRegister(SQLModel):
     email: EmailStr = Field(max_length=255)
     password: str = Field(min_length=8, max_length=40)
-    full_name: str | None = Field(default=None, max_length=255)
+    full_name: Optional[str] = Field(default=None, max_length=255)
 
 
-# Properties to receive via API on update, all are optional
-class UserUpdate(UserBase):
-    email: EmailStr | None = Field(default=None, max_length=255)  # type: ignore
-    password: str | None = Field(default=None, min_length=8, max_length=40)
-
+class UserUpdate(SQLModel):
+    email: Optional[EmailStr] = Field(default=None, max_length=255)
+    password: Optional[str] = Field(default=None, min_length=8, max_length=40)
+    full_name: Optional[str] = Field(default=None, max_length=255)
 
 class UserUpdateMe(SQLModel):
     full_name: str | None = Field(default=None, max_length=255)
@@ -41,16 +61,13 @@ class UpdatePassword(SQLModel):
     new_password: str = Field(min_length=8, max_length=40)
 
 
-# Database model (UUIDs stored as string for SQLite)
-class User(UserBase, table=True):
-    id: str = Field(default_factory=lambda: str(uuid.uuid4()), primary_key=True)
+class User(BaseModel, UserBase, table=True):
     hashed_password: str
-    items: list["Item"] = Relationship(back_populates="owner", cascade_delete=True)
+    items: List["Item"] = Relationship(back_populates="owner", cascade_delete=True)
 
 
-# Properties to return via API
-class UserPublic(UserBase):
-    id: str
+class UserPublic(BasePublic, UserBase):
+    pass
 
 
 class UsersPublic(SQLModel):
@@ -58,32 +75,30 @@ class UsersPublic(SQLModel):
     count: int
 
 
-# ===========================
-# ITEM MODELS
-# ===========================
+# =====================================================
+# ✅ ITEM MODELS
+# =====================================================
 
 class ItemBase(SQLModel):
     title: str = Field(min_length=1, max_length=255)
-    description: str | None = Field(default=None, max_length=255)
+    description: Optional[str] = Field(default=None, max_length=255)
 
 
 class ItemCreate(ItemBase):
     pass
 
 
-class ItemUpdate(ItemBase):
-    title: str | None = Field(default=None, min_length=1, max_length=255)  # type: ignore
+class ItemUpdate(SQLModel):
+    title: Optional[str] = Field(default=None, min_length=1, max_length=255)
+    description: Optional[str] = Field(default=None, max_length=255)
 
 
-# Database model (UUIDs stored as string)
-class Item(ItemBase, table=True):
-    id: str = Field(default_factory=lambda: str(uuid.uuid4()), primary_key=True)
-    owner_id: str = Field(foreign_key="user.id", nullable=False, ondelete="CASCADE")
-    owner: User | None = Relationship(back_populates="items")
+class Item(BaseModel, ItemBase, table=True):
+    owner_id: str = Field(foreign_key="user.id", nullable=False)
+    owner: Optional["User"] = Relationship(back_populates="items")
 
 
-class ItemPublic(ItemBase):
-    id: str
+class ItemPublic(BasePublic, ItemBase):
     owner_id: str
 
 
@@ -92,9 +107,39 @@ class ItemsPublic(SQLModel):
     count: int
 
 
-# ===========================
-# AUTH / TOKEN MODELS
-# ===========================
+# =====================================================
+# ✅ ORGANIZATION MODELS
+# =====================================================
+
+class OrganizationBase(SQLModel):
+    name: str = Field(min_length=1, max_length=255, index=True, unique=True)
+    description: Optional[str] = Field(default=None, max_length=255)
+
+
+class OrganizationCreate(OrganizationBase):
+    pass
+
+
+class OrganizationUpdate(OrganizationBase):
+    pass
+
+
+class Organization(BaseModel, OrganizationBase, table=True):
+    pass
+
+
+class OrganizationPublic(BasePublic, OrganizationBase):
+    pass
+
+
+class OrganizationsPublic(SQLModel):
+    data: list[OrganizationPublic]
+    count: int
+
+
+# =====================================================
+# ✅ AUTH / TOKEN / MISC MODELS
+# =====================================================
 
 class Message(SQLModel):
     message: str
@@ -106,7 +151,7 @@ class Token(SQLModel):
 
 
 class TokenPayload(SQLModel):
-    sub: str | None = None
+    sub: Optional[str] = None
 
 
 class NewPassword(SQLModel):

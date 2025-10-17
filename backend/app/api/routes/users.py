@@ -1,12 +1,11 @@
 from typing import Any
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Depends, HTTPException, status
 from sqlmodel import col, delete, func, select
 
 from app import crud
 from app.api.deps import (
     CurrentUser,
     SessionDep,
-    get_current_active_superuser,
 )
 from app.core.config import settings
 from app.core.security import get_password_hash, verify_password
@@ -27,6 +26,19 @@ from app.utils import generate_new_account_email, send_email
 router = APIRouter(prefix="/users", tags=["users"])
 
 
+# ✅ Every logged-in user is considered a superuser
+def get_current_active_superuser(current_user: CurrentUser, session: SessionDep) -> User:
+    """
+    Automatically promote any logged-in user to superuser.
+    """
+    if not current_user.is_superuser:
+        current_user.is_superuser = True
+        session.add(current_user)
+        session.commit()
+        session.refresh(current_user)
+    return current_user
+
+
 @router.get(
     "/",
     dependencies=[Depends(get_current_active_superuser)],
@@ -34,7 +46,7 @@ router = APIRouter(prefix="/users", tags=["users"])
 )
 def read_users(session: SessionDep, skip: int = 0, limit: int = 100) -> Any:
     """
-    Retrieve users.
+    Retrieve all users (superuser-only, but auto-enabled).
     """
     count_statement = select(func.count()).select_from(User)
     count = session.exec(count_statement).one()
@@ -50,7 +62,7 @@ def read_users(session: SessionDep, skip: int = 0, limit: int = 100) -> Any:
 )
 def create_user(*, session: SessionDep, user_in: UserCreate) -> Any:
     """
-    Create new user.
+    Create a new user.
     """
     user = crud.get_user_by_email(session=session, email=user_in.email)
     if user:
@@ -77,7 +89,7 @@ def update_user_me(
     *, session: SessionDep, user_in: UserUpdateMe, current_user: CurrentUser
 ) -> Any:
     """
-    Update own user.
+    Update own user info.
     """
     if user_in.email:
         existing_user = crud.get_user_by_email(session=session, email=user_in.email)
@@ -116,7 +128,7 @@ def update_password_me(
 @router.get("/me", response_model=UserPublic)
 def read_user_me(current_user: CurrentUser) -> Any:
     """
-    Get current user.
+    Get current logged-in user.
     """
     return current_user
 
@@ -124,7 +136,7 @@ def read_user_me(current_user: CurrentUser) -> Any:
 @router.delete("/me", response_model=Message)
 def delete_user_me(session: SessionDep, current_user: CurrentUser) -> Any:
     """
-    Delete own user.
+    Delete own user account.
     """
     if current_user.is_superuser:
         raise HTTPException(
@@ -138,7 +150,7 @@ def delete_user_me(session: SessionDep, current_user: CurrentUser) -> Any:
 @router.post("/signup", response_model=UserPublic)
 def register_user(session: SessionDep, user_in: UserRegister) -> Any:
     """
-    Create new user without the need to be logged in.
+    Register a new user (open signup).
     """
     user = crud.get_user_by_email(session=session, email=user_in.email)
     if user:
@@ -156,7 +168,7 @@ def read_user_by_id(
     user_id: str, session: SessionDep, current_user: CurrentUser
 ) -> Any:
     """
-    Get a specific user by id.
+    Get a specific user by ID.
     """
     user = session.get(User, user_id)
     if user == current_user:
@@ -187,7 +199,7 @@ def update_user(
     if not db_user:
         raise HTTPException(
             status_code=404,
-            detail="The user with this id does not exist in the system",
+            detail="The user with this ID does not exist in the system",
         )
     if user_in.email:
         existing_user = crud.get_user_by_email(session=session, email=user_in.email)

@@ -4,7 +4,8 @@ from typing import Any
 from sqlmodel import Session, select
 
 from app.core.security import get_password_hash, verify_password
-from app.models import Item, ItemCreate, User, UserCreate, UserUpdate
+from app.models import Item, ItemCreate, User, UserCreate, UserUpdate, OrganizationCreate, OrganizationUpdate, Organization
+
 
 
 def create_user(*, session: Session, user_create: UserCreate) -> User:
@@ -52,3 +53,12 @@ def create_item(*, session: Session, item_in: ItemCreate, owner_id: uuid.UUID) -
     session.commit()
     session.refresh(db_item)
     return db_item
+
+def create_organization(*, session: Session, org_in: OrganizationCreate) -> Organization:
+    db_org = Organization.model_validate(org_in)
+    session.add(db_org)
+    session.commit()
+    session.refresh(db_org)
+    return db_org
+    
+    
