@@ -2,6 +2,7 @@
 import React, { useState } from "react";
 import ComponentCard from "../../common/ComponentCard";
 import { useDropzone } from "react-dropzone";
+import Button from "@/components/ui/button/Button";
 
 const DropzoneComponent: React.FC = () => {
   const [files, setFiles] = useState<File[]>([]);
@@ -22,7 +23,7 @@ const DropzoneComponent: React.FC = () => {
   };
 
   return (
-    <div className="flex  flex-col flex-1 lg:w-1/2 w-full mx-auto">
+    <div className="flex flex-col flex-1 lg:w-1/2 w-full mx-auto">
     <ComponentCard title="Upload Documents">
       <div className="transition border border-gray-300 border-dashed cursor-pointer dark:hover:border-brand-500 dark:border-gray-700 rounded-xl hover:border-brand-500">
         <div>
@@ -93,6 +94,11 @@ const DropzoneComponent: React.FC = () => {
           </ul>
         )}
       </div>
+      <div className="flex items-center justify-right">
+      <Button size="md" variant="primary" disabled={files.length === 0} className="flex mt-6 mx-auto">
+                Create Exam!
+              </Button>
+                </div>
 
     </ComponentCard>
     </div>
