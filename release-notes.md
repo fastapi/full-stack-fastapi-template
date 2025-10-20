@@ -52,6 +52,7 @@
 
 ### Internal
 
+* ⬆ Bump pydantic from 2.11.10 to 2.12.3 in /backend. PR [#1947](https://github.com/fastapi/full-stack-fastapi-template/pull/1947) by [@dependabot[bot]](https://github.com/apps/dependabot).
 * ⬆ Bump react-dom and @types/react-dom in /frontend. PR [#1934](https://github.com/fastapi/full-stack-fastapi-template/pull/1934) by [@dependabot[bot]](https://github.com/apps/dependabot).
 * ⬆ Bump alembic from 1.16.5 to 1.17.0 in /backend. PR [#1935](https://github.com/fastapi/full-stack-fastapi-template/pull/1935) by [@dependabot[bot]](https://github.com/apps/dependabot).
 * ⬆ Bump actions/setup-node from 5 to 6. PR [#1937](https://github.com/fastapi/full-stack-fastapi-template/pull/1937) by [@dependabot[bot]](https://github.com/apps/dependabot).
