@@ -12,20 +12,34 @@ jobs:
     steps:
     - uses: actions/checkout@v4
     
-    - name: Set up Python
-      uses: actions/setup-python@v4
+    - name: Install uv
+      uses: astral-sh/setup-uv@v4
       with:
-        python-version: '3.10'
+        enable-cache: true
+    
+    - name: Set up Python
+      run: uv python install 3.10
     
     - name: Install dependencies
       run: |
         cd backend
-        pip install -r requirements.txt || pip install -e .
+        uv sync
     
     - name: Run tests
+      env:
+        PROJECT_NAME: Test Project
+        POSTGRES_SERVER: localhost
+        POSTGRES_PORT: 5432
+        POSTGRES_USER: postgres
+        POSTGRES_PASSWORD: postgres
+        POSTGRES_DB: test_db
+        SECRET_KEY: test-secret-key-for-testing
+        FIRST_SUPERUSER: test@example.com
+        FIRST_SUPERUSER_PASSWORD: testpassword
+        ENVIRONMENT: local
       run: |
         cd backend
-        python -m pytest tests/ -v
+        uv run pytest tests/ -v
 
   deploy:
     needs: test
