@@ -57,7 +57,6 @@ function getStatusLabel(status: string) {
 }
 
 function ProjectsTable() {
-  const navigate = useNavigate({ from: Route.fullPath })
   const { page } = Route.useSearch()
 
   const { data, isLoading, isPlaceholderData } = useQuery({
@@ -65,15 +64,7 @@ function ProjectsTable() {
     placeholderData: (prevData) => prevData,
   })
 
-  const setPage = (page: number) => {
-    navigate({
-      to: "/projects",
-      search: (prev) => ({ ...prev, page }),
-    })
-  }
-
   const projects = data?.data ?? []
-  const count = data?.count ?? 0
 
   if (isLoading) {
     return <Text>Loading projects...</Text>
