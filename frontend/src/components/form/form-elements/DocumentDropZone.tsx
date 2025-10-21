@@ -2,7 +2,7 @@
 import React, { useState } from "react";
 import ComponentCard from "../../common/ComponentCard";
 import { useDropzone } from "react-dropzone";
-import Button from "@/components/ui/button/Button";
+import SpinnerButton from "@/components/ui/button/SpinnerButton";
 
 const DropzoneComponent: React.FC = () => {
   const [files, setFiles] = useState<File[]>([]);
@@ -95,9 +95,9 @@ const DropzoneComponent: React.FC = () => {
         )}
       </div>
       <div className="flex items-center justify-right">
-      <Button size="md" variant="primary" disabled={files.length === 0} className="flex mt-6 mx-auto">
+      <SpinnerButton size="md" variant="primary" disabled={files.length === 0} loading={false} className="flex mt-6 mx-auto">
                 Create Exam!
-              </Button>
+              </SpinnerButton>
                 </div>
 
     </ComponentCard>
