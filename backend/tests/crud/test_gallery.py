@@ -4,7 +4,7 @@ from sqlmodel import Session
 
 from app import crud
 from app.models import OrganizationCreate, ProjectCreate, GalleryCreate, GalleryUpdate
-from app.tests.utils.utils import random_lower_string
+from tests.utils.utils import random_lower_string
 
 
 def test_create_gallery(db: Session) -> None:

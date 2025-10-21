@@ -4,7 +4,7 @@ from sqlmodel import Session
 
 from app import crud
 from app.models import OrganizationCreate, ProjectCreate
-from app.tests.utils.utils import random_lower_string
+from tests.utils.utils import random_lower_string
 
 
 def test_dashboard_stats_empty_organization(db: Session) -> None:
