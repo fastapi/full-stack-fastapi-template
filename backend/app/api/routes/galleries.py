@@ -2,18 +2,15 @@ import uuid
 from typing import Any
 
 from fastapi import APIRouter, HTTPException
-from sqlmodel import func, select
 
 from app import crud
 from app.api.deps import CurrentUser, SessionDep
 from app.models import (
-    Message,
-    Gallery,
+    GalleriesPublic,
     GalleryCreate,
     GalleryPublic,
-    GalleriesPublic,
     GalleryUpdate,
-    Project,
+    Message,
 )
 
 router = APIRouter()
@@ -32,26 +29,31 @@ def read_galleries(
     Otherwise, get all galleries for the user's organization.
     """
     if not current_user.organization_id:
-        raise HTTPException(status_code=400, detail="User is not part of an organization")
-    
+        raise HTTPException(
+            status_code=400, detail="User is not part of an organization"
+        )
+
     if project_id:
         # Verify project belongs to user's organization
         project = crud.get_project(session=session, project_id=project_id)
         if not project or project.organization_id != current_user.organization_id:
             raise HTTPException(status_code=403, detail="Not enough permissions")
-        
+
         galleries = crud.get_galleries_by_project(
             session=session, project_id=project_id, skip=skip, limit=limit
         )
         count = len(galleries)  # Simple count for project galleries
     else:
         galleries = crud.get_galleries_by_organization(
-            session=session, organization_id=current_user.organization_id, skip=skip, limit=limit
+            session=session,
+            organization_id=current_user.organization_id,
+            skip=skip,
+            limit=limit,
         )
         count = crud.count_galleries_by_organization(
             session=session, organization_id=current_user.organization_id
         )
-    
+
     return GalleriesPublic(data=galleries, count=count)
 
 
@@ -63,13 +65,15 @@ def create_gallery(
     Create new gallery.
     """
     if not current_user.organization_id:
-        raise HTTPException(status_code=400, detail="User is not part of an organization")
-    
+        raise HTTPException(
+            status_code=400, detail="User is not part of an organization"
+        )
+
     # Verify project belongs to user's organization
     project = crud.get_project(session=session, project_id=gallery_in.project_id)
     if not project or project.organization_id != current_user.organization_id:
         raise HTTPException(status_code=403, detail="Not enough permissions")
-    
+
     gallery = crud.create_gallery(session=session, gallery_in=gallery_in)
     return gallery
 
@@ -82,12 +86,12 @@ def read_gallery(session: SessionDep, current_user: CurrentUser, id: uuid.UUID) 
     gallery = crud.get_gallery(session=session, gallery_id=id)
     if not gallery:
         raise HTTPException(status_code=404, detail="Gallery not found")
-    
+
     # Check if gallery's project belongs to user's organization
     project = crud.get_project(session=session, project_id=gallery.project_id)
     if not project or project.organization_id != current_user.organization_id:
         raise HTTPException(status_code=403, detail="Not enough permissions")
-    
+
     return gallery
 
 
@@ -105,13 +109,15 @@ def update_gallery(
     gallery = crud.get_gallery(session=session, gallery_id=id)
     if not gallery:
         raise HTTPException(status_code=404, detail="Gallery not found")
-    
+
     # Check if gallery's project belongs to user's organization
     project = crud.get_project(session=session, project_id=gallery.project_id)
     if not project or project.organization_id != current_user.organization_id:
         raise HTTPException(status_code=403, detail="Not enough permissions")
-    
-    gallery = crud.update_gallery(session=session, db_gallery=gallery, gallery_in=gallery_in)
+
+    gallery = crud.update_gallery(
+        session=session, db_gallery=gallery, gallery_in=gallery_in
+    )
     return gallery
 
 
@@ -125,12 +131,11 @@ def delete_gallery(
     gallery = crud.get_gallery(session=session, gallery_id=id)
     if not gallery:
         raise HTTPException(status_code=404, detail="Gallery not found")
-    
+
     # Check if gallery's project belongs to user's organization
     project = crud.get_project(session=session, project_id=gallery.project_id)
     if not project or project.organization_id != current_user.organization_id:
         raise HTTPException(status_code=403, detail="Not enough permissions")
-    
+
     crud.delete_gallery(session=session, gallery_id=id)
     return Message(message="Gallery deleted successfully")
-

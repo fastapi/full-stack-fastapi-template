@@ -1,10 +1,12 @@
 """Seed script to add sample projects and galleries to the database"""
+
 import logging
-from datetime import date, datetime, timedelta
+from datetime import date, timedelta
+
 from sqlmodel import Session, select
 
 from app.core.db import engine
-from app.models import Organization, Project, Gallery, User
+from app.models import Gallery, Organization, Project
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
@@ -16,25 +18,25 @@ def seed_data() -> None:
         organization = session.exec(
             select(Organization).where(Organization.name == "Default Organization")
         ).first()
-        
+
         if not organization:
             logger.error("Default organization not found! Run init_db first.")
             return
-        
+
         logger.info(f"Using organization: {organization.name}")
-        
+
         # Check if we already have sample data
         existing_projects = session.exec(
             select(Project).where(Project.organization_id == organization.id)
         ).first()
-        
+
         if existing_projects:
             logger.info("Sample data already exists. Skipping seed.")
             return
-        
+
         # Create sample projects
         today = date.today()
-        
+
         project1 = Project(
             name="Sarah & John Wedding Photography",
             client_name="Sarah Thompson",
@@ -45,10 +47,10 @@ def seed_data() -> None:
             start_date=today - timedelta(days=18),
             budget="$3,500",
             progress=65,
-            organization_id=organization.id
+            organization_id=organization.id,
         )
         session.add(project1)
-        
+
         project2 = Project(
             name="Product Shoot - TechCorp",
             client_name="TechCorp Inc.",
@@ -59,10 +61,10 @@ def seed_data() -> None:
             start_date=today - timedelta(days=7),
             budget="$2,000",
             progress=90,
-            organization_id=organization.id
+            organization_id=organization.id,
         )
         session.add(project2)
-        
+
         project3 = Project(
             name="Brand Photography - StartupX",
             client_name="StartupX",
@@ -73,10 +75,10 @@ def seed_data() -> None:
             start_date=today,
             budget="$1,800",
             progress=15,
-            organization_id=organization.id
+            organization_id=organization.id,
         )
         session.add(project3)
-        
+
         project4 = Project(
             name="Corporate Headshots - Law Firm",
             client_name="Smith & Associates",
@@ -87,10 +89,10 @@ def seed_data() -> None:
             start_date=today + timedelta(days=2),
             budget="$1,250",
             progress=10,
-            organization_id=organization.id
+            organization_id=organization.id,
         )
         session.add(project4)
-        
+
         project5 = Project(
             name="Restaurant Menu Photography",
             client_name="Bella Italia",
@@ -101,19 +103,19 @@ def seed_data() -> None:
             start_date=today - timedelta(days=30),
             budget="$1,500",
             progress=100,
-            organization_id=organization.id
+            organization_id=organization.id,
         )
         session.add(project5)
-        
+
         # Commit projects first so we have their IDs
         session.commit()
         session.refresh(project1)
         session.refresh(project2)
         session.refresh(project3)
         session.refresh(project5)
-        
+
         logger.info("Created 5 sample projects")
-        
+
         # Create sample galleries
         gallery1 = Gallery(
             name="Engagement Shoot",
@@ -122,10 +124,10 @@ def seed_data() -> None:
             photographer="Alice Johnson",
             status="published",
             cover_image_url="https://images.unsplash.com/photo-1519741497674-611481863552?w=400&h=300&fit=crop",
-            project_id=project1.id
+            project_id=project1.id,
         )
         session.add(gallery1)
-        
+
         gallery2 = Gallery(
             name="Wedding Day - Ceremony",
             date=today - timedelta(days=3),
@@ -133,10 +135,10 @@ def seed_data() -> None:
             photographer="Alice Johnson",
             status="processing",
             cover_image_url="https://images.unsplash.com/photo-1606800052052-a08af7148866?w=400&h=300&fit=crop",
-            project_id=project1.id
+            project_id=project1.id,
         )
         session.add(gallery2)
-        
+
         gallery3 = Gallery(
             name="Wedding Day - Reception",
             date=today - timedelta(days=3),
@@ -144,10 +146,10 @@ def seed_data() -> None:
             photographer="Bob Smith",
             status="processing",
             cover_image_url="https://images.unsplash.com/photo-1464366400600-7168b8af9bc3?w=400&h=300&fit=crop",
-            project_id=project1.id
+            project_id=project1.id,
         )
         session.add(gallery3)
-        
+
         gallery4 = Gallery(
             name="Smartphone Collection - White BG",
             date=today - timedelta(days=3),
@@ -155,10 +157,10 @@ def seed_data() -> None:
             photographer="Charlie Davis",
             status="published",
             cover_image_url="https://images.unsplash.com/photo-1511707171634-5f897ff02aa9?w=400&h=300&fit=crop",
-            project_id=project2.id
+            project_id=project2.id,
         )
         session.add(gallery4)
-        
+
         gallery5 = Gallery(
             name="Lifestyle Shots",
             date=today - timedelta(days=3),
@@ -166,10 +168,10 @@ def seed_data() -> None:
             photographer="Charlie Davis",
             status="published",
             cover_image_url="https://images.unsplash.com/photo-1556656793-08538906a9f8?w=400&h=300&fit=crop",
-            project_id=project2.id
+            project_id=project2.id,
         )
         session.add(gallery5)
-        
+
         gallery6 = Gallery(
             name="Mood Board & References",
             date=today,
@@ -177,10 +179,10 @@ def seed_data() -> None:
             photographer="Alice Johnson",
             status="draft",
             cover_image_url="https://images.unsplash.com/photo-1542744173-8e7e53415bb0?w=400&h=300&fit=crop",
-            project_id=project3.id
+            project_id=project3.id,
         )
         session.add(gallery6)
-        
+
         gallery7 = Gallery(
             name="Menu Items - Appetizers",
             date=today - timedelta(days=20),
@@ -188,10 +190,10 @@ def seed_data() -> None:
             photographer="David Lee",
             status="published",
             cover_image_url="https://images.unsplash.com/photo-1504674900247-0877df9cc836?w=400&h=300&fit=crop",
-            project_id=project5.id
+            project_id=project5.id,
         )
         session.add(gallery7)
-        
+
         gallery8 = Gallery(
             name="Menu Items - Main Courses",
             date=today - timedelta(days=18),
@@ -199,10 +201,10 @@ def seed_data() -> None:
             photographer="David Lee",
             status="published",
             cover_image_url="https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=400&h=300&fit=crop",
-            project_id=project5.id
+            project_id=project5.id,
         )
         session.add(gallery8)
-        
+
         session.commit()
         logger.info("Created 8 sample galleries")
         logger.info("Sample data seeding complete!")
@@ -216,4 +218,3 @@ def main() -> None:
 
 if __name__ == "__main__":
     main()
-

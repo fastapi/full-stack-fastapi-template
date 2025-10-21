@@ -1,26 +1,26 @@
 import uuid
-from typing import Any
 from datetime import datetime, timedelta
+from typing import Any
 
-from sqlmodel import Session, select, func, or_
+from sqlmodel import Session, desc, func, or_, select
 
 from app.core.security import get_password_hash, verify_password
 from app.models import (
+    DashboardStats,
+    Gallery,
+    GalleryCreate,
+    GalleryUpdate,
     Item,
     ItemCreate,
-    User,
-    UserCreate,
-    UserUpdate,
     Organization,
     OrganizationCreate,
     OrganizationUpdate,
     Project,
     ProjectCreate,
     ProjectUpdate,
-    Gallery,
-    GalleryCreate,
-    GalleryUpdate,
-    DashboardStats,
+    User,
+    UserCreate,
+    UserUpdate,
 )
 
 
@@ -75,7 +75,10 @@ def create_item(*, session: Session, item_in: ItemCreate, owner_id: uuid.UUID) -
 # ORGANIZATION CRUD
 # ============================================================================
 
-def create_organization(*, session: Session, organization_in: OrganizationCreate) -> Organization:
+
+def create_organization(
+    *, session: Session, organization_in: OrganizationCreate
+) -> Organization:
     db_obj = Organization.model_validate(organization_in)
     session.add(db_obj)
     session.commit()
@@ -83,12 +86,17 @@ def create_organization(*, session: Session, organization_in: OrganizationCreate
     return db_obj
 
 
-def get_organization(*, session: Session, organization_id: uuid.UUID) -> Organization | None:
+def get_organization(
+    *, session: Session, organization_id: uuid.UUID
+) -> Organization | None:
     return session.get(Organization, organization_id)
 
 
 def update_organization(
-    *, session: Session, db_organization: Organization, organization_in: OrganizationUpdate
+    *,
+    session: Session,
+    db_organization: Organization,
+    organization_in: OrganizationUpdate,
 ) -> Organization:
     organization_data = organization_in.model_dump(exclude_unset=True)
     db_organization.sqlmodel_update(organization_data)
@@ -101,6 +109,7 @@ def update_organization(
 # ============================================================================
 # PROJECT CRUD
 # ============================================================================
+
 
 def create_project(*, session: Session, project_in: ProjectCreate) -> Project:
     db_obj = Project.model_validate(project_in)
@@ -122,17 +131,25 @@ def get_projects_by_organization(
         .where(Project.organization_id == organization_id)
         .offset(skip)
         .limit(limit)
-        .order_by(Project.created_at.desc())
+        .order_by(desc(Project.created_at))
     )
     return list(session.exec(statement).all())
 
 
-def count_projects_by_organization(*, session: Session, organization_id: uuid.UUID) -> int:
-    statement = select(func.count()).select_from(Project).where(Project.organization_id == organization_id)
+def count_projects_by_organization(
+    *, session: Session, organization_id: uuid.UUID
+) -> int:
+    statement = (
+        select(func.count())
+        .select_from(Project)
+        .where(Project.organization_id == organization_id)
+    )
     return session.exec(statement).one()
 
 
-def update_project(*, session: Session, db_project: Project, project_in: ProjectUpdate) -> Project:
+def update_project(
+    *, session: Session, db_project: Project, project_in: ProjectUpdate
+) -> Project:
     project_data = project_in.model_dump(exclude_unset=True)
     project_data["updated_at"] = datetime.utcnow()
     db_project.sqlmodel_update(project_data)
@@ -152,6 +169,7 @@ def delete_project(*, session: Session, project_id: uuid.UUID) -> None:
 # ============================================================================
 # GALLERY CRUD
 # ============================================================================
+
 
 def create_gallery(*, session: Session, gallery_in: GalleryCreate) -> Gallery:
     db_obj = Gallery.model_validate(gallery_in)
@@ -173,7 +191,7 @@ def get_galleries_by_project(
         .where(Gallery.project_id == project_id)
         .offset(skip)
         .limit(limit)
-        .order_by(Gallery.created_at.desc())
+        .order_by(desc(Gallery.created_at))
     )
     return list(session.exec(statement).all())
 
@@ -188,12 +206,14 @@ def get_galleries_by_organization(
         .where(Project.organization_id == organization_id)
         .offset(skip)
         .limit(limit)
-        .order_by(Gallery.created_at.desc())
+        .order_by(desc(Gallery.created_at))
     )
     return list(session.exec(statement).all())
 
 
-def count_galleries_by_organization(*, session: Session, organization_id: uuid.UUID) -> int:
+def count_galleries_by_organization(
+    *, session: Session, organization_id: uuid.UUID
+) -> int:
     statement = (
         select(func.count())
         .select_from(Gallery)
@@ -203,7 +223,9 @@ def count_galleries_by_organization(*, session: Session, organization_id: uuid.U
     return session.exec(statement).one()
 
 
-def update_gallery(*, session: Session, db_gallery: Gallery, gallery_in: GalleryUpdate) -> Gallery:
+def update_gallery(
+    *, session: Session, db_gallery: Gallery, gallery_in: GalleryUpdate
+) -> Gallery:
     gallery_data = gallery_in.model_dump(exclude_unset=True)
     db_gallery.sqlmodel_update(gallery_data)
     session.add(db_gallery)
@@ -223,20 +245,23 @@ def delete_gallery(*, session: Session, gallery_id: uuid.UUID) -> None:
 # DASHBOARD STATS
 # ============================================================================
 
-def get_dashboard_stats(*, session: Session, organization_id: uuid.UUID) -> DashboardStats:
+
+def get_dashboard_stats(
+    *, session: Session, organization_id: uuid.UUID
+) -> DashboardStats:
     """Calculate dashboard statistics for an organization"""
-    
+
     # Count active projects (in_progress or review status)
     active_projects_stmt = (
         select(func.count())
         .select_from(Project)
         .where(
             Project.organization_id == organization_id,
-            or_(Project.status == "in_progress", Project.status == "review")
+            or_(Project.status == "in_progress", Project.status == "review"),
         )
     )
     active_projects = session.exec(active_projects_stmt).one()
-    
+
     # Count upcoming deadlines (projects with deadline in next 14 days, not completed)
     today = datetime.utcnow().date()
     two_weeks = today + timedelta(days=14)
@@ -245,14 +270,14 @@ def get_dashboard_stats(*, session: Session, organization_id: uuid.UUID) -> Dash
         .select_from(Project)
         .where(
             Project.organization_id == organization_id,
-            Project.deadline.isnot(None),
-            Project.deadline >= today,
-            Project.deadline <= two_weeks,
-            Project.status != "completed"
+            Project.deadline.isnot(None),  # type: ignore[union-attr]
+            Project.deadline >= today,  # type: ignore[operator]
+            Project.deadline <= two_weeks,  # type: ignore[operator]
+            Project.status != "completed",
         )
     )
     upcoming_deadlines = session.exec(upcoming_deadlines_stmt).one()
-    
+
     # Count team members in organization
     team_members_stmt = (
         select(func.count())
@@ -260,7 +285,7 @@ def get_dashboard_stats(*, session: Session, organization_id: uuid.UUID) -> Dash
         .where(User.organization_id == organization_id)
     )
     team_members = session.exec(team_members_stmt).one()
-    
+
     # Count completed projects this month
     first_day_of_month = today.replace(day=1)
     completed_this_month_stmt = (
@@ -269,11 +294,11 @@ def get_dashboard_stats(*, session: Session, organization_id: uuid.UUID) -> Dash
         .where(
             Project.organization_id == organization_id,
             Project.status == "completed",
-            Project.updated_at >= first_day_of_month
+            Project.updated_at >= first_day_of_month,
         )
     )
     completed_this_month = session.exec(completed_this_month_stmt).one()
-    
+
     return DashboardStats(
         active_projects=active_projects,
         upcoming_deadlines=upcoming_deadlines,

@@ -1,6 +1,8 @@
-from datetime import datetime
 import platform
 import sys
+from datetime import datetime
+from typing import Any
+
 from fastapi import APIRouter, Depends
 from pydantic.networks import EmailStr
 
@@ -35,7 +37,7 @@ async def health_check() -> bool:
 
 
 @router.get("/system-info/")
-async def get_system_info() -> dict:
+async def get_system_info() -> dict[str, Any]:
     """
     Get interesting system information including current time, platform details, and Python version.
     """
@@ -55,7 +57,7 @@ async def get_system_info() -> dict:
                 "major": sys.version_info.major,
                 "minor": sys.version_info.minor,
                 "micro": sys.version_info.micro,
-            }
+            },
         },
-        "fun_fact": "This API endpoint was created as part of CS4800 team project exercise!"
+        "fun_fact": "This API endpoint was created as part of CS4800 team project exercise!",
     }

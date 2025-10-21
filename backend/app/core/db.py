@@ -2,7 +2,7 @@ from sqlmodel import Session, create_engine, select
 
 from app import crud
 from app.core.config import settings
-from app.models import User, UserCreate, Organization, OrganizationCreate
+from app.models import Organization, OrganizationCreate, User, UserCreate
 
 engine = create_engine(str(settings.SQLALCHEMY_DATABASE_URI))
 
@@ -27,10 +27,11 @@ def init_db(session: Session) -> None:
     ).first()
     if not organization:
         organization_in = OrganizationCreate(
-            name="Default Organization",
-            description="Initial organization for Mosaic"
+            name="Default Organization", description="Initial organization for Mosaic"
         )
-        organization = crud.create_organization(session=session, organization_in=organization_in)
+        organization = crud.create_organization(
+            session=session, organization_in=organization_in
+        )
 
     user = session.exec(
         select(User).where(User.email == settings.FIRST_SUPERUSER)
@@ -42,7 +43,7 @@ def init_db(session: Session) -> None:
             is_superuser=True,
         )
         user = crud.create_user(session=session, user_create=user_in)
-    
+
     # Assign user to default organization if not already assigned
     if user and not user.organization_id:
         user.organization_id = organization.id

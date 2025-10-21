@@ -75,18 +75,7 @@ jobs:
     - run: docker compose down -v --remove-orphans
     - name: Run Playwright tests
       run: docker compose run --rm playwright npx playwright test --fail-on-flaky-tests --trace=retain-on-failure --shard=${{ matrix.shardIndex }}/${{ matrix.shardTotal }}
-      env:
-        # Required environment variables for Docker Compose
-        FIRST_SUPERUSER: admin@example.com
-        FIRST_SUPERUSER_PASSWORD: changethis
-        SECRET_KEY: changethis
-        PROJECT_NAME: FastAPI Project
-        POSTGRES_SERVER: db
-        POSTGRES_PORT: 5432
-        POSTGRES_USER: postgres
-        POSTGRES_PASSWORD: changethis
-        POSTGRES_DB: app
-        ENVIRONMENT: test
+
     - run: docker compose down -v --remove-orphans
     - name: Upload blob report to GitHub Actions Artifacts
       if: ${{ !cancelled() }}
