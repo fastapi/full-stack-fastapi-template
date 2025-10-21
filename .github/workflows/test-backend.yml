@@ -32,6 +32,18 @@ jobs:
       - name: Run tests
         run: uv run bash scripts/tests-start.sh "Coverage for ${{ github.sha }}"
         working-directory: backend
+        env:
+          # Required environment variables for tests (using dummy values for CI)
+          FIRST_SUPERUSER: admin@example.com
+          FIRST_SUPERUSER_PASSWORD: changethis
+          SECRET_KEY: changethis
+          PROJECT_NAME: FastAPI Project
+          POSTGRES_SERVER: db
+          POSTGRES_PORT: 5432
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: changethis
+          POSTGRES_DB: app
+          ENVIRONMENT: test
       - run: docker compose down -v --remove-orphans
       - name: Store coverage files
         uses: actions/upload-artifact@v4
