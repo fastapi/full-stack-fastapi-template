@@ -47,32 +47,42 @@ jobs:
     
     - name: Deploy to EC2
       run: |
-        ssh ec2-user@${{ secrets.EC2_HOST }} << 'EOF'
-          # Navigate to project directory
-          cd mosaic-project-cs4800 || cd mosaic-project-cs4800-main
-          
-          # Pull latest changes
-          git pull origin main || git pull origin master
-          
-          # Make deployment script executable
-          chmod +x deploy-ip.sh
-          
-          # Run deployment script
-          ./deploy-ip.sh ${{ secrets.EC2_HOST }}
-          
-          # Deploy with Docker Compose
-          docker compose -f docker-compose.production.yml down
-          docker compose -f docker-compose.production.yml up -d --build
-          
-          # Wait for services to be healthy
-          sleep 30
-          
-          # Check if services are running
-          docker compose -f docker-compose.production.yml ps
-          
-          # Test backend health
-          curl -f http://localhost:8000/api/v1/utils/health-check/ || echo "Backend health check failed"
-        EOF
+        ssh ec2-user@${{ secrets.EC2_HOST }} 'bash -s' << 'ENDSSH'
+        cd mosaic-project-cs4800 || cd mosaic-project-cs4800-main
+        git pull origin main || git pull origin master
+        chmod +x deploy-ip.sh
+        ./deploy-ip.sh ${{ secrets.EC2_HOST }}
+        cat > .env << 'ENVEOF'
+        ENVIRONMENT=production
+        DOMAIN=${{ secrets.EC2_HOST }}
+        PROJECT_NAME=Mosaic Project
+        STACK_NAME=mosaic-project-production
+        BACKEND_CORS_ORIGINS=http://${{ secrets.EC2_HOST }}:5173,http://${{ secrets.EC2_HOST }}:80,http://${{ secrets.EC2_HOST }}
+        FRONTEND_HOST=http://${{ secrets.EC2_HOST }}:5173
+        SECRET_KEY=${{ secrets.SECRET_KEY }}
+        FIRST_SUPERUSER=${{ secrets.FIRST_SUPERUSER }}
+        FIRST_SUPERUSER_PASSWORD=${{ secrets.FIRST_SUPERUSER_PASSWORD }}
+        POSTGRES_SERVER=db
+        POSTGRES_PORT=5432
+        POSTGRES_USER=postgres
+        POSTGRES_PASSWORD=${{ secrets.POSTGRES_PASSWORD }}
+        POSTGRES_DB=app
+        SMTP_HOST=
+        SMTP_USER=
+        SMTP_PASSWORD=
+        EMAILS_FROM_EMAIL=
+        DOCKER_IMAGE_BACKEND=mosaic-backend
+        DOCKER_IMAGE_FRONTEND=mosaic-frontend
+        TAG=latest
+        ENVEOF
+        export DOCKER_BUILDKIT=1
+        export COMPOSE_DOCKER_CLI_BUILD=1
+        docker compose -f docker-compose.production.yml down
+        docker compose -f docker-compose.production.yml up -d --build
+        sleep 30
+        docker compose -f docker-compose.production.yml ps
+        curl -f http://localhost:8000/api/v1/utils/health-check/ || echo "Backend health check failed"
+        ENDSSH
     
     - name: Verify deployment
       run: |
