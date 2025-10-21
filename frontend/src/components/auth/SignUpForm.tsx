@@ -19,8 +19,9 @@ export default function SignUpForm() {
     register,
     handleSubmit,
     formState: { errors },
-  } = useForm<FormData>();
-
+  } = useForm<FormData>({
+    mode: "onChange"
+  });
   const onSubmit = (data: FormData) => {
     console.log("Form data:", data);
   };

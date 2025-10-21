@@ -13,7 +13,13 @@ const eslintConfig = [
   {
     ignores: ["src/client/**"], // ✅ Ignore generated OpenAPI client
   },
-  ...compat.extends("next/core-web-vitals", "next/typescript"),
+  ...compat.config({
+    extends: ["next/core-web-vitals", "next/typescript"],
+
+    rules: {
+      "@typescript-eslint/no-explicit-any": "warn",
+    },
+  }),
 ];
 
 export default eslintConfig;
