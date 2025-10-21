@@ -3,6 +3,8 @@ import Button from "./Button";
 import Spinner from "@/components/ui/spinner";
 
 interface SpinnerButtonProps {
+  variant?: "primary" | "secondary" | "tertiary"; // Button variant
+  size?: "sm" | "md" | undefined;
   children: ReactNode; // Button text or content
   startIcon?: ReactNode; // Icon before the text
   onClick?: () => void; // Click handler
