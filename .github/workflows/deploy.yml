@@ -1,0 +1,84 @@
+name: Deploy to EC2
+
+on:
+  push:
+    branches: [ main, master ]
+  pull_request:
+    branches: [ main, master ]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v4
+    
+    - name: Set up Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.10'
+    
+    - name: Install dependencies
+      run: |
+        cd backend
+        pip install -r requirements.txt || pip install -e .
+    
+    - name: Run tests
+      run: |
+        cd backend
+        python -m pytest tests/ -v
+
+  deploy:
+    needs: test
+    runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/main' || github.ref == 'refs/heads/master'
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+    
+    - name: Setup SSH
+      uses: webfactory/ssh-agent@v0.7.0
+      with:
+        ssh-private-key: ${{ secrets.EC2_SSH_KEY }}
+    
+    - name: Add EC2 to known hosts
+      run: |
+        ssh-keyscan -H ${{ secrets.EC2_HOST }} >> ~/.ssh/known_hosts
+    
+    - name: Deploy to EC2
+      run: |
+        ssh ec2-user@${{ secrets.EC2_HOST }} << 'EOF'
+          # Navigate to project directory
+          cd mosaic-project-cs4800 || cd mosaic-project-cs4800-main
+          
+          # Pull latest changes
+          git pull origin main || git pull origin master
+          
+          # Make deployment script executable
+          chmod +x deploy-ip.sh
+          
+          # Run deployment script
+          ./deploy-ip.sh ${{ secrets.EC2_HOST }}
+          
+          # Deploy with Docker Compose
+          docker compose -f docker-compose.production.yml down
+          docker compose -f docker-compose.production.yml up -d --build
+          
+          # Wait for services to be healthy
+          sleep 30
+          
+          # Check if services are running
+          docker compose -f docker-compose.production.yml ps
+          
+          # Test backend health
+          curl -f http://localhost:8000/api/v1/utils/health-check/ || echo "Backend health check failed"
+        EOF
+    
+    - name: Verify deployment
+      run: |
+        # Wait a bit for services to fully start
+        sleep 10
+        
+        # Test if the application is accessible
+        curl -f http://${{ secrets.EC2_HOST }}:8000/api/v1/utils/health-check/ || echo "Backend not accessible"
+        curl -f http://${{ secrets.EC2_HOST }} || echo "Frontend not accessible"
