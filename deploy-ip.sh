@@ -83,6 +83,7 @@ services:
         restart: true
     command: bash scripts/prestart.sh
     environment:
+      - PROJECT_NAME=\${PROJECT_NAME}
       - DOMAIN=\${DOMAIN}
       - FRONTEND_HOST=\${FRONTEND_HOST}
       - ENVIRONMENT=\${ENVIRONMENT}
@@ -112,6 +113,7 @@ services:
     build:
       context: ./backend
     environment:
+      - PROJECT_NAME=\${PROJECT_NAME}
       - DOMAIN=\${DOMAIN}
       - FRONTEND_HOST=\${FRONTEND_HOST}
       - ENVIRONMENT=\${ENVIRONMENT}
