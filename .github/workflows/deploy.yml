@@ -12,20 +12,23 @@ jobs:
     steps:
     - uses: actions/checkout@v4
     
-    - name: Set up Python
-      uses: actions/setup-python@v4
+    - name: Install uv
+      uses: astral-sh/setup-uv@v4
       with:
-        python-version: '3.10'
+        enable-cache: true
+    
+    - name: Set up Python
+      run: uv python install 3.10
     
     - name: Install dependencies
       run: |
         cd backend
-        pip install -r requirements.txt || pip install -e .
+        uv sync
     
     - name: Run tests
       run: |
         cd backend
-        python -m pytest tests/ -v
+        uv run pytest tests/ -v
 
   deploy:
     needs: test
