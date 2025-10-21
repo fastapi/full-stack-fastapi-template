@@ -1,13 +1,10 @@
 import React, { ReactNode } from "react";
-import Button, { ButtonProps } from "./Button";
+import Button from "./Button";
 import Spinner from "@/components/ui/spinner";
 
 interface SpinnerButtonProps {
   children: ReactNode; // Button text or content
-  size?: "sm" | "md"; // Button size
-  variant?: "primary" | "outline"; // Button variant
   startIcon?: ReactNode; // Icon before the text
-  endIcon?: ReactNode; // Icon after the text
   onClick?: () => void; // Click handler
   disabled?: boolean; // Disabled state
   className?: string; // Disabled state
@@ -16,10 +13,7 @@ interface SpinnerButtonProps {
 
 const SpinnerButton: React.FC<SpinnerButtonProps> = ({
   children,
-  size = "md",
-  variant = "primary",
   startIcon,
-  endIcon,
   onClick,
   className = "",
   disabled = false,
@@ -31,6 +25,11 @@ const SpinnerButton: React.FC<SpinnerButtonProps> = ({
       {...props}
       startIcon={loading ? <Spinner /> : startIcon}
       disabled={disabled || loading}
+        onClick={onClick}
+        className={className}
+        variant="primary"
+
+
     >
       {children}
     </Button>

@@ -2,7 +2,6 @@
 import React, { useState } from "react";
 import ComponentCard from "../../common/ComponentCard";
 import { useDropzone } from "react-dropzone";
-import Button from "@/components/ui/button/Button";
 import SpinnerButton from "@/components/ui/button/SpinnerButton";
 
 const DropzoneComponent: React.FC = () => {
