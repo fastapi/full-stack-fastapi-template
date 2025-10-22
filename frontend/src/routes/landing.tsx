@@ -2,6 +2,8 @@ import { Box, Button, Container, Flex, Heading, Text } from "@chakra-ui/react"
 import { Link as RouterLink, createFileRoute } from "@tanstack/react-router"
 
 import { isLoggedIn } from "@/hooks/useAuth"
+import { OddsCard } from "@/components/Landing/OddsCard"
+import useCustomToast from "@/hooks/useCustomToast"
 
 export const Route = createFileRoute("/landing")({
   component: LandingPage,
@@ -9,6 +11,34 @@ export const Route = createFileRoute("/landing")({
 
 function LandingPage() {
   const loggedIn = isLoggedIn()
+  const { showSuccessToast } = useCustomToast()
+
+  const featuredMarket = {
+    homeTeam: "Tampines Rovers",
+    awayTeam: "Pohang Steelers",
+    marketLabel: "Moneyline",
+    home: {
+      value: "+640",
+      book: {
+        name: "BC.GAME",
+        logoUrl: "https://dummyimage.com/60x18/eeeeee/333333&text=BC.GAME",
+      },
+    },
+    draw: {
+      value: "+350",
+      book: {
+        name: "MOSTBET",
+        logoUrl: "https://dummyimage.com/64x18/eeeeee/333333&text=MOSTBET",
+      },
+    },
+    away: {
+      value: "-129",
+      book: {
+        name: "betway",
+        logoUrl: "https://dummyimage.com/64x18/eeeeee/333333&text=betway",
+      },
+    },
+  }
 
   return (
     <Container
@@ -60,6 +90,24 @@ function LandingPage() {
         <Feature
           title="Collaboration Ready"
           description="Invite your team and share insights to coordinate faster trades."
+        />
+      </Flex>
+
+      <Flex direction="column" gap={6}>
+        <Heading as="h2" size="lg">
+          Track markets effortlessly
+        </Heading>
+        <Text color="fg.muted">
+          Explore a unified view of the best odds across your books. Select a side to
+          fast-track it into your workflow.
+        </Text>
+        <OddsCard
+          {...featuredMarket}
+          onSelect={(market) =>
+            showSuccessToast(
+              `Selected ${market.toUpperCase()} market from the featured matchup.`,
+            )
+          }
         />
       </Flex>
     </Container>
