@@ -6,8 +6,11 @@
   "scripts": {
     "dev": "next dev",
     "build": "next build",
-    "start": "next start",
+    "start": "next start -H 0.0.0.0",
     "lint": "next lint",
+    "lint:fix": "next lint --fix",
+    "format": "prettier --write .",
+    "clean": "npm run lint:fix && npm run format",
     "generate-client": "openapi-ts"
   },
   "dependencies": {
@@ -23,7 +26,7 @@
     "@tailwindcss/postcss": "^4.0.9",
     "@tanstack/react-query": "^5.90.5",
     "@tanstack/react-router": "^1.133.21",
-    "apexcharts": "^4.3.0",
+        "apexcharts": "^4.3.0",
     "autoprefixer": "^10.4.20",
     "axios": "^1.12.2",
     "flatpickr": "^4.6.13",

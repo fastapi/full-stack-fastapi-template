@@ -4,17 +4,23 @@ import Label from "@/components/form/Label";
 import { ChevronLeftIcon, EyeCloseIcon, EyeIcon } from "@/icons";
 import Link from "next/link";
 import React, { useState } from "react";
-import { namePattern, passwordRules } from "@/utils";
+import { namePattern, emailPattern, passwordRules } from "@/utils";
 import { useForm } from "react-hook-form";
+import { useSignup } from "@/hooks/useSignup";
+import SpinnerButton from "../ui/button/SpinnerButton";
+
 
 type FormData = {
   firstName: string;
   lastName: string;
   password: string;
+  email: string;
 };
 
 export default function SignUpForm() {
   const [showPassword, setShowPassword] = useState(false);
+  const signupMutation = useSignup();
+
   const {
     register,
     handleSubmit,
@@ -24,6 +30,23 @@ export default function SignUpForm() {
   });
   const onSubmit = (data: FormData) => {
     console.log("Form data:", data);
+    signupMutation.mutate(
+      {
+        requestBody: {
+          full_name: data.firstName + " " + data.lastName,
+          password: data.password,
+          email: data.email,
+        },
+      },
+      {
+        onSuccess: (res) => {
+          console.log("Signup success:", res);
+        },
+        onError: (err) => {
+          console.error("Signup failed:", err);
+        },
+      }
+    );
   };
 
   return (
@@ -34,7 +57,7 @@ export default function SignUpForm() {
           className="inline-flex items-center text-sm text-gray-500 transition-colors hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-300"
         >
           <ChevronLeftIcon />
-          Back to dashboard
+          Back to home
         </Link>
       </div>
 
@@ -81,7 +104,22 @@ export default function SignUpForm() {
                 hint={errors.lastName?.message}
               />
             </div>
-
+            {/* Email */}
+            <div className="sm:col-span-2">
+              <Label>
+                Email<span className="text-error-500">*</span>
+              </Label>
+              <Input
+                placeholder="Enter your email"
+                type="email"
+                {...register("email", {
+                  required: "Email is required",
+                  pattern: emailPattern
+                })}
+                error={!!errors.email}
+                hint={errors.email?.message}
+              />
+            </div>
             {/* Password */}
             <div className="sm:col-span-2">
               <Label>
@@ -107,19 +145,18 @@ export default function SignUpForm() {
                 </span>
               </div>
             </div>
-
             {/* Submit Button */}
             <div className="sm:col-span-2">
-              <button
-                type="submit"
+              <SpinnerButton
                 className="flex items-center justify-center w-full px-4 py-3 text-sm font-medium text-white transition rounded-lg bg-brand-500 shadow-theme-xs hover:bg-brand-600"
+                disabled={signupMutation.isPending}
+                loading={signupMutation.isPending}
               >
                 Sign Up
-              </button>
+              </SpinnerButton>
             </div>
           </div>
         </form>
-
         <div className="mt-5">
           <p className="text-sm font-normal text-center text-gray-700 dark:text-gray-400 sm:text-start">
             Already have an account?{" "}
