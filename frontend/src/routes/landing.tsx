@@ -3,6 +3,7 @@ import { Link as RouterLink, createFileRoute } from "@tanstack/react-router"
 
 import { isLoggedIn } from "@/hooks/useAuth"
 import { OddsCard } from "@/components/Landing/OddsCard"
+import { ColorModeButton } from "@/components/ui/color-mode"
 import useCustomToast from "@/hooks/useCustomToast"
 
 export const Route = createFileRoute("/landing")({
@@ -51,6 +52,9 @@ function LandingPage() {
       py={12}
     >
       <Flex direction="column" gap={6}>
+        <Flex justify="flex-end">
+          <ColorModeButton aria-label="Toggle color mode" size="sm" />
+        </Flex>
         <Heading as="h1" size="3xl">
           Seamless Arbitrage Insights
         </Heading>

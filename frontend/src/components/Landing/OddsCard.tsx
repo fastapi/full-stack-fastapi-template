@@ -35,7 +35,7 @@ function BookBadge({ logoUrl, name }: BookInfo) {
 
   return (
     <Flex
-      mt={3}
+      mt={2}
       align="center"
       gap={2}
       bg={badgeBg}
@@ -72,6 +72,8 @@ function OddsPill({ value, book, label, onSelect }: OddsPillProps) {
       display="flex"
       flexDir="column"
       alignItems="center"
+      justifyContent="center"
+      gap={2}
       transition="all 0.2s ease-in-out"
       _hover={{ transform: "translateY(-3px)", bg: hoverBg, shadow: "md" }}
     >
@@ -166,22 +168,15 @@ export function OddsCard({
             {awayTeam}
           </Text>
         </Flex>
-        <Flex direction="column" justify="center" align="center" gap={2}>
-          <Text fontSize="sm" fontWeight="medium" color="teal.600">
+        <Flex direction="column" align="center" justify="center" w="full" maxW="3xl" gap={4}>
+          <Text fontSize="sm" fontWeight="medium" color="teal.600" textTransform="uppercase">
             {marketLabel}
           </Text>
-        </Flex>
-
-        <Flex
-          justify="space-evenly"
-          align="center"
-          gap={10}
-          w="full"
-          maxW="3xl"
-        >
-          <MarketColumn title="HOME" market={home} onSelect={() => onSelect?.("home")} />
-          <MarketColumn title="DRAW" market={draw} onSelect={() => onSelect?.("draw")} />
-          <MarketColumn title="AWAY" market={away} onSelect={() => onSelect?.("away")} />
+          <Flex justify="space-evenly" align="center" gap={10} w="full">
+            <MarketColumn title="HOME" market={home} onSelect={() => onSelect?.("home")} />
+            <MarketColumn title="DRAW" market={draw} onSelect={() => onSelect?.("draw")} />
+            <MarketColumn title="AWAY" market={away} onSelect={() => onSelect?.("away")} />
+          </Flex>
         </Flex>
       </Flex>
     </Box>
