@@ -35,15 +35,15 @@ function BookBadge({ logoUrl, name }: BookInfo) {
 
   return (
     <Flex
-      mt={2}
+      mt={3}
       align="center"
       gap={2}
       bg={badgeBg}
       color={badgeColor}
-      px={2}
+      px={3}
       py={1}
-      borderRadius="md"
-      fontSize="xs"
+      borderRadius="lg"
+      fontSize="sm"
       maxW="100%"
     >
       {logoUrl ? (
@@ -57,7 +57,8 @@ function BookBadge({ logoUrl, name }: BookInfo) {
 
 function OddsPill({ value, book, label, onSelect }: OddsPillProps) {
   const borderColor = useColorModeValue("gray.200", "gray.600")
-  const hoverBg = useColorModeValue("gray.50", "gray.700")
+  const hoverBg = useColorModeValue("gray.100", "gray.700")
+  const textColor = useColorModeValue("teal.600", "teal.200")
 
   return (
     <Button
@@ -65,16 +66,16 @@ function OddsPill({ value, book, label, onSelect }: OddsPillProps) {
       variant="outline"
       borderRadius="xl"
       borderColor={borderColor}
-      w="100px"
-      py={3}
-      px={3}
+      minW="140px"
+      py={4}
+      px={4}
       display="flex"
       flexDir="column"
       alignItems="center"
       transition="all 0.2s ease-in-out"
       _hover={{ transform: "translateY(-3px)", bg: hoverBg, shadow: "md" }}
     >
-      <Text fontSize="lg" fontWeight="semibold" letterSpacing="tight" color="fg.default">
+      <Text fontSize="2xl" fontWeight="semibold" letterSpacing="tight" color={textColor}>
         {value}
       </Text>
       {book ? <BookBadge {...book} /> : <Text fontSize="xs">{label}</Text>}
@@ -119,9 +120,10 @@ export function OddsCard({
       borderRadius="2xl"
       borderColor={borderColor}
       bg={wrapperBg}
-      p={6}
+      px={10}
+      py={8}
       w="full"
-      maxW="3xl"
+      maxW="5xl"
     >
       <Flex
         direction={{ base: "column", sm: "row" }}
@@ -129,39 +131,57 @@ export function OddsCard({
         align={{ base: "stretch", sm: "center" }}
         gap={6}
       >
-        <Box>
-          <Text fontSize="xl" fontWeight="semibold" lineHeight="shorter">
+        <Flex
+          direction={{ base: "column", md: "row" }}
+          align="center"
+          justify="center"
+          gap={4}
+          minW={{ base: "full", md: "sm" }}
+        >
+          <Text
+            fontSize="2xl"
+            fontWeight="semibold"
+            textAlign={{ base: "center", md: "right" }}
+            lineHeight="short"
+          >
             {homeTeam}
           </Text>
-          <Text fontSize="xl" fontWeight="semibold" lineHeight="shorter">
+          <Box
+            px={3}
+            py={1}
+            borderRadius="full"
+            bg="teal.600"
+            color="white"
+            fontWeight="bold"
+            fontSize="sm"
+          >
+            VS
+          </Box>
+          <Text
+            fontSize="2xl"
+            fontWeight="semibold"
+            textAlign={{ base: "center", md: "left" }}
+            lineHeight="short"
+          >
             {awayTeam}
           </Text>
-          <Text mt={3} fontSize="sm" fontWeight="medium" color="teal.600">
+        </Flex>
+        <Flex direction="column" justify="center" align="center" gap={2}>
+          <Text fontSize="sm" fontWeight="medium" color="teal.600">
             {marketLabel}
           </Text>
-        </Box>
+        </Flex>
 
         <Flex
-          justify="space-between"
-          gap={4}
+          justify="space-evenly"
+          align="center"
+          gap={10}
           w="full"
-          maxW={{ base: "full", sm: "auto" }}
+          maxW="3xl"
         >
-          <MarketColumn
-            title="HOME"
-            market={home}
-            onSelect={() => onSelect?.("home")}
-          />
-          <MarketColumn
-            title="DRAW"
-            market={draw}
-            onSelect={() => onSelect?.("draw")}
-          />
-          <MarketColumn
-            title="AWAY"
-            market={away}
-            onSelect={() => onSelect?.("away")}
-          />
+          <MarketColumn title="HOME" market={home} onSelect={() => onSelect?.("home")} />
+          <MarketColumn title="DRAW" market={draw} onSelect={() => onSelect?.("draw")} />
+          <MarketColumn title="AWAY" market={away} onSelect={() => onSelect?.("away")} />
         </Flex>
       </Flex>
     </Box>
