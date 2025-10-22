@@ -67,7 +67,7 @@ function OddsPill({ value, book, label, onSelect }: OddsPillProps) {
       borderRadius="xl"
       borderColor={borderColor}
       minW="140px"
-      py={4}
+      py={50}
       px={4}
       display="flex"
       flexDir="column"
@@ -118,7 +118,7 @@ export function OddsCard({
 
   return (
     <Box
-      borderWidth="1px"
+      borderWidth="4px"
       borderRadius="2xl"
       borderColor={borderColor}
       bg={wrapperBg}
