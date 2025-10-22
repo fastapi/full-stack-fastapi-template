@@ -212,8 +212,8 @@ export function OverUnderOddsCard({
       borderRadius="2xl"
       borderColor={borderColor}
       bg={wrapperBg}
-      px={10}
-      py={50}
+      px={8}
+      py={6}
       w="full"
       maxW="5xl"
     >
@@ -258,12 +258,12 @@ export function OverUnderOddsCard({
             {awayTeam}
           </Text>
         </Flex>
-        <Flex direction="column" align="center" justify="center" w="full" maxW="2xl" gap={4}>
+        <Flex direction="column" align="center" justify="center" w="full" maxW="2xl" gap={2}>
           <Text fontSize="sm" fontWeight="medium" color="teal.600" textTransform="uppercase">
             {marketLabel}
           </Text>
           {line && (
-            <Text fontSize="3xl" fontWeight="semibold" color="fg.default">
+            <Text fontSize="2xl" fontWeight="medium" color="fg.default">
               {line}
             </Text>
           )}
