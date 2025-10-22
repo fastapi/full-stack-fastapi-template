@@ -2,7 +2,7 @@ import { Box, Button, Container, Flex, Heading, Text } from "@chakra-ui/react"
 import { Link as RouterLink, createFileRoute } from "@tanstack/react-router"
 
 import { isLoggedIn } from "@/hooks/useAuth"
-import { OddsCard } from "@/components/Landing/OddsCard"
+import { OddsCard, OverUnderOddsCard } from "@/components/Landing/OddsCard"
 import { ColorModeButton } from "@/components/ui/color-mode"
 import useCustomToast from "@/hooks/useCustomToast"
 
@@ -37,6 +37,27 @@ function LandingPage() {
       book: {
         name: "betway",
         logoUrl: "https://dummyimage.com/64x18/eeeeee/333333&text=betway",
+      },
+    },
+  }
+
+  const totalsMarket = {
+    homeTeam: "Real Betis",
+    awayTeam: "Sevilla FC",
+    marketLabel: "Total Goals",
+    line: "2.5",
+    over: {
+      value: "-105",
+      book: {
+        name: "FanDuel",
+        logoUrl: "https://dummyimage.com/64x18/eeeeee/333333&text=FanDuel",
+      },
+    },
+    under: {
+      value: "-110",
+      book: {
+        name: "DraftKings",
+        logoUrl: "https://dummyimage.com/64x18/eeeeee/333333&text=DraftKings",
       },
     },
   }
@@ -110,6 +131,23 @@ function LandingPage() {
           onSelect={(market) =>
             showSuccessToast(
               `Selected ${market.toUpperCase()} market from the featured matchup.`,
+            )
+          }
+        />
+      </Flex>
+
+      <Flex direction="column" gap={6}>
+        <Heading as="h2" size="lg">
+          Totals, made simple
+        </Heading>
+        <Text color="fg.muted">
+          Surface edges on totals with streamlined over/under comparisons across your books.
+        </Text>
+        <OverUnderOddsCard
+          {...totalsMarket}
+          onSelect={(market) =>
+            showSuccessToast(
+              `Selected ${market.toUpperCase()} option on the featured totals market.`,
             )
           }
         />

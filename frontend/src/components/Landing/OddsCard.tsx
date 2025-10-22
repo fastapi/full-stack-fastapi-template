@@ -3,6 +3,7 @@ import { Box, Button, Flex, Image, Text } from "@chakra-ui/react"
 import { useColorModeValue } from "@/components/ui/color-mode"
 
 type MarketKey = "home" | "draw" | "away"
+type OverUnderKey = "over" | "under"
 
 interface BookInfo {
   name: string
@@ -22,6 +23,16 @@ export interface OddsCardProps {
   draw: Market
   away: Market
   onSelect?: (market: MarketKey) => void
+}
+
+export interface OverUnderOddsCardProps {
+  homeTeam: string
+  awayTeam: string
+  marketLabel?: string
+  line?: string
+  over: Market
+  under: Market
+  onSelect?: (market: OverUnderKey) => void
 }
 
 interface OddsPillProps extends Market {
@@ -118,7 +129,7 @@ export function OddsCard({
 
   return (
     <Box
-      borderWidth="4px"
+      borderWidth="1px"
       borderRadius="2xl"
       borderColor={borderColor}
       bg={wrapperBg}
@@ -176,6 +187,89 @@ export function OddsCard({
             <MarketColumn title="HOME" market={home} onSelect={() => onSelect?.("home")} />
             <MarketColumn title="DRAW" market={draw} onSelect={() => onSelect?.("draw")} />
             <MarketColumn title="AWAY" market={away} onSelect={() => onSelect?.("away")} />
+          </Flex>
+        </Flex>
+      </Flex>
+    </Box>
+  )
+}
+
+export function OverUnderOddsCard({
+  homeTeam,
+  awayTeam,
+  marketLabel = "Total",
+  line,
+  over,
+  under,
+  onSelect,
+}: OverUnderOddsCardProps) {
+  const wrapperBg = useColorModeValue("gray.50", "gray.800")
+  const borderColor = useColorModeValue("gray.200", "gray.600")
+
+  return (
+    <Box
+      borderWidth="1px"
+      borderRadius="2xl"
+      borderColor={borderColor}
+      bg={wrapperBg}
+      px={10}
+      py={50}
+      w="full"
+      maxW="5xl"
+    >
+      <Flex
+        direction={{ base: "column", sm: "row" }}
+        justify="space-between"
+        align={{ base: "stretch", sm: "center" }}
+        gap={6}
+      >
+        <Flex
+          direction={{ base: "column", md: "row" }}
+          align="center"
+          justify="center"
+          gap={4}
+          minW={{ base: "full", md: "sm" }}
+        >
+          <Text
+            fontSize="2xl"
+            fontWeight="semibold"
+            textAlign={{ base: "center", md: "right" }}
+            lineHeight="short"
+          >
+            {homeTeam}
+          </Text>
+          <Box
+            px={3}
+            py={1}
+            borderRadius="full"
+            bg="teal.600"
+            color="white"
+            fontWeight="bold"
+            fontSize="sm"
+          >
+            VS
+          </Box>
+          <Text
+            fontSize="2xl"
+            fontWeight="semibold"
+            textAlign={{ base: "center", md: "left" }}
+            lineHeight="short"
+          >
+            {awayTeam}
+          </Text>
+        </Flex>
+        <Flex direction="column" align="center" justify="center" w="full" maxW="2xl" gap={4}>
+          <Text fontSize="sm" fontWeight="medium" color="teal.600" textTransform="uppercase">
+            {marketLabel}
+          </Text>
+          {line && (
+            <Text fontSize="3xl" fontWeight="semibold" color="fg.default">
+              {line}
+            </Text>
+          )}
+          <Flex justify="space-evenly" align="center" gap={10} w="full">
+            <MarketColumn title="OVER" market={over} onSelect={() => onSelect?.("over")} />
+            <MarketColumn title="UNDER" market={under} onSelect={() => onSelect?.("under")} />
           </Flex>
         </Flex>
       </Flex>
