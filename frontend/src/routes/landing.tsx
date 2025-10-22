@@ -72,7 +72,7 @@ function LandingPage() {
       gap={16}
       py={12}
     >
-      <Flex direction="column" gap={6}>
+      {/* <Flex direction="column" gap={6}>
         <Flex justify="flex-end">
           <ColorModeButton aria-label="Toggle color mode" size="sm" />
         </Flex>
@@ -97,9 +97,9 @@ function LandingPage() {
             </RouterLink>
           )}
         </Flex>
-      </Flex>
+      </Flex> */}
 
-      <Flex
+      {/* <Flex
         direction={{ base: "column", md: "row" }}
         gap={8}
         align="stretch"
@@ -116,16 +116,11 @@ function LandingPage() {
           title="Collaboration Ready"
           description="Invite your team and share insights to coordinate faster trades."
         />
-      </Flex>
+      </Flex> */}
 
       <Flex direction="column" gap={6}>
-        <Heading as="h2" size="lg">
-          Track markets effortlessly
-        </Heading>
-        <Text color="fg.muted">
-          Explore a unified view of the best odds across your books. Select a side to
-          fast-track it into your workflow.
-        </Text>
+
+
         <OddsCard
           {...featuredMarket}
           onSelect={(market) =>
@@ -137,12 +132,7 @@ function LandingPage() {
       </Flex>
 
       <Flex direction="column" gap={6}>
-        <Heading as="h2" size="lg">
-          Totals, made simple
-        </Heading>
-        <Text color="fg.muted">
-          Surface edges on totals with streamlined over/under comparisons across your books.
-        </Text>
+
         <OverUnderOddsCard
           {...totalsMarket}
           onSelect={(market) =>
