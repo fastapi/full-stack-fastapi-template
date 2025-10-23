@@ -1,0 +1,104 @@
+name: Test Frontend
+
+on:
+  push:
+    branches:
+      - master
+  pull_request:
+    types:
+      - opened
+      - synchronize
+
+jobs:
+  test-frontend:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    env:
+      # Backend environment (Supabase will be mocked)
+      DATABASE_URL: postgresql://test:test@localhost:5432/test
+      SUPABASE_URL: https://test.supabase.co
+      SUPABASE_ANON_KEY: test-anon-key
+      SUPABASE_SERVICE_KEY: test-service-key
+      REDIS_PASSWORD: test-redis-password
+      REDIS_URL: redis://:test-redis-password@redis:6379/0
+      CELERY_BROKER_URL: redis://:test-redis-password@redis:6379/0
+      CELERY_RESULT_BACKEND: redis://:test-redis-password@redis:6379/0
+      SECRET_KEY: test-secret-key-minimum-length-32-chars-for-jwt
+      FIRST_SUPERUSER: admin@example.com
+      FIRST_SUPERUSER_PASSWORD: test-password-123
+      
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v5
+        
+      - name: Set up Python
+        uses: actions/setup-python@v6
+        with:
+          python-version: "3.10"
+          
+      - name: Install uv
+        uses: astral-sh/setup-uv@v7
+        with:
+          version: "0.4.15"
+          enable-cache: true
+          
+      - name: Set up Node.js
+        uses: actions/setup-node@v6
+        with:
+          node-version: lts/*
+          cache: npm
+          cache-dependency-path: frontend/package-lock.json
+          
+      - name: Install frontend dependencies
+        run: npm ci
+        working-directory: frontend
+        
+      - name: Lint frontend
+        run: npm run lint
+        working-directory: frontend
+        
+      - name: Build frontend
+        run: npm run build
+        working-directory: frontend
+        
+      - name: Install Playwright browsers
+        run: npx playwright install --with-deps chromium
+        working-directory: frontend
+        
+      - name: Start services for E2E tests
+        run: |
+          docker compose down -v --remove-orphans
+          docker compose up -d --wait backend redis
+          
+      - name: Wait for backend
+        run: |
+          for i in {1..30}; do
+            if curl -f http://localhost:8000/api/v1/utils/health-check; then
+              echo "✅ Backend ready"
+              exit 0
+            fi
+            echo "Waiting... $i/30"
+            sleep 2
+          done
+          echo "❌ Backend timeout"
+          docker compose logs backend
+          exit 1
+          
+      - name: Run Playwright tests
+        run: npx playwright test
+        working-directory: frontend
+        env:
+          CI: true
+          
+      - name: Upload Playwright report
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: playwright-report
+          path: frontend/playwright-report/
+          retention-days: 7
+          
+      - name: Cleanup
+        if: always()
+        run: docker compose down -v --remove-orphans
+

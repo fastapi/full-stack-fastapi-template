@@ -1,46 +1,18 @@
 services:
 
-  db:
-    image: postgres:17
+  redis:
+    image: redis:7-alpine
     restart: always
-    healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER} -d ${POSTGRES_DB}"]
-      interval: 10s
-      retries: 5
-      start_period: 30s
-      timeout: 10s
+    command: redis-server --requirepass ${REDIS_PASSWORD?Variable not set}
     volumes:
-      - app-db-data:/var/lib/postgresql/data/pgdata
-    env_file:
-      - .env
+      - redis-data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "--raw", "incr", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
     environment:
-      - PGDATA=/var/lib/postgresql/data/pgdata
-      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD?Variable not set}
-      - POSTGRES_USER=${POSTGRES_USER?Variable not set}
-      - POSTGRES_DB=${POSTGRES_DB?Variable not set}
-
-  adminer:
-    image: adminer
-    restart: always
-    networks:
-      - traefik-public
-      - default
-    depends_on:
-      - db
-    environment:
-      - ADMINER_DESIGN=pepa-linha-dark
-    labels:
-      - traefik.enable=true
-      - traefik.docker.network=traefik-public
-      - traefik.constraint-label=traefik-public
-      - traefik.http.routers.${STACK_NAME?Variable not set}-adminer-http.rule=Host(`adminer.${DOMAIN?Variable not set}`)
-      - traefik.http.routers.${STACK_NAME?Variable not set}-adminer-http.entrypoints=http
-      - traefik.http.routers.${STACK_NAME?Variable not set}-adminer-http.middlewares=https-redirect
-      - traefik.http.routers.${STACK_NAME?Variable not set}-adminer-https.rule=Host(`adminer.${DOMAIN?Variable not set}`)
-      - traefik.http.routers.${STACK_NAME?Variable not set}-adminer-https.entrypoints=https
-      - traefik.http.routers.${STACK_NAME?Variable not set}-adminer-https.tls=true
-      - traefik.http.routers.${STACK_NAME?Variable not set}-adminer-https.tls.certresolver=le
-      - traefik.http.services.${STACK_NAME?Variable not set}-adminer.loadbalancer.server.port=8080
+      - REDIS_PASSWORD=${REDIS_PASSWORD?Variable not set}
 
   prestart:
     image: '${DOCKER_IMAGE_BACKEND?Variable not set}:${TAG-latest}'
@@ -49,10 +21,6 @@ services:
     networks:
       - traefik-public
       - default
-    depends_on:
-      db:
-        condition: service_healthy
-        restart: true
     command: bash scripts/prestart.sh
     env_file:
       - .env
@@ -68,11 +36,10 @@ services:
       - SMTP_USER=${SMTP_USER}
       - SMTP_PASSWORD=${SMTP_PASSWORD}
       - EMAILS_FROM_EMAIL=${EMAILS_FROM_EMAIL}
-      - POSTGRES_SERVER=db
-      - POSTGRES_PORT=${POSTGRES_PORT}
-      - POSTGRES_DB=${POSTGRES_DB}
-      - POSTGRES_USER=${POSTGRES_USER?Variable not set}
-      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD?Variable not set}
+      - DATABASE_URL=${DATABASE_URL?Variable not set}
+      - SUPABASE_URL=${SUPABASE_URL?Variable not set}
+      - SUPABASE_SERVICE_KEY=${SUPABASE_SERVICE_KEY?Variable not set}
+      - REDIS_URL=${REDIS_URL?Variable not set}
       - SENTRY_DSN=${SENTRY_DSN}
 
   backend:
@@ -82,9 +49,8 @@ services:
       - traefik-public
       - default
     depends_on:
-      db:
+      redis:
         condition: service_healthy
-        restart: true
       prestart:
         condition: service_completed_successfully
     env_file:
@@ -101,11 +67,12 @@ services:
       - SMTP_USER=${SMTP_USER}
       - SMTP_PASSWORD=${SMTP_PASSWORD}
       - EMAILS_FROM_EMAIL=${EMAILS_FROM_EMAIL}
-      - POSTGRES_SERVER=db
-      - POSTGRES_PORT=${POSTGRES_PORT}
-      - POSTGRES_DB=${POSTGRES_DB}
-      - POSTGRES_USER=${POSTGRES_USER?Variable not set}
-      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD?Variable not set}
+      - DATABASE_URL=${DATABASE_URL?Variable not set}
+      - SUPABASE_URL=${SUPABASE_URL?Variable not set}
+      - SUPABASE_SERVICE_KEY=${SUPABASE_SERVICE_KEY?Variable not set}
+      - REDIS_URL=${REDIS_URL?Variable not set}
+      - CELERY_BROKER_URL=${CELERY_BROKER_URL?Variable not set}
+      - CELERY_RESULT_BACKEND=${CELERY_RESULT_BACKEND?Variable not set}
       - SENTRY_DSN=${SENTRY_DSN}
 
     healthcheck:
@@ -133,6 +100,27 @@ services:
 
       # Enable redirection for HTTP and HTTPS
       - traefik.http.routers.${STACK_NAME?Variable not set}-backend-http.middlewares=https-redirect
+
+  celery-worker:
+    image: '${DOCKER_IMAGE_BACKEND?Variable not set}:${TAG-latest}'
+    restart: always
+    command: celery -A app.worker worker --loglevel=info --concurrency=4
+    depends_on:
+      redis:
+        condition: service_healthy
+      backend:
+        condition: service_healthy
+    env_file:
+      - .env
+    environment:
+      - DATABASE_URL=${DATABASE_URL?Variable not set}
+      - SUPABASE_URL=${SUPABASE_URL?Variable not set}
+      - SUPABASE_SERVICE_KEY=${SUPABASE_SERVICE_KEY?Variable not set}
+      - REDIS_URL=${REDIS_URL?Variable not set}
+      - CELERY_BROKER_URL=${CELERY_BROKER_URL?Variable not set}
+      - CELERY_RESULT_BACKEND=${CELERY_RESULT_BACKEND?Variable not set}
+    build:
+      context: ./backend
 
   frontend:
     image: '${DOCKER_IMAGE_FRONTEND?Variable not set}:${TAG-latest}'
@@ -162,8 +150,9 @@ services:
 
       # Enable redirection for HTTP and HTTPS
       - traefik.http.routers.${STACK_NAME?Variable not set}-frontend-http.middlewares=https-redirect
+
 volumes:
-  app-db-data:
+  redis-data:
 
 networks:
   traefik-public:

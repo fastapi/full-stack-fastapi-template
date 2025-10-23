@@ -1,239 +1,491 @@
-# Full Stack FastAPI Template
+# CurriculumExtractor
 
-<a href="https://github.com/fastapi/full-stack-fastapi-template/actions?query=workflow%3ATest" target="_blank"><img src="https://github.com/fastapi/full-stack-fastapi-template/workflows/Test/badge.svg" alt="Test"></a>
-<a href="https://coverage-badge.samuelcolvin.workers.dev/redirect/fastapi/full-stack-fastapi-template" target="_blank"><img src="https://coverage-badge.samuelcolvin.workers.dev/fastapi/full-stack-fastapi-template.svg" alt="Coverage"></a>
+**AI-Powered K-12 Worksheet Question Extraction Platform for Singapore Education**
 
-## Technology Stack and Features
+Extract, structure, and tag educational content from worksheets across all subjects (Math, Science, Languages, Humanities) with AI-powered OCR, segmentation, and curriculum-aligned tagging.
 
-- ⚡ [**FastAPI**](https://fastapi.tiangolo.com) for the Python backend API.
-    - 🧰 [SQLModel](https://sqlmodel.tiangolo.com) for the Python SQL database interactions (ORM).
-    - 🔍 [Pydantic](https://docs.pydantic.dev), used by FastAPI, for the data validation and settings management.
-    - 💾 [PostgreSQL](https://www.postgresql.org) as the SQL database.
-- 🚀 [React](https://react.dev) for the frontend.
-    - 💃 Using TypeScript, hooks, Vite, and other parts of a modern frontend stack.
-    - 🎨 [Chakra UI](https://chakra-ui.com) for the frontend components.
-    - 🤖 An automatically generated frontend client.
-    - 🧪 [Playwright](https://playwright.dev) for End-to-End testing.
-    - 🦇 Dark mode support.
-- 🐋 [Docker Compose](https://www.docker.com) for development and production.
-- 🔒 Secure password hashing by default.
-- 🔑 JWT (JSON Web Token) authentication.
-- 📫 Email based password recovery.
-- ✅ Tests with [Pytest](https://pytest.org).
-- 📞 [Traefik](https://traefik.io) as a reverse proxy / load balancer.
-- 🚢 Deployment instructions using Docker Compose, including how to set up a frontend Traefik proxy to handle automatic HTTPS certificates.
-- 🏭 CI (continuous integration) and CD (continuous deployment) based on GitHub Actions.
+---
 
-### Dashboard Login
+## 🎯 What is CurriculumExtractor?
 
-[![API docs](img/login.png)](https://github.com/fastapi/full-stack-fastapi-template)
+CurriculumExtractor automates the extraction of questions from K-12 worksheets, transforming hours of manual data entry into minutes. It combines:
 
-### Dashboard - Admin
+- **Multi-subject document processing** - Math, Science, Languages, Humanities
+- **Intelligent AI pipeline** - OCR → Segmentation → Curriculum Tagging
+- **Human-in-the-loop review** - Side-by-side PDF viewer with question editor
+- **Singapore curriculum alignment** - Auto-tagging with MOE syllabus taxonomies
+- **LaTeX rendering** - Fast mathematical expression display with KaTeX
+- **Question bank persistence** - Structured storage with version control
 
-[![API docs](img/dashboard.png)](https://github.com/fastapi/full-stack-fastapi-template)
+**Target Users**: Content Operations Reviewers, Admins, and Integrators in EdTech
 
-### Dashboard - Create User
+---
 
-[![API docs](img/dashboard-create.png)](https://github.com/fastapi/full-stack-fastapi-template)
+## ✨ Key Features
 
-### Dashboard - Items
+### Infrastructure (Complete ✅)
+- ✅ **FastAPI Backend** - Python 3.10 with async support
+- ✅ **React Frontend** - React 19 with TypeScript 5.2
+- ✅ **Supabase PostgreSQL** - Managed database (Session Mode, ap-south-1)
+- ✅ **Celery + Redis** - Async task queue (4 worker processes)
+- ✅ **User Authentication** - JWT with 8-day expiry
+- ✅ **Task API** - Queue, monitor, and retrieve async task results
+- ✅ **Docker Compose** - Full-stack orchestration with hot-reload
 
-[![API docs](img/dashboard-items.png)](https://github.com/fastapi/full-stack-fastapi-template)
+### Phase 1: MVP (Primary Mathematics P1-P6) - In Progress
+- ✅ Infrastructure complete (Supabase + Celery + Redis)
+- ✅ User management and authentication
+- ✅ Task queue for async processing
+- ⏳ Extraction models (PDF → Question)
+- ⏳ OCR and question segmentation (PaddleOCR + docTR)
+- ⏳ Review UI with PDF annotation (react-pdf)
+- ⏳ LaTeX math rendering (KaTeX)
+- ⏳ Curriculum tagging
+- ⏳ Question bank export
 
-### Dashboard - User Settings
+### Phase 2-4: Future
+- Multi-subject expansion (Science, English, Humanities)
+- Subject-specific ML adapters (DeBERTa-v3 fine-tuned)
+- Advanced question types (essays, practicals)
+- Semantic search and difficulty classification
 
-[![API docs](img/dashboard-user-settings.png)](https://github.com/fastapi/full-stack-fastapi-template)
+See **[Product Requirements](docs/prd/overview.md)** for complete feature list.
 
-### Dashboard - Dark Mode
+---
 
-[![API docs](img/dashboard-dark.png)](https://github.com/fastapi/full-stack-fastapi-template)
+## 🚀 Quick Start
 
-### Interactive API Documentation
+### Prerequisites
 
-[![API docs](img/docs.png)](https://github.com/fastapi/full-stack-fastapi-template)
+- [Docker](https://www.docker.com/) & Docker Compose
+- [Node.js](https://nodejs.org/) v20+ (via nvm/fnm)
+- [Python](https://www.python.org/) 3.10+ with [uv](https://docs.astral.sh/uv/)
+- [Supabase](https://supabase.com) account (free tier)
 
-## How To Use It
+### Setup
 
-You can **just fork or clone** this repository and use it as is.
+**For detailed setup instructions**, see:
+- **[Setup Guide](docs/getting-started/setup.md)** - Complete installation guide
+- **[Supabase Setup Guide](docs/getting-started/supabase-setup-guide.md)** - Database configuration
 
-✨ It just works. ✨
+**Quick Start**:
 
-### How to Use a Private Repository
+1. **Clone repository**
+   ```bash
+   git clone <repository-url>
+   cd CurriculumExtractor
+   ```
 
-If you want to have a private repository, GitHub won't allow you to simply fork it as it doesn't allow changing the visibility of forks.
+2. **Configure Supabase**
+   - Project ID: `wijzypbstiigssjuiuvh` (ap-south-1 region)
+   - Connection: Session Mode (port 5432)
+   - Update `.env` with your credentials
+   
+3. **Start development**
+   ```bash
+   docker compose watch
+   ```
 
-But you can do the following:
+4. **Access application**
+   - **Frontend**: http://localhost:5173
+   - **Backend**: http://localhost:8000
+   - **API Docs**: http://localhost:8000/docs
+   
+5. **Login**
+   - Email: `admin@curriculumextractor.com`
+   - Password: From `FIRST_SUPERUSER_PASSWORD` in `.env`
 
-- Create a new GitHub repo, for example `my-full-stack`.
-- Clone this repository manually, set the name with the name of the project you want to use, for example `my-full-stack`:
+**All services (7)** will start automatically:
+- Backend (FastAPI), Frontend (React), Database (Supabase)
+- Redis, Celery Worker, Proxy (Traefik), MailCatcher
 
-```bash
-git clone git@github.com:fastapi/full-stack-fastapi-template.git my-full-stack
+---
+
+## 🏗️ Technology Stack
+
+**Backend** (Python 3.10):
+- **FastAPI** 0.115+ - Async web framework with OpenAPI docs
+- **SQLModel** 0.0.24 - ORM combining Pydantic + SQLAlchemy
+- **PostgreSQL** 17 via **Supabase** - Managed database (Session Mode)
+- **Celery** 5.5 + **Redis** 7 - Distributed task queue (4 workers)
+- **psycopg3** - PostgreSQL driver with prepared statement support
+- **Alembic** - Database migrations
+- **pyjwt** - JWT authentication
+
+**Frontend** (TypeScript 5.2):
+- **React** 19 - UI framework
+- **Vite** 7 - Build tool with HMR
+- **TanStack Router** - File-based routing
+- **TanStack Query** - Server state management
+- **Chakra UI** 3 - Component library
+- **react-pdf** 9.x (planned) - PDF viewing
+- **KaTeX** (planned) - LaTeX math rendering
+
+**ML Pipeline** (Phase 2):
+- **PaddleOCR** - Text extraction with bounding boxes
+- **docTR** - Document layout analysis
+- **DeBERTa-v3** - Curriculum tagging (fine-tuned for Singapore syllabus)
+
+**Infrastructure**:
+- **Docker Compose** - Development orchestration (7 services)
+- **Supabase** - Managed PostgreSQL 17 + S3-compatible Storage
+  - Project: wijzypbstiigssjuiuvh
+  - Region: ap-south-1 (Mumbai, India)
+  - Mode: Session pooler (10 base + 20 overflow connections)
+- **Redis** 7 - Message broker for Celery
+- **GitHub Actions** - CI/CD with 7 workflows
+- **Traefik** - Reverse proxy (production)
+
+---
+
+## 📁 Project Structure
+
+```
+CurriculumExtractor/
+├── backend/               # FastAPI application
+│   ├── app/
+│   │   ├── api/          # API routes
+│   │   ├── core/         # Config, security, DB
+│   │   ├── models.py     # SQLModel schemas
+│   │   ├── crud.py       # Database operations
+│   │   ├── worker.py     # Celery configuration
+│   │   └── tasks/        # Async extraction tasks
+│   ├── tests/            # Pytest tests
+│   └── scripts/          # Utility scripts
+├── frontend/             # React application
+│   ├── src/
+│   │   ├── routes/       # TanStack Router pages
+│   │   ├── components/   # React components
+│   │   ├── client/       # Auto-generated OpenAPI client
+│   │   └── hooks/        # Custom React hooks
+│   └── tests/            # Playwright E2E tests
+├── docs/                 # Documentation
+│   ├── getting-started/  # Setup and development guides
+│   ├── prd/             # Product requirements
+│   ├── architecture/    # System design
+│   └── api/             # API documentation
+├── scripts/             # Project scripts
+└── docker-compose.yml   # Service orchestration
 ```
 
-- Enter into the new directory:
+---
 
+## 📖 Documentation
+
+### Getting Started
+- **[Setup Guide](docs/getting-started/setup.md)** - Installation instructions
+- **[Supabase Setup](docs/getting-started/supabase-setup-guide.md)** - Database configuration
+- **[Development Workflow](docs/getting-started/development.md)** - Daily development
+- **[Environment Status](ENVIRONMENT_READY.md)** - Current setup status
+
+### Product & Architecture
+- **[Product Overview](docs/prd/overview.md)** - Complete PRD
+- **[Architecture Overview](docs/architecture/overview.md)** - System design
+- **[Data Models](docs/data/models.md)** - Database schema
+- **[API Documentation](docs/api/overview.md)** - REST API reference
+
+### Development
+- **[CLAUDE.md](CLAUDE.md)** - Quick reference for AI-assisted development
+- **[SETUP_PLAN.md](SETUP_PLAN.md)** - Template cleanup and implementation phases
+- **[SETUP_STATUS.md](SETUP_STATUS.md)** - Detailed environment status
+
+---
+
+## 🧪 Testing
+
+### Backend (Pytest)
 ```bash
-cd my-full-stack
+cd backend
+bash scripts/test.sh
 ```
 
-- Set the new origin to your new repository, copy it from the GitHub interface, for example:
-
+### Frontend (Playwright)
 ```bash
-git remote set-url origin git@github.com:octocat/my-full-stack.git
+cd frontend
+npx playwright test
 ```
 
-- Add this repo as another "remote" to allow you to get updates later:
-
+### Linting & Type Checking
 ```bash
-git remote add upstream git@github.com:fastapi/full-stack-fastapi-template.git
+# Pre-commit hooks (recommended)
+uv run pre-commit install
+uv run pre-commit run --all-files
+
+# Manual checks
+cd backend && uv run ruff check . && uv run mypy .
+cd frontend && npm run lint
 ```
 
-- Push the code to your new repository:
+---
 
-```bash
-git push -u origin master
+## 🔄 Development Workflow
+
+1. **Start services**
+   ```bash
+   docker compose watch  # Hot-reload enabled
+   ```
+
+2. **Make changes** - Edit code, changes auto-reload
+
+3. **Run tests**
+   ```bash
+   bash backend/scripts/test.sh
+   cd frontend && npx playwright test
+   ```
+
+4. **Database migrations** (when models change)
+   ```bash
+   docker compose exec backend bash
+   alembic revision --autogenerate -m "Description"
+   alembic upgrade head
+   ```
+
+5. **Update frontend client** (when API changes)
+   ```bash
+   ./scripts/generate-client.sh
+   ```
+
+See **[Development Guide](docs/getting-started/development.md)** for more.
+
+---
+
+## 🗂️ Current Status
+
+**Updated**: October 23, 2025  
+**Phase**: MVP Development (Primary Mathematics)  
+**Environment**: ✅ **Fully Operational**
+
+### ✅ Infrastructure Complete (100%)
+
+- [x] **FastAPI Backend** - Python 3.10, async, JWT auth
+- [x] **React Frontend** - React 19, TypeScript, TanStack Router/Query
+- [x] **Supabase PostgreSQL** - Session Mode, 10+20 connection pool
+- [x] **Celery Worker** - 4 processes, tested with health_check + test_task
+- [x] **Redis** - Message broker, result backend
+- [x] **Docker Compose** - 7 services orchestrated with hot-reload
+- [x] **GitHub Actions** - 7 CI/CD workflows (lint, test, generate client)
+- [x] **Documentation** - CLAUDE.md, development.md, API docs, architecture
+
+### ✅ Development Environment (100%)
+
+- [x] Supabase project created (wijzypbstiigssjuiuvh, ap-south-1)
+- [x] Database connected (PostgreSQL 17.6.1)
+- [x] Migrations working (Alembic + Supabase MCP)
+- [x] Admin user created (admin@curriculumextractor.com)
+- [x] Celery tasks tested (health_check: 0.005s, test_task: 10s)
+- [x] Task API endpoints (/api/v1/tasks/)
+- [x] Template cleanup (Item model removed)
+- [x] All services healthy
+
+### ⏳ Feature Development (0% - Ready to Start)
+
+**Next Milestones**:
+1. Create core models (Extraction, Question, Ingestion, Tag)
+2. Set up Supabase Storage buckets (worksheets, extractions)
+3. Add document processing libraries (PaddleOCR, docTR, pypdf)
+4. Install PDF viewing libraries (react-pdf, KaTeX)
+5. Build review UI components
+6. Implement extraction Celery task
+7. Create question bank API
+
+**Current Focus**: Creating Extraction/Question data models ← **YOU ARE HERE**
+
+### 📊 Progress Summary
+
+```
+✅ Environment Setup        - 100% (All services operational)
+✅ Infrastructure           - 100% (Supabase + Celery working)
+✅ Documentation           - 100% (2,405+ lines updated)
+✅ CI/CD                   - 100% (7 workflows configured)
+⏳ Core Models             -   0% (Next step)
+⏳ Document Processing     -   0% (Libraries ready to add)
+⏳ Review UI               -   0% (After models)
+⏳ ML Integration          -   0% (Phase 2)
 ```
 
-### Update From the Original Template
+**Track detailed progress**: See [CLAUDE.md](CLAUDE.md#project-specific-notes)
 
-After cloning the repository, and after doing changes, you might want to get the latest changes from this original template.
+---
 
-- Make sure you added the original repository as a remote, you can check it with:
+## 📊 Roadmap
 
-```bash
-git remote -v
+### Phase 1: MVP (Weeks 1-6) - Current
+- Primary Math extraction pipeline
+- Review UI with PDF viewer
+- Curriculum tagging
+- Question bank persistence
 
-origin    git@github.com:octocat/my-full-stack.git (fetch)
-origin    git@github.com:octocat/my-full-stack.git (push)
-upstream    git@github.com:fastapi/full-stack-fastapi-template.git (fetch)
-upstream    git@github.com:fastapi/full-stack-fastapi-template.git (push)
+### Phase 2: Multi-Subject (Weeks 7-14)
+- Primary Science + English support
+- Subject-specific ML adapters
+- Expanded taxonomy management
+
+### Phase 3: Secondary & Beyond (Weeks 15-26)
+- Secondary Math/Science/Humanities
+- Advanced question types
+- QTI export for LMS
+
+### Phase 4: Intelligence Layer (Q3-Q4 2026)
+- Semantic search
+- Difficulty classification
+- Question generation
+- Duplicate detection
+
+See **[Product Roadmap](docs/prd/overview.md#11-rollout-plan)** for details.
+
+---
+
+## 🤝 Contributing
+
+See **[Contributing Guide](docs/getting-started/contributing.md)**
+
+### Development Setup
+1. Follow [Setup Guide](docs/getting-started/setup.md)
+2. Create feature branch: `git checkout -b feature/my-feature`
+3. Make changes with tests
+4. Run `uv run pre-commit run --all-files`
+5. Submit pull request
+
+### Code Standards
+- **Backend**: Ruff + mypy (enforced by pre-commit)
+- **Frontend**: Biome linting (enforced by pre-commit)
+- **Tests**: ≥80% coverage target
+- **Commits**: Conventional commits format
+
+---
+
+## 📄 License
+
+[License information to be added]
+
+---
+
+## 🆘 Support
+
+### Common Issues
+
+**Setup Problems**:
+- See [Setup Guide](docs/getting-started/setup.md#troubleshooting)
+- See [Development Workflow](docs/getting-started/development.md#troubleshooting)
+
+**Supabase Issues**:
+- See [Supabase Setup Guide](docs/getting-started/supabase-setup-guide.md)
+- Use MCP: `mcp_supabase_get_project(id="wijzypbstiigssjuiuvh")`
+- Check logs: `mcp_supabase_get_logs(project_id="wijzypbstiigssjuiuvh", service="postgres")`
+
+**Celery Issues**:
+- Check worker: `docker compose logs celery-worker -f`
+- Test Redis: `docker compose exec redis redis-cli -a <password> PING`
+- Inspect tasks: `docker compose exec celery-worker celery -A app.worker inspect registered`
+
+**Docker Issues**:
+- View logs: `docker compose logs -f`
+- Restart service: `docker compose restart backend`
+- Rebuild: `docker compose build backend && docker compose up -d`
+
+### Resources
+
+- **Documentation**: [docs/](docs/) - Complete guides
+- **API Docs**: http://localhost:8000/docs - Interactive API explorer
+- **Supabase Dashboard**: https://app.supabase.com/project/wijzypbstiigssjuiuvh
+- **Development Guide**: [CLAUDE.md](CLAUDE.md) - AI-assisted development
+- **Architecture**: [docs/architecture/overview.md](docs/architecture/overview.md)
+
+---
+
+## 🎯 Project Goals
+
+**Mission**: Transform manual question entry from hours to minutes while maintaining curriculum alignment accuracy.
+
+**Success Metrics**:
+- 5x productivity improvement (10 → 50+ questions/hour)
+- ≥85% extraction accuracy
+- ≥90% curriculum tagging accuracy (Top-3)
+- 1,000 worksheets/month capacity (Year 1)
+
+**Impact**: Enable EdTech platforms to scale content operations efficiently across all K-12 subjects in Singapore.
+
+---
+
+---
+
+## 📈 Development Environment
+
+**Status**: ✅ **All Systems Operational**
+
+```
+Services Running:
+✅ Backend (FastAPI)      - http://localhost:8000 (healthy)
+✅ Frontend (React)       - http://localhost:5173
+✅ Database (Supabase)    - PostgreSQL 17.6.1 (Session Mode)
+✅ Redis                  - localhost:6379 (healthy)
+✅ Celery Worker          - 4 processes (ready)
+✅ Proxy (Traefik)        - localhost:80
+✅ MailCatcher            - localhost:1080
+
+Configuration:
+✅ Supabase Project       - wijzypbstiigssjuiuvh (ap-south-1)
+✅ Connection Pooling     - 10 base + 20 overflow = 30 max
+✅ Task Queue             - Celery 5.5 with Redis broker
+✅ Authentication         - JWT with bcrypt password hashing
+✅ CI/CD                  - 7 GitHub Actions workflows
+✅ Documentation          - 2,405+ lines (CLAUDE.md, docs/)
 ```
 
-- Pull the latest changes without merging:
+**Ready for feature development!** Start building extraction models →
+
+---
+
+**Built with FastAPI + React + Supabase + Celery**  
+**Powered by AI for Singapore Education** 🚀
+
+---
+
+## 🔗 Quick Links
+
+### Documentation
+
+| Resource | Link | Purpose |
+|----------|------|---------|
+| **CLAUDE.md** | [CLAUDE.md](CLAUDE.md) | AI development guide (Supabase MCP, patterns, quick ref) |
+| **Setup Guide** | [docs/getting-started/setup.md](docs/getting-started/setup.md) | Installation & Supabase setup |
+| **Development Workflow** | [docs/getting-started/development.md](docs/getting-started/development.md) | Daily development guide |
+| **Product PRD** | [docs/prd/overview.md](docs/prd/overview.md) | Complete product requirements |
+| **Architecture** | [docs/architecture/overview.md](docs/architecture/overview.md) | System design & data flow |
+| **API Reference** | [docs/api/overview.md](docs/api/overview.md) | API endpoints & examples |
+| **Testing Strategy** | [docs/testing/strategy.md](docs/testing/strategy.md) | Testing guide |
+| **Deployment** | [docs/deployment/environments.md](docs/deployment/environments.md) | Environment setup |
+
+### Live Services (When Running)
+
+| Service | URL | Description |
+|---------|-----|-------------|
+| **Frontend** | http://localhost:5173 | React application |
+| **Backend API** | http://localhost:8000 | FastAPI server |
+| **API Docs** | http://localhost:8000/docs | Swagger UI (try it out!) |
+| **MailCatcher** | http://localhost:1080 | Email testing |
+| **Traefik Dashboard** | http://localhost:8090 | Proxy stats |
+| **Supabase Dashboard** | https://app.supabase.com/project/wijzypbstiigssjuiuvh | Database & storage management |
+
+### Commands
 
 ```bash
-git pull --no-commit upstream master
+# Start development
+docker compose watch
+
+# View logs
+docker compose logs -f backend
+docker compose logs -f celery-worker
+
+# Test Celery
+curl -X POST http://localhost:8000/api/v1/tasks/health-check
+
+# Run tests
+cd backend && bash scripts/test.sh
+cd frontend && npx playwright test
+
+# Database migration
+docker compose exec backend alembic revision --autogenerate -m "Add model"
+docker compose exec backend alembic upgrade head
 ```
 
-This will download the latest changes from this template without committing them, that way you can check everything is right before committing.
-
-- If there are conflicts, solve them in your editor.
-
-- Once you are done, commit the changes:
-
-```bash
-git merge --continue
-```
-
-### Configure
-
-You can then update configs in the `.env` files to customize your configurations.
-
-Before deploying it, make sure you change at least the values for:
-
-- `SECRET_KEY`
-- `FIRST_SUPERUSER_PASSWORD`
-- `POSTGRES_PASSWORD`
-
-You can (and should) pass these as environment variables from secrets.
-
-Read the [deployment.md](./deployment.md) docs for more details.
-
-### Generate Secret Keys
-
-Some environment variables in the `.env` file have a default value of `changethis`.
-
-You have to change them with a secret key, to generate secret keys you can run the following command:
-
-```bash
-python -c "import secrets; print(secrets.token_urlsafe(32))"
-```
-
-Copy the content and use that as password / secret key. And run that again to generate another secure key.
-
-## How To Use It - Alternative With Copier
-
-This repository also supports generating a new project using [Copier](https://copier.readthedocs.io).
-
-It will copy all the files, ask you configuration questions, and update the `.env` files with your answers.
-
-### Install Copier
-
-You can install Copier with:
-
-```bash
-pip install copier
-```
-
-Or better, if you have [`pipx`](https://pipx.pypa.io/), you can run it with:
-
-```bash
-pipx install copier
-```
-
-**Note**: If you have `pipx`, installing copier is optional, you could run it directly.
-
-### Generate a Project With Copier
-
-Decide a name for your new project's directory, you will use it below. For example, `my-awesome-project`.
-
-Go to the directory that will be the parent of your project, and run the command with your project's name:
-
-```bash
-copier copy https://github.com/fastapi/full-stack-fastapi-template my-awesome-project --trust
-```
-
-If you have `pipx` and you didn't install `copier`, you can run it directly:
-
-```bash
-pipx run copier copy https://github.com/fastapi/full-stack-fastapi-template my-awesome-project --trust
-```
-
-**Note** the `--trust` option is necessary to be able to execute a [post-creation script](https://github.com/fastapi/full-stack-fastapi-template/blob/master/.copier/update_dotenv.py) that updates your `.env` files.
-
-### Input Variables
-
-Copier will ask you for some data, you might want to have at hand before generating the project.
-
-But don't worry, you can just update any of that in the `.env` files afterwards.
-
-The input variables, with their default values (some auto generated) are:
-
-- `project_name`: (default: `"FastAPI Project"`) The name of the project, shown to API users (in .env).
-- `stack_name`: (default: `"fastapi-project"`) The name of the stack used for Docker Compose labels and project name (no spaces, no periods) (in .env).
-- `secret_key`: (default: `"changethis"`) The secret key for the project, used for security, stored in .env, you can generate one with the method above.
-- `first_superuser`: (default: `"admin@example.com"`) The email of the first superuser (in .env).
-- `first_superuser_password`: (default: `"changethis"`) The password of the first superuser (in .env).
-- `smtp_host`: (default: "") The SMTP server host to send emails, you can set it later in .env.
-- `smtp_user`: (default: "") The SMTP server user to send emails, you can set it later in .env.
-- `smtp_password`: (default: "") The SMTP server password to send emails, you can set it later in .env.
-- `emails_from_email`: (default: `"info@example.com"`) The email account to send emails from, you can set it later in .env.
-- `postgres_password`: (default: `"changethis"`) The password for the PostgreSQL database, stored in .env, you can generate one with the method above.
-- `sentry_dsn`: (default: "") The DSN for Sentry, if you are using it, you can set it later in .env.
-
-## Backend Development
-
-Backend docs: [backend/README.md](./backend/README.md).
-
-## Frontend Development
-
-Frontend docs: [frontend/README.md](./frontend/README.md).
-
-## Deployment
-
-Deployment docs: [deployment.md](./deployment.md).
-
-## Development
-
-General development docs: [development.md](./development.md).
-
-This includes using Docker Compose, custom local domains, `.env` configurations, etc.
-
-## Release Notes
-
-Check the file [release-notes.md](./release-notes.md).
-
-## License
-
-The Full Stack FastAPI Template is licensed under the terms of the MIT license.

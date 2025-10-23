@@ -50,23 +50,33 @@ class Settings(BaseSettings):
 
     PROJECT_NAME: str
     SENTRY_DSN: HttpUrl | None = None
-    POSTGRES_SERVER: str
-    POSTGRES_PORT: int = 5432
-    POSTGRES_USER: str
-    POSTGRES_PASSWORD: str = ""
-    POSTGRES_DB: str = ""
+
+    # Supabase Configuration
+    # Use DATABASE_URL with Supabase pooler connection for IPv6 compatibility
+    DATABASE_URL: PostgresDsn
+    SUPABASE_URL: HttpUrl
+    SUPABASE_ANON_KEY: str
+    SUPABASE_SERVICE_KEY: str
+
+    # Legacy Postgres fields - deprecated, kept for backward compatibility
+    # Use DATABASE_URL instead
+    POSTGRES_SERVER: str | None = None
+    POSTGRES_PORT: int | None = 5432
+    POSTGRES_USER: str | None = None
+    POSTGRES_PASSWORD: str | None = None
+    POSTGRES_DB: str | None = None
 
     @computed_field  # type: ignore[prop-decorator]
     @property
     def SQLALCHEMY_DATABASE_URI(self) -> PostgresDsn:
-        return PostgresDsn.build(
-            scheme="postgresql+psycopg",
-            username=self.POSTGRES_USER,
-            password=self.POSTGRES_PASSWORD,
-            host=self.POSTGRES_SERVER,
-            port=self.POSTGRES_PORT,
-            path=self.POSTGRES_DB,
-        )
+        # Use DATABASE_URL directly (Supabase pooler connection)
+        return self.DATABASE_URL
+
+    # Redis and Celery Configuration
+    REDIS_PASSWORD: str
+    REDIS_URL: str
+    CELERY_BROKER_URL: str
+    CELERY_RESULT_BACKEND: str
 
     SMTP_TLS: bool = True
     SMTP_SSL: bool = False
@@ -108,7 +118,7 @@ class Settings(BaseSettings):
     @model_validator(mode="after")
     def _enforce_non_default_secrets(self) -> Self:
         self._check_default_secret("SECRET_KEY", self.SECRET_KEY)
-        self._check_default_secret("POSTGRES_PASSWORD", self.POSTGRES_PASSWORD)
+        self._check_default_secret("REDIS_PASSWORD", self.REDIS_PASSWORD)
         self._check_default_secret(
             "FIRST_SUPERUSER_PASSWORD", self.FIRST_SUPERUSER_PASSWORD
         )

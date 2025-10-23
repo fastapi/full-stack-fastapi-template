@@ -4,3 +4,17 @@ node_modules/
 /playwright-report/
 /blob-report/
 /playwright/.cache/
+
+# Environment variables (contains secrets)
+.env
+.env.local
+.env.*.local
+
+# Development documentation (contains credentials)
+CLAUDE.md
+*_RUNNING.md
+*_READY.md
+*_COMPLETE.md
+*_STATUS.md
+*_UPDATED.md
+.env.backup

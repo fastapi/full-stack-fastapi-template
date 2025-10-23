@@ -40,8 +40,16 @@ jobs:
       env:
         VIRTUAL_ENV: backend/.venv
         SECRET_KEY: just-for-generating-client
-        POSTGRES_PASSWORD: just-for-generating-client
         FIRST_SUPERUSER_PASSWORD: just-for-generating-client
+        # Supabase and Redis dummy values for client generation
+        DATABASE_URL: postgresql://postgres:password@localhost:5432/app
+        SUPABASE_URL: https://dummy.supabase.co
+        SUPABASE_ANON_KEY: dummy-anon-key
+        SUPABASE_SERVICE_KEY: dummy-service-key
+        REDIS_PASSWORD: dummy-redis-password
+        REDIS_URL: redis://:dummy@localhost:6379/0
+        CELERY_BROKER_URL: redis://:dummy@localhost:6379/0
+        CELERY_RESULT_BACKEND: redis://:dummy@localhost:6379/0
     - name: Add changes to git
       run: |
         git config --local user.email "github-actions@github.com"

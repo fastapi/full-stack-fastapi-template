@@ -8,7 +8,8 @@ import type { UserPublic } from "@/client"
 
 const items = [
   { icon: FiHome, title: "Dashboard", path: "/" },
-  { icon: FiBriefcase, title: "Items", path: "/items" },
+  // TODO: Add Extractions route when implemented
+  // { icon: FiBriefcase, title: "Extractions", path: "/extractions" },
   { icon: FiSettings, title: "User Settings", path: "/settings" },
 ]
 

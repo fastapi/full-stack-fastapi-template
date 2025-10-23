@@ -1,0 +1,31 @@
+# Cursor ignore file
+# Files and directories to exclude from Cursor's context
+
+# Dependencies
+node_modules/
+.venv/
+__pycache__/
+*.pyc
+
+# Build outputs
+dist/
+build/
+*.egg-info/
+
+# Test outputs
+.pytest_cache/
+.coverage
+htmlcov/
+/test-results/
+/playwright-report/
+/blob-report/
+/playwright/.cache/
+
+# Large files
+*.log
+*.sqlite
+*.db
+
+# Note: .env is NOT ignored - Cursor can read it
+# This is helpful for development but be careful not to expose secrets
+

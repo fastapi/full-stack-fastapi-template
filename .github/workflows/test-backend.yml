@@ -25,13 +25,25 @@ jobs:
           version: "0.4.15"
           enable-cache: true
       - run: docker compose down -v --remove-orphans
-      - run: docker compose up -d db mailcatcher
-      - name: Migrate DB
-        run: uv run bash scripts/prestart.sh
-        working-directory: backend
+      # Start Redis and MailCatcher (no local DB - using Supabase)
+      - run: docker compose up -d redis mailcatcher
       - name: Run tests
         run: uv run bash scripts/tests-start.sh "Coverage for ${{ github.sha }}"
         working-directory: backend
+        env:
+          # Test environment uses in-memory SQLite
+          # Tests should mock Supabase connections
+          DATABASE_URL: sqlite:///./test.db
+          SUPABASE_URL: https://test.supabase.co
+          SUPABASE_ANON_KEY: test-anon-key
+          SUPABASE_SERVICE_KEY: test-service-key
+          REDIS_URL: redis://:test@redis:6379/0
+          REDIS_PASSWORD: test-redis-password
+          CELERY_BROKER_URL: redis://:test@redis:6379/0
+          CELERY_RESULT_BACKEND: redis://:test@redis:6379/0
+          SECRET_KEY: test-secret-key-for-ci
+          FIRST_SUPERUSER: test@example.com
+          FIRST_SUPERUSER_PASSWORD: test-password
       - run: docker compose down -v --remove-orphans
       - name: Store coverage files
         uses: actions/upload-artifact@v4

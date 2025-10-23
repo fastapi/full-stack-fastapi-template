@@ -13,14 +13,39 @@ jobs:
 
   test-docker-compose:
     runs-on: ubuntu-latest
+    env:
+      # CI environment variables (Supabase requires real credentials or mocking)
+      DATABASE_URL: postgresql://test:test@localhost:5432/test
+      SUPABASE_URL: https://test.supabase.co
+      SUPABASE_ANON_KEY: test-anon-key
+      SUPABASE_SERVICE_KEY: test-service-key
+      REDIS_PASSWORD: test-redis-password
+      REDIS_URL: redis://:test-redis-password@redis:6379/0
+      CELERY_BROKER_URL: redis://:test-redis-password@redis:6379/0
+      CELERY_RESULT_BACKEND: redis://:test-redis-password@redis:6379/0
+      SECRET_KEY: test-secret-key-minimum-length-32-chars
+      FIRST_SUPERUSER: test@example.com
+      FIRST_SUPERUSER_PASSWORD: test-password-123
     steps:
       - name: Checkout
         uses: actions/checkout@v5
       - run: docker compose build
       - run: docker compose down -v --remove-orphans
-      - run: docker compose up -d --wait backend frontend adminer
-      - name: Test backend is up
-        run: curl http://localhost:8000/api/v1/utils/health-check
+      # Start core services (no adminer, no celery-worker for basic smoke test)
+      - run: docker compose up -d --wait backend frontend redis
+      - name: Wait for backend to be healthy
+        run: |
+          for i in {1..30}; do
+            if curl -f http://localhost:8000/api/v1/utils/health-check; then
+              echo "✅ Backend is healthy"
+              exit 0
+            fi
+            echo "Waiting for backend... attempt $i/30"
+            sleep 2
+          done
+          echo "❌ Backend failed to start"
+          docker compose logs backend
+          exit 1
       - name: Test frontend is up
-        run: curl http://localhost:5173
+        run: curl -f http://localhost:5173
       - run: docker compose down -v --remove-orphans

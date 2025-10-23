@@ -45,15 +45,10 @@ services:
       - traefik-public
       - default
 
-  db:
+  redis:
     restart: "no"
     ports:
-      - "5432:5432"
-
-  adminer:
-    restart: "no"
-    ports:
-      - "8080:8080"
+      - "6379:6379"
 
   backend:
     restart: "no"
@@ -84,7 +79,23 @@ services:
       SMTP_HOST: "mailcatcher"
       SMTP_PORT: "1025"
       SMTP_TLS: "false"
-      EMAILS_FROM_EMAIL: "noreply@example.com"
+      EMAILS_FROM_EMAIL: "noreply@curriculumextractor.com"
+
+  celery-worker:
+    restart: "no"
+    build:
+      context: ./backend
+    command: celery -A app.worker worker --loglevel=debug --concurrency=2
+    develop:
+      watch:
+        - path: ./backend
+          action: sync
+          target: /app
+          ignore:
+            - ./backend/.venv
+            - .venv
+        - path: ./backend/pyproject.toml
+          action: rebuild
 
   mailcatcher:
     image: schickling/mailcatcher
