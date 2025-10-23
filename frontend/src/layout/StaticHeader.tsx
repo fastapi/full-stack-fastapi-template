@@ -33,7 +33,7 @@ const StaticHeader: React.FC = () => {
         {/* Right Side Actions */}
         <div className="flex items-center gap-3">
           <Link
-            href="/login"
+            href="/signin"
             className="rounded-md border border-gray-300 px-3 py-1.5 text-sm font-medium text-gray-700 hover:bg-gray-100 dark:border-gray-700 dark:text-gray-200 dark:hover:bg-gray-800"
           >
             Log in

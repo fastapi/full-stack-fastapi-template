@@ -3,11 +3,14 @@ import Input from "@/components/form/input/InputField";
 import Label from "@/components/form/Label";
 import { ChevronLeftIcon, EyeCloseIcon, EyeIcon } from "@/icons";
 import Link from "next/link";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { namePattern, emailPattern, passwordRules } from "@/utils";
-import { useForm } from "react-hook-form";
-import { useSignup } from "@/hooks/useSignup";
+import { type SubmitHandler, useForm } from "react-hook-form"
+import useAuth, { isLoggedIn } from "@/hooks/useAuth";
+import type { UserRegister } from "@/client";
 import SpinnerButton from "../ui/button/SpinnerButton";
+import { useRouter } from "next/navigation";
+
 
 
 type FormData = {
@@ -19,34 +22,33 @@ type FormData = {
 
 export default function SignUpForm() {
   const [showPassword, setShowPassword] = useState(false);
-  const signupMutation = useSignup();
+
+  const { signUpMutation } = useAuth();
+  const router = useRouter();
+
+
+    useEffect(() => {
+      if (isLoggedIn()) {
+        router.push("/");
+      }
+    }, [router])
+
 
   const {
     register,
     handleSubmit,
-    formState: { errors },
+    formState: { errors, isSubmitting },
   } = useForm<FormData>({
     mode: "onChange"
   });
-  const onSubmit = (data: FormData) => {
-    console.log("Form data:", data);
-    signupMutation.mutate(
-      {
-        requestBody: {
-          full_name: data.firstName + " " + data.lastName,
-          password: data.password,
-          email: data.email,
-        },
-      },
-      {
-        onSuccess: (res) => {
-          console.log("Signup success:", res);
-        },
-        onError: (err) => {
-          console.error("Signup failed:", err);
-        },
-      }
-    );
+  const onSubmit: SubmitHandler<FormData> = (data) => {
+    const payload: UserRegister = {
+      full_name: `${data.firstName} ${data.lastName}`,
+      email: data.email,
+      password: data.password,
+    };
+
+    signUpMutation.mutate(payload);
   };
 
   return (
@@ -149,8 +151,8 @@ export default function SignUpForm() {
             <div className="sm:col-span-2">
               <SpinnerButton
                 className="flex items-center justify-center w-full px-4 py-3 text-sm font-medium text-white transition rounded-lg bg-brand-500 shadow-theme-xs hover:bg-brand-600"
-                disabled={signupMutation.isPending}
-                loading={signupMutation.isPending}
+                disabled={!!errors.firstName || !!errors.lastName || !!errors.email || !!errors.password}
+                loading={isSubmitting}
               >
                 Sign Up
               </SpinnerButton>
