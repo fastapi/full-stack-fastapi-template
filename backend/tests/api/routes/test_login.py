@@ -1,7 +1,7 @@
 from unittest.mock import patch
 
 from fastapi.testclient import TestClient
-from sqlmodel import Session
+from sqlalchemy.orm import Session
 
 from app.core.config import settings
 from app.core.security import verify_password

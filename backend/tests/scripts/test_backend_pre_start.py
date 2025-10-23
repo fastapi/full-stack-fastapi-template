@@ -1,6 +1,6 @@
 from unittest.mock import MagicMock, patch
 
-from sqlmodel import select
+from sqlalchemy import select
 
 from app.backend_pre_start import init, logger
 

@@ -1,5 +1,6 @@
 from fastapi.testclient import TestClient
-from sqlmodel import Session, select
+from sqlalchemy import select
+from sqlalchemy.orm import Session
 
 from app.core.config import settings
 from app.models import User
@@ -19,7 +20,7 @@ def test_create_user(client: TestClient, db: Session) -> None:
 
     data = r.json()
 
-    user = db.exec(select(User).where(User.id == data["id"])).first()
+    user = db.execute(select(User).where(User.id == data["id"])).scalar_one_or_none()
 
     assert user
     assert user.email == "pollo@listo.com"

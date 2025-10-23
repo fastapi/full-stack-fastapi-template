@@ -1,15 +1,21 @@
 import uuid
 from typing import Any
 
-from sqlmodel import Session, select
+from sqlalchemy.orm import Session
+from sqlalchemy import select
 
 from app.core.security import get_password_hash, verify_password
 from app.models import Item, ItemCreate, User, UserCreate, UserUpdate
 
 
 def create_user(*, session: Session, user_create: UserCreate) -> User:
-    db_obj = User.model_validate(
-        user_create, update={"hashed_password": get_password_hash(user_create.password)}
+    user_data = user_create.model_dump()
+    user_data.pop("password", None)  # Remove password from user data
+    hashed_password = get_password_hash(user_create.password)
+    
+    db_obj = User(
+        **user_data,
+        hashed_password=hashed_password
     )
     session.add(db_obj)
     session.commit()
@@ -19,12 +25,15 @@ def create_user(*, session: Session, user_create: UserCreate) -> User:
 
 def update_user(*, session: Session, db_user: User, user_in: UserUpdate) -> Any:
     user_data = user_in.model_dump(exclude_unset=True)
-    extra_data = {}
+    
     if "password" in user_data:
-        password = user_data["password"]
+        password = user_data.pop("password")
         hashed_password = get_password_hash(password)
-        extra_data["hashed_password"] = hashed_password
-    db_user.sqlmodel_update(user_data, update=extra_data)
+        user_data["hashed_password"] = hashed_password
+    
+    for field, value in user_data.items():
+        setattr(db_user, field, value)
+    
     session.add(db_user)
     session.commit()
     session.refresh(db_user)
@@ -33,8 +42,8 @@ def update_user(*, session: Session, db_user: User, user_in: UserUpdate) -> Any:
 
 def get_user_by_email(*, session: Session, email: str) -> User | None:
     statement = select(User).where(User.email == email)
-    session_user = session.exec(statement).first()
-    return session_user
+    result = session.execute(statement)
+    return result.scalar_one_or_none()
 
 
 def authenticate(*, session: Session, email: str, password: str) -> User | None:
@@ -47,7 +56,11 @@ def authenticate(*, session: Session, email: str, password: str) -> User | None:
 
 
 def create_item(*, session: Session, item_in: ItemCreate, owner_id: uuid.UUID) -> Item:
-    db_item = Item.model_validate(item_in, update={"owner_id": owner_id})
+    item_data = item_in.model_dump()
+    db_item = Item(
+        **item_data,
+        owner_id=owner_id
+    )
     session.add(db_item)
     session.commit()
     session.refresh(db_item)

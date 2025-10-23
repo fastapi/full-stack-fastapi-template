@@ -1,5 +1,5 @@
 from fastapi.testclient import TestClient
-from sqlmodel import Session
+from sqlalchemy.orm import Session
 
 from app import crud
 from app.core.config import settings

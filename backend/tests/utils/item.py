@@ -1,4 +1,4 @@
-from sqlmodel import Session
+from sqlalchemy.orm import Session
 
 from app import crud
 from app.models import Item, ItemCreate

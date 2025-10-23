@@ -2,7 +2,7 @@ import uuid
 from typing import Any
 
 from fastapi import APIRouter, Depends, HTTPException
-from sqlmodel import col, delete, func, select
+from sqlalchemy import func, select, delete
 
 from app import crud
 from app.api.deps import (
@@ -40,10 +40,10 @@ def read_users(session: SessionDep, skip: int = 0, limit: int = 100) -> Any:
     """
 
     count_statement = select(func.count()).select_from(User)
-    count = session.exec(count_statement).one()
+    count = session.execute(count_statement).scalar_one()
 
     statement = select(User).offset(skip).limit(limit)
-    users = session.exec(statement).all()
+    users = session.execute(statement).scalars().all()
 
     return UsersPublic(data=users, count=count)
 
@@ -219,8 +219,8 @@ def delete_user(
         raise HTTPException(
             status_code=403, detail="Super users are not allowed to delete themselves"
         )
-    statement = delete(Item).where(col(Item.owner_id) == user_id)
-    session.exec(statement)  # type: ignore
+    statement = delete(Item).where(Item.owner_id == user_id)
+    session.execute(statement)
     session.delete(user)
     session.commit()
     return Message(message="User deleted successfully")

@@ -1,5 +1,5 @@
 from fastapi.encoders import jsonable_encoder
-from sqlmodel import Session
+from sqlalchemy.orm import Session
 
 from app import crud
 from app.core.security import verify_password
