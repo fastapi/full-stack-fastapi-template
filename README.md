@@ -1,3 +1,15 @@
+# SecureNotes (fork of full-stack-fastapi-postgresql)
+
+Phase 1 deliverables for SecureNotes (REST API security project).
+
+## Phase 1 contents
+
+* `docs/PROJECT_PROPOSAL.md`
+* `docs/SECURITY_PLAN.md`
+* `docs/system_overview.drawio` / `.png` / `.pdf`
+* `README.md`, `CHANGELOG.md`
+
+This repo is a fork of the `tiangolo/full-stack-fastapi-postgresql` starter.
 # Full Stack FastAPI Template
 
 <a href="https://github.com/fastapi/full-stack-fastapi-template/actions?query=workflow%3ATest" target="_blank"><img src="https://github.com/fastapi/full-stack-fastapi-template/workflows/Test/badge.svg" alt="Test"></a>
