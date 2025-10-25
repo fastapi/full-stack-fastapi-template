@@ -1,7 +1,9 @@
 from collections.abc import Generator
+from typing import Any
 
 import pytest
 from fastapi.testclient import TestClient
+from sqlalchemy.engine import Engine
 from sqlmodel import Session, SQLModel
 
 from app.api.deps import get_db
@@ -13,7 +15,7 @@ from tests.utils.utils import get_superuser_token_headers
 
 
 @pytest.fixture(scope="session", autouse=True)
-def test_engine():
+def test_engine() -> Generator[Engine, Any, None]:
     """
     Session-scoped fixture that creates tables and initializes test database.
     Follows official SQLModel testing pattern for FastAPI applications.
@@ -33,7 +35,7 @@ def test_engine():
 
 
 @pytest.fixture(scope="function")
-def session(test_engine) -> Generator[Session, None, None]:
+def session(test_engine: Engine) -> Generator[Session, None, None]:
     """
     Function-scoped fixture that provides a fresh database session for each test.
     This ensures test isolation and prevents data contamination between tests.
@@ -55,7 +57,7 @@ def client(session: Session) -> Generator[TestClient, None, None]:
     This follows the official SQLModel + FastAPI testing pattern.
     """
 
-    def get_session_override():
+    def get_session_override() -> Session:
         return session
 
     app.dependency_overrides[get_db] = get_session_override
