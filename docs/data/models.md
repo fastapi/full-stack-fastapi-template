@@ -50,6 +50,7 @@ class UserPublic(UserBase):
 
 **Relationships**:
 - `items`: One-to-many with Item (cascade delete)
+- `ingestions`: One-to-many with Ingestion (cascade delete)
 
 **Variants**:
 - `UserBase`: Common properties
@@ -59,6 +60,75 @@ class UserPublic(UserBase):
 - `UserRegister`: Public signup input
 - `UserPublic`: API response (excludes sensitive data)
 - `UsersPublic`: Paginated list response
+
+### Ingestion (Extraction)
+
+**Purpose**: PDF extraction metadata and processing pipeline tracking
+
+**Table Name**: `extractions` (domain-driven naming)
+
+**Database Fields**:
+- `id`: UUID (primary key, auto-generated)
+- `owner_id`: UUID (foreign key to user.id, CASCADE delete, indexed)
+- `filename`: str (original filename, max 255 chars, required)
+- `file_size`: int (file size in bytes, >0, required)
+- `page_count`: int | None (number of PDF pages, nullable for corrupted files)
+- `mime_type`: str (MIME type, max 100 chars, typically "application/pdf")
+- `status`: ExtractionStatus (pipeline state, default: "UPLOADED")
+- `presigned_url`: str (Supabase signed URL, max 2048 chars, 7-day expiry)
+- `storage_path`: str (Supabase storage path, max 512 chars)
+- `uploaded_at`: datetime (upload timestamp, auto-set)
+- `updated_at`: datetime (last update timestamp, auto-updated via trigger)
+
+**Extraction Status Enum**:
+```python
+class ExtractionStatus(str, Enum):
+    UPLOADED = "UPLOADED"                      # Initial upload complete
+    OCR_PROCESSING = "OCR_PROCESSING"          # OCR task in progress
+    OCR_COMPLETE = "OCR_COMPLETE"              # OCR completed
+    SEGMENTATION_PROCESSING = "SEGMENTATION_PROCESSING"  # Segmentation in progress
+    SEGMENTATION_COMPLETE = "SEGMENTATION_COMPLETE"      # Segmentation done
+    TAGGING_PROCESSING = "TAGGING_PROCESSING"  # ML tagging in progress
+    DRAFT = "DRAFT"                            # Ready for human review
+    IN_REVIEW = "IN_REVIEW"                    # Under human review
+    APPROVED = "APPROVED"                      # Reviewed and approved
+    REJECTED = "REJECTED"                      # Rejected during review
+    FAILED = "FAILED"                          # Processing failed
+```
+
+**Relationships**:
+- `owner`: Many-to-one with User (back_populates="ingestions")
+
+**Variants**:
+- `IngestionBase`: Common properties (shared fields)
+- `IngestionCreate`: Creation input (not used - file upload instead)
+- `Ingestion`: Database model (`table=True`, full schema)
+- `IngestionPublic`: API response (excludes `storage_path` for security)
+- `IngestionsPublic`: Paginated list response
+
+**Business Rules**:
+- File size must be greater than 0 (check constraint)
+- Filename limited to 255 characters
+- Page count nullable (handles corrupted PDFs gracefully)
+- Storage path never exposed in API (security)
+- Presigned URLs regenerated on status changes (DRAFT → APPROVED)
+- Cascade delete: User deletion removes all ingestions automatically
+
+**Database Constraints**:
+```sql
+CHECK (file_size > 0)
+FOREIGN KEY (owner_id) REFERENCES user(id) ON DELETE CASCADE
+```
+
+**Indexes** (for query performance):
+- `ix_extractions_owner_id` (B-tree on owner_id)
+- `ix_extractions_status` (B-tree on status)
+- `ix_extractions_uploaded_at` (B-tree on uploaded_at)
+
+**Auto-Update Trigger**:
+- `set_timestamp` trigger on UPDATE
+- Automatically sets `updated_at = NOW()` on any row modification
+- Uses reusable `trigger_set_timestamp()` function
 
 ### Item
 
@@ -97,24 +167,48 @@ Automatic validation:
 
 ## Database Relationships
 
+### One-to-Many Pattern
+
+**User → Items**:
 ```python
-# One-to-many
 class User(UserBase, table=True):
     items: list["Item"] = Relationship(
         back_populates="owner",
-        cascade_delete=True
+        cascade_delete=True  # ORM-level cascade
     )
 
 class Item(ItemBase, table=True):
     owner_id: UUID = Field(
         foreign_key="user.id",
         nullable=False,
-        ondelete="CASCADE"
+        ondelete="CASCADE"  # DB-level cascade
     )
     owner: User | None = Relationship(back_populates="items")
 ```
 
-**Cascade Delete**: When user deleted, all items deleted automatically.
+**User → Ingestions**:
+```python
+class User(UserBase, table=True):
+    ingestions: list["Ingestion"] = Relationship(
+        back_populates="owner",
+        cascade_delete=True  # ORM-level cascade
+    )
+
+class Ingestion(IngestionBase, table=True):
+    owner_id: UUID = Field(
+        foreign_key="user.id",
+        nullable=False,
+        ondelete="CASCADE",  # DB-level cascade
+        index=True  # Performance index
+    )
+    owner: "User" = Relationship(back_populates="ingestions")
+```
+
+**Cascade Delete Strategy**:
+- **ORM-level** (`cascade_delete=True`): SQLAlchemy handles deletions in Python
+- **DB-level** (`ondelete="CASCADE"`): PostgreSQL enforces at database level
+- **Best Practice**: Use both for consistency (2025 standard)
+- **Effect**: When user deleted, all owned items and ingestions automatically deleted
 
 ## Authentication Models
 

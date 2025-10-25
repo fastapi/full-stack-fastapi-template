@@ -1045,6 +1045,35 @@ git push origin feature/extraction-model
 # Create pull request on GitHub
 ```
 
+### PR Labeling
+
+**All pull requests must have at least one type label** to pass CI checks. The `check-labels` workflow validates this requirement.
+
+**Available labels** (based on conventional commit types):
+- `feature` - New feature implementation (feat commits)
+- `bug` - Bug fixes (fix commits)
+- `docs` - Documentation changes (docs commits)
+- `refactor` - Code refactoring (refactor commits)
+- `enhancement` - Performance improvements (perf commits)
+- `internal` - Internal/maintenance changes (chore, ci, build, style commits)
+- `breaking` - Breaking changes (feat!, fix! commits)
+- `security` - Security-related changes
+- `upgrade` - Dependency upgrades
+
+**Labeling methods**:
+1. **Manual**: Add label via GitHub UI when creating PR
+2. **Via Claude**: Use the `pr-labeling` skill when creating PRs with Claude Code
+3. **Via CLI**: `gh pr edit <number> --add-label <label-name>`
+
+**Example**:
+```bash
+# Create PR with gh CLI
+gh pr create --title "feat: add extraction model" --body "Description"
+
+# Add label
+gh pr edit <number> --add-label feature
+```
+
 ### Commit Message Format
 
 Follow conventional commits:
