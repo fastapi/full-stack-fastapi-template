@@ -89,7 +89,9 @@ def _redact_sensitive_data(data: str, redact_after: int = 10) -> str:
 def get_supabase_client() -> Client:
     """Get Supabase client with service role key for backend operations."""
     try:
-        client = create_client(str(settings.SUPABASE_URL), settings.SUPABASE_SERVICE_KEY)
+        client = create_client(
+            str(settings.SUPABASE_URL), settings.SUPABASE_SERVICE_KEY
+        )
         logger.debug(
             "Supabase client initialized successfully for URL: %s",
             _redact_sensitive_data(str(settings.SUPABASE_URL)),
@@ -144,9 +146,7 @@ def upload_to_supabase(
             file_options={"content-type": content_type},
         )
 
-        logger.info(
-            "Upload successful: path=%s, size=%.2f MB", file_path, file_size_mb
-        )
+        logger.info("Upload successful: path=%s, size=%.2f MB", file_path, file_size_mb)
         return file_path
 
     except Exception as e:
@@ -167,7 +167,9 @@ def upload_to_supabase(
         elif "credential" in error_msg.lower() or "auth" in error_msg.lower():
             raise AuthException(f"Invalid Supabase credentials: {error_msg}") from e
         else:
-            raise StorageException(f"Supabase Storage upload failed: {error_msg}") from e
+            raise StorageException(
+                f"Supabase Storage upload failed: {error_msg}"
+            ) from e
 
 
 def generate_presigned_url(
@@ -204,9 +206,7 @@ def generate_presigned_url(
 
         # Redact token from URL for logging
         url_for_logging = (
-            signed_url.split("?")[0] + "?token=***"
-            if "?" in signed_url
-            else signed_url
+            signed_url.split("?")[0] + "?token=***" if "?" in signed_url else signed_url
         )
         logger.info(
             "Presigned URL generated successfully: path=%s, url=%s",
@@ -225,9 +225,7 @@ def generate_presigned_url(
         )
 
         if "not found" in error_msg.lower():
-            raise StorageException(
-                f"File not found at path: {storage_path}"
-            ) from e
+            raise StorageException(f"File not found at path: {storage_path}") from e
         else:
             raise StorageException(
                 f"Failed to generate presigned URL: {error_msg}"
