@@ -28,11 +28,41 @@ jobs:
         run: docker compose down -v --remove-orphans
         env:
           REDIS_PASSWORD: test-redis-password
-      # Start Redis and MailCatcher (no local DB - using Supabase)
+          DOMAIN: test.example.com
+          FRONTEND_HOST: http://localhost:5173
+          STACK_NAME: curriculum-extractor-test
+          SECRET_KEY: test-secret-key
+          FIRST_SUPERUSER: test@example.com
+          FIRST_SUPERUSER_PASSWORD: test-password
+          DATABASE_URL: postgresql+psycopg://postgres:password@localhost:5432/app
+          SUPABASE_URL: https://test.supabase.co
+          SUPABASE_SERVICE_KEY: test-service-key
+          REDIS_URL: redis://:test@redis:6379/0
+          CELERY_BROKER_URL: redis://:test@redis:6379/0
+          CELERY_RESULT_BACKEND: redis://:test@redis:6379/0
+          DOCKER_IMAGE_BACKEND: backend
+          DOCKER_IMAGE_FRONTEND: frontend
+          TAG: test
+      # Start Redis (no local DB - using Supabase)
       - name: Start services
-        run: docker compose up -d redis mailcatcher
+        run: docker compose up -d redis
         env:
           REDIS_PASSWORD: test-redis-password
+          DOMAIN: test.example.com
+          FRONTEND_HOST: http://localhost:5173
+          STACK_NAME: curriculum-extractor-test
+          SECRET_KEY: test-secret-key
+          FIRST_SUPERUSER: test@example.com
+          FIRST_SUPERUSER_PASSWORD: test-password
+          DATABASE_URL: postgresql+psycopg://postgres:password@localhost:5432/app
+          SUPABASE_URL: https://test.supabase.co
+          SUPABASE_SERVICE_KEY: test-service-key
+          REDIS_URL: redis://:test@redis:6379/0
+          CELERY_BROKER_URL: redis://:test@redis:6379/0
+          CELERY_RESULT_BACKEND: redis://:test@redis:6379/0
+          DOCKER_IMAGE_BACKEND: backend
+          DOCKER_IMAGE_FRONTEND: frontend
+          TAG: test
       - name: Run tests
         run: uv run bash scripts/tests-start.sh "Coverage for ${{ github.sha }}"
         working-directory: backend
@@ -54,6 +84,21 @@ jobs:
         run: docker compose down -v --remove-orphans
         env:
           REDIS_PASSWORD: test-redis-password
+          DOMAIN: test.example.com
+          FRONTEND_HOST: http://localhost:5173
+          STACK_NAME: curriculum-extractor-test
+          SECRET_KEY: test-secret-key
+          FIRST_SUPERUSER: test@example.com
+          FIRST_SUPERUSER_PASSWORD: test-password
+          DATABASE_URL: postgresql+psycopg://postgres:password@localhost:5432/app
+          SUPABASE_URL: https://test.supabase.co
+          SUPABASE_SERVICE_KEY: test-service-key
+          REDIS_URL: redis://:test@redis:6379/0
+          CELERY_BROKER_URL: redis://:test@redis:6379/0
+          CELERY_RESULT_BACKEND: redis://:test@redis:6379/0
+          DOCKER_IMAGE_BACKEND: backend
+          DOCKER_IMAGE_FRONTEND: frontend
+          TAG: test
       - name: Store coverage files
         uses: actions/upload-artifact@v4
         with:
