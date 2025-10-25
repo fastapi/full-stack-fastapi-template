@@ -45,7 +45,9 @@ class UpdatePassword(SQLModel):
 class User(UserBase, table=True):
     id: uuid.UUID = Field(default_factory=uuid.uuid4, primary_key=True)
     hashed_password: str
-    ingestions: list["Ingestion"] = Relationship(back_populates="owner", cascade_delete=True)
+    ingestions: list["Ingestion"] = Relationship(
+        back_populates="owner", cascade_delete=True
+    )
 
 
 # Properties to return via API, id is always required
@@ -82,6 +84,7 @@ class NewPassword(SQLModel):
 # Extraction Status Enum
 class ExtractionStatus(str, Enum):
     """Extraction pipeline status enum."""
+
     UPLOADED = "UPLOADED"
     OCR_PROCESSING = "OCR_PROCESSING"
     OCR_COMPLETE = "OCR_COMPLETE"

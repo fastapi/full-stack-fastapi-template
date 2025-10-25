@@ -8,21 +8,16 @@ from app.core.config import settings
 
 def get_supabase_client() -> Client:
     """Get Supabase client with service role key for backend operations."""
-    return create_client(
-        str(settings.SUPABASE_URL),
-        settings.SUPABASE_SERVICE_KEY
-    )
+    return create_client(str(settings.SUPABASE_URL), settings.SUPABASE_SERVICE_KEY)
 
 
 @retry(
     stop=stop_after_attempt(3),
     wait=wait_exponential(multiplier=1, min=1, max=4),
-    reraise=True
+    reraise=True,
 )
 def upload_to_supabase(
-    file_path: str,
-    file_bytes: bytes,
-    content_type: str = "application/pdf"
+    file_path: str, file_bytes: bytes, content_type: str = "application/pdf"
 ) -> str:
     """
     Upload file to Supabase Storage with retry logic.
@@ -40,12 +35,8 @@ def upload_to_supabase(
     """
     supabase = get_supabase_client()
 
-    supabase.storage.from_(
-        settings.SUPABASE_STORAGE_BUCKET_WORKSHEETS
-    ).upload(
-        path=file_path,
-        file=file_bytes,
-        file_options={"content-type": content_type}
+    supabase.storage.from_(settings.SUPABASE_STORAGE_BUCKET_WORKSHEETS).upload(
+        path=file_path, file=file_bytes, file_options={"content-type": content_type}
     )
 
     return file_path
@@ -53,7 +44,7 @@ def upload_to_supabase(
 
 def generate_presigned_url(
     storage_path: str,
-    expiry_seconds: int = 604800  # 7 days
+    expiry_seconds: int = 604800,  # 7 days
 ) -> str:
     """
     Generate presigned URL for accessing uploaded file.
@@ -69,9 +60,7 @@ def generate_presigned_url(
 
     response = supabase.storage.from_(
         settings.SUPABASE_STORAGE_BUCKET_WORKSHEETS
-    ).create_signed_url(
-        path=storage_path,
-        expires_in=expiry_seconds
-    )
+    ).create_signed_url(path=storage_path, expires_in=expiry_seconds)
 
-    return response['signedURL']
+    signed_url: str = response["signedURL"]
+    return signed_url

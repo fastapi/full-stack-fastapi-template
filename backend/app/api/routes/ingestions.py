@@ -25,7 +25,7 @@ async def create_ingestion(
     *,
     session: SessionDep,
     current_user: CurrentUser,
-    file: UploadFile = File(..., description="PDF worksheet file")
+    file: UploadFile = File(..., description="PDF worksheet file"),
 ) -> Any:
     """
     Upload PDF worksheet and create extraction record.
@@ -36,8 +36,7 @@ async def create_ingestion(
     # Validate MIME type
     if file.content_type != "application/pdf":
         raise HTTPException(
-            status_code=400,
-            detail="Invalid file type. Only PDF files are supported."
+            status_code=400, detail="Invalid file type. Only PDF files are supported."
         )
 
     # Read file content
@@ -47,14 +46,14 @@ async def create_ingestion(
     if len(file_bytes) > MAX_FILE_SIZE:
         raise HTTPException(
             status_code=400,
-            detail=f"File too large. Maximum size: 25MB. Your file: {len(file_bytes) / (1024 * 1024):.1f}MB."
+            detail=f"File too large. Maximum size: 25MB. Your file: {len(file_bytes) / (1024 * 1024):.1f}MB.",
         )
 
     # Validate PDF magic number (%PDF-)
-    if not file_bytes.startswith(b'%PDF-'):
+    if not file_bytes.startswith(b"%PDF-"):
         raise HTTPException(
             status_code=400,
-            detail="Invalid PDF file. File signature does not match PDF format."
+            detail="Invalid PDF file. File signature does not match PDF format.",
         )
 
     # Extract PDF metadata (page count)
@@ -65,7 +64,9 @@ async def create_ingestion(
         logger.info(f"Extracted page count: {page_count} for file: {file.filename}")
     except Exception as e:
         # Log warning but allow upload to continue with NULL page_count
-        logger.warning(f"Could not extract page count from PDF: {file.filename}. Error: {e}")
+        logger.warning(
+            f"Could not extract page count from PDF: {file.filename}. Error: {e}"
+        )
 
     # Generate unique storage path
     extraction_id = uuid.uuid4()
@@ -77,10 +78,7 @@ async def create_ingestion(
         logger.info(f"Uploaded file to Supabase: {storage_path}")
     except Exception as e:
         logger.error(f"Supabase upload failed: {e}")
-        raise HTTPException(
-            status_code=500,
-            detail="Upload failed. Please try again."
-        )
+        raise HTTPException(status_code=500, detail="Upload failed. Please try again.")
 
     # Generate presigned URL (7-day expiry)
     try:
@@ -91,7 +89,7 @@ async def create_ingestion(
         # But for now, just fail with 500
         raise HTTPException(
             status_code=500,
-            detail="Failed to generate access URL. Please contact support."
+            detail="Failed to generate access URL. Please contact support.",
         )
 
     # Create extraction record in database
@@ -116,7 +114,7 @@ async def create_ingestion(
         # TODO: Ideally should cleanup uploaded file from Supabase here
         raise HTTPException(
             status_code=500,
-            detail="Failed to create extraction record. Please try again."
+            detail="Failed to create extraction record. Please try again.",
         )
 
     return ingestion
