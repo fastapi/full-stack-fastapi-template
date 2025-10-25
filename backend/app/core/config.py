@@ -143,10 +143,16 @@ class Settings(BaseSettings):
 
         # For production/staging, ensure it's PostgreSQL
         if self.ENVIRONMENT in ["staging", "production"]:
-            if not any(db_url.startswith(scheme) for scheme in [
-                "postgres://", "postgresql://", "postgresql+psycopg://",
-                "postgresql+asyncpg://", "postgresql+pg8000://"
-            ]):
+            if not any(
+                db_url.startswith(scheme)
+                for scheme in [
+                    "postgres://",
+                    "postgresql://",
+                    "postgresql+psycopg://",
+                    "postgresql+asyncpg://",
+                    "postgresql+pg8000://",
+                ]
+            ):
                 raise ValueError(
                     f"DATABASE_URL must be PostgreSQL in {self.ENVIRONMENT} environment"
                 )
