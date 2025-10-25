@@ -44,7 +44,8 @@ jobs:
         FIRST_SUPERUSER: admin@example.com
         FIRST_SUPERUSER_PASSWORD: just-for-generating-client
         # Supabase and Redis dummy values for client generation
-        DATABASE_URL: postgresql://postgres:password@localhost:5432/app
+        # Use postgresql+psycopg:// for psycopg v3 driver
+        DATABASE_URL: postgresql+psycopg://postgres:password@localhost:5432/app
         SUPABASE_URL: https://dummy.supabase.co
         SUPABASE_ANON_KEY: dummy-anon-key
         SUPABASE_SERVICE_KEY: dummy-service-key
