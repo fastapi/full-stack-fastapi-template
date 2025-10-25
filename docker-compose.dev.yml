@@ -1,0 +1,77 @@
+# Development-specific Docker Compose configuration
+# Use with: docker-compose -f docker-compose.yml -f docker-compose.dev.yml up
+
+services:
+  backend:
+    # Enable hot reload for development
+    command:
+      - fastapi
+      - run
+      - --reload
+      - --host
+      - "0.0.0.0"
+      - --port
+      - "8000"
+      - "app/main.py"
+    
+    # Mount source code for live editing
+    volumes:
+      - ./backend:/app
+      - /app/.venv  # Exclude virtual environment
+    
+    # Development environment variables
+    environment:
+      - LOG_LEVEL=DEBUG
+      - RELOAD=true
+    
+    # Expose port for direct access
+    ports:
+      - "8000:8000"
+
+  frontend:
+    # Development build with hot reload
+    build:
+      context: ./frontend
+      target: build-stage  # Stop at build stage for dev
+      args:
+        - VITE_API_URL=http://localhost:8000
+        - NODE_ENV=development
+    
+    # Override command for development server
+    command: npm run dev -- --host 0.0.0.0
+    
+    # Mount source code for live editing
+    volumes:
+      - ./frontend:/app
+      - /app/node_modules  # Exclude node_modules
+    
+    # Expose port for direct access
+    ports:
+      - "5173:5173"
+
+  db:
+    # Expose database port for direct access
+    ports:
+      - "5432:5432"
+    
+    # Add development database initialization
+    volumes:
+      - app-db-data:/var/lib/postgresql/data/pgdata
+      - ./scripts/init-dev-db.sql:/docker-entrypoint-initdb.d/init-dev-db.sql:ro
+
+  # Add development tools
+  adminer:
+    ports:
+      - "8080:8080"
+
+  # Mail catcher for development email testing
+  mailcatcher:
+    image: schickling/mailcatcher
+    ports:
+      - "1080:1080"  # Web interface
+      - "1025:1025"  # SMTP server
+    networks:
+      - default
+
+volumes:
+  app-db-data:
