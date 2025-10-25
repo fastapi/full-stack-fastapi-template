@@ -18,9 +18,13 @@ def db() -> Generator[Session, None, None]:
     # Works for both SQLite and PostgreSQL
     SQLModel.metadata.create_all(engine)
 
+    # Initialize database with superuser in a separate session
+    with Session(engine) as init_session:
+        init_db(init_session)
+        init_session.commit()
+
+    # Yield a fresh session for tests to use
     with Session(engine) as session:
-        init_db(session)
-        session.commit()  # Commit superuser to database
         yield session
 
         # Cleanup after all tests
