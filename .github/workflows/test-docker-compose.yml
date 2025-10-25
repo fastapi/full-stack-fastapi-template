@@ -26,6 +26,10 @@ jobs:
       SECRET_KEY: test-secret-key-minimum-length-32-chars
       FIRST_SUPERUSER: test@example.com
       FIRST_SUPERUSER_PASSWORD: test-password-123
+      # Docker image names
+      DOCKER_IMAGE_BACKEND: backend
+      DOCKER_IMAGE_FRONTEND: frontend
+      TAG: latest
     steps:
       - name: Checkout
         uses: actions/checkout@v5

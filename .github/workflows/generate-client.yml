@@ -19,7 +19,7 @@ jobs:
       if: ( github.event_name != 'pull_request' || github.secret_source == 'Actions' )
       with:
         ref: ${{ github.head_ref }}
-        token: ${{ secrets.FULL_STACK_FASTAPI_TEMPLATE_REPO_TOKEN }}
+        token: ${{ secrets.GITHUB_TOKEN }}
     - uses: actions/setup-node@v6
       with:
         node-version: lts/*

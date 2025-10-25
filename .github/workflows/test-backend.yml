@@ -24,9 +24,15 @@ jobs:
         with:
           version: "0.4.15"
           enable-cache: true
-      - run: docker compose down -v --remove-orphans
+      - name: Clean up docker
+        run: docker compose down -v --remove-orphans
+        env:
+          REDIS_PASSWORD: test-redis-password
       # Start Redis and MailCatcher (no local DB - using Supabase)
-      - run: docker compose up -d redis mailcatcher
+      - name: Start services
+        run: docker compose up -d redis mailcatcher
+        env:
+          REDIS_PASSWORD: test-redis-password
       - name: Run tests
         run: uv run bash scripts/tests-start.sh "Coverage for ${{ github.sha }}"
         working-directory: backend
@@ -44,7 +50,10 @@ jobs:
           SECRET_KEY: test-secret-key-for-ci
           FIRST_SUPERUSER: test@example.com
           FIRST_SUPERUSER_PASSWORD: test-password
-      - run: docker compose down -v --remove-orphans
+      - name: Cleanup
+        run: docker compose down -v --remove-orphans
+        env:
+          REDIS_PASSWORD: test-redis-password
       - name: Store coverage files
         uses: actions/upload-artifact@v4
         with:
