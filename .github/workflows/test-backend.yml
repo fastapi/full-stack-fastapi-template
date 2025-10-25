@@ -83,9 +83,11 @@ jobs:
         run: uv run bash scripts/tests-start.sh "Coverage for ${{ github.sha }}"
         working-directory: backend
         env:
-          # Test environment uses in-memory SQLite
-          # Tests should mock Supabase connections
-          DATABASE_URL: sqlite:///./test.db
+          # Required for Settings validation
+          PROJECT_NAME: CurriculumExtractor
+          # Use PostgreSQL URL format even though tests use SQLite
+          # Settings class validates the URL scheme
+          DATABASE_URL: postgresql+psycopg://postgres:password@localhost:5432/test
           SUPABASE_URL: https://test.supabase.co
           SUPABASE_ANON_KEY: test-anon-key
           SUPABASE_SERVICE_KEY: test-service-key
