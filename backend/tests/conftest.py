@@ -25,9 +25,13 @@ def db() -> Generator[Session, None, None]:
     # Create all tables
     SQLModel.metadata.create_all(engine)
 
-    # Open session and initialize database
+    # Initialize database in separate session that commits and closes
+    with Session(engine) as init_session:
+        init_db(init_session)  # Creates superuser and commits (via crud.create_user)
+    # init_session closes here, releasing connection to pool
+
+    # Yield a fresh session for tests
     with Session(engine) as session:
-        init_db(session)  # Creates superuser and commits (via crud.create_user)
         yield session
 
     # Cleanup: drop all tables after test session
