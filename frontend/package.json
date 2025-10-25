@@ -8,7 +8,10 @@
     "build": "tsc -p tsconfig.build.json && vite build",
     "lint": "biome check --write --unsafe --no-errors-on-unmatched --files-ignore-unknown=true ./",
     "preview": "vite preview",
-    "generate-client": "openapi-ts"
+    "generate-client": "openapi-ts",
+    "test": "vitest",
+    "test:ui": "vitest --ui",
+    "test:run": "vitest run"
   },
   "dependencies": {
     "@chakra-ui/react": "^3.27.0",
@@ -31,12 +34,17 @@
     "@playwright/test": "^1.55.0",
     "@tanstack/router-devtools": "^1.131.42",
     "@tanstack/router-plugin": "^1.133.15",
+    "@testing-library/jest-dom": "^6.9.1",
+    "@testing-library/react": "^16.3.0",
     "@types/node": "^24.5.2",
     "@types/react": "^19.1.16",
     "@types/react-dom": "^19.2.1",
     "@vitejs/plugin-react-swc": "^4.0.1",
+    "@vitest/ui": "^4.0.3",
     "dotenv": "^17.2.2",
+    "jsdom": "^27.0.1",
     "typescript": "^5.2.2",
-    "vite": "^7.1.11"
+    "vite": "^7.1.11",
+    "vitest": "^4.0.3"
   }
 }
