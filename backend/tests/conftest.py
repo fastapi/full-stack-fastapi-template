@@ -14,17 +14,23 @@ from tests.utils.utils import get_superuser_token_headers
 
 @pytest.fixture(scope="session", autouse=True)
 def db() -> Generator[Session, None, None]:
-    # Create tables for testing (SQLite doesn't use Alembic migrations)
+    # Create tables for testing (faster than running migrations)
+    # Works for both SQLite and PostgreSQL
     SQLModel.metadata.create_all(engine)
 
     with Session(engine) as session:
         init_db(session)
         yield session
+
+        # Cleanup after all tests
         statement = delete(Ingestion)
         session.execute(statement)
         statement = delete(User)
         session.execute(statement)
         session.commit()
+
+    # Drop all tables after test session (clean slate for next run)
+    SQLModel.metadata.drop_all(engine)
 
 
 @pytest.fixture(scope="module")

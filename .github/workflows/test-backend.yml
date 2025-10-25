@@ -12,6 +12,23 @@ on:
 jobs:
   test-backend:
     runs-on: ubuntu-latest
+
+    # PostgreSQL service container for production-parity testing
+    services:
+      postgres:
+        image: postgres:17
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: testpassword
+          POSTGRES_DB: test
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
     steps:
       - name: Checkout
         uses: actions/checkout@v5
@@ -52,8 +69,8 @@ jobs:
           SMTP_PASSWORD: ""
           EMAILS_FROM_EMAIL: noreply@test.example.com
           SENTRY_DSN: ""
-      # Start Redis (no local DB - using Supabase)
-      - name: Start services
+      # Start Redis for Celery tests (PostgreSQL is already available via service container)
+      - name: Start Redis
         run: docker compose up -d redis
         env:
           REDIS_PASSWORD: test-redis-password
@@ -86,8 +103,8 @@ jobs:
           # Required for Settings validation
           PROJECT_NAME: CurriculumExtractor
           ENVIRONMENT: testing
-          # Use in-memory SQLite for tests (no external database needed)
-          DATABASE_URL: sqlite:///
+          # Use PostgreSQL service container for production-parity testing
+          DATABASE_URL: postgresql+psycopg://postgres:testpassword@localhost:5432/test
           SUPABASE_URL: https://test.supabase.co
           SUPABASE_ANON_KEY: test-anon-key
           SUPABASE_SERVICE_KEY: test-service-key

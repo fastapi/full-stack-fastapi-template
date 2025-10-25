@@ -35,8 +35,14 @@ Unit Tests (40%) → Business logic, CRUD, validation
 ### Framework & Structure
 - **Pytest** + FastAPI TestClient + SQLModel
 - **Fixtures**: `client`, `db`, `superuser_token_headers`, `normal_user_token_headers`
-- **Database**: SQLite (CI), PostgreSQL (local) with transaction rollback
+- **Database**: **PostgreSQL 17** (CI & local) for production parity
 - **Coverage Target**: ≥80%, run with `bash backend/scripts/test.sh`
+
+**Why PostgreSQL for Tests?**
+- ✅ Production parity - catches PostgreSQL-specific issues
+- ✅ SQL dialect consistency - no SQLite surprises
+- ✅ Feature coverage - full PostgreSQL capabilities (JSON ops, window functions, etc.)
+- ⚠️ Tradeoff: ~30s slower than SQLite, but worth it for reliability
 
 ### Key Patterns
 ```python
@@ -249,15 +255,26 @@ docker compose exec celery-worker celery -A app.worker inspect registered
 
 GitHub Actions runs on every push/PR:
 1. **lint-backend** - Ruff + mypy (~1 min)
-2. **test-backend** - Pytest with coverage (~4 min)
+2. **test-backend** - Pytest with PostgreSQL (~5 min)
 3. **test-frontend** - Playwright E2E (~8 min)
 4. **test-docker-compose** - Smoke test (~4 min)
 
 **CI Environment**:
-- Database: SQLite (fast, isolated)
-- Redis: Real service
+- Database: **PostgreSQL 17 service container** (production parity)
+- Redis: Docker Compose service (for Celery tests)
 - Celery: Eager mode for unit tests
 - Coverage artifact uploaded for review
+
+**PostgreSQL Service Container**:
+```yaml
+services:
+  postgres:
+    image: postgres:17
+    env:
+      POSTGRES_PASSWORD: testpassword
+      POSTGRES_DB: test
+    options: --health-cmd pg_isready
+```
 
 ---
 
