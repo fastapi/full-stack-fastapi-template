@@ -35,7 +35,7 @@ class Settings(BaseSettings):
     # 60 minutes * 24 hours * 8 days = 8 days
     ACCESS_TOKEN_EXPIRE_MINUTES: int = 60 * 24 * 8
     FRONTEND_HOST: str = "http://localhost:5173"
-    ENVIRONMENT: Literal["local", "staging", "production"] = "local"
+    ENVIRONMENT: Literal["local", "testing", "staging", "production"] = "local"
 
     BACKEND_CORS_ORIGINS: Annotated[
         list[AnyUrl] | str, BeforeValidator(parse_cors)
@@ -53,7 +53,8 @@ class Settings(BaseSettings):
 
     # Supabase Configuration
     # Use DATABASE_URL with Supabase pooler connection for IPv6 compatibility
-    DATABASE_URL: PostgresDsn
+    # Allows SQLite for testing (sqlite:///) and PostgreSQL for production
+    DATABASE_URL: PostgresDsn | str
     SUPABASE_URL: HttpUrl
     SUPABASE_ANON_KEY: str
     SUPABASE_SERVICE_KEY: str
@@ -69,8 +70,9 @@ class Settings(BaseSettings):
 
     @computed_field  # type: ignore[prop-decorator]
     @property
-    def SQLALCHEMY_DATABASE_URI(self) -> PostgresDsn:
+    def SQLALCHEMY_DATABASE_URI(self) -> PostgresDsn | str:
         # Use DATABASE_URL directly (Supabase pooler connection)
+        # In testing, this may be a SQLite URL (sqlite:///)
         return self.DATABASE_URL
 
     # Redis and Celery Configuration
@@ -123,6 +125,31 @@ class Settings(BaseSettings):
         self._check_default_secret(
             "FIRST_SUPERUSER_PASSWORD", self.FIRST_SUPERUSER_PASSWORD
         )
+
+        return self
+
+    @model_validator(mode="after")
+    def _validate_database_url(self) -> Self:
+        """Validate DATABASE_URL based on environment.
+
+        - Production/Staging: Must be PostgreSQL
+        - Local/Testing: Allows SQLite for fast testing
+        """
+        db_url = str(self.DATABASE_URL)
+
+        # Allow SQLite for testing (sqlite:///)
+        if db_url.startswith("sqlite"):
+            return self
+
+        # For production/staging, ensure it's PostgreSQL
+        if self.ENVIRONMENT in ["staging", "production"]:
+            if not any(db_url.startswith(scheme) for scheme in [
+                "postgres://", "postgresql://", "postgresql+psycopg://",
+                "postgresql+asyncpg://", "postgresql+pg8000://"
+            ]):
+                raise ValueError(
+                    f"DATABASE_URL must be PostgreSQL in {self.ENVIRONMENT} environment"
+                )
 
         return self
 

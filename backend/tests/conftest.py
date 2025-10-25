@@ -2,7 +2,7 @@ from collections.abc import Generator
 
 import pytest
 from fastapi.testclient import TestClient
-from sqlmodel import Session, delete
+from sqlmodel import Session, SQLModel, delete
 
 from app.core.config import settings
 from app.core.db import engine, init_db
@@ -14,6 +14,9 @@ from tests.utils.utils import get_superuser_token_headers
 
 @pytest.fixture(scope="session", autouse=True)
 def db() -> Generator[Session, None, None]:
+    # Create tables for testing (SQLite doesn't use Alembic migrations)
+    SQLModel.metadata.create_all(engine)
+
     with Session(engine) as session:
         init_db(session)
         yield session

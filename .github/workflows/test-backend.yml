@@ -85,6 +85,7 @@ jobs:
         env:
           # Required for Settings validation
           PROJECT_NAME: CurriculumExtractor
+          ENVIRONMENT: testing
           # Use in-memory SQLite for tests (no external database needed)
           DATABASE_URL: sqlite:///
           SUPABASE_URL: https://test.supabase.co
