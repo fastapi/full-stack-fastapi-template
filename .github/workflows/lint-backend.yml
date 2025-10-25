@@ -27,8 +27,8 @@ jobs:
       - name: Install dependencies
         run: uv sync
         working-directory: backend
-      - name: Run linters
-        run: uv run bash scripts/lint.sh
+      - name: Run mypy
+        run: uv run mypy app
         working-directory: backend
         env:
           # Required env vars for Settings class initialization during mypy analysis
@@ -44,3 +44,9 @@ jobs:
           REDIS_URL: redis://:dummy@localhost:6379/0
           CELERY_BROKER_URL: redis://:dummy@localhost:6379/0
           CELERY_RESULT_BACKEND: redis://:dummy@localhost:6379/0
+      - name: Run ruff check
+        run: uv run ruff check app
+        working-directory: backend
+      - name: Run ruff format check
+        run: uv run ruff format app --check
+        working-directory: backend
