@@ -25,7 +25,7 @@ jobs:
           version: "0.4.15"
           enable-cache: true
       - name: Install dependencies
-        run: uv sync
+        run: uv sync --group dev
         working-directory: backend
       - name: Run mypy
         run: uv run mypy app
