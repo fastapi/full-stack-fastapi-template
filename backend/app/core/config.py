@@ -57,6 +57,7 @@ class Settings(BaseSettings):
     SUPABASE_URL: HttpUrl
     SUPABASE_ANON_KEY: str
     SUPABASE_SERVICE_KEY: str
+    SUPABASE_STORAGE_BUCKET_WORKSHEETS: str = "worksheets"
 
     # Legacy Postgres fields - deprecated, kept for backward compatibility
     # Use DATABASE_URL instead
