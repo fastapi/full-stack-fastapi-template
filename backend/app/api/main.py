@@ -11,5 +11,5 @@ api_router.include_router(tasks.router)
 api_router.include_router(ingestions.router)
 
 
-if settings.ENVIRONMENT == "local":
+if settings.ENVIRONMENT in ["local", "testing"]:
     api_router.include_router(private.router)

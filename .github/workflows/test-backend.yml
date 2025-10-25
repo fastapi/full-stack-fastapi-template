@@ -51,7 +51,7 @@ jobs:
           FRONTEND_HOST: http://localhost:5173
           STACK_NAME: curriculum-extractor-test
           SECRET_KEY: test-secret-key
-          FIRST_SUPERUSER: test@example.com
+          FIRST_SUPERUSER: admin@example.com
           FIRST_SUPERUSER_PASSWORD: test-password
           DATABASE_URL: postgresql+psycopg://postgres:password@localhost:5432/app
           SUPABASE_URL: https://test.supabase.co
@@ -78,7 +78,7 @@ jobs:
           FRONTEND_HOST: http://localhost:5173
           STACK_NAME: curriculum-extractor-test
           SECRET_KEY: test-secret-key
-          FIRST_SUPERUSER: test@example.com
+          FIRST_SUPERUSER: admin@example.com
           FIRST_SUPERUSER_PASSWORD: test-password
           DATABASE_URL: postgresql+psycopg://postgres:password@localhost:5432/app
           SUPABASE_URL: https://test.supabase.co
@@ -113,7 +113,7 @@ jobs:
           CELERY_BROKER_URL: redis://:test@redis:6379/0
           CELERY_RESULT_BACKEND: redis://:test@redis:6379/0
           SECRET_KEY: test-secret-key-for-ci
-          FIRST_SUPERUSER: test@example.com
+          FIRST_SUPERUSER: admin@example.com
           FIRST_SUPERUSER_PASSWORD: test-password
       - name: Cleanup
         run: docker compose down -v --remove-orphans
@@ -123,7 +123,7 @@ jobs:
           FRONTEND_HOST: http://localhost:5173
           STACK_NAME: curriculum-extractor-test
           SECRET_KEY: test-secret-key
-          FIRST_SUPERUSER: test@example.com
+          FIRST_SUPERUSER: admin@example.com
           FIRST_SUPERUSER_PASSWORD: test-password
           DATABASE_URL: postgresql+psycopg://postgres:password@localhost:5432/app
           SUPABASE_URL: https://test.supabase.co
