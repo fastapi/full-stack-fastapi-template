@@ -2,55 +2,83 @@ from collections.abc import Generator
 
 import pytest
 from fastapi.testclient import TestClient
-from sqlmodel import Session, SQLModel, delete
+from sqlmodel import Session, SQLModel
 
+from app.api.deps import get_db
 from app.core.config import settings
 from app.core.db import engine, init_db
 from app.main import app
-from app.models import Ingestion, User
 from tests.utils.user import authentication_token_from_email
 from tests.utils.utils import get_superuser_token_headers
 
 
 @pytest.fixture(scope="session", autouse=True)
-def db() -> Generator[Session, None, None]:
-    # Create tables for testing (faster than running migrations)
-    # Works for both SQLite and PostgreSQL
+def test_engine():
+    """
+    Session-scoped fixture that creates tables and initializes test database.
+    Follows official SQLModel testing pattern for FastAPI applications.
+    """
+    # Create all tables
     SQLModel.metadata.create_all(engine)
 
-    # Initialize database with superuser in a separate session
+    # Initialize database with superuser once for all tests
     with Session(engine) as init_session:
         init_db(init_session)
         init_session.commit()
 
-    # Yield a fresh session for tests to use
-    with Session(engine) as session:
-        yield session
+    yield engine
 
-        # Cleanup after all tests
-        statement = delete(Ingestion)
-        session.execute(statement)
-        statement = delete(User)
-        session.execute(statement)
-        session.commit()
-
-    # Drop all tables after test session (clean slate for next run)
+    # Cleanup: drop all tables after test session
     SQLModel.metadata.drop_all(engine)
 
 
-@pytest.fixture(scope="module")
-def client() -> Generator[TestClient, None, None]:
+@pytest.fixture(scope="function")
+def session(test_engine) -> Generator[Session, None, None]:
+    """
+    Function-scoped fixture that provides a fresh database session for each test.
+    This ensures test isolation and prevents data contamination between tests.
+    """
+    with Session(test_engine) as session:
+        yield session
+
+
+@pytest.fixture(scope="function")
+def client(session: Session) -> Generator[TestClient, None, None]:
+    """
+    Function-scoped fixture that provides a TestClient with overridden database dependency.
+
+    This ensures that both:
+    1. Direct database operations in tests (via session fixture)
+    2. API calls through TestClient
+
+    Use the SAME session, guaranteeing transaction visibility and consistency.
+    This follows the official SQLModel + FastAPI testing pattern.
+    """
+
+    def get_session_override():
+        return session
+
+    app.dependency_overrides[get_db] = get_session_override
+
     with TestClient(app) as c:
         yield c
 
+    app.dependency_overrides.clear()
 
-@pytest.fixture(scope="module")
+
+@pytest.fixture(scope="function")
 def superuser_token_headers(client: TestClient) -> dict[str, str]:
+    """Get authentication headers for superuser."""
     return get_superuser_token_headers(client)
 
 
-@pytest.fixture(scope="module")
-def normal_user_token_headers(client: TestClient, db: Session) -> dict[str, str]:
+@pytest.fixture(scope="function")
+def normal_user_token_headers(client: TestClient, session: Session) -> dict[str, str]:
+    """Get authentication headers for normal test user."""
     return authentication_token_from_email(
-        client=client, email=settings.EMAIL_TEST_USER, db=db
+        client=client, email=settings.EMAIL_TEST_USER, db=session
     )
+
+
+# Backward compatibility alias
+db = session
