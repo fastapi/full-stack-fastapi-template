@@ -12,20 +12,56 @@ on:
 jobs:
   test-frontend:
     runs-on: ubuntu-latest
-    timeout-minutes: 15
+    timeout-minutes: 20
+    services:
+      postgres:
+        image: postgres:17
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: testpassword
+          POSTGRES_DB: test
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+      redis:
+        image: redis:7-alpine
+        ports:
+          - 6379:6379
+        options: >-
+          --health-cmd "redis-cli ping"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+      mailcatcher:
+        image: schickling/mailcatcher
+        ports:
+          - 1080:1080
+          - 1025:1025
     env:
-      # Backend environment (Supabase will be mocked)
-      DATABASE_URL: postgresql://test:test@localhost:5432/test
-      SUPABASE_URL: https://test.supabase.co
-      SUPABASE_ANON_KEY: test-anon-key
-      SUPABASE_SERVICE_KEY: test-service-key
-      REDIS_PASSWORD: test-redis-password
-      REDIS_URL: redis://:test-redis-password@redis:6379/0
-      CELERY_BROKER_URL: redis://:test-redis-password@redis:6379/0
-      CELERY_RESULT_BACKEND: redis://:test-redis-password@redis:6379/0
+      PROJECT_NAME: CurriculumExtractor
+      ENVIRONMENT: testing
+      FRONTEND_HOST: http://localhost:5173
+      BACKEND_CORS_ORIGINS: http://localhost:5173
       SECRET_KEY: test-secret-key-minimum-length-32-chars-for-jwt
       FIRST_SUPERUSER: admin@example.com
       FIRST_SUPERUSER_PASSWORD: test-password-123
+      DATABASE_URL: postgresql+psycopg://postgres:testpassword@localhost:5432/test
+      REDIS_PASSWORD: test-redis-password
+      REDIS_URL: redis://:test-redis-password@localhost:6379/0
+      CELERY_BROKER_URL: redis://:test-redis-password@localhost:6379/0
+      CELERY_RESULT_BACKEND: redis://:test-redis-password@localhost:6379/0
+      SUPABASE_URL: https://test.supabase.co
+      SUPABASE_ANON_KEY: test-anon-key
+      SUPABASE_SERVICE_KEY: test-service-key
+      SMTP_HOST: localhost
+      SMTP_PORT: "1025"
+      SMTP_TLS: "false"
+      EMAILS_FROM_EMAIL: noreply@test.example.com
+      SENTRY_DSN: ""
       
     steps:
       - name: Checkout
@@ -35,11 +71,11 @@ jobs:
         uses: actions/setup-python@v6
         with:
           python-version: "3.10"
-          
+
       - name: Install uv
         uses: astral-sh/setup-uv@v7
         with:
-          version: "0.4.15"
+          version: "0.9.5"
           enable-cache: true
           
       - name: Set up Node.js
@@ -65,40 +101,60 @@ jobs:
         run: npx playwright install --with-deps chromium
         working-directory: frontend
         
-      - name: Start services for E2E tests
+      - name: Install backend dependencies
+        run: uv sync
+        working-directory: backend
+
+      - name: Initialize backend database
         run: |
-          docker compose down -v --remove-orphans
-          docker compose up -d --wait backend redis
-          
+          uv run python app/backend_pre_start.py
+          uv run alembic upgrade head
+          uv run python app/initial_data.py
+        working-directory: backend
+
+      - name: Start backend API
+        run: |
+          nohup uv run fastapi run app/main.py --port 8000 > backend_server.log 2>&1 &
+          echo $! > backend_server.pid
+        working-directory: backend
+
       - name: Wait for backend
         run: |
           for i in {1..30}; do
-            if curl -f http://localhost:8000/api/v1/utils/health-check; then
-              echo "✅ Backend ready"
-              exit 0
-            fi
-            echo "Waiting... $i/30"
-            sleep 2
+            if curl -f http://localhost:8000/api/v1/utils/health-check/; then
+              echo "✅ Backend ready"; exit 0; fi
+            echo "Waiting... $i/30"; sleep 2;
           done
-          echo "❌ Backend timeout"
-          docker compose logs backend
-          exit 1
+          echo "❌ Backend timeout"; cat backend/backend_server.log || true; exit 1
           
       - name: Run Playwright tests
         run: npx playwright test
         working-directory: frontend
         env:
           CI: true
-          
-      - name: Upload Playwright report
+          VITE_API_URL: http://localhost:8000
+          MAILCATCHER_HOST: http://localhost:1080
+          FIRST_SUPERUSER: admin@example.com
+          FIRST_SUPERUSER_PASSWORD: test-password-123
+      
+      - name: Merge Playwright blob report to HTML
+        if: always()
+        run: npx playwright merge-reports --reporter html blob-report
+        working-directory: frontend
+
+      - name: Upload Playwright HTML report
         uses: actions/upload-artifact@v4
         if: always()
         with:
           name: playwright-report
           path: frontend/playwright-report/
           retention-days: 7
-          
-      - name: Cleanup
+
+      - name: Upload Playwright blob report
+        uses: actions/upload-artifact@v4
         if: always()
-        run: docker compose down -v --remove-orphans
+        with:
+          name: playwright-blob-report
+          path: frontend/blob-report/
+          retention-days: 7
 

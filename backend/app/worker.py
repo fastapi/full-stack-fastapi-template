@@ -1,6 +1,6 @@
 """Celery worker configuration for async task processing."""
 
-from celery import Celery
+from celery import Celery  # type: ignore[import-untyped]
 
 from app.core.config import settings
 
@@ -38,4 +38,3 @@ celery_app.conf.task_default_routing_key = "celery"
 #     "app.tasks.extraction.*": {"queue": "extraction"},
 #     "app.tasks.default.*": {"queue": "default"},
 # }
-

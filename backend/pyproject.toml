@@ -24,6 +24,9 @@ dependencies = [
     # Async task queue
     "celery[redis]<6.0.0,>=5.3.4",
     "redis<5.0.0,>=4.6.0",
+    # File upload and storage
+    "supabase<3.0.0,>=2.0.0",
+    "pypdf<4.0.0,>=3.0.0",
 ]
 
 [dependency-groups]

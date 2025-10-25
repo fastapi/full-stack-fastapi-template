@@ -19,7 +19,7 @@ jobs:
       if: ( github.event_name != 'pull_request' || github.secret_source == 'Actions' )
       with:
         ref: ${{ github.head_ref }}
-        token: ${{ secrets.FULL_STACK_FASTAPI_TEMPLATE_REPO_TOKEN }}
+        token: ${{ secrets.GITHUB_TOKEN }}
     - uses: actions/setup-node@v6
       with:
         node-version: lts/*
@@ -29,7 +29,7 @@ jobs:
     - name: Install uv
       uses: astral-sh/setup-uv@v7
       with:
-        version: "0.4.15"
+        version: "0.9.5"
         enable-cache: true
     - name: Install dependencies
       run: npm ci
@@ -39,10 +39,13 @@ jobs:
     - run: uv run bash scripts/generate-client.sh
       env:
         VIRTUAL_ENV: backend/.venv
+        PROJECT_NAME: CurriculumExtractor
         SECRET_KEY: just-for-generating-client
+        FIRST_SUPERUSER: admin@example.com
         FIRST_SUPERUSER_PASSWORD: just-for-generating-client
         # Supabase and Redis dummy values for client generation
-        DATABASE_URL: postgresql://postgres:password@localhost:5432/app
+        # Use postgresql+psycopg:// for psycopg v3 driver
+        DATABASE_URL: postgresql+psycopg://postgres:password@localhost:5432/app
         SUPABASE_URL: https://dummy.supabase.co
         SUPABASE_ANON_KEY: dummy-anon-key
         SUPABASE_SERVICE_KEY: dummy-service-key

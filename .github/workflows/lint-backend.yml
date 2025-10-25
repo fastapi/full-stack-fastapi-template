@@ -22,7 +22,31 @@ jobs:
       - name: Install uv
         uses: astral-sh/setup-uv@v7
         with:
-          version: "0.4.15"
+          version: "0.9.5"
           enable-cache: true
-      - run: uv run bash scripts/lint.sh
+      - name: Install dependencies
+        run: uv sync --dev
+        working-directory: backend
+      - name: Run mypy
+        run: uv run mypy app
+        working-directory: backend
+        env:
+          # Required env vars for Settings class initialization during mypy analysis
+          PROJECT_NAME: CurriculumExtractor
+          SECRET_KEY: just-for-linting
+          FIRST_SUPERUSER: admin@example.com
+          FIRST_SUPERUSER_PASSWORD: just-for-linting
+          DATABASE_URL: postgresql+psycopg://postgres:password@localhost:5432/app
+          SUPABASE_URL: https://dummy.supabase.co
+          SUPABASE_ANON_KEY: dummy-anon-key
+          SUPABASE_SERVICE_KEY: dummy-service-key
+          REDIS_PASSWORD: dummy-redis-password
+          REDIS_URL: redis://:dummy@localhost:6379/0
+          CELERY_BROKER_URL: redis://:dummy@localhost:6379/0
+          CELERY_RESULT_BACKEND: redis://:dummy@localhost:6379/0
+      - name: Run ruff check
+        run: uv run ruff check app
+        working-directory: backend
+      - name: Run ruff format check
+        run: uv run ruff format app --check
         working-directory: backend
