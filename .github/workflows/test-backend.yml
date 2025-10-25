@@ -80,14 +80,13 @@ jobs:
           EMAILS_FROM_EMAIL: noreply@test.example.com
           SENTRY_DSN: ""
       - name: Run tests
-        run: uv run bash scripts/tests-start.sh "Coverage for ${{ github.sha }}"
+        run: uv run bash scripts/test.sh "Coverage for ${{ github.sha }}"
         working-directory: backend
         env:
           # Required for Settings validation
           PROJECT_NAME: CurriculumExtractor
-          # Use PostgreSQL URL format even though tests use SQLite
-          # Settings class validates the URL scheme
-          DATABASE_URL: postgresql+psycopg://postgres:password@localhost:5432/test
+          # Use in-memory SQLite for tests (no external database needed)
+          DATABASE_URL: sqlite:///
           SUPABASE_URL: https://test.supabase.co
           SUPABASE_ANON_KEY: test-anon-key
           SUPABASE_SERVICE_KEY: test-service-key
