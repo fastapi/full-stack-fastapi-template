@@ -115,6 +115,7 @@ jobs:
           SECRET_KEY: test-secret-key-for-ci
           FIRST_SUPERUSER: admin@example.com
           FIRST_SUPERUSER_PASSWORD: test-password
+          EMAILS_FROM_EMAIL: noreply@test.example.com
       - name: Cleanup
         run: docker compose down -v --remove-orphans
         env:
