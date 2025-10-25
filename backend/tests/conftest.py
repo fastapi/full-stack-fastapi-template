@@ -34,27 +34,29 @@ def test_engine() -> Generator[Engine, Any, None]:
     SQLModel.metadata.drop_all(engine)
 
 
-@pytest.fixture(scope="function")
+@pytest.fixture(scope="module")
 def session(test_engine: Engine) -> Generator[Session, None, None]:
     """
-    Function-scoped fixture that provides a fresh database session for each test.
-    This ensures test isolation and prevents data contamination between tests.
+    Module-scoped fixture that provides a database session for all tests in a module.
+    Uses module scope to avoid transaction management overhead while maintaining
+    reasonable isolation (one session per test file).
     """
     with Session(test_engine) as session:
         yield session
 
 
-@pytest.fixture(scope="function")
+@pytest.fixture(scope="module")
 def client(session: Session) -> Generator[TestClient, None, None]:
     """
-    Function-scoped fixture that provides a TestClient with overridden database dependency.
+    Module-scoped fixture that provides a TestClient with overridden database dependency.
 
     This ensures that both:
     1. Direct database operations in tests (via session fixture)
     2. API calls through TestClient
 
     Use the SAME session, guaranteeing transaction visibility and consistency.
-    This follows the official SQLModel + FastAPI testing pattern.
+    Module scope reduces overhead of creating new clients and managing dependency
+    overrides for each test, following the FastAPI template pattern.
     """
 
     def get_session_override() -> Session:
@@ -68,15 +70,15 @@ def client(session: Session) -> Generator[TestClient, None, None]:
     app.dependency_overrides.clear()
 
 
-@pytest.fixture(scope="function")
+@pytest.fixture(scope="module")
 def superuser_token_headers(client: TestClient) -> dict[str, str]:
-    """Get authentication headers for superuser."""
+    """Get authentication headers for superuser (cached per module)."""
     return get_superuser_token_headers(client)
 
 
-@pytest.fixture(scope="function")
+@pytest.fixture(scope="module")
 def normal_user_token_headers(client: TestClient, session: Session) -> dict[str, str]:
-    """Get authentication headers for normal test user."""
+    """Get authentication headers for normal test user (cached per module)."""
     return authentication_token_from_email(
         client=client, email=settings.EMAIL_TEST_USER, db=session
     )
