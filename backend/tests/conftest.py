@@ -20,6 +20,7 @@ def db() -> Generator[Session, None, None]:
 
     with Session(engine) as session:
         init_db(session)
+        session.commit()  # Commit superuser to database
         yield session
 
         # Cleanup after all tests
