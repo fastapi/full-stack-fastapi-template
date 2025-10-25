@@ -15,6 +15,8 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v5
+      - name: Create dummy .env file
+        run: touch .env
       - name: Set up Python
         uses: actions/setup-python@v6
         with:
@@ -43,6 +45,13 @@ jobs:
           DOCKER_IMAGE_BACKEND: backend
           DOCKER_IMAGE_FRONTEND: frontend
           TAG: test
+          ENVIRONMENT: testing
+          BACKEND_CORS_ORIGINS: http://localhost:5173
+          SMTP_HOST: ""
+          SMTP_USER: ""
+          SMTP_PASSWORD: ""
+          EMAILS_FROM_EMAIL: noreply@test.example.com
+          SENTRY_DSN: ""
       # Start Redis (no local DB - using Supabase)
       - name: Start services
         run: docker compose up -d redis
@@ -63,6 +72,13 @@ jobs:
           DOCKER_IMAGE_BACKEND: backend
           DOCKER_IMAGE_FRONTEND: frontend
           TAG: test
+          ENVIRONMENT: testing
+          BACKEND_CORS_ORIGINS: http://localhost:5173
+          SMTP_HOST: ""
+          SMTP_USER: ""
+          SMTP_PASSWORD: ""
+          EMAILS_FROM_EMAIL: noreply@test.example.com
+          SENTRY_DSN: ""
       - name: Run tests
         run: uv run bash scripts/tests-start.sh "Coverage for ${{ github.sha }}"
         working-directory: backend
@@ -99,6 +115,13 @@ jobs:
           DOCKER_IMAGE_BACKEND: backend
           DOCKER_IMAGE_FRONTEND: frontend
           TAG: test
+          ENVIRONMENT: testing
+          BACKEND_CORS_ORIGINS: http://localhost:5173
+          SMTP_HOST: ""
+          SMTP_USER: ""
+          SMTP_PASSWORD: ""
+          EMAILS_FROM_EMAIL: noreply@test.example.com
+          SENTRY_DSN: ""
       - name: Store coverage files
         uses: actions/upload-artifact@v4
         with:
