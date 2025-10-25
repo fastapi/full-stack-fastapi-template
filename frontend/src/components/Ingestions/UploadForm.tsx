@@ -1,4 +1,12 @@
-import { Box, Button, HStack, Icon, Text, VStack } from "@chakra-ui/react"
+import {
+  Box,
+  Button,
+  HStack,
+  Icon,
+  Progress,
+  Text,
+  VStack,
+} from "@chakra-ui/react"
 import { useRef, useState } from "react"
 import { FiCheckCircle, FiFile, FiUpload, FiXCircle } from "react-icons/fi"
 import useCustomToast from "@/hooks/useCustomToast"
@@ -13,7 +21,7 @@ export function UploadForm() {
   const [extractionId, setExtractionId] = useState<string | null>(null)
 
   const fileInputRef = useRef<HTMLInputElement>(null)
-  const { upload, isUploading, error } = useFileUpload()
+  const { upload, progress, isUploading, error } = useFileUpload()
   const { showSuccessToast, showErrorToast } = useCustomToast()
 
   // Handle file selection (from picker or drag-and-drop)
@@ -179,6 +187,7 @@ export function UploadForm() {
               type="file"
               accept="application/pdf"
               onChange={handleFileInputChange}
+              disabled={isUploading}
               style={{ display: "none" }}
               aria-label="Upload PDF file"
             />
@@ -229,6 +238,36 @@ export function UploadForm() {
               </Text>
             </VStack>
           </HStack>
+        </Box>
+      )}
+
+      {/* Upload Progress */}
+      {isUploading && file && (
+        <Box
+          p={4}
+          borderRadius="md"
+          bg="blue.50"
+          borderWidth="1px"
+          borderColor="blue.200"
+        >
+          <VStack align="stretch" gap={3}>
+            <HStack gap={3}>
+              <Icon fontSize="xl" color="blue.500">
+                <FiFile />
+              </Icon>
+              <VStack align="start" gap={0} flex={1}>
+                <Text fontWeight="medium">{file.name}</Text>
+                <Text fontSize="sm" color="blue.600">
+                  Uploading... {progress}%
+                </Text>
+              </VStack>
+            </HStack>
+            <Progress.Root value={progress} size="sm" colorPalette="blue">
+              <Progress.Track>
+                <Progress.Range />
+              </Progress.Track>
+            </Progress.Root>
+          </VStack>
         </Box>
       )}
 
