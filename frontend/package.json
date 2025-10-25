@@ -40,6 +40,7 @@
     "@types/react": "^19.1.16",
     "@types/react-dom": "^19.2.1",
     "@vitejs/plugin-react-swc": "^4.0.1",
+    "@vitest/coverage-v8": "^4.0.3",
     "@vitest/ui": "^4.0.3",
     "dotenv": "^17.2.2",
     "jsdom": "^27.0.1",
