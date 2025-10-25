@@ -39,7 +39,9 @@ jobs:
     - run: uv run bash scripts/generate-client.sh
       env:
         VIRTUAL_ENV: backend/.venv
+        PROJECT_NAME: CurriculumExtractor
         SECRET_KEY: just-for-generating-client
+        FIRST_SUPERUSER: admin@example.com
         FIRST_SUPERUSER_PASSWORD: just-for-generating-client
         # Supabase and Redis dummy values for client generation
         DATABASE_URL: postgresql://postgres:password@localhost:5432/app
