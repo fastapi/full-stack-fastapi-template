@@ -1,0 +1,33 @@
+name: Check PR Labels
+
+on:
+  pull_request:
+    types: [opened, labeled, unlabeled, synchronize, reopened]
+
+jobs:
+  check-labels:
+    runs-on: ubuntu-latest
+    name: Validate PR has required labels
+    steps:
+      - name: Check for at least one type label
+        uses: mheap/github-action-required-labels@v5
+        with:
+          mode: minimum
+          count: 1
+          labels: "feature, bug, docs, refactor, enhancement, internal, breaking, security, upgrade"
+          add_comment: true
+          message: |
+            This PR requires at least one type label to be added.
+
+            Available labels:
+            - `feature` - New feature implementation (feat type)
+            - `bug` - Bug fixes (fix type)
+            - `docs` - Documentation changes (docs type)
+            - `refactor` - Code refactoring (refactor type)
+            - `enhancement` - Performance improvements (perf type)
+            - `internal` - Internal/maintenance changes (chore, ci, build, style types)
+            - `breaking` - Breaking changes (feat!, fix! types)
+            - `security` - Security-related changes
+            - `upgrade` - Dependency upgrades
+
+            Please add the appropriate label based on your PR's conventional commit type.
