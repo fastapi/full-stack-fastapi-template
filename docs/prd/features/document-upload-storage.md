@@ -2,8 +2,8 @@
 
 **Version**: 1.0
 **Component**: Full-stack (Backend + Frontend)
-**Status**: Ready for Implementation
-**Last Updated**: 2025-10-22
+**Status**: ✅ Implemented (Epic CUR-28 Complete)
+**Last Updated**: 2025-10-25
 **Related**: [Product Overview](../overview.md), [Implementation Plan - Math](../implementation-plan-math.md), [Infrastructure Setup](./infrastructure-setup.md)
 
 ---
@@ -960,28 +960,28 @@ export function useFileUpload() {
 
 ### Unit Tests
 
-- [ ] **File validation**:
+- [x] **File validation**:
   - Valid PDF → passes
   - DOCX file → rejected with 400
   - File >25MB → rejected with 400
   - Corrupted PDF → rejected with 422
-- [ ] **PDF metadata extraction**:
+- [x] **PDF metadata extraction**:
   - 10-page PDF → page_count = 10
   - 1-page PDF → page_count = 1
   - Encrypted PDF → throws exception
-- [ ] **Storage path generation**:
+- [x] **Storage path generation**:
   - UUID-based path format: `{user_id}/{extraction_id}/original.pdf`
   - No path traversal vulnerabilities
-- [ ] **Presigned URL generation**:
+- [x] **Presigned URL generation**:
   - URL contains `token=` query param
   - URL expires in 7 days (604800 seconds)
-- [ ] **Filename sanitization**:
+- [x] **Filename sanitization**:
   - Special characters removed
   - Length limited to 255 characters
 
 ### Integration Tests
 
-- [ ] **Upload workflow** (`test_ingestions.py`):
+- [x] **Upload workflow** (`test_ingestions.py`):
   ```python
   def test_create_ingestion_success(client, normal_user_token_headers, db):
       """Test successful PDF upload"""
@@ -1002,17 +1002,19 @@ export function useFileUpload() {
       assert ingestion is not None
       assert ingestion.page_count > 0
   ```
-- [ ] **Supabase Storage integration**:
+- [x] **Supabase Storage integration**:
   - Upload file → verify file exists in bucket
   - Generate presigned URL → verify URL is accessible
   - User isolation → verify user A cannot access user B's files
-- [ ] **Error handling**:
+- [x] **Error handling**:
   - Invalid file type → 400 error
   - File too large → 400 error
   - Corrupted PDF → 422 error
   - Supabase API failure → 500 error (mock failure)
 
 ### E2E Tests (Playwright)
+
+**Note**: E2E tests deferred (covered by comprehensive unit/integration tests).
 
 - [ ] **Upload happy path** (`tests/ingestion-upload.spec.ts`):
   ```typescript
@@ -1042,14 +1044,14 @@ export function useFileUpload() {
 ### Manual Verification
 
 Map to acceptance criteria:
-- [ ] **AC1 - Successful upload**: Upload 5MB PDF → success in <5s, extraction created
-- [ ] **AC2 - File type validation**: Upload DOCX → rejected before API call
-- [ ] **AC3 - File size validation**: Upload 30MB PDF → rejected before API call
-- [ ] **AC4 - Progress indicator**: Upload 10MB PDF → progress bar updates every 10%
-- [ ] **AC5 - Network error**: Disconnect mid-upload → error message shown
-- [ ] **AC6 - Server error**: Stop backend → 500 error handled gracefully
-- [ ] **AC7 - Authentication**: Access upload page logged out → redirected to login
-- [ ] **AC8 - Metadata extraction**: Upload 12-page PDF → metadata correct in DB
+- [x] **AC1 - Successful upload**: Upload 5MB PDF → success in <5s, extraction created
+- [x] **AC2 - File type validation**: Upload DOCX → rejected before API call
+- [x] **AC3 - File size validation**: Upload 30MB PDF → rejected before API call
+- [x] **AC4 - Progress indicator**: Upload 10MB PDF → progress bar updates every 10% (500ms throttle)
+- [x] **AC5 - Network error**: Disconnect mid-upload → error message shown
+- [x] **AC6 - Server error**: Stop backend → 500 error handled gracefully
+- [x] **AC7 - Authentication**: Access upload page logged out → redirected to login
+- [x] **AC8 - Metadata extraction**: Upload 12-page PDF → metadata correct in DB
 
 ---
 

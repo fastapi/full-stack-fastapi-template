@@ -82,13 +82,15 @@ Authorization: Bearer eyJ0eXAiOiJKV1...
 ### Utilities
 - `GET /api/v1/utils/health-check/` - Backend health check
 
+### Ingestions (Document Upload) ✅ Implemented
+- `POST /api/v1/ingestions/` - Upload PDF worksheet (multipart/form-data)
+
 ---
 
 ## CurriculumExtractor Endpoints (To Be Implemented)
 
 ### Extractions
 - `GET /api/v1/extractions/` - List user's extractions
-- `POST /api/v1/extractions/` - Create new extraction (upload PDF)
 - `GET /api/v1/extractions/{id}` - Get extraction details
 - `PATCH /api/v1/extractions/{id}` - Update extraction
 - `DELETE /api/v1/extractions/{id}` - Delete extraction
@@ -101,11 +103,6 @@ Authorization: Bearer eyJ0eXAiOiJKV1...
 - `DELETE /api/v1/questions/{id}` - Delete question
 - `POST /api/v1/questions/{id}/approve` - Approve for question bank
 - `POST /api/v1/questions/{id}/reject` - Reject question
-
-### Ingestions (Batch Upload)
-- `GET /api/v1/ingestions/` - List batch uploads
-- `POST /api/v1/ingestions/` - Create batch upload
-- `GET /api/v1/ingestions/{id}` - Get ingestion details
 
 ## Common Patterns
 
@@ -187,24 +184,25 @@ curl -X GET http://localhost:8000/api/v1/users/me \
   -H "Authorization: Bearer eyJ0eXAiOiJKV1QiLCJhbGc..."
 ```
 
-### Future: Upload PDF for Extraction
+### Upload PDF for Extraction
 
 ```bash
-# Upload PDF (to be implemented)
-curl -X POST http://localhost:8000/api/v1/extractions/ \
+# Upload PDF ✅ Implemented
+curl -X POST http://localhost:8000/api/v1/ingestions/ \
   -H "Authorization: Bearer {token}" \
-  -F "file=@worksheet.pdf" \
-  -F "subject=Mathematics" \
-  -F "grade=P4"
+  -F "file=@worksheet.pdf"
 
 # Response
 {
-  "id": "123e4567-e89b-12d3-a456-426614174000",
+  "id": "7c9e6679-7425-40de-944b-e07fc1f90ae7",
   "filename": "worksheet.pdf",
-  "status": "DRAFT",
-  "pdf_url": "https://wijzypbstiigssjuiuvh.supabase.co/storage/...",
-  "task_id": "abc123...",
-  "created_at": "2025-10-23T08:00:00Z"
+  "file_size": 5242880,
+  "page_count": 10,
+  "mime_type": "application/pdf",
+  "status": "UPLOADED",
+  "presigned_url": "https://wijzypbstiigssjuiuvh.supabase.co/storage/v1/object/sign/worksheets/...",
+  "uploaded_at": "2025-10-25T14:30:00Z",
+  "owner_id": "550e8400-e29b-41d4-a716-446655440000"
 }
 ```
 
