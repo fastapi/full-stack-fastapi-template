@@ -1,6 +1,6 @@
-import { useState } from "react"
-import { type IngestionPublic, IngestionsService } from "@/client"
-import type { ApiError } from "@/client/core/ApiError"
+import axios, { type AxiosProgressEvent } from "axios"
+import { useCallback, useRef, useState } from "react"
+import type { IngestionPublic } from "@/client"
 
 interface UploadResult {
   success: boolean
@@ -13,24 +13,70 @@ export function useFileUpload() {
   const [isUploading, setIsUploading] = useState(false)
   const [error, setError] = useState<string | null>(null)
 
+  // Use ref to track last progress update time for throttling
+  const lastUpdateTimeRef = useRef<number>(0)
+  const THROTTLE_MS = 500 // Update UI at most every 500ms per PRD
+
+  // Throttled progress update function
+  const updateProgress = useCallback((newProgress: number) => {
+    const now = Date.now()
+    const timeSinceLastUpdate = now - lastUpdateTimeRef.current
+
+    // Only update if enough time has passed or if we've reached 100%
+    if (timeSinceLastUpdate >= THROTTLE_MS || newProgress === 100) {
+      setProgress(newProgress)
+      lastUpdateTimeRef.current = now
+    }
+  }, [])
+
   const upload = async (file: File): Promise<UploadResult> => {
     setIsUploading(true)
     setError(null)
     setProgress(0)
+    lastUpdateTimeRef.current = 0
 
     try {
-      // OpenAPI client handles FormData automatically
-      const result = await IngestionsService.createIngestion({
-        formData: { file },
-      })
+      // Create FormData
+      const formData = new FormData()
+      formData.append("file", file)
 
+      // Use axios directly for progress tracking
+      const result = await axios.post<IngestionPublic>(
+        "/api/v1/ingestions",
+        formData,
+        {
+          headers: { "Content-Type": "multipart/form-data" },
+          onUploadProgress: (progressEvent: AxiosProgressEvent) => {
+            // Calculate percentage, handle undefined total
+            const total = progressEvent.total || 1
+            const percentCompleted = Math.round(
+              (progressEvent.loaded * 100) / total,
+            )
+
+            // Cap at 100%
+            const cappedProgress = Math.min(percentCompleted, 100)
+
+            // Update with throttling
+            updateProgress(cappedProgress)
+          },
+        },
+      )
+
+      // Ensure progress shows 100% at completion
       setProgress(100)
-      return { success: true, data: result }
-    } catch (err) {
-      const apiError = err as ApiError
+      return { success: true, data: result.data }
+    } catch (err: unknown) {
+      // Extract error message from axios error response
+      const axiosError = err as {
+        response?: {
+          data?: {
+            detail?: string
+          }
+        }
+      }
+
       const errorMsg =
-        (apiError.body as { detail?: string })?.detail ||
-        "Upload failed. Please try again."
+        axiosError.response?.data?.detail || "Upload failed. Please try again."
       setError(errorMsg)
       return { success: false, error: errorMsg }
     } finally {
@@ -42,6 +88,7 @@ export function useFileUpload() {
     setProgress(0)
     setIsUploading(false)
     setError(null)
+    lastUpdateTimeRef.current = 0
   }
 
   return { upload, progress, isUploading, error, reset }

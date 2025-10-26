@@ -44,7 +44,7 @@ Full-stack application with async task processing for K-12 educational content e
 ┌──────────────────────────────────────────────────────┐
 │  API Routes (app/api/routes/)                        │ ◄─ HTTP/REST endpoints
 │  - users.py, login.py, tasks.py                      │
-│  - extractions.py (future), questions.py (future)    │
+│  - ingestions.py ✅, questions.py (future)           │
 ├──────────────────────────────────────────────────────┤
 │  Dependencies (app/api/deps.py)                      │ ◄─ Auth, DB session injection
 │  - SessionDep, CurrentUser                           │
@@ -67,13 +67,13 @@ Full-stack application with async task processing for K-12 educational content e
                     │  (app/worker.py) │      │  PostgreSQL 17   │
                     │                  │      │                  │
                     │  Tasks:          │      │  Tables:         │
-                    │  - OCR           │      │  - users         │
-                    │  - Segmentation  │      │  - extractions   │
+                    │  - OCR (future)  │      │  - users ✅      │
+                    │  - Segmentation  │      │  - extractions ✅│
                     │  - Tagging       │      │  - questions     │
                     │                  │      │  - tags          │
                     │  Queue: Redis    │      │                  │
                     └──────────────────┘      │  Storage:        │
-                                              │  - worksheets/   │
+                                              │  - worksheets/ ✅│
                                               │  - extractions/  │
                                               └──────────────────┘
 ```
@@ -82,10 +82,10 @@ Full-stack application with async task processing for K-12 educational content e
 
 - **models.py**: Data models with SQLModel
   - **User**: Authentication and authorization
-  - **Extraction**: PDF upload metadata, processing status
-  - **Question**: Extracted questions with curriculum tags
-  - **Ingestion**: Batch upload tracking
-  - **Tag**: Curriculum taxonomy nodes
+  - **Ingestion** ✅: PDF upload metadata, Supabase storage paths, presigned URLs
+  - **Extraction** (future): Processing status, OCR/segmentation/tagging results
+  - **Question** (future): Extracted questions with curriculum tags
+  - **Tag** (future): Curriculum taxonomy nodes
   - Pattern: Base → Create → Update → DB Model (table=True) → Public
 
 - **crud.py**: Database operations layer
@@ -103,7 +103,7 @@ Full-stack application with async task processing for K-12 educational content e
   - `users.py`: User management and auth
   - `login.py`: Authentication (JWT)
   - `tasks.py`: Celery task management
-  - `extractions.py` (future): PDF upload and processing
+  - `ingestions.py` ✅: PDF upload and Supabase Storage integration
   - `questions.py` (future): Question bank CRUD
 
 - **worker.py**: Celery configuration
