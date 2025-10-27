@@ -13,6 +13,28 @@ jobs:
 
   test-docker-compose:
     runs-on: ubuntu-latest
+    env:
+      DOMAIN: localhost
+      ENVIRONMENT: local
+      FRONTEND_HOST: http://localhost:5173
+      BACKEND_CORS_ORIGINS: http://localhost:5173,http://localhost:8000
+      SECRET_KEY: ${{ secrets.SECRET_KEY }}
+      FIRST_SUPERUSER: ${{ secrets.FIRST_SUPERUSER }}
+      FIRST_SUPERUSER_PASSWORD: ${{ secrets.FIRST_SUPERUSER_PASSWORD }}
+      POSTGRES_SERVER: db
+      POSTGRES_PORT: 5432
+      POSTGRES_DB: app
+      POSTGRES_USER: ${{ secrets.POSTGRES_USER }}
+      POSTGRES_PASSWORD: ${{ secrets.POSTGRES_PASSWORD }}
+      SMTP_HOST: ""
+      SMTP_USER: ""
+      SMTP_PASSWORD: ""
+      EMAILS_FROM_EMAIL: noreply@example.com
+      SENTRY_DSN: ""
+      PROJECT_NAME: "Mosaic Project"
+      STACK_NAME: mosaic-project-local
+      DOCKER_IMAGE_BACKEND: backend
+      DOCKER_IMAGE_FRONTEND: frontend
     steps:
       - name: Checkout
         uses: actions/checkout@v5
