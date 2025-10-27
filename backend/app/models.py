@@ -2,7 +2,7 @@ import uuid
 from datetime import datetime
 from decimal import Decimal
 from enum import Enum
-
+from pydantic import field_validator
 from pydantic import EmailStr
 from sqlmodel import Field, Relationship, SQLModel, Column
 from sqlalchemy import Numeric
@@ -11,25 +11,25 @@ from sqlalchemy import Numeric
 # Enums for Inventory Management System
 class UserRole(str, Enum):
     """Roles de usuario en el sistema de inventario"""
-    ADMINISTRADOR = "administrador"
-    VENDEDOR = "vendedor"
-    AUXILIAR = "auxiliar"
+    ADMINISTRADOR = "ADMINISTRADOR"
+    VENDEDOR = "VENDEDOR"
+    AUXILIAR = "AUXILIAR"
 
 
 class MovementType(str, Enum):
     """Tipos de movimientos de inventario"""
-    ENTRADA_COMPRA = "entrada_compra"
-    SALIDA_VENTA = "salida_venta"
-    AJUSTE_CONTEO = "ajuste_conteo"
-    AJUSTE_MERMA = "ajuste_merma"
-    DEVOLUCION_CLIENTE = "devolucion_cliente"
-    DEVOLUCION_PROVEEDOR = "devolucion_proveedor"
+    ENTRADA_COMPRA = "ENTRADA_COMPRA"
+    SALIDA_VENTA = "SALIDA_VENTA"
+    AJUSTE_CONTEO = "AJUSTE_CONTEO"
+    AJUSTE_MERMA = "AJUSTE_MERMA"
+    DEVOLUCION_CLIENTE = "DEVOLUCION_CLIENTE"
+    DEVOLUCION_PROVEEDOR = "DEVOLUCION_PROVEEDOR"
 
 
 class AlertType(str, Enum):
     """Tipos de alertas de inventario"""
-    LOW_STOCK = "low_stock"
-    OUT_OF_STOCK = "out_of_stock"
+    LOW_STOCK = "LOW_STOCK"
+    OUT_OF_STOCK = "OUT_OF_STOCK"
 
 
 # Shared properties
@@ -210,7 +210,7 @@ class ProductBase(SQLModel):
     sku: str = Field(min_length=1, max_length=50, unique=True, index=True)
     name: str = Field(min_length=1, max_length=255)
     description: str | None = Field(default=None, max_length=500)
-    category_id: uuid.UUID | None = None
+    category_id: uuid.UUID | None = Field(default=None, foreign_key="category.id")
     unit_price: Decimal = Field(
         sa_column=Column(Numeric(10, 2), nullable=False),
         gt=0,
@@ -236,7 +236,7 @@ class ProductUpdate(SQLModel):
     sku: str | None = Field(default=None, min_length=1, max_length=50)
     name: str | None = Field(default=None, min_length=1, max_length=255)
     description: str | None = None
-    category_id: uuid.UUID | None = None
+    category_id: uuid.UUID | None = Field(default=None, foreign_key="category.id")
     unit_price: Decimal | None = Field(default=None, gt=0)
     sale_price: Decimal | None = Field(default=None, gt=0)
     unit_of_measure: str | None = Field(default=None, max_length=50)
@@ -279,10 +279,9 @@ class ProductsPublic(SQLModel):
 
 class InventoryMovementBase(SQLModel):
     """Base model for InventoryMovement with shared properties"""
-    product_id: uuid.UUID
+    product_id: uuid.UUID = Field(foreign_key="product.id")
     movement_type: MovementType
     quantity: int = Field(
-        ne=0,
         description="Positivo para entradas, negativo para salidas"
     )
     reference_number: str | None = Field(default=None, max_length=100)
@@ -293,6 +292,13 @@ class InventoryMovementBase(SQLModel):
         gt=0
     )
     movement_date: datetime = Field(default_factory=datetime.utcnow)
+    
+    @field_validator('quantity')
+    @classmethod
+    def quantity_not_zero(cls, v: int) -> int:
+        if v == 0:
+            raise ValueError('La cantidad no puede ser 0')
+        return v
 
 
 class InventoryMovementCreate(InventoryMovementBase):
@@ -338,7 +344,7 @@ class InventoryMovementsPublic(SQLModel):
 
 class AlertBase(SQLModel):
     """Base model for Alert with shared properties"""
-    product_id: uuid.UUID
+    product_id: uuid.UUID = Field(foreign_key="product.id")
     alert_type: AlertType
     current_stock: int = Field(ge=0)
     min_stock: int = Field(ge=0)
