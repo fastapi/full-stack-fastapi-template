@@ -482,6 +482,56 @@ cd frontend
 npx tsc --noEmit
 ```
 
+**Network Request Debugging**:
+
+When API calls fail, check which server is handling the request:
+
+1. **Open browser DevTools → Network tab**
+2. **Look at request URLs**:
+   - ✅ Backend API: `http://localhost:8000/api/v1/...`
+   - ❌ Frontend nginx: `http://localhost:5173/api/v1/...`
+
+3. **Common issues**:
+   ```bash
+   # Issue: Requests hitting frontend (5173) instead of backend (8000)
+   # Cause: Using relative URLs in axios without OpenAPI.BASE
+   # Fix: Use `${OpenAPI.BASE}/api/v1/endpoint`
+
+   # Issue: 401 Unauthorized on authenticated endpoints
+   # Cause: Missing Authorization header in custom axios calls
+   # Fix: Include token from OpenAPI.TOKEN
+
+   # Issue: CORS errors
+   # Cause: Backend not configured for frontend origin
+   # Fix: Check BACKEND_CORS_ORIGINS in .env
+   ```
+
+4. **Test API directly**:
+   ```bash
+   # Health check (no auth)
+   curl http://localhost:8000/api/v1/utils/health-check/
+
+   # Authenticated endpoint
+   TOKEN="your-token-from-browser-localstorage"
+   curl -H "Authorization: Bearer $TOKEN" \
+        http://localhost:8000/api/v1/users/me
+
+   # File upload
+   curl -X POST \
+        -H "Authorization: Bearer $TOKEN" \
+        -F "file=@test.pdf" \
+        http://localhost:8000/api/v1/ingestions
+   ```
+
+5. **Check authentication state**:
+   ```javascript
+   // In browser console
+   localStorage.getItem('access_token')  // Should return JWT token
+
+   // Decode token (without verification) to check expiry
+   JSON.parse(atob(localStorage.getItem('access_token').split('.')[1]))
+   ```
+
 ### Celery Debugging
 
 **Check task status**:
@@ -708,6 +758,126 @@ docker compose exec backend alembic revision --autogenerate -m "Sync extraction 
      queryFn: () => ExtractionsService.listExtractions()
    })
    ```
+
+---
+
+## File Uploads with Progress Tracking
+
+### Using Axios for Upload Progress
+
+The generated OpenAPI client doesn't support upload progress callbacks. When you need progress tracking (e.g., for file uploads), use axios directly with proper authentication.
+
+**Key Requirements**:
+1. Use `${OpenAPI.BASE}` for absolute URL (not relative paths)
+2. Manually fetch and include authentication token
+3. Handle `OpenAPI.TOKEN` as async function
+4. Include `Content-Type: multipart/form-data` header
+
+**Example: useFileUpload Hook**
+```typescript
+import axios, { type AxiosProgressEvent } from "axios"
+import { OpenAPI, type IngestionPublic } from "@/client"
+
+export function useFileUpload() {
+  const upload = async (file: File): Promise<UploadResult> => {
+    const formData = new FormData()
+    formData.append("file", file)
+
+    // Get auth token (OpenAPI.TOKEN is async function)
+    const token = typeof OpenAPI.TOKEN === "function"
+      ? await (OpenAPI.TOKEN as () => Promise<string>)()
+      : OpenAPI.TOKEN
+
+    // Use absolute URL with OpenAPI.BASE
+    const result = await axios.post<IngestionPublic>(
+      `${OpenAPI.BASE}/api/v1/ingestions`,  // ✅ Absolute URL
+      formData,
+      {
+        headers: {
+          "Content-Type": "multipart/form-data",
+          ...(token && { Authorization: `Bearer ${token}` })  // ✅ Auth
+        },
+        onUploadProgress: (progressEvent: AxiosProgressEvent) => {
+          const percentCompleted = Math.round(
+            (progressEvent.loaded * 100) / (progressEvent.total || 1)
+          )
+          updateProgress(Math.min(percentCompleted, 100))
+        },
+      },
+    )
+
+    return { success: true, data: result.data }
+  }
+}
+```
+
+**Common Mistakes**:
+- ❌ Using relative URL: `/api/v1/ingestions` → Request goes to frontend nginx (port 5173)
+- ❌ Missing auth header → 401 Unauthorized
+- ❌ Calling `OpenAPI.TOKEN()` without type assertion → TypeScript error
+- ❌ Not handling undefined `progressEvent.total` → NaN progress
+
+**Debugging Upload Issues**:
+
+1. **Check request URL in browser DevTools Network tab**:
+   - ✅ Should see: `http://localhost:8000/api/v1/ingestions/` (port 8000)
+   - ❌ If you see: `http://localhost:5173/api/v1/ingestions` (port 5173) → URL is relative
+
+2. **Verify authentication**:
+   ```bash
+   # Check if token exists
+   localStorage.getItem('access_token')
+
+   # Should see Authorization header in Network tab
+   Authorization: Bearer eyJ0eXAiOiJKV1QiLCJhbGc...
+   ```
+
+3. **Common HTTP errors**:
+   - `413 Request Entity Too Large` → Request hitting nginx frontend instead of backend
+   - `401 Unauthorized` → Missing or invalid auth token
+   - `400 Bad Request` → File validation failed (check MIME type, size)
+
+4. **Test upload manually**:
+   ```bash
+   # Get token from browser localStorage
+   TOKEN="your-token-here"
+
+   # Test upload
+   curl -X POST http://localhost:8000/api/v1/ingestions \
+     -H "Authorization: Bearer $TOKEN" \
+     -F "file=@test.pdf"
+   ```
+
+### Frontend Build and Deployment
+
+**When changes don't appear** after editing frontend code:
+
+1. **Docker-served frontend** (port 5173 via nginx):
+   - Vite dev server changes won't affect Docker container
+   - Need full rebuild and restart:
+   ```bash
+   cd frontend && npm run build
+   docker compose build --no-cache frontend
+   docker compose restart frontend
+   ```
+
+2. **Standalone dev server** (npm run dev):
+   - Changes apply via HMR automatically
+   - Only needed for development without Docker
+
+3. **Verify deployed bundle**:
+   ```bash
+   # Check files in Docker container
+   docker compose exec frontend ls -la /usr/share/nginx/html/assets/
+
+   # Search for your code in bundle
+   docker compose exec frontend grep -r "your-pattern" /usr/share/nginx/html/assets/
+   ```
+
+**Cache Busting**:
+- Hard refresh: `Cmd+Shift+R` (Mac) or `Ctrl+Shift+R` (Windows)
+- Clear browser cache if route changes don't appear
+- Vite automatically adds hashes to filenames (e.g., `index-CNYtKbML.js`)
 
 ---
 
@@ -995,6 +1165,63 @@ mcp_supabase_get_logs(project_id="wijzypbstiigssjuiuvh", service="postgres")
 
 # Test connection from backend
 docker compose exec backend python3 -c "from app.core.db import engine; engine.connect(); print('✅ Connected')"
+```
+
+### File Upload Issues
+
+**Symptom**: Upload fails with "413 Request Entity Too Large" or "Upload failed. Please try again."
+
+**Diagnosis**:
+```bash
+# 1. Check browser Network tab - look at request URL
+# If you see: http://localhost:5173/api/v1/ingestions
+# → Request is hitting frontend nginx instead of backend
+
+# 2. Check for 401 errors
+# → Missing authentication token
+
+# 3. Verify backend is accessible
+curl http://localhost:8000/api/v1/utils/health-check/
+```
+
+**Fix for 413 errors** (Request hitting frontend):
+```typescript
+// ❌ Wrong - relative URL
+await axios.post('/api/v1/ingestions', formData)
+
+// ✅ Correct - absolute URL with OpenAPI.BASE
+import { OpenAPI } from '@/client'
+await axios.post(`${OpenAPI.BASE}/api/v1/ingestions`, formData)
+```
+
+**Fix for 401 errors** (Missing auth):
+```typescript
+// Get token from OpenAPI config
+const token = typeof OpenAPI.TOKEN === "function"
+  ? await (OpenAPI.TOKEN as () => Promise<string>)()
+  : OpenAPI.TOKEN
+
+// Include in headers
+await axios.post(url, formData, {
+  headers: {
+    "Content-Type": "multipart/form-data",
+    ...(token && { Authorization: `Bearer ${token}` })
+  }
+})
+```
+
+**Verification**:
+```bash
+# 1. Network tab should show:
+#    - URL: http://localhost:8000/api/v1/ingestions/ (port 8000)
+#    - Status: 201 Created
+#    - Headers include: Authorization: Bearer ...
+
+# 2. Test manually
+TOKEN=$(node -e "console.log(localStorage.getItem('access_token'))")
+curl -X POST http://localhost:8000/api/v1/ingestions \
+  -H "Authorization: Bearer $TOKEN" \
+  -F "file=@test.pdf"
 ```
 
 ---

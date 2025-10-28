@@ -1,6 +1,6 @@
 import axios, { type AxiosProgressEvent } from "axios"
 import { useCallback, useRef, useState } from "react"
-import type { IngestionPublic } from "@/client"
+import { OpenAPI, type IngestionPublic } from "@/client"
 
 interface UploadResult {
   success: boolean
@@ -40,12 +40,20 @@ export function useFileUpload() {
       const formData = new FormData()
       formData.append("file", file)
 
+      // Get auth token
+      const token = typeof OpenAPI.TOKEN === "function"
+        ? await (OpenAPI.TOKEN as () => Promise<string>)()
+        : OpenAPI.TOKEN
+
       // Use axios directly for progress tracking
       const result = await axios.post<IngestionPublic>(
-        "/api/v1/ingestions",
+        `${OpenAPI.BASE}/api/v1/ingestions`,
         formData,
         {
-          headers: { "Content-Type": "multipart/form-data" },
+          headers: {
+            "Content-Type": "multipart/form-data",
+            ...(token && { Authorization: `Bearer ${token}` })
+          },
           onUploadProgress: (progressEvent: AxiosProgressEvent) => {
             // Calculate percentage, handle undefined total
             const total = progressEvent.total || 1
