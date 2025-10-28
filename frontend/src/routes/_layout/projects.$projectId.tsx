@@ -22,7 +22,7 @@ import {
   FiUsers,
 } from "react-icons/fi"
 
-import { ProjectsServiceTemp, GalleriesServiceTemp, type Gallery } from "@/client"
+import { ProjectsService, GalleriesService, type GalleryPublic } from "@/client"
 
 export const Route = createFileRoute("/_layout/projects/$projectId")({
   component: ProjectDetail,
@@ -49,13 +49,13 @@ function ProjectDetail() {
   // Fetch project from backend
   const { data: project, isLoading } = useQuery({
     queryKey: ["project", projectId],
-    queryFn: () => ProjectsServiceTemp.readProject(projectId),
+    queryFn: () => ProjectsService.readProject({ id: projectId }),
   })
 
   // Fetch galleries for this project
   const { data: galleriesData } = useQuery({
     queryKey: ["projectGalleries", projectId],
-    queryFn: () => GalleriesServiceTemp.readGalleries({ project_id: projectId }),
+    queryFn: () => GalleriesService.readGalleries({ projectId: projectId }),
   })
 
   if (isLoading) {
@@ -78,7 +78,7 @@ function ProjectDetail() {
   }
 
   const galleries = galleriesData?.data || []
-  const fileCount = galleries.reduce((sum: number, g: Gallery) => sum + g.photo_count, 0)
+  const fileCount = galleries.reduce((sum: number, g: GalleryPublic) => sum + (g.photo_count || 0), 0)
 
   return (
     <Container maxW="full" p={6}>
@@ -106,8 +106,8 @@ function ProjectDetail() {
                   )}
                 </HStack>
               </Box>
-              <Badge size="lg" colorScheme={getStatusColor(project.status)}>
-                {getStatusLabel(project.status)}
+              <Badge size="lg" colorScheme={getStatusColor(project.status || 'pending')}>
+                {getStatusLabel(project.status || 'pending')}
               </Badge>
             </Flex>
           </Box>
@@ -218,7 +218,7 @@ function ProjectDetail() {
                     <Text fontWeight="semibold" mb={2}>Galleries</Text>
                     {galleries.length > 0 ? (
                       <Stack gap={2}>
-                        {galleries.map((gallery: Gallery) => (
+                        {galleries.map((gallery: GalleryPublic) => (
                           <Flex key={gallery.id} alignItems="center" gap={2}>
                             <FiImage size={14} />
                             <Text fontSize="sm">{gallery.name}</Text>
@@ -243,8 +243,8 @@ function ProjectDetail() {
                 <Stack gap={4}>
                   <Box>
                     <Text fontWeight="semibold" mb={2}>Status</Text>
-                    <Badge size="lg" colorScheme={getStatusColor(project.status)}>
-                      {getStatusLabel(project.status)}
+                    <Badge size="lg" colorScheme={getStatusColor(project.status || 'pending')}>
+                      {getStatusLabel(project.status || 'pending')}
                     </Badge>
                   </Box>
                   <Box>
@@ -253,12 +253,12 @@ function ProjectDetail() {
                       <Box flex={1} h="8px" bg="bg.muted" borderRadius="full" overflow="hidden">
                         <Box
                           h="100%"
-                          w={`${project.progress}%`}
-                          bg={project.progress === 100 ? "green.500" : project.progress >= 50 ? "blue.500" : "orange.500"}
+                          w={`${project.progress || 0}%`}
+                          bg={(project.progress || 0) === 100 ? "green.500" : (project.progress || 0) >= 50 ? "blue.500" : "orange.500"}
                           transition="width 0.3s"
                         />
                       </Box>
-                      <Text fontWeight="semibold">{project.progress}%</Text>
+                      <Text fontWeight="semibold">{project.progress || 0}%</Text>
                     </Flex>
                   </Box>
                 </Stack>

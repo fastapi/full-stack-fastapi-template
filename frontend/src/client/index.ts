@@ -4,7 +4,3 @@ export { CancelablePromise, CancelError } from './core/CancelablePromise';
 export { OpenAPI, type OpenAPIConfig } from './core/OpenAPI';
 export * from './sdk.gen';
 export * from './types.gen';
-
-// Temporary exports for new features (until OpenAPI client is regenerated)
-export { ProjectsServiceTemp, GalleriesServiceTemp } from './services-projects';
-export type { Project, ProjectsPublic, Gallery, GalleriesPublic, DashboardStats } from './types-projects';

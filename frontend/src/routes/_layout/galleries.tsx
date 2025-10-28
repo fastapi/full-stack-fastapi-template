@@ -15,11 +15,12 @@ import { useQuery } from "@tanstack/react-query"
 import { createFileRoute, Link } from "@tanstack/react-router"
 import { FiCalendar, FiImage, FiUser } from "react-icons/fi"
 
-import { GalleriesServiceTemp, type Gallery } from "@/client"
+import { GalleriesService } from "@/client"
+import type { GalleryPublic } from "@/client"
 
 function getGalleriesQueryOptions() {
   return {
-    queryFn: () => GalleriesServiceTemp.readGalleries({ skip: 0, limit: 100 }),
+    queryFn: () => GalleriesService.readGalleries({ skip: 0, limit: 100 }),
     queryKey: ["galleries"],
   }
 }
@@ -103,7 +104,7 @@ function Galleries() {
           }}
           gap={6}
         >
-          {galleries.map((gallery: Gallery) => (
+          {galleries.map((gallery: GalleryPublic) => (
             <Link
               key={gallery.id}
               to="/projects/$projectId"
@@ -148,9 +149,9 @@ function Galleries() {
                     position="absolute"
                     top={2}
                     left={2}
-                    colorScheme={getStatusColor(gallery.status)}
+                    colorScheme={getStatusColor(gallery.status || 'pending')}
                   >
-                    {getStatusLabel(gallery.status)}
+                    {getStatusLabel(gallery.status || 'pending')}
                   </Badge>
                 </Box>
 

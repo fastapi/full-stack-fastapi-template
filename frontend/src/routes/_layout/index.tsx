@@ -4,7 +4,7 @@ import { FiCalendar, FiCheckCircle, FiClock, FiFolder, FiUsers } from "react-ico
 import { useQuery } from "@tanstack/react-query"
 
 import useAuth from "@/hooks/useAuth"
-import { ProjectsServiceTemp, type Project } from "@/client"
+import { ProjectsService, type ProjectPublic } from "@/client"
 
 export const Route = createFileRoute("/_layout/")({
   component: Dashboard,
@@ -66,28 +66,28 @@ function Dashboard() {
   // Fetch dashboard stats
   const { data: stats, isLoading: statsLoading } = useQuery({
     queryKey: ["dashboardStats"],
-    queryFn: () => ProjectsServiceTemp.getDashboardStats(),
+    queryFn: () => ProjectsService.readDashboardStats(),
   })
 
   // Fetch recent projects
   const { data: projectsData, isLoading: projectsLoading } = useQuery({
     queryKey: ["recentProjects"],
-    queryFn: () => ProjectsServiceTemp.readProjects({ skip: 0, limit: 5 }),
+    queryFn: () => ProjectsService.readProjects({ skip: 0, limit: 5 }),
   })
 
   const recentProjects = projectsData?.data?.slice(0, 3) || []
   
   // Get projects with upcoming deadlines (within 2 weeks, not completed)
   type DeadlineItem = {
-    id: number
+    id: string
     project: string
     date: string
     daysLeft: number
   }
 
   const upcomingDeadlines = (projectsData?.data || [])
-    .filter((p: Project) => p.deadline && p.status !== "completed")
-    .map((p: Project): DeadlineItem => ({
+    .filter((p: ProjectPublic) => p.deadline && p.status !== "completed")
+    .map((p: ProjectPublic): DeadlineItem => ({
       id: p.id,
       project: p.name,
       date: p.deadline!,
@@ -137,7 +137,7 @@ function Dashboard() {
                 <Text color="fg.muted">No projects yet. Create your first project!</Text>
               ) : (
                 <Stack gap={4}>
-                  {recentProjects.map((project: Project) => (
+                  {recentProjects.map((project: ProjectPublic) => (
                     <Link
                       key={project.id}
                       to="/projects/$projectId"
@@ -165,8 +165,8 @@ function Dashboard() {
                               Client: {project.client_name}
                             </Text>
                           </Box>
-                          <Badge colorScheme={getStatusColor(project.status)}>
-                            {getStatusLabel(project.status)}
+                          <Badge colorScheme={getStatusColor(project.status || 'pending')}>
+                            {getStatusLabel(project.status || 'pending')}
                           </Badge>
                         </Flex>
                         {project.deadline && (

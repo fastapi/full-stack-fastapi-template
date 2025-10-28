@@ -5,3 +5,11 @@ node_modules/
 /playwright-report/
 /blob-report/
 /playwright/.cache/
+
+# OpenAPI generated file
+frontend/openapi.json
+
+# Editor backup files
+*~
+*.swp
+*.swo

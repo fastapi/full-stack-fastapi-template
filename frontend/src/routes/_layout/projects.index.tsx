@@ -16,7 +16,7 @@ import { createFileRoute, Link } from "@tanstack/react-router"
 import { FiCalendar, FiFolder } from "react-icons/fi"
 import { z } from "zod"
 
-import { ProjectsServiceTemp, type Project } from "@/client"
+import { ProjectsService, type ProjectPublic } from "@/client"
 
 const projectsSearchSchema = z.object({
   page: z.number().catch(1),
@@ -27,7 +27,7 @@ const PER_PAGE = 10
 function getProjectsQueryOptions({ page }: { page: number }) {
   return {
     queryFn: () =>
-      ProjectsServiceTemp.readProjects({ skip: (page - 1) * PER_PAGE, limit: PER_PAGE }),
+      ProjectsService.readProjects({ skip: (page - 1) * PER_PAGE, limit: PER_PAGE }),
     queryKey: ["projects", { page }],
   }
 }
@@ -101,7 +101,7 @@ function ProjectsTable() {
           </Table.Row>
         </Table.Header>
         <Table.Body>
-          {projects.map((project: Project) => (
+          {projects.map((project: ProjectPublic) => (
             <Table.Row
               key={project.id}
               opacity={isPlaceholderData ? 0.5 : 1}
@@ -122,8 +122,8 @@ function ProjectsTable() {
                 </Text>
               </Table.Cell>
               <Table.Cell>
-                <Badge colorScheme={getStatusColor(project.status)}>
-                  {getStatusLabel(project.status)}
+                <Badge colorScheme={getStatusColor(project.status || 'pending')}>
+                  {getStatusLabel(project.status || 'pending')}
                 </Badge>
               </Table.Cell>
               <Table.Cell>
@@ -145,22 +145,22 @@ function ProjectsTable() {
                     borderRadius="full"
                     overflow="hidden"
                   >
-                    <Box
-                      h="100%"
-                      w={`${project.progress}%`}
-                      bg={
-                        project.progress === 100
-                          ? "green.500"
-                          : project.progress >= 50
-                          ? "blue.500"
-                          : "orange.500"
-                      }
-                      transition="width 0.3s"
-                    />
-                  </Box>
-                  <Text fontSize="sm" fontWeight="semibold">
-                    {project.progress}%
-                  </Text>
+                  <Box
+                    h="100%"
+                    w={`${project.progress || 0}%`}
+                    bg={
+                      (project.progress || 0) === 100
+                        ? "green.500"
+                        : (project.progress || 0) >= 50
+                        ? "blue.500"
+                        : "orange.500"
+                    }
+                    transition="width 0.3s"
+                  />
+                </Box>
+                <Text fontSize="sm" fontWeight="semibold">
+                  {project.progress || 0}%
+                </Text>
                 </Flex>
               </Table.Cell>
             </Table.Row>
