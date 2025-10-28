@@ -22,7 +22,7 @@ import {
   FiUsers,
 } from "react-icons/fi"
 
-import { ProjectsServiceTemp, GalleriesServiceTemp } from "@/client"
+import { ProjectsServiceTemp, GalleriesServiceTemp, type Gallery } from "@/client"
 
 export const Route = createFileRoute("/_layout/projects/$projectId")({
   component: ProjectDetail,
@@ -78,7 +78,7 @@ function ProjectDetail() {
   }
 
   const galleries = galleriesData?.data || []
-  const fileCount = galleries.reduce((sum, g) => sum + g.photo_count, 0)
+  const fileCount = galleries.reduce((sum: number, g: Gallery) => sum + g.photo_count, 0)
 
   return (
     <Container maxW="full" p={6}>
@@ -218,7 +218,7 @@ function ProjectDetail() {
                     <Text fontWeight="semibold" mb={2}>Galleries</Text>
                     {galleries.length > 0 ? (
                       <Stack gap={2}>
-                        {galleries.map((gallery) => (
+                        {galleries.map((gallery: Gallery) => (
                           <Flex key={gallery.id} alignItems="center" gap={2}>
                             <FiImage size={14} />
                             <Text fontSize="sm">{gallery.name}</Text>

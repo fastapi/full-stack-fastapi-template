@@ -78,16 +78,23 @@ function Dashboard() {
   const recentProjects = projectsData?.data?.slice(0, 3) || []
   
   // Get projects with upcoming deadlines (within 2 weeks, not completed)
+  type DeadlineItem = {
+    id: number
+    project: string
+    date: string
+    daysLeft: number
+  }
+
   const upcomingDeadlines = (projectsData?.data || [])
     .filter((p: Project) => p.deadline && p.status !== "completed")
-    .map((p: Project) => ({
+    .map((p: Project): DeadlineItem => ({
       id: p.id,
       project: p.name,
       date: p.deadline!,
       daysLeft: getDaysUntil(p.deadline!),
     }))
-    .filter((d) => d.daysLeft >= 0 && d.daysLeft <= 14)
-    .sort((a, b) => a.daysLeft - b.daysLeft)
+    .filter((d: DeadlineItem) => d.daysLeft >= 0 && d.daysLeft <= 14)
+    .sort((a: DeadlineItem, b: DeadlineItem) => a.daysLeft - b.daysLeft)
     .slice(0, 3)
 
   const isLoading = statsLoading || projectsLoading
@@ -188,7 +195,7 @@ function Dashboard() {
                 <Text color="fg.muted">No upcoming deadlines in the next 2 weeks.</Text>
               ) : (
                 <Stack gap={3}>
-                  {upcomingDeadlines.map((deadline) => (
+                  {upcomingDeadlines.map((deadline: DeadlineItem) => (
                     <Box key={deadline.id} p={3} borderWidth="1px" borderRadius="md">
                       <Text fontWeight="semibold" fontSize="sm" mb={1}>
                         {deadline.project}

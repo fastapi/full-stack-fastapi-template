@@ -70,6 +70,8 @@ jobs:
       fail-fast: false
     steps:
     - uses: actions/checkout@v5
+    - name: Create .env file
+      run: touch .env
     - uses: actions/setup-node@v5
       with:
         node-version: lts/*

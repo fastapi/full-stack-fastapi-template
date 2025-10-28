@@ -32,9 +32,13 @@ jobs:
       SENTRY_DSN: ""
       PROJECT_NAME: "Mosaic Project"
       STACK_NAME: mosaic-project-local
+      DOCKER_IMAGE_BACKEND: backend
+      DOCKER_IMAGE_FRONTEND: frontend
     steps:
       - name: Checkout
         uses: actions/checkout@v5
+      - name: Create .env file
+        run: touch .env
       - name: Set up Python
         uses: actions/setup-python@v6
         with:
