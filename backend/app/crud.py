@@ -31,6 +31,16 @@ def create_user(*, session: Session, user_create: UserCreate) -> User:
     session.add(db_obj)
     session.commit()
     session.refresh(db_obj)
+
+    # Automatically assign user to default organization if not already assigned
+    if not db_obj.organization_id:
+        default_org = get_default_organization(session=session)
+        if default_org:
+            db_obj.organization_id = default_org.id
+            session.add(db_obj)
+            session.commit()
+            session.refresh(db_obj)
+
     return db_obj
 
 

@@ -152,15 +152,6 @@ def register_user(session: SessionDep, user_in: UserRegister) -> Any:
         )
     user_create = UserCreate.model_validate(user_in)
     user = crud.create_user(session=session, user_create=user_create)
-    
-    # Assign user to default organization
-    default_org = crud.get_default_organization(session=session)
-    if default_org:
-        user.organization_id = default_org.id
-        session.add(user)
-        session.commit()
-        session.refresh(user)
-    
     return user
 
 
