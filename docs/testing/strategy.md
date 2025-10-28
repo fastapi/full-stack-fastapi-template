@@ -478,6 +478,128 @@ def test_extraction_pipeline_integration():
 
 ---
 
+## Database Migration Testing
+
+### Alembic Migration Best Practices
+
+**Critical Rule**: Maintain linear migration history to avoid branching errors.
+
+#### Common Pitfall: Migration Branching
+
+**Problem**: Multiple migrations with the same `down_revision` create a branch point:
+
+```python
+# Migration A (from PR #3)
+revision = '460746be37d1'
+down_revision = '1a31ce608336'  # Same parent
+
+# Migration B (from PR #5)
+revision = 'efc9ab8c3122'
+down_revision = '1a31ce608336'  # Same parent → BRANCH!
+```
+
+**Error in CI**:
+```
+ERROR: Multiple head revisions are present for given argument 'head'
+```
+
+**Why It Happens**:
+- Feature branch diverges from master before another PR merges
+- Both PRs independently create migrations from the same parent
+- GitHub Actions tests merge commits by default → both migrations present
+
+#### Prevention Strategies
+
+**1. Always Rebase Before Creating Migrations**
+```bash
+# Before creating migration
+git fetch origin master
+git rebase origin/master
+
+# Then create migration
+cd backend
+uv run alembic revision --autogenerate -m "description"
+```
+
+**2. Check for Existing Migrations**
+```bash
+# Before creating migration, check what's in master
+git log origin/master -- backend/app/alembic/versions/
+
+# Look for recent migrations that might conflict
+```
+
+**3. Use Conditional DDL for Idempotency**
+```python
+def upgrade():
+    # ✅ Idempotent - safe to run multiple times
+    op.execute("""
+        DO $$ BEGIN
+            CREATE TYPE extraction_status AS ENUM ('UPLOADED', 'PROCESSING', ...);
+        EXCEPTION
+            WHEN duplicate_object THEN null;
+        END $$;
+    """)
+
+    # ❌ Non-idempotent - fails if enum exists
+    op.execute("CREATE TYPE extraction_status AS ENUM (...)")
+```
+
+**4. Test Migrations in CI with Fresh Database**
+- E2E tests use Supabase local (fresh instance per workflow)
+- Catches migration conflicts before merge
+- **Caveat**: Supabase local persists state if migration fails partway
+
+#### Resolving Migration Conflicts
+
+**If branching occurs:**
+
+1. **Check production database**:
+   ```sql
+   SELECT version_num FROM alembic_version;
+   ```
+
+2. **If conflicting migration NOT in production**:
+   - Remove duplicate migration from master
+   - Rebase feature branch on updated master
+   - Push with `--force-with-lease`
+
+3. **If conflicting migration IS in production**:
+   - Create merge migration: `alembic merge heads -m "merge parallel migrations"`
+   - Add conflict resolution logic to handle duplicate tables/enums
+
+#### Migration Testing Checklist
+
+Before committing migrations:
+- [ ] Rebased on latest master
+- [ ] Migration runs successfully locally
+- [ ] `alembic heads` shows single head
+- [ ] `alembic branches` shows no branching
+- [ ] Migration is idempotent (uses `IF NOT EXISTS` or equivalent)
+- [ ] Tested upgrade AND downgrade paths
+- [ ] CI tests pass (full E2E with Supabase local)
+
+#### Debugging Migration Issues in CI
+
+**Enable diagnostics** (temporary, for debugging):
+```yaml
+- name: Debug Alembic state
+  run: |
+    echo "Migration files:"
+    ls -la app/alembic/versions/*.py
+    echo "Alembic heads:"
+    uv run alembic heads
+    echo "Alembic branches:"
+    uv run alembic branches
+```
+
+**Common Issues**:
+1. **Duplicate enum error** → Supabase local retained state from failed run
+2. **Multiple heads** → Merge commit includes both PR and master migrations
+3. **Can't locate revision** → Migration file deleted but DB has record
+
+---
+
 ## Test Categories & Coverage
 
 | Category | Time | Coverage | Framework | Examples |
@@ -528,26 +650,46 @@ GitHub Actions runs on every push/PR:
 2. **test-backend** - Pytest with PostgreSQL (~5 min)
 3. **lint-frontend** - Biome linting (~30s)
 4. **test-frontend-unit** - Vitest unit tests (~1 min)
-5. **test-frontend-e2e** - Playwright E2E (~8 min)
+5. **test-frontend-e2e** - Playwright E2E with Supabase local (~8 min)
 6. **test-docker-compose** - Smoke test (~4 min)
 
 **CI Environment**:
-- Database: **PostgreSQL 17 service container** (production parity)
-- Redis: Docker Compose service (for Celery tests)
-- Celery: Eager mode for unit tests
-- Frontend: Node.js with Vitest + Playwright
-- Coverage artifact uploaded for review
+- **Backend tests**: PostgreSQL 17 service container (unit/integration)
+- **E2E tests**: **Supabase local** (full Supabase stack including Auth, Storage, RLS)
+- **Redis**: Docker Compose service (for Celery tests)
+- **Celery**: Eager mode for unit tests, real worker for E2E
+- **Frontend**: Node.js with Vitest + Playwright
+- **Coverage**: Artifacts uploaded for review
 
-**PostgreSQL Service Container**:
+### Why Supabase Local for E2E Tests?
+
+**Replaces**: Plain PostgreSQL service
+**Provides**:
+- ✅ Full Supabase stack (Auth, Storage, Realtime, Edge Functions)
+- ✅ Row-Level Security (RLS) policy testing
+- ✅ Production parity - tests actual auth flows
+- ✅ Storage bucket operations without mocking
+- ✅ Static credentials (same across all CI runs)
+
+**Setup**:
 ```yaml
-services:
-  postgres:
-    image: postgres:17
-    env:
-      POSTGRES_PASSWORD: testpassword
-      POSTGRES_DB: test
-    options: --health-cmd pg_isready
+- name: Setup Supabase CLI
+  uses: supabase/setup-cli@v1
+  with:
+    version: latest
+
+- name: Start Supabase local
+  run: supabase start
 ```
+
+**Static Credentials** (safe to hardcode, documented by Supabase):
+```bash
+DATABASE_URL: postgresql+psycopg://postgres:postgres@127.0.0.1:54322/postgres
+SUPABASE_URL: http://127.0.0.1:54321
+SUPABASE_ANON_KEY: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
+```
+
+**Important**: Supabase local **persists state** between test runs in CI. If migrations fail partway through, enum types or tables may remain in the database. Solution: Always use `IF NOT EXISTS` in migrations or implement cleanup in CI workflow.
 
 ---
 
@@ -577,6 +719,15 @@ services:
 17. **Test NFRs**: <1s load, <500ms navigation, <100ms LaTeX
 18. **Visual regression**: Optional screenshots for annotations
 19. **Error states**: LaTeX fallback, PDF load failures
+
+### Database Migration Specific
+20. **Rebase before migrations**: Always rebase on master before creating migrations
+21. **Check for conflicts**: Use `alembic heads` and `alembic branches` before committing
+22. **Make migrations idempotent**: Use `IF NOT EXISTS` for enums, tables, indexes
+23. **Test both directions**: Verify both `upgrade` and `downgrade` work
+24. **Linear history**: Avoid merge migrations by preventing branching
+25. **CI catches conflicts**: GitHub Actions tests merge commits, exposing branching issues
+26. **Supabase local for E2E**: Tests RLS policies and auth flows, not just schema
 
 ---
 
