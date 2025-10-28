@@ -92,6 +92,12 @@ def get_organization(
     return session.get(Organization, organization_id)
 
 
+def get_default_organization(*, session: Session) -> Organization | None:
+    """Get the default organization (typically 'Default Organization')"""
+    statement = select(Organization).where(Organization.name == "Default Organization")
+    return session.exec(statement).first()
+
+
 def update_organization(
     *,
     session: Session,
