@@ -59,8 +59,8 @@ function IngestionsListPage() {
   }
 
   const handleRowClick = (ingestionId: string) => {
-    // Navigate to review page (not yet implemented)
-    window.location.href = `/ingestions/${ingestionId}/review`
+    // Navigate to review page using TanStack Router
+    navigate({ to: "/ingestions/$id/review", params: { id: ingestionId } })
   }
 
   const formatFileSize = (bytes: number): string => {

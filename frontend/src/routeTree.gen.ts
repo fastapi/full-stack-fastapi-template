@@ -20,6 +20,7 @@ import { Route as LayoutSettingsRouteImport } from './routes/_layout/settings'
 import { Route as LayoutAdminRouteImport } from './routes/_layout/admin'
 import { Route as LayoutIngestionsIndexRouteImport } from './routes/_layout/ingestions/index'
 import { Route as LayoutIngestionsUploadRouteImport } from './routes/_layout/ingestions/upload'
+import { Route as LayoutIngestionsIdReviewRouteImport } from './routes/_layout/ingestions/$id.review'
 
 const TestPdfRoute = TestPdfRouteImport.update({
   id: '/test-pdf',
@@ -75,6 +76,12 @@ const LayoutIngestionsUploadRoute = LayoutIngestionsUploadRouteImport.update({
   path: '/ingestions/upload',
   getParentRoute: () => LayoutRoute,
 } as any)
+const LayoutIngestionsIdReviewRoute =
+  LayoutIngestionsIdReviewRouteImport.update({
+    id: '/ingestions/$id/review',
+    path: '/ingestions/$id/review',
+    getParentRoute: () => LayoutRoute,
+  } as any)
 
 export interface FileRoutesByFullPath {
   '/login': typeof LoginRoute
@@ -87,6 +94,7 @@ export interface FileRoutesByFullPath {
   '/': typeof LayoutIndexRoute
   '/ingestions/upload': typeof LayoutIngestionsUploadRoute
   '/ingestions': typeof LayoutIngestionsIndexRoute
+  '/ingestions/$id/review': typeof LayoutIngestionsIdReviewRoute
 }
 export interface FileRoutesByTo {
   '/login': typeof LoginRoute
@@ -99,6 +107,7 @@ export interface FileRoutesByTo {
   '/': typeof LayoutIndexRoute
   '/ingestions/upload': typeof LayoutIngestionsUploadRoute
   '/ingestions': typeof LayoutIngestionsIndexRoute
+  '/ingestions/$id/review': typeof LayoutIngestionsIdReviewRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -113,6 +122,7 @@ export interface FileRoutesById {
   '/_layout/': typeof LayoutIndexRoute
   '/_layout/ingestions/upload': typeof LayoutIngestionsUploadRoute
   '/_layout/ingestions/': typeof LayoutIngestionsIndexRoute
+  '/_layout/ingestions/$id/review': typeof LayoutIngestionsIdReviewRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -127,6 +137,7 @@ export interface FileRouteTypes {
     | '/'
     | '/ingestions/upload'
     | '/ingestions'
+    | '/ingestions/$id/review'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/login'
@@ -139,6 +150,7 @@ export interface FileRouteTypes {
     | '/'
     | '/ingestions/upload'
     | '/ingestions'
+    | '/ingestions/$id/review'
   id:
     | '__root__'
     | '/_layout'
@@ -152,6 +164,7 @@ export interface FileRouteTypes {
     | '/_layout/'
     | '/_layout/ingestions/upload'
     | '/_layout/ingestions/'
+    | '/_layout/ingestions/$id/review'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -242,6 +255,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof LayoutIngestionsUploadRouteImport
       parentRoute: typeof LayoutRoute
     }
+    '/_layout/ingestions/$id/review': {
+      id: '/_layout/ingestions/$id/review'
+      path: '/ingestions/$id/review'
+      fullPath: '/ingestions/$id/review'
+      preLoaderRoute: typeof LayoutIngestionsIdReviewRouteImport
+      parentRoute: typeof LayoutRoute
+    }
   }
 }
 
@@ -251,6 +271,7 @@ interface LayoutRouteChildren {
   LayoutIndexRoute: typeof LayoutIndexRoute
   LayoutIngestionsUploadRoute: typeof LayoutIngestionsUploadRoute
   LayoutIngestionsIndexRoute: typeof LayoutIngestionsIndexRoute
+  LayoutIngestionsIdReviewRoute: typeof LayoutIngestionsIdReviewRoute
 }
 
 const LayoutRouteChildren: LayoutRouteChildren = {
@@ -259,6 +280,7 @@ const LayoutRouteChildren: LayoutRouteChildren = {
   LayoutIndexRoute: LayoutIndexRoute,
   LayoutIngestionsUploadRoute: LayoutIngestionsUploadRoute,
   LayoutIngestionsIndexRoute: LayoutIngestionsIndexRoute,
+  LayoutIngestionsIdReviewRoute: LayoutIngestionsIdReviewRoute,
 }
 
 const LayoutRouteWithChildren =
