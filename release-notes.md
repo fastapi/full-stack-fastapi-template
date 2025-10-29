@@ -4,17 +4,127 @@
 
 ### Fixes
 
+* 🐛 Fix `parse_cors` function to be consistent for both empty string and empty list. PR [#1672](https://github.com/fastapi/full-stack-fastapi-template/pull/1672) by [@rolkotaki](https://github.com/rolkotaki).
 * 🐛 Close sidebar drawer on user selection. PR [#1515](https://github.com/fastapi/full-stack-fastapi-template/pull/1515) by [@dtellz](https://github.com/dtellz).
 * 🐛 Fix required password validation when editing user fields. PR [#1508](https://github.com/fastapi/full-stack-fastapi-template/pull/1508) by [@jpizquierdo](https://github.com/jpizquierdo).
 
 ### Refactors
 
+* ♻️ Update password max length. PR [#1447](https://github.com/fastapi/full-stack-fastapi-template/pull/1447) by [@michaelAlvarino](https://github.com/michaelAlvarino).
+* 🚚 Move backend tests outside the `app` directory. PR [#1862](https://github.com/fastapi/full-stack-fastapi-template/pull/1862) by [@YuriiMotov](https://github.com/YuriiMotov).
+* ✨ Add ImportMetaEnv and ImportMeta interfaces for Vite environment variables. PR [#1860](https://github.com/fastapi/full-stack-fastapi-template/pull/1860) by [@alejsdev](https://github.com/alejsdev).
+* 🔧 Update `tsconfig.json` and fix errors. PR [#1859](https://github.com/fastapi/full-stack-fastapi-template/pull/1859) by [@alejsdev](https://github.com/alejsdev).
+* ♻️ Remove disabled attribute from Save button in ChangePassword component. PR [#1844](https://github.com/fastapi/full-stack-fastapi-template/pull/1844) by [@alejsdev](https://github.com/alejsdev).
+* 👷🏻‍♀️  Update CI for client generation. PR [#1573](https://github.com/fastapi/full-stack-fastapi-template/pull/1573) by [@alejsdev](https://github.com/alejsdev).
 * ♻️ Remove redundant field in inherited class. PR [#1520](https://github.com/fastapi/full-stack-fastapi-template/pull/1520) by [@tzway](https://github.com/tzway).
 * 🎨 Add minor UI tweaks in Skeletons and other components. PR [#1507](https://github.com/fastapi/full-stack-fastapi-template/pull/1507) by [@alejsdev](https://github.com/alejsdev).
 * 🎨 Add minor UI tweaks. PR [#1506](https://github.com/fastapi/full-stack-fastapi-template/pull/1506) by [@alejsdev](https://github.com/alejsdev).
 
+### Upgrades
+
+* ⬆ Bump @types/react from 19.1.12 to 19.1.13 in /frontend. PR [#1888](https://github.com/fastapi/full-stack-fastapi-template/pull/1888) by [@dependabot[bot]](https://github.com/apps/dependabot).
+* ⬆ Bump @tanstack/router-plugin from 1.131.41 to 1.131.43 in /frontend. PR [#1887](https://github.com/fastapi/full-stack-fastapi-template/pull/1887) by [@dependabot[bot]](https://github.com/apps/dependabot).
+* ⬆ Bump pydantic from 2.11.7 to 2.11.9 in /backend. PR [#1891](https://github.com/fastapi/full-stack-fastapi-template/pull/1891) by [@dependabot[bot]](https://github.com/apps/dependabot).
+* ⬆ Bump @chakra-ui/react from 3.26.0 to 3.27.0 in /frontend. PR [#1890](https://github.com/fastapi/full-stack-fastapi-template/pull/1890) by [@dependabot[bot]](https://github.com/apps/dependabot).
+* ⬆ Bump axios from 1.12.0 to 1.12.2 in /frontend. PR [#1889](https://github.com/fastapi/full-stack-fastapi-template/pull/1889) by [@dependabot[bot]](https://github.com/apps/dependabot).
+* ⬆ Bump @types/node from 24.3.1 to 24.4.0 in /frontend. PR [#1886](https://github.com/fastapi/full-stack-fastapi-template/pull/1886) by [@dependabot[bot]](https://github.com/apps/dependabot).
+* ⬆ Bump @tanstack/router-devtools from 1.131.41 to 1.131.42 in /frontend. PR [#1881](https://github.com/fastapi/full-stack-fastapi-template/pull/1881) by [@dependabot[bot]](https://github.com/apps/dependabot).
+* ⬆ Bump @tanstack/router-plugin from 1.131.39 to 1.131.41 in /frontend. PR [#1879](https://github.com/fastapi/full-stack-fastapi-template/pull/1879) by [@dependabot[bot]](https://github.com/apps/dependabot).
+* ⬆ Bump @tanstack/react-query-devtools from 5.87.3 to 5.87.4 in /frontend. PR [#1876](https://github.com/fastapi/full-stack-fastapi-template/pull/1876) by [@dependabot[bot]](https://github.com/apps/dependabot).
+* ⬆ Bump axios from 1.11.0 to 1.12.0 in /frontend. PR [#1878](https://github.com/fastapi/full-stack-fastapi-template/pull/1878) by [@dependabot[bot]](https://github.com/apps/dependabot).
+* ⬆ Bump @tanstack/router-devtools from 1.131.40 to 1.131.41 in /frontend. PR [#1877](https://github.com/fastapi/full-stack-fastapi-template/pull/1877) by [@dependabot[bot]](https://github.com/apps/dependabot).
+* ⬆ Bump @tanstack/react-router from 1.131.40 to 1.131.41 in /frontend. PR [#1875](https://github.com/fastapi/full-stack-fastapi-template/pull/1875) by [@dependabot[bot]](https://github.com/apps/dependabot).
+* ⬆ Bump @tanstack/router-devtools from 1.131.36 to 1.131.37 in /frontend. PR [#1871](https://github.com/fastapi/full-stack-fastapi-template/pull/1871) by [@dependabot[bot]](https://github.com/apps/dependabot).
+* ⬆ Bump @tanstack/router-plugin from 1.131.36 to 1.131.37 in /frontend. PR [#1870](https://github.com/fastapi/full-stack-fastapi-template/pull/1870) by [@dependabot[bot]](https://github.com/apps/dependabot).
+* ⬆ Bump @tanstack/react-query from 5.87.1 to 5.87.4 in /frontend. PR [#1868](https://github.com/fastapi/full-stack-fastapi-template/pull/1868) by [@dependabot[bot]](https://github.com/apps/dependabot).
+* ⬆ Bump @biomejs/biome from 2.2.3 to 2.2.4 in /frontend. PR [#1869](https://github.com/fastapi/full-stack-fastapi-template/pull/1869) by [@dependabot[bot]](https://github.com/apps/dependabot).
+* ⬆ Bump @tanstack/react-router from 1.131.36 to 1.131.37 in /frontend. PR [#1872](https://github.com/fastapi/full-stack-fastapi-template/pull/1872) by [@dependabot[bot]](https://github.com/apps/dependabot).
+* ⬆️ Upgrade Biome to the latest version. PR [#1861](https://github.com/fastapi/full-stack-fastapi-template/pull/1861) by [@alejsdev](https://github.com/alejsdev).
+* ⬆️ Update TansTack Router dependencies. PR [#1853](https://github.com/fastapi/full-stack-fastapi-template/pull/1853) by [@alejsdev](https://github.com/alejsdev).
+* ⬆️ Bump @tanstack/react-query from 5.28.14 to 5.87.1. PR [#1852](https://github.com/fastapi/full-stack-fastapi-template/pull/1852) by [@alejsdev](https://github.com/alejsdev).
+* ⬆ Bump @chakra-ui/react from 3.8.0 to 3.26.0 in /frontend. PR [#1796](https://github.com/fastapi/full-stack-fastapi-template/pull/1796) by [@dependabot[bot]](https://github.com/apps/dependabot).
+* ⬆️ Update @hey-api/openapi-ts dependency version and update dependabot config. PR [#1845](https://github.com/fastapi/full-stack-fastapi-template/pull/1845) by [@alejsdev](https://github.com/alejsdev).
+* ⬆️ Update Playwright. PR [#1793](https://github.com/fastapi/full-stack-fastapi-template/pull/1793) by [@alejsdev](https://github.com/alejsdev).
+* ⬆️ Upgrade React and related dependencies. PR [#1843](https://github.com/fastapi/full-stack-fastapi-template/pull/1843) by [@alejsdev](https://github.com/alejsdev).
+
+### Docs
+
+* ✏️ Fix small typo in `deployment.md`. PR [#1679](https://github.com/fastapi/full-stack-fastapi-template/pull/1679) by [@cassmtnr](https://github.com/cassmtnr).
+
 ### Internal
 
+* ⬆ Bump @vitejs/plugin-react-swc from 4.0.1 to 4.1.0 in /frontend. PR [#1897](https://github.com/fastapi/full-stack-fastapi-template/pull/1897) by [@dependabot[bot]](https://github.com/apps/dependabot).
+* ⬆ Bump playwright from v1.55.0-noble to v1.56.1-noble in /frontend. PR [#1943](https://github.com/fastapi/full-stack-fastapi-template/pull/1943) by [@dependabot[bot]](https://github.com/apps/dependabot).
+* 🔧 Configure reminder for `waiting` label in `issue-manager`. PR [#1939](https://github.com/fastapi/full-stack-fastapi-template/pull/1939) by [@YuriiMotov](https://github.com/YuriiMotov).
+* ⬆ Bump vite from 7.1.9 to 7.1.11 in /frontend. PR [#1949](https://github.com/fastapi/full-stack-fastapi-template/pull/1949) by [@dependabot[bot]](https://github.com/apps/dependabot).
+* ⬆ Bump pydantic from 2.11.10 to 2.12.3 in /backend. PR [#1947](https://github.com/fastapi/full-stack-fastapi-template/pull/1947) by [@dependabot[bot]](https://github.com/apps/dependabot).
+* ⬆ Bump react-dom and @types/react-dom in /frontend. PR [#1934](https://github.com/fastapi/full-stack-fastapi-template/pull/1934) by [@dependabot[bot]](https://github.com/apps/dependabot).
+* ⬆ Bump alembic from 1.16.5 to 1.17.0 in /backend. PR [#1935](https://github.com/fastapi/full-stack-fastapi-template/pull/1935) by [@dependabot[bot]](https://github.com/apps/dependabot).
+* ⬆ Bump actions/setup-node from 5 to 6. PR [#1937](https://github.com/fastapi/full-stack-fastapi-template/pull/1937) by [@dependabot[bot]](https://github.com/apps/dependabot).
+* ⬆ Bump @tanstack/router-plugin from 1.132.41 to 1.133.15 in /frontend. PR [#1946](https://github.com/fastapi/full-stack-fastapi-template/pull/1946) by [@dependabot[bot]](https://github.com/apps/dependabot).
+* ⬆ Bump astral-sh/setup-uv from 6 to 7. PR [#1925](https://github.com/fastapi/full-stack-fastapi-template/pull/1925) by [@dependabot[bot]](https://github.com/apps/dependabot).
+* ⬆ Bump vite from 7.1.7 to 7.1.9 in /frontend. PR [#1919](https://github.com/fastapi/full-stack-fastapi-template/pull/1919) by [@dependabot[bot]](https://github.com/apps/dependabot).
+* ⬆ Bump @tanstack/router-plugin from 1.131.44 to 1.132.41 in /frontend. PR [#1920](https://github.com/fastapi/full-stack-fastapi-template/pull/1920) by [@dependabot[bot]](https://github.com/apps/dependabot).
+* ⬆ Bump @tanstack/react-query-devtools from 5.87.4 to 5.90.2 in /frontend. PR [#1921](https://github.com/fastapi/full-stack-fastapi-template/pull/1921) by [@dependabot[bot]](https://github.com/apps/dependabot).
+* ⬆ Bump pydantic from 2.11.9 to 2.11.10 in /backend. PR [#1922](https://github.com/fastapi/full-stack-fastapi-template/pull/1922) by [@dependabot[bot]](https://github.com/apps/dependabot).
+* ⬆ Bump tiangolo/issue-manager from 0.5.1 to 0.6.0. PR [#1912](https://github.com/fastapi/full-stack-fastapi-template/pull/1912) by [@dependabot[bot]](https://github.com/apps/dependabot).
+* ⬆ Bump @types/react from 19.1.13 to 19.1.15 in /frontend. PR [#1906](https://github.com/fastapi/full-stack-fastapi-template/pull/1906) by [@dependabot[bot]](https://github.com/apps/dependabot).
+* ⬆ Bump pydantic-settings from 2.10.1 to 2.11.0 in /backend. PR [#1907](https://github.com/fastapi/full-stack-fastapi-template/pull/1907) by [@dependabot[bot]](https://github.com/apps/dependabot).
+* ⬆ Bump @tanstack/react-query from 5.90.1 to 5.90.2 in /frontend. PR [#1905](https://github.com/fastapi/full-stack-fastapi-template/pull/1905) by [@dependabot[bot]](https://github.com/apps/dependabot).
+* ⬆ Bump @types/node from 24.4.0 to 24.5.2 in /frontend. PR [#1903](https://github.com/fastapi/full-stack-fastapi-template/pull/1903) by [@dependabot[bot]](https://github.com/apps/dependabot).
+* ⬆ Bump vite from 7.1.5 to 7.1.7 in /frontend. PR [#1893](https://github.com/fastapi/full-stack-fastapi-template/pull/1893) by [@dependabot[bot]](https://github.com/apps/dependabot).
+* ⬆ Bump @tanstack/react-query from 5.87.4 to 5.90.1 in /frontend. PR [#1896](https://github.com/fastapi/full-stack-fastapi-template/pull/1896) by [@dependabot[bot]](https://github.com/apps/dependabot).
+* ⬆ Bump @tanstack/react-router from 1.131.44 to 1.131.50 in /frontend. PR [#1894](https://github.com/fastapi/full-stack-fastapi-template/pull/1894) by [@dependabot[bot]](https://github.com/apps/dependabot).
+* 🔧 Update dependabot intervals for uv and npm dependencies to weekly. PR [#1880](https://github.com/fastapi/full-stack-fastapi-template/pull/1880) by [@alejsdev](https://github.com/alejsdev).
+* ⬆ Bump pydantic from 2.9.2 to 2.11.7 in /backend. PR [#1864](https://github.com/fastapi/full-stack-fastapi-template/pull/1864) by [@dependabot[bot]](https://github.com/apps/dependabot).
+* 🔧 Update coverage configuration and simplify test script. PR [#1867](https://github.com/fastapi/full-stack-fastapi-template/pull/1867) by [@alejsdev](https://github.com/alejsdev).
+* 🔧 Add T201 rule to ruff linting configuration to disallow print statements. PR [#1865](https://github.com/fastapi/full-stack-fastapi-template/pull/1865) by [@alejsdev](https://github.com/alejsdev).
+* ⬆ Bump @tanstack/react-query-devtools from 5.87.1 to 5.87.3 in /frontend. PR [#1863](https://github.com/fastapi/full-stack-fastapi-template/pull/1863) by [@dependabot[bot]](https://github.com/apps/dependabot).
+* ⬆ Bump vite from 6.3.4 to 7.1.5 in /frontend. PR [#1857](https://github.com/fastapi/full-stack-fastapi-template/pull/1857) by [@dependabot[bot]](https://github.com/apps/dependabot).
+* ⬆ Bump @types/node from 22.15.3 to 24.3.1 in /frontend. PR [#1854](https://github.com/fastapi/full-stack-fastapi-template/pull/1854) by [@dependabot[bot]](https://github.com/apps/dependabot).
+* ⬆ Bump @vitejs/plugin-react-swc from 3.9.0 to 4.0.1 in /frontend. PR [#1856](https://github.com/fastapi/full-stack-fastapi-template/pull/1856) by [@dependabot[bot]](https://github.com/apps/dependabot).
+* ⬆ Bump axios from 1.9.0 to 1.11.0 in /frontend. PR [#1855](https://github.com/fastapi/full-stack-fastapi-template/pull/1855) by [@dependabot[bot]](https://github.com/apps/dependabot).
+* ⬆ Bump alembic from 1.15.2 to 1.16.5 in /backend. PR [#1847](https://github.com/fastapi/full-stack-fastapi-template/pull/1847) by [@dependabot[bot]](https://github.com/apps/dependabot).
+* ⬆ Bump email-validator from 2.2.0 to 2.3.0 in /backend. PR [#1850](https://github.com/fastapi/full-stack-fastapi-template/pull/1850) by [@dependabot[bot]](https://github.com/apps/dependabot).
+* ⬆ Bump pydantic-settings from 2.9.1 to 2.10.1 in /backend. PR [#1851](https://github.com/fastapi/full-stack-fastapi-template/pull/1851) by [@dependabot[bot]](https://github.com/apps/dependabot).
+* ⬆ Bump react-error-boundary from 5.0.0 to 6.0.0 in /frontend. PR [#1849](https://github.com/fastapi/full-stack-fastapi-template/pull/1849) by [@dependabot[bot]](https://github.com/apps/dependabot).
+* ⬆ Bump @tanstack/react-query-devtools from 5.74.9 to 5.87.1 in /frontend. PR [#1848](https://github.com/fastapi/full-stack-fastapi-template/pull/1848) by [@dependabot[bot]](https://github.com/apps/dependabot).
+* ⬆ Bump dotenv from 16.4.5 to 17.2.2 in /frontend. PR [#1846](https://github.com/fastapi/full-stack-fastapi-template/pull/1846) by [@dependabot[bot]](https://github.com/apps/dependabot).
+* ⬆ Bump node from 20 to 24 in /frontend. PR [#1621](https://github.com/fastapi/full-stack-fastapi-template/pull/1621) by [@dependabot[bot]](https://github.com/apps/dependabot).
+* ⬆ Bump actions/labeler from 5 to 6. PR [#1839](https://github.com/fastapi/full-stack-fastapi-template/pull/1839) by [@dependabot[bot]](https://github.com/apps/dependabot).
+* ⬆ Bump actions/setup-python from 5 to 6. PR [#1835](https://github.com/fastapi/full-stack-fastapi-template/pull/1835) by [@dependabot[bot]](https://github.com/apps/dependabot).
+* ⬆ Bump actions/setup-node from 4 to 5. PR [#1836](https://github.com/fastapi/full-stack-fastapi-template/pull/1836) by [@dependabot[bot]](https://github.com/apps/dependabot).
+* 👷 Detect and label merge conflicts on PRs automatically. PR [#1838](https://github.com/fastapi/full-stack-fastapi-template/pull/1838) by [@svlandeg](https://github.com/svlandeg).
+* 🔧 Add frontend linter pre-commit hook. PR [#1791](https://github.com/fastapi/full-stack-fastapi-template/pull/1791) by [@alexrockhill](https://github.com/alexrockhill).
+* ⬆ Bump form-data from 4.0.2 to 4.0.4 in /frontend. PR [#1725](https://github.com/fastapi/full-stack-fastapi-template/pull/1725) by [@dependabot[bot]](https://github.com/apps/dependabot).
+* ⬆ Bump actions/checkout from 4 to 5. PR [#1768](https://github.com/fastapi/full-stack-fastapi-template/pull/1768) by [@dependabot[bot]](https://github.com/apps/dependabot).
+* ⬆ Bump actions/download-artifact from 4 to 5. PR [#1754](https://github.com/fastapi/full-stack-fastapi-template/pull/1754) by [@dependabot[bot]](https://github.com/apps/dependabot).
+* ⬆ Bump tiangolo/latest-changes from 0.3.2 to 0.4.0. PR [#1744](https://github.com/fastapi/full-stack-fastapi-template/pull/1744) by [@dependabot[bot]](https://github.com/apps/dependabot).
+* ⬆ Bump bcrypt from 4.0.1 to 4.3.0 in /backend. PR [#1601](https://github.com/fastapi/full-stack-fastapi-template/pull/1601) by [@dependabot[bot]](https://github.com/apps/dependabot).
+* ⬆ Bump react-error-boundary from 4.0.13 to 5.0.0 in /frontend. PR [#1602](https://github.com/fastapi/full-stack-fastapi-template/pull/1602) by [@dependabot[bot]](https://github.com/apps/dependabot).
+* ⬆ Bump vite from 6.3.3 to 6.3.4 in /frontend. PR [#1608](https://github.com/fastapi/full-stack-fastapi-template/pull/1608) by [@dependabot[bot]](https://github.com/apps/dependabot).
+* ⬆ Bump @playwright/test from 1.45.2 to 1.52.0 in /frontend. PR [#1586](https://github.com/fastapi/full-stack-fastapi-template/pull/1586) by [@dependabot[bot]](https://github.com/apps/dependabot).
+* ⬆ Bump pydantic-settings from 2.5.2 to 2.9.1 in /backend. PR [#1589](https://github.com/fastapi/full-stack-fastapi-template/pull/1589) by [@dependabot[bot]](https://github.com/apps/dependabot).
+* ⬆ Bump next-themes from 0.4.4 to 0.4.6 in /frontend. PR [#1598](https://github.com/fastapi/full-stack-fastapi-template/pull/1598) by [@dependabot[bot]](https://github.com/apps/dependabot).
+* ⬆ Bump @types/node from 20.10.5 to 22.15.3 in /frontend. PR [#1599](https://github.com/fastapi/full-stack-fastapi-template/pull/1599) by [@dependabot[bot]](https://github.com/apps/dependabot).
+* ⬆ Bump @tanstack/react-query-devtools from 5.28.14 to 5.74.9 in /frontend. PR [#1597](https://github.com/fastapi/full-stack-fastapi-template/pull/1597) by [@dependabot[bot]](https://github.com/apps/dependabot).
+* ⬆ Bump sqlmodel from 0.0.22 to 0.0.24 in /backend. PR [#1596](https://github.com/fastapi/full-stack-fastapi-template/pull/1596) by [@dependabot[bot]](https://github.com/apps/dependabot).
+* ⬆ Bump python-multipart from 0.0.10 to 0.0.20 in /backend. PR [#1595](https://github.com/fastapi/full-stack-fastapi-template/pull/1595) by [@dependabot[bot]](https://github.com/apps/dependabot).
+* ⬆ Bump alembic from 1.13.2 to 1.15.2 in /backend. PR [#1594](https://github.com/fastapi/full-stack-fastapi-template/pull/1594) by [@dependabot[bot]](https://github.com/apps/dependabot).
+* ⬆ Bump postgres from 12 to 17. PR [#1580](https://github.com/fastapi/full-stack-fastapi-template/pull/1580) by [@dependabot[bot]](https://github.com/apps/dependabot).
+* ⬆ Bump axios from 1.8.2 to 1.9.0 in /frontend. PR [#1592](https://github.com/fastapi/full-stack-fastapi-template/pull/1592) by [@dependabot[bot]](https://github.com/apps/dependabot).
+* ⬆ Bump react-icons from 5.4.0 to 5.5.0 in /frontend. PR [#1581](https://github.com/fastapi/full-stack-fastapi-template/pull/1581) by [@dependabot[bot]](https://github.com/apps/dependabot).
+* ⬆ Bump jinja2 from 3.1.4 to 3.1.6 in /backend. PR [#1591](https://github.com/fastapi/full-stack-fastapi-template/pull/1591) by [@dependabot[bot]](https://github.com/apps/dependabot).
+* ⬆ Bump pyjwt from 2.9.0 to 2.10.1 in /backend. PR [#1588](https://github.com/fastapi/full-stack-fastapi-template/pull/1588) by [@dependabot[bot]](https://github.com/apps/dependabot).
+* ⬆ Bump httpx from 0.27.2 to 0.28.1 in /backend. PR [#1587](https://github.com/fastapi/full-stack-fastapi-template/pull/1587) by [@dependabot[bot]](https://github.com/apps/dependabot).
+* ⬆ Bump form-data from 4.0.0 to 4.0.2 in /frontend. PR [#1578](https://github.com/fastapi/full-stack-fastapi-template/pull/1578) by [@dependabot[bot]](https://github.com/apps/dependabot).
+* ⬆ Bump @biomejs/biome from 1.6.1 to 1.9.4 in /frontend. PR [#1582](https://github.com/fastapi/full-stack-fastapi-template/pull/1582) by [@dependabot[bot]](https://github.com/apps/dependabot).
+* ⬆️ Update Dependabot configuration to target the backend directory for Python uv updates. PR [#1577](https://github.com/fastapi/full-stack-fastapi-template/pull/1577) by [@alejsdev](https://github.com/alejsdev).
+* 🔧 Update Dependabot config. PR [#1576](https://github.com/fastapi/full-stack-fastapi-template/pull/1576) by [@alejsdev](https://github.com/alejsdev).
+* Bump @babel/runtime from 7.23.9 to 7.27.0 in /frontend. PR [#1570](https://github.com/fastapi/full-stack-fastapi-template/pull/1570) by [@dependabot[bot]](https://github.com/apps/dependabot).
+* Bump esbuild, @vitejs/plugin-react-swc and vite in /frontend. PR [#1571](https://github.com/fastapi/full-stack-fastapi-template/pull/1571) by [@dependabot[bot]](https://github.com/apps/dependabot).
+* Bump axios from 1.7.4 to 1.8.2 in /frontend. PR [#1568](https://github.com/fastapi/full-stack-fastapi-template/pull/1568) by [@dependabot[bot]](https://github.com/apps/dependabot).
+* ⬆ Bump astral-sh/setup-uv from 5 to 6. PR [#1566](https://github.com/fastapi/full-stack-fastapi-template/pull/1566) by [@dependabot[bot]](https://github.com/apps/dependabot).
 * 🔧  Add npm and docker package ecosystems to Dependabot configuration. PR [#1535](https://github.com/fastapi/full-stack-fastapi-template/pull/1535) by [@alejsdev](https://github.com/alejsdev).
 
 ## 0.8.0

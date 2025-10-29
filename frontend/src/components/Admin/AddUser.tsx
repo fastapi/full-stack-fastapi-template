@@ -1,10 +1,3 @@
-import { useMutation, useQueryClient } from "@tanstack/react-query"
-import { Controller, type SubmitHandler, useForm } from "react-hook-form"
-
-import { type UserCreate, UsersService } from "@/client"
-import type { ApiError } from "@/client/core/ApiError"
-import useCustomToast from "@/hooks/useCustomToast"
-import { emailPattern, handleError } from "@/utils"
 import {
   Button,
   DialogActionTrigger,
@@ -14,8 +7,14 @@ import {
   Text,
   VStack,
 } from "@chakra-ui/react"
+import { useMutation, useQueryClient } from "@tanstack/react-query"
 import { useState } from "react"
+import { Controller, type SubmitHandler, useForm } from "react-hook-form"
 import { FaPlus } from "react-icons/fa"
+import { type UserCreate, UsersService } from "@/client"
+import type { ApiError } from "@/client/core/ApiError"
+import useCustomToast from "@/hooks/useCustomToast"
+import { emailPattern, handleError } from "@/utils"
 import { Checkbox } from "../ui/checkbox"
 import {
   DialogBody,
@@ -106,7 +105,6 @@ const AddUser = () => {
                 label="Email"
               >
                 <Input
-                  id="email"
                   {...register("email", {
                     required: "Email is required",
                     pattern: emailPattern,
@@ -122,7 +120,6 @@ const AddUser = () => {
                 label="Full Name"
               >
                 <Input
-                  id="name"
                   {...register("full_name")}
                   placeholder="Full name"
                   type="text"
@@ -136,7 +133,6 @@ const AddUser = () => {
                 label="Set Password"
               >
                 <Input
-                  id="password"
                   {...register("password", {
                     required: "Password is required",
                     minLength: {
@@ -156,7 +152,6 @@ const AddUser = () => {
                 label="Confirm Password"
               >
                 <Input
-                  id="confirm_password"
                   {...register("confirm_password", {
                     required: "Please confirm your password",
                     validate: (value) =>
