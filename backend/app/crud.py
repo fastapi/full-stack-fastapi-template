@@ -1,7 +1,7 @@
 import uuid
 from typing import Any
 
-from sqlmodel import Session, func, select
+from sqlmodel import Session, desc, func, select
 
 from app.core.security import get_password_hash, verify_password
 from app.models import Ingestion, User, UserCreate, UserUpdate
@@ -68,7 +68,7 @@ def get_ingestions(
     statement = (
         select(Ingestion)
         .where(Ingestion.owner_id == owner_id)
-        .order_by(Ingestion.uploaded_at.desc())
+        .order_by(desc(Ingestion.uploaded_at))
         .offset(skip)
         .limit(limit)
     )
