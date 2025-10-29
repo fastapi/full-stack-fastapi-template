@@ -112,9 +112,9 @@ class IngestionCreate(IngestionBase):
     pass
 
 
-# Database model for extractions
+# Database model for ingestions
 class Ingestion(IngestionBase, table=True):
-    __tablename__ = "extractions"  # Table name matches domain
+    __tablename__ = "ingestions"  # Table name matches database
 
     id: uuid.UUID = Field(default_factory=uuid.uuid4, primary_key=True)
     owner_id: uuid.UUID = Field(
