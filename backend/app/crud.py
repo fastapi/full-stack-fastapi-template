@@ -60,7 +60,9 @@ def get_ingestions(
     """
     # Count total ingestions for this user
     count_statement = (
-        select(func.count()).select_from(Ingestion).where(Ingestion.owner_id == owner_id)
+        select(func.count())
+        .select_from(Ingestion)
+        .where(Ingestion.owner_id == owner_id)
     )
     count = session.exec(count_statement).one()
 
