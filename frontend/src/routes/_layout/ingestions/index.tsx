@@ -1,4 +1,4 @@
-import { Badge, Container, Flex, Heading, Table } from "@chakra-ui/react"
+import { Badge, Button, Container, Flex, Heading, Table } from "@chakra-ui/react"
 import { useQuery, useQueryClient } from "@tanstack/react-query"
 import { createFileRoute, useNavigate } from "@tanstack/react-router"
 import { useState } from "react"
@@ -89,11 +89,27 @@ function IngestionsListPage() {
     return colors[status] || "gray"
   }
 
+  const handleUploadClick = () => {
+    navigate({ to: "/ingestions/upload" })
+  }
+
   return (
     <Container maxW="full">
-      <Heading size="lg" textAlign={{ base: "center", md: "left" }} pt={12}>
-        Ingestions
-      </Heading>
+      <Flex
+        pt={12}
+        pb={4}
+        justifyContent="space-between"
+        alignItems="center"
+        direction={{ base: "column", md: "row" }}
+        gap={4}
+      >
+        <Heading size="lg" textAlign={{ base: "center", md: "left" }}>
+          Ingestions
+        </Heading>
+        <Button colorPalette="blue" onClick={handleUploadClick}>
+          Upload Worksheet
+        </Button>
+      </Flex>
 
       {isLoading ? (
         <p>Loading...</p>
