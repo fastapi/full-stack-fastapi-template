@@ -46,6 +46,24 @@ def authenticate(*, session: Session, email: str, password: str) -> User | None:
     return db_user
 
 
+def get_ingestion(
+    *,
+    session: Session,
+    ingestion_id: uuid.UUID,
+    owner_id: uuid.UUID,
+) -> Ingestion | None:
+    """
+    Get a single ingestion by ID for the given owner.
+
+    Returns None if not found or if owner doesn't match.
+    """
+    statement = select(Ingestion).where(
+        Ingestion.id == ingestion_id,
+        Ingestion.owner_id == owner_id,
+    )
+    return session.exec(statement).first()
+
+
 def get_ingestions(
     *,
     session: Session,

@@ -139,3 +139,28 @@ def read_ingestions(
     )
 
     return IngestionsPublic(data=ingestions, count=count)
+
+
+@router.get("/{id}", response_model=IngestionPublic)
+def get_ingestion(
+    *,
+    session: SessionDep,
+    current_user: CurrentUser,
+    id: uuid.UUID,
+) -> Any:
+    """
+    Get a single ingestion by ID.
+
+    Returns ingestion details including presigned URL for PDF access.
+    Only returns ingestions owned by the current user (403 if not owner).
+    """
+    ingestion = crud.get_ingestion(
+        session=session, ingestion_id=id, owner_id=current_user.id
+    )
+
+    if not ingestion:
+        raise HTTPException(
+            status_code=404, detail="Ingestion not found or access denied."
+        )
+
+    return ingestion

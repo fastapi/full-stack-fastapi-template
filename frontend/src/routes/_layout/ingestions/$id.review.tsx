@@ -61,7 +61,7 @@ function PDFReviewPage() {
    * Navigate back to ingestions list
    */
   const handleBackToList = () => {
-    navigate({ to: "/ingestions" })
+    navigate({ to: "/ingestions", search: { page: 1 } })
   }
 
   // Loading state

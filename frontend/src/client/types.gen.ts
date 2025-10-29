@@ -139,6 +139,12 @@ export type IngestionsReadIngestionsData = {
 
 export type IngestionsReadIngestionsResponse = (IngestionsPublic);
 
+export type IngestionsGetIngestionData = {
+    id: string;
+};
+
+export type IngestionsGetIngestionResponse = (IngestionPublic);
+
 export type LoginLoginAccessTokenData = {
     formData: Body_login_login_access_token;
 };

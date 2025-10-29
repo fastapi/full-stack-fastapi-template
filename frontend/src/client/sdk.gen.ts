@@ -3,7 +3,7 @@
 import type { CancelablePromise } from './core/CancelablePromise';
 import { OpenAPI } from './core/OpenAPI';
 import { request as __request } from './core/request';
-import type { IngestionsCreateIngestionData, IngestionsCreateIngestionResponse, IngestionsReadIngestionsData, IngestionsReadIngestionsResponse, LoginLoginAccessTokenData, LoginLoginAccessTokenResponse, LoginTestTokenResponse, LoginRecoverPasswordData, LoginRecoverPasswordResponse, LoginResetPasswordData, LoginResetPasswordResponse, LoginRecoverPasswordHtmlContentData, LoginRecoverPasswordHtmlContentResponse, PrivateCreateUserData, PrivateCreateUserResponse, TasksTriggerHealthCheckResponse, TasksTriggerTestTaskData, TasksTriggerTestTaskResponse, TasksGetTaskStatusData, TasksGetTaskStatusResponse, TasksGetWorkerStatsResponse, UsersReadUsersData, UsersReadUsersResponse, UsersCreateUserData, UsersCreateUserResponse, UsersReadUserMeResponse, UsersDeleteUserMeResponse, UsersUpdateUserMeData, UsersUpdateUserMeResponse, UsersUpdatePasswordMeData, UsersUpdatePasswordMeResponse, UsersRegisterUserData, UsersRegisterUserResponse, UsersReadUserByIdData, UsersReadUserByIdResponse, UsersUpdateUserData, UsersUpdateUserResponse, UsersDeleteUserData, UsersDeleteUserResponse, UtilsTestEmailData, UtilsTestEmailResponse, UtilsHealthCheckResponse } from './types.gen';
+import type { IngestionsCreateIngestionData, IngestionsCreateIngestionResponse, IngestionsReadIngestionsData, IngestionsReadIngestionsResponse, IngestionsGetIngestionData, IngestionsGetIngestionResponse, LoginLoginAccessTokenData, LoginLoginAccessTokenResponse, LoginTestTokenResponse, LoginRecoverPasswordData, LoginRecoverPasswordResponse, LoginResetPasswordData, LoginResetPasswordResponse, LoginRecoverPasswordHtmlContentData, LoginRecoverPasswordHtmlContentResponse, PrivateCreateUserData, PrivateCreateUserResponse, TasksTriggerHealthCheckResponse, TasksTriggerTestTaskData, TasksTriggerTestTaskResponse, TasksGetTaskStatusData, TasksGetTaskStatusResponse, TasksGetWorkerStatsResponse, UsersReadUsersData, UsersReadUsersResponse, UsersCreateUserData, UsersCreateUserResponse, UsersReadUserMeResponse, UsersDeleteUserMeResponse, UsersUpdateUserMeData, UsersUpdateUserMeResponse, UsersUpdatePasswordMeData, UsersUpdatePasswordMeResponse, UsersRegisterUserData, UsersRegisterUserResponse, UsersReadUserByIdData, UsersReadUserByIdResponse, UsersUpdateUserData, UsersUpdateUserResponse, UsersDeleteUserData, UsersDeleteUserResponse, UtilsTestEmailData, UtilsTestEmailResponse, UtilsHealthCheckResponse } from './types.gen';
 
 export class IngestionsService {
     /**
@@ -47,6 +47,30 @@ export class IngestionsService {
             query: {
                 skip: data.skip,
                 limit: data.limit
+            },
+            errors: {
+                422: 'Validation Error'
+            }
+        });
+    }
+    
+    /**
+     * Get Ingestion
+     * Get a single ingestion by ID.
+     *
+     * Returns ingestion details including presigned URL for PDF access.
+     * Only returns ingestions owned by the current user (403 if not owner).
+     * @param data The data for the request.
+     * @param data.id
+     * @returns IngestionPublic Successful Response
+     * @throws ApiError
+     */
+    public static getIngestion(data: IngestionsGetIngestionData): CancelablePromise<IngestionsGetIngestionResponse> {
+        return __request(OpenAPI, {
+            method: 'GET',
+            url: '/api/v1/ingestions/{id}',
+            path: {
+                id: data.id
             },
             errors: {
                 422: 'Validation Error'
