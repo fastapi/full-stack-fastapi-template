@@ -11,7 +11,7 @@ import {
   VStack,
 } from "@chakra-ui/react"
 import { useEffect, useState } from "react"
-import { Document, Page, pdfjs } from "react-pdf"
+import { Document, Page } from "react-pdf"
 import {
   FiChevronLeft,
   FiChevronRight,
