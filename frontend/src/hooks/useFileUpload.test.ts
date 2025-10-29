@@ -6,7 +6,7 @@ import { useFileUpload } from "./useFileUpload"
 
 // Mock axios
 vi.mock("axios")
-const mockedAxios = vi.mocked(axios)
+const mockedAxios = vi.mocked(axios, true) // true for deep mocking
 
 describe("useFileUpload", () => {
   beforeEach(() => {
@@ -133,7 +133,6 @@ describe("useFileUpload", () => {
       const { result } = renderHook(() => useFileUpload())
 
       // Track progress updates
-      const _originalProgress = result.current.progress
       const uploadPromise = result.current.upload(mockFile)
 
       // Simulate rapid progress events (every 10ms)
