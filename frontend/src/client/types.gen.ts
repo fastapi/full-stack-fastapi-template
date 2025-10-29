@@ -49,6 +49,11 @@ export type IngestionPublic = {
     uploaded_at: string;
 };
 
+export type IngestionsPublic = {
+    data: Array<IngestionPublic>;
+    count: number;
+};
+
 export type Message = {
     message: string;
 };
@@ -126,6 +131,13 @@ export type IngestionsCreateIngestionData = {
 };
 
 export type IngestionsCreateIngestionResponse = (IngestionPublic);
+
+export type IngestionsReadIngestionsData = {
+    limit?: number;
+    skip?: number;
+};
+
+export type IngestionsReadIngestionsResponse = (IngestionsPublic);
 
 export type LoginLoginAccessTokenData = {
     formData: Body_login_login_access_token;

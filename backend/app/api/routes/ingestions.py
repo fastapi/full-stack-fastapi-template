@@ -8,8 +8,9 @@ from typing import Any
 from fastapi import APIRouter, File, HTTPException, UploadFile
 from pypdf import PdfReader
 
+from app import crud
 from app.api.deps import CurrentUser, SessionDep
-from app.models import Ingestion, IngestionPublic
+from app.models import Ingestion, IngestionPublic, IngestionsPublic
 from app.services.storage import generate_presigned_url, upload_to_supabase
 
 router = APIRouter(prefix="/ingestions", tags=["ingestions"])
@@ -118,3 +119,23 @@ async def create_ingestion(
         )
 
     return ingestion
+
+
+@router.get("/", response_model=IngestionsPublic)
+def read_ingestions(
+    *,
+    session: SessionDep,
+    current_user: CurrentUser,
+    skip: int = 0,
+    limit: int = 100,
+) -> Any:
+    """
+    List user's uploaded PDF worksheets with pagination.
+
+    Returns paginated list of ingestions owned by the current user.
+    """
+    ingestions, count = crud.get_ingestions(
+        session=session, owner_id=current_user.id, skip=skip, limit=limit
+    )
+
+    return IngestionsPublic(data=ingestions, count=count)
