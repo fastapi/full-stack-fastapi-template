@@ -16,9 +16,9 @@ import { Route as RecoverPasswordRouteImport } from './routes/recover-password'
 import { Route as LoginRouteImport } from './routes/login'
 import { Route as LayoutRouteImport } from './routes/_layout'
 import { Route as LayoutIndexRouteImport } from './routes/_layout/index'
-import { Route as LayoutTestPdfviewerRouteImport } from './routes/_layout/test-pdfviewer'
 import { Route as LayoutSettingsRouteImport } from './routes/_layout/settings'
 import { Route as LayoutAdminRouteImport } from './routes/_layout/admin'
+import { Route as LayoutIngestionsIndexRouteImport } from './routes/_layout/ingestions/index'
 import { Route as LayoutIngestionsUploadRouteImport } from './routes/_layout/ingestions/upload'
 
 const TestPdfRoute = TestPdfRouteImport.update({
@@ -55,11 +55,6 @@ const LayoutIndexRoute = LayoutIndexRouteImport.update({
   path: '/',
   getParentRoute: () => LayoutRoute,
 } as any)
-const LayoutTestPdfviewerRoute = LayoutTestPdfviewerRouteImport.update({
-  id: '/test-pdfviewer',
-  path: '/test-pdfviewer',
-  getParentRoute: () => LayoutRoute,
-} as any)
 const LayoutSettingsRoute = LayoutSettingsRouteImport.update({
   id: '/settings',
   path: '/settings',
@@ -68,6 +63,11 @@ const LayoutSettingsRoute = LayoutSettingsRouteImport.update({
 const LayoutAdminRoute = LayoutAdminRouteImport.update({
   id: '/admin',
   path: '/admin',
+  getParentRoute: () => LayoutRoute,
+} as any)
+const LayoutIngestionsIndexRoute = LayoutIngestionsIndexRouteImport.update({
+  id: '/ingestions/',
+  path: '/ingestions/',
   getParentRoute: () => LayoutRoute,
 } as any)
 const LayoutIngestionsUploadRoute = LayoutIngestionsUploadRouteImport.update({
@@ -84,9 +84,9 @@ export interface FileRoutesByFullPath {
   '/test-pdf': typeof TestPdfRoute
   '/admin': typeof LayoutAdminRoute
   '/settings': typeof LayoutSettingsRoute
-  '/test-pdfviewer': typeof LayoutTestPdfviewerRoute
   '/': typeof LayoutIndexRoute
   '/ingestions/upload': typeof LayoutIngestionsUploadRoute
+  '/ingestions': typeof LayoutIngestionsIndexRoute
 }
 export interface FileRoutesByTo {
   '/login': typeof LoginRoute
@@ -96,9 +96,9 @@ export interface FileRoutesByTo {
   '/test-pdf': typeof TestPdfRoute
   '/admin': typeof LayoutAdminRoute
   '/settings': typeof LayoutSettingsRoute
-  '/test-pdfviewer': typeof LayoutTestPdfviewerRoute
   '/': typeof LayoutIndexRoute
   '/ingestions/upload': typeof LayoutIngestionsUploadRoute
+  '/ingestions': typeof LayoutIngestionsIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -110,9 +110,9 @@ export interface FileRoutesById {
   '/test-pdf': typeof TestPdfRoute
   '/_layout/admin': typeof LayoutAdminRoute
   '/_layout/settings': typeof LayoutSettingsRoute
-  '/_layout/test-pdfviewer': typeof LayoutTestPdfviewerRoute
   '/_layout/': typeof LayoutIndexRoute
   '/_layout/ingestions/upload': typeof LayoutIngestionsUploadRoute
+  '/_layout/ingestions/': typeof LayoutIngestionsIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -124,9 +124,9 @@ export interface FileRouteTypes {
     | '/test-pdf'
     | '/admin'
     | '/settings'
-    | '/test-pdfviewer'
     | '/'
     | '/ingestions/upload'
+    | '/ingestions'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/login'
@@ -136,9 +136,9 @@ export interface FileRouteTypes {
     | '/test-pdf'
     | '/admin'
     | '/settings'
-    | '/test-pdfviewer'
     | '/'
     | '/ingestions/upload'
+    | '/ingestions'
   id:
     | '__root__'
     | '/_layout'
@@ -149,9 +149,9 @@ export interface FileRouteTypes {
     | '/test-pdf'
     | '/_layout/admin'
     | '/_layout/settings'
-    | '/_layout/test-pdfviewer'
     | '/_layout/'
     | '/_layout/ingestions/upload'
+    | '/_layout/ingestions/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -214,13 +214,6 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof LayoutIndexRouteImport
       parentRoute: typeof LayoutRoute
     }
-    '/_layout/test-pdfviewer': {
-      id: '/_layout/test-pdfviewer'
-      path: '/test-pdfviewer'
-      fullPath: '/test-pdfviewer'
-      preLoaderRoute: typeof LayoutTestPdfviewerRouteImport
-      parentRoute: typeof LayoutRoute
-    }
     '/_layout/settings': {
       id: '/_layout/settings'
       path: '/settings'
@@ -233,6 +226,13 @@ declare module '@tanstack/react-router' {
       path: '/admin'
       fullPath: '/admin'
       preLoaderRoute: typeof LayoutAdminRouteImport
+      parentRoute: typeof LayoutRoute
+    }
+    '/_layout/ingestions/': {
+      id: '/_layout/ingestions/'
+      path: '/ingestions'
+      fullPath: '/ingestions'
+      preLoaderRoute: typeof LayoutIngestionsIndexRouteImport
       parentRoute: typeof LayoutRoute
     }
     '/_layout/ingestions/upload': {
@@ -248,17 +248,17 @@ declare module '@tanstack/react-router' {
 interface LayoutRouteChildren {
   LayoutAdminRoute: typeof LayoutAdminRoute
   LayoutSettingsRoute: typeof LayoutSettingsRoute
-  LayoutTestPdfviewerRoute: typeof LayoutTestPdfviewerRoute
   LayoutIndexRoute: typeof LayoutIndexRoute
   LayoutIngestionsUploadRoute: typeof LayoutIngestionsUploadRoute
+  LayoutIngestionsIndexRoute: typeof LayoutIngestionsIndexRoute
 }
 
 const LayoutRouteChildren: LayoutRouteChildren = {
   LayoutAdminRoute: LayoutAdminRoute,
   LayoutSettingsRoute: LayoutSettingsRoute,
-  LayoutTestPdfviewerRoute: LayoutTestPdfviewerRoute,
   LayoutIndexRoute: LayoutIndexRoute,
   LayoutIngestionsUploadRoute: LayoutIngestionsUploadRoute,
+  LayoutIngestionsIndexRoute: LayoutIngestionsIndexRoute,
 }
 
 const LayoutRouteWithChildren =

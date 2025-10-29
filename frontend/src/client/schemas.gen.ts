@@ -151,6 +151,25 @@ export const IngestionPublicSchema = {
     title: 'IngestionPublic'
 } as const;
 
+export const IngestionsPublicSchema = {
+    properties: {
+        data: {
+            items: {
+                '$ref': '#/components/schemas/IngestionPublic'
+            },
+            type: 'array',
+            title: 'Data'
+        },
+        count: {
+            type: 'integer',
+            title: 'Count'
+        }
+    },
+    type: 'object',
+    required: ['data', 'count'],
+    title: 'IngestionsPublic'
+} as const;
+
 export const MessageSchema = {
     properties: {
         message: {

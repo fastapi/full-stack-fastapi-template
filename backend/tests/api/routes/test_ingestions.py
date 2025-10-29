@@ -3,10 +3,20 @@
 from io import BytesIO
 from unittest.mock import MagicMock, patch
 
+import pytest
 from fastapi.testclient import TestClient
-from sqlmodel import Session, select
+from sqlmodel import Session, delete, select
 
 from app.models import Ingestion
+
+
+@pytest.fixture
+def clean_ingestions(db: Session) -> None:
+    """Clean up all ingestions before running GET endpoint tests."""
+    # Delete all ingestions from previous tests
+    statement = delete(Ingestion)
+    db.exec(statement)
+    db.commit()
 
 
 def test_create_ingestion_success(
@@ -161,3 +171,169 @@ def test_create_ingestion_corrupted_pdf(
     data = response.json()
     # page_count might be None if extraction failed gracefully
     assert data["page_count"] is None or isinstance(data["page_count"], int)
+
+
+# GET /api/v1/ingestions/ - List ingestions
+
+
+def test_read_ingestions_empty(
+    client: TestClient, normal_user_token_headers: dict[str, str], clean_ingestions: None
+) -> None:
+    """Test listing ingestions when user has no uploads."""
+    response = client.get(
+        "/api/v1/ingestions/",
+        headers=normal_user_token_headers,
+    )
+
+    assert response.status_code == 200
+    data = response.json()
+    assert data["data"] == []
+    assert data["count"] == 0
+
+
+def test_read_ingestions_with_data(
+    client: TestClient, normal_user_token_headers: dict[str, str], db: Session, clean_ingestions: None
+) -> None:
+    """Test listing ingestions returns user's uploads."""
+    # Create test ingestions via POST endpoint
+    pdf_content = b'%PDF-1.4\n%\xe2\xe3\xcf\xd3\n1 0 obj<</Pages 2 0 R>>endobj trailer<</Root 1 0 R>>'
+
+    with patch('app.api.routes.ingestions.upload_to_supabase') as mock_upload, \
+         patch('app.api.routes.ingestions.generate_presigned_url') as mock_url:
+
+        mock_upload.return_value = "test-path"
+        mock_url.return_value = "https://example.com/test"
+
+        # Create 3 ingestions
+        for i in range(3):
+            client.post(
+                "/api/v1/ingestions",
+                headers=normal_user_token_headers,
+                files={"file": (f"test{i}.pdf", BytesIO(pdf_content), "application/pdf")}
+            )
+
+    # List ingestions
+    response = client.get(
+        "/api/v1/ingestions/",
+        headers=normal_user_token_headers,
+    )
+
+    assert response.status_code == 200
+    data = response.json()
+    assert len(data["data"]) == 3
+    assert data["count"] == 3
+    assert all(ing["filename"] in ["test0.pdf", "test1.pdf", "test2.pdf"] for ing in data["data"])
+
+
+def test_read_ingestions_pagination(
+    client: TestClient, normal_user_token_headers: dict[str, str], clean_ingestions: None
+) -> None:
+    """Test listing ingestions with pagination."""
+    pdf_content = b'%PDF-1.4\n%\xe2\xe3\xcf\xd3\n'
+
+    with patch('app.api.routes.ingestions.upload_to_supabase') as mock_upload, \
+         patch('app.api.routes.ingestions.generate_presigned_url') as mock_url:
+
+        mock_upload.return_value = "test-path"
+        mock_url.return_value = "https://example.com/test"
+
+        # Create 5 ingestions
+        for i in range(5):
+            client.post(
+                "/api/v1/ingestions",
+                headers=normal_user_token_headers,
+                files={"file": (f"test{i}.pdf", BytesIO(pdf_content), "application/pdf")}
+            )
+
+    # Get first page (2 items)
+    response = client.get(
+        "/api/v1/ingestions/?skip=0&limit=2",
+        headers=normal_user_token_headers,
+    )
+
+    assert response.status_code == 200
+    data = response.json()
+    assert len(data["data"]) == 2
+    assert data["count"] == 5
+
+    # Get second page (2 items)
+    response = client.get(
+        "/api/v1/ingestions/?skip=2&limit=2",
+        headers=normal_user_token_headers,
+    )
+
+    assert response.status_code == 200
+    data = response.json()
+    assert len(data["data"]) == 2
+    assert data["count"] == 5
+
+    # Get third page (1 item)
+    response = client.get(
+        "/api/v1/ingestions/?skip=4&limit=2",
+        headers=normal_user_token_headers,
+    )
+
+    assert response.status_code == 200
+    data = response.json()
+    assert len(data["data"]) == 1
+    assert data["count"] == 5
+
+
+def test_read_ingestions_unauthorized(
+    client: TestClient
+) -> None:
+    """Test that listing ingestions requires authentication."""
+    response = client.get("/api/v1/ingestions/")
+
+    assert response.status_code == 401
+
+
+def test_read_ingestions_filters_by_owner(
+    client: TestClient,
+    normal_user_token_headers: dict[str, str],
+    superuser_token_headers: dict[str, str],
+    clean_ingestions: None
+) -> None:
+    """Test that users only see their own ingestions (RLS)."""
+    pdf_content = b'%PDF-1.4\n%\xe2\xe3\xcf\xd3\n'
+
+    with patch('app.api.routes.ingestions.upload_to_supabase') as mock_upload, \
+         patch('app.api.routes.ingestions.generate_presigned_url') as mock_url:
+
+        mock_upload.return_value = "test-path"
+        mock_url.return_value = "https://example.com/test"
+
+        # Normal user creates 2 ingestions
+        for i in range(2):
+            client.post(
+                "/api/v1/ingestions",
+                headers=normal_user_token_headers,
+                files={"file": (f"normal{i}.pdf", BytesIO(pdf_content), "application/pdf")}
+            )
+
+        # Superuser creates 1 ingestion
+        client.post(
+            "/api/v1/ingestions",
+            headers=superuser_token_headers,
+            files={"file": ("super.pdf", BytesIO(pdf_content), "application/pdf")}
+        )
+
+    # Normal user should only see their 2 ingestions
+    response = client.get(
+        "/api/v1/ingestions/",
+        headers=normal_user_token_headers,
+    )
+    assert response.status_code == 200
+    data = response.json()
+    assert len(data["data"]) == 2
+    assert data["count"] == 2
+
+    # Superuser should only see their 1 ingestion
+    response = client.get(
+        "/api/v1/ingestions/",
+        headers=superuser_token_headers,
+    )
+    assert response.status_code == 200
+    data = response.json()
+    assert len(data["data"]) == 1
+    assert data["count"] == 1
