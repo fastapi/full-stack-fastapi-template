@@ -7,9 +7,16 @@ import {
 import { createRouter, RouterProvider } from "@tanstack/react-router"
 import { StrictMode } from "react"
 import ReactDOM from "react-dom/client"
+import { pdfjs } from "react-pdf"
 import { ApiError, OpenAPI } from "./client"
 import { CustomProvider } from "./components/ui/provider"
 import { routeTree } from "./routeTree.gen"
+
+// Configure PDF.js worker (CDN for v1 - reduces bundle by ~500KB)
+pdfjs.GlobalWorkerOptions.workerSrc = `https://unpkg.com/pdfjs-dist@${pdfjs.version}/build/pdf.worker.min.mjs`
+console.log(
+  `INFO: PDF.js worker configured from CDN: ${pdfjs.GlobalWorkerOptions.workerSrc}`,
+)
 
 OpenAPI.BASE = import.meta.env.VITE_API_URL
 OpenAPI.TOKEN = async () => {
