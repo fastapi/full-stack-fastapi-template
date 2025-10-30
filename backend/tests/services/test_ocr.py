@@ -2,7 +2,6 @@
 
 import uuid
 from datetime import datetime
-from unittest.mock import Mock
 
 import httpx
 import pytest
@@ -85,7 +84,7 @@ class TestMistralOCRProvider:
             # Verify content block
             block = page.blocks[0]
             assert block.text == "Solve for x: 2x + 5 = 15"
-            assert block.block_type == "text"
+            assert block.block_type == "paragraph"  # "text" type maps to "paragraph"
             assert block.confidence == 0.98
             assert block.bbox.x == 100
             assert block.bbox.y == 200
@@ -360,3 +359,422 @@ class TestOCRResult:
         assert result.ocr_provider == "mistral"
         assert result.total_pages == 1
         assert result.metadata["cost_usd"] == 0.01
+
+
+class TestSemanticBlockExtraction:
+    """Test semantic block extraction features for question segmentation."""
+
+    @pytest.mark.asyncio
+    async def test_semantic_block_type_classification(self):
+        """Test that blocks are correctly classified with semantic types."""
+
+        def mock_handler(request: httpx.Request) -> httpx.Response:
+            return httpx.Response(
+                status_code=200,
+                json={
+                    "pages": [
+                        {
+                            "page_number": 1,
+                            "text_blocks": [
+                                {
+                                    "text": "Question 1",
+                                    "type": "heading",
+                                    "bbox": {
+                                        "x": 50,
+                                        "y": 100,
+                                        "width": 200,
+                                        "height": 30,
+                                    },
+                                    "confidence": 0.99,
+                                },
+                                {
+                                    "text": "Round 3.456 to 1 decimal place.",
+                                    "type": "text",
+                                    "bbox": {
+                                        "x": 50,
+                                        "y": 140,
+                                        "width": 500,
+                                        "height": 50,
+                                    },
+                                    "confidence": 0.97,
+                                },
+                                {
+                                    "text": "$$\\frac{3x + 2}{5} = 7$$",
+                                    "type": "equation",
+                                    "latex": "\\frac{3x + 2}{5} = 7",
+                                    "bbox": {
+                                        "x": 50,
+                                        "y": 200,
+                                        "width": 200,
+                                        "height": 40,
+                                    },
+                                    "confidence": 0.95,
+                                },
+                            ],
+                            "tables": [],
+                            "images": [],
+                        }
+                    ]
+                },
+            )
+
+        transport = httpx.MockTransport(mock_handler)
+        async with httpx.AsyncClient(transport=transport) as client:
+            provider = MistralOCRProvider(api_key="test-key")
+            provider.client = client
+
+            result = await provider.extract_text(b"%PDF-1.4 content")
+
+            # Verify semantic block types are correctly mapped
+            blocks = result.pages[0].blocks
+            assert len(blocks) == 3
+
+            # Check header block (heading → header)
+            header_block = blocks[0]
+            assert header_block.block_type == "header"
+            assert header_block.text == "Question 1"
+
+            # Check paragraph block (text → paragraph)
+            paragraph_block = blocks[1]
+            assert paragraph_block.block_type == "paragraph"
+            assert "Round 3.456" in paragraph_block.text
+
+            # Check equation block
+            equation_block = blocks[2]
+            assert equation_block.block_type == "equation"
+            assert equation_block.latex == "\\frac{3x + 2}{5} = 7"
+
+    @pytest.mark.asyncio
+    async def test_table_structure_extraction_with_cells(self):
+        """Test table extraction with cell-level row/column detail."""
+
+        def mock_handler(request: httpx.Request) -> httpx.Response:
+            return httpx.Response(
+                status_code=200,
+                json={
+                    "pages": [
+                        {
+                            "page_number": 1,
+                            "text_blocks": [],
+                            "tables": [
+                                {
+                                    "bbox": {
+                                        "x": 50,
+                                        "y": 200,
+                                        "width": 300,
+                                        "height": 100,
+                                    },
+                                    "rows": 4,
+                                    "columns": 2,
+                                    "cells": [
+                                        {
+                                            "row": 0,
+                                            "col": 0,
+                                            "text": "A.",
+                                            "bbox": {
+                                                "x": 50,
+                                                "y": 200,
+                                                "width": 50,
+                                                "height": 25,
+                                            },
+                                        },
+                                        {
+                                            "row": 0,
+                                            "col": 1,
+                                            "text": "3.4",
+                                            "bbox": {
+                                                "x": 100,
+                                                "y": 200,
+                                                "width": 100,
+                                                "height": 25,
+                                            },
+                                        },
+                                        {
+                                            "row": 1,
+                                            "col": 0,
+                                            "text": "B.",
+                                            "bbox": {
+                                                "x": 50,
+                                                "y": 225,
+                                                "width": 50,
+                                                "height": 25,
+                                            },
+                                        },
+                                        {
+                                            "row": 1,
+                                            "col": 1,
+                                            "text": "3.5",
+                                            "bbox": {
+                                                "x": 100,
+                                                "y": 225,
+                                                "width": 100,
+                                                "height": 25,
+                                            },
+                                        },
+                                    ],
+                                }
+                            ],
+                            "images": [],
+                        }
+                    ]
+                },
+            )
+
+        transport = httpx.MockTransport(mock_handler)
+        async with httpx.AsyncClient(transport=transport) as client:
+            provider = MistralOCRProvider(api_key="test-key")
+            provider.client = client
+
+            result = await provider.extract_text(b"%PDF-1.4 content")
+
+            # Find table block
+            table_block = next(
+                (b for b in result.pages[0].blocks if b.block_type == "table"), None
+            )
+            assert table_block is not None
+
+            # Verify table structure with cell-level detail
+            table_struct = table_block.table_structure
+            assert table_struct is not None
+            assert table_struct["rows"] == 4
+            assert table_struct["columns"] == 2
+            assert len(table_struct["cells"]) == 4
+
+            # Verify cell data with row/column positions
+            cell_a = table_struct["cells"][0]
+            assert cell_a["row"] == 0
+            assert cell_a["col"] == 0
+            assert cell_a["text"] == "A."
+
+            cell_b = table_struct["cells"][2]
+            assert cell_b["row"] == 1
+            assert cell_b["col"] == 0
+            assert cell_b["text"] == "B."
+
+    @pytest.mark.asyncio
+    async def test_hierarchical_structure_preservation(self):
+        """Test that hierarchical structure (parent-child) is preserved."""
+
+        def mock_handler(request: httpx.Request) -> httpx.Response:
+            return httpx.Response(
+                status_code=200,
+                json={
+                    "pages": [
+                        {
+                            "page_number": 1,
+                            "text_blocks": [
+                                {
+                                    "text": "Question 1",
+                                    "type": "heading",
+                                    "bbox": {
+                                        "x": 50,
+                                        "y": 100,
+                                        "width": 200,
+                                        "height": 30,
+                                    },
+                                    "confidence": 0.99,
+                                    "level": 0,
+                                },
+                                {
+                                    "text": "(a) Find the value of x",
+                                    "type": "list",
+                                    "bbox": {
+                                        "x": 70,
+                                        "y": 140,
+                                        "width": 400,
+                                        "height": 30,
+                                    },
+                                    "confidence": 0.97,
+                                    "level": 1,
+                                },
+                                {
+                                    "text": "(b) Calculate the area",
+                                    "type": "list",
+                                    "bbox": {
+                                        "x": 70,
+                                        "y": 180,
+                                        "width": 400,
+                                        "height": 30,
+                                    },
+                                    "confidence": 0.97,
+                                    "level": 1,
+                                },
+                            ],
+                            "tables": [],
+                            "images": [],
+                        }
+                    ]
+                },
+            )
+
+        transport = httpx.MockTransport(mock_handler)
+        async with httpx.AsyncClient(transport=transport) as client:
+            provider = MistralOCRProvider(api_key="test-key")
+            provider.client = client
+
+            result = await provider.extract_text(b"%PDF-1.4 content")
+
+            blocks = result.pages[0].blocks
+            assert len(blocks) == 3
+
+            # Verify hierarchy levels are captured
+            header_block = blocks[0]
+            assert header_block.hierarchy_level == 0
+            assert header_block.parent_block_id is None
+
+            # Verify child blocks have parent references
+            part_a = blocks[1]
+            assert part_a.hierarchy_level == 1
+            assert part_a.parent_block_id == header_block.block_id
+
+            part_b = blocks[2]
+            assert part_b.hierarchy_level == 1
+            assert part_b.parent_block_id == header_block.block_id
+
+    @pytest.mark.asyncio
+    async def test_markdown_content_preservation(self):
+        """Test that Mistral's Markdown output is preserved in blocks."""
+
+        def mock_handler(request: httpx.Request) -> httpx.Response:
+            return httpx.Response(
+                status_code=200,
+                json={
+                    "pages": [
+                        {
+                            "page_number": 1,
+                            "text_blocks": [
+                                {
+                                    "text": "Question 1",
+                                    "type": "heading",
+                                    "bbox": {
+                                        "x": 50,
+                                        "y": 100,
+                                        "width": 200,
+                                        "height": 30,
+                                    },
+                                    "confidence": 0.99,
+                                    "markdown": "# Question 1",
+                                },
+                                {
+                                    "text": "Solve the equation",
+                                    "type": "text",
+                                    "bbox": {
+                                        "x": 50,
+                                        "y": 140,
+                                        "width": 300,
+                                        "height": 30,
+                                    },
+                                    "confidence": 0.97,
+                                    "markdown": "Solve the equation",
+                                },
+                            ],
+                            "tables": [],
+                            "images": [],
+                        }
+                    ]
+                },
+            )
+
+        transport = httpx.MockTransport(mock_handler)
+        async with httpx.AsyncClient(transport=transport) as client:
+            provider = MistralOCRProvider(api_key="test-key")
+            provider.client = client
+
+            result = await provider.extract_text(b"%PDF-1.4 content")
+
+            blocks = result.pages[0].blocks
+
+            # Verify markdown content is preserved
+            header_block = blocks[0]
+            assert header_block.markdown_content == "# Question 1"
+
+            text_block = blocks[1]
+            assert text_block.markdown_content == "Solve the equation"
+
+    @pytest.mark.asyncio
+    async def test_raw_mistral_response_storage(self):
+        """Test that raw Mistral API response is stored for debugging."""
+
+        def mock_handler(request: httpx.Request) -> httpx.Response:
+            return httpx.Response(
+                status_code=200,
+                json={
+                    "pages": [
+                        {
+                            "page_number": 1,
+                            "text_blocks": [
+                                {
+                                    "text": "Sample text",
+                                    "type": "text",
+                                    "bbox": {
+                                        "x": 100,
+                                        "y": 200,
+                                        "width": 300,
+                                        "height": 50,
+                                    },
+                                    "confidence": 0.98,
+                                }
+                            ],
+                            "tables": [],
+                            "images": [],
+                        }
+                    ],
+                    "metadata": {"model": "mistral-ocr-v1", "api_version": "2025-01"},
+                },
+            )
+
+        transport = httpx.MockTransport(mock_handler)
+        async with httpx.AsyncClient(transport=transport) as client:
+            provider = MistralOCRProvider(api_key="test-key")
+            provider.client = client
+
+            result = await provider.extract_text(b"%PDF-1.4 content")
+
+            # Verify raw response is stored
+            assert result.raw_mistral_response is not None
+            assert "pages" in result.raw_mistral_response
+            assert "metadata" in result.raw_mistral_response
+            assert result.raw_mistral_response["metadata"]["model"] == "mistral-ocr-v1"
+
+    @pytest.mark.asyncio
+    async def test_missing_block_type_defaults_to_text(self):
+        """Test that blocks without type default to 'text' with warning."""
+
+        def mock_handler(request: httpx.Request) -> httpx.Response:
+            return httpx.Response(
+                status_code=200,
+                json={
+                    "pages": [
+                        {
+                            "page_number": 1,
+                            "text_blocks": [
+                                {
+                                    "text": "Unknown block",
+                                    # Missing "type" field
+                                    "bbox": {
+                                        "x": 100,
+                                        "y": 200,
+                                        "width": 300,
+                                        "height": 50,
+                                    },
+                                    "confidence": 0.90,
+                                }
+                            ],
+                            "tables": [],
+                            "images": [],
+                        }
+                    ]
+                },
+            )
+
+        transport = httpx.MockTransport(mock_handler)
+        async with httpx.AsyncClient(transport=transport) as client:
+            provider = MistralOCRProvider(api_key="test-key")
+            provider.client = client
+
+            result = await provider.extract_text(b"%PDF-1.4 content")
+
+            # Verify missing type defaults to "text"
+            block = result.pages[0].blocks[0]
+            assert block.block_type == "text"
+            assert block.text == "Unknown block"

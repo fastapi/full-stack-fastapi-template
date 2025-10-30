@@ -35,7 +35,8 @@ class ContentBlock(BaseModel):
 
     block_id: str = Field(..., description="Unique identifier for this content block")
     block_type: str = Field(
-        ..., description="Type of content: text, equation, table, image, header"
+        ...,
+        description="Type of content: text, equation, table, image, header, paragraph, list",
     )
     text: str = Field(..., description="Extracted text content")
     bbox: BoundingBox = Field(..., description="Bounding box coordinates")
@@ -46,6 +47,16 @@ class ContentBlock(BaseModel):
     )
     image_description: str | None = Field(
         None, description="Description of image content"
+    )
+    # NEW: Fields for semantic block extraction and question segmentation
+    markdown_content: str | None = Field(
+        None, description="Markdown representation from Mistral API"
+    )
+    hierarchy_level: int | None = Field(
+        None, description="Nesting depth (0 = top level)"
+    )
+    parent_block_id: str | None = Field(
+        None, description="Parent block ID for nested structures"
     )
 
 
@@ -79,6 +90,10 @@ class OCRResult(BaseModel):
         default_factory=dict,
         description="Additional metadata (cost, avg confidence, etc.)",
     )
+    # NEW: Store raw Mistral response for debugging and future re-processing
+    raw_mistral_response: dict[str, Any] | None = Field(
+        None, description="Original Mistral API response"
+    )
 
 
 class MistralOCRProvider:
@@ -103,6 +118,52 @@ class MistralOCRProvider:
             },
             timeout=httpx.Timeout(60.0),
         )
+
+    def _map_block_type(self, mistral_type: str) -> str:
+        """Map Mistral's block type to semantic types for segmentation.
+
+        Args:
+            mistral_type: Block type from Mistral API (e.g., "heading", "text")
+
+        Returns:
+            Semantic block type (e.g., "header", "paragraph")
+        """
+        mapping = {
+            "heading": "header",
+            "text": "paragraph",
+            "equation": "equation",
+            "table": "table",
+            "image": "image",
+            "list": "list",
+        }
+        return mapping.get(mistral_type, "text")  # Default to "text" if unknown
+
+    def _build_hierarchy(self, blocks: list[ContentBlock]) -> list[ContentBlock]:
+        """Build hierarchical parent-child relationships between blocks.
+
+        Args:
+            blocks: List of content blocks with hierarchy_level set
+
+        Returns:
+            Same list with parent_block_id populated
+        """
+        parent_stack: list[ContentBlock] = []
+
+        for block in blocks:
+            level = block.hierarchy_level or 0
+
+            # Pop stack until we find the parent level
+            while parent_stack and (parent_stack[-1].hierarchy_level or 0) >= level:
+                parent_stack.pop()
+
+            # Set parent_block_id if we have a parent
+            if parent_stack:
+                block.parent_block_id = parent_stack[-1].block_id
+
+            # Add current block to stack
+            parent_stack.append(block)
+
+        return blocks
 
     async def extract_text(self, pdf_bytes: bytes) -> OCRResult:
         """Extract text and layout from PDF bytes using Mistral OCR.
@@ -152,12 +213,21 @@ class MistralOCRProvider:
             for page_data in api_response.get("pages", []):
                 blocks = []
 
-                # Process text blocks
+                # Process text blocks with semantic type mapping
                 for text_block in page_data.get("text_blocks", []):
                     bbox_data = text_block["bbox"]
+                    mistral_type = text_block.get("type")
+
+                    # If no type provided, default to "text" (fallback/unknown type)
+                    # If type is provided, map to semantic type
+                    if mistral_type is None:
+                        block_type = "text"  # Default fallback
+                    else:
+                        block_type = self._map_block_type(mistral_type)
+
                     block = ContentBlock(
                         block_id=f"blk_{uuid.uuid4().hex[:8]}",
-                        block_type=text_block.get("type", "text"),
+                        block_type=block_type,
                         text=text_block["text"],
                         bbox=BoundingBox(
                             x=bbox_data["x"],
@@ -169,6 +239,10 @@ class MistralOCRProvider:
                         latex=text_block.get("latex"),
                         table_structure=None,
                         image_description=None,
+                        # NEW: Capture additional fields for segmentation
+                        markdown_content=text_block.get("markdown"),
+                        hierarchy_level=text_block.get("level"),
+                        parent_block_id=None,  # Will be set by _build_hierarchy
                     )
                     blocks.append(block)
 
@@ -193,6 +267,9 @@ class MistralOCRProvider:
                             "cells": table_data.get("cells", []),
                         },
                         image_description=None,
+                        markdown_content=None,
+                        hierarchy_level=None,
+                        parent_block_id=None,
                     )
                     blocks.append(block)
 
@@ -213,8 +290,14 @@ class MistralOCRProvider:
                         latex=None,
                         table_structure=None,
                         image_description=image_data.get("description"),
+                        markdown_content=None,
+                        hierarchy_level=None,
+                        parent_block_id=None,
                     )
                     blocks.append(block)
+
+                # Build hierarchy for blocks on this page
+                blocks = self._build_hierarchy(blocks)
 
                 page_result = OCRPageResult(
                     page_number=page_data["page_number"],
@@ -235,6 +318,7 @@ class MistralOCRProvider:
                     "cost_usd": 0.01 * len(pages),  # Placeholder cost
                     "average_confidence": 0.95,  # Placeholder
                 },
+                raw_mistral_response=api_response,  # Store raw API response
             )
 
         except httpx.HTTPStatusError as e:
