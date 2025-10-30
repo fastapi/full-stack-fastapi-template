@@ -13,7 +13,7 @@ jobs:
   test-backend:
     runs-on: ubuntu-latest
 
-    # PostgreSQL service container for production-parity testing
+    # PostgreSQL and Redis service containers for production-parity testing
     services:
       postgres:
         image: postgres:17
@@ -25,6 +25,15 @@ jobs:
           - 5432:5432
         options: >-
           --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+      redis:
+        image: redis:7-alpine
+        ports:
+          - 6379:6379
+        options: >-
+          --health-cmd "redis-cli ping"
           --health-interval 10s
           --health-timeout 5s
           --health-retries 5
@@ -69,33 +78,6 @@ jobs:
           SMTP_PASSWORD: ""
           EMAILS_FROM_EMAIL: noreply@test.example.com
           SENTRY_DSN: ""
-      # Start Redis for Celery tests (PostgreSQL is already available via service container)
-      - name: Start Redis
-        run: docker compose up -d redis
-        env:
-          REDIS_PASSWORD: test-redis-password
-          DOMAIN: test.example.com
-          FRONTEND_HOST: http://localhost:5173
-          STACK_NAME: curriculum-extractor-test
-          SECRET_KEY: test-secret-key
-          FIRST_SUPERUSER: admin@example.com
-          FIRST_SUPERUSER_PASSWORD: test-password
-          DATABASE_URL: postgresql+psycopg://postgres:password@localhost:5432/app
-          SUPABASE_URL: https://test.supabase.co
-          SUPABASE_SERVICE_KEY: test-service-key
-          REDIS_URL: redis://:test@redis:6379/0
-          CELERY_BROKER_URL: redis://:test@redis:6379/0
-          CELERY_RESULT_BACKEND: redis://:test@redis:6379/0
-          DOCKER_IMAGE_BACKEND: backend
-          DOCKER_IMAGE_FRONTEND: frontend
-          TAG: test
-          ENVIRONMENT: testing
-          BACKEND_CORS_ORIGINS: http://localhost:5173
-          SMTP_HOST: ""
-          SMTP_USER: ""
-          SMTP_PASSWORD: ""
-          EMAILS_FROM_EMAIL: noreply@test.example.com
-          SENTRY_DSN: ""
       - name: Run tests
         run: uv run bash scripts/test.sh "Coverage for ${{ github.sha }}"
         working-directory: backend
@@ -108,10 +90,10 @@ jobs:
           SUPABASE_URL: https://test.supabase.co
           SUPABASE_ANON_KEY: test-anon-key
           SUPABASE_SERVICE_KEY: test-service-key
-          REDIS_URL: redis://:test@localhost:6379/0
-          REDIS_PASSWORD: test-redis-password
-          CELERY_BROKER_URL: redis://:test@localhost:6379/0
-          CELERY_RESULT_BACKEND: redis://:test@localhost:6379/0
+          REDIS_URL: redis://localhost:6379/0
+          REDIS_PASSWORD: ""
+          CELERY_BROKER_URL: redis://localhost:6379/0
+          CELERY_RESULT_BACKEND: redis://localhost:6379/0
           SECRET_KEY: test-secret-key-for-ci
           FIRST_SUPERUSER: admin@example.com
           FIRST_SUPERUSER_PASSWORD: test-password

@@ -654,12 +654,19 @@ GitHub Actions runs on every push/PR:
 6. **test-docker-compose** - Smoke test (~4 min)
 
 **CI Environment**:
-- **Backend tests**: PostgreSQL 17 service container (unit/integration)
-- **E2E tests**: **Supabase local** (full Supabase stack including Auth, Storage, RLS)
-- **Redis**: Docker Compose service (for Celery tests)
+- **Backend tests**: PostgreSQL 17 + Redis 7 service containers (unit/integration)
+- **E2E tests**: PostgreSQL 17 + Redis 7 service containers + Supabase local (full stack)
+- **Redis**: Service container (not docker compose) - exposes port 6379 to host for test access
 - **Celery**: Eager mode for unit tests, real worker for E2E
 - **Frontend**: Node.js with Vitest + Playwright
 - **Coverage**: Artifacts uploaded for review
+
+**Why Redis Service Container?**
+- ✅ Exposes port to host machine (tests run on host, not in Docker)
+- ✅ Consistent with PostgreSQL setup (both service containers)
+- ✅ Faster startup than docker compose
+- ✅ No authentication needed in test environment
+- ❌ Docker compose Redis doesn't expose ports to host → connection failures
 
 ### Why Supabase Local for E2E Tests?
 
