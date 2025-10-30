@@ -12,6 +12,7 @@ from app import crud
 from app.api.deps import CurrentUser, SessionDep
 from app.models import Ingestion, IngestionPublic, IngestionsPublic
 from app.services.storage import generate_presigned_url, upload_to_supabase
+from app.tasks.extraction import process_ocr_task
 
 router = APIRouter(prefix="/ingestions", tags=["ingestions"])
 
@@ -110,6 +111,11 @@ async def create_ingestion(
         session.commit()
         session.refresh(ingestion)
         logger.info(f"Created extraction record: {ingestion.id}")
+
+        # Trigger asynchronous OCR processing
+        task = process_ocr_task.delay(str(ingestion.id))
+        logger.info(f"Triggered OCR task {task.id} for ingestion {ingestion.id}")
+
     except Exception as e:
         logger.error(f"Database error: {e}")
         # TODO: Ideally should cleanup uploaded file from Supabase here

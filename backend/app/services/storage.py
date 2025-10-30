@@ -172,6 +172,64 @@ def upload_to_supabase(
             ) from e
 
 
+@retry(
+    stop=stop_after_attempt(3),
+    wait=wait_random_exponential(multiplier=1, min=1, max=10),
+    reraise=True,
+)
+def download_from_storage(storage_path: str) -> bytes:
+    """
+    Download file from Supabase Storage with retry logic.
+
+    Args:
+        storage_path: Storage path in Supabase
+
+    Returns:
+        File content as bytes
+
+    Raises:
+        ValueError: If storage path is invalid
+        StorageException: If download fails after retry attempts
+    """
+    # Validate storage path before attempting download
+    validate_storage_path(storage_path)
+
+    logger.info("Downloading file from Supabase Storage: path=%s", storage_path)
+
+    try:
+        supabase = get_supabase_client()
+
+        response: bytes = supabase.storage.from_(
+            settings.SUPABASE_STORAGE_BUCKET_WORKSHEETS
+        ).download(storage_path)
+
+        file_size_mb = len(response) / (1024 * 1024)
+        logger.info(
+            "Download successful: path=%s, size=%.2f MB", storage_path, file_size_mb
+        )
+
+        return response
+
+    except Exception as e:
+        error_msg = str(e)
+        logger.error("Download failed: path=%s, error=%s", storage_path, error_msg)
+
+        if "not found" in error_msg.lower():
+            raise StorageException(f"File not found at path: {storage_path}") from e
+        elif "bucket" in error_msg.lower() and "not found" in error_msg.lower():
+            raise StorageException(
+                f"Bucket '{settings.SUPABASE_STORAGE_BUCKET_WORKSHEETS}' not found"
+            ) from e
+        elif "timeout" in error_msg.lower():
+            raise TimeoutException(f"Download timed out: {error_msg}") from e
+        elif "credential" in error_msg.lower() or "auth" in error_msg.lower():
+            raise AuthException(f"Invalid Supabase credentials: {error_msg}") from e
+        else:
+            raise StorageException(
+                f"Supabase Storage download failed: {error_msg}"
+            ) from e
+
+
 def generate_presigned_url(
     storage_path: str,
     expiry_seconds: int = 604800,  # 7 days

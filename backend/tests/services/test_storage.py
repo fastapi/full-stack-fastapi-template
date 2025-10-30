@@ -254,7 +254,10 @@ class TestGeneratePresignedUrl:
                 path=storage_path, expires_in=604800
             )
 
-            assert url == "https://example.supabase.co/storage/v1/object/sign/worksheets/test-path?token=abc123"
+            assert (
+                url
+                == "https://example.supabase.co/storage/v1/object/sign/worksheets/test-path?token=abc123"
+            )
 
     @patch("app.services.storage.get_supabase_client")
     def test_generate_presigned_url_custom_expiry(self, mock_get_client):

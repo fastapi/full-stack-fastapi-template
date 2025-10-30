@@ -24,18 +24,19 @@ def test_create_ingestion_success(
 ) -> None:
     """Test successful PDF upload with valid file."""
     # Create a minimal valid PDF
-    pdf_content = b'%PDF-1.4\n%\xe2\xe3\xcf\xd3\n1 0 obj<</Pages 2 0 R>>endobj 2 0 obj<</Count 1/Kids[3 0 R]>>endobj 3 0 obj<</MediaBox[0 0 612 792]>>endobj trailer<</Root 1 0 R>>'
+    pdf_content = b"%PDF-1.4\n%\xe2\xe3\xcf\xd3\n1 0 obj<</Pages 2 0 R>>endobj 2 0 obj<</Count 1/Kids[3 0 R]>>endobj 3 0 obj<</MediaBox[0 0 612 792]>>endobj trailer<</Root 1 0 R>>"
 
-    with patch('app.api.routes.ingestions.upload_to_supabase') as mock_upload, \
-         patch('app.api.routes.ingestions.generate_presigned_url') as mock_url:
-
+    with (
+        patch("app.api.routes.ingestions.upload_to_supabase") as mock_upload,
+        patch("app.api.routes.ingestions.generate_presigned_url") as mock_url,
+    ):
         mock_upload.return_value = "test-user-id/test-uuid/original.pdf"
         mock_url.return_value = "https://example.supabase.co/storage/v1/object/sign/worksheets/test-user-id/test-uuid/original.pdf?token=test"
 
         response = client.post(
             "/api/v1/ingestions",
             headers=normal_user_token_headers,
-            files={"file": ("test.pdf", BytesIO(pdf_content), "application/pdf")}
+            files={"file": ("test.pdf", BytesIO(pdf_content), "application/pdf")},
         )
 
     assert response.status_code == 201
@@ -44,7 +45,9 @@ def test_create_ingestion_success(
     assert data["status"] == "UPLOADED"
     assert "presigned_url" in data
     assert data["file_size"] == len(pdf_content)
-    assert data["page_count"] is not None or data["page_count"] is None  # pypdf may succeed or fail
+    assert (
+        data["page_count"] is not None or data["page_count"] is None
+    )  # pypdf may succeed or fail
 
     # Verify ingestion record was created in database
     statement = select(Ingestion).where(Ingestion.id == data["id"])
@@ -62,7 +65,13 @@ def test_create_ingestion_invalid_mime_type(
     response = client.post(
         "/api/v1/ingestions",
         headers=normal_user_token_headers,
-        files={"file": ("test.docx", BytesIO(docx_content), "application/vnd.openxmlformats-officedocument.wordprocessingml.document")}
+        files={
+            "file": (
+                "test.docx",
+                BytesIO(docx_content),
+                "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+            )
+        },
     )
 
     assert response.status_code == 400
@@ -78,11 +87,14 @@ def test_create_ingestion_invalid_magic_number(
     response = client.post(
         "/api/v1/ingestions",
         headers=normal_user_token_headers,
-        files={"file": ("fake.pdf", BytesIO(fake_pdf_content), "application/pdf")}
+        files={"file": ("fake.pdf", BytesIO(fake_pdf_content), "application/pdf")},
     )
 
     assert response.status_code == 400
-    assert "Invalid PDF file" in response.json()["detail"] or "magic number" in response.json()["detail"].lower()
+    assert (
+        "Invalid PDF file" in response.json()["detail"]
+        or "magic number" in response.json()["detail"].lower()
+    )
 
 
 def test_create_ingestion_file_too_large(
@@ -90,12 +102,12 @@ def test_create_ingestion_file_too_large(
 ) -> None:
     """Test rejection of oversized files (>25MB)."""
     # Create a file larger than 25MB
-    large_content = b'%PDF-' + b'x' * (26 * 1024 * 1024)
+    large_content = b"%PDF-" + b"x" * (26 * 1024 * 1024)
 
     response = client.post(
         "/api/v1/ingestions",
         headers=normal_user_token_headers,
-        files={"file": ("large.pdf", BytesIO(large_content), "application/pdf")}
+        files={"file": ("large.pdf", BytesIO(large_content), "application/pdf")},
     )
 
     assert response.status_code == 400
@@ -114,15 +126,13 @@ def test_create_ingestion_missing_file(
     assert response.status_code == 422  # FastAPI validation error
 
 
-def test_create_ingestion_unauthorized(
-    client: TestClient
-) -> None:
+def test_create_ingestion_unauthorized(client: TestClient) -> None:
     """Test that upload requires authentication."""
-    pdf_content = b'%PDF-1.4\n'
+    pdf_content = b"%PDF-1.4\n"
 
     response = client.post(
         "/api/v1/ingestions",
-        files={"file": ("test.pdf", BytesIO(pdf_content), "application/pdf")}
+        files={"file": ("test.pdf", BytesIO(pdf_content), "application/pdf")},
     )
 
     assert response.status_code == 401
@@ -132,15 +142,15 @@ def test_create_ingestion_supabase_failure(
     client: TestClient, normal_user_token_headers: dict[str, str]
 ) -> None:
     """Test handling of Supabase upload failure."""
-    pdf_content = b'%PDF-1.4\n%\xe2\xe3\xcf\xd3\n'
+    pdf_content = b"%PDF-1.4\n%\xe2\xe3\xcf\xd3\n"
 
-    with patch('app.api.routes.ingestions.upload_to_supabase') as mock_upload:
+    with patch("app.api.routes.ingestions.upload_to_supabase") as mock_upload:
         mock_upload.side_effect = Exception("Supabase connection failed")
 
         response = client.post(
             "/api/v1/ingestions",
             headers=normal_user_token_headers,
-            files={"file": ("test.pdf", BytesIO(pdf_content), "application/pdf")}
+            files={"file": ("test.pdf", BytesIO(pdf_content), "application/pdf")},
         )
 
     assert response.status_code == 500
@@ -152,18 +162,21 @@ def test_create_ingestion_corrupted_pdf(
 ) -> None:
     """Test handling of corrupted PDF (metadata extraction fails but upload succeeds)."""
     # PDF with valid header but corrupted content
-    corrupted_pdf = b'%PDF-1.4\ncorrupted content that pypdf cannot parse'
+    corrupted_pdf = b"%PDF-1.4\ncorrupted content that pypdf cannot parse"
 
-    with patch('app.api.routes.ingestions.upload_to_supabase') as mock_upload, \
-         patch('app.api.routes.ingestions.generate_presigned_url') as mock_url:
-
+    with (
+        patch("app.api.routes.ingestions.upload_to_supabase") as mock_upload,
+        patch("app.api.routes.ingestions.generate_presigned_url") as mock_url,
+    ):
         mock_upload.return_value = "test-user-id/test-uuid/original.pdf"
         mock_url.return_value = "https://example.supabase.co/signed-url"
 
         response = client.post(
             "/api/v1/ingestions",
             headers=normal_user_token_headers,
-            files={"file": ("corrupted.pdf", BytesIO(corrupted_pdf), "application/pdf")}
+            files={
+                "file": ("corrupted.pdf", BytesIO(corrupted_pdf), "application/pdf")
+            },
         )
 
     # Should succeed but page_count may be NULL
@@ -177,7 +190,9 @@ def test_create_ingestion_corrupted_pdf(
 
 
 def test_read_ingestions_empty(
-    client: TestClient, normal_user_token_headers: dict[str, str], clean_ingestions: None
+    client: TestClient,
+    normal_user_token_headers: dict[str, str],
+    clean_ingestions: None,
 ) -> None:
     """Test listing ingestions when user has no uploads."""
     response = client.get(
@@ -192,15 +207,19 @@ def test_read_ingestions_empty(
 
 
 def test_read_ingestions_with_data(
-    client: TestClient, normal_user_token_headers: dict[str, str], db: Session, clean_ingestions: None
+    client: TestClient,
+    normal_user_token_headers: dict[str, str],
+    db: Session,
+    clean_ingestions: None,
 ) -> None:
     """Test listing ingestions returns user's uploads."""
     # Create test ingestions via POST endpoint
-    pdf_content = b'%PDF-1.4\n%\xe2\xe3\xcf\xd3\n1 0 obj<</Pages 2 0 R>>endobj trailer<</Root 1 0 R>>'
+    pdf_content = b"%PDF-1.4\n%\xe2\xe3\xcf\xd3\n1 0 obj<</Pages 2 0 R>>endobj trailer<</Root 1 0 R>>"
 
-    with patch('app.api.routes.ingestions.upload_to_supabase') as mock_upload, \
-         patch('app.api.routes.ingestions.generate_presigned_url') as mock_url:
-
+    with (
+        patch("app.api.routes.ingestions.upload_to_supabase") as mock_upload,
+        patch("app.api.routes.ingestions.generate_presigned_url") as mock_url,
+    ):
         mock_upload.return_value = "test-path"
         mock_url.return_value = "https://example.com/test"
 
@@ -209,7 +228,9 @@ def test_read_ingestions_with_data(
             client.post(
                 "/api/v1/ingestions",
                 headers=normal_user_token_headers,
-                files={"file": (f"test{i}.pdf", BytesIO(pdf_content), "application/pdf")}
+                files={
+                    "file": (f"test{i}.pdf", BytesIO(pdf_content), "application/pdf")
+                },
             )
 
     # List ingestions
@@ -222,18 +243,24 @@ def test_read_ingestions_with_data(
     data = response.json()
     assert len(data["data"]) == 3
     assert data["count"] == 3
-    assert all(ing["filename"] in ["test0.pdf", "test1.pdf", "test2.pdf"] for ing in data["data"])
+    assert all(
+        ing["filename"] in ["test0.pdf", "test1.pdf", "test2.pdf"]
+        for ing in data["data"]
+    )
 
 
 def test_read_ingestions_pagination(
-    client: TestClient, normal_user_token_headers: dict[str, str], clean_ingestions: None
+    client: TestClient,
+    normal_user_token_headers: dict[str, str],
+    clean_ingestions: None,
 ) -> None:
     """Test listing ingestions with pagination."""
-    pdf_content = b'%PDF-1.4\n%\xe2\xe3\xcf\xd3\n'
+    pdf_content = b"%PDF-1.4\n%\xe2\xe3\xcf\xd3\n"
 
-    with patch('app.api.routes.ingestions.upload_to_supabase') as mock_upload, \
-         patch('app.api.routes.ingestions.generate_presigned_url') as mock_url:
-
+    with (
+        patch("app.api.routes.ingestions.upload_to_supabase") as mock_upload,
+        patch("app.api.routes.ingestions.generate_presigned_url") as mock_url,
+    ):
         mock_upload.return_value = "test-path"
         mock_url.return_value = "https://example.com/test"
 
@@ -242,7 +269,9 @@ def test_read_ingestions_pagination(
             client.post(
                 "/api/v1/ingestions",
                 headers=normal_user_token_headers,
-                files={"file": (f"test{i}.pdf", BytesIO(pdf_content), "application/pdf")}
+                files={
+                    "file": (f"test{i}.pdf", BytesIO(pdf_content), "application/pdf")
+                },
             )
 
     # Get first page (2 items)
@@ -279,9 +308,7 @@ def test_read_ingestions_pagination(
     assert data["count"] == 5
 
 
-def test_read_ingestions_unauthorized(
-    client: TestClient
-) -> None:
+def test_read_ingestions_unauthorized(client: TestClient) -> None:
     """Test that listing ingestions requires authentication."""
     response = client.get("/api/v1/ingestions/")
 
@@ -292,14 +319,15 @@ def test_read_ingestions_filters_by_owner(
     client: TestClient,
     normal_user_token_headers: dict[str, str],
     superuser_token_headers: dict[str, str],
-    clean_ingestions: None
+    clean_ingestions: None,
 ) -> None:
     """Test that users only see their own ingestions (RLS)."""
-    pdf_content = b'%PDF-1.4\n%\xe2\xe3\xcf\xd3\n'
+    pdf_content = b"%PDF-1.4\n%\xe2\xe3\xcf\xd3\n"
 
-    with patch('app.api.routes.ingestions.upload_to_supabase') as mock_upload, \
-         patch('app.api.routes.ingestions.generate_presigned_url') as mock_url:
-
+    with (
+        patch("app.api.routes.ingestions.upload_to_supabase") as mock_upload,
+        patch("app.api.routes.ingestions.generate_presigned_url") as mock_url,
+    ):
         mock_upload.return_value = "test-path"
         mock_url.return_value = "https://example.com/test"
 
@@ -308,14 +336,16 @@ def test_read_ingestions_filters_by_owner(
             client.post(
                 "/api/v1/ingestions",
                 headers=normal_user_token_headers,
-                files={"file": (f"normal{i}.pdf", BytesIO(pdf_content), "application/pdf")}
+                files={
+                    "file": (f"normal{i}.pdf", BytesIO(pdf_content), "application/pdf")
+                },
             )
 
         # Superuser creates 1 ingestion
         client.post(
             "/api/v1/ingestions",
             headers=superuser_token_headers,
-            files={"file": ("super.pdf", BytesIO(pdf_content), "application/pdf")}
+            files={"file": ("super.pdf", BytesIO(pdf_content), "application/pdf")},
         )
 
     # Normal user should only see their 2 ingestions

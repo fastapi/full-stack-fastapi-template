@@ -81,6 +81,13 @@ class Settings(BaseSettings):
     CELERY_BROKER_URL: str
     CELERY_RESULT_BACKEND: str
 
+    # Mistral OCR Configuration
+    MISTRAL_API_KEY: str | None = None
+    OCR_PROVIDER: str = "mistral"
+    OCR_MAX_RETRIES: int = 3
+    OCR_RETRY_DELAY: int = 2  # seconds (exponential backoff base)
+    OCR_MAX_PAGES: int = 50  # reject documents >50 pages
+
     SMTP_TLS: bool = True
     SMTP_SSL: bool = False
     SMTP_PORT: int = 587
@@ -126,6 +133,16 @@ class Settings(BaseSettings):
             "FIRST_SUPERUSER_PASSWORD", self.FIRST_SUPERUSER_PASSWORD
         )
 
+        return self
+
+    @model_validator(mode="after")
+    def _validate_mistral_api_key(self) -> Self:
+        """Validate MISTRAL_API_KEY is set in production environments."""
+        if self.ENVIRONMENT in ["production", "staging"]:
+            if not self.MISTRAL_API_KEY:
+                raise ValueError(
+                    "MISTRAL_API_KEY must be set in production/staging environments"
+                )
         return self
 
     @model_validator(mode="after")

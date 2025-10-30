@@ -105,6 +105,23 @@ class IngestionBase(SQLModel):
     page_count: int | None = Field(default=None, description="Number of pages in PDF")
     mime_type: str = Field(max_length=100, description="MIME type (application/pdf)")
     status: ExtractionStatus = Field(default=ExtractionStatus.UPLOADED)
+    # OCR metadata fields
+    ocr_provider: str | None = Field(
+        default=None, max_length=50, description="OCR provider used (e.g., 'mistral')"
+    )
+    ocr_processed_at: datetime | None = Field(
+        default=None, description="Timestamp when OCR completed"
+    )
+    ocr_processing_time: float | None = Field(
+        default=None, description="OCR processing time in seconds"
+    )
+    ocr_cost: float | None = Field(default=None, description="OCR API cost in USD")
+    ocr_average_confidence: float | None = Field(
+        default=None, description="Average OCR confidence score (0.0-1.0)"
+    )
+    ocr_storage_path: str | None = Field(
+        default=None, max_length=500, description="Path to OCR output JSON in storage"
+    )
 
 
 # Properties to receive via API on creation (not used for file upload)
