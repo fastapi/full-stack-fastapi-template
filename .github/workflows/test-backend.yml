@@ -91,7 +91,7 @@ jobs:
           SUPABASE_ANON_KEY: test-anon-key
           SUPABASE_SERVICE_KEY: test-service-key
           REDIS_URL: redis://localhost:6379/0
-          REDIS_PASSWORD: ""
+          REDIS_PASSWORD: test-redis-password
           CELERY_BROKER_URL: redis://localhost:6379/0
           CELERY_RESULT_BACKEND: redis://localhost:6379/0
           SECRET_KEY: test-secret-key-for-ci
