@@ -2,3 +2,4 @@
 
 # Import all tasks here so Celery can discover them
 from app.tasks.default import *  # noqa
+from app.tasks.extraction import *  # noqa

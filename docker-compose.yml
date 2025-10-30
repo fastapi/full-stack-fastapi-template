@@ -40,6 +40,7 @@ services:
       - SUPABASE_URL=${SUPABASE_URL?Variable not set}
       - SUPABASE_SERVICE_KEY=${SUPABASE_SERVICE_KEY?Variable not set}
       - REDIS_URL=${REDIS_URL?Variable not set}
+      - MISTRAL_API_KEY=${MISTRAL_API_KEY}
       - SENTRY_DSN=${SENTRY_DSN}
 
   backend:
@@ -73,6 +74,7 @@ services:
       - REDIS_URL=${REDIS_URL?Variable not set}
       - CELERY_BROKER_URL=${CELERY_BROKER_URL?Variable not set}
       - CELERY_RESULT_BACKEND=${CELERY_RESULT_BACKEND?Variable not set}
+      - MISTRAL_API_KEY=${MISTRAL_API_KEY}
       - SENTRY_DSN=${SENTRY_DSN}
 
     healthcheck:
@@ -119,6 +121,7 @@ services:
       - REDIS_URL=${REDIS_URL?Variable not set}
       - CELERY_BROKER_URL=${CELERY_BROKER_URL?Variable not set}
       - CELERY_RESULT_BACKEND=${CELERY_RESULT_BACKEND?Variable not set}
+      - MISTRAL_API_KEY=${MISTRAL_API_KEY}
     build:
       context: ./backend
 
