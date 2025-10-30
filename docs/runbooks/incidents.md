@@ -153,6 +153,158 @@ docker compose exec backend python -c "from app.core.config import settings; pri
 3. Check email logs
 4. Verify `EMAILS_FROM_EMAIL` set
 
+### Database Tables Missing After Migration (P1 - Critical)
+
+**Date**: 2025-10-30
+**Severity**: P1 - Critical (Data Loss Risk)
+**Status**: Resolved with preventive measures implemented
+
+**Symptoms**:
+- All application tables (user, ingestions) missing from database
+- Only `alembic_version` table exists
+- Alembic reports latest migration version but schema doesn't match
+- Application fails with "relation does not exist" errors
+
+**Root Causes**:
+1. **Buggy Autogenerate Migration**: Alembic's autogenerate created a migration file with `CREATE TABLE` operations instead of `ALTER TABLE ADD COLUMN` operations for existing tables
+2. **Manual Version Stamping**: Someone ran `alembic stamp <revision>` instead of `alembic upgrade head`, updating the version number without applying the migration
+3. **Missing Safety Checks**: No validation in env.py to prevent CREATE TABLE on existing tables
+
+**Diagnosis:**
+```bash
+# Check current database state
+docker compose exec backend uv run alembic current
+
+# List tables in database (via Supabase MCP or direct SQL)
+mcp_supabase_list_tables(project_id="wijzypbstiigssjuiuvh", schemas=["public"])
+
+# Check alembic version table directly
+docker compose exec backend psql $DATABASE_URL -c "SELECT version_num FROM alembic_version;"
+
+# Inspect migration files for dangerous operations
+grep -r "op.create_table" backend/app/alembic/versions/
+
+# Compare database schema with models
+docker compose exec backend uv run alembic check
+```
+
+**Resolution Steps**:
+
+1. **Immediate Recovery** (if tables are missing):
+```bash
+# Reset alembic version to last known good state
+docker compose exec backend psql $DATABASE_URL -c "UPDATE alembic_version SET version_num = '<previous_revision>';"
+
+# Apply migrations properly
+docker compose exec backend uv run alembic upgrade head
+
+# Verify tables created
+docker compose exec backend uv run alembic current
+docker compose exec backend psql $DATABASE_URL -c "\dt"
+```
+
+2. **Enable RLS** (if using Supabase):
+```sql
+-- Enable RLS on all tables
+ALTER TABLE "user" ENABLE ROW LEVEL SECURITY;
+ALTER TABLE ingestions ENABLE ROW LEVEL SECURITY;
+
+-- Create service role policy
+CREATE POLICY "Service role has full access to ingestions" ON ingestions
+  FOR ALL USING (true) WITH CHECK (true);
+
+-- Verify with security advisors
+mcp_supabase_get_advisors(project_id="wijzypbstiigssjuiuvh", type="security")
+```
+
+3. **Delete Buggy Migration**:
+```bash
+# Identify the bad migration (look for CREATE TABLE on existing tables)
+# Delete it BEFORE creating a replacement
+rm backend/app/alembic/versions/<bad_revision>_*.py
+```
+
+4. **Create Proper Replacement Migration**:
+```bash
+# Create new migration manually (not autogenerate)
+docker compose exec backend uv run alembic revision -m "add_ocr_fields_to_ingestions"
+
+# Edit the migration to use ALTER TABLE operations:
+# ✅ CORRECT:
+# op.add_column('ingestions', sa.Column('ocr_provider', ...))
+#
+# ❌ WRONG:
+# op.create_table('ingestions', ...)
+```
+
+5. **Mark Migration as Applied** (if schema changes already exist):
+```bash
+# If you manually applied the schema changes, stamp the migration
+docker compose exec backend uv run alembic stamp <new_revision>
+
+# Verify
+docker compose exec backend uv run alembic current
+```
+
+**Preventive Measures Implemented**:
+
+1. **Enhanced env.py with Safety Hooks** (`backend/app/alembic/env.py`):
+   - Added `prevent_table_recreation()` rewriter to catch CREATE TABLE on existing tables
+   - Added `include_object()` filter to prevent autogenerate false positives
+   - Added `process_revision_directives()` to prevent empty migrations
+   - Added `compare_type=True` and `compare_server_default=True` for accuracy
+
+2. **Pre-commit Hooks** (`.pre-commit-config.yaml`):
+   - `alembic-check`: Runs `alembic check` to detect migration drift
+   - `alembic-migration-safety`: Validates migration files for dangerous operations
+
+3. **Migration Safety Checker** (`backend/scripts/check_migration_safety.py`):
+   - Detects CREATE TABLE operations (requires confirmation comment)
+   - Detects DROP TABLE/COLUMN operations (requires confirmation comment)
+   - Ensures migrations have both upgrade() and downgrade() functions
+   - Prevents empty migrations
+
+**Testing Preventive Measures**:
+```bash
+# Install pre-commit hooks
+cd /path/to/CurriculumExtractor
+pre-commit install
+
+# Test migration safety checker
+python backend/scripts/check_migration_safety.py
+
+# Test alembic check
+cd backend && uv run alembic check
+
+# Try creating a migration (should now prevent dangerous operations)
+cd backend && uv run alembic revision --autogenerate -m "test"
+```
+
+**Warning Signs to Watch For**:
+- ❌ Alembic reports version but tables missing
+- ❌ Migration files contain `op.create_table()` for existing tables
+- ❌ Someone used `alembic stamp` instead of `alembic upgrade`
+- ❌ Security advisors show missing RLS policies after migration
+- ❌ `alembic check` reports drift
+
+**When to Escalate**:
+- Immediately escalate if data loss suspected
+- Contact database admin if unable to recover tables
+- Notify tech lead if migrations are corrupted
+
+**Lessons Learned**:
+1. Never use `alembic stamp` unless you know exactly what you're doing
+2. Always review autogenerated migrations before applying
+3. Use `alembic check` regularly to detect drift
+4. Enable RLS immediately after table creation (Supabase)
+5. Keep migration files in version control - they are source of truth
+6. Use Alembic for team development, Supabase MCP only for debugging
+
+**Related Documentation**:
+- `@docs/getting-started/development.md#database-changes` - Migration workflows
+- `@CLAUDE.md#keeping-alembic-synchronized` - Sync guidelines
+- `@CLAUDE.md#supabase-mcp-commands` - MCP vs Alembic usage
+
 ## Escalation Path
 
 1. **On-call engineer** attempts resolution

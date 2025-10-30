@@ -33,6 +33,20 @@ repos:
         types: [text]
         files: ^frontend/
 
+      - id: alembic-check
+        name: alembic check (detect migration drift)
+        entry: bash -c 'cd backend && uv run alembic check'
+        language: system
+        pass_filenames: false
+        files: ^backend/app/(models\.py|alembic/versions/.*\.py)$
+
+      - id: alembic-migration-safety
+        name: alembic migration safety (prevent data loss)
+        entry: python backend/scripts/check_migration_safety.py
+        language: system
+        pass_filenames: false
+        files: ^backend/app/alembic/versions/.*\.py$
+
 ci:
   autofix_commit_msg: 🎨 [pre-commit.ci] Auto format from pre-commit.com hooks
   autoupdate_commit_msg: ⬆ [pre-commit.ci] pre-commit autoupdate
