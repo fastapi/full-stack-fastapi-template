@@ -108,10 +108,10 @@ jobs:
           SUPABASE_URL: https://test.supabase.co
           SUPABASE_ANON_KEY: test-anon-key
           SUPABASE_SERVICE_KEY: test-service-key
-          REDIS_URL: redis://:test@redis:6379/0
+          REDIS_URL: redis://:test@localhost:6379/0
           REDIS_PASSWORD: test-redis-password
-          CELERY_BROKER_URL: redis://:test@redis:6379/0
-          CELERY_RESULT_BACKEND: redis://:test@redis:6379/0
+          CELERY_BROKER_URL: redis://:test@localhost:6379/0
+          CELERY_RESULT_BACKEND: redis://:test@localhost:6379/0
           SECRET_KEY: test-secret-key-for-ci
           FIRST_SUPERUSER: admin@example.com
           FIRST_SUPERUSER_PASSWORD: test-password

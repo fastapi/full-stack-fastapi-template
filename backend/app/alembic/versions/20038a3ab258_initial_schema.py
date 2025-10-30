@@ -31,18 +31,63 @@ depends_on = None
 
 
 def upgrade():
-    """Baseline migration - no operations needed.
+    """Baseline migration - create initial schema.
 
-    The database already contains:
+    Creates:
     - user table (6 columns, RLS enabled)
     - ingestions table (16 columns including OCR fields, RLS enabled)
     """
-    pass
+    # Create user table
+    op.create_table(
+        'user',
+        sa.Column('id', sa.UUID(), nullable=False),
+        sa.Column('email', sqlmodel.sql.sqltypes.AutoString(length=255), nullable=False),
+        sa.Column('is_active', sa.Boolean(), nullable=False, server_default='true'),
+        sa.Column('is_superuser', sa.Boolean(), nullable=False, server_default='false'),
+        sa.Column('full_name', sqlmodel.sql.sqltypes.AutoString(length=255), nullable=True),
+        sa.Column('hashed_password', sqlmodel.sql.sqltypes.AutoString(), nullable=False),
+        sa.PrimaryKeyConstraint('id')
+    )
+    op.create_index('ix_user_email', 'user', ['email'], unique=True)
+
+    # Create ingestions table
+    op.create_table(
+        'ingestions',
+        sa.Column('id', sa.UUID(), nullable=False),
+        sa.Column('owner_id', sa.UUID(), nullable=False),
+        sa.Column('filename', sqlmodel.sql.sqltypes.AutoString(length=255), nullable=False),
+        sa.Column('file_size', sa.Integer(), nullable=False),
+        sa.Column('page_count', sa.Integer(), nullable=True),
+        sa.Column('mime_type', sqlmodel.sql.sqltypes.AutoString(length=100), nullable=False),
+        sa.Column('status', sqlmodel.sql.sqltypes.AutoString(), nullable=False, server_default='UPLOADED'),
+        sa.Column('presigned_url', sqlmodel.sql.sqltypes.AutoString(length=2048), nullable=False),
+        sa.Column('storage_path', sqlmodel.sql.sqltypes.AutoString(length=512), nullable=False),
+        sa.Column('uploaded_at', sa.DateTime(), nullable=False),
+        sa.Column('ocr_provider', sqlmodel.sql.sqltypes.AutoString(length=50), nullable=True),
+        sa.Column('ocr_processed_at', sa.DateTime(), nullable=True),
+        sa.Column('ocr_processing_time', sa.Float(), nullable=True),
+        sa.Column('ocr_cost', sa.Float(), nullable=True),
+        sa.Column('ocr_average_confidence', sa.Float(), nullable=True),
+        sa.Column('ocr_storage_path', sqlmodel.sql.sqltypes.AutoString(length=500), nullable=True),
+        sa.ForeignKeyConstraint(['owner_id'], ['user.id'], ondelete='CASCADE'),
+        sa.PrimaryKeyConstraint('id')
+    )
+    op.create_index('ix_ingestions_owner_id', 'ingestions', ['owner_id'], unique=False)
+    op.create_index('ix_ingestions_status', 'ingestions', ['status'], unique=False)
+    op.create_index('ix_ingestions_ocr_processed_at', 'ingestions', ['ocr_processed_at'], unique=False)
 
 
 def downgrade():
-    """Cannot downgrade from baseline migration.
+    """Downgrade from baseline migration.
 
-    This represents the initial state - there is nothing to downgrade to.
+    Drops all tables in reverse order (respecting foreign key constraints).
     """
-    pass
+    # Drop ingestions first (has foreign key to user)
+    op.drop_index('ix_ingestions_ocr_processed_at', table_name='ingestions')
+    op.drop_index('ix_ingestions_status', table_name='ingestions')
+    op.drop_index('ix_ingestions_owner_id', table_name='ingestions')
+    op.drop_table('ingestions')
+
+    # Drop user table
+    op.drop_index('ix_user_email', table_name='user')
+    op.drop_table('user')

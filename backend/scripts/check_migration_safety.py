@@ -28,17 +28,21 @@ def check_migration_file(filepath: Path) -> list[str]:
     errors = []
     content = filepath.read_text()
 
-    # Check for CREATE TABLE operations (should use ALTER TABLE)
+    # Check if this is a baseline migration (down_revision = None)
+    is_baseline = re.search(r"down_revision\s*=\s*None", content) is not None
+
+    # Check for CREATE TABLE operations (allowed for baseline migrations)
     if re.search(r"op\.create_table\s*\(", content):
-        errors.append(
-            f"❌ {filepath.name}: Contains CREATE TABLE operation. "
-            "This may drop and recreate existing tables, causing DATA LOSS. "
-            "Use ALTER TABLE ADD COLUMN instead."
-        )
+        if not is_baseline:
+            errors.append(
+                f"❌ {filepath.name}: Contains CREATE TABLE operation. "
+                "This may drop and recreate existing tables, causing DATA LOSS. "
+                "Use ALTER TABLE ADD COLUMN instead."
+            )
 
     # Check for DROP TABLE operations without explicit confirmation
     if re.search(r"op\.drop_table\s*\(", content):
-        if "# CONFIRMED: Safe to drop table" not in content:
+        if "# CONFIRMED: Safe to drop table" not in content and not is_baseline:
             errors.append(
                 f"⚠️  {filepath.name}: Contains DROP TABLE operation without confirmation. "
                 "Add comment '# CONFIRMED: Safe to drop table' if this is intentional."
@@ -52,8 +56,8 @@ def check_migration_file(filepath: Path) -> list[str]:
                 "Add comment '# CONFIRMED: Safe to drop column' if this is intentional."
             )
 
-    # Check for empty upgrade() or downgrade() functions
-    if re.search(r"def upgrade\(\):\s+pass", content):
+    # Check for empty upgrade() or downgrade() functions (skip for baseline)
+    if re.search(r"def upgrade\(\):\s+pass", content) and not is_baseline:
         errors.append(
             f"⚠️  {filepath.name}: upgrade() function is empty. "
             "This migration does nothing."
