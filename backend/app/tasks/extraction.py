@@ -12,7 +12,13 @@ from sqlmodel import Session
 from app.core.config import settings
 from app.core.db import engine
 from app.models import ExtractionStatus, Ingestion
-from app.services.ocr import MistralOCRProvider, OCRProviderError
+from app.services.ocr import (
+    MistralOCRProvider,
+    NonRetryableError,
+    OCRProviderError,
+    RateLimitError,
+    RetryableError,
+)
 from app.services.storage import download_from_storage
 from app.worker import celery_app
 
@@ -29,12 +35,20 @@ def get_db_context() -> Generator[Session, None, None]:
 @celery_app.task(
     bind=True,
     name="app.tasks.extraction.process_ocr",
-    max_retries=3,
-    time_limit=600,  # 10 minutes
+    autoretry_for=(RetryableError,),  # Auto-retry on transient errors
+    retry_backoff=True,  # Exponential backoff: 1s, 2s, 4s, 8s...
+    retry_backoff_max=600,  # Cap backoff at 10 minutes
+    retry_jitter=True,  # Add randomness to prevent thundering herd
+    retry_kwargs={"max_retries": 3},
+    time_limit=600,  # 10 minutes max per attempt
 )  # type: ignore[misc]
 def process_ocr_task(self: Any, ingestion_id: str) -> dict[str, Any]:
     """
     Process a PDF ingestion through OCR using Mistral AI.
+
+    Automatically retries on RetryableError (500, 502, 503, 504, 408) with
+    exponential backoff. Does NOT retry on NonRetryableError (400, 401, 403, 404).
+    Special handling for RateLimitError (429) to respect Retry-After header.
 
     Args:
         ingestion_id: UUID of the ingestion record
@@ -44,10 +58,13 @@ def process_ocr_task(self: Any, ingestion_id: str) -> dict[str, Any]:
 
     Raises:
         ValueError: If ingestion not found or invalid ID format
-        OCRProviderError: If OCR processing fails
-        Retry: If task should be retried (transient errors)
+        NonRetryableError: Permanent errors (auth, bad request)
+        RetryableError: Transient errors (after max retries exhausted)
+        RateLimitError: Rate limit errors (after max retries exhausted)
     """
-    logger.info(f"Starting OCR processing for ingestion: {ingestion_id}")
+    logger.info(
+        f"Starting OCR for {ingestion_id} (attempt {self.request.retries + 1})"
+    )
 
     # Validate ingestion_id format
     try:
@@ -95,8 +112,14 @@ def process_ocr_task(self: Any, ingestion_id: str) -> dict[str, Any]:
                 loop.close()
 
             logger.info(
-                f"[{ingestion_id}] OCR completed: {ocr_result.total_pages} pages, "
-                f"{ocr_result.processing_time_seconds:.2f}s"
+                f"[{ingestion_id}] OCR completed successfully",
+                extra={
+                    "ingestion_id": ingestion_id,
+                    "provider": ocr_result.ocr_provider,
+                    "total_pages": ocr_result.total_pages,
+                    "processing_time_seconds": ocr_result.processing_time_seconds,
+                    "retry_count": self.request.retries,
+                },
             )
 
             # Update ingestion status to OCR_COMPLETE
@@ -115,8 +138,37 @@ def process_ocr_task(self: Any, ingestion_id: str) -> dict[str, Any]:
                 "metadata": ocr_result.metadata,
             }
 
-    except OCRProviderError as e:
-        logger.error(f"[{ingestion_id}] OCR provider error: {str(e)}")
+    except RateLimitError as e:
+        # Special handling for 429 - respect Retry-After header
+        logger.warning(
+            f"[{ingestion_id}] Rate limited (429). "
+            f"Retry-After: {e.retry_after}s. Attempt {self.request.retries + 1}/3",
+            extra={
+                "ingestion_id": ingestion_id,
+                "error_type": "RateLimitError",
+                "status_code": 429,
+                "retry_after": e.retry_after,
+                "retry_count": self.request.retries,
+            },
+        )
+
+        if e.retry_after:
+            # Override default backoff with Retry-After value from API
+            raise self.retry(exc=e, countdown=e.retry_after)
+        else:
+            # Let autoretry_for handle it with exponential backoff
+            raise
+
+    except NonRetryableError as e:
+        # Don't retry - permanent errors (401, 400, 403, 404)
+        logger.error(
+            f"[{ingestion_id}] Non-retryable error: {e}",
+            extra={
+                "ingestion_id": ingestion_id,
+                "error_type": type(e).__name__,
+                "status_code": e.status_code,
+            },
+        )
 
         # Update status to FAILED
         with get_db_context() as db:
@@ -126,18 +178,32 @@ def process_ocr_task(self: Any, ingestion_id: str) -> dict[str, Any]:
                 db.add(ingestion)
                 db.commit()
 
-        # Retry on transient errors (rate limits, timeouts)
-        if "rate limit" in str(e).lower() or "timeout" in str(e).lower():
-            retry_countdown = 2**self.request.retries  # Exponential backoff
-            logger.warning(
-                f"[{ingestion_id}] Retrying after {retry_countdown}s (attempt {self.request.retries + 1}/3)"
-            )
-            raise self.retry(exc=e, countdown=retry_countdown, max_retries=3)
-        else:
-            raise
+        raise  # Don't retry, fail immediately
+
+    except RetryableError as e:
+        # Transient errors - will be caught by autoretry_for
+        logger.warning(
+            f"[{ingestion_id}] Retryable error: {e}. "
+            f"Attempt {self.request.retries + 1}/3",
+            extra={
+                "ingestion_id": ingestion_id,
+                "error_type": type(e).__name__,
+                "status_code": e.status_code,
+                "retry_count": self.request.retries,
+            },
+        )
+        raise  # Let autoretry_for handle it with exponential backoff
 
     except Exception as e:
-        logger.error(f"[{ingestion_id}] Unexpected error during OCR: {str(e)}")
+        # Unexpected error - log and fail
+        logger.error(
+            f"[{ingestion_id}] Unexpected error: {str(e)}",
+            exc_info=True,
+            extra={
+                "ingestion_id": ingestion_id,
+                "error_type": type(e).__name__,
+            },
+        )
 
         # Update status to FAILED
         try:

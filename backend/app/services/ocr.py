@@ -13,9 +13,43 @@ from pydantic import BaseModel, Field
 
 
 class OCRProviderError(Exception):
-    """Exception raised when OCR provider encounters an error."""
+    """Base exception for OCR provider errors."""
 
     pass
+
+
+class RetryableError(OCRProviderError):
+    """Error that should trigger a retry (500, 502, 503, 504, 408).
+
+    These are transient errors that may resolve with retry.
+    """
+
+    def __init__(self, message: str, status_code: int | None = None):
+        super().__init__(message)
+        self.status_code = status_code
+
+
+class NonRetryableError(OCRProviderError):
+    """Error that should NOT be retried (400, 401, 403, 404).
+
+    These are permanent errors that won't resolve with retry.
+    """
+
+    def __init__(self, message: str, status_code: int | None = None):
+        super().__init__(message)
+        self.status_code = status_code
+
+
+class RateLimitError(RetryableError):
+    """429 Rate Limit error with optional Retry-After header.
+
+    Indicates the API rate limit has been exceeded.
+    The retry_after attribute contains seconds to wait (from Retry-After header).
+    """
+
+    def __init__(self, message: str, retry_after: int | None = None):
+        super().__init__(message, status_code=429)
+        self.retry_after = retry_after  # Seconds to wait before retry
 
 
 class BoundingBox(BaseModel):
@@ -196,14 +230,41 @@ class MistralOCRProvider:
                 },
             )
 
-            if response.status_code != 200:
-                error_msg = f"Mistral API error (status {response.status_code})"
-                try:
-                    error_data = response.json()
-                    error_msg += f": {error_data.get('error', 'Unknown error')}"
-                except Exception:
-                    pass
-                raise OCRProviderError(error_msg)
+            # Error classification based on HTTP status code
+            if response.status_code == 429:
+                # Rate limit - extract Retry-After header
+                retry_after_header = response.headers.get("retry-after")
+                retry_seconds = int(retry_after_header) if retry_after_header else None
+                raise RateLimitError(
+                    "Mistral API rate limit exceeded", retry_after=retry_seconds
+                )
+
+            elif response.status_code == 401:
+                raise NonRetryableError(
+                    "Mistral API authentication failed - check API key",
+                    status_code=401,
+                )
+
+            elif response.status_code in (400, 403, 404):
+                # Client errors - don't retry
+                raise NonRetryableError(
+                    f"Mistral API error: {response.status_code}",
+                    status_code=response.status_code,
+                )
+
+            elif response.status_code in (500, 502, 503, 504, 408):
+                # Server errors - retry
+                raise RetryableError(
+                    f"Mistral API server error: {response.status_code}",
+                    status_code=response.status_code,
+                )
+
+            elif response.status_code != 200:
+                # Unknown error - default to retryable for safety
+                raise RetryableError(
+                    f"Mistral API error: {response.status_code}",
+                    status_code=response.status_code,
+                )
 
             api_response = response.json()
             processing_time = time.time() - start_time

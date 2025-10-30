@@ -10,9 +10,12 @@ from app.services.ocr import (
     BoundingBox,
     ContentBlock,
     MistralOCRProvider,
+    NonRetryableError,
     OCRPageResult,
     OCRProviderError,
     OCRResult,
+    RateLimitError,
+    RetryableError,
 )
 
 
@@ -205,7 +208,7 @@ class TestMistralOCRProvider:
 
     @pytest.mark.asyncio
     async def test_extract_text_api_error_400(self):
-        """Test handling of 400 Bad Request error."""
+        """Test handling of 400 Bad Request error raises NonRetryableError."""
 
         def mock_handler(request: httpx.Request) -> httpx.Response:
             return httpx.Response(
@@ -218,12 +221,15 @@ class TestMistralOCRProvider:
             provider = MistralOCRProvider(api_key="test-key")
             provider.client = client
 
-            with pytest.raises(OCRProviderError, match="Mistral API error"):
+            with pytest.raises(NonRetryableError) as exc_info:
                 await provider.extract_text(b"invalid content")
+
+            assert exc_info.value.status_code == 400
+            assert "400" in str(exc_info.value)
 
     @pytest.mark.asyncio
     async def test_extract_text_api_error_401(self):
-        """Test handling of 401 Unauthorized error (invalid API key)."""
+        """Test handling of 401 Unauthorized error raises NonRetryableError."""
 
         def mock_handler(request: httpx.Request) -> httpx.Response:
             return httpx.Response(
@@ -236,12 +242,15 @@ class TestMistralOCRProvider:
             provider = MistralOCRProvider(api_key="invalid-key")
             provider.client = client
 
-            with pytest.raises(OCRProviderError, match="Mistral API error"):
+            with pytest.raises(NonRetryableError) as exc_info:
                 await provider.extract_text(b"%PDF-1.4")
+
+            assert exc_info.value.status_code == 401
+            assert "authentication" in str(exc_info.value).lower()
 
     @pytest.mark.asyncio
     async def test_extract_text_api_error_429(self):
-        """Test handling of 429 Rate Limit error."""
+        """Test handling of 429 Rate Limit error raises RateLimitError with retry_after."""
 
         def mock_handler(request: httpx.Request) -> httpx.Response:
             return httpx.Response(
@@ -255,12 +264,16 @@ class TestMistralOCRProvider:
             provider = MistralOCRProvider(api_key="test-key")
             provider.client = client
 
-            with pytest.raises(OCRProviderError, match="Mistral API error"):
+            with pytest.raises(RateLimitError) as exc_info:
                 await provider.extract_text(b"%PDF-1.4")
+
+            assert exc_info.value.status_code == 429
+            assert exc_info.value.retry_after == 60
+            assert "rate limit" in str(exc_info.value).lower()
 
     @pytest.mark.asyncio
     async def test_extract_text_api_error_500(self):
-        """Test handling of 500 Internal Server Error."""
+        """Test handling of 500 Internal Server Error raises RetryableError."""
 
         def mock_handler(request: httpx.Request) -> httpx.Response:
             return httpx.Response(
@@ -273,8 +286,11 @@ class TestMistralOCRProvider:
             provider = MistralOCRProvider(api_key="test-key")
             provider.client = client
 
-            with pytest.raises(OCRProviderError, match="Mistral API error"):
+            with pytest.raises(RetryableError) as exc_info:
                 await provider.extract_text(b"%PDF-1.4")
+
+            assert exc_info.value.status_code == 500
+            assert "500" in str(exc_info.value)
 
     @pytest.mark.asyncio
     async def test_extract_text_network_error(self):
@@ -290,6 +306,79 @@ class TestMistralOCRProvider:
 
             with pytest.raises(OCRProviderError, match="Mistral API error"):
                 await provider.extract_text(b"%PDF-1.4")
+
+    @pytest.mark.asyncio
+    async def test_extract_text_api_error_429_without_retry_after(self):
+        """Test 429 error without Retry-After header defaults retry_after to None."""
+
+        def mock_handler(request: httpx.Request) -> httpx.Response:
+            return httpx.Response(
+                status_code=429,
+                json={"error": "Rate limit exceeded"},
+                # No Retry-After header
+            )
+
+        transport = httpx.MockTransport(mock_handler)
+        async with httpx.AsyncClient(transport=transport) as client:
+            provider = MistralOCRProvider(api_key="test-key")
+            provider.client = client
+
+            with pytest.raises(RateLimitError) as exc_info:
+                await provider.extract_text(b"%PDF-1.4")
+
+            assert exc_info.value.status_code == 429
+            assert exc_info.value.retry_after is None
+
+    @pytest.mark.asyncio
+    async def test_extract_text_api_error_502(self):
+        """Test 502 Bad Gateway raises RetryableError."""
+
+        def mock_handler(request: httpx.Request) -> httpx.Response:
+            return httpx.Response(status_code=502)
+
+        transport = httpx.MockTransport(mock_handler)
+        async with httpx.AsyncClient(transport=transport) as client:
+            provider = MistralOCRProvider(api_key="test-key")
+            provider.client = client
+
+            with pytest.raises(RetryableError) as exc_info:
+                await provider.extract_text(b"%PDF-1.4")
+
+            assert exc_info.value.status_code == 502
+
+    @pytest.mark.asyncio
+    async def test_extract_text_api_error_503(self):
+        """Test 503 Service Unavailable raises RetryableError."""
+
+        def mock_handler(request: httpx.Request) -> httpx.Response:
+            return httpx.Response(status_code=503)
+
+        transport = httpx.MockTransport(mock_handler)
+        async with httpx.AsyncClient(transport=transport) as client:
+            provider = MistralOCRProvider(api_key="test-key")
+            provider.client = client
+
+            with pytest.raises(RetryableError) as exc_info:
+                await provider.extract_text(b"%PDF-1.4")
+
+            assert exc_info.value.status_code == 503
+
+    @pytest.mark.asyncio
+    async def test_extract_text_api_error_403(self):
+        """Test 403 Forbidden raises NonRetryableError."""
+
+        def mock_handler(request: httpx.Request) -> httpx.Response:
+            return httpx.Response(status_code=403)
+
+        transport = httpx.MockTransport(mock_handler)
+        async with httpx.AsyncClient(transport=transport) as client:
+            provider = MistralOCRProvider(api_key="test-key")
+            provider.client = client
+
+            with pytest.raises(NonRetryableError) as exc_info:
+                await provider.extract_text(b"%PDF-1.4")
+
+            assert exc_info.value.status_code == 403
 
 
 class TestBoundingBox:
