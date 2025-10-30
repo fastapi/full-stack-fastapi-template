@@ -67,8 +67,8 @@ Full-stack application with async task processing for K-12 educational content e
                     │  (app/worker.py) │      │  PostgreSQL 17   │
                     │                  │      │                  │
                     │  Tasks:          │      │  Tables:         │
-                    │  - OCR (future)  │      │  - users ✅      │
-                    │  - Segmentation  │      │  - extractions ✅│
+                    │  - OCR ✅        │      │  - user ✅       │
+                    │  - Segmentation  │      │  - ingestions ✅ │
                     │  - Tagging       │      │  - questions     │
                     │                  │      │  - tags          │
                     │  Queue: Redis    │      │                  │
@@ -82,8 +82,10 @@ Full-stack application with async task processing for K-12 educational content e
 
 - **models.py**: Data models with SQLModel
   - **User**: Authentication and authorization
-  - **Ingestion** ✅: PDF upload metadata, Supabase storage paths, presigned URLs
-  - **Extraction** (future): Processing status, OCR/segmentation/tagging results
+  - **Ingestion** ✅: PDF upload metadata, Supabase storage, OCR processing metadata
+    - Core fields: filename, file_size, page_count, status, presigned_url
+    - OCR fields (Oct 30, 2025): ocr_provider, ocr_processed_at, ocr_processing_time, ocr_cost, ocr_average_confidence, ocr_storage_path
+    - Indexed: status, ocr_processed_at for efficient filtering
   - **Question** (future): Extracted questions with curriculum tags
   - **Tag** (future): Curriculum taxonomy nodes
   - Pattern: Base → Create → Update → DB Model (table=True) → Public
@@ -171,9 +173,12 @@ src/
 ┌─────────────────────────────────────────────────────────────┐
 │  3. Celery Worker Processes (Async)                        │
 │     ┌─────────────────────────────────────┐               │
-│     │  Stage 1: OCR                       │               │
-│     │  - PaddleOCR text extraction        │               │
+│     │  Stage 1: OCR ✅ Implemented        │               │
+│     │  - Mistral Vision OCR API           │               │
+│     │  - Semantic block extraction        │               │
+│     │  - Hierarchical structure detection │               │
 │     │  - Bounding box detection           │               │
+│     │  - Metadata: provider, cost, time   │               │
 │     └─────────────────────────────────────┘               │
 │                     │                                       │
 │                     ▼                                       │
@@ -212,7 +217,7 @@ src/
 
 ## Database Schema
 
-### Current Tables
+### Current Tables ✅
 
 - **user**: User accounts and authentication
   - UUID primary key
@@ -221,31 +226,32 @@ src/
   - Role flags (is_superuser, is_active)
   - Full name (optional)
 
-### Future Tables (CurriculumExtractor)
-
-- **extraction**: PDF extraction metadata
+- **ingestions**: PDF extraction metadata and OCR processing
   - UUID primary key
-  - Foreign key to user
-  - Filename, PDF URL (Supabase Storage)
-  - Status (DRAFT/PROCESSING/APPROVED/REJECTED)
-  - Celery task_id
-  - Timestamps (created_at, updated_at)
+  - Foreign key to user (owner_id, indexed, CASCADE delete)
+  - **File metadata**: filename, file_size, page_count, mime_type
+  - **Storage**: presigned_url (7-day expiry), storage_path (Supabase)
+  - **Pipeline status**: status (ExtractionStatus enum), uploaded_at
+  - **OCR metadata** (added Oct 30, 2025):
+    - ocr_provider: OCR engine used (e.g., 'mistral', 'paddleocr')
+    - ocr_processed_at: Completion timestamp (indexed for date filtering)
+    - ocr_processing_time: Duration in seconds
+    - ocr_cost: API cost in USD
+    - ocr_average_confidence: Confidence score (0.0-1.0)
+    - ocr_storage_path: Path to OCR JSON output in Supabase storage
+  - **Indexes**: ix_ingestions_owner_id, ix_ingestions_status, ix_ingestions_ocr_processed_at
+
+### Future Tables (Phase 2)
 
 - **question**: Extracted questions
   - UUID primary key
-  - Foreign key to extraction
+  - Foreign key to ingestion
   - Question text, answer, explanation
   - Question type (MCQ, short answer, etc.)
   - Subject, grade level
   - Curriculum tags (JSONB array)
   - LaTeX content (if math question)
   - Bounding boxes for PDF regions
-
-- **ingestion**: Batch upload tracking
-  - UUID primary key
-  - Foreign key to user
-  - Batch metadata
-  - Multiple extractions per ingestion
 
 - **tag**: Curriculum taxonomy
   - UUID primary key
@@ -255,9 +261,17 @@ src/
 
 ### Migration Strategy
 
-- **Alembic** for local development (version controlled)
-- **Supabase MCP** for quick prototyping/hotfixes
-- Auto-generate from model changes
+- **Alembic** for version-controlled migrations
+- **Migration Safety Infrastructure** (added Oct 30, 2025):
+  - Enhanced env.py with safety hooks (prevents CREATE TABLE on existing tables)
+  - Pre-commit validation (alembic-check, alembic-migration-safety)
+  - Migration safety checker script (validates dangerous operations)
+  - Comprehensive incident documentation in runbook
+- **Clean Baseline**: Migration history reset to 20038a3ab258 (Oct 30, 2025)
+  - Represents current production state (user, ingestions with OCR fields)
+  - All future migrations build on this foundation
+- **Supabase MCP** for debugging and hotfixes only (not primary workflow)
+- Auto-generate from model changes with safety validation
 - Review all migrations before applying
 - Check for security advisories with `mcp_supabase_get_advisors()`
 - Never use `SQLModel.metadata.create_all()` in production
@@ -289,9 +303,19 @@ src/
 - **Traefik** - Reverse proxy (production)
 - **GitHub Actions** - CI/CD pipeline
 
-### ML Pipeline (Phase 2)
-- **PaddleOCR** / **Mistral OCR** - Text extraction
-- **docTR** / **LayoutLMv3** - Layout analysis
+### ML Pipeline
+
+**Phase 1 (Implemented):**
+- **Mistral OCR** ✅ - Text extraction with semantic block detection (Oct 30, 2025)
+  - Vision OCR API for PDF text extraction
+  - Semantic block types: header, paragraph, equation, table, image, list
+  - Hierarchical structure detection for question boundaries
+  - Bounding box coordinates and confidence scores
+  - Metadata tracking: provider, cost, processing time
+
+**Phase 2 (Future):**
+- **PaddleOCR** (alternative) - Text extraction
+- **docTR** / **LayoutLMv3** - Advanced layout analysis
 - **DeBERTa-v3** - Curriculum tagging (fine-tuned)
 
 ---

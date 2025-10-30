@@ -82,19 +82,20 @@ Authorization: Bearer eyJ0eXAiOiJKV1...
 ### Utilities
 - `GET /api/v1/utils/health-check/` - Backend health check
 
-### Ingestions (Document Upload) ✅ Implemented
+### Ingestions (Document Upload & OCR) ✅ Implemented
 - `POST /api/v1/ingestions/` - Upload PDF worksheet (multipart/form-data)
+- `GET /api/v1/ingestions/` - List user's ingestions (with OCR metadata)
+- `GET /api/v1/ingestions/{id}` - Get ingestion details (including OCR status)
+
+**OCR Processing**: Automatic via Celery after upload (Mistral Vision OCR)
+- Semantic block extraction (headers, paragraphs, equations, tables, images)
+- Hierarchical structure detection for question boundaries
+- Metadata: provider, processing time, cost, confidence scores
+- OCR output stored in Supabase storage (ocr_storage_path)
 
 ---
 
-## CurriculumExtractor Endpoints (To Be Implemented)
-
-### Extractions
-- `GET /api/v1/extractions/` - List user's extractions
-- `GET /api/v1/extractions/{id}` - Get extraction details
-- `PATCH /api/v1/extractions/{id}` - Update extraction
-- `DELETE /api/v1/extractions/{id}` - Delete extraction
-- `POST /api/v1/extractions/{id}/process` - Trigger OCR extraction pipeline
+## CurriculumExtractor Endpoints (Phase 2 - To Be Implemented)
 
 ### Questions
 - `GET /api/v1/questions/` - List questions (with filters)
@@ -202,7 +203,15 @@ curl -X POST http://localhost:8000/api/v1/ingestions/ \
   "status": "UPLOADED",
   "presigned_url": "https://wijzypbstiigssjuiuvh.supabase.co/storage/v1/object/sign/worksheets/...",
   "uploaded_at": "2025-10-25T14:30:00Z",
-  "owner_id": "550e8400-e29b-41d4-a716-446655440000"
+  "owner_id": "550e8400-e29b-41d4-a716-446655440000",
+
+  // OCR metadata fields (null until processed by Celery worker)
+  "ocr_provider": null,
+  "ocr_processed_at": null,
+  "ocr_processing_time": null,
+  "ocr_cost": null,
+  "ocr_average_confidence": null,
+  "ocr_storage_path": null
 }
 ```
 
