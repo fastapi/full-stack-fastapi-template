@@ -126,6 +126,81 @@ export const IngestionPublicSchema = {
             '$ref': '#/components/schemas/ExtractionStatus',
             default: 'UPLOADED'
         },
+        ocr_provider: {
+            anyOf: [
+                {
+                    type: 'string',
+                    maxLength: 50
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Ocr Provider',
+            description: "OCR provider used (e.g., 'mistral')"
+        },
+        ocr_processed_at: {
+            anyOf: [
+                {
+                    type: 'string',
+                    format: 'date-time'
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Ocr Processed At',
+            description: 'Timestamp when OCR completed'
+        },
+        ocr_processing_time: {
+            anyOf: [
+                {
+                    type: 'number'
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Ocr Processing Time',
+            description: 'OCR processing time in seconds'
+        },
+        ocr_cost: {
+            anyOf: [
+                {
+                    type: 'number'
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Ocr Cost',
+            description: 'OCR API cost in USD'
+        },
+        ocr_average_confidence: {
+            anyOf: [
+                {
+                    type: 'number'
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Ocr Average Confidence',
+            description: 'Average OCR confidence score (0.0-1.0)'
+        },
+        ocr_storage_path: {
+            anyOf: [
+                {
+                    type: 'string',
+                    maxLength: 500
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Ocr Storage Path',
+            description: 'Path to OCR output JSON in storage'
+        },
         id: {
             type: 'string',
             format: 'uuid',

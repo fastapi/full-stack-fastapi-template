@@ -43,6 +43,30 @@ export type IngestionPublic = {
      */
     mime_type: string;
     status?: ExtractionStatus;
+    /**
+     * OCR provider used (e.g., 'mistral')
+     */
+    ocr_provider?: (string | null);
+    /**
+     * Timestamp when OCR completed
+     */
+    ocr_processed_at?: (string | null);
+    /**
+     * OCR processing time in seconds
+     */
+    ocr_processing_time?: (number | null);
+    /**
+     * OCR API cost in USD
+     */
+    ocr_cost?: (number | null);
+    /**
+     * Average OCR confidence score (0.0-1.0)
+     */
+    ocr_average_confidence?: (number | null);
+    /**
+     * Path to OCR output JSON in storage
+     */
+    ocr_storage_path?: (string | null);
     id: string;
     owner_id: string;
     presigned_url: string;
