@@ -81,10 +81,18 @@ class UserPublic(UserBase):
 - `file_size`: int (file size in bytes, required)
 - `page_count`: int | None (number of PDF pages, nullable for corrupted files)
 - `mime_type`: str (MIME type, max 100 chars, typically "application/pdf")
-- `status`: ExtractionStatus (pipeline state, default: "UPLOADED")
+- `status`: ExtractionStatus (pipeline state, default: "UPLOADED", **indexed**)
 - `presigned_url`: str (Supabase signed URL, max 2048 chars, 7-day expiry)
 - `storage_path`: str (Supabase storage path, max 512 chars)
 - `uploaded_at`: datetime (upload timestamp, auto-set, UTC)
+
+**OCR Metadata Fields** (added Oct 30, 2025):
+- `ocr_provider`: str | None (OCR provider used, max 50 chars, e.g., 'mistral', 'paddleocr')
+- `ocr_processed_at`: datetime | None (OCR completion timestamp, UTC, **indexed**)
+- `ocr_processing_time`: float | None (OCR processing duration in seconds)
+- `ocr_cost`: float | None (OCR API cost in USD)
+- `ocr_average_confidence`: float | None (average OCR confidence score, 0.0-1.0)
+- `ocr_storage_path`: str | None (path to OCR output JSON in Supabase storage, max 500 chars)
 
 **Extraction Status Enum**:
 ```python
@@ -125,12 +133,12 @@ FOREIGN KEY (owner_id) REFERENCES user(id) ON DELETE CASCADE
 ```
 
 **Indexes** (for query performance):
-- `ix_ingestions_owner_id` (B-tree on owner_id, exists)
+- `ix_ingestions_owner_id` (B-tree on owner_id) - User-owned ingestions lookup
+- `ix_ingestions_status` (B-tree on status) ✅ **Implemented Oct 30, 2025** - Status filtering
+- `ix_ingestions_ocr_processed_at` (B-tree on ocr_processed_at) ✅ **Implemented Oct 30, 2025** - Date-based sorting/filtering
 
-**Optional Performance Improvements**:
-- Add index on `status` for filtering queries
-- Add index on `uploaded_at` for date-based sorting
-- Add `updated_at` column with auto-update trigger
+**Future Performance Improvements**:
+- Add `updated_at` column with auto-update trigger for change tracking
 
 **Row-Level Security (RLS)**:
 ✅ **Enabled** - Applied October 29, 2025
@@ -319,21 +327,29 @@ extractions/
 
 ## Database State
 
-**Last Synced**: October 29, 2025
-**Migration Version**: `16dd7a6f4ff4` (head)
-**Tables**: `user`, `ingestions`, `alembic_version`
+**Last Synced**: October 30, 2025
+**Migration Version**: `20038a3ab258` (head, clean baseline)
+**Tables**: `user`, `ingestions` (with OCR metadata fields), `alembic_version`
 **RLS Status**: ✅ Enabled on `user` and `ingestions`
 **Storage Buckets**: `worksheets` (25MB, PDF only), `extractions` (50MB, images/JSON)
 
 **Migration History**:
 ```
-<base> → e2412789c190  Initialize models
-e2412789c190 → 9c0a54914c78  Add VARCHAR length constraints
-9c0a54914c78 → d98dd8ec85a3  Convert IDs to UUID
-d98dd8ec85a3 → 1a31ce608336  Add CASCADE relationships
-1a31ce608336 → 21e0899d3af8  Add ingestions table (remove items)
-21e0899d3af8 → 16dd7a6f4ff4  Rename extractions → ingestions (current)
+# Migration history reset on October 30, 2025 for clean baseline
+# Legacy migrations (e2412789c190 through 16dd7a6f4ff4) removed
+# New baseline represents current production state:
+
+<base> → 20038a3ab258  Initial schema baseline (current)
+                       - user table (6 columns, RLS enabled)
+                       - ingestions table (16 columns with OCR metadata, RLS enabled)
+                       - Indexes: ix_ingestions_owner_id, ix_ingestions_status, ix_ingestions_ocr_processed_at
 ```
+
+**Migration Safety Infrastructure** (added Oct 30, 2025):
+- ✅ Enhanced `env.py` with safety hooks to prevent CREATE TABLE on existing tables
+- ✅ Pre-commit hooks for Alembic validation (`alembic-check`, `alembic-migration-safety`)
+- ✅ Migration safety checker script (`scripts/check_migration_safety.py`)
+- ✅ Comprehensive incident documentation in runbook (`docs/runbooks/incidents.md`)
 
 **Security**: 1 low-priority warning remaining (`trigger_set_timestamp` search_path)
 
