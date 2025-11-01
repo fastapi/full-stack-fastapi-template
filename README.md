@@ -1,7 +1,28 @@
-# Full Stack FastAPI Template
+# Full Stack FastAPI Payment Template
 
 <a href="https://github.com/fastapi/full-stack-fastapi-template/actions?query=workflow%3ATest" target="_blank"><img src="https://github.com/fastapi/full-stack-fastapi-template/workflows/Test/badge.svg" alt="Test"></a>
 <a href="https://coverage-badge.samuelcolvin.workers.dev/redirect/fastapi/full-stack-fastapi-template" target="_blank"><img src="https://coverage-badge.samuelcolvin.workers.dev/fastapi/full-stack-fastapi-template.svg" alt="Coverage"></a>
+
+This repository is a fork of the official Full Stack FastAPI Template with a focused goal: to provide a production-ready starting point that adds payments and billing capabilities to the original template.
+
+Goal: extend the upstream template with common payment patterns (one-time payments, subscriptions, invoices, webhook handling, and example frontend flows) so teams can bootstrap apps that require monetization without wiring payments from scratch.
+
+This project remains compatible with the parent template and intends to track upstream improvements where possible. Parent (upstream) repository: https://github.com/fastapi/full-stack-fastapi-template
+
+## Progress / Features in development
+
+The sections below list the main payment-related features being added to this fork. Items marked with a checkbox indicate progress; this list will be kept up-to-date as work advances.
+
+- [x] Repository fork and integration tests (keep upstream compatibility)
+- [x] Example Stripe integration (checkout session, client/server flow)
+- [ ] Webhook handlers with secure signature verification
+- [ ] Subscription models and billing webhooks (plans, trials)
+- [ ] Invoice generation and management endpoints
+- [ ] Frontend payment UI components (checkout, billing settings, invoices)
+- [ ] End-to-end tests for payment flows (Playwright)
+- [ ] Example environment configuration and deployment notes for production payments
+
+If you'd like to contribute or request a specific payment provider or feature, open an issue or submit a pull request.
 
 ## Technology Stack and Features
 
