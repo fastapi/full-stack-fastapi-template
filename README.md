@@ -1,28 +1,9 @@
-# Full Stack FastAPI Payment Template
+# Full Stack FastAPI Template
 
 <a href="https://github.com/fastapi/full-stack-fastapi-template/actions?query=workflow%3ATest" target="_blank"><img src="https://github.com/fastapi/full-stack-fastapi-template/workflows/Test/badge.svg" alt="Test"></a>
 <a href="https://coverage-badge.samuelcolvin.workers.dev/redirect/fastapi/full-stack-fastapi-template" target="_blank"><img src="https://coverage-badge.samuelcolvin.workers.dev/fastapi/full-stack-fastapi-template.svg" alt="Coverage"></a>
 
-This repository is a fork of the official Full Stack FastAPI Template with a focused goal: to provide a production-ready starting point that adds payments and billing capabilities to the original template.
-
-Goal: extend the upstream template with common payment patterns (one-time payments, subscriptions, invoices, webhook handling, and example frontend flows) so teams can bootstrap apps that require monetization without wiring payments from scratch.
-
-This project remains compatible with the parent template and intends to track upstream improvements where possible. Parent (upstream) repository: https://github.com/fastapi/full-stack-fastapi-template
-
-## Progress / Features in development
-
-The sections below list the main payment-related features being added to this fork. Items marked with a checkbox indicate progress; this list will be kept up-to-date as work advances.
-
-- [x] Repository fork and integration tests (keep upstream compatibility)
-- [x] Example Stripe integration (checkout session, client/server flow)
-- [ ] Webhook handlers with secure signature verification
-- [ ] Subscription models and billing webhooks (plans, trials)
-- [ ] Invoice generation and management endpoints
-- [ ] Frontend payment UI components (checkout, billing settings, invoices)
-- [ ] End-to-end tests for payment flows (Playwright)
-- [ ] Example environment configuration and deployment notes for production payments
-
-If you'd like to contribute or request a specific payment provider or feature, open an issue or submit a pull request.
+A modern, full-stack FastAPI template with React frontend, authentication, and payment gateway integration.
 
 ## Technology Stack and Features
 
@@ -44,30 +25,35 @@ If you'd like to contribute or request a specific payment provider or feature, o
 - 📞 [Traefik](https://traefik.io) as a reverse proxy / load balancer.
 - 🚢 Deployment instructions using Docker Compose, including how to set up a frontend Traefik proxy to handle automatic HTTPS certificates.
 - 🏭 CI (continuous integration) and CD (continuous deployment) based on GitHub Actions.
+- 💳 **Payment Gateway Integration** with Razorpay for one-time payments, webhook handling, and payment analytics.
 
 ### Dashboard Login
 
-[![API docs](img/login.png)](https://github.com/fastapi/full-stack-fastapi-template)
+[![Login](img/login.png)](https://github.com/fastapi/full-stack-fastapi-template)
 
 ### Dashboard - Admin
 
-[![API docs](img/dashboard.png)](https://github.com/fastapi/full-stack-fastapi-template)
+[![Dashboard](img/dashboard.png)](https://github.com/fastapi/full-stack-fastapi-template)
 
 ### Dashboard - Create User
 
-[![API docs](img/dashboard-create.png)](https://github.com/fastapi/full-stack-fastapi-template)
+[![Create User](img/dashboard-create.png)](https://github.com/fastapi/full-stack-fastapi-template)
 
 ### Dashboard - Items
 
-[![API docs](img/dashboard-items.png)](https://github.com/fastapi/full-stack-fastapi-template)
+[![Items](img/dashboard-items.png)](https://github.com/fastapi/full-stack-fastapi-template)
 
 ### Dashboard - User Settings
 
-[![API docs](img/dashboard-user-settings.png)](https://github.com/fastapi/full-stack-fastapi-template)
+[![User Settings](img/dashboard-user-settings.png)](https://github.com/fastapi/full-stack-fastapi-template)
 
 ### Dashboard - Dark Mode
 
-[![API docs](img/dashboard-dark.png)](https://github.com/fastapi/full-stack-fastapi-template)
+[![Dark Mode](img/dashboard-dark.png)](https://github.com/fastapi/full-stack-fastapi-template)
+
+### Payment Checkout
+
+[![Payment Checkout](img/checkout.png)](https://github.com/fastapi/full-stack-fastapi-template)
 
 ### Interactive API Documentation
 
@@ -160,6 +146,53 @@ Before deploying it, make sure you change at least the values for:
 You can (and should) pass these as environment variables from secrets.
 
 Read the [deployment.md](./deployment.md) docs for more details.
+
+## Payment Integration (Razorpay)
+
+This template now includes Razorpay payment gateway integration for accepting one-time payments.
+
+### Setup
+
+1. **Create Razorpay Account**: Sign up at [https://dashboard.razorpay.com/signup](https://dashboard.razorpay.com/signup)
+2. **Get API Keys**: Navigate to Settings → API Keys in Razorpay Dashboard
+3. **Configure Environment Variables**: Add to `.env`:
+   ```bash
+   RAZORPAY_KEY_ID=rzp_test_xxxxxxxxxxxxx
+   RAZORPAY_KEY_SECRET=xxxxxxxxxxxxxxxxxxxxxxxxxx
+   RAZORPAY_WEBHOOK_SECRET=your_webhook_secret_here  # Optional for production
+   ```
+
+### Features
+
+- **Order Creation**: Backend creates Razorpay orders and saves to database
+- **Payment Verification**: Secure signature verification for payment confirmation
+- **Webhook Handling**: Real-time payment status updates via webhooks
+- **Frontend Integration**: React components for checkout, success, and failure pages
+- **Payment Analytics**: Dashboard showing payment history and statistics
+- **Database Models**: Order and Payment models with proper relationships
+
+### API Endpoints
+
+- `POST /api/v1/payments/create-order` - Create payment order (requires auth)
+- `POST /api/v1/payments/verify` - Verify payment signature (requires auth)
+- `POST /api/v1/payments/webhook` - Razorpay webhook handler (public, signature verified)
+- `GET /api/v1/payments/orders` - List user orders (requires auth)
+- `GET /api/v1/payments/orders/{order_id}` - Get order details (requires auth)
+
+### Database Schema
+
+New tables added:
+- `order` - Stores payment orders with Razorpay order IDs
+- `payment` - Stores payment records linked to orders
+
+Migrations are handled automatically via Alembic. See [backend/README.md](./backend/README.md#database-migrations-with-alembic) for details.
+
+### Documentation
+
+For detailed setup and configuration:
+- Payment API details: [backend/README.md](./backend/README.md#payment-api-endpoints)
+- Database migrations: [backend/README.md](./backend/README.md#database-migrations-with-alembic)
+- Development guide: [development.md](./development.md)
 
 ### Generate Secret Keys
 
