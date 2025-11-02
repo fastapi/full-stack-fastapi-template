@@ -94,6 +94,16 @@ class Settings(BaseSettings):
     FIRST_SUPERUSER: EmailStr
     FIRST_SUPERUSER_PASSWORD: str
 
+    # Razorpay Payment Gateway Configuration
+    RAZORPAY_KEY_ID: str = ""
+    RAZORPAY_KEY_SECRET: str = ""
+    RAZORPAY_WEBHOOK_SECRET: str | None = None
+
+    @computed_field  # type: ignore[prop-decorator]
+    @property
+    def razorpay_enabled(self) -> bool:
+        return bool(self.RAZORPAY_KEY_ID and self.RAZORPAY_KEY_SECRET)
+
     def _check_default_secret(self, var_name: str, value: str | None) -> None:
         if value == "changethis":
             message = (
@@ -112,6 +122,17 @@ class Settings(BaseSettings):
         self._check_default_secret(
             "FIRST_SUPERUSER_PASSWORD", self.FIRST_SUPERUSER_PASSWORD
         )
+        # Warn if Razorpay keys are not set in production
+        if (
+            self.ENVIRONMENT != "local"
+            and not self.razorpay_enabled
+            and self.RAZORPAY_KEY_ID == ""
+        ):
+            warnings.warn(
+                "RAZORPAY_KEY_ID and RAZORPAY_KEY_SECRET are not set. "
+                "Payment functionality will be disabled.",
+                stacklevel=1,
+            )
 
         return self
 
