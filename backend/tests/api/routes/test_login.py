@@ -133,19 +133,19 @@ def test_login_sql_injection_protection(client: TestClient) -> None:
         "admin' OR 1=1#",
         "' UNION SELECT NULL--",
     ]
-    
+
     for malicious_input in sql_injection_attempts:
         login_data = {
             "username": malicious_input,
             "password": "anypassword",
         }
         r = client.post(f"{settings.API_V1_STR}/login/access-token", data=login_data)
-        
+
         # Should return authentication error, not SQL error or success
         assert r.status_code == 400
         response_data = r.json()
         assert "access_token" not in response_data
-        
+
         # Also test in password field
         login_data = {
             "username": settings.FIRST_SUPERUSER,

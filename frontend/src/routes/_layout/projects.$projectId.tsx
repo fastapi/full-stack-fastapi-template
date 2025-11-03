@@ -22,7 +22,7 @@ import {
   FiUsers,
 } from "react-icons/fi"
 
-import { ProjectsService, GalleriesService, type GalleryPublic } from "@/client"
+import { ProjectsService, GalleriesService } from "@/client"
 import useAuth from "@/hooks/useAuth"
 import { InviteClient } from "@/components/Projects/InviteClient"
 import { ClientAccessList } from "@/components/Projects/ClientAccessList"

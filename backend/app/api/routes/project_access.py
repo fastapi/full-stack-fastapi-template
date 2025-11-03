@@ -8,10 +8,10 @@ from app.api.deps import CurrentUser, SessionDep
 from app.models import (
     Message,
     ProjectAccessCreate,
-    ProjectAccessPublic,
     ProjectAccessesPublic,
-    ProjectAccessWithUser,
+    ProjectAccessPublic,
     ProjectAccessUpdate,
+    User,
 )
 
 router = APIRouter()
@@ -38,24 +38,24 @@ def grant_project_access(
             status_code=403,
             detail="Only team members can invite clients to projects",
         )
-    
+
     # Check if project exists and user has access to it
     project = crud.get_project(session=session, project_id=project_id)
     if not project:
         raise HTTPException(status_code=404, detail="Project not found")
-    
+
     # Check if current user's organization owns the project
     if not current_user.organization_id or current_user.organization_id != project.organization_id:
         raise HTTPException(
             status_code=403,
             detail="You don't have permission to manage this project",
         )
-    
+
     # Check if user to be invited exists
-    user_to_invite = session.get(crud.User, user_id)
+    user_to_invite = session.get(User, user_id)
     if not user_to_invite:
         raise HTTPException(status_code=404, detail="User not found")
-    
+
     # Create access
     access_in = ProjectAccessCreate(
         project_id=project_id,
@@ -83,7 +83,7 @@ def read_project_access_list(
     project = crud.get_project(session=session, project_id=project_id)
     if not project:
         raise HTTPException(status_code=404, detail="Project not found")
-    
+
     # Check permissions
     if getattr(current_user, "user_type", None) == "team_member":
         if current_user.organization_id != project.organization_id:
@@ -94,7 +94,7 @@ def read_project_access_list(
             session=session, project_id=project_id, user_id=current_user.id
         ):
             raise HTTPException(status_code=403, detail="Access denied")
-    
+
     access_list = crud.get_project_access_list(session=session, project_id=project_id)
     return ProjectAccessesPublic(data=access_list, count=len(access_list))
 
@@ -117,16 +117,16 @@ def revoke_project_access(
             status_code=403,
             detail="Only team members can revoke project access",
         )
-    
+
     # Check if project exists
     project = crud.get_project(session=session, project_id=project_id)
     if not project:
         raise HTTPException(status_code=404, detail="Project not found")
-    
+
     # Check permissions
     if current_user.organization_id != project.organization_id:
         raise HTTPException(status_code=403, detail="Access denied")
-    
+
     # Revoke access
     crud.delete_project_access(
         session=session, project_id=project_id, user_id=user_id
@@ -153,23 +153,23 @@ def update_project_access_permissions(
             status_code=403,
             detail="Only team members can update project access",
         )
-    
+
     # Check if project exists
     project = crud.get_project(session=session, project_id=project_id)
     if not project:
         raise HTTPException(status_code=404, detail="Project not found")
-    
+
     # Check permissions
     if current_user.organization_id != project.organization_id:
         raise HTTPException(status_code=403, detail="Access denied")
-    
+
     # Get existing access
     db_access = crud.get_project_access(
         session=session, project_id=project_id, user_id=user_id
     )
     if not db_access:
         raise HTTPException(status_code=404, detail="Access not found")
-    
+
     # Update access
     access = crud.update_project_access(
         session=session, db_access=db_access, access_in=access_in

@@ -1,5 +1,6 @@
 """Unit tests for Project CRUD operations"""
 from datetime import date, timedelta
+
 from sqlmodel import Session
 
 from app import crud
@@ -15,12 +16,12 @@ def test_create_project(db: Session) -> None:
         description="Test organization"
     )
     organization = crud.create_organization(session=db, organization_in=org_in)
-    
+
     # Create a project
     project_name = f"Test Project {random_lower_string()}"
     client_name = f"Client {random_lower_string()}"
     deadline = date.today() + timedelta(days=30)
-    
+
     project_in = ProjectCreate(
         name=project_name,
         client_name=client_name,
@@ -31,9 +32,9 @@ def test_create_project(db: Session) -> None:
         progress=0,
         organization_id=organization.id
     )
-    
+
     project = crud.create_project(session=db, project_in=project_in)
-    
+
     assert project.name == project_name
     assert project.client_name == client_name
     assert project.status == "planning"
@@ -49,7 +50,7 @@ def test_get_project(db: Session) -> None:
     # Create organization and project
     org_in = OrganizationCreate(name=random_lower_string())
     organization = crud.create_organization(session=db, organization_in=org_in)
-    
+
     project_in = ProjectCreate(
         name="Test Project",
         client_name="Test Client",
@@ -58,10 +59,10 @@ def test_get_project(db: Session) -> None:
         organization_id=organization.id
     )
     created_project = crud.create_project(session=db, project_in=project_in)
-    
+
     # Retrieve the project
     retrieved_project = crud.get_project(session=db, project_id=created_project.id)
-    
+
     assert retrieved_project is not None
     assert retrieved_project.id == created_project.id
     assert retrieved_project.name == "Test Project"
@@ -73,7 +74,7 @@ def test_update_project(db: Session) -> None:
     # Create organization and project
     org_in = OrganizationCreate(name=random_lower_string())
     organization = crud.create_organization(session=db, organization_in=org_in)
-    
+
     project_in = ProjectCreate(
         name="Original Name",
         client_name="Test Client",
@@ -82,20 +83,20 @@ def test_update_project(db: Session) -> None:
         organization_id=organization.id
     )
     project = crud.create_project(session=db, project_in=project_in)
-    
+
     # Update the project
     project_update = ProjectUpdate(
         name="Updated Name",
         status="in_progress",
         progress=75
     )
-    
+
     updated_project = crud.update_project(
         session=db,
         db_project=project,
         project_in=project_update
     )
-    
+
     assert updated_project.name == "Updated Name"
     assert updated_project.status == "in_progress"
     assert updated_project.progress == 75
@@ -107,9 +108,9 @@ def test_get_projects_by_organization(db: Session) -> None:
     # Create organization
     org_in = OrganizationCreate(name=random_lower_string())
     organization = crud.create_organization(session=db, organization_in=org_in)
-    
+
     # Create multiple projects
-    project1 = crud.create_project(
+    _project1 = crud.create_project(
         session=db,
         project_in=ProjectCreate(
             name="Project 1",
@@ -117,8 +118,8 @@ def test_get_projects_by_organization(db: Session) -> None:
             organization_id=organization.id
         )
     )
-    
-    project2 = crud.create_project(
+
+    _project2 = crud.create_project(
         session=db,
         project_in=ProjectCreate(
             name="Project 2",
@@ -126,13 +127,13 @@ def test_get_projects_by_organization(db: Session) -> None:
             organization_id=organization.id
         )
     )
-    
+
     # Retrieve projects
     projects = crud.get_projects_by_organization(
         session=db,
         organization_id=organization.id
     )
-    
+
     assert len(projects) == 2
     project_names = [p.name for p in projects]
     assert "Project 1" in project_names
@@ -144,14 +145,14 @@ def test_count_projects_by_organization(db: Session) -> None:
     # Create organization
     org_in = OrganizationCreate(name=random_lower_string())
     organization = crud.create_organization(session=db, organization_in=org_in)
-    
+
     # Initially should have 0 projects
     count = crud.count_projects_by_organization(
         session=db,
         organization_id=organization.id
     )
     assert count == 0
-    
+
     # Create 3 projects
     for i in range(3):
         crud.create_project(
@@ -162,7 +163,7 @@ def test_count_projects_by_organization(db: Session) -> None:
                 organization_id=organization.id
             )
         )
-    
+
     # Should now have 3 projects
     count = crud.count_projects_by_organization(
         session=db,
@@ -176,7 +177,7 @@ def test_delete_project(db: Session) -> None:
     # Create organization and project
     org_in = OrganizationCreate(name=random_lower_string())
     organization = crud.create_organization(session=db, organization_in=org_in)
-    
+
     project_in = ProjectCreate(
         name="Project to Delete",
         client_name="Test Client",
@@ -184,13 +185,13 @@ def test_delete_project(db: Session) -> None:
     )
     project = crud.create_project(session=db, project_in=project_in)
     project_id = project.id
-    
+
     # Verify project exists
     assert crud.get_project(session=db, project_id=project_id) is not None
-    
+
     # Delete project
     crud.delete_project(session=db, project_id=project_id)
-    
+
     # Verify project is deleted
     assert crud.get_project(session=db, project_id=project_id) is None
 
@@ -199,7 +200,7 @@ def test_project_progress_validation(db: Session) -> None:
     """Test that project progress is validated (0-100)"""
     org_in = OrganizationCreate(name=random_lower_string())
     organization = crud.create_organization(session=db, organization_in=org_in)
-    
+
     # Valid progress values
     for progress_val in [0, 50, 100]:
         project_in = ProjectCreate(

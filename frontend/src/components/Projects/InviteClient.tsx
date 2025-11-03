@@ -12,7 +12,6 @@ import { Button } from "@/components/ui/button"
 import { Field } from "@/components/ui/field"
 import { Input } from "@chakra-ui/react"
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query"
-import { UsersService, ProjectsService } from "@/client"
 import { FiUserPlus } from "react-icons/fi"
 import useCustomToast from "@/hooks/useCustomToast"
 
@@ -52,7 +51,7 @@ export function InviteClient({ projectId }: InviteClientProps) {
 
   // Filter by search
   const filteredClients = clientUsers.filter(
-    (user) =>
+    (user: any) =>
       user.email.toLowerCase().includes(searchEmail.toLowerCase()) ||
       user.full_name?.toLowerCase().includes(searchEmail.toLowerCase())
   )
@@ -126,7 +125,7 @@ export function InviteClient({ projectId }: InviteClientProps) {
                 No clients found
               </p>
             ) : (
-              filteredClients.map((user) => (
+              filteredClients.map((user: any) => (
                 <div
                   key={user.id}
                   onClick={() => setSelectedUserId(user.id)}

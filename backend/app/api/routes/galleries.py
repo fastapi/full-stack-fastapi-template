@@ -37,7 +37,7 @@ def read_galleries(
         project = crud.get_project(session=session, project_id=project_id)
         if not project:
             raise HTTPException(status_code=404, detail="Project not found")
-        
+
         # Check access based on user type
         if user_type == "client":
             # Client must have explicit access
@@ -62,7 +62,7 @@ def read_galleries(
                 session=session, user_id=current_user.id, skip=0, limit=1000
             )
             project_ids = [p.id for p in accessible_projects]
-            
+
             # Get galleries for all accessible projects
             galleries = []
             for pid in project_ids[skip:skip+limit]:
@@ -70,7 +70,7 @@ def read_galleries(
                     session=session, project_id=pid, skip=0, limit=100
                 )
                 galleries.extend(project_galleries)
-            
+
             count = sum(
                 len(crud.get_galleries_by_project(session=session, project_id=pid, skip=0, limit=1000))
                 for pid in project_ids
@@ -81,7 +81,7 @@ def read_galleries(
                 raise HTTPException(
                     status_code=400, detail="User is not part of an organization"
                 )
-            
+
             galleries = crud.get_galleries_by_organization(
                 session=session,
                 organization_id=current_user.organization_id,
@@ -103,13 +103,13 @@ def create_gallery(
     Create new gallery. Only team members can create galleries.
     """
     user_type = getattr(current_user, "user_type", None)
-    
+
     # Only team members can create galleries
     if user_type != "team_member":
         raise HTTPException(
             status_code=403, detail="Only team members can create galleries"
         )
-    
+
     if not current_user.organization_id:
         raise HTTPException(
             status_code=400, detail="User is not part of an organization"
@@ -138,7 +138,7 @@ def read_gallery(session: SessionDep, current_user: CurrentUser, id: uuid.UUID) 
     project = crud.get_project(session=session, project_id=gallery.project_id)
     if not project:
         raise HTTPException(status_code=404, detail="Project not found")
-    
+
     if user_type == "client":
         # Client must have access to the project
         if not crud.user_has_project_access(
@@ -165,13 +165,13 @@ def update_gallery(
     Update a gallery. Only team members can update galleries.
     """
     user_type = getattr(current_user, "user_type", None)
-    
+
     # Only team members can update galleries
     if user_type != "team_member":
         raise HTTPException(
             status_code=403, detail="Only team members can update galleries"
         )
-    
+
     gallery = crud.get_gallery(session=session, gallery_id=id)
     if not gallery:
         raise HTTPException(status_code=404, detail="Gallery not found")
@@ -195,13 +195,13 @@ def delete_gallery(
     Delete a gallery. Only team members can delete galleries.
     """
     user_type = getattr(current_user, "user_type", None)
-    
+
     # Only team members can delete galleries
     if user_type != "team_member":
         raise HTTPException(
             status_code=403, detail="Only team members can delete galleries"
         )
-    
+
     gallery = crud.get_gallery(session=session, gallery_id=id)
     if not gallery:
         raise HTTPException(status_code=404, detail="Gallery not found")

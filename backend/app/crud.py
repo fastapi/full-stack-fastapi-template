@@ -266,7 +266,7 @@ def create_project_access(
             ProjectAccess.user_id == access_in.user_id,
         )
     ).first()
-    
+
     if existing:
         # Update existing access
         for key, value in access_in.model_dump(exclude_unset=True).items():
@@ -275,7 +275,7 @@ def create_project_access(
         session.commit()
         session.refresh(existing)
         return existing
-    
+
     # Create new access
     db_obj = ProjectAccess.model_validate(access_in)
     session.add(db_obj)

@@ -1,6 +1,17 @@
 from fastapi import APIRouter
 
-from app.api.routes import galleries, invitations, items, login, organizations, private, project_access, projects, users, utils
+from app.api.routes import (
+    galleries,
+    invitations,
+    items,
+    login,
+    organizations,
+    private,
+    project_access,
+    projects,
+    users,
+    utils,
+)
 from app.core.config import settings
 
 api_router = APIRouter()

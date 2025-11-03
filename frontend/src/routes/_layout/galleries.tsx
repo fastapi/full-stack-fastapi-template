@@ -12,7 +12,7 @@ import {
   VStack,
 } from "@chakra-ui/react"
 import { useQuery } from "@tanstack/react-query"
-import { createFileRoute, Link, Outlet } from "@tanstack/react-router"
+import { createFileRoute, Link } from "@tanstack/react-router"
 import { FiCalendar, FiImage, FiUser } from "react-icons/fi"
 
 import { GalleriesService } from "@/client"
@@ -47,11 +47,6 @@ function getStatusLabel(status: string) {
 }
 
 function Galleries() {
-  // This component just renders the outlet for child routes
-  return <Outlet />
-}
-
-function GalleriesList() {
   const { data, isLoading } = useQuery({
     ...getGalleriesQueryOptions(),
   })

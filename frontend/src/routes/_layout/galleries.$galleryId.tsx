@@ -110,13 +110,6 @@ function GalleryDetail() {
           </Box>
         </Flex>
 
-        {/* Gallery Description */}
-        {gallery.description && (
-          <Box>
-            <Text color="fg.muted">{gallery.description}</Text>
-          </Box>
-        )}
-
         {/* Photo Grid - Placeholder for now */}
         <Box>
           <Heading size="lg" mb={4}>

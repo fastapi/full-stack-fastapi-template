@@ -10,7 +10,6 @@ from app.models import (
     OrganizationCreate,
     OrganizationPublic,
     OrganizationUpdate,
-    Message,
 )
 
 router = APIRouter()
@@ -33,25 +32,25 @@ def create_organization(
             status_code=403,
             detail="Only team members can create organizations",
         )
-    
+
     # Check user doesn't already have an organization
     if current_user.organization_id:
         raise HTTPException(
             status_code=400,
             detail="You already belong to an organization",
         )
-    
+
     # Create the organization
     organization = crud.create_organization(
         session=session, organization_in=organization_in
     )
-    
+
     # Assign the user to the new organization
     current_user.organization_id = organization.id
     session.add(current_user)
     session.commit()
     session.refresh(current_user)
-    
+
     return organization
 
 
@@ -66,14 +65,14 @@ def read_organization(
     organization = session.get(Organization, organization_id)
     if not organization:
         raise HTTPException(status_code=404, detail="Organization not found")
-    
+
     # Only allow viewing own organization (unless superuser)
     if not current_user.is_superuser and current_user.organization_id != organization_id:
         raise HTTPException(
             status_code=403,
             detail="Not enough permissions",
         )
-    
+
     return organization
 
 
@@ -92,19 +91,19 @@ def update_organization(
     organization = session.get(Organization, organization_id)
     if not organization:
         raise HTTPException(status_code=404, detail="Organization not found")
-    
+
     # Only allow updating own organization (unless superuser)
     if not current_user.is_superuser and current_user.organization_id != organization_id:
         raise HTTPException(
             status_code=403,
             detail="Not enough permissions",
         )
-    
+
     update_dict = organization_in.model_dump(exclude_unset=True)
     organization.sqlmodel_update(update_dict)
     session.add(organization)
     session.commit()
     session.refresh(organization)
-    
+
     return organization
 

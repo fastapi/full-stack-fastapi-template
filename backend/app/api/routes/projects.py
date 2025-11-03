@@ -68,7 +68,7 @@ def read_dashboard_stats(session: SessionDep, current_user: CurrentUser) -> Any:
         raise HTTPException(
             status_code=403, detail="Dashboard stats only available to team members"
         )
-    
+
     if not current_user.organization_id:
         raise HTTPException(
             status_code=400, detail="User is not part of an organization"
@@ -91,7 +91,7 @@ def create_project(
         raise HTTPException(
             status_code=403, detail="Only team members can create projects"
         )
-    
+
     if not current_user.organization_id:
         raise HTTPException(
             status_code=400, detail="User is not part of an organization"
@@ -102,7 +102,7 @@ def create_project(
         raise HTTPException(status_code=403, detail="Not enough permissions")
 
     project = crud.create_project(session=session, project_in=project_in)
-    
+
     # Automatically create a gallery for the project
     gallery_in = GalleryCreate(
         name=f"{project.name} - Gallery",
@@ -110,7 +110,7 @@ def create_project(
         status="draft",
     )
     crud.create_gallery(session=session, gallery_in=gallery_in)
-    
+
     return project
 
 
@@ -154,7 +154,7 @@ def update_project(
         raise HTTPException(
             status_code=403, detail="Only team members can update projects"
         )
-    
+
     project = crud.get_project(session=session, project_id=id)
     if not project:
         raise HTTPException(status_code=404, detail="Project not found")
@@ -181,7 +181,7 @@ def delete_project(
         raise HTTPException(
             status_code=403, detail="Only team members can delete projects"
         )
-    
+
     project = crud.get_project(session=session, project_id=id)
     if not project:
         raise HTTPException(status_code=404, detail="Project not found")

@@ -10,7 +10,7 @@ interface ClientAccessListProps {
 }
 
 export function ClientAccessList({ projectId, isTeamMember }: ClientAccessListProps) {
-  const showToast = useCustomToast()
+  const { showSuccessToast, showErrorToast } = useCustomToast()
   const queryClient = useQueryClient()
 
   // Fetch project access list
@@ -52,11 +52,11 @@ export function ClientAccessList({ projectId, isTeamMember }: ClientAccessListPr
       return response.json()
     },
     onSuccess: () => {
-      showToast("Success", "Access revoked successfully", "success")
+      showSuccessToast("Access revoked successfully")
       queryClient.invalidateQueries({ queryKey: ["projectAccess", projectId] })
     },
     onError: (error: Error) => {
-      showToast("Error", error.message, "error")
+      showErrorToast(error.message)
     },
   })
 
