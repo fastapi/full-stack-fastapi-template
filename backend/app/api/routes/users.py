@@ -62,18 +62,11 @@ def read_clients(
         )
 
     count_statement = (
-        select(func.count())
-        .select_from(User)
-        .where(User.user_type == "client")
+        select(func.count()).select_from(User).where(User.user_type == "client")
     )
     count = session.exec(count_statement).one()
 
-    statement = (
-        select(User)
-        .where(User.user_type == "client")
-        .offset(skip)
-        .limit(limit)
-    )
+    statement = select(User).where(User.user_type == "client").offset(skip).limit(limit)
     users = session.exec(statement).all()
 
     return UsersPublic(data=users, count=count)
@@ -207,6 +200,48 @@ def register_user(session: SessionDep, user_in: UserRegister) -> Any:
     return user
 
 
+@router.get("/organization-members", response_model=UsersPublic)
+def get_organization_members(
+    session: SessionDep,
+    current_user: CurrentUser,
+    skip: int = 0,
+    limit: int = 100,
+) -> Any:
+    """
+    Get all members of the current user's organization.
+    Accessible by team members to see their organization members.
+    """
+    if getattr(current_user, "user_type", None) != "team_member":
+        raise HTTPException(
+            status_code=403, detail="Only team members can view organization members"
+        )
+
+    if not current_user.organization_id:
+        raise HTTPException(
+            status_code=400,
+            detail="You must be part of an organization to view members",
+        )
+
+    count_statement = (
+        select(func.count())
+        .select_from(User)
+        .where(User.organization_id == current_user.organization_id)
+        .where(User.user_type == "team_member")
+    )
+    count = session.exec(count_statement).one()
+
+    statement = (
+        select(User)
+        .where(User.organization_id == current_user.organization_id)
+        .where(User.user_type == "team_member")
+        .offset(skip)
+        .limit(limit)
+    )
+    users = session.exec(statement).all()
+
+    return UsersPublic(data=users, count=count)
+
+
 @router.get("/pending", response_model=UsersPublic)
 def get_pending_users(
     session: SessionDep,
@@ -219,7 +254,9 @@ def get_pending_users(
     Accessible by team members to invite people to their organization.
     """
     if getattr(current_user, "user_type", None) != "team_member":
-        raise HTTPException(status_code=403, detail="Only team members can invite users")
+        raise HTTPException(
+            status_code=403, detail="Only team members can invite users"
+        )
 
     from sqlmodel import select
 
@@ -255,7 +292,10 @@ def assign_user_to_organization(
     Team members can assign users to their own organization.
     Superusers can assign to any organization.
     """
-    if getattr(current_user, "user_type", None) != "team_member" and not current_user.is_superuser:
+    if (
+        getattr(current_user, "user_type", None) != "team_member"
+        and not current_user.is_superuser
+    ):
         raise HTTPException(status_code=403, detail="Not enough permissions")
 
     user = session.get(User, user_id)
@@ -269,11 +309,15 @@ def assign_user_to_organization(
     else:
         # Team members assign to their own organization
         if not current_user.organization_id:
-            raise HTTPException(status_code=400, detail="You must be part of an organization to invite others")
+            raise HTTPException(
+                status_code=400,
+                detail="You must be part of an organization to invite others",
+            )
         target_org_id = current_user.organization_id
 
     # Verify organization exists
     from app.models import Organization
+
     org = session.get(Organization, target_org_id)
     if not org:
         raise HTTPException(status_code=404, detail="Organization not found")

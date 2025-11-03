@@ -22,26 +22,12 @@ function OrganizationPage() {
 
   const hasOrgId = currentUser && 'organization_id' in currentUser && currentUser.organization_id
 
-  // Fetch organization members (using pending endpoint but filter differently)
+  // Fetch organization members
   const { data: membersData } = useQuery({
     queryKey: ["orgMembers"],
     queryFn: async () => {
-      // For now, we'll create a simple count based on current user
-      // TODO: Add proper org members endpoint
-      return {
-        data: currentUser ? [currentUser] : [],
-        count: currentUser ? 1 : 0,
-      }
-    },
-    enabled: Boolean(hasOrgId),
-  })
-
-  // Fetch pending users
-  const { data: pendingUsers } = useQuery({
-    queryKey: ["pendingUsers"],
-    queryFn: async () => {
       const baseUrl = (import.meta.env.VITE_API_URL || "http://localhost:8000").replace(/\/$/, "")
-      const response = await fetch(`${baseUrl}/api/v1/users/pending`, {
+      const response = await fetch(`${baseUrl}/api/v1/users/organization-members`, {
         headers: {
           Authorization: `Bearer ${localStorage.getItem("access_token")}`,
         },
@@ -99,29 +85,6 @@ function OrganizationPage() {
     },
     onError: (error: any) => {
       showErrorToast(error.message || "Failed to send invitation")
-    },
-  })
-
-  // Add pending user
-  const addUserMutation = useMutation({
-    mutationFn: async (userId: string) => {
-      const baseUrl = (import.meta.env.VITE_API_URL || "http://localhost:8000").replace(/\/$/, "")
-      const response = await fetch(`${baseUrl}/api/v1/users/${userId}/assign-organization`, {
-        method: "PATCH",
-        headers: {
-          Authorization: `Bearer ${localStorage.getItem("access_token")}`,
-        },
-      })
-      if (!response.ok) throw new Error("Failed to add user")
-      return response.json()
-    },
-    onSuccess: () => {
-      showSuccessToast("User added to organization")
-      queryClient.invalidateQueries({ queryKey: ["pendingUsers"] })
-      queryClient.invalidateQueries({ queryKey: ["orgMembers"] })
-    },
-    onError: () => {
-      showErrorToast("Failed to add user")
     },
   })
 
@@ -332,89 +295,41 @@ function OrganizationPage() {
             </Card.Body>
           </Card.Root>
 
-          {/* Pending Users & Invitations */}
-          <Stack gap={6}>
-            {/* Pending Users */}
-            <Card.Root>
-              <Card.Header>
-                <Heading size="lg">Pending Users</Heading>
-                <Text fontSize="sm" color="fg.muted">
-                  Users waiting to join
-                </Text>
-              </Card.Header>
-              <Card.Body>
-                {!pendingUsers?.data || pendingUsers.data.length === 0 ? (
-                  <Text color="fg.muted">No pending users</Text>
-                ) : (
-                  <Stack gap={3}>
-                    {pendingUsers.data.map((user: any) => (
-                      <Flex
-                        key={user.id}
-                        justifyContent="space-between"
-                        alignItems="center"
-                        p={3}
-                        borderWidth="1px"
-                        borderRadius="md"
-                      >
-                        <Box>
-                          <Text fontWeight="semibold">
-                            {user.full_name || user.email}
-                          </Text>
-                          <Text fontSize="sm" color="fg.muted">
-                            {user.email}
-                          </Text>
-                        </Box>
-                        <Button
-                          size="sm"
-                          colorScheme="blue"
-                          onClick={() => addUserMutation.mutate(user.id)}
-                        >
-                          <FiUserPlus />
-                          Add
-                        </Button>
-                      </Flex>
-                    ))}
-                  </Stack>
-                )}
-              </Card.Body>
-            </Card.Root>
-
-            {/* Email Invitations */}
-            <Card.Root>
-              <Card.Header>
-                <Heading size="lg">Authorized Emails</Heading>
-                <Text fontSize="sm" color="fg.muted">
-                  Pre-authorized emails that can join
-                </Text>
-              </Card.Header>
-              <Card.Body>
-                {!invitations?.data || invitations.data.length === 0 ? (
-                  <Text color="fg.muted">No authorized emails</Text>
-                ) : (
-                  <Stack gap={3}>
-                    {invitations.data.map((inv: any) => (
-                      <Flex
-                        key={inv.id}
-                        justifyContent="space-between"
-                        alignItems="center"
-                        p={3}
-                        borderWidth="1px"
-                        borderRadius="md"
-                      >
-                        <Box>
-                          <Text fontWeight="semibold">{inv.email}</Text>
-                          <Text fontSize="sm" color="fg.muted">
-                            Added {new Date(inv.created_at).toLocaleDateString()}
-                          </Text>
-                        </Box>
-                        <Badge colorScheme="green">Authorized</Badge>
-                      </Flex>
-                    ))}
-                  </Stack>
-                )}
-              </Card.Body>
-            </Card.Root>
-          </Stack>
+          {/* Email Invitations */}
+          <Card.Root>
+            <Card.Header>
+              <Heading size="lg">Authorized Emails</Heading>
+              <Text fontSize="sm" color="fg.muted">
+                Pre-authorized emails that can join
+              </Text>
+            </Card.Header>
+            <Card.Body>
+              {!invitations?.data || invitations.data.length === 0 ? (
+                <Text color="fg.muted">No authorized emails</Text>
+              ) : (
+                <Stack gap={3}>
+                  {invitations.data.map((inv: any) => (
+                    <Flex
+                      key={inv.id}
+                      justifyContent="space-between"
+                      alignItems="center"
+                      p={3}
+                      borderWidth="1px"
+                      borderRadius="md"
+                    >
+                      <Box>
+                        <Text fontWeight="semibold">{inv.email}</Text>
+                        <Text fontSize="sm" color="fg.muted">
+                          Added {new Date(inv.created_at).toLocaleDateString()}
+                        </Text>
+                      </Box>
+                      <Badge colorScheme="green">Authorized</Badge>
+                    </Flex>
+                  ))}
+                </Stack>
+              )}
+            </Card.Body>
+          </Card.Root>
         </Grid>
       </Stack>
     </Container>

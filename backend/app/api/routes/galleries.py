@@ -47,7 +47,10 @@ def read_galleries(
                 raise HTTPException(status_code=403, detail="Not enough permissions")
         else:
             # Team member must be in same organization
-            if not current_user.organization_id or project.organization_id != current_user.organization_id:
+            if (
+                not current_user.organization_id
+                or project.organization_id != current_user.organization_id
+            ):
                 raise HTTPException(status_code=403, detail="Not enough permissions")
 
         galleries = crud.get_galleries_by_project(
@@ -65,14 +68,18 @@ def read_galleries(
 
             # Get galleries for all accessible projects
             galleries = []
-            for pid in project_ids[skip:skip+limit]:
+            for pid in project_ids[skip : skip + limit]:
                 project_galleries = crud.get_galleries_by_project(
                     session=session, project_id=pid, skip=0, limit=100
                 )
                 galleries.extend(project_galleries)
 
             count = sum(
-                len(crud.get_galleries_by_project(session=session, project_id=pid, skip=0, limit=1000))
+                len(
+                    crud.get_galleries_by_project(
+                        session=session, project_id=pid, skip=0, limit=1000
+                    )
+                )
                 for pid in project_ids
             )
         else:
@@ -147,7 +154,10 @@ def read_gallery(session: SessionDep, current_user: CurrentUser, id: uuid.UUID) 
             raise HTTPException(status_code=403, detail="Not enough permissions")
     else:
         # Team member must be in same organization
-        if not current_user.organization_id or project.organization_id != current_user.organization_id:
+        if (
+            not current_user.organization_id
+            or project.organization_id != current_user.organization_id
+        ):
             raise HTTPException(status_code=403, detail="Not enough permissions")
 
     return gallery

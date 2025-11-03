@@ -1,4 +1,5 @@
 """Unit tests for Dashboard Statistics"""
+
 from datetime import date, timedelta
 
 from sqlmodel import Session
@@ -24,8 +25,7 @@ def test_dashboard_stats_empty_organization(db: Session) -> None:
 def test_dashboard_stats_active_projects(db: Session) -> None:
     """Test counting active projects (in_progress and review status)"""
     org = crud.create_organization(
-        session=db,
-        organization_in=OrganizationCreate(name=random_lower_string())
+        session=db, organization_in=OrganizationCreate(name=random_lower_string())
     )
 
     # Create projects with different statuses
@@ -35,8 +35,8 @@ def test_dashboard_stats_active_projects(db: Session) -> None:
             name="Project 1",
             client_name="Client 1",
             status="in_progress",
-            organization_id=org.id
-        )
+            organization_id=org.id,
+        ),
     )
     crud.create_project(
         session=db,
@@ -44,8 +44,8 @@ def test_dashboard_stats_active_projects(db: Session) -> None:
             name="Project 2",
             client_name="Client 2",
             status="review",
-            organization_id=org.id
-        )
+            organization_id=org.id,
+        ),
     )
     crud.create_project(
         session=db,
@@ -53,8 +53,8 @@ def test_dashboard_stats_active_projects(db: Session) -> None:
             name="Project 3",
             client_name="Client 3",
             status="planning",  # Not active
-            organization_id=org.id
-        )
+            organization_id=org.id,
+        ),
     )
     crud.create_project(
         session=db,
@@ -62,8 +62,8 @@ def test_dashboard_stats_active_projects(db: Session) -> None:
             name="Project 4",
             client_name="Client 4",
             status="completed",  # Not active
-            organization_id=org.id
-        )
+            organization_id=org.id,
+        ),
     )
 
     stats = crud.get_dashboard_stats(session=db, organization_id=org.id)
@@ -75,8 +75,7 @@ def test_dashboard_stats_active_projects(db: Session) -> None:
 def test_dashboard_stats_upcoming_deadlines(db: Session) -> None:
     """Test counting upcoming deadlines (within next 14 days)"""
     org = crud.create_organization(
-        session=db,
-        organization_in=OrganizationCreate(name=random_lower_string())
+        session=db, organization_in=OrganizationCreate(name=random_lower_string())
     )
 
     today = date.today()
@@ -89,8 +88,8 @@ def test_dashboard_stats_upcoming_deadlines(db: Session) -> None:
             client_name="Client",
             status="in_progress",
             deadline=today + timedelta(days=5),
-            organization_id=org.id
-        )
+            organization_id=org.id,
+        ),
     )
 
     # Project with deadline in 30 days - should NOT count (too far)
@@ -101,8 +100,8 @@ def test_dashboard_stats_upcoming_deadlines(db: Session) -> None:
             client_name="Client",
             status="in_progress",
             deadline=today + timedelta(days=30),
-            organization_id=org.id
-        )
+            organization_id=org.id,
+        ),
     )
 
     # Completed project with deadline in 7 days - should NOT count (completed)
@@ -113,8 +112,8 @@ def test_dashboard_stats_upcoming_deadlines(db: Session) -> None:
             client_name="Client",
             status="completed",
             deadline=today + timedelta(days=7),
-            organization_id=org.id
-        )
+            organization_id=org.id,
+        ),
     )
 
     stats = crud.get_dashboard_stats(session=db, organization_id=org.id)
@@ -126,8 +125,7 @@ def test_dashboard_stats_upcoming_deadlines(db: Session) -> None:
 def test_dashboard_stats_completed_this_month(db: Session) -> None:
     """Test counting projects completed this month"""
     org = crud.create_organization(
-        session=db,
-        organization_in=OrganizationCreate(name=random_lower_string())
+        session=db, organization_in=OrganizationCreate(name=random_lower_string())
     )
 
     # Create completed projects
@@ -137,8 +135,8 @@ def test_dashboard_stats_completed_this_month(db: Session) -> None:
             name="Completed Project",
             client_name="Client",
             status="completed",
-            organization_id=org.id
-        )
+            organization_id=org.id,
+        ),
     )
 
     # Also create a non-completed project
@@ -148,12 +146,11 @@ def test_dashboard_stats_completed_this_month(db: Session) -> None:
             name="In Progress Project",
             client_name="Client",
             status="in_progress",
-            organization_id=org.id
-        )
+            organization_id=org.id,
+        ),
     )
 
     stats = crud.get_dashboard_stats(session=db, organization_id=org.id)
 
     # Should count only completed projects
     assert stats.completed_this_month >= 1  # At least the one we created
-

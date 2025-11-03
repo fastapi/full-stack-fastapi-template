@@ -1,4 +1,5 @@
 """Unit tests for Gallery CRUD operations"""
+
 from datetime import date
 
 from sqlmodel import Session
@@ -15,9 +16,7 @@ def test_create_gallery(db: Session) -> None:
     organization = crud.create_organization(session=db, organization_in=org_in)
 
     project_in = ProjectCreate(
-        name="Test Project",
-        client_name="Test Client",
-        organization_id=organization.id
+        name="Test Project", client_name="Test Client", organization_id=organization.id
     )
     project = crud.create_project(session=db, project_in=project_in)
 
@@ -30,7 +29,7 @@ def test_create_gallery(db: Session) -> None:
         photographer="Test Photographer",
         status="published",
         cover_image_url="https://example.com/image.jpg",
-        project_id=project.id
+        project_id=project.id,
     )
 
     gallery = crud.create_gallery(session=db, gallery_in=gallery_in)
@@ -47,22 +46,16 @@ def test_get_gallery(db: Session) -> None:
     """Test retrieving a gallery by ID"""
     # Setup: create org, project, and gallery
     org = crud.create_organization(
-        session=db,
-        organization_in=OrganizationCreate(name=random_lower_string())
+        session=db, organization_in=OrganizationCreate(name=random_lower_string())
     )
     project = crud.create_project(
         session=db,
         project_in=ProjectCreate(
-            name="Test Project",
-            client_name="Client",
-            organization_id=org.id
-        )
+            name="Test Project", client_name="Client", organization_id=org.id
+        ),
     )
     gallery_in = GalleryCreate(
-        name="Test Gallery",
-        photo_count=100,
-        status="draft",
-        project_id=project.id
+        name="Test Gallery", photo_count=100, status="draft", project_id=project.id
     )
     created_gallery = crud.create_gallery(session=db, gallery_in=gallery_in)
 
@@ -79,38 +72,28 @@ def test_update_gallery(db: Session) -> None:
     """Test updating a gallery"""
     # Setup
     org = crud.create_organization(
-        session=db,
-        organization_in=OrganizationCreate(name=random_lower_string())
+        session=db, organization_in=OrganizationCreate(name=random_lower_string())
     )
     project = crud.create_project(
         session=db,
         project_in=ProjectCreate(
-            name="Test Project",
-            client_name="Client",
-            organization_id=org.id
-        )
+            name="Test Project", client_name="Client", organization_id=org.id
+        ),
     )
     gallery = crud.create_gallery(
         session=db,
         gallery_in=GalleryCreate(
-            name="Original Name",
-            photo_count=50,
-            status="draft",
-            project_id=project.id
-        )
+            name="Original Name", photo_count=50, status="draft", project_id=project.id
+        ),
     )
 
     # Update gallery
     gallery_update = GalleryUpdate(
-        name="Updated Name",
-        photo_count=100,
-        status="published"
+        name="Updated Name", photo_count=100, status="published"
     )
 
     updated_gallery = crud.update_gallery(
-        session=db,
-        db_gallery=gallery,
-        gallery_in=gallery_update
+        session=db, db_gallery=gallery, gallery_in=gallery_update
     )
 
     assert updated_gallery.name == "Updated Name"
@@ -122,16 +105,13 @@ def test_get_galleries_by_project(db: Session) -> None:
     """Test retrieving all galleries for a project"""
     # Setup
     org = crud.create_organization(
-        session=db,
-        organization_in=OrganizationCreate(name=random_lower_string())
+        session=db, organization_in=OrganizationCreate(name=random_lower_string())
     )
     project = crud.create_project(
         session=db,
         project_in=ProjectCreate(
-            name="Test Project",
-            client_name="Client",
-            organization_id=org.id
-        )
+            name="Test Project", client_name="Client", organization_id=org.id
+        ),
     )
 
     # Create multiple galleries
@@ -139,10 +119,8 @@ def test_get_galleries_by_project(db: Session) -> None:
         crud.create_gallery(
             session=db,
             gallery_in=GalleryCreate(
-                name=f"Gallery {i}",
-                photo_count=i * 10,
-                project_id=project.id
-            )
+                name=f"Gallery {i}", photo_count=i * 10, project_id=project.id
+            ),
         )
 
     # Retrieve galleries
@@ -159,24 +137,19 @@ def test_delete_gallery(db: Session) -> None:
     """Test deleting a gallery"""
     # Setup
     org = crud.create_organization(
-        session=db,
-        organization_in=OrganizationCreate(name=random_lower_string())
+        session=db, organization_in=OrganizationCreate(name=random_lower_string())
     )
     project = crud.create_project(
         session=db,
         project_in=ProjectCreate(
-            name="Test Project",
-            client_name="Client",
-            organization_id=org.id
-        )
+            name="Test Project", client_name="Client", organization_id=org.id
+        ),
     )
     gallery = crud.create_gallery(
         session=db,
         gallery_in=GalleryCreate(
-            name="Gallery to Delete",
-            photo_count=50,
-            project_id=project.id
-        )
+            name="Gallery to Delete", photo_count=50, project_id=project.id
+        ),
     )
     gallery_id = gallery.id
 
@@ -188,4 +161,3 @@ def test_delete_gallery(db: Session) -> None:
 
     # Verify gallery is deleted
     assert crud.get_gallery(session=db, gallery_id=gallery_id) is None
-

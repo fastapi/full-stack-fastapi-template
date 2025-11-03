@@ -345,9 +345,7 @@ def delete_project_access(
     *, session: Session, project_id: uuid.UUID, user_id: uuid.UUID
 ) -> None:
     """Remove a user's access to a project"""
-    access = get_project_access(
-        session=session, project_id=project_id, user_id=user_id
-    )
+    access = get_project_access(session=session, project_id=project_id, user_id=user_id)
     if access:
         session.delete(access)
         session.commit()

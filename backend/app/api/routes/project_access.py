@@ -45,7 +45,10 @@ def grant_project_access(
         raise HTTPException(status_code=404, detail="Project not found")
 
     # Check if current user's organization owns the project
-    if not current_user.organization_id or current_user.organization_id != project.organization_id:
+    if (
+        not current_user.organization_id
+        or current_user.organization_id != project.organization_id
+    ):
         raise HTTPException(
             status_code=403,
             detail="You don't have permission to manage this project",
@@ -128,9 +131,7 @@ def revoke_project_access(
         raise HTTPException(status_code=403, detail="Access denied")
 
     # Revoke access
-    crud.delete_project_access(
-        session=session, project_id=project_id, user_id=user_id
-    )
+    crud.delete_project_access(session=session, project_id=project_id, user_id=user_id)
     return Message(message="Access revoked successfully")
 
 
@@ -175,4 +176,3 @@ def update_project_access_permissions(
         session=session, db_access=db_access, access_in=access_in
     )
     return access
-

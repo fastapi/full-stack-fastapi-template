@@ -67,7 +67,10 @@ def read_organization(
         raise HTTPException(status_code=404, detail="Organization not found")
 
     # Only allow viewing own organization (unless superuser)
-    if not current_user.is_superuser and current_user.organization_id != organization_id:
+    if (
+        not current_user.is_superuser
+        and current_user.organization_id != organization_id
+    ):
         raise HTTPException(
             status_code=403,
             detail="Not enough permissions",
@@ -93,7 +96,10 @@ def update_organization(
         raise HTTPException(status_code=404, detail="Organization not found")
 
     # Only allow updating own organization (unless superuser)
-    if not current_user.is_superuser and current_user.organization_id != organization_id:
+    if (
+        not current_user.is_superuser
+        and current_user.organization_id != organization_id
+    ):
         raise HTTPException(
             status_code=403,
             detail="Not enough permissions",
@@ -106,4 +112,3 @@ def update_organization(
     session.refresh(organization)
 
     return organization
-

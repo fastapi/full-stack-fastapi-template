@@ -29,8 +29,7 @@ def init_db(session: Session) -> None:
     if not user:
         # Create the superuser's organization
         organization_in = OrganizationCreate(
-            name="Admin Organization",
-            description="Organization for admin user"
+            name="Admin Organization", description="Organization for admin user"
         )
         organization = crud.create_organization(
             session=session, organization_in=organization_in

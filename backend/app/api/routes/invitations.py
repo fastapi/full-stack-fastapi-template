@@ -102,4 +102,3 @@ def delete_invitation(
     session.delete(invitation)
     session.commit()
     return {"message": "Invitation deleted"}
-
