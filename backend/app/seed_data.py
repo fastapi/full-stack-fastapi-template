@@ -14,13 +14,13 @@ logger = logging.getLogger(__name__)
 
 def seed_data() -> None:
     with Session(engine) as session:
-        # Get the default organization
+        # Get the admin organization (created during init_db)
         organization = session.exec(
-            select(Organization).where(Organization.name == "Default Organization")
+            select(Organization).where(Organization.name == "Admin Organization")
         ).first()
 
         if not organization:
-            logger.error("Default organization not found! Run init_db first.")
+            logger.error("Admin organization not found! Run initial_data.py first.")
             return
 
         logger.info(f"Using organization: {organization.name}")
@@ -112,101 +112,69 @@ def seed_data() -> None:
         session.refresh(project1)
         session.refresh(project2)
         session.refresh(project3)
+        session.refresh(project4)
         session.refresh(project5)
 
         logger.info("Created 5 sample projects")
 
-        # Create sample galleries
+        # Create one gallery per project
         gallery1 = Gallery(
-            name="Engagement Shoot",
-            date=today - timedelta(days=10),
-            photo_count=87,
-            photographer="Alice Johnson",
-            status="published",
-            cover_image_url="https://images.unsplash.com/photo-1519741497674-611481863552?w=400&h=300&fit=crop",
+            name=f"{project1.name} - Gallery",
+            date=project1.start_date,
+            photo_count=0,
+            photographer=None,
+            status="draft",
+            cover_image_url=None,
             project_id=project1.id,
         )
         session.add(gallery1)
 
         gallery2 = Gallery(
-            name="Wedding Day - Ceremony",
-            date=today - timedelta(days=3),
-            photo_count=234,
-            photographer="Alice Johnson",
-            status="processing",
-            cover_image_url="https://images.unsplash.com/photo-1606800052052-a08af7148866?w=400&h=300&fit=crop",
-            project_id=project1.id,
+            name=f"{project2.name} - Gallery",
+            date=project2.start_date,
+            photo_count=0,
+            photographer=None,
+            status="draft",
+            cover_image_url=None,
+            project_id=project2.id,
         )
         session.add(gallery2)
 
         gallery3 = Gallery(
-            name="Wedding Day - Reception",
-            date=today - timedelta(days=3),
-            photo_count=198,
-            photographer="Bob Smith",
-            status="processing",
-            cover_image_url="https://images.unsplash.com/photo-1464366400600-7168b8af9bc3?w=400&h=300&fit=crop",
-            project_id=project1.id,
+            name=f"{project3.name} - Gallery",
+            date=project3.start_date,
+            photo_count=0,
+            photographer=None,
+            status="draft",
+            cover_image_url=None,
+            project_id=project3.id,
         )
         session.add(gallery3)
 
         gallery4 = Gallery(
-            name="Smartphone Collection - White BG",
-            date=today - timedelta(days=3),
-            photo_count=52,
-            photographer="Charlie Davis",
-            status="published",
-            cover_image_url="https://images.unsplash.com/photo-1511707171634-5f897ff02aa9?w=400&h=300&fit=crop",
-            project_id=project2.id,
+            name=f"{project4.name} - Gallery",
+            date=project4.start_date,
+            photo_count=0,
+            photographer=None,
+            status="draft",
+            cover_image_url=None,
+            project_id=project4.id,
         )
         session.add(gallery4)
 
         gallery5 = Gallery(
-            name="Lifestyle Shots",
-            date=today - timedelta(days=3),
-            photo_count=48,
-            photographer="Charlie Davis",
-            status="published",
-            cover_image_url="https://images.unsplash.com/photo-1556656793-08538906a9f8?w=400&h=300&fit=crop",
-            project_id=project2.id,
+            name=f"{project5.name} - Gallery",
+            date=project5.start_date,
+            photo_count=0,
+            photographer=None,
+            status="draft",
+            cover_image_url=None,
+            project_id=project5.id,
         )
         session.add(gallery5)
 
-        gallery6 = Gallery(
-            name="Mood Board & References",
-            date=today,
-            photo_count=15,
-            photographer="Alice Johnson",
-            status="draft",
-            cover_image_url="https://images.unsplash.com/photo-1542744173-8e7e53415bb0?w=400&h=300&fit=crop",
-            project_id=project3.id,
-        )
-        session.add(gallery6)
-
-        gallery7 = Gallery(
-            name="Menu Items - Appetizers",
-            date=today - timedelta(days=20),
-            photo_count=45,
-            photographer="David Lee",
-            status="published",
-            cover_image_url="https://images.unsplash.com/photo-1504674900247-0877df9cc836?w=400&h=300&fit=crop",
-            project_id=project5.id,
-        )
-        session.add(gallery7)
-
-        gallery8 = Gallery(
-            name="Menu Items - Main Courses",
-            date=today - timedelta(days=18),
-            photo_count=52,
-            photographer="David Lee",
-            status="published",
-            cover_image_url="https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=400&h=300&fit=crop",
-            project_id=project5.id,
-        )
-        session.add(gallery8)
-
         session.commit()
-        logger.info("Created 8 sample galleries")
+        logger.info("Created 5 galleries (one per project)")
         logger.info("Sample data seeding complete!")
 
 
