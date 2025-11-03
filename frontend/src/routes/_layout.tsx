@@ -10,7 +10,7 @@ export const Route = createFileRoute("/_layout")({
   beforeLoad: async () => {
     if (!isLoggedIn()) {
       throw redirect({
-        to: "/login",
+        to: "/",
       })
     }
   },
@@ -29,5 +29,3 @@ function Layout() {
     </Flex>
   )
 }
-
-export default Layout

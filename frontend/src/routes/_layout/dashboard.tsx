@@ -6,7 +6,7 @@ import { useQuery } from "@tanstack/react-query"
 import useAuth from "@/hooks/useAuth"
 import { ProjectsService, type ProjectPublic } from "@/client"
 
-export const Route = createFileRoute("/_layout/")({
+export const Route = createFileRoute("/_layout/dashboard")({
   component: Dashboard,
 })
 

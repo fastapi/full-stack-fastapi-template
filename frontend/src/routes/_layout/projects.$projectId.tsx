@@ -23,6 +23,7 @@ import {
 } from "react-icons/fi"
 
 import { ProjectsService, GalleriesService, type GalleryPublic } from "@/client"
+import useAuth from "@/hooks/useAuth"
 
 export const Route = createFileRoute("/_layout/projects/$projectId")({
   component: ProjectDetail,
@@ -45,6 +46,7 @@ function getStatusLabel(status: string) {
 
 function ProjectDetail() {
   const { projectId } = Route.useParams()
+  const { user: currentUser } = useAuth()
   
   // Fetch project from backend
   const { data: project, isLoading } = useQuery({
@@ -320,18 +322,20 @@ function ProjectDetail() {
                       <Text fontSize="sm">Add Comment</Text>
                     </Flex>
                   </Box>
-                  <Box 
-                    p={3} 
-                    borderWidth="1px" 
-                    borderRadius="md"
-                    cursor="pointer"
-                    _hover={{ bg: "bg.subtle" }}
-                  >
-                    <Flex alignItems="center" gap={2}>
-                      <FiUsers />
-                      <Text fontSize="sm">Manage Team</Text>
-                    </Flex>
-                  </Box>
+                  {currentUser?.user_type === "team_member" && (
+                    <Box 
+                      p={3} 
+                      borderWidth="1px" 
+                      borderRadius="md"
+                      cursor="pointer"
+                      _hover={{ bg: "bg.subtle" }}
+                    >
+                      <Flex alignItems="center" gap={2}>
+                        <FiUsers />
+                        <Text fontSize="sm">Manage Team</Text>
+                      </Flex>
+                    </Box>
+                  )}
                 </Stack>
               </Card.Body>
             </Card.Root>

@@ -13,20 +13,20 @@ import { Field } from "@/components/ui/field"
 import { InputGroup } from "@/components/ui/input-group"
 import { PasswordInput } from "@/components/ui/password-input"
 import useAuth, { isLoggedIn } from "@/hooks/useAuth"
-import { emailPattern, passwordRules } from "../utils"
+import { emailPattern, passwordRules } from "@/utils"
 
-export const Route = createFileRoute("/login")({
-  component: Login,
+export const Route = createFileRoute("/team-login")({
+  component: TeamLogin,
   beforeLoad: async () => {
     if (isLoggedIn()) {
       throw redirect({
-        to: "/",
+        to: "/dashboard",
       })
     }
   },
 })
 
-function Login() {
+function TeamLogin() {
   const { loginMutation, error, resetError } = useAuth()
   const {
     register,
@@ -69,13 +69,13 @@ function Login() {
           size="4xl"
           bgGradient="to-r"
           gradientFrom="blue.400"
-          gradientTo="purple.500"
+          gradientTo="blue.600"
           bgClip="text"
         >
-          Mosaic
+          Team Member Login
         </Heading>
         <Text fontSize="md" color="fg.muted" mt={2}>
-          Keep in touch.
+          Access your organization's projects
         </Text>
       </div>
       <Field
@@ -103,13 +103,12 @@ function Login() {
       <RouterLink to="/recover-password" className="main-link">
         Forgot Password?
       </RouterLink>
-      <Button variant="solid" type="submit" loading={isSubmitting} size="md">
+      <Button variant="solid" colorScheme="blue" type="submit" loading={isSubmitting} size="md">
         Log In
       </Button>
       <Text>
-        Don't have an account?{" "}
-        <RouterLink to="/signup" className="main-link">
-          Sign Up
+        <RouterLink to="/" className="main-link">
+          ← Back to Home
         </RouterLink>
       </Text>
     </Container>
