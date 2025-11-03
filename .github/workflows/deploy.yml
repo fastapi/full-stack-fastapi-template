@@ -48,7 +48,7 @@ jobs:
         POSTGRES_PASSWORD: postgres
         POSTGRES_DB: test_db
         SECRET_KEY: test-secret-key-for-testing
-        FIRST_SUPERUSER: test@example.com
+        FIRST_SUPERUSER: admin@example.com
         FIRST_SUPERUSER_PASSWORD: testpassword
         ENVIRONMENT: local
       run: |
@@ -64,7 +64,7 @@ jobs:
         POSTGRES_PASSWORD: postgres
         POSTGRES_DB: test_db
         SECRET_KEY: test-secret-key-for-testing
-        FIRST_SUPERUSER: test@example.com
+        FIRST_SUPERUSER: admin@example.com
         FIRST_SUPERUSER_PASSWORD: testpassword
         ENVIRONMENT: local
       run: |
