@@ -24,6 +24,10 @@ import {
 
 import { ProjectsService, GalleriesService, type GalleryPublic } from "@/client"
 import useAuth from "@/hooks/useAuth"
+import { InviteClient } from "@/components/Projects/InviteClient"
+import { ClientAccessList } from "@/components/Projects/ClientAccessList"
+import { EditProject } from "@/components/Projects/EditProject"
+import { DeleteProject } from "@/components/Projects/DeleteProject"
 
 export const Route = createFileRoute("/_layout/projects/$projectId")({
   component: ProjectDetail,
@@ -80,7 +84,9 @@ function ProjectDetail() {
   }
 
   const galleries = galleriesData?.data || []
-  const fileCount = galleries.reduce((sum: number, g: GalleryPublic) => sum + (g.photo_count || 0), 0)
+  
+  // Get the project's gallery (should only be one per project)
+  const projectGallery = galleries.length > 0 ? galleries[0] : null
 
   return (
     <Container maxW="full" p={6}>
@@ -108,9 +114,18 @@ function ProjectDetail() {
                   )}
                 </HStack>
               </Box>
-              <Badge size="lg" colorScheme={getStatusColor(project.status || 'pending')}>
-                {getStatusLabel(project.status || 'pending')}
-              </Badge>
+              <Flex alignItems="center" gap={3}>
+                {currentUser?.user_type === "team_member" && (
+                  <>
+                    <EditProject project={project} />
+                    <DeleteProject project={project} />
+                    <InviteClient projectId={projectId} />
+                  </>
+                )}
+                <Badge size="lg" colorScheme={getStatusColor(project.status || 'pending')}>
+                  {getStatusLabel(project.status || 'pending')}
+                </Badge>
+              </Flex>
             </Flex>
           </Box>
         </Flex>
@@ -128,14 +143,14 @@ function ProjectDetail() {
               </Flex>
             </Card.Body>
           </Card.Root>
-          
+
           <Card.Root>
             <Card.Body>
               <Flex alignItems="center" gap={3}>
                 <FiImage size={20} />
                 <Box>
-                  <Text fontSize="xs" color="fg.muted">Files</Text>
-                  <Text fontWeight="semibold">{fileCount}</Text>
+                  <Text fontSize="xs" color="fg.muted">Gallery Photos</Text>
+                  <Text fontWeight="semibold">{projectGallery?.photo_count || 0}</Text>
                 </Box>
               </Flex>
             </Card.Body>
@@ -146,8 +161,8 @@ function ProjectDetail() {
               <Flex alignItems="center" gap={3}>
                 <FiMessageSquare size={20} />
                 <Box>
-                  <Text fontSize="xs" color="fg.muted">Galleries</Text>
-                  <Text fontWeight="semibold">{galleries.length}</Text>
+                  <Text fontSize="xs" color="fg.muted">Comments</Text>
+                  <Text fontWeight="semibold">0</Text>
                 </Box>
               </Flex>
             </Card.Body>
@@ -217,19 +232,15 @@ function ProjectDetail() {
                   <Separator />
 
                   <Box>
-                    <Text fontWeight="semibold" mb={2}>Galleries</Text>
-                    {galleries.length > 0 ? (
-                      <Stack gap={2}>
-                        {galleries.map((gallery: GalleryPublic) => (
-                          <Flex key={gallery.id} alignItems="center" gap={2}>
-                            <FiImage size={14} />
-                            <Text fontSize="sm">{gallery.name}</Text>
-                            <Badge size="sm" colorScheme="blue">{gallery.photo_count} photos</Badge>
-                          </Flex>
-                        ))}
-                      </Stack>
+                    <Text fontWeight="semibold" mb={2}>Gallery</Text>
+                    {projectGallery ? (
+                      <Flex alignItems="center" gap={2}>
+                        <FiImage size={14} />
+                        <Text fontSize="sm">{projectGallery.name}</Text>
+                        <Badge size="sm" colorScheme="blue">{projectGallery.photo_count || 0} photos</Badge>
+                      </Flex>
                     ) : (
-                      <Text fontSize="sm" color="fg.muted">No galleries yet</Text>
+                      <Text fontSize="sm" color="fg.muted">No gallery yet</Text>
                     )}
                   </Box>
                 </Stack>
@@ -289,6 +300,12 @@ function ProjectDetail() {
               </Card.Body>
             </Card.Root>
 
+            {/* Client Access List */}
+            <ClientAccessList 
+              projectId={projectId} 
+              isTeamMember={currentUser?.user_type === "team_member"}
+            />
+
             {/* Quick Actions */}
             <Card.Root>
               <Card.Header>
@@ -296,20 +313,38 @@ function ProjectDetail() {
               </Card.Header>
               <Card.Body>
                 <Stack gap={2}>
-                  <Link to="/galleries" style={{ textDecoration: "none", color: "inherit" }}>
+                  {projectGallery ? (
+                    <Link 
+                      to="/galleries/$galleryId" 
+                      params={{ galleryId: projectGallery.id }}
+                      style={{ textDecoration: "none", color: "inherit" }}
+                    >
+                      <Box 
+                        p={3} 
+                        borderWidth="1px" 
+                        borderRadius="md"
+                        cursor="pointer"
+                        _hover={{ bg: "bg.subtle" }}
+                      >
+                        <Flex alignItems="center" gap={2}>
+                          <FiImage />
+                          <Text fontSize="sm">View Gallery</Text>
+                        </Flex>
+                      </Box>
+                    </Link>
+                  ) : (
                     <Box 
                       p={3} 
                       borderWidth="1px" 
                       borderRadius="md"
-                      cursor="pointer"
-                      _hover={{ bg: "bg.subtle" }}
+                      opacity={0.5}
                     >
                       <Flex alignItems="center" gap={2}>
                         <FiImage />
-                        <Text fontSize="sm">View Gallery</Text>
+                        <Text fontSize="sm">No Gallery Yet</Text>
                       </Flex>
                     </Box>
-                  </Link>
+                  )}
                   <Box 
                     p={3} 
                     borderWidth="1px" 

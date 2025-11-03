@@ -11,13 +11,15 @@ import { ApiError, OpenAPI } from "./client"
 import { CustomProvider } from "./components/ui/provider"
 import { routeTree } from "./routeTree.gen"
 
-OpenAPI.BASE = import.meta.env.VITE_API_URL
+OpenAPI.BASE = import.meta.env.VITE_API_URL 
+  ? import.meta.env.VITE_API_URL.replace(/\/$/, '')
+  : "http://localhost:8000"
 OpenAPI.TOKEN = async () => {
   return localStorage.getItem("access_token") || ""
 }
 
 const handleApiError = (error: Error) => {
-  if (error instanceof ApiError && [401, 403].includes(error.status)) {
+  if (error instanceof ApiError && error.status === 401) {
     localStorage.removeItem("access_token")
     window.location.href = "/"
   }

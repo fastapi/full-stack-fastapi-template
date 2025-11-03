@@ -21,32 +21,26 @@ def init_db(session: Session) -> None:
     # This works because the models are already imported and registered from app.models
     # SQLModel.metadata.create_all(engine)
 
-    # Create default organization if it doesn't exist
-    organization = session.exec(
-        select(Organization).where(Organization.name == "Default Organization")
+    # Check if superuser exists
+    user = session.exec(
+        select(User).where(User.email == settings.FIRST_SUPERUSER)
     ).first()
-    if not organization:
+    
+    if not user:
+        # Create the superuser's organization
         organization_in = OrganizationCreate(
-            name="Default Organization", description="Initial organization for Mosaic"
+            name="Admin Organization", 
+            description="Organization for admin user"
         )
         organization = crud.create_organization(
             session=session, organization_in=organization_in
         )
-
-    user = session.exec(
-        select(User).where(User.email == settings.FIRST_SUPERUSER)
-    ).first()
-    if not user:
+        
+        # Create superuser and assign to their organization
         user_in = UserCreate(
             email=settings.FIRST_SUPERUSER,
             password=settings.FIRST_SUPERUSER_PASSWORD,
             is_superuser=True,
+            organization_id=organization.id,
         )
         user = crud.create_user(session=session, user_create=user_in)
-
-    # Assign user to default organization if not already assigned
-    if user and not user.organization_id:
-        user.organization_id = organization.id
-        session.add(user)
-        session.commit()
-        session.refresh(user)

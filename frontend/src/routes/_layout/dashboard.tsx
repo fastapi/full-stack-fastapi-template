@@ -1,10 +1,16 @@
 import { Badge, Box, Card, Container, Flex, Grid, Heading, HStack, Stack, Text } from "@chakra-ui/react"
+import { Button } from "@/components/ui/button"
 import { createFileRoute, Link } from "@tanstack/react-router"
-import { FiCalendar, FiCheckCircle, FiClock, FiFolder, FiUsers } from "react-icons/fi"
-import { useQuery } from "@tanstack/react-query"
+import { FiCalendar, FiCheckCircle, FiClock, FiFolder, FiUsers, FiUserPlus, FiBriefcase } from "react-icons/fi"
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query"
+import { useState } from "react"
 
 import useAuth from "@/hooks/useAuth"
 import { ProjectsService, type ProjectPublic } from "@/client"
+import { CreateProject } from "@/components/Projects/CreateProject"
+import useCustomToast from "@/hooks/useCustomToast"
+import { Input } from "@chakra-ui/react"
+import { Field } from "@/components/ui/field"
 
 export const Route = createFileRoute("/_layout/dashboard")({
   component: Dashboard,
@@ -62,20 +68,101 @@ function getStatusLabel(status: string) {
 
 function Dashboard() {
   const { user: currentUser } = useAuth()
+  const { showSuccessToast, showErrorToast } = useCustomToast()
+  const queryClient = useQueryClient()
+  const [orgName, setOrgName] = useState("")
+  
+  // Check if team member has organization
+  const hasOrganization = Boolean(currentUser?.user_type === "client" || currentUser?.organization_id)
+  const hasOrgId = currentUser && 'organization_id' in currentUser && currentUser.organization_id
 
-  // Fetch dashboard stats
+  // Create organization mutation (must be before any returns)
+  const createOrgMutation = useMutation({
+    mutationFn: async (name: string) => {
+      const baseUrl = (import.meta.env.VITE_API_URL || "http://localhost:8000").replace(/\/$/, "")
+      const response = await fetch(`${baseUrl}/api/v1/organizations/`, {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${localStorage.getItem("access_token")}`,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ name, description: `Organization for ${currentUser?.full_name || currentUser?.email}` }),
+      })
+      if (!response.ok) {
+        const error = await response.json()
+        throw new Error(error.detail || "Failed to create organization")
+      }
+      return response.json()
+    },
+    onSuccess: () => {
+      showSuccessToast("Organization created successfully!")
+      queryClient.invalidateQueries({ queryKey: ["currentUser"] })
+      setOrgName("")
+    },
+    onError: (error: any) => {
+      showErrorToast(error.message || "Failed to create organization")
+    },
+  })
+
+  // Fetch dashboard stats (only for team members with organization)
   const { data: stats, isLoading: statsLoading } = useQuery({
     queryKey: ["dashboardStats"],
     queryFn: () => ProjectsService.readDashboardStats(),
+    enabled: Boolean(currentUser?.user_type === "team_member" && hasOrgId),
   })
 
-  // Fetch recent projects
+  // Fetch recent projects (only if has organization)
   const { data: projectsData, isLoading: projectsLoading } = useQuery({
     queryKey: ["recentProjects"],
     queryFn: () => ProjectsService.readProjects({ skip: 0, limit: 5 }),
+    enabled: hasOrganization,
+  })
+
+  // Fetch pending users (team members only, with organization)
+  const { data: pendingUsers } = useQuery({
+    queryKey: ["pendingUsers"],
+    queryFn: async () => {
+      const baseUrl = (import.meta.env.VITE_API_URL || "http://localhost:8000").replace(/\/$/, "")
+      const response = await fetch(`${baseUrl}/api/v1/users/pending`, {
+        headers: {
+          Authorization: `Bearer ${localStorage.getItem("access_token")}`,
+        },
+      })
+      if (!response.ok) return { data: [], count: 0 }
+      return response.json()
+    },
+    enabled: Boolean(currentUser?.user_type === "team_member" && hasOrgId),
   })
 
   const recentProjects = projectsData?.data?.slice(0, 3) || []
+  
+  // Invite user mutation
+  const inviteUserMutation = useMutation({
+    mutationFn: async (userId: string) => {
+      const baseUrl = (import.meta.env.VITE_API_URL || "http://localhost:8000").replace(/\/$/, '')
+      const response = await fetch(
+        `${baseUrl}/api/v1/users/${userId}/assign-organization`,
+        {
+          method: "PATCH",
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem("access_token")}`,
+          },
+        }
+      )
+      if (!response.ok) {
+        throw new Error("Failed to invite user")
+      }
+      return response.json()
+    },
+    onSuccess: () => {
+      showSuccessToast("User added to your organization")
+      queryClient.invalidateQueries({ queryKey: ["pendingUsers"] })
+      queryClient.invalidateQueries({ queryKey: ["dashboardStats"] })
+    },
+    onError: () => {
+      showErrorToast("Failed to add user")
+    },
+  })
   
   // Get projects with upcoming deadlines (within 2 weeks, not completed)
   type DeadlineItem = {
@@ -97,6 +184,12 @@ function Dashboard() {
     .sort((a: DeadlineItem, b: DeadlineItem) => a.daysLeft - b.daysLeft)
     .slice(0, 3)
 
+  const handleCreateOrg = () => {
+    if (orgName && orgName.trim().length > 0) {
+      createOrgMutation.mutate(orgName)
+    }
+  }
+
   const isLoading = statsLoading || projectsLoading
 
   if (isLoading) {
@@ -107,24 +200,112 @@ function Dashboard() {
     )
   }
 
+  // Show create organization form for team members without organization
+  if (currentUser?.user_type === "team_member" && !hasOrgId) {
+    return (
+      <Container maxW="md" centerContent py={20}>
+        <Card.Root w="full">
+          <Card.Header textAlign="center">
+            <Flex justifyContent="center" mb={4}>
+              <FiBriefcase size={48} />
+            </Flex>
+            <Heading size="xl" mb={2}>
+              Create Your Organization
+            </Heading>
+            <Text color="fg.muted">
+              You need to create an organization before you can manage projects and invite team members.
+            </Text>
+          </Card.Header>
+          <Card.Body>
+            <Stack gap={4}>
+              <Field label="Organization Name" required>
+                <Input
+                  placeholder="My Studio"
+                  value={orgName}
+                  onChange={(e) => setOrgName(e.target.value)}
+                  onKeyPress={(e) => e.key === "Enter" && handleCreateOrg()}
+                />
+              </Field>
+              <Button
+                colorScheme="blue"
+                w="full"
+                onClick={handleCreateOrg}
+                loading={createOrgMutation.isPending}
+                disabled={!orgName || orgName.trim().length === 0}
+              >
+                <FiBriefcase />
+                Create Organization
+              </Button>
+            </Stack>
+          </Card.Body>
+        </Card.Root>
+      </Container>
+    )
+  }
+  
   return (
     <Container maxW="full" p={6}>
       <Stack gap={6}>
         {/* Welcome Section */}
-        <Box>
-          <Heading size="2xl" mb={2}>
-            Welcome back, {currentUser?.full_name || currentUser?.email?.split('@')[0]}! 👋
-          </Heading>
-          <Text color="fg.muted">Here's what's happening with your projects today.</Text>
-        </Box>
+        <Flex justifyContent="space-between" alignItems="start">
+          <Box>
+            <Heading size="2xl" mb={2}>
+              Welcome back, {currentUser?.full_name || currentUser?.email?.split('@')[0]}! 👋
+            </Heading>
+            <Text color="fg.muted">Here's what's happening with your projects today.</Text>
+          </Box>
+          {currentUser?.user_type === "team_member" && currentUser?.organization_id && (
+            <CreateProject />
+          )}
+        </Flex>
 
-        {/* Stats Cards */}
-        <Grid templateColumns={{ base: "1fr", md: "repeat(2, 1fr)", lg: "repeat(4, 1fr)" }} gap={4}>
-          <StatCard icon={FiFolder} label="Active Projects" value={stats?.active_projects || 0} colorScheme="blue" />
-          <StatCard icon={FiClock} label="Upcoming Deadlines" value={stats?.upcoming_deadlines || 0} colorScheme="orange" />
-          <StatCard icon={FiUsers} label="Team Members" value={stats?.team_members || 0} colorScheme="purple" />
-          <StatCard icon={FiCheckCircle} label="Completed This Month" value={stats?.completed_this_month || 0} colorScheme="green" />
-        </Grid>
+        {/* Stats Cards - Only for team members */}
+        {currentUser?.user_type === "team_member" && (
+          <Grid templateColumns={{ base: "1fr", md: "repeat(2, 1fr)", lg: "repeat(4, 1fr)" }} gap={4}>
+            <StatCard icon={FiFolder} label="Active Projects" value={stats?.active_projects || 0} colorScheme="blue" />
+            <StatCard icon={FiClock} label="Upcoming Deadlines" value={stats?.upcoming_deadlines || 0} colorScheme="orange" />
+            <StatCard icon={FiUsers} label="Team Members" value={stats?.team_members || 0} colorScheme="purple" />
+            <StatCard icon={FiCheckCircle} label="Completed This Month" value={stats?.completed_this_month || 0} colorScheme="green" />
+          </Grid>
+        )}
+
+        {/* Pending Team Members - Show if user has organization */}
+        {currentUser?.user_type === "team_member" && currentUser?.organization_id && pendingUsers?.data?.length > 0 && (
+          <Card.Root>
+            <Card.Header>
+              <Heading size="lg">Pending Team Members</Heading>
+              <Text fontSize="sm" color="fg.muted">Users waiting to join an organization</Text>
+            </Card.Header>
+            <Card.Body>
+              <Stack gap={3}>
+                {pendingUsers.data.map((user: any) => (
+                  <Flex
+                    key={user.id}
+                    justifyContent="space-between"
+                    alignItems="center"
+                    p={3}
+                    borderWidth="1px"
+                    borderRadius="md"
+                  >
+                    <Box>
+                      <Text fontWeight="semibold">{user.full_name || user.email}</Text>
+                      <Text fontSize="sm" color="fg.muted">{user.email}</Text>
+                    </Box>
+                    <Button
+                      size="sm"
+                      colorScheme="blue"
+                      onClick={() => inviteUserMutation.mutate(user.id)}
+                      loading={inviteUserMutation.isPending}
+                    >
+                      <FiUserPlus />
+                      Add to Team
+                    </Button>
+                  </Flex>
+                ))}
+              </Stack>
+            </Card.Body>
+          </Card.Root>
+        )}
 
         <Grid templateColumns={{ base: "1fr", lg: "2fr 1fr" }} gap={6}>
           {/* Recent Projects */}

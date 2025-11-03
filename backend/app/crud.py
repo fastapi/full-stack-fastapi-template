@@ -16,6 +16,9 @@ from app.models import (
     OrganizationCreate,
     OrganizationUpdate,
     Project,
+    ProjectAccess,
+    ProjectAccessCreate,
+    ProjectAccessUpdate,
     ProjectCreate,
     ProjectUpdate,
     User,
@@ -31,16 +34,6 @@ def create_user(*, session: Session, user_create: UserCreate) -> User:
     session.add(db_obj)
     session.commit()
     session.refresh(db_obj)
-
-    # Automatically assign user to default organization if not already assigned
-    if not db_obj.organization_id:
-        default_org = get_default_organization(session=session)
-        if default_org:
-            db_obj.organization_id = default_org.id
-            session.add(db_obj)
-            session.commit()
-            session.refresh(db_obj)
-
     return db_obj
 
 
@@ -255,6 +248,125 @@ def delete_gallery(*, session: Session, gallery_id: uuid.UUID) -> None:
     if gallery:
         session.delete(gallery)
         session.commit()
+
+
+# ============================================================================
+# PROJECT ACCESS CRUD
+# ============================================================================
+
+
+def create_project_access(
+    *, session: Session, access_in: ProjectAccessCreate
+) -> ProjectAccess:
+    """Grant a user access to a project"""
+    # Check if access already exists
+    existing = session.exec(
+        select(ProjectAccess).where(
+            ProjectAccess.project_id == access_in.project_id,
+            ProjectAccess.user_id == access_in.user_id,
+        )
+    ).first()
+    
+    if existing:
+        # Update existing access
+        for key, value in access_in.model_dump(exclude_unset=True).items():
+            setattr(existing, key, value)
+        session.add(existing)
+        session.commit()
+        session.refresh(existing)
+        return existing
+    
+    # Create new access
+    db_obj = ProjectAccess.model_validate(access_in)
+    session.add(db_obj)
+    session.commit()
+    session.refresh(db_obj)
+    return db_obj
+
+
+def get_project_access(
+    *, session: Session, project_id: uuid.UUID, user_id: uuid.UUID
+) -> ProjectAccess | None:
+    """Get a user's access to a specific project"""
+    statement = select(ProjectAccess).where(
+        ProjectAccess.project_id == project_id,
+        ProjectAccess.user_id == user_id,
+    )
+    return session.exec(statement).first()
+
+
+def get_project_access_list(
+    *, session: Session, project_id: uuid.UUID
+) -> list[ProjectAccess]:
+    """Get all users with access to a project"""
+    statement = select(ProjectAccess).where(ProjectAccess.project_id == project_id)
+    return list(session.exec(statement).all())
+
+
+def get_user_accessible_projects(
+    *, session: Session, user_id: uuid.UUID, skip: int = 0, limit: int = 100
+) -> list[Project]:
+    """Get all projects a user has access to (for clients)"""
+    statement = (
+        select(Project)
+        .join(ProjectAccess)
+        .where(ProjectAccess.user_id == user_id)
+        .offset(skip)
+        .limit(limit)
+        .order_by(desc(Project.created_at))
+    )
+    return list(session.exec(statement).all())
+
+
+def count_user_accessible_projects(*, session: Session, user_id: uuid.UUID) -> int:
+    """Count projects a user has access to"""
+    statement = (
+        select(func.count())
+        .select_from(Project)
+        .join(ProjectAccess)
+        .where(ProjectAccess.user_id == user_id)
+    )
+    return session.exec(statement).one()
+
+
+def update_project_access(
+    *, session: Session, db_access: ProjectAccess, access_in: ProjectAccessUpdate
+) -> ProjectAccess:
+    """Update project access permissions"""
+    access_data = access_in.model_dump(exclude_unset=True)
+    db_access.sqlmodel_update(access_data)
+    session.add(db_access)
+    session.commit()
+    session.refresh(db_access)
+    return db_access
+
+
+def delete_project_access(
+    *, session: Session, project_id: uuid.UUID, user_id: uuid.UUID
+) -> None:
+    """Remove a user's access to a project"""
+    access = get_project_access(
+        session=session, project_id=project_id, user_id=user_id
+    )
+    if access:
+        session.delete(access)
+        session.commit()
+
+
+def user_has_project_access(
+    *, session: Session, project_id: uuid.UUID, user_id: uuid.UUID
+) -> bool:
+    """Check if a user has access to a project"""
+    statement = (
+        select(func.count())
+        .select_from(ProjectAccess)
+        .where(
+            ProjectAccess.project_id == project_id,
+            ProjectAccess.user_id == user_id,
+        )
+    )
+    count = session.exec(statement).one()
+    return count > 0
 
 
 # ============================================================================

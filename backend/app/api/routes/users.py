@@ -48,6 +48,37 @@ def read_users(session: SessionDep, skip: int = 0, limit: int = 100) -> Any:
     return UsersPublic(data=users, count=count)
 
 
+@router.get("/clients", response_model=UsersPublic)
+def read_clients(
+    session: SessionDep, current_user: CurrentUser, skip: int = 0, limit: int = 100
+) -> Any:
+    """
+    Retrieve client users. Team members can access this to invite clients.
+    """
+    if getattr(current_user, "user_type", None) != "team_member":
+        raise HTTPException(
+            status_code=403,
+            detail="Only team members can list clients",
+        )
+
+    count_statement = (
+        select(func.count())
+        .select_from(User)
+        .where(User.user_type == "client")
+    )
+    count = session.exec(count_statement).one()
+
+    statement = (
+        select(User)
+        .where(User.user_type == "client")
+        .offset(skip)
+        .limit(limit)
+    )
+    users = session.exec(statement).all()
+
+    return UsersPublic(data=users, count=count)
+
+
 @router.post(
     "/", dependencies=[Depends(get_current_active_superuser)], response_model=UserPublic
 )
@@ -143,15 +174,114 @@ def delete_user_me(session: SessionDep, current_user: CurrentUser) -> Any:
 def register_user(session: SessionDep, user_in: UserRegister) -> Any:
     """
     Create new user without the need to be logged in.
+    Team members are assigned to an organization only if they were invited.
     """
+    from app.models import OrganizationInvitation
+    from sqlmodel import select
+    
     user = crud.get_user_by_email(session=session, email=user_in.email)
     if user:
         raise HTTPException(
             status_code=400,
             detail="The user with this email already exists in the system",
         )
+    
     user_create = UserCreate.model_validate(user_in)
+    
+    # Check if there's an invitation for this email (team members only)
+    if user_create.user_type == "team_member":
+        statement = select(OrganizationInvitation).where(
+            OrganizationInvitation.email == user_create.email
+        )
+        invitation = session.exec(statement).first()
+        
+        if invitation:
+            # Auto-assign to the invited organization
+            user_create.organization_id = invitation.organization_id
+            # Delete the invitation after use
+            session.delete(invitation)
+            session.commit()
+    
     user = crud.create_user(session=session, user_create=user_create)
+    return user
+
+
+@router.get("/pending", response_model=UsersPublic)
+def get_pending_users(
+    session: SessionDep,
+    current_user: CurrentUser,
+    skip: int = 0,
+    limit: int = 100,
+) -> Any:
+    """
+    Get users without an organization (pending approval).
+    Accessible by team members to invite people to their organization.
+    """
+    if getattr(current_user, "user_type", None) != "team_member":
+        raise HTTPException(status_code=403, detail="Only team members can invite users")
+    
+    from sqlmodel import select
+    
+    count_statement = (
+        select(func.count())
+        .select_from(User)
+        .where(User.organization_id.is_(None))
+        .where(User.user_type == "team_member")
+    )
+    count = session.exec(count_statement).one()
+    
+    statement = (
+        select(User)
+        .where(User.organization_id.is_(None))
+        .where(User.user_type == "team_member")
+        .offset(skip)
+        .limit(limit)
+    )
+    users = session.exec(statement).all()
+    
+    return UsersPublic(data=users, count=count)
+
+
+@router.patch("/{user_id}/assign-organization", response_model=UserPublic)
+def assign_user_to_organization(
+    user_id: uuid.UUID,
+    session: SessionDep,
+    current_user: CurrentUser,
+    organization_id: uuid.UUID | None = None,
+) -> Any:
+    """
+    Assign a user to an organization.
+    Team members can assign users to their own organization.
+    Superusers can assign to any organization.
+    """
+    if getattr(current_user, "user_type", None) != "team_member" and not current_user.is_superuser:
+        raise HTTPException(status_code=403, detail="Not enough permissions")
+    
+    user = session.get(User, user_id)
+    if not user:
+        raise HTTPException(status_code=404, detail="User not found")
+    
+    # Determine which organization to assign to
+    if current_user.is_superuser and organization_id:
+        # Superuser can specify any organization
+        target_org_id = organization_id
+    else:
+        # Team members assign to their own organization
+        if not current_user.organization_id:
+            raise HTTPException(status_code=400, detail="You must be part of an organization to invite others")
+        target_org_id = current_user.organization_id
+    
+    # Verify organization exists
+    from app.models import Organization
+    org = session.get(Organization, target_org_id)
+    if not org:
+        raise HTTPException(status_code=404, detail="Organization not found")
+    
+    user.organization_id = target_org_id
+    session.add(user)
+    session.commit()
+    session.refresh(user)
+    
     return user
 
 

@@ -7,6 +7,7 @@ from app import crud
 from app.api.deps import CurrentUser, SessionDep
 from app.models import (
     DashboardStats,
+    GalleryCreate,
     Message,
     ProjectCreate,
     ProjectPublic,
@@ -22,22 +23,37 @@ def read_projects(
     session: SessionDep, current_user: CurrentUser, skip: int = 0, limit: int = 100
 ) -> Any:
     """
-    Retrieve projects for the current user's organization.
+    Retrieve projects.
+    - Team members see projects from their organization
+    - Clients see projects they have been invited to
     """
-    if not current_user.organization_id:
-        raise HTTPException(
-            status_code=400, detail="User is not part of an organization"
+    if getattr(current_user, "user_type", None) == "client":
+        # Clients see only projects they have access to
+        projects = crud.get_user_accessible_projects(
+            session=session,
+            user_id=current_user.id,
+            skip=skip,
+            limit=limit,
         )
+        count = crud.count_user_accessible_projects(
+            session=session, user_id=current_user.id
+        )
+    else:
+        # Team members see projects from their organization
+        if not current_user.organization_id:
+            raise HTTPException(
+                status_code=400, detail="User is not part of an organization"
+            )
 
-    projects = crud.get_projects_by_organization(
-        session=session,
-        organization_id=current_user.organization_id,
-        skip=skip,
-        limit=limit,
-    )
-    count = crud.count_projects_by_organization(
-        session=session, organization_id=current_user.organization_id
-    )
+        projects = crud.get_projects_by_organization(
+            session=session,
+            organization_id=current_user.organization_id,
+            skip=skip,
+            limit=limit,
+        )
+        count = crud.count_projects_by_organization(
+            session=session, organization_id=current_user.organization_id
+        )
 
     return ProjectsPublic(data=projects, count=count)
 
@@ -46,7 +62,13 @@ def read_projects(
 def read_dashboard_stats(session: SessionDep, current_user: CurrentUser) -> Any:
     """
     Get dashboard statistics for the current user's organization.
+    Only available to team members.
     """
+    if getattr(current_user, "user_type", None) != "team_member":
+        raise HTTPException(
+            status_code=403, detail="Dashboard stats only available to team members"
+        )
+    
     if not current_user.organization_id:
         raise HTTPException(
             status_code=400, detail="User is not part of an organization"
@@ -63,7 +85,13 @@ def create_project(
 ) -> Any:
     """
     Create new project.
+    Only team members can create projects.
     """
+    if getattr(current_user, "user_type", None) != "team_member":
+        raise HTTPException(
+            status_code=403, detail="Only team members can create projects"
+        )
+    
     if not current_user.organization_id:
         raise HTTPException(
             status_code=400, detail="User is not part of an organization"
@@ -74,6 +102,15 @@ def create_project(
         raise HTTPException(status_code=403, detail="Not enough permissions")
 
     project = crud.create_project(session=session, project_in=project_in)
+    
+    # Automatically create a gallery for the project
+    gallery_in = GalleryCreate(
+        name=f"{project.name} - Gallery",
+        project_id=project.id,
+        status="draft",
+    )
+    crud.create_gallery(session=session, gallery_in=gallery_in)
+    
     return project
 
 
@@ -86,9 +123,17 @@ def read_project(session: SessionDep, current_user: CurrentUser, id: uuid.UUID) 
     if not project:
         raise HTTPException(status_code=404, detail="Project not found")
 
-    # Check if project belongs to user's organization
-    if project.organization_id != current_user.organization_id:
-        raise HTTPException(status_code=403, detail="Not enough permissions")
+    # Check permissions based on user type
+    if getattr(current_user, "user_type", None) == "client":
+        # Clients need explicit access
+        if not crud.user_has_project_access(
+            session=session, project_id=id, user_id=current_user.id
+        ):
+            raise HTTPException(status_code=403, detail="Not enough permissions")
+    else:
+        # Team members need organization match
+        if project.organization_id != current_user.organization_id:
+            raise HTTPException(status_code=403, detail="Not enough permissions")
 
     return project
 
@@ -103,7 +148,13 @@ def update_project(
 ) -> Any:
     """
     Update a project.
+    Only team members from the project's organization can update projects.
     """
+    if getattr(current_user, "user_type", None) != "team_member":
+        raise HTTPException(
+            status_code=403, detail="Only team members can update projects"
+        )
+    
     project = crud.get_project(session=session, project_id=id)
     if not project:
         raise HTTPException(status_code=404, detail="Project not found")
@@ -124,7 +175,13 @@ def delete_project(
 ) -> Message:
     """
     Delete a project.
+    Only team members from the project's organization can delete projects.
     """
+    if getattr(current_user, "user_type", None) != "team_member":
+        raise HTTPException(
+            status_code=403, detail="Only team members can delete projects"
+        )
+    
     project = crud.get_project(session=session, project_id=id)
     if not project:
         raise HTTPException(status_code=404, detail="Project not found")

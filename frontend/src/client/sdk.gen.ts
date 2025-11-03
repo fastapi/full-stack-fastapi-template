@@ -3,7 +3,7 @@
 import type { CancelablePromise } from './core/CancelablePromise';
 import { OpenAPI } from './core/OpenAPI';
 import { request as __request } from './core/request';
-import type { GalleriesReadGalleriesData, GalleriesReadGalleriesResponse, GalleriesCreateGalleryData, GalleriesCreateGalleryResponse, GalleriesReadGalleryData, GalleriesReadGalleryResponse, GalleriesUpdateGalleryData, GalleriesUpdateGalleryResponse, GalleriesDeleteGalleryData, GalleriesDeleteGalleryResponse, ItemsReadItemsData, ItemsReadItemsResponse, ItemsCreateItemData, ItemsCreateItemResponse, ItemsReadItemData, ItemsReadItemResponse, ItemsUpdateItemData, ItemsUpdateItemResponse, ItemsDeleteItemData, ItemsDeleteItemResponse, LoginLoginAccessTokenData, LoginLoginAccessTokenResponse, LoginTestTokenResponse, LoginRecoverPasswordData, LoginRecoverPasswordResponse, LoginResetPasswordData, LoginResetPasswordResponse, LoginRecoverPasswordHtmlContentData, LoginRecoverPasswordHtmlContentResponse, PrivateCreateUserData, PrivateCreateUserResponse, ProjectsReadProjectsData, ProjectsReadProjectsResponse, ProjectsCreateProjectData, ProjectsCreateProjectResponse, ProjectsReadDashboardStatsResponse, ProjectsReadProjectData, ProjectsReadProjectResponse, ProjectsUpdateProjectData, ProjectsUpdateProjectResponse, ProjectsDeleteProjectData, ProjectsDeleteProjectResponse, UsersReadUsersData, UsersReadUsersResponse, UsersCreateUserData, UsersCreateUserResponse, UsersReadUserMeResponse, UsersDeleteUserMeResponse, UsersUpdateUserMeData, UsersUpdateUserMeResponse, UsersUpdatePasswordMeData, UsersUpdatePasswordMeResponse, UsersRegisterUserData, UsersRegisterUserResponse, UsersReadUserByIdData, UsersReadUserByIdResponse, UsersUpdateUserData, UsersUpdateUserResponse, UsersDeleteUserData, UsersDeleteUserResponse, UtilsTestEmailData, UtilsTestEmailResponse, UtilsHealthCheckResponse, UtilsGetSystemInfoResponse } from './types.gen';
+import type { GalleriesReadGalleriesData, GalleriesReadGalleriesResponse, GalleriesCreateGalleryData, GalleriesCreateGalleryResponse, GalleriesReadGalleryData, GalleriesReadGalleryResponse, GalleriesUpdateGalleryData, GalleriesUpdateGalleryResponse, GalleriesDeleteGalleryData, GalleriesDeleteGalleryResponse, ItemsReadItemsData, ItemsReadItemsResponse, ItemsCreateItemData, ItemsCreateItemResponse, ItemsReadItemData, ItemsReadItemResponse, ItemsUpdateItemData, ItemsUpdateItemResponse, ItemsDeleteItemData, ItemsDeleteItemResponse, LoginLoginAccessTokenData, LoginLoginAccessTokenResponse, LoginTestTokenResponse, LoginRecoverPasswordData, LoginRecoverPasswordResponse, LoginResetPasswordData, LoginResetPasswordResponse, LoginRecoverPasswordHtmlContentData, LoginRecoverPasswordHtmlContentResponse, PrivateCreateUserData, PrivateCreateUserResponse, ProjectAccessGrantProjectAccessData, ProjectAccessGrantProjectAccessResponse, ProjectAccessReadProjectAccessListData, ProjectAccessReadProjectAccessListResponse, ProjectAccessRevokeProjectAccessData, ProjectAccessRevokeProjectAccessResponse, ProjectAccessUpdateProjectAccessPermissionsData, ProjectAccessUpdateProjectAccessPermissionsResponse, ProjectsReadProjectsData, ProjectsReadProjectsResponse, ProjectsCreateProjectData, ProjectsCreateProjectResponse, ProjectsReadDashboardStatsResponse, ProjectsReadProjectData, ProjectsReadProjectResponse, ProjectsUpdateProjectData, ProjectsUpdateProjectResponse, ProjectsDeleteProjectData, ProjectsDeleteProjectResponse, UsersReadUsersData, UsersReadUsersResponse, UsersCreateUserData, UsersCreateUserResponse, UsersReadUserMeResponse, UsersDeleteUserMeResponse, UsersUpdateUserMeData, UsersUpdateUserMeResponse, UsersUpdatePasswordMeData, UsersUpdatePasswordMeResponse, UsersRegisterUserData, UsersRegisterUserResponse, UsersReadUserByIdData, UsersReadUserByIdResponse, UsersUpdateUserData, UsersUpdateUserResponse, UsersDeleteUserData, UsersDeleteUserResponse, UtilsTestEmailData, UtilsTestEmailResponse, UtilsHealthCheckResponse, UtilsGetSystemInfoResponse } from './types.gen';
 
 export class GalleriesService {
     /**
@@ -349,10 +349,119 @@ export class PrivateService {
     }
 }
 
+export class ProjectAccessService {
+    /**
+     * Grant Project Access
+     * Grant a user access to a project (invite a client).
+     * Only team members can invite clients.
+     * @param data The data for the request.
+     * @param data.projectId
+     * @param data.userId
+     * @param data.role
+     * @param data.canComment
+     * @param data.canDownload
+     * @returns ProjectAccessPublic Successful Response
+     * @throws ApiError
+     */
+    public static grantProjectAccess(data: ProjectAccessGrantProjectAccessData): CancelablePromise<ProjectAccessGrantProjectAccessResponse> {
+        return __request(OpenAPI, {
+            method: 'POST',
+            url: '/api/v1/projects/{project_id}/access',
+            path: {
+                project_id: data.projectId
+            },
+            query: {
+                user_id: data.userId,
+                role: data.role,
+                can_comment: data.canComment,
+                can_download: data.canDownload
+            },
+            errors: {
+                422: 'Validation Error'
+            }
+        });
+    }
+    
+    /**
+     * Read Project Access List
+     * Get list of users with access to a project.
+     * Only team members from the project's organization can see this.
+     * @param data The data for the request.
+     * @param data.projectId
+     * @returns ProjectAccessesPublic Successful Response
+     * @throws ApiError
+     */
+    public static readProjectAccessList(data: ProjectAccessReadProjectAccessListData): CancelablePromise<ProjectAccessReadProjectAccessListResponse> {
+        return __request(OpenAPI, {
+            method: 'GET',
+            url: '/api/v1/projects/{project_id}/access',
+            path: {
+                project_id: data.projectId
+            },
+            errors: {
+                422: 'Validation Error'
+            }
+        });
+    }
+    
+    /**
+     * Revoke Project Access
+     * Revoke a user's access to a project.
+     * Only team members from the project's organization can do this.
+     * @param data The data for the request.
+     * @param data.projectId
+     * @param data.userId
+     * @returns Message Successful Response
+     * @throws ApiError
+     */
+    public static revokeProjectAccess(data: ProjectAccessRevokeProjectAccessData): CancelablePromise<ProjectAccessRevokeProjectAccessResponse> {
+        return __request(OpenAPI, {
+            method: 'DELETE',
+            url: '/api/v1/projects/{project_id}/access/{user_id}',
+            path: {
+                project_id: data.projectId,
+                user_id: data.userId
+            },
+            errors: {
+                422: 'Validation Error'
+            }
+        });
+    }
+    
+    /**
+     * Update Project Access Permissions
+     * Update a user's project access permissions.
+     * Only team members from the project's organization can do this.
+     * @param data The data for the request.
+     * @param data.projectId
+     * @param data.userId
+     * @param data.requestBody
+     * @returns ProjectAccessPublic Successful Response
+     * @throws ApiError
+     */
+    public static updateProjectAccessPermissions(data: ProjectAccessUpdateProjectAccessPermissionsData): CancelablePromise<ProjectAccessUpdateProjectAccessPermissionsResponse> {
+        return __request(OpenAPI, {
+            method: 'PATCH',
+            url: '/api/v1/projects/{project_id}/access/{user_id}',
+            path: {
+                project_id: data.projectId,
+                user_id: data.userId
+            },
+            body: data.requestBody,
+            mediaType: 'application/json',
+            errors: {
+                422: 'Validation Error'
+            }
+        });
+    }
+}
+
 export class ProjectsService {
     /**
      * Read Projects
-     * Retrieve projects for the current user's organization.
+     * Retrieve projects.
+     * - Team members see projects from their organization
+     * - Clients see projects they have been invited to
      * @param data The data for the request.
      * @param data.skip
      * @param data.limit
@@ -376,6 +485,7 @@ export class ProjectsService {
     /**
      * Create Project
      * Create new project.
+     * Only team members can create projects.
      * @param data The data for the request.
      * @param data.requestBody
      * @returns ProjectPublic Successful Response
@@ -396,6 +506,7 @@ export class ProjectsService {
     /**
      * Read Dashboard Stats
      * Get dashboard statistics for the current user's organization.
+     * Only available to team members.
      * @returns DashboardStats Successful Response
      * @throws ApiError
      */
@@ -430,6 +541,7 @@ export class ProjectsService {
     /**
      * Update Project
      * Update a project.
+     * Only team members from the project's organization can update projects.
      * @param data The data for the request.
      * @param data.id
      * @param data.requestBody
@@ -454,6 +566,7 @@ export class ProjectsService {
     /**
      * Delete Project
      * Delete a project.
+     * Only team members from the project's organization can delete projects.
      * @param data The data for the request.
      * @param data.id
      * @returns Message Successful Response

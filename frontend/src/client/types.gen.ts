@@ -94,6 +94,27 @@ export type PrivateUserCreate = {
     is_verified?: boolean;
 };
 
+export type ProjectAccessesPublic = {
+    data: Array<ProjectAccessPublic>;
+    count: number;
+};
+
+export type ProjectAccessPublic = {
+    role?: string;
+    can_comment?: boolean;
+    can_download?: boolean;
+    id: string;
+    created_at: string;
+    project_id: string;
+    user_id: string;
+};
+
+export type ProjectAccessUpdate = {
+    role?: (string | null);
+    can_comment?: (boolean | null);
+    can_download?: (boolean | null);
+};
+
 export type ProjectCreate = {
     name: string;
     client_name: string;
@@ -163,6 +184,8 @@ export type UserPublic = {
     is_active?: boolean;
     is_superuser?: boolean;
     full_name?: (string | null);
+    user_type?: string;
+    organization_id?: (string | null);
     id: string;
 };
 
@@ -170,6 +193,7 @@ export type UserRegister = {
     email: string;
     password: string;
     full_name?: (string | null);
+    user_type?: string;
 };
 
 export type UsersPublic = {
@@ -292,6 +316,37 @@ export type PrivateCreateUserData = {
 };
 
 export type PrivateCreateUserResponse = (UserPublic);
+
+export type ProjectAccessGrantProjectAccessData = {
+    canComment?: boolean;
+    canDownload?: boolean;
+    projectId: string;
+    role?: string;
+    userId: string;
+};
+
+export type ProjectAccessGrantProjectAccessResponse = (ProjectAccessPublic);
+
+export type ProjectAccessReadProjectAccessListData = {
+    projectId: string;
+};
+
+export type ProjectAccessReadProjectAccessListResponse = (ProjectAccessesPublic);
+
+export type ProjectAccessRevokeProjectAccessData = {
+    projectId: string;
+    userId: string;
+};
+
+export type ProjectAccessRevokeProjectAccessResponse = (Message);
+
+export type ProjectAccessUpdateProjectAccessPermissionsData = {
+    projectId: string;
+    requestBody: ProjectAccessUpdate;
+    userId: string;
+};
+
+export type ProjectAccessUpdateProjectAccessPermissionsResponse = (ProjectAccessPublic);
 
 export type ProjectsReadProjectsData = {
     limit?: number;

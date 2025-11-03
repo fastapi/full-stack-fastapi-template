@@ -504,6 +504,110 @@ export const PrivateUserCreateSchema = {
     title: 'PrivateUserCreate'
 } as const;
 
+export const ProjectAccessPublicSchema = {
+    properties: {
+        role: {
+            type: 'string',
+            maxLength: 50,
+            title: 'Role',
+            default: 'viewer'
+        },
+        can_comment: {
+            type: 'boolean',
+            title: 'Can Comment',
+            default: true
+        },
+        can_download: {
+            type: 'boolean',
+            title: 'Can Download',
+            default: true
+        },
+        id: {
+            type: 'string',
+            format: 'uuid',
+            title: 'Id'
+        },
+        created_at: {
+            type: 'string',
+            format: 'date-time',
+            title: 'Created At'
+        },
+        project_id: {
+            type: 'string',
+            format: 'uuid',
+            title: 'Project Id'
+        },
+        user_id: {
+            type: 'string',
+            format: 'uuid',
+            title: 'User Id'
+        }
+    },
+    type: 'object',
+    required: ['id', 'created_at', 'project_id', 'user_id'],
+    title: 'ProjectAccessPublic'
+} as const;
+
+export const ProjectAccessUpdateSchema = {
+    properties: {
+        role: {
+            anyOf: [
+                {
+                    type: 'string',
+                    maxLength: 50
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Role'
+        },
+        can_comment: {
+            anyOf: [
+                {
+                    type: 'boolean'
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Can Comment'
+        },
+        can_download: {
+            anyOf: [
+                {
+                    type: 'boolean'
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Can Download'
+        }
+    },
+    type: 'object',
+    title: 'ProjectAccessUpdate'
+} as const;
+
+export const ProjectAccessesPublicSchema = {
+    properties: {
+        data: {
+            items: {
+                '$ref': '#/components/schemas/ProjectAccessPublic'
+            },
+            type: 'array',
+            title: 'Data'
+        },
+        count: {
+            type: 'integer',
+            title: 'Count'
+        }
+    },
+    type: 'object',
+    required: ['data', 'count'],
+    title: 'ProjectAccessesPublic'
+} as const;
+
 export const ProjectCreateSchema = {
     properties: {
         name: {

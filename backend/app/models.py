@@ -13,6 +13,8 @@ class UserBase(SQLModel):
     is_active: bool = True
     is_superuser: bool = False
     full_name: str | None = Field(default=None, max_length=255)
+    user_type: str = Field(default="team_member", max_length=50)
+    organization_id: uuid.UUID | None = Field(default=None)
 
 
 # Properties to receive via API on creation
@@ -24,6 +26,7 @@ class UserRegister(SQLModel):
     email: EmailStr = Field(max_length=255)
     password: str = Field(min_length=8, max_length=40)
     full_name: str | None = Field(default=None, max_length=255)
+    user_type: str = Field(default="team_member", max_length=50)
 
 
 # Properties to receive via API on update, all are optional
@@ -51,6 +54,9 @@ class User(UserBase, table=True):
         default=None, foreign_key="organization.id"
     )
     organization: Optional["Organization"] = Relationship(back_populates="users")
+    project_access: list["ProjectAccess"] = Relationship(
+        back_populates="user", cascade_delete=True
+    )
 
 
 # Properties to return via API, id is always required
@@ -204,6 +210,9 @@ class Project(ProjectBase, table=True):
     galleries: list["Gallery"] = Relationship(
         back_populates="project", cascade_delete=True
     )
+    access_list: list["ProjectAccess"] = Relationship(
+        back_populates="project", cascade_delete=True
+    )
 
 
 class ProjectPublic(ProjectBase):
@@ -266,6 +275,57 @@ class GalleriesPublic(SQLModel):
 
 
 # ============================================================================
+# PROJECT ACCESS (Client Invitations)
+# ============================================================================
+
+
+class ProjectAccessBase(SQLModel):
+    role: str = Field(default="viewer", max_length=50)  # viewer, collaborator
+    can_comment: bool = Field(default=True)
+    can_download: bool = Field(default=True)
+
+
+class ProjectAccessCreate(ProjectAccessBase):
+    project_id: uuid.UUID
+    user_id: uuid.UUID
+
+
+class ProjectAccessUpdate(SQLModel):
+    role: str | None = Field(default=None, max_length=50)
+    can_comment: bool | None = None
+    can_download: bool | None = None
+
+
+class ProjectAccess(ProjectAccessBase, table=True):
+    id: uuid.UUID = Field(default_factory=uuid.uuid4, primary_key=True)
+    created_at: datetime = Field(default_factory=datetime.utcnow)
+    project_id: uuid.UUID = Field(
+        foreign_key="project.id", nullable=False, ondelete="CASCADE"
+    )
+    user_id: uuid.UUID = Field(
+        foreign_key="user.id", nullable=False, ondelete="CASCADE"
+    )
+    project: Optional["Project"] = Relationship(back_populates="access_list")
+    user: Optional["User"] = Relationship(back_populates="project_access")
+
+
+class ProjectAccessPublic(ProjectAccessBase):
+    id: uuid.UUID
+    created_at: datetime
+    project_id: uuid.UUID
+    user_id: uuid.UUID
+
+
+class ProjectAccessWithUser(ProjectAccessPublic):
+    user: UserPublic
+
+
+class ProjectAccessesPublic(SQLModel):
+    data: list[ProjectAccessPublic]
+    count: int
+
+
+# ============================================================================
 # DASHBOARD STATS
 # ============================================================================
 
@@ -275,3 +335,36 @@ class DashboardStats(SQLModel):
     upcoming_deadlines: int
     team_members: int
     completed_this_month: int
+
+
+# ============================================================================
+# Organization Invitation Models
+# ============================================================================
+
+
+class OrganizationInvitationBase(SQLModel):
+    email: EmailStr = Field(max_length=255, index=True)
+
+
+class OrganizationInvitationCreate(OrganizationInvitationBase):
+    pass
+
+
+class OrganizationInvitation(OrganizationInvitationBase, table=True):
+    id: uuid.UUID = Field(default_factory=uuid.uuid4, primary_key=True)
+    created_at: datetime = Field(default_factory=datetime.utcnow)
+    organization_id: uuid.UUID = Field(
+        foreign_key="organization.id", nullable=False, ondelete="CASCADE"
+    )
+    organization: Optional["Organization"] = Relationship()
+
+
+class OrganizationInvitationPublic(OrganizationInvitationBase):
+    id: uuid.UUID
+    created_at: datetime
+    organization_id: uuid.UUID
+
+
+class OrganizationInvitationsPublic(SQLModel):
+    data: list[OrganizationInvitationPublic]
+    count: int

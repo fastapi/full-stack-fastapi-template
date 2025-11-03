@@ -12,21 +12,14 @@ import {
   VStack,
 } from "@chakra-ui/react"
 import { useQuery } from "@tanstack/react-query"
-import { createFileRoute, Link, Outlet } from "@tanstack/react-router"
+import { createFileRoute, Link } from "@tanstack/react-router"
 import { FiCalendar, FiImage, FiUser } from "react-icons/fi"
 
 import { GalleriesService } from "@/client"
 import type { GalleryPublic } from "@/client"
 
-function getGalleriesQueryOptions() {
-  return {
-    queryFn: () => GalleriesService.readGalleries({ skip: 0, limit: 100 }),
-    queryKey: ["galleries"],
-  }
-}
-
-export const Route = createFileRoute("/_layout/galleries")({
-  component: Galleries,
+export const Route = createFileRoute("/_layout/galleries/")({
+  component: GalleriesList,
 })
 
 function getStatusColor(status: string) {
@@ -46,14 +39,10 @@ function getStatusLabel(status: string) {
   return status.charAt(0).toUpperCase() + status.slice(1)
 }
 
-function Galleries() {
-  // This component just renders the outlet for child routes
-  return <Outlet />
-}
-
 function GalleriesList() {
   const { data, isLoading } = useQuery({
-    ...getGalleriesQueryOptions(),
+    queryKey: ["galleries"],
+    queryFn: () => GalleriesService.readGalleries({ skip: 0, limit: 100 }),
   })
 
   const galleries = data?.data ?? []
