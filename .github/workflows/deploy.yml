@@ -41,6 +41,7 @@ jobs:
     
     - name: Run migrations
       env:
+        PROJECT_NAME: Mosaic Test
         POSTGRES_SERVER: localhost
         POSTGRES_PORT: 5432
         POSTGRES_USER: postgres
