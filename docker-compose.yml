@@ -4,13 +4,16 @@ services:
     image: postgres:17
     restart: always
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER} -d ${POSTGRES_DB}"]
+      test: |
+        pg_isready -U $${POSTGRES_USER} -d $${POSTGRES_DB} &&
+        pg_isready -U $${POSTGRES_USER} -d $${POSTGRES_DB_ASYNC}
       interval: 10s
       retries: 5
       start_period: 30s
       timeout: 10s
     volumes:
       - app-db-data:/var/lib/postgresql/data/pgdata
+      - ./scripts/init-async-database.sh:/docker-entrypoint-initdb.d/init-async-database.sh
     env_file:
       - .env
     environment:
@@ -18,6 +21,7 @@ services:
       - POSTGRES_PASSWORD=${POSTGRES_PASSWORD?Variable not set}
       - POSTGRES_USER=${POSTGRES_USER?Variable not set}
       - POSTGRES_DB=${POSTGRES_DB?Variable not set}
+      - POSTGRES_DB_ASYNC=${POSTGRES_DB_ASYNC?Variable not set}
 
   adminer:
     image: adminer
