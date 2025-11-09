@@ -53,6 +53,7 @@
 
 ### Internal
 
+* 🔧 Fix issue-manager config for reminder. PR [#1972](https://github.com/fastapi/full-stack-fastapi-template/pull/1972) by [@tiangolo](https://github.com/tiangolo).
 * ⬆ Bump @vitejs/plugin-react-swc from 4.0.1 to 4.1.0 in /frontend. PR [#1897](https://github.com/fastapi/full-stack-fastapi-template/pull/1897) by [@dependabot[bot]](https://github.com/apps/dependabot).
 * ⬆ Bump playwright from v1.55.0-noble to v1.56.1-noble in /frontend. PR [#1943](https://github.com/fastapi/full-stack-fastapi-template/pull/1943) by [@dependabot[bot]](https://github.com/apps/dependabot).
 * 🔧 Configure reminder for `waiting` label in `issue-manager`. PR [#1939](https://github.com/fastapi/full-stack-fastapi-template/pull/1939) by [@YuriiMotov](https://github.com/YuriiMotov).
