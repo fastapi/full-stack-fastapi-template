@@ -78,7 +78,7 @@ jobs:
     - run: docker compose down -v --remove-orphans
     - name: Upload blob report to GitHub Actions Artifacts
       if: ${{ !cancelled() }}
-      uses: actions/upload-artifact@v4
+      uses: actions/upload-artifact@v5
       with:
         name: blob-report-${{ matrix.shardIndex }}
         path: frontend/blob-report
@@ -110,7 +110,7 @@ jobs:
       run: npx playwright merge-reports --reporter html ./all-blob-reports
       working-directory: frontend
     - name: Upload HTML report
-      uses: actions/upload-artifact@v4
+      uses: actions/upload-artifact@v5
       with:
         name: html-report--attempt-${{ github.run_attempt }}
         path: frontend/playwright-report
