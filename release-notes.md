@@ -53,6 +53,7 @@
 
 ### Internal
 
+* ⬆ Bump react-hook-form from 7.62.0 to 7.65.0 in /frontend. PR [#1964](https://github.com/fastapi/full-stack-fastapi-template/pull/1964) by [@dependabot[bot]](https://github.com/apps/dependabot).
 * ⬆ Bump alembic from 1.17.0 to 1.17.1 in /backend. PR [#1970](https://github.com/fastapi/full-stack-fastapi-template/pull/1970) by [@dependabot[bot]](https://github.com/apps/dependabot).
 * 🔧 Fix issue-manager config for reminder. PR [#1972](https://github.com/fastapi/full-stack-fastapi-template/pull/1972) by [@tiangolo](https://github.com/tiangolo).
 * ⬆ Bump @vitejs/plugin-react-swc from 4.0.1 to 4.1.0 in /frontend. PR [#1897](https://github.com/fastapi/full-stack-fastapi-template/pull/1897) by [@dependabot[bot]](https://github.com/apps/dependabot).
