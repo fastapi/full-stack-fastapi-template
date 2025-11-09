@@ -53,6 +53,7 @@
 
 ### Internal
 
+* ⬆ Bump @types/node from 24.5.2 to 24.9.1 in /frontend. PR [#1961](https://github.com/fastapi/full-stack-fastapi-template/pull/1961) by [@dependabot[bot]](https://github.com/apps/dependabot).
 * ⬆ Bump actions/upload-artifact from 4 to 5. PR [#1962](https://github.com/fastapi/full-stack-fastapi-template/pull/1962) by [@dependabot[bot]](https://github.com/apps/dependabot).
 * ⬆ Bump react-hook-form from 7.62.0 to 7.65.0 in /frontend. PR [#1964](https://github.com/fastapi/full-stack-fastapi-template/pull/1964) by [@dependabot[bot]](https://github.com/apps/dependabot).
 * ⬆ Bump alembic from 1.17.0 to 1.17.1 in /backend. PR [#1970](https://github.com/fastapi/full-stack-fastapi-template/pull/1970) by [@dependabot[bot]](https://github.com/apps/dependabot).
