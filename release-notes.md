@@ -53,6 +53,13 @@
 
 ### Internal
 
+* ⬆ Bump @vitejs/plugin-react-swc from 4.1.0 to 4.2.0 in /frontend. PR [#1958](https://github.com/fastapi/full-stack-fastapi-template/pull/1958) by [@dependabot[bot]](https://github.com/apps/dependabot).
+* ⬆ Bump actions/download-artifact from 5 to 6. PR [#1959](https://github.com/fastapi/full-stack-fastapi-template/pull/1959) by [@dependabot[bot]](https://github.com/apps/dependabot).
+* ⬆ Bump @types/node from 24.5.2 to 24.9.1 in /frontend. PR [#1961](https://github.com/fastapi/full-stack-fastapi-template/pull/1961) by [@dependabot[bot]](https://github.com/apps/dependabot).
+* ⬆ Bump actions/upload-artifact from 4 to 5. PR [#1962](https://github.com/fastapi/full-stack-fastapi-template/pull/1962) by [@dependabot[bot]](https://github.com/apps/dependabot).
+* ⬆ Bump react-hook-form from 7.62.0 to 7.65.0 in /frontend. PR [#1964](https://github.com/fastapi/full-stack-fastapi-template/pull/1964) by [@dependabot[bot]](https://github.com/apps/dependabot).
+* ⬆ Bump alembic from 1.17.0 to 1.17.1 in /backend. PR [#1970](https://github.com/fastapi/full-stack-fastapi-template/pull/1970) by [@dependabot[bot]](https://github.com/apps/dependabot).
+* 🔧 Fix issue-manager config for reminder. PR [#1972](https://github.com/fastapi/full-stack-fastapi-template/pull/1972) by [@tiangolo](https://github.com/tiangolo).
 * ⬆ Bump @vitejs/plugin-react-swc from 4.0.1 to 4.1.0 in /frontend. PR [#1897](https://github.com/fastapi/full-stack-fastapi-template/pull/1897) by [@dependabot[bot]](https://github.com/apps/dependabot).
 * ⬆ Bump playwright from v1.55.0-noble to v1.56.1-noble in /frontend. PR [#1943](https://github.com/fastapi/full-stack-fastapi-template/pull/1943) by [@dependabot[bot]](https://github.com/apps/dependabot).
 * 🔧 Configure reminder for `waiting` label in `issue-manager`. PR [#1939](https://github.com/fastapi/full-stack-fastapi-template/pull/1939) by [@YuriiMotov](https://github.com/YuriiMotov).
