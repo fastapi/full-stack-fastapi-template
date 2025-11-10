@@ -1,4 +1,4 @@
-import { Container, Image, Input, Text } from "@chakra-ui/react"
+import { Container, Heading, Input, Text } from "@chakra-ui/react"
 import {
   createFileRoute,
   Link as RouterLink,
@@ -13,21 +13,20 @@ import { Field } from "@/components/ui/field"
 import { InputGroup } from "@/components/ui/input-group"
 import { PasswordInput } from "@/components/ui/password-input"
 import useAuth, { isLoggedIn } from "@/hooks/useAuth"
-import Logo from "/assets/images/fastapi-logo.svg"
-import { emailPattern, passwordRules } from "../utils"
+import { emailPattern, passwordRules } from "@/utils"
 
-export const Route = createFileRoute("/login")({
-  component: Login,
+export const Route = createFileRoute("/team-login")({
+  component: TeamLogin,
   beforeLoad: async () => {
     if (isLoggedIn()) {
       throw redirect({
-        to: "/",
+        to: "/dashboard",
       })
     }
   },
 })
 
-function Login() {
+function TeamLogin() {
   const { loginMutation, error, resetError } = useAuth()
   const {
     register,
@@ -65,14 +64,20 @@ function Login() {
       gap={4}
       centerContent
     >
-      <Image
-        src={Logo}
-        alt="FastAPI logo"
-        height="auto"
-        maxW="2xs"
-        alignSelf="center"
-        mb={4}
-      />
+      <div style={{ textAlign: "center", marginBottom: "2rem" }}>
+        <Heading
+          size="4xl"
+          bgGradient="to-r"
+          gradientFrom="blue.400"
+          gradientTo="blue.600"
+          bgClip="text"
+        >
+          Team Member Login
+        </Heading>
+        <Text fontSize="md" color="fg.muted" mt={2}>
+          Access your organization's projects
+        </Text>
+      </div>
       <Field
         invalid={!!errors.username}
         errorText={errors.username?.message || !!error}
@@ -98,13 +103,12 @@ function Login() {
       <RouterLink to="/recover-password" className="main-link">
         Forgot Password?
       </RouterLink>
-      <Button variant="solid" type="submit" loading={isSubmitting} size="md">
+      <Button variant="solid" colorScheme="blue" type="submit" loading={isSubmitting} size="md">
         Log In
       </Button>
       <Text>
-        Don't have an account?{" "}
-        <RouterLink to="/signup" className="main-link">
-          Sign Up
+        <RouterLink to="/" className="main-link">
+          ← Back to Home
         </RouterLink>
       </Text>
     </Container>

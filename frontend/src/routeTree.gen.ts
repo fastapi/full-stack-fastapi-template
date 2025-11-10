@@ -9,16 +9,29 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
+import { Route as TeamLoginRouteImport } from './routes/team-login'
 import { Route as SignupRouteImport } from './routes/signup'
 import { Route as ResetPasswordRouteImport } from './routes/reset-password'
 import { Route as RecoverPasswordRouteImport } from './routes/recover-password'
-import { Route as LoginRouteImport } from './routes/login'
+import { Route as ClientLoginRouteImport } from './routes/client-login'
 import { Route as LayoutRouteImport } from './routes/_layout'
-import { Route as LayoutIndexRouteImport } from './routes/_layout/index'
+import { Route as IndexRouteImport } from './routes/index'
 import { Route as LayoutSettingsRouteImport } from './routes/_layout/settings'
+import { Route as LayoutOrganizationRouteImport } from './routes/_layout/organization'
 import { Route as LayoutItemsRouteImport } from './routes/_layout/items'
+import { Route as LayoutGalleriesRouteImport } from './routes/_layout/galleries'
+import { Route as LayoutDashboardRouteImport } from './routes/_layout/dashboard'
 import { Route as LayoutAdminRouteImport } from './routes/_layout/admin'
+import { Route as LayoutProjectsIndexRouteImport } from './routes/_layout/projects.index'
+import { Route as LayoutGalleriesIndexRouteImport } from './routes/_layout/galleries.index'
+import { Route as LayoutProjectsProjectIdRouteImport } from './routes/_layout/projects.$projectId'
+import { Route as LayoutGalleriesGalleryIdRouteImport } from './routes/_layout/galleries.$galleryId'
 
+const TeamLoginRoute = TeamLoginRouteImport.update({
+  id: '/team-login',
+  path: '/team-login',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const SignupRoute = SignupRouteImport.update({
   id: '/signup',
   path: '/signup',
@@ -34,23 +47,28 @@ const RecoverPasswordRoute = RecoverPasswordRouteImport.update({
   path: '/recover-password',
   getParentRoute: () => rootRouteImport,
 } as any)
-const LoginRoute = LoginRouteImport.update({
-  id: '/login',
-  path: '/login',
+const ClientLoginRoute = ClientLoginRouteImport.update({
+  id: '/client-login',
+  path: '/client-login',
   getParentRoute: () => rootRouteImport,
 } as any)
 const LayoutRoute = LayoutRouteImport.update({
   id: '/_layout',
   getParentRoute: () => rootRouteImport,
 } as any)
-const LayoutIndexRoute = LayoutIndexRouteImport.update({
+const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
-  getParentRoute: () => LayoutRoute,
+  getParentRoute: () => rootRouteImport,
 } as any)
 const LayoutSettingsRoute = LayoutSettingsRouteImport.update({
   id: '/settings',
   path: '/settings',
+  getParentRoute: () => LayoutRoute,
+} as any)
+const LayoutOrganizationRoute = LayoutOrganizationRouteImport.update({
+  id: '/organization',
+  path: '/organization',
   getParentRoute: () => LayoutRoute,
 } as any)
 const LayoutItemsRoute = LayoutItemsRouteImport.update({
@@ -58,88 +76,174 @@ const LayoutItemsRoute = LayoutItemsRouteImport.update({
   path: '/items',
   getParentRoute: () => LayoutRoute,
 } as any)
+const LayoutGalleriesRoute = LayoutGalleriesRouteImport.update({
+  id: '/galleries',
+  path: '/galleries',
+  getParentRoute: () => LayoutRoute,
+} as any)
+const LayoutDashboardRoute = LayoutDashboardRouteImport.update({
+  id: '/dashboard',
+  path: '/dashboard',
+  getParentRoute: () => LayoutRoute,
+} as any)
 const LayoutAdminRoute = LayoutAdminRouteImport.update({
   id: '/admin',
   path: '/admin',
   getParentRoute: () => LayoutRoute,
 } as any)
+const LayoutProjectsIndexRoute = LayoutProjectsIndexRouteImport.update({
+  id: '/projects/',
+  path: '/projects/',
+  getParentRoute: () => LayoutRoute,
+} as any)
+const LayoutGalleriesIndexRoute = LayoutGalleriesIndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => LayoutGalleriesRoute,
+} as any)
+const LayoutProjectsProjectIdRoute = LayoutProjectsProjectIdRouteImport.update({
+  id: '/projects/$projectId',
+  path: '/projects/$projectId',
+  getParentRoute: () => LayoutRoute,
+} as any)
+const LayoutGalleriesGalleryIdRoute =
+  LayoutGalleriesGalleryIdRouteImport.update({
+    id: '/$galleryId',
+    path: '/$galleryId',
+    getParentRoute: () => LayoutGalleriesRoute,
+  } as any)
 
 export interface FileRoutesByFullPath {
-  '/login': typeof LoginRoute
+  '/': typeof IndexRoute
+  '/client-login': typeof ClientLoginRoute
   '/recover-password': typeof RecoverPasswordRoute
   '/reset-password': typeof ResetPasswordRoute
   '/signup': typeof SignupRoute
+  '/team-login': typeof TeamLoginRoute
   '/admin': typeof LayoutAdminRoute
+  '/dashboard': typeof LayoutDashboardRoute
+  '/galleries': typeof LayoutGalleriesRouteWithChildren
   '/items': typeof LayoutItemsRoute
+  '/organization': typeof LayoutOrganizationRoute
   '/settings': typeof LayoutSettingsRoute
-  '/': typeof LayoutIndexRoute
+  '/galleries/$galleryId': typeof LayoutGalleriesGalleryIdRoute
+  '/projects/$projectId': typeof LayoutProjectsProjectIdRoute
+  '/galleries/': typeof LayoutGalleriesIndexRoute
+  '/projects': typeof LayoutProjectsIndexRoute
 }
 export interface FileRoutesByTo {
-  '/login': typeof LoginRoute
+  '/': typeof IndexRoute
+  '/client-login': typeof ClientLoginRoute
   '/recover-password': typeof RecoverPasswordRoute
   '/reset-password': typeof ResetPasswordRoute
   '/signup': typeof SignupRoute
+  '/team-login': typeof TeamLoginRoute
   '/admin': typeof LayoutAdminRoute
+  '/dashboard': typeof LayoutDashboardRoute
   '/items': typeof LayoutItemsRoute
+  '/organization': typeof LayoutOrganizationRoute
   '/settings': typeof LayoutSettingsRoute
-  '/': typeof LayoutIndexRoute
+  '/galleries/$galleryId': typeof LayoutGalleriesGalleryIdRoute
+  '/projects/$projectId': typeof LayoutProjectsProjectIdRoute
+  '/galleries': typeof LayoutGalleriesIndexRoute
+  '/projects': typeof LayoutProjectsIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
+  '/': typeof IndexRoute
   '/_layout': typeof LayoutRouteWithChildren
-  '/login': typeof LoginRoute
+  '/client-login': typeof ClientLoginRoute
   '/recover-password': typeof RecoverPasswordRoute
   '/reset-password': typeof ResetPasswordRoute
   '/signup': typeof SignupRoute
+  '/team-login': typeof TeamLoginRoute
   '/_layout/admin': typeof LayoutAdminRoute
+  '/_layout/dashboard': typeof LayoutDashboardRoute
+  '/_layout/galleries': typeof LayoutGalleriesRouteWithChildren
   '/_layout/items': typeof LayoutItemsRoute
+  '/_layout/organization': typeof LayoutOrganizationRoute
   '/_layout/settings': typeof LayoutSettingsRoute
-  '/_layout/': typeof LayoutIndexRoute
+  '/_layout/galleries/$galleryId': typeof LayoutGalleriesGalleryIdRoute
+  '/_layout/projects/$projectId': typeof LayoutProjectsProjectIdRoute
+  '/_layout/galleries/': typeof LayoutGalleriesIndexRoute
+  '/_layout/projects/': typeof LayoutProjectsIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
-    | '/login'
+    | '/'
+    | '/client-login'
     | '/recover-password'
     | '/reset-password'
     | '/signup'
+    | '/team-login'
     | '/admin'
+    | '/dashboard'
+    | '/galleries'
     | '/items'
+    | '/organization'
     | '/settings'
-    | '/'
+    | '/galleries/$galleryId'
+    | '/projects/$projectId'
+    | '/galleries/'
+    | '/projects'
   fileRoutesByTo: FileRoutesByTo
   to:
-    | '/login'
+    | '/'
+    | '/client-login'
     | '/recover-password'
     | '/reset-password'
     | '/signup'
+    | '/team-login'
     | '/admin'
+    | '/dashboard'
     | '/items'
+    | '/organization'
     | '/settings'
-    | '/'
+    | '/galleries/$galleryId'
+    | '/projects/$projectId'
+    | '/galleries'
+    | '/projects'
   id:
     | '__root__'
+    | '/'
     | '/_layout'
-    | '/login'
+    | '/client-login'
     | '/recover-password'
     | '/reset-password'
     | '/signup'
+    | '/team-login'
     | '/_layout/admin'
+    | '/_layout/dashboard'
+    | '/_layout/galleries'
     | '/_layout/items'
+    | '/_layout/organization'
     | '/_layout/settings'
-    | '/_layout/'
+    | '/_layout/galleries/$galleryId'
+    | '/_layout/projects/$projectId'
+    | '/_layout/galleries/'
+    | '/_layout/projects/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
+  IndexRoute: typeof IndexRoute
   LayoutRoute: typeof LayoutRouteWithChildren
-  LoginRoute: typeof LoginRoute
+  ClientLoginRoute: typeof ClientLoginRoute
   RecoverPasswordRoute: typeof RecoverPasswordRoute
   ResetPasswordRoute: typeof ResetPasswordRoute
   SignupRoute: typeof SignupRoute
+  TeamLoginRoute: typeof TeamLoginRoute
 }
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
+    '/team-login': {
+      id: '/team-login'
+      path: '/team-login'
+      fullPath: '/team-login'
+      preLoaderRoute: typeof TeamLoginRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/signup': {
       id: '/signup'
       path: '/signup'
@@ -161,11 +265,11 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof RecoverPasswordRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/login': {
-      id: '/login'
-      path: '/login'
-      fullPath: '/login'
-      preLoaderRoute: typeof LoginRouteImport
+    '/client-login': {
+      id: '/client-login'
+      path: '/client-login'
+      fullPath: '/client-login'
+      preLoaderRoute: typeof ClientLoginRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/_layout': {
@@ -175,18 +279,25 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof LayoutRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/_layout/': {
-      id: '/_layout/'
+    '/': {
+      id: '/'
       path: '/'
       fullPath: '/'
-      preLoaderRoute: typeof LayoutIndexRouteImport
-      parentRoute: typeof LayoutRoute
+      preLoaderRoute: typeof IndexRouteImport
+      parentRoute: typeof rootRouteImport
     }
     '/_layout/settings': {
       id: '/_layout/settings'
       path: '/settings'
       fullPath: '/settings'
       preLoaderRoute: typeof LayoutSettingsRouteImport
+      parentRoute: typeof LayoutRoute
+    }
+    '/_layout/organization': {
+      id: '/_layout/organization'
+      path: '/organization'
+      fullPath: '/organization'
+      preLoaderRoute: typeof LayoutOrganizationRouteImport
       parentRoute: typeof LayoutRoute
     }
     '/_layout/items': {
@@ -196,6 +307,20 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof LayoutItemsRouteImport
       parentRoute: typeof LayoutRoute
     }
+    '/_layout/galleries': {
+      id: '/_layout/galleries'
+      path: '/galleries'
+      fullPath: '/galleries'
+      preLoaderRoute: typeof LayoutGalleriesRouteImport
+      parentRoute: typeof LayoutRoute
+    }
+    '/_layout/dashboard': {
+      id: '/_layout/dashboard'
+      path: '/dashboard'
+      fullPath: '/dashboard'
+      preLoaderRoute: typeof LayoutDashboardRouteImport
+      parentRoute: typeof LayoutRoute
+    }
     '/_layout/admin': {
       id: '/_layout/admin'
       path: '/admin'
@@ -203,32 +328,84 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof LayoutAdminRouteImport
       parentRoute: typeof LayoutRoute
     }
+    '/_layout/projects/': {
+      id: '/_layout/projects/'
+      path: '/projects'
+      fullPath: '/projects'
+      preLoaderRoute: typeof LayoutProjectsIndexRouteImport
+      parentRoute: typeof LayoutRoute
+    }
+    '/_layout/galleries/': {
+      id: '/_layout/galleries/'
+      path: '/'
+      fullPath: '/galleries/'
+      preLoaderRoute: typeof LayoutGalleriesIndexRouteImport
+      parentRoute: typeof LayoutGalleriesRoute
+    }
+    '/_layout/projects/$projectId': {
+      id: '/_layout/projects/$projectId'
+      path: '/projects/$projectId'
+      fullPath: '/projects/$projectId'
+      preLoaderRoute: typeof LayoutProjectsProjectIdRouteImport
+      parentRoute: typeof LayoutRoute
+    }
+    '/_layout/galleries/$galleryId': {
+      id: '/_layout/galleries/$galleryId'
+      path: '/$galleryId'
+      fullPath: '/galleries/$galleryId'
+      preLoaderRoute: typeof LayoutGalleriesGalleryIdRouteImport
+      parentRoute: typeof LayoutGalleriesRoute
+    }
   }
 }
 
+interface LayoutGalleriesRouteChildren {
+  LayoutGalleriesGalleryIdRoute: typeof LayoutGalleriesGalleryIdRoute
+  LayoutGalleriesIndexRoute: typeof LayoutGalleriesIndexRoute
+}
+
+const LayoutGalleriesRouteChildren: LayoutGalleriesRouteChildren = {
+  LayoutGalleriesGalleryIdRoute: LayoutGalleriesGalleryIdRoute,
+  LayoutGalleriesIndexRoute: LayoutGalleriesIndexRoute,
+}
+
+const LayoutGalleriesRouteWithChildren = LayoutGalleriesRoute._addFileChildren(
+  LayoutGalleriesRouteChildren,
+)
+
 interface LayoutRouteChildren {
   LayoutAdminRoute: typeof LayoutAdminRoute
+  LayoutDashboardRoute: typeof LayoutDashboardRoute
+  LayoutGalleriesRoute: typeof LayoutGalleriesRouteWithChildren
   LayoutItemsRoute: typeof LayoutItemsRoute
+  LayoutOrganizationRoute: typeof LayoutOrganizationRoute
   LayoutSettingsRoute: typeof LayoutSettingsRoute
-  LayoutIndexRoute: typeof LayoutIndexRoute
+  LayoutProjectsProjectIdRoute: typeof LayoutProjectsProjectIdRoute
+  LayoutProjectsIndexRoute: typeof LayoutProjectsIndexRoute
 }
 
 const LayoutRouteChildren: LayoutRouteChildren = {
   LayoutAdminRoute: LayoutAdminRoute,
+  LayoutDashboardRoute: LayoutDashboardRoute,
+  LayoutGalleriesRoute: LayoutGalleriesRouteWithChildren,
   LayoutItemsRoute: LayoutItemsRoute,
+  LayoutOrganizationRoute: LayoutOrganizationRoute,
   LayoutSettingsRoute: LayoutSettingsRoute,
-  LayoutIndexRoute: LayoutIndexRoute,
+  LayoutProjectsProjectIdRoute: LayoutProjectsProjectIdRoute,
+  LayoutProjectsIndexRoute: LayoutProjectsIndexRoute,
 }
 
 const LayoutRouteWithChildren =
   LayoutRoute._addFileChildren(LayoutRouteChildren)
 
 const rootRouteChildren: RootRouteChildren = {
+  IndexRoute: IndexRoute,
   LayoutRoute: LayoutRouteWithChildren,
-  LoginRoute: LoginRoute,
+  ClientLoginRoute: ClientLoginRoute,
   RecoverPasswordRoute: RecoverPasswordRoute,
   ResetPasswordRoute: ResetPasswordRoute,
   SignupRoute: SignupRoute,
+  TeamLoginRoute: TeamLoginRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

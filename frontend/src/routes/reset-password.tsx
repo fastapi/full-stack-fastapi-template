@@ -56,7 +56,7 @@ function ResetPassword() {
     onSuccess: () => {
       showSuccessToast("Password updated successfully.")
       reset()
-      navigate({ to: "/login" })
+      navigate({ to: "/team-login" })
     },
     onError: (err: ApiError) => {
       handleError(err)

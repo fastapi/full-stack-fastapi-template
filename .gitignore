@@ -1,6 +1,15 @@
+.env
 .vscode
 node_modules/
 /test-results/
 /playwright-report/
 /blob-report/
 /playwright/.cache/
+
+# OpenAPI generated file
+frontend/openapi.json
+
+# Editor backup files
+*~
+*.swp
+*.swo

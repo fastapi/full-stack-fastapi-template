@@ -9,6 +9,49 @@ export type Body_login_login_access_token = {
     client_secret?: (string | null);
 };
 
+export type DashboardStats = {
+    active_projects: number;
+    upcoming_deadlines: number;
+    team_members: number;
+    completed_this_month: number;
+};
+
+export type GalleriesPublic = {
+    data: Array<GalleryPublic>;
+    count: number;
+};
+
+export type GalleryCreate = {
+    name: string;
+    date?: (string | null);
+    photo_count?: number;
+    photographer?: (string | null);
+    status?: string;
+    cover_image_url?: (string | null);
+    project_id: string;
+};
+
+export type GalleryPublic = {
+    name: string;
+    date?: (string | null);
+    photo_count?: number;
+    photographer?: (string | null);
+    status?: string;
+    cover_image_url?: (string | null);
+    id: string;
+    created_at: string;
+    project_id: string;
+};
+
+export type GalleryUpdate = {
+    name?: (string | null);
+    date?: (string | null);
+    photo_count?: (number | null);
+    photographer?: (string | null);
+    status?: (string | null);
+    cover_image_url?: (string | null);
+};
+
 export type HTTPValidationError = {
     detail?: Array<ValidationError>;
 };
@@ -51,6 +94,73 @@ export type PrivateUserCreate = {
     is_verified?: boolean;
 };
 
+export type ProjectAccessesPublic = {
+    data: Array<ProjectAccessPublic>;
+    count: number;
+};
+
+export type ProjectAccessPublic = {
+    role?: string;
+    can_comment?: boolean;
+    can_download?: boolean;
+    id: string;
+    created_at: string;
+    project_id: string;
+    user_id: string;
+};
+
+export type ProjectAccessUpdate = {
+    role?: (string | null);
+    can_comment?: (boolean | null);
+    can_download?: (boolean | null);
+};
+
+export type ProjectCreate = {
+    name: string;
+    client_name: string;
+    client_email?: (string | null);
+    description?: (string | null);
+    status?: string;
+    deadline?: (string | null);
+    start_date?: (string | null);
+    budget?: (string | null);
+    progress?: number;
+    organization_id: string;
+};
+
+export type ProjectPublic = {
+    name: string;
+    client_name: string;
+    client_email?: (string | null);
+    description?: (string | null);
+    status?: string;
+    deadline?: (string | null);
+    start_date?: (string | null);
+    budget?: (string | null);
+    progress?: number;
+    id: string;
+    created_at: string;
+    updated_at: string;
+    organization_id: string;
+};
+
+export type ProjectsPublic = {
+    data: Array<ProjectPublic>;
+    count: number;
+};
+
+export type ProjectUpdate = {
+    name?: (string | null);
+    client_name?: (string | null);
+    client_email?: (string | null);
+    description?: (string | null);
+    status?: (string | null);
+    deadline?: (string | null);
+    start_date?: (string | null);
+    budget?: (string | null);
+    progress?: (number | null);
+};
+
 export type Token = {
     access_token: string;
     token_type?: string;
@@ -74,6 +184,8 @@ export type UserPublic = {
     is_active?: boolean;
     is_superuser?: boolean;
     full_name?: (string | null);
+    user_type?: string;
+    organization_id?: (string | null);
     id: string;
 };
 
@@ -81,6 +193,7 @@ export type UserRegister = {
     email: string;
     password: string;
     full_name?: (string | null);
+    user_type?: string;
 };
 
 export type UsersPublic = {
@@ -106,6 +219,39 @@ export type ValidationError = {
     msg: string;
     type: string;
 };
+
+export type GalleriesReadGalleriesData = {
+    limit?: number;
+    projectId?: (string | null);
+    skip?: number;
+};
+
+export type GalleriesReadGalleriesResponse = (GalleriesPublic);
+
+export type GalleriesCreateGalleryData = {
+    requestBody: GalleryCreate;
+};
+
+export type GalleriesCreateGalleryResponse = (GalleryPublic);
+
+export type GalleriesReadGalleryData = {
+    id: string;
+};
+
+export type GalleriesReadGalleryResponse = (GalleryPublic);
+
+export type GalleriesUpdateGalleryData = {
+    id: string;
+    requestBody: GalleryUpdate;
+};
+
+export type GalleriesUpdateGalleryResponse = (GalleryPublic);
+
+export type GalleriesDeleteGalleryData = {
+    id: string;
+};
+
+export type GalleriesDeleteGalleryResponse = (Message);
 
 export type ItemsReadItemsData = {
     limit?: number;
@@ -171,6 +317,71 @@ export type PrivateCreateUserData = {
 
 export type PrivateCreateUserResponse = (UserPublic);
 
+export type ProjectAccessGrantProjectAccessData = {
+    canComment?: boolean;
+    canDownload?: boolean;
+    projectId: string;
+    role?: string;
+    userId: string;
+};
+
+export type ProjectAccessGrantProjectAccessResponse = (ProjectAccessPublic);
+
+export type ProjectAccessReadProjectAccessListData = {
+    projectId: string;
+};
+
+export type ProjectAccessReadProjectAccessListResponse = (ProjectAccessesPublic);
+
+export type ProjectAccessRevokeProjectAccessData = {
+    projectId: string;
+    userId: string;
+};
+
+export type ProjectAccessRevokeProjectAccessResponse = (Message);
+
+export type ProjectAccessUpdateProjectAccessPermissionsData = {
+    projectId: string;
+    requestBody: ProjectAccessUpdate;
+    userId: string;
+};
+
+export type ProjectAccessUpdateProjectAccessPermissionsResponse = (ProjectAccessPublic);
+
+export type ProjectsReadProjectsData = {
+    limit?: number;
+    skip?: number;
+};
+
+export type ProjectsReadProjectsResponse = (ProjectsPublic);
+
+export type ProjectsCreateProjectData = {
+    requestBody: ProjectCreate;
+};
+
+export type ProjectsCreateProjectResponse = (ProjectPublic);
+
+export type ProjectsReadDashboardStatsResponse = (DashboardStats);
+
+export type ProjectsReadProjectData = {
+    id: string;
+};
+
+export type ProjectsReadProjectResponse = (ProjectPublic);
+
+export type ProjectsUpdateProjectData = {
+    id: string;
+    requestBody: ProjectUpdate;
+};
+
+export type ProjectsUpdateProjectResponse = (ProjectPublic);
+
+export type ProjectsDeleteProjectData = {
+    id: string;
+};
+
+export type ProjectsDeleteProjectResponse = (Message);
+
 export type UsersReadUsersData = {
     limit?: number;
     skip?: number;
@@ -232,3 +443,7 @@ export type UtilsTestEmailData = {
 export type UtilsTestEmailResponse = (Message);
 
 export type UtilsHealthCheckResponse = (boolean);
+
+export type UtilsGetSystemInfoResponse = ({
+    [key: string]: unknown;
+});

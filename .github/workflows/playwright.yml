@@ -41,6 +41,28 @@ jobs:
     if: ${{ needs.changes.outputs.changed == 'true' }}
     timeout-minutes: 60
     runs-on: ubuntu-latest
+    env:
+      DOMAIN: localhost
+      ENVIRONMENT: local
+      FRONTEND_HOST: http://localhost:5173
+      BACKEND_CORS_ORIGINS: http://localhost:5173,http://localhost:8000
+      SECRET_KEY: ${{ secrets.SECRET_KEY }}
+      FIRST_SUPERUSER: ${{ secrets.FIRST_SUPERUSER }}
+      FIRST_SUPERUSER_PASSWORD: ${{ secrets.FIRST_SUPERUSER_PASSWORD }}
+      POSTGRES_SERVER: db
+      POSTGRES_PORT: 5432
+      POSTGRES_DB: app
+      POSTGRES_USER: ${{ secrets.POSTGRES_USER }}
+      POSTGRES_PASSWORD: ${{ secrets.POSTGRES_PASSWORD }}
+      SMTP_HOST: ""
+      SMTP_USER: ""
+      SMTP_PASSWORD: ""
+      EMAILS_FROM_EMAIL: noreply@example.com
+      SENTRY_DSN: ""
+      PROJECT_NAME: "Mosaic Project"
+      STACK_NAME: mosaic-project-local
+      DOCKER_IMAGE_BACKEND: backend
+      DOCKER_IMAGE_FRONTEND: frontend
     strategy:
       matrix:
         shardIndex: [1, 2, 3, 4]
@@ -48,7 +70,9 @@ jobs:
       fail-fast: false
     steps:
     - uses: actions/checkout@v5
-    - uses: actions/setup-node@v6
+    - name: Create .env file
+      run: touch .env
+    - uses: actions/setup-node@v5
       with:
         node-version: lts/*
     - uses: actions/setup-python@v6
@@ -60,7 +84,7 @@ jobs:
       with:
         limit-access-to-actor: true
     - name: Install uv
-      uses: astral-sh/setup-uv@v7
+      uses: astral-sh/setup-uv@v6
       with:
         version: "0.4.15"
         enable-cache: true
@@ -75,10 +99,11 @@ jobs:
     - run: docker compose down -v --remove-orphans
     - name: Run Playwright tests
       run: docker compose run --rm playwright npx playwright test --fail-on-flaky-tests --trace=retain-on-failure --shard=${{ matrix.shardIndex }}/${{ matrix.shardTotal }}
+
     - run: docker compose down -v --remove-orphans
     - name: Upload blob report to GitHub Actions Artifacts
       if: ${{ !cancelled() }}
-      uses: actions/upload-artifact@v5
+      uses: actions/upload-artifact@v4
       with:
         name: blob-report-${{ matrix.shardIndex }}
         path: frontend/blob-report
@@ -94,14 +119,14 @@ jobs:
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v5
-    - uses: actions/setup-node@v6
+    - uses: actions/setup-node@v5
       with:
         node-version: 20
     - name: Install dependencies
       run: npm ci
       working-directory: frontend
     - name: Download blob reports from GitHub Actions Artifacts
-      uses: actions/download-artifact@v6
+      uses: actions/download-artifact@v5
       with:
         path: frontend/all-blob-reports
         pattern: blob-report-*
@@ -110,7 +135,7 @@ jobs:
       run: npx playwright merge-reports --reporter html ./all-blob-reports
       working-directory: frontend
     - name: Upload HTML report
-      uses: actions/upload-artifact@v5
+      uses: actions/upload-artifact@v4
       with:
         name: html-report--attempt-${{ github.run_attempt }}
         path: frontend/playwright-report

@@ -3,7 +3,121 @@
 import type { CancelablePromise } from './core/CancelablePromise';
 import { OpenAPI } from './core/OpenAPI';
 import { request as __request } from './core/request';
-import type { ItemsReadItemsData, ItemsReadItemsResponse, ItemsCreateItemData, ItemsCreateItemResponse, ItemsReadItemData, ItemsReadItemResponse, ItemsUpdateItemData, ItemsUpdateItemResponse, ItemsDeleteItemData, ItemsDeleteItemResponse, LoginLoginAccessTokenData, LoginLoginAccessTokenResponse, LoginTestTokenResponse, LoginRecoverPasswordData, LoginRecoverPasswordResponse, LoginResetPasswordData, LoginResetPasswordResponse, LoginRecoverPasswordHtmlContentData, LoginRecoverPasswordHtmlContentResponse, PrivateCreateUserData, PrivateCreateUserResponse, UsersReadUsersData, UsersReadUsersResponse, UsersCreateUserData, UsersCreateUserResponse, UsersReadUserMeResponse, UsersDeleteUserMeResponse, UsersUpdateUserMeData, UsersUpdateUserMeResponse, UsersUpdatePasswordMeData, UsersUpdatePasswordMeResponse, UsersRegisterUserData, UsersRegisterUserResponse, UsersReadUserByIdData, UsersReadUserByIdResponse, UsersUpdateUserData, UsersUpdateUserResponse, UsersDeleteUserData, UsersDeleteUserResponse, UtilsTestEmailData, UtilsTestEmailResponse, UtilsHealthCheckResponse } from './types.gen';
+import type { GalleriesReadGalleriesData, GalleriesReadGalleriesResponse, GalleriesCreateGalleryData, GalleriesCreateGalleryResponse, GalleriesReadGalleryData, GalleriesReadGalleryResponse, GalleriesUpdateGalleryData, GalleriesUpdateGalleryResponse, GalleriesDeleteGalleryData, GalleriesDeleteGalleryResponse, ItemsReadItemsData, ItemsReadItemsResponse, ItemsCreateItemData, ItemsCreateItemResponse, ItemsReadItemData, ItemsReadItemResponse, ItemsUpdateItemData, ItemsUpdateItemResponse, ItemsDeleteItemData, ItemsDeleteItemResponse, LoginLoginAccessTokenData, LoginLoginAccessTokenResponse, LoginTestTokenResponse, LoginRecoverPasswordData, LoginRecoverPasswordResponse, LoginResetPasswordData, LoginResetPasswordResponse, LoginRecoverPasswordHtmlContentData, LoginRecoverPasswordHtmlContentResponse, PrivateCreateUserData, PrivateCreateUserResponse, ProjectAccessGrantProjectAccessData, ProjectAccessGrantProjectAccessResponse, ProjectAccessReadProjectAccessListData, ProjectAccessReadProjectAccessListResponse, ProjectAccessRevokeProjectAccessData, ProjectAccessRevokeProjectAccessResponse, ProjectAccessUpdateProjectAccessPermissionsData, ProjectAccessUpdateProjectAccessPermissionsResponse, ProjectsReadProjectsData, ProjectsReadProjectsResponse, ProjectsCreateProjectData, ProjectsCreateProjectResponse, ProjectsReadDashboardStatsResponse, ProjectsReadProjectData, ProjectsReadProjectResponse, ProjectsUpdateProjectData, ProjectsUpdateProjectResponse, ProjectsDeleteProjectData, ProjectsDeleteProjectResponse, UsersReadUsersData, UsersReadUsersResponse, UsersCreateUserData, UsersCreateUserResponse, UsersReadUserMeResponse, UsersDeleteUserMeResponse, UsersUpdateUserMeData, UsersUpdateUserMeResponse, UsersUpdatePasswordMeData, UsersUpdatePasswordMeResponse, UsersRegisterUserData, UsersRegisterUserResponse, UsersReadUserByIdData, UsersReadUserByIdResponse, UsersUpdateUserData, UsersUpdateUserResponse, UsersDeleteUserData, UsersDeleteUserResponse, UtilsTestEmailData, UtilsTestEmailResponse, UtilsHealthCheckResponse, UtilsGetSystemInfoResponse } from './types.gen';
+
+export class GalleriesService {
+    /**
+     * Read Galleries
+     * Retrieve galleries. If project_id is provided, get galleries for that project.
+     * Otherwise, get all galleries for the user's organization.
+     * @param data The data for the request.
+     * @param data.projectId
+     * @param data.skip
+     * @param data.limit
+     * @returns GalleriesPublic Successful Response
+     * @throws ApiError
+     */
+    public static readGalleries(data: GalleriesReadGalleriesData = {}): CancelablePromise<GalleriesReadGalleriesResponse> {
+        return __request(OpenAPI, {
+            method: 'GET',
+            url: '/api/v1/galleries/',
+            query: {
+                project_id: data.projectId,
+                skip: data.skip,
+                limit: data.limit
+            },
+            errors: {
+                422: 'Validation Error'
+            }
+        });
+    }
+    
+    /**
+     * Create Gallery
+     * Create new gallery.
+     * @param data The data for the request.
+     * @param data.requestBody
+     * @returns GalleryPublic Successful Response
+     * @throws ApiError
+     */
+    public static createGallery(data: GalleriesCreateGalleryData): CancelablePromise<GalleriesCreateGalleryResponse> {
+        return __request(OpenAPI, {
+            method: 'POST',
+            url: '/api/v1/galleries/',
+            body: data.requestBody,
+            mediaType: 'application/json',
+            errors: {
+                422: 'Validation Error'
+            }
+        });
+    }
+    
+    /**
+     * Read Gallery
+     * Get gallery by ID.
+     * @param data The data for the request.
+     * @param data.id
+     * @returns GalleryPublic Successful Response
+     * @throws ApiError
+     */
+    public static readGallery(data: GalleriesReadGalleryData): CancelablePromise<GalleriesReadGalleryResponse> {
+        return __request(OpenAPI, {
+            method: 'GET',
+            url: '/api/v1/galleries/{id}',
+            path: {
+                id: data.id
+            },
+            errors: {
+                422: 'Validation Error'
+            }
+        });
+    }
+    
+    /**
+     * Update Gallery
+     * Update a gallery.
+     * @param data The data for the request.
+     * @param data.id
+     * @param data.requestBody
+     * @returns GalleryPublic Successful Response
+     * @throws ApiError
+     */
+    public static updateGallery(data: GalleriesUpdateGalleryData): CancelablePromise<GalleriesUpdateGalleryResponse> {
+        return __request(OpenAPI, {
+            method: 'PUT',
+            url: '/api/v1/galleries/{id}',
+            path: {
+                id: data.id
+            },
+            body: data.requestBody,
+            mediaType: 'application/json',
+            errors: {
+                422: 'Validation Error'
+            }
+        });
+    }
+    
+    /**
+     * Delete Gallery
+     * Delete a gallery.
+     * @param data The data for the request.
+     * @param data.id
+     * @returns Message Successful Response
+     * @throws ApiError
+     */
+    public static deleteGallery(data: GalleriesDeleteGalleryData): CancelablePromise<GalleriesDeleteGalleryResponse> {
+        return __request(OpenAPI, {
+            method: 'DELETE',
+            url: '/api/v1/galleries/{id}',
+            path: {
+                id: data.id
+            },
+            errors: {
+                422: 'Validation Error'
+            }
+        });
+    }
+}
 
 export class ItemsService {
     /**
@@ -228,6 +342,243 @@ export class PrivateService {
             url: '/api/v1/private/users/',
             body: data.requestBody,
             mediaType: 'application/json',
+            errors: {
+                422: 'Validation Error'
+            }
+        });
+    }
+}
+
+export class ProjectAccessService {
+    /**
+     * Grant Project Access
+     * Grant a user access to a project (invite a client).
+     * Only team members can invite clients.
+     * @param data The data for the request.
+     * @param data.projectId
+     * @param data.userId
+     * @param data.role
+     * @param data.canComment
+     * @param data.canDownload
+     * @returns ProjectAccessPublic Successful Response
+     * @throws ApiError
+     */
+    public static grantProjectAccess(data: ProjectAccessGrantProjectAccessData): CancelablePromise<ProjectAccessGrantProjectAccessResponse> {
+        return __request(OpenAPI, {
+            method: 'POST',
+            url: '/api/v1/projects/{project_id}/access',
+            path: {
+                project_id: data.projectId
+            },
+            query: {
+                user_id: data.userId,
+                role: data.role,
+                can_comment: data.canComment,
+                can_download: data.canDownload
+            },
+            errors: {
+                422: 'Validation Error'
+            }
+        });
+    }
+    
+    /**
+     * Read Project Access List
+     * Get list of users with access to a project.
+     * Only team members from the project's organization can see this.
+     * @param data The data for the request.
+     * @param data.projectId
+     * @returns ProjectAccessesPublic Successful Response
+     * @throws ApiError
+     */
+    public static readProjectAccessList(data: ProjectAccessReadProjectAccessListData): CancelablePromise<ProjectAccessReadProjectAccessListResponse> {
+        return __request(OpenAPI, {
+            method: 'GET',
+            url: '/api/v1/projects/{project_id}/access',
+            path: {
+                project_id: data.projectId
+            },
+            errors: {
+                422: 'Validation Error'
+            }
+        });
+    }
+    
+    /**
+     * Revoke Project Access
+     * Revoke a user's access to a project.
+     * Only team members from the project's organization can do this.
+     * @param data The data for the request.
+     * @param data.projectId
+     * @param data.userId
+     * @returns Message Successful Response
+     * @throws ApiError
+     */
+    public static revokeProjectAccess(data: ProjectAccessRevokeProjectAccessData): CancelablePromise<ProjectAccessRevokeProjectAccessResponse> {
+        return __request(OpenAPI, {
+            method: 'DELETE',
+            url: '/api/v1/projects/{project_id}/access/{user_id}',
+            path: {
+                project_id: data.projectId,
+                user_id: data.userId
+            },
+            errors: {
+                422: 'Validation Error'
+            }
+        });
+    }
+    
+    /**
+     * Update Project Access Permissions
+     * Update a user's project access permissions.
+     * Only team members from the project's organization can do this.
+     * @param data The data for the request.
+     * @param data.projectId
+     * @param data.userId
+     * @param data.requestBody
+     * @returns ProjectAccessPublic Successful Response
+     * @throws ApiError
+     */
+    public static updateProjectAccessPermissions(data: ProjectAccessUpdateProjectAccessPermissionsData): CancelablePromise<ProjectAccessUpdateProjectAccessPermissionsResponse> {
+        return __request(OpenAPI, {
+            method: 'PATCH',
+            url: '/api/v1/projects/{project_id}/access/{user_id}',
+            path: {
+                project_id: data.projectId,
+                user_id: data.userId
+            },
+            body: data.requestBody,
+            mediaType: 'application/json',
+            errors: {
+                422: 'Validation Error'
+            }
+        });
+    }
+}
+
+export class ProjectsService {
+    /**
+     * Read Projects
+     * Retrieve projects.
+     * - Team members see projects from their organization
+     * - Clients see projects they have been invited to
+     * @param data The data for the request.
+     * @param data.skip
+     * @param data.limit
+     * @returns ProjectsPublic Successful Response
+     * @throws ApiError
+     */
+    public static readProjects(data: ProjectsReadProjectsData = {}): CancelablePromise<ProjectsReadProjectsResponse> {
+        return __request(OpenAPI, {
+            method: 'GET',
+            url: '/api/v1/projects/',
+            query: {
+                skip: data.skip,
+                limit: data.limit
+            },
+            errors: {
+                422: 'Validation Error'
+            }
+        });
+    }
+    
+    /**
+     * Create Project
+     * Create new project.
+     * Only team members can create projects.
+     * @param data The data for the request.
+     * @param data.requestBody
+     * @returns ProjectPublic Successful Response
+     * @throws ApiError
+     */
+    public static createProject(data: ProjectsCreateProjectData): CancelablePromise<ProjectsCreateProjectResponse> {
+        return __request(OpenAPI, {
+            method: 'POST',
+            url: '/api/v1/projects/',
+            body: data.requestBody,
+            mediaType: 'application/json',
+            errors: {
+                422: 'Validation Error'
+            }
+        });
+    }
+    
+    /**
+     * Read Dashboard Stats
+     * Get dashboard statistics for the current user's organization.
+     * Only available to team members.
+     * @returns DashboardStats Successful Response
+     * @throws ApiError
+     */
+    public static readDashboardStats(): CancelablePromise<ProjectsReadDashboardStatsResponse> {
+        return __request(OpenAPI, {
+            method: 'GET',
+            url: '/api/v1/projects/stats'
+        });
+    }
+    
+    /**
+     * Read Project
+     * Get project by ID.
+     * @param data The data for the request.
+     * @param data.id
+     * @returns ProjectPublic Successful Response
+     * @throws ApiError
+     */
+    public static readProject(data: ProjectsReadProjectData): CancelablePromise<ProjectsReadProjectResponse> {
+        return __request(OpenAPI, {
+            method: 'GET',
+            url: '/api/v1/projects/{id}',
+            path: {
+                id: data.id
+            },
+            errors: {
+                422: 'Validation Error'
+            }
+        });
+    }
+    
+    /**
+     * Update Project
+     * Update a project.
+     * Only team members from the project's organization can update projects.
+     * @param data The data for the request.
+     * @param data.id
+     * @param data.requestBody
+     * @returns ProjectPublic Successful Response
+     * @throws ApiError
+     */
+    public static updateProject(data: ProjectsUpdateProjectData): CancelablePromise<ProjectsUpdateProjectResponse> {
+        return __request(OpenAPI, {
+            method: 'PUT',
+            url: '/api/v1/projects/{id}',
+            path: {
+                id: data.id
+            },
+            body: data.requestBody,
+            mediaType: 'application/json',
+            errors: {
+                422: 'Validation Error'
+            }
+        });
+    }
+    
+    /**
+     * Delete Project
+     * Delete a project.
+     * Only team members from the project's organization can delete projects.
+     * @param data The data for the request.
+     * @param data.id
+     * @returns Message Successful Response
+     * @throws ApiError
+     */
+    public static deleteProject(data: ProjectsDeleteProjectData): CancelablePromise<ProjectsDeleteProjectResponse> {
+        return __request(OpenAPI, {
+            method: 'DELETE',
+            url: '/api/v1/projects/{id}',
+            path: {
+                id: data.id
+            },
             errors: {
                 422: 'Validation Error'
             }
@@ -463,6 +814,19 @@ export class UtilsService {
         return __request(OpenAPI, {
             method: 'GET',
             url: '/api/v1/utils/health-check/'
+        });
+    }
+    
+    /**
+     * Get System Info
+     * Get interesting system information including current time, platform details, and Python version.
+     * @returns unknown Successful Response
+     * @throws ApiError
+     */
+    public static getSystemInfo(): CancelablePromise<UtilsGetSystemInfoResponse> {
+        return __request(OpenAPI, {
+            method: 'GET',
+            url: '/api/v1/utils/system-info/'
         });
     }
 }

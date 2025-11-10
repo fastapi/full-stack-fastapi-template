@@ -1,0 +1,138 @@
+name: Deploy to EC2
+
+on:
+  push:
+    branches: [ main, master ]
+  pull_request:
+    branches: [ main, master ]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_DB: test_db
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+    steps:
+    - uses: actions/checkout@v4
+    
+    - name: Install uv
+      uses: astral-sh/setup-uv@v4
+      with:
+        enable-cache: true
+    
+    - name: Set up Python
+      run: uv python install 3.10
+    
+    - name: Install dependencies
+      run: |
+        cd backend
+        uv sync
+    
+    - name: Run migrations
+      env:
+        PROJECT_NAME: Mosaic Test
+        POSTGRES_SERVER: localhost
+        POSTGRES_PORT: 5432
+        POSTGRES_USER: postgres
+        POSTGRES_PASSWORD: postgres
+        POSTGRES_DB: test_db
+        SECRET_KEY: test-secret-key-for-testing
+        FIRST_SUPERUSER: admin@example.com
+        FIRST_SUPERUSER_PASSWORD: testpassword
+        ENVIRONMENT: local
+      run: |
+        cd backend
+        uv run alembic upgrade head
+    
+    - name: Run tests
+      env:
+        PROJECT_NAME: Test Project
+        POSTGRES_SERVER: localhost
+        POSTGRES_PORT: 5432
+        POSTGRES_USER: postgres
+        POSTGRES_PASSWORD: postgres
+        POSTGRES_DB: test_db
+        SECRET_KEY: test-secret-key-for-testing
+        FIRST_SUPERUSER: admin@example.com
+        FIRST_SUPERUSER_PASSWORD: testpassword
+        ENVIRONMENT: local
+      run: |
+        cd backend
+        uv run pytest tests/ -v
+
+  deploy:
+    needs: test
+    runs-on: ubuntu-latest
+    if: always() && (github.ref == 'refs/heads/main' || github.ref == 'refs/heads/master')
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+    
+    - name: Setup SSH
+      uses: webfactory/ssh-agent@v0.7.0
+      with:
+        ssh-private-key: ${{ secrets.EC2_SSH_KEY }}
+    
+    - name: Add EC2 to known hosts
+      run: |
+        ssh-keyscan -H ${{ secrets.EC2_HOST }} >> ~/.ssh/known_hosts
+    
+    - name: Deploy to EC2
+      run: |
+        ssh ec2-user@${{ secrets.EC2_HOST }} 'bash -s' << 'ENDSSH'
+        cd mosaic-project-cs4800 || cd mosaic-project-cs4800-main
+        git pull origin main || git pull origin master
+        chmod +x deploy-ip.sh
+        ./deploy-ip.sh ${{ secrets.EC2_HOST }}
+        cat > .env << 'ENVEOF'
+        ENVIRONMENT=production
+        DOMAIN=${{ secrets.EC2_HOST }}
+        PROJECT_NAME=Mosaic Project
+        STACK_NAME=mosaic-project-production
+        BACKEND_CORS_ORIGINS=http://${{ secrets.EC2_HOST }}:5173,http://${{ secrets.EC2_HOST }}:80,http://${{ secrets.EC2_HOST }}
+        FRONTEND_HOST=http://${{ secrets.EC2_HOST }}:5173
+        SECRET_KEY=${{ secrets.SECRET_KEY }}
+        FIRST_SUPERUSER=${{ secrets.FIRST_SUPERUSER }}
+        FIRST_SUPERUSER_PASSWORD=${{ secrets.FIRST_SUPERUSER_PASSWORD }}
+        POSTGRES_SERVER=db
+        POSTGRES_PORT=5432
+        POSTGRES_USER=postgres
+        POSTGRES_PASSWORD=${{ secrets.POSTGRES_PASSWORD }}
+        POSTGRES_DB=app
+        SMTP_HOST=
+        SMTP_USER=
+        SMTP_PASSWORD=
+        EMAILS_FROM_EMAIL=
+        DOCKER_IMAGE_BACKEND=mosaic-backend
+        DOCKER_IMAGE_FRONTEND=mosaic-frontend
+        TAG=latest
+        ENVEOF
+        export DOCKER_BUILDKIT=1
+        export COMPOSE_DOCKER_CLI_BUILD=1
+        docker compose -f docker-compose.production.yml down
+        docker compose -f docker-compose.production.yml up -d --build
+        sleep 30
+        docker compose -f docker-compose.production.yml ps
+        curl -f http://localhost:8000/api/v1/utils/health-check/ || echo "Backend health check failed"
+        ENDSSH
+    
+    - name: Verify deployment
+      run: |
+        # Wait a bit for services to fully start
+        sleep 10
+        
+        # Test if the application is accessible
+        curl -f http://${{ secrets.EC2_HOST }}:8000/api/v1/utils/health-check/ || echo "Backend not accessible"
+        curl -f http://${{ secrets.EC2_HOST }} || echo "Frontend not accessible"
