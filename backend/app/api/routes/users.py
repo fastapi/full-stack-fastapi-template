@@ -2,7 +2,7 @@ import uuid
 from typing import Any
 
 from fastapi import APIRouter, Depends, HTTPException
-from sqlmodel import col, delete, func, select
+from sqlmodel import func, select
 
 from app import crud
 from app.api.deps import (
@@ -196,7 +196,7 @@ def register_user(session: SessionDep, user_in: UserRegister) -> Any:
             session.commit()
 
     user = crud.create_user(session=session, user_create=user_create)
-    
+
     # Process any pending project invitations for clients
     if user.user_type == "client":
         crud.process_pending_project_invitations(
@@ -204,7 +204,7 @@ def register_user(session: SessionDep, user_in: UserRegister) -> Any:
             user_id=user.id,
             email=user.email,
         )
-    
+
     return user
 
 

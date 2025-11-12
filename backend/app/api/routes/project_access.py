@@ -8,7 +8,6 @@ from app.api.deps import CurrentUser, SessionDep
 from app.models import (
     Message,
     ProjectAccessCreate,
-    ProjectAccessesPublic,
     ProjectAccessInviteByEmail,
     ProjectAccessPublic,
     ProjectAccessUpdate,
@@ -65,7 +64,7 @@ def invite_client_by_email(
             can_comment=invite_data.can_comment,
             can_download=invite_data.can_download,
         )
-        
+
         if is_pending:
             return {
                 "message": "Invitation sent. Client will get access when they sign up with this email.",
