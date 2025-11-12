@@ -10,8 +10,8 @@ import {
 } from "@/components/ui/dialog"
 import { Button } from "@/components/ui/button"
 import { Field } from "@/components/ui/field"
-import { Input } from "@chakra-ui/react"
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query"
+import { Input, Text } from "@chakra-ui/react"
+import { useMutation, useQueryClient } from "@tanstack/react-query"
 import { FiUserPlus } from "react-icons/fi"
 import useCustomToast from "@/hooks/useCustomToast"
 
@@ -21,50 +21,32 @@ interface InviteClientProps {
 
 export function InviteClient({ projectId }: InviteClientProps) {
   const [open, setOpen] = useState(false)
-  const [selectedUserId, setSelectedUserId] = useState<string>("")
-  const [searchEmail, setSearchEmail] = useState("")
+  const [email, setEmail] = useState("")
+  const [emailError, setEmailError] = useState("")
   const { showSuccessToast, showErrorToast } = useCustomToast()
   const queryClient = useQueryClient()
 
-  // Fetch client users
-  const { data: usersData } = useQuery({
-    queryKey: ["clients"],
-    queryFn: async () => {
-      const baseUrl = (import.meta.env.VITE_API_URL || "http://localhost:8000").replace(/\/$/, '')
-      const response = await fetch(
-        `${baseUrl}/api/v1/users/clients?skip=0&limit=100`,
-        {
-          headers: {
-            Authorization: `Bearer ${localStorage.getItem("access_token")}`,
-          },
-        }
-      )
-      if (!response.ok) {
-        throw new Error("Failed to fetch clients")
-      }
-      return response.json()
-    },
-    enabled: open,
-  })
-
-  const clientUsers = usersData?.data || []
-
-  // Filter by search
-  const filteredClients = clientUsers.filter(
-    (user: any) =>
-      user.email.toLowerCase().includes(searchEmail.toLowerCase()) ||
-      user.full_name?.toLowerCase().includes(searchEmail.toLowerCase())
-  )
+  const validateEmail = (email: string) => {
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
+    return emailRegex.test(email)
+  }
 
   const inviteMutation = useMutation({
-    mutationFn: async (userId: string) => {
+    mutationFn: async (email: string) => {
       const baseUrl = (import.meta.env.VITE_API_URL || "http://localhost:8000").replace(/\/$/, '')
-      const url = `${baseUrl}/api/v1/projects/${projectId}/access?user_id=${userId}&role=viewer&can_comment=true&can_download=true`
+      const url = `${baseUrl}/api/v1/projects/${projectId}/access/invite-by-email`
       const response = await fetch(url, {
         method: "POST",
         headers: {
-          Authorization: `Bearer ${localStorage.getItem("access_token")}`,
+          "Authorization": `Bearer ${localStorage.getItem("access_token")}`,
+          "Content-Type": "application/json",
         },
+        body: JSON.stringify({
+          email: email,
+          role: "viewer",
+          can_comment: true,
+          can_download: true,
+        }),
       })
       if (!response.ok) {
         const error = await response.json().catch(() => ({}))
@@ -72,22 +54,43 @@ export function InviteClient({ projectId }: InviteClientProps) {
       }
       return response.json()
     },
-    onSuccess: () => {
-      showSuccessToast("Client invited successfully")
+    onSuccess: (data) => {
+      if (data.is_pending) {
+        showSuccessToast("Invitation created! Client will get access when they sign up with this email.")
+      } else {
+        showSuccessToast("Client invited successfully!")
+      }
       queryClient.invalidateQueries({ queryKey: ["projectAccess", projectId] })
       setOpen(false)
-      setSelectedUserId("")
-      setSearchEmail("")
+      setEmail("")
+      setEmailError("")
     },
     onError: (error: any) => {
-      const message = error?.body?.detail || error?.message || "Failed to invite client"
+      const message = error?.message || "Failed to invite client"
       showErrorToast(message)
     },
   })
 
   const handleInvite = () => {
-    if (selectedUserId) {
-      inviteMutation.mutate(selectedUserId)
+    // Validate email
+    if (!email.trim()) {
+      setEmailError("Email is required")
+      return
+    }
+    
+    if (!validateEmail(email)) {
+      setEmailError("Please enter a valid email address")
+      return
+    }
+
+    setEmailError("")
+    inviteMutation.mutate(email.trim().toLowerCase())
+  }
+
+  const handleEmailChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setEmail(e.target.value)
+    if (emailError) {
+      setEmailError("")
     }
   }
 
@@ -110,56 +113,23 @@ export function InviteClient({ projectId }: InviteClientProps) {
         <DialogCloseTrigger />
 
         <DialogBody>
-          <Field label="Search for client">
+          <Field 
+            label="Client Email" 
+            invalid={!!emailError}
+            errorText={emailError}
+          >
             <Input
-              placeholder="Search by email or name..."
-              value={searchEmail}
-              onChange={(e) => setSearchEmail(e.target.value)}
-              mb={4}
+              placeholder="client@example.com"
+              value={email}
+              onChange={handleEmailChange}
+              type="email"
+              autoComplete="email"
             />
           </Field>
-
-          <div style={{ maxHeight: "300px", overflowY: "auto" }}>
-            {filteredClients.length === 0 ? (
-              <p style={{ color: "gray", textAlign: "center", padding: "20px" }}>
-                No clients found
-              </p>
-            ) : (
-              filteredClients.map((user: any) => (
-                <div
-                  key={user.id}
-                  onClick={() => setSelectedUserId(user.id)}
-                  style={{
-                    padding: "12px",
-                    border: "1px solid #e2e8f0",
-                    borderRadius: "8px",
-                    marginBottom: "8px",
-                    cursor: "pointer",
-                    backgroundColor:
-                      selectedUserId === user.id ? "#ebf8ff" : "transparent",
-                    transition: "all 0.2s",
-                  }}
-                  onMouseEnter={(e) => {
-                    if (selectedUserId !== user.id) {
-                      e.currentTarget.style.backgroundColor = "#f7fafc"
-                    }
-                  }}
-                  onMouseLeave={(e) => {
-                    if (selectedUserId !== user.id) {
-                      e.currentTarget.style.backgroundColor = "transparent"
-                    }
-                  }}
-                >
-                  <div style={{ fontWeight: "500" }}>
-                    {user.full_name || "No name"}
-                  </div>
-                  <div style={{ fontSize: "14px", color: "#718096" }}>
-                    {user.email}
-                  </div>
-                </div>
-              ))
-            )}
-          </div>
+          <Text fontSize="sm" color="fg.muted" mt={2}>
+            Enter the client's email address. If they already have an account, they'll be added immediately. 
+            If not, they'll get access when they sign up with this email.
+          </Text>
         </DialogBody>
 
         <DialogFooter>
@@ -169,7 +139,7 @@ export function InviteClient({ projectId }: InviteClientProps) {
           <Button
             colorScheme="blue"
             onClick={handleInvite}
-            disabled={!selectedUserId}
+            disabled={!email.trim()}
             loading={inviteMutation.isPending}
           >
             Invite Client

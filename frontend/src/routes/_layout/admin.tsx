@@ -1,4 +1,4 @@
-import { Badge, Container, Flex, Heading, Table } from "@chakra-ui/react"
+import { Badge, Container, Flex, Heading, Table, Text } from "@chakra-ui/react"
 import { useQuery, useQueryClient } from "@tanstack/react-query"
 import { createFileRoute, useNavigate } from "@tanstack/react-router"
 import { z } from "zod"
@@ -6,7 +6,6 @@ import { z } from "zod"
 import { type UserPublic, UsersService } from "@/client"
 import AddUser from "@/components/Admin/AddUser"
 import { UserActionsMenu } from "@/components/Common/UserActionsMenu"
-import PendingUsers from "@/components/Pending/PendingUsers"
 import {
   PaginationItems,
   PaginationNextTrigger,
@@ -55,7 +54,7 @@ function UsersTable() {
   const count = data?.count ?? 0
 
   if (isLoading) {
-    return <PendingUsers />
+    return <Text>Loading users...</Text>
   }
 
   return (

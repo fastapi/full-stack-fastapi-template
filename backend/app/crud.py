@@ -10,8 +10,6 @@ from app.models import (
     Gallery,
     GalleryCreate,
     GalleryUpdate,
-    Item,
-    ItemCreate,
     Organization,
     OrganizationCreate,
     OrganizationUpdate,
@@ -64,14 +62,6 @@ def authenticate(*, session: Session, email: str, password: str) -> User | None:
     if not verify_password(password, db_user.hashed_password):
         return None
     return db_user
-
-
-def create_item(*, session: Session, item_in: ItemCreate, owner_id: uuid.UUID) -> Item:
-    db_item = Item.model_validate(item_in, update={"owner_id": owner_id})
-    session.add(db_item)
-    session.commit()
-    session.refresh(db_item)
-    return db_item
 
 
 # ============================================================================
@@ -365,6 +355,105 @@ def user_has_project_access(
     )
     count = session.exec(statement).one()
     return count > 0
+
+
+def invite_client_by_email(
+    *,
+    session: Session,
+    project_id: uuid.UUID,
+    email: str,
+    role: str = "viewer",
+    can_comment: bool = True,
+    can_download: bool = True,
+) -> tuple[ProjectAccess | None, bool]:
+    """
+    Invite a client to a project by email.
+    If user exists: grants immediate access
+    If user doesn't exist: creates a pending invitation
+    Returns (ProjectAccess or None, is_pending)
+    """
+    from app.models import ProjectAccessCreate, ProjectInvitation
+    
+    # Check if user exists
+    user = get_user_by_email(session=session, email=email)
+    
+    if user:
+        # User exists - verify they're a client and grant immediate access
+        if user.user_type != "client":
+            raise ValueError(f"User {email} is not a client. Only client users can be invited to projects.")
+        
+        # Create or update project access
+        access_in = ProjectAccessCreate(
+            project_id=project_id,
+            user_id=user.id,
+            role=role,
+            can_comment=can_comment,
+            can_download=can_download,
+        )
+        access = create_project_access(session=session, access_in=access_in)
+        return access, False
+    else:
+        # User doesn't exist - create pending invitation
+        # Check if invitation already exists
+        existing = session.exec(
+            select(ProjectInvitation).where(
+                ProjectInvitation.email == email,
+                ProjectInvitation.project_id == project_id,
+            )
+        ).first()
+        
+        if existing:
+            # Update existing invitation
+            existing.role = role
+            existing.can_comment = can_comment
+            existing.can_download = can_download
+            session.add(existing)
+        else:
+            # Create new invitation
+            invitation = ProjectInvitation(
+                email=email,
+                project_id=project_id,
+                role=role,
+                can_comment=can_comment,
+                can_download=can_download,
+            )
+            session.add(invitation)
+        
+        session.commit()
+        return None, True
+
+
+def process_pending_project_invitations(*, session: Session, user_id: uuid.UUID, email: str) -> int:
+    """
+    Process any pending project invitations for a user after they register.
+    Returns count of invitations processed.
+    """
+    from app.models import ProjectInvitation, ProjectAccessCreate
+    
+    # Find all pending invitations for this email
+    statement = select(ProjectInvitation).where(ProjectInvitation.email == email)
+    invitations = session.exec(statement).all()
+    
+    count = 0
+    for invitation in invitations:
+        # Create project access
+        access_in = ProjectAccessCreate(
+            project_id=invitation.project_id,
+            user_id=user_id,
+            role=invitation.role,
+            can_comment=invitation.can_comment,
+            can_download=invitation.can_download,
+        )
+        create_project_access(session=session, access_in=access_in)
+        
+        # Delete the invitation
+        session.delete(invitation)
+        count += 1
+    
+    if count > 0:
+        session.commit()
+    
+    return count
 
 
 # ============================================================================

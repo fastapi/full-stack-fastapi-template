@@ -13,8 +13,8 @@ export function ClientAccessList({ projectId, isTeamMember }: ClientAccessListPr
   const { showSuccessToast, showErrorToast } = useCustomToast()
   const queryClient = useQueryClient()
 
-  // Fetch project access list
-  const { data: accessData, isLoading } = useQuery({
+  // Fetch project access list (now returns array with user data)
+  const { data: accessList, isLoading } = useQuery({
     queryKey: ["projectAccess", projectId],
     queryFn: async () => {
       const baseUrl = (import.meta.env.VITE_API_URL || "http://localhost:8000").replace(/\/$/, '')
@@ -29,7 +29,9 @@ export function ClientAccessList({ projectId, isTeamMember }: ClientAccessListPr
       if (!response.ok) {
         throw new Error("Failed to fetch access list")
       }
-      return response.json()
+      const data = await response.json()
+      // Backend now returns array directly
+      return Array.isArray(data) ? data : []
     },
   })
 
@@ -64,9 +66,7 @@ export function ClientAccessList({ projectId, isTeamMember }: ClientAccessListPr
     return <Text>Loading...</Text>
   }
 
-  const accessList = accessData?.data || []
-
-  if (accessList.length === 0) {
+  if (!accessList || !Array.isArray(accessList) || accessList.length === 0) {
     return (
       <Card.Root>
         <Card.Header>
@@ -105,7 +105,10 @@ export function ClientAccessList({ projectId, isTeamMember }: ClientAccessListPr
                 </Box>
                 <Box>
                   <Text fontWeight="semibold" fontSize="sm">
-                    User ID: {access.user_id.substring(0, 8)}...
+                    {access.user?.full_name || "No name"}
+                  </Text>
+                  <Text fontSize="xs" color="fg.muted">
+                    {access.user?.email}
                   </Text>
                   <Text fontSize="xs" color="fg.muted">
                     Role: {access.role}

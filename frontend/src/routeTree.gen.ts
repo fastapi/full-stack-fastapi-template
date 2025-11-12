@@ -18,7 +18,6 @@ import { Route as LayoutRouteImport } from './routes/_layout'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as LayoutSettingsRouteImport } from './routes/_layout/settings'
 import { Route as LayoutOrganizationRouteImport } from './routes/_layout/organization'
-import { Route as LayoutItemsRouteImport } from './routes/_layout/items'
 import { Route as LayoutGalleriesRouteImport } from './routes/_layout/galleries'
 import { Route as LayoutDashboardRouteImport } from './routes/_layout/dashboard'
 import { Route as LayoutAdminRouteImport } from './routes/_layout/admin'
@@ -71,11 +70,6 @@ const LayoutOrganizationRoute = LayoutOrganizationRouteImport.update({
   path: '/organization',
   getParentRoute: () => LayoutRoute,
 } as any)
-const LayoutItemsRoute = LayoutItemsRouteImport.update({
-  id: '/items',
-  path: '/items',
-  getParentRoute: () => LayoutRoute,
-} as any)
 const LayoutGalleriesRoute = LayoutGalleriesRouteImport.update({
   id: '/galleries',
   path: '/galleries',
@@ -123,7 +117,6 @@ export interface FileRoutesByFullPath {
   '/admin': typeof LayoutAdminRoute
   '/dashboard': typeof LayoutDashboardRoute
   '/galleries': typeof LayoutGalleriesRouteWithChildren
-  '/items': typeof LayoutItemsRoute
   '/organization': typeof LayoutOrganizationRoute
   '/settings': typeof LayoutSettingsRoute
   '/galleries/$galleryId': typeof LayoutGalleriesGalleryIdRoute
@@ -140,7 +133,6 @@ export interface FileRoutesByTo {
   '/team-login': typeof TeamLoginRoute
   '/admin': typeof LayoutAdminRoute
   '/dashboard': typeof LayoutDashboardRoute
-  '/items': typeof LayoutItemsRoute
   '/organization': typeof LayoutOrganizationRoute
   '/settings': typeof LayoutSettingsRoute
   '/galleries/$galleryId': typeof LayoutGalleriesGalleryIdRoute
@@ -160,7 +152,6 @@ export interface FileRoutesById {
   '/_layout/admin': typeof LayoutAdminRoute
   '/_layout/dashboard': typeof LayoutDashboardRoute
   '/_layout/galleries': typeof LayoutGalleriesRouteWithChildren
-  '/_layout/items': typeof LayoutItemsRoute
   '/_layout/organization': typeof LayoutOrganizationRoute
   '/_layout/settings': typeof LayoutSettingsRoute
   '/_layout/galleries/$galleryId': typeof LayoutGalleriesGalleryIdRoute
@@ -180,7 +171,6 @@ export interface FileRouteTypes {
     | '/admin'
     | '/dashboard'
     | '/galleries'
-    | '/items'
     | '/organization'
     | '/settings'
     | '/galleries/$galleryId'
@@ -197,7 +187,6 @@ export interface FileRouteTypes {
     | '/team-login'
     | '/admin'
     | '/dashboard'
-    | '/items'
     | '/organization'
     | '/settings'
     | '/galleries/$galleryId'
@@ -216,7 +205,6 @@ export interface FileRouteTypes {
     | '/_layout/admin'
     | '/_layout/dashboard'
     | '/_layout/galleries'
-    | '/_layout/items'
     | '/_layout/organization'
     | '/_layout/settings'
     | '/_layout/galleries/$galleryId'
@@ -300,13 +288,6 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof LayoutOrganizationRouteImport
       parentRoute: typeof LayoutRoute
     }
-    '/_layout/items': {
-      id: '/_layout/items'
-      path: '/items'
-      fullPath: '/items'
-      preLoaderRoute: typeof LayoutItemsRouteImport
-      parentRoute: typeof LayoutRoute
-    }
     '/_layout/galleries': {
       id: '/_layout/galleries'
       path: '/galleries'
@@ -377,7 +358,6 @@ interface LayoutRouteChildren {
   LayoutAdminRoute: typeof LayoutAdminRoute
   LayoutDashboardRoute: typeof LayoutDashboardRoute
   LayoutGalleriesRoute: typeof LayoutGalleriesRouteWithChildren
-  LayoutItemsRoute: typeof LayoutItemsRoute
   LayoutOrganizationRoute: typeof LayoutOrganizationRoute
   LayoutSettingsRoute: typeof LayoutSettingsRoute
   LayoutProjectsProjectIdRoute: typeof LayoutProjectsProjectIdRoute
@@ -388,7 +368,6 @@ const LayoutRouteChildren: LayoutRouteChildren = {
   LayoutAdminRoute: LayoutAdminRoute,
   LayoutDashboardRoute: LayoutDashboardRoute,
   LayoutGalleriesRoute: LayoutGalleriesRouteWithChildren,
-  LayoutItemsRoute: LayoutItemsRoute,
   LayoutOrganizationRoute: LayoutOrganizationRoute,
   LayoutSettingsRoute: LayoutSettingsRoute,
   LayoutProjectsProjectIdRoute: LayoutProjectsProjectIdRoute,
