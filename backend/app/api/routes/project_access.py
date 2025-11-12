@@ -170,6 +170,7 @@ def read_project_access_list(
         user = session.get(User, access.user_id)
         if user:
             from app.models import UserPublic
+
             result.append(
                 ProjectAccessWithUser(
                     id=access.id,

@@ -380,7 +380,9 @@ def invite_client_by_email(
     if user:
         # User exists - verify they're a client and grant immediate access
         if user.user_type != "client":
-            raise ValueError(f"User {email} is not a client. Only client users can be invited to projects.")
+            raise ValueError(
+                f"User {email} is not a client. Only client users can be invited to projects."
+            )
 
         # Create or update project access
         access_in = ProjectAccessCreate(
@@ -423,7 +425,9 @@ def invite_client_by_email(
         return None, True
 
 
-def process_pending_project_invitations(*, session: Session, user_id: uuid.UUID, email: str) -> int:
+def process_pending_project_invitations(
+    *, session: Session, user_id: uuid.UUID, email: str
+) -> int:
     """
     Process any pending project invitations for a user after they register.
     Returns count of invitations processed.

@@ -255,6 +255,7 @@ class ProjectAccessCreate(ProjectAccessBase):
 
 class ProjectAccessInviteByEmail(ProjectAccessBase):
     """Invite a client to a project by email - creates user if needed"""
+
     email: EmailStr = Field(max_length=255)
 
 
