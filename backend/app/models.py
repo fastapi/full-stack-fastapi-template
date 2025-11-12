@@ -275,6 +275,40 @@ class GalleriesPublic(SQLModel):
 
 
 # ============================================================================
+# PHOTO MODELS
+# ============================================================================
+
+
+class PhotoBase(SQLModel):
+    filename: str = Field(min_length=1, max_length=255)
+    url: str = Field(min_length=1, max_length=500)
+
+
+class PhotoCreate(SQLModel):
+    gallery_id: uuid.UUID
+    filename: str = Field(min_length=1, max_length=255)
+    url: str = Field(min_length=1, max_length=500)
+
+
+class Photo(PhotoBase, table=True):
+    id: uuid.UUID = Field(default_factory=uuid.uuid4, primary_key=True)
+    created_at: datetime = Field(default_factory=datetime.utcnow)
+    gallery_id: uuid.UUID = Field(
+        foreign_key="gallery.id", nullable=False, ondelete="CASCADE"
+    )
+
+
+class PhotoPublic(PhotoBase):
+    id: uuid.UUID
+    created_at: datetime
+    gallery_id: uuid.UUID
+
+
+class PhotosPublic(SQLModel):
+    data: list[PhotoPublic]
+    count: int
+
+# ============================================================================
 # PROJECT ACCESS (Client Invitations)
 # ============================================================================
 

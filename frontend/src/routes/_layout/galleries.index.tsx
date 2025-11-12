@@ -15,7 +15,7 @@ import { useQuery } from "@tanstack/react-query"
 import { createFileRoute, Link } from "@tanstack/react-router"
 import { FiCalendar, FiImage, FiUser } from "react-icons/fi"
 
-import { GalleriesService } from "@/client"
+import { GalleriesService, OpenAPI } from "@/client"
 import type { GalleryPublic } from "@/client"
 
 export const Route = createFileRoute("/_layout/galleries/")({
@@ -37,6 +37,115 @@ function getStatusColor(status: string) {
 
 function getStatusLabel(status: string) {
   return status.charAt(0).toUpperCase() + status.slice(1)
+}
+
+// Component to fetch and display first photo for a gallery
+function GalleryCard({ gallery }: { gallery: GalleryPublic }) {
+  // Fetch first photo for this gallery
+  const { data: photosData } = useQuery({
+    queryKey: ["galleryFirstPhoto", gallery.id],
+    queryFn: async () => {
+      const res = await fetch(`${OpenAPI.BASE}/api/v1/galleries/${gallery.id}/photos?skip=0&limit=1`, {
+        headers: {
+          Authorization: `Bearer ${localStorage.getItem("access_token") ?? ""}`,
+        },
+      })
+      if (!res.ok) return null
+      const data = await res.json() as { data: { id: string; filename: string; url: string }[]; count: number }
+      if (data.data && data.data.length > 0) {
+        const photo = data.data[0]
+        // Convert relative URL to absolute URL
+        const photoUrl = photo.url.startsWith("http") ? photo.url : `${OpenAPI.BASE}${photo.url}`
+        return photoUrl
+      }
+      return null
+    },
+    enabled: (gallery.photo_count ?? 0) > 0, // Only fetch if gallery has photos
+  })
+
+  const coverImageUrl = photosData || gallery.cover_image_url
+
+  return (
+    <Link
+      to="/galleries/$galleryId"
+      params={{ galleryId: gallery.id }}
+      style={{ textDecoration: "none", color: "inherit" }}
+    >
+      <Card.Root
+        overflow="hidden"
+        transition="all 0.2s"
+        _hover={{
+          transform: "translateY(-4px)",
+          boxShadow: "lg",
+          cursor: "pointer",
+        }}
+      >
+        {/* Gallery Cover Image */}
+        <Box
+          h="200px"
+          bg="gray.200"
+          backgroundImage={coverImageUrl ? `url(${coverImageUrl})` : undefined}
+          backgroundSize="cover"
+          backgroundPosition="center"
+          position="relative"
+        >
+          <Box
+            position="absolute"
+            top={2}
+            right={2}
+            bg="blackAlpha.700"
+            px={2}
+            py={1}
+            borderRadius="md"
+          >
+            <Flex alignItems="center" gap={1}>
+              <FiImage color="white" size={14} />
+              <Text fontSize="sm" fontWeight="semibold" color="white">
+                {gallery.photo_count}
+              </Text>
+            </Flex>
+          </Box>
+          <Badge
+            position="absolute"
+            top={2}
+            left={2}
+            colorScheme={getStatusColor(gallery.status || 'pending')}
+          >
+            {getStatusLabel(gallery.status || 'pending')}
+          </Badge>
+        </Box>
+
+        {/* Gallery Info */}
+        <Card.Body>
+          <Stack gap={2}>
+            <Heading size="md" mb={1}>
+              {gallery.name}
+            </Heading>
+            <Flex
+              justifyContent="space-between"
+              alignItems="center"
+              pt={2}
+              fontSize="xs"
+              color="fg.muted"
+            >
+              {gallery.photographer && (
+                <Flex alignItems="center" gap={1}>
+                  <FiUser size={12} />
+                  <Text>{gallery.photographer}</Text>
+                </Flex>
+              )}
+              {gallery.date && (
+                <Flex alignItems="center" gap={1}>
+                  <FiCalendar size={12} />
+                  <Text>{gallery.date}</Text>
+                </Flex>
+              )}
+            </Flex>
+          </Stack>
+        </Card.Body>
+      </Card.Root>
+    </Link>
+  )
 }
 
 function GalleriesList() {
@@ -99,86 +208,7 @@ function GalleriesList() {
           gap={6}
         >
           {galleries.map((gallery: GalleryPublic) => (
-            <Link
-              key={gallery.id}
-              to="/galleries/$galleryId"
-              params={{ galleryId: gallery.id }}
-              style={{ textDecoration: "none", color: "inherit" }}
-            >
-              <Card.Root
-                overflow="hidden"
-                transition="all 0.2s"
-                _hover={{
-                  transform: "translateY(-4px)",
-                  boxShadow: "lg",
-                  cursor: "pointer",
-                }}
-              >
-                {/* Gallery Cover Image */}
-                <Box
-                  h="200px"
-                  bg="gray.200"
-                  backgroundImage={gallery.cover_image_url ? `url(${gallery.cover_image_url})` : undefined}
-                  backgroundSize="cover"
-                  backgroundPosition="center"
-                  position="relative"
-                >
-                  <Box
-                    position="absolute"
-                    top={2}
-                    right={2}
-                    bg="blackAlpha.700"
-                    px={2}
-                    py={1}
-                    borderRadius="md"
-                  >
-                    <Flex alignItems="center" gap={1}>
-                      <FiImage color="white" size={14} />
-                      <Text fontSize="sm" fontWeight="semibold" color="white">
-                        {gallery.photo_count}
-                      </Text>
-                    </Flex>
-                  </Box>
-                  <Badge
-                    position="absolute"
-                    top={2}
-                    left={2}
-                    colorScheme={getStatusColor(gallery.status || 'pending')}
-                  >
-                    {getStatusLabel(gallery.status || 'pending')}
-                  </Badge>
-                </Box>
-
-                {/* Gallery Info */}
-                <Card.Body>
-                  <Stack gap={2}>
-                    <Heading size="md" mb={1}>
-                      {gallery.name}
-                    </Heading>
-                    <Flex
-                      justifyContent="space-between"
-                      alignItems="center"
-                      pt={2}
-                      fontSize="xs"
-                      color="fg.muted"
-                    >
-                      {gallery.photographer && (
-                        <Flex alignItems="center" gap={1}>
-                          <FiUser size={12} />
-                          <Text>{gallery.photographer}</Text>
-                        </Flex>
-                      )}
-                      {gallery.date && (
-                        <Flex alignItems="center" gap={1}>
-                          <FiCalendar size={12} />
-                          <Text>{gallery.date}</Text>
-                        </Flex>
-                      )}
-                    </Flex>
-                  </Stack>
-                </Card.Body>
-              </Card.Root>
-            </Link>
+            <GalleryCard key={gallery.id} gallery={gallery} />
           ))}
         </Grid>
       </Stack>

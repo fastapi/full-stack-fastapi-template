@@ -78,6 +78,8 @@ services:
 
   backend:
     image: '${DOCKER_IMAGE_BACKEND?Variable not set}:${TAG-latest}'
+    build:
+      context: ./backend
     restart: always
     networks:
       - traefik-public
@@ -90,6 +92,8 @@ services:
         condition: service_completed_successfully
     env_file:
       - .env
+    volumes:
+      - ./backend/app_data:/app/app_data
     environment:
       - DOMAIN=${DOMAIN}
       - FRONTEND_HOST=${FRONTEND_HOST?Variable not set}
@@ -109,15 +113,13 @@ services:
       - POSTGRES_PASSWORD=${POSTGRES_PASSWORD?Variable not set}
       - SENTRY_DSN=${SENTRY_DSN}
       - PROJECT_NAME=${PROJECT_NAME?Variable not set}
-
+    command: bash -lc "alembic upgrade head && fastapi run --workers 4 app/main.py"
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:8000/api/v1/utils/health-check/"]
       interval: 10s
       timeout: 5s
       retries: 5
 
-    build:
-      context: ./backend
     labels:
       - traefik.enable=true
       - traefik.docker.network=traefik-public
