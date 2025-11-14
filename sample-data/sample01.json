@@ -1,0 +1,19 @@
+[
+  {
+    "holiday_name": "Barcelona Weekend",
+    "holiday_id": "holiday_001",
+    "activities": [
+      {
+        "main_location_name": "Barcelona",
+        "specific_location_name": "Barcelona",
+        "activity_name": "Stay in Barcelona",
+        "activity_id": "activity_001a",
+        "lat": 41.4036,
+        "lon": 2.1744,
+        "from_date_time": "2025-04-12T10:00:00Z",
+        "to_date_time": "2025-04-12T12:30:00Z",
+        "activities": []
+      }
+    ]
+  }
+]

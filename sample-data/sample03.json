@@ -1,0 +1,86 @@
+[
+  {
+    "holiday_name": "Spain Week",
+    "holiday_id": "holiday_001",
+    "activities": [
+      {
+        "main_location_name": "Barcelona",
+        "specific_location_name": "Barcelona",
+        "activity_name": "Stay in Barcelona",
+        "activity_id": "activity_001a",
+        "lat": 41.4036,
+        "lon": 2.1744,
+        "from_date_time": "2025-04-12T08:00:00Z",
+        "to_date_time": "2025-04-14T20:00:00Z",
+        "activities": [
+          {
+            "main_location_name": "Barcelona",
+            "specific_location_name": "Sagrada Familia",
+            "activity_name": "Sagrada Familia tour",
+            "activity_id": "activity_001a1",
+            "lat": 41.4036,
+            "lon": 2.1744,
+            "from_date_time": "2025-04-12T10:00:00Z",
+            "to_date_time": "2025-04-12T11:30:00Z",
+            "activities": []
+          },
+          {
+            "main_location_name": "Barcelona",
+            "specific_location_name": "Park Güell",
+            "activity_name": "Park Güell visit",
+            "activity_id": "activity_001a2",
+            "lat": 41.4145,
+            "lon": 2.1527,
+            "from_date_time": "2025-04-12T14:00:00Z",
+            "to_date_time": "2025-04-12T16:00:00Z",
+            "activities": []
+          },
+          {
+            "main_location_name": "Barcelona",
+            "specific_location_name": "Gothic Quarter",
+            "activity_name": "Gothic Quarter walking tour",
+            "activity_id": "activity_001a3",
+            "lat": 41.3833,
+            "lon": 2.1751,
+            "from_date_time": "2025-04-12T17:00:00Z",
+            "to_date_time": "2025-04-12T19:00:00Z",
+            "activities": []
+          }
+        ]
+      },
+      {
+        "main_location_name": "Madrid",
+        "specific_location_name": "Madrid",
+        "activity_name": "Madrid cultural visit",
+        "activity_id": "activity_001b",
+        "lat": 40.4168,
+        "lon": -3.7038,
+        "from_date_time": "2025-04-15T09:00:00Z",
+        "to_date_time": "2025-04-17T18:00:00Z",
+        "activities": []
+      },
+      {
+        "main_location_name": "Valencia",
+        "specific_location_name": "Valencia",
+        "activity_name": "Valencia coastal experience",
+        "activity_id": "activity_001c",
+        "lat": 39.4699,
+        "lon": -0.3763,
+        "from_date_time": "2025-04-14T10:00:00Z",
+        "to_date_time": "2025-04-14T19:00:00Z",
+        "activities": []
+      },
+      {
+        "main_location_name": "Seville",
+        "specific_location_name": "Seville",
+        "activity_name": "Seville historic exploration",
+        "activity_id": "activity_001d",
+        "lat": 37.3891,
+        "lon": -5.9845,
+        "from_date_time": "2025-04-15T08:00:00Z",
+        "to_date_time": "2025-04-15T17:00:00Z",
+        "activities": []
+      }
+    ]
+  }
+]
