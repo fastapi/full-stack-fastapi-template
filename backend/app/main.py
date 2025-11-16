@@ -33,7 +33,11 @@ if settings.all_cors_origins:
 
 # Set rate Limiting
 if settings.rate_limit_enabled:
-    rate_limiter = get_rate_limiter(settings.RATE_LIMITER_STRATEGY, settings.REDIS_URL, settings.RATE_LIMIT_FAIL_OPEN)
+    rate_limiter = get_rate_limiter(
+        settings.RATE_LIMITER_STRATEGY,
+        settings.REDIS_URL,
+        settings.RATE_LIMIT_FAIL_OPEN,
+    )
     app.state.rate_limiter = rate_limiter
 
 app.include_router(api_router, prefix=settings.API_V1_STR)

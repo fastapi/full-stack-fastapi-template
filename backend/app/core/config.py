@@ -43,9 +43,7 @@ class Settings(BaseSettings):
 
     # Correct Redis default inside Docker Compose
     REDIS_URL: str = ""
-    RATE_LIMITER_STRATEGY: Literal[
-        "none", "sliding_window"
-    ] = "none"
+    RATE_LIMITER_STRATEGY: Literal["none", "sliding_window"] = "none"
     RATE_LIMIT_FAIL_OPEN: bool = True
 
     @computed_field  # type: ignore[prop-decorator]

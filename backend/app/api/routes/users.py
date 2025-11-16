@@ -33,8 +33,12 @@ router = APIRouter(prefix="/users", tags=["users"])
 
 @router.get(
     "/",
-    dependencies=[Depends(RateLimiter(limit=10, window_seconds=60, key_policy=KeyStrategyName.IP)),
-    Depends(get_current_active_superuser)],
+    dependencies=[
+        Depends(
+            RateLimiter(limit=10, window_seconds=60, key_policy=KeyStrategyName.IP)
+        ),
+        Depends(get_current_active_superuser),
+    ],
     response_model=UsersPublic,
 )
 def read_users(session: SessionDep, skip: int = 0, limit: int = 100) -> Any:

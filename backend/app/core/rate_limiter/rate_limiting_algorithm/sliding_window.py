@@ -9,8 +9,7 @@ from app.core.rate_limiter.rate_limiting_algorithm.base import BaseRateLimiter
 logger = logging.getLogger(__name__)
 
 SCRIPT_PATH = (
-    Path(__file__).resolve()
-    .parents[3]
+    Path(__file__).resolve().parents[3]
     / "alembic"
     / "rate_limiting_algorithms"
     / "sliding_window.lua"
@@ -31,13 +30,8 @@ class SlidingWindowRateLimiter(BaseRateLimiter):
         return self.lua_script
 
     async def allow_request(
-        self,
-        key: str,
-        limit: int,
-        window_seconds: int,
-        member_id: str | None = None
+        self, key: str, limit: int, window_seconds: int, member_id: str | None = None
     ) -> tuple[bool, int | None]:
-
         now_ms = int(time.time() * 1000)
         window_ms = window_seconds * 1000
         member = member_id or f"{now_ms}"
@@ -46,14 +40,8 @@ class SlidingWindowRateLimiter(BaseRateLimiter):
             sha = await self.load_script()
             if sha is None:
                 raise Exception
-            res = await self.redis.evalsha(# type: ignore[misc]
-                sha,
-                1,
-                key,
-                now_ms,
-                window_ms,
-                limit,
-                member
+            res = await self.redis.evalsha(  # type: ignore[misc]
+                sha, 1, key, now_ms, window_ms, limit, member
             )
         except Exception:
             logger.exception("Redis error; failing open")
