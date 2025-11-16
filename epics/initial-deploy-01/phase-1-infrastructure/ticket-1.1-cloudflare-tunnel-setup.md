@@ -56,17 +56,6 @@ sudo apt update
 sudo apt install cloudflared
 ```
 
-#### For other Linux distributions:
-```bash
-# Download the latest binary
-wget https://github.com/cloudflare/cloudflared/releases/latest/download/cloudflared-linux-amd64
-
-# Make it executable
-chmod +x cloudflared-linux-amd64
-
-# Move to system path
-sudo mv cloudflared-linux-amd64 /usr/local/bin/cloudflared
-```
 
 ### Verify Installation
 ```bash
@@ -102,6 +91,7 @@ cloudflared tunnel create fastapi-prod
 **Save the output!** You'll see:
 - Tunnel ID (a long UUID like: `a1b2c3d4-e5f6-7890-abcd-ef1234567890`)
 - Credentials file location: `~/.cloudflared/<TUNNEL_ID>.json`
+home/home/.cloudflared/219ccc48-4d89-467c-9ea3-f1f39e02ce05.json
 
 ### Verify Tunnel Creation
 ```bash
@@ -174,32 +164,6 @@ cloudflared tunnel route dns fastapi-prod www.yourdomain.com
 cloudflared tunnel route dns fastapi-prod api.yourdomain.com
 ```
 
-### Option B: Manual DNS Configuration
-If CLI doesn't work, configure manually in Cloudflare Dashboard:
-
-1. Go to https://dash.cloudflare.com
-2. Select your domain
-3. Go to DNS > Records
-4. Add CNAME records:
-
-**Record 1:**
-- Type: CNAME
-- Name: `@` (or your root domain)
-- Target: `YOUR_TUNNEL_ID.cfargotunnel.com`
-- Proxy status: Proxied (orange cloud)
-
-**Record 2:**
-- Type: CNAME
-- Name: `www`
-- Target: `YOUR_TUNNEL_ID.cfargotunnel.com`
-- Proxy status: Proxied
-
-**Record 3:**
-- Type: CNAME
-- Name: `api`
-- Target: `YOUR_TUNNEL_ID.cfargotunnel.com`
-- Proxy status: Proxied
-
 ## Step 8: Test the Tunnel
 
 ### Start Tunnel Manually (Test Run)
@@ -223,15 +187,21 @@ nslookup yourdomain.com
 
 # Test if tunnel responds (will show 502 if app isn't running yet - that's OK)
 curl -I https://yourdomain.com
+
 ```
 
 ## Step 9: Install Tunnel as System Service
 
 ### Create Systemd Service
 ```bash
-# Install as service
+# If you named your config file config.yml
 sudo cloudflared service install
+
+# If you named your config file config.yaml, specify the path explicitly
+sudo cloudflared --config ~/.cloudflared/config.yaml service install
 ```
+
+**Note:** Cloudflared looks for `config.yml` by default. If you named it `config.yaml`, you must specify the path with `--config`.
 
 ### Start and Enable Service
 ```bash

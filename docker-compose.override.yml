@@ -10,7 +10,7 @@ services:
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
     ports:
-      - "80:80"
+      # - "80:80"
       - "8090:8080"
     # Duplicate the command from docker-compose.yml to add --api.insecure=true
     command:
@@ -50,6 +50,11 @@ services:
     ports:
       - "5432:5432"
 
+  adminer:
+    restart: "no"
+    ports:
+      - "8080:8080"
+
   backend:
     restart: "no"
     ports:
@@ -75,11 +80,6 @@ services:
     # TODO: remove once coverage is done locally
     volumes:
       - ./backend/htmlcov:/app/htmlcov
-    environment:
-      SMTP_HOST: "mailcatcher"
-      SMTP_PORT: "1025"
-      SMTP_TLS: "false"
-      EMAILS_FROM_EMAIL: "noreply@example.com"
 
   mailcatcher:
     image: schickling/mailcatcher
@@ -94,8 +94,8 @@ services:
     build:
       context: ./frontend
       args:
-        - VITE_API_URL=http://localhost:8000
-        - NODE_ENV=development
+        - VITE_API_URL=https://api.a-seashell-company.com
+        - NODE_ENV=production
 
   playwright:
     build:
