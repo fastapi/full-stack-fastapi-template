@@ -1,5 +1,7 @@
 from abc import ABC, abstractmethod
+
 from starlette.requests import Request
+
 
 class KeyStrategy(ABC):
     """Base interface for rate-limit key generation."""

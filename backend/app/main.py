@@ -5,7 +5,6 @@ from starlette.middleware.cors import CORSMiddleware
 
 from app.api.main import api_router
 from app.core.config import settings
-
 from app.core.rate_limiter.rate_limiting_algorithm.registry import get_rate_limiter
 
 

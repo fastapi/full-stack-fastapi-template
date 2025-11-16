@@ -1,7 +1,6 @@
-import time
 import logging
+import time
 from pathlib import Path
-from typing import Optional, Tuple
 
 import redis.asyncio as redis
 
@@ -9,7 +8,13 @@ from app.core.rate_limiter.rate_limiting_algorithm.base import BaseRateLimiter
 
 logger = logging.getLogger(__name__)
 
-SCRIPT_PATH = Path(__file__).parent /".."/".."/".."/"alembic"/ "rate_limiting_algorithms" / "sliding_window.lua"
+SCRIPT_PATH = (
+    Path(__file__).resolve()
+    .parents[3]
+    / "alembic"
+    / "rate_limiting_algorithms"
+    / "sliding_window.lua"
+)
 
 
 class SlidingWindowRateLimiter(BaseRateLimiter):
@@ -18,7 +23,7 @@ class SlidingWindowRateLimiter(BaseRateLimiter):
         self.lua_script = None
         self.fail_open = fail_open
 
-    async def load_script(self):
+    async def load_script(self) -> str | None:
         if self.lua_script is None:
             script_text = SCRIPT_PATH.read_text()
             # LOAD script into redis → returns SHA
@@ -30,8 +35,8 @@ class SlidingWindowRateLimiter(BaseRateLimiter):
         key: str,
         limit: int,
         window_seconds: int,
-        member_id: Optional[str] = None
-    ) -> Tuple[bool, Optional[int]]:
+        member_id: str | None = None
+    ) -> tuple[bool, int | None]:
 
         now_ms = int(time.time() * 1000)
         window_ms = window_seconds * 1000
@@ -39,7 +44,9 @@ class SlidingWindowRateLimiter(BaseRateLimiter):
 
         try:
             sha = await self.load_script()
-            res = await self.redis.evalsha(
+            if sha is None:
+                raise Exception
+            res = await self.redis.evalsha(# type: ignore[misc]
                 sha,
                 1,
                 key,
@@ -62,5 +69,5 @@ class SlidingWindowRateLimiter(BaseRateLimiter):
 
         return False, retry_after_s
 
-    def get_fail_open(self):
+    def get_fail_open(self) -> bool:
         return self.fail_open

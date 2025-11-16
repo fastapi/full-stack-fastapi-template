@@ -1,7 +1,10 @@
-import pytest
 from unittest.mock import AsyncMock
 
-from app.core.rate_limiter.rate_limiting_algorithm.sliding_window import SlidingWindowRateLimiter
+import pytest
+
+from app.core.rate_limiter.rate_limiting_algorithm.sliding_window import (
+    SlidingWindowRateLimiter,
+)
 
 
 @pytest.mark.asyncio

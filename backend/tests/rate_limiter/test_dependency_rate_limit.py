@@ -1,7 +1,8 @@
-import pytest
-from fastapi import FastAPI, Depends
-from fastapi.testclient import TestClient
 from unittest.mock import AsyncMock
+
+import pytest
+from fastapi import Depends, FastAPI
+from fastapi.testclient import TestClient
 
 from app.core.rate_limiter.rate_limiter import RateLimiter
 

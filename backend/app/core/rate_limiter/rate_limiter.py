@@ -1,5 +1,7 @@
 import logging
-from fastapi import Request, HTTPException
+
+from fastapi import HTTPException, Request
+
 from app.core.rate_limiter.key_strategy import key_strategy_registry
 from app.core.rate_limiter.key_strategy.key_strategy_enum import KeyStrategyName
 
@@ -11,15 +13,16 @@ class RateLimiter:
         self.window_seconds = window_seconds
         self.key_policy = key_policy
 
-    async def __call__(self, request: Request):
+    async def __call__(self, request: Request) -> None:
         rate_limiter = getattr(request.app.state, "rate_limiter", None)
 
         if rate_limiter is None:
-            return
+            return None
 
         # Create Key
         key_strategy = key_strategy_registry.get_key_strategy(self.key_policy)
-        key = key_strategy.get_key(request, request.scope.get('path'))
+        path: str = request.scope.get("path") or ""
+        key = key_strategy.get_key(request, path)
 
         allowed = True
         retry_after = None
