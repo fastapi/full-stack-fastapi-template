@@ -37,6 +37,7 @@
     "@vitejs/plugin-react-swc": "^4.0.1",
     "dotenv": "^17.2.2",
     "typescript": "^5.2.2",
-    "vite": "^7.1.5"
+    "vite": "^7.1.5",
+    "vite-plugin-pwa": "^1.1.0"
   }
 }
