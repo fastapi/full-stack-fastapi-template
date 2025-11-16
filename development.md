@@ -68,7 +68,7 @@ fastapi dev app/main.py
 
 ## Docker Compose in `localhost.tiangolo.com`
 
-When you start the Docker Compose stack, it uses `localhost` by default, with different ports for each service (backend, frontend, adminer, etc).
+When you start the Docker Compose stack, it uses `localhost` by default, with different ports for each service (backend, frontend, etc).
 
 When you deploy it to production (or staging), it will deploy each service in a different subdomain, like `api.example.com` for the backend and `dashboard.example.com` for the frontend.
 

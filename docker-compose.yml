@@ -121,7 +121,7 @@ services:
       context: ./frontend
       args:
         - VITE_API_URL=https://api.${DOMAIN?Variable not set}
-        - NODE_ENV=production
+        - NODE_ENV=${NODE_ENV}
     labels:
       - traefik.enable=true
       - traefik.docker.network=traefik-public
