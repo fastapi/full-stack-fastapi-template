@@ -7,6 +7,7 @@ from app.core.rate_limiter.rate_limiting_algorithm.sliding_window import (
     SlidingWindowRateLimiter,
 )
 
+
 @pytest.fixture
 def mock_redis_from_url():
     with patch("redis.asyncio.from_url") as mocker:
@@ -48,49 +49,49 @@ async def test_fail_open_allows_requests():
     assert allowed is True
     assert retry_after is None
 
-def test_get_rate_limiter_none_strategy(mock_redis_from_url):
+def test_get_rate_limiter_none_strategy(mock_redis_from_url): # noqa: ARG001
     rl = get_rate_limiter(strategy="none", redis_url="redis://localhost:6379/0", fail_open=True)
     assert rl is None
 
 
-def test_get_rate_limiter_empty_strategy(mock_redis_from_url):
+def test_get_rate_limiter_empty_strategy(mock_redis_from_url): # noqa: ARG001
     rl = get_rate_limiter(strategy="", redis_url="redis://localhost:6379/0", fail_open=True)
     assert rl is None
 
 
-def test_get_rate_limiter_null_strategy(mock_redis_from_url):
+def test_get_rate_limiter_null_strategy(mock_redis_from_url): # noqa: ARG001
     rl = get_rate_limiter(strategy="null", redis_url="redis://localhost:6379/0", fail_open=True)
     assert rl is None
 
 
-def test_get_rate_limiter_no_strategy(mock_redis_from_url):
+def test_get_rate_limiter_no_strategy(mock_redis_from_url): # noqa: ARG001
     rl = get_rate_limiter(strategy=None, redis_url="redis://localhost:6379/0", fail_open=True)
     assert rl is None
 
 
-def test_get_rate_limiter_no_redis_url(mock_redis_from_url):
+def test_get_rate_limiter_no_redis_url(mock_redis_from_url): # noqa: ARG001
     rl = get_rate_limiter(strategy="sliding_window", redis_url="", fail_open=True)
     assert rl is None
 
 
-def test_get_rate_limiter_sliding_window(mock_redis_from_url):
+def test_get_rate_limiter_sliding_window(mock_redis_from_url): # noqa: ARG001
     rl = get_rate_limiter(strategy="sliding_window", redis_url="redis://x", fail_open=True)
     assert isinstance(rl, SlidingWindowRateLimiter)
 
 
-def test_get_rate_limiter_sliding_window_dash(mock_redis_from_url):
+def test_get_rate_limiter_sliding_window_dash(mock_redis_from_url): # noqa: ARG001
     rl = get_rate_limiter(strategy="sliding-window", redis_url="redis://x", fail_open=False)
     assert isinstance(rl, SlidingWindowRateLimiter)
     assert rl.get_fail_open() is False
 
 
-def test_get_rate_limiter_fail_open_coercion(mock_redis_from_url):
+def test_get_rate_limiter_fail_open_coercion(mock_redis_from_url): # noqa: ARG001
     rl = get_rate_limiter(strategy="sliding_window", redis_url="redis://x", fail_open=None)
     assert isinstance(rl, SlidingWindowRateLimiter)
     assert rl.get_fail_open() is False  # default fallback
 
 
-def test_rate_limiter_unknown_strategy(mock_redis_from_url):
+def test_rate_limiter_unknown_strategy(mock_redis_from_url): # noqa: ARG001
     with pytest.raises(ValueError) as e:
         get_rate_limiter(strategy="weird_strategy", redis_url="redis://x", fail_open=True)
     assert "Unknown rate limiter strategy" in str(e.value)
