@@ -6,6 +6,8 @@ from starlette.middleware.cors import CORSMiddleware
 from app.api.main import api_router
 from app.core.config import settings
 
+from app.core.rate_limiter.rate_limiting_algorithm.registry import get_rate_limiter
+
 
 def custom_generate_unique_id(route: APIRoute) -> str:
     return f"{route.tags[0]}-{route.name}"
@@ -29,5 +31,10 @@ if settings.all_cors_origins:
         allow_methods=["*"],
         allow_headers=["*"],
     )
+
+# Set rate Limiting
+if settings.rate_limit_enabled:
+    rate_limiter = get_rate_limiter(settings.RATE_LIMITER_STRATEGY, settings.REDIS_URL, settings.RATE_LIMIT_FAIL_OPEN)
+    app.state.rate_limiter = rate_limiter
 
 app.include_router(api_router, prefix=settings.API_V1_STR)

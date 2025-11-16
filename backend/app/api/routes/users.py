@@ -11,6 +11,8 @@ from app.api.deps import (
     get_current_active_superuser,
 )
 from app.core.config import settings
+from app.core.rate_limiter.key_strategy.key_strategy_enum import KeyStrategyName
+from app.core.rate_limiter.rate_limiter import RateLimiter
 from app.core.security import get_password_hash, verify_password
 from app.models import (
     Item,
@@ -31,7 +33,8 @@ router = APIRouter(prefix="/users", tags=["users"])
 
 @router.get(
     "/",
-    dependencies=[Depends(get_current_active_superuser)],
+    dependencies=[Depends(RateLimiter(limit=10, window_seconds=60, key_policy=KeyStrategyName.IP)),
+    Depends(get_current_active_superuser)],
     response_model=UsersPublic,
 )
 def read_users(session: SessionDep, skip: int = 0, limit: int = 100) -> Any:

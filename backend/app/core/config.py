@@ -41,12 +41,31 @@ class Settings(BaseSettings):
         list[AnyUrl] | str, BeforeValidator(parse_cors)
     ] = []
 
+    # Correct Redis default inside Docker Compose
+    REDIS_URL: str = ""
+    RATE_LIMITER_STRATEGY: Literal[
+        "none", "sliding_window"
+    ] = "none"
+    RATE_LIMIT_FAIL_OPEN: bool = True
+
     @computed_field  # type: ignore[prop-decorator]
     @property
     def all_cors_origins(self) -> list[str]:
         return [str(origin).rstrip("/") for origin in self.BACKEND_CORS_ORIGINS] + [
             self.FRONTEND_HOST
         ]
+
+    @computed_field  # type: ignore[prop-decorator]
+    @property
+    def rate_limit_enabled(self) -> bool:
+        """
+        Returns True if rate limiting should be enabled based on strategy.
+        Mirrors the style of all_cors_origins.
+        """
+        strategy = (self.RATE_LIMITER_STRATEGY or "").strip().lower()
+        redis_url = (self.REDIS_URL or "").strip()
+
+        return strategy not in ("", "none") and bool(redis_url)
 
     PROJECT_NAME: str
     SENTRY_DSN: HttpUrl | None = None
