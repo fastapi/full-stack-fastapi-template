@@ -1,7 +1,7 @@
 import { Badge, Box, Card, Container, Flex, Grid, Heading, HStack, Stack, Text } from "@chakra-ui/react"
 import { Button } from "@/components/ui/button"
 import { createFileRoute, Link } from "@tanstack/react-router"
-import { FiCalendar, FiCheckCircle, FiClock, FiFolder, FiUsers, FiUserPlus, FiBriefcase } from "react-icons/fi"
+import { FiCalendar, FiCheckCircle, FiClock, FiFolder, FiUsers, FiBriefcase } from "react-icons/fi"
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query"
 import { useState } from "react"
 
@@ -258,6 +258,27 @@ function Dashboard() {
               </Button>
             </Stack>
           </Card.Body>
+        </Card.Root>
+      </Container>
+    )
+  }
+
+  // Show message for clients with no projects
+  if (currentUser?.user_type === "client" && (!projectsData?.data || projectsData.data.length === 0)) {
+    return (
+      <Container maxW="md" centerContent py={20}>
+        <Card.Root w="full">
+          <Card.Header textAlign="center">
+            <Flex justifyContent="center" mb={4}>
+              <FiFolder size={48} />
+            </Flex>
+            <Heading size="xl" mb={2}>
+              Welcome!
+            </Heading>
+            <Text color="fg.muted" fontSize="lg">
+              You don't have any projects yet. Please wait for your team to add you to a project.
+            </Text>
+          </Card.Header>
         </Card.Root>
       </Container>
     )

@@ -8,9 +8,10 @@ from app.api.deps import CurrentUser, SessionDep
 from app.models import (
     Message,
     ProjectAccessCreate,
-    ProjectAccessesPublic,
+    ProjectAccessInviteByEmail,
     ProjectAccessPublic,
     ProjectAccessUpdate,
+    ProjectAccessWithUser,
     User,
 )
 
@@ -47,6 +48,68 @@ def read_my_projects(
     else:
         return {"data": [], "count": 0}
 
+@router.post("/{project_id}/access/invite-by-email")
+def invite_client_by_email(
+    *,
+    session: SessionDep,
+    current_user: CurrentUser,
+    project_id: uuid.UUID,
+    invite_data: ProjectAccessInviteByEmail,
+) -> Any:
+    """
+    Invite a client to a project by email.
+    If user exists: grants immediate access
+    If user doesn't exist: creates a pending invitation
+    Only team members can invite clients.
+    """
+    # Check if current user is a team member
+    if getattr(current_user, "user_type", None) != "team_member":
+        raise HTTPException(
+            status_code=403,
+            detail="Only team members can invite clients to projects",
+        )
+
+    # Check if project exists and user has access to it
+    project = crud.get_project(session=session, project_id=project_id)
+    if not project:
+        raise HTTPException(status_code=404, detail="Project not found")
+
+    # Check if current user's organization owns the project
+    if (
+        not current_user.organization_id
+        or current_user.organization_id != project.organization_id
+    ):
+        raise HTTPException(
+            status_code=403,
+            detail="You don't have permission to manage this project",
+        )
+
+    # Invite client by email
+    try:
+        access, is_pending = crud.invite_client_by_email(
+            session=session,
+            project_id=project_id,
+            email=invite_data.email,
+            role=invite_data.role,
+            can_comment=invite_data.can_comment,
+            can_download=invite_data.can_download,
+        )
+
+        if is_pending:
+            return {
+                "message": "Invitation sent. Client will get access when they sign up with this email.",
+                "is_pending": True,
+                "email": invite_data.email,
+            }
+        else:
+            return {
+                "message": "Client invited successfully",
+                "is_pending": False,
+                "access": ProjectAccessPublic.model_validate(access),
+            }
+    except ValueError as e:
+        raise HTTPException(status_code=400, detail=str(e))
+
 
 @router.post("/{project_id}/access", response_model=ProjectAccessPublic)
 def grant_project_access(
@@ -62,6 +125,7 @@ def grant_project_access(
     """
     Grant a user access to a project (invite a client).
     Only team members can invite clients.
+    DEPRECATED: Use /invite-by-email endpoint instead.
     """
     # Check if current user is a team member
     if getattr(current_user, "user_type", None) != "team_member":
@@ -102,7 +166,7 @@ def grant_project_access(
     return access
 
 
-@router.get("/{project_id}/access", response_model=ProjectAccessesPublic)
+@router.get("/{project_id}/access", response_model=list[ProjectAccessWithUser])
 def read_project_access_list(
     *,
     session: SessionDep,
@@ -130,7 +194,26 @@ def read_project_access_list(
             raise HTTPException(status_code=403, detail="Access denied")
 
     access_list = crud.get_project_access_list(session=session, project_id=project_id)
-    return ProjectAccessesPublic(data=access_list, count=len(access_list))
+    # Convert to ProjectAccessWithUser
+    result = []
+    for access in access_list:
+        user = session.get(User, access.user_id)
+        if user:
+            from app.models import UserPublic
+
+            result.append(
+                ProjectAccessWithUser(
+                    id=access.id,
+                    created_at=access.created_at,
+                    project_id=access.project_id,
+                    user_id=access.user_id,
+                    role=access.role,
+                    can_comment=access.can_comment,
+                    can_download=access.can_download,
+                    user=UserPublic.model_validate(user),
+                )
+            )
+    return result
 
 
 @router.delete("/{project_id}/access/{user_id}", response_model=Message)

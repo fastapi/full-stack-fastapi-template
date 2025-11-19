@@ -17,6 +17,7 @@ import { FiCalendar, FiFolder } from "react-icons/fi"
 import { z } from "zod"
 
 import { ProjectsService, type ProjectPublic } from "@/client"
+import useAuth from "@/hooks/useAuth"
 
 const projectsSearchSchema = z.object({
   page: z.number().catch(1),
@@ -58,6 +59,7 @@ function getStatusLabel(status: string) {
 
 function ProjectsTable() {
   const { page } = Route.useSearch()
+  const { user: currentUser } = useAuth()
 
   const { data, isLoading, isPlaceholderData } = useQuery({
     ...getProjectsQueryOptions({ page }),
@@ -71,6 +73,7 @@ function ProjectsTable() {
   }
 
   if (projects.length === 0) {
+    const isClient = currentUser?.user_type === "client"
     return (
       <EmptyState.Root>
         <EmptyState.Content>
@@ -80,7 +83,9 @@ function ProjectsTable() {
           <VStack textAlign="center">
             <EmptyState.Title>No projects yet</EmptyState.Title>
             <EmptyState.Description>
-              Create your first project to get started
+              {isClient 
+                ? "You don't have any projects yet. Please wait for your team to add you to a project."
+                : "Create your first project to get started"}
             </EmptyState.Description>
           </VStack>
         </EmptyState.Content>
