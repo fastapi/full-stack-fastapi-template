@@ -72,8 +72,9 @@ function Dashboard() {
   const queryClient = useQueryClient()
   const [orgName, setOrgName] = useState("")
   
-  // Check if team member has organization
-  const hasOrganization = Boolean(currentUser?.user_type === "client" || currentUser?.organization_id)
+  // AN - Check if team member has organization
+  const isClient = currentUser?.user_type === "client"
+  const isTeamMember = currentUser?.user_type === "team_member"
   const hasOrgId = currentUser && 'organization_id' in currentUser && currentUser.organization_id
 
   // Create organization mutation (must be before any returns)
@@ -108,17 +109,80 @@ function Dashboard() {
   const { data: stats, isLoading: statsLoading } = useQuery({
     queryKey: ["dashboardStats"],
     queryFn: () => ProjectsService.readDashboardStats(),
-    enabled: Boolean(currentUser?.user_type === "team_member" && hasOrgId),
+    enabled: Boolean(isTeamMember && hasOrgId),
   })
 
-  // Fetch recent projects (only if has organization)
-  const { data: projectsData, isLoading: projectsLoading } = useQuery({
+  // AN - Fetch projects for TEAM MEMBERS (all projects in their org)
+  const { data: teamProjectsData, isLoading: teamProjectsLoading } = useQuery({
     queryKey: ["recentProjects"],
-    queryFn: () => ProjectsService.readProjects({ skip: 0, limit: 5 }),
-    enabled: hasOrganization,
+    queryFn: () => ProjectsService.readProjects({ skip: 0, limit: 100 }),
+    enabled: Boolean(isTeamMember && hasOrgId),
   })
 
+  // AN - Fetch projects for CLIENTS (only projects they have access to)
+  const { data: clientProjectsData, isLoading: clientProjectsLoading } = useQuery({
+    queryKey: ["clientProjects"],
+    queryFn: async () => {
+      const baseUrl = (import.meta.env.VITE_API_URL || "http://localhost:8000").replace(/\/$/, "")
+      const response = await fetch(`${baseUrl}/api/v1/projects/my-projects`, {
+        headers: {
+          Authorization: `Bearer ${localStorage.getItem("access_token")}`,
+        },
+      })
+      if (!response.ok) return { data: [], count: 0 }
+      return response.json()
+    },
+    enabled: isClient,
+  })
+
+
+
+  // Fetch pending users (team members only, with organization)
+  const { data: pendingUsers } = useQuery({
+    queryKey: ["pendingUsers"],
+    queryFn: async () => {
+      const baseUrl = (import.meta.env.VITE_API_URL || "http://localhost:8000").replace(/\/$/, "")
+      const response = await fetch(`${baseUrl}/api/v1/users/pending`, {
+        headers: {
+          Authorization: `Bearer ${localStorage.getItem("access_token")}`,
+        },
+      })
+      if (!response.ok) return { data: [], count: 0 }
+      return response.json()
+    },
+    enabled: Boolean(isTeamMember && hasOrgId),
+  })
+
+  const projectsData = isClient ? clientProjectsData : teamProjectsData
   const recentProjects = projectsData?.data?.slice(0, 3) || []
+
+  // Invite user mutation
+  const inviteUserMutation = useMutation({
+    mutationFn: async (userId: string) => {
+      const baseUrl = (import.meta.env.VITE_API_URL || "http://localhost:8000").replace(/\/$/, '')
+      const response = await fetch(
+        `${baseUrl}/api/v1/users/${userId}/assign-organization`,
+        {
+          method: "PATCH",
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem("access_token")}`,
+          },
+        }
+      )
+      if (!response.ok) {
+        throw new Error("Failed to invite user")
+      }
+      return response.json()
+    },
+    onSuccess: () => {
+      showSuccessToast("User added to your organization")
+      queryClient.invalidateQueries({ queryKey: ["pendingUsers"] })
+      queryClient.invalidateQueries({ queryKey: ["dashboardStats"] })
+    },
+    onError: () => {
+      showErrorToast("Failed to add user")
+    },
+  })
   
   // Get projects with upcoming deadlines (within 2 weeks, not completed)
   type DeadlineItem = {
@@ -146,7 +210,7 @@ function Dashboard() {
     }
   }
 
-  const isLoading = statsLoading || projectsLoading
+  const isLoading = statsLoading || teamProjectsLoading || clientProjectsLoading
 
   if (isLoading) {
     return (
@@ -157,7 +221,7 @@ function Dashboard() {
   }
 
   // Show create organization form for team members without organization
-  if (currentUser?.user_type === "team_member" && !hasOrgId) {
+  if (isTeamMember && !hasOrgId) {
     return (
       <Container maxW="md" centerContent py={20}>
         <Card.Root w="full">
@@ -229,21 +293,87 @@ function Dashboard() {
             <Heading size="2xl" mb={2}>
               Welcome back, {currentUser?.full_name || currentUser?.email?.split('@')[0]}! 👋
             </Heading>
-            <Text color="fg.muted">Here's what's happening with your projects today.</Text>
+            <Text color="fg.muted">
+              {isClient 
+                ? "Here's an overview of your projects." 
+                : "Here's what's happening with your projects today."}
+            </Text>
           </Box>
-          {currentUser?.user_type === "team_member" && currentUser?.organization_id && (
+          {isTeamMember && currentUser?.organization_id && (
             <CreateProject />
           )}
         </Flex>
 
         {/* Stats Cards - Only for team members */}
-        {currentUser?.user_type === "team_member" && (
+        {isTeamMember && (
           <Grid templateColumns={{ base: "1fr", md: "repeat(2, 1fr)", lg: "repeat(4, 1fr)" }} gap={4}>
             <StatCard icon={FiFolder} label="Active Projects" value={stats?.active_projects || 0} colorScheme="blue" />
             <StatCard icon={FiClock} label="Upcoming Deadlines" value={stats?.upcoming_deadlines || 0} colorScheme="orange" />
             <StatCard icon={FiUsers} label="Team Members" value={stats?.team_members || 0} colorScheme="purple" />
             <StatCard icon={FiCheckCircle} label="Completed This Month" value={stats?.completed_this_month || 0} colorScheme="green" />
           </Grid>
+        )}
+
+        {/* Client Stats - Stats Card */}
+        {isClient && (
+          <Grid templateColumns={{ base: "1fr", md: "repeat(3, 1fr)" }} gap={4}>
+            <StatCard 
+              icon={FiFolder} 
+              label="My Projects" 
+              value={projectsData?.data?.length || 0} 
+              colorScheme="blue" 
+            />
+            <StatCard 
+              icon={FiClock} 
+              label="In Progress" 
+              value={projectsData?.data?.filter((p: ProjectPublic) => p.status === "in_progress").length || 0} 
+              colorScheme="orange" 
+            />
+            <StatCard 
+              icon={FiCheckCircle} 
+              label="Completed" 
+              value={projectsData?.data?.filter((p: ProjectPublic) => p.status === "completed").length || 0} 
+              colorScheme="green" 
+            />
+          </Grid>
+        )}
+
+        {/* Pending Team Members - Show if user has organization */}
+        {isTeamMember && currentUser?.organization_id && pendingUsers?.data?.length > 0 && (
+          <Card.Root>
+            <Card.Header>
+              <Heading size="lg">Pending Team Members</Heading>
+              <Text fontSize="sm" color="fg.muted">Users waiting to join an organization</Text>
+            </Card.Header>
+            <Card.Body>
+              <Stack gap={3}>
+                {pendingUsers.data.map((user: any) => (
+                  <Flex
+                    key={user.id}
+                    justifyContent="space-between"
+                    alignItems="center"
+                    p={3}
+                    borderWidth="1px"
+                    borderRadius="md"
+                  >
+                    <Box>
+                      <Text fontWeight="semibold">{user.full_name || user.email}</Text>
+                      <Text fontSize="sm" color="fg.muted">{user.email}</Text>
+                    </Box>
+                    <Button
+                      size="sm"
+                      colorScheme="blue"
+                      onClick={() => inviteUserMutation.mutate(user.id)}
+                      loading={inviteUserMutation.isPending}
+                    >
+                      <FiUserPlus />
+                      Add to Team
+                    </Button>
+                  </Flex>
+                ))}
+              </Stack>
+            </Card.Body>
+          </Card.Root>
         )}
 
         <Grid templateColumns={{ base: "1fr", lg: "2fr 1fr" }} gap={6}>
@@ -254,7 +384,11 @@ function Dashboard() {
             </Card.Header>
             <Card.Body>
               {recentProjects.length === 0 ? (
-                <Text color="fg.muted">No projects yet. Create your first project!</Text>
+                <Text color="fg.muted">
+                  {isClient 
+                    ? "You don't have any projects yet. Contact your team to get invited to a project!" 
+                    : "No projects yet. Create your first project!"}
+                </Text>
               ) : (
                 <Stack gap={4}>
                   {recentProjects.map((project: ProjectPublic) => (

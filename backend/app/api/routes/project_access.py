@@ -18,6 +18,36 @@ from app.models import (
 router = APIRouter()
 
 
+# AN - New endpoint to get all projects the current user has access to
+@router.get("/my-projects")
+def read_my_projects(
+    session: SessionDep,
+    current_user: CurrentUser,
+) -> Any:
+    """
+    Get all projects the current user has access to.
+    For clients: returns projects they've been invited to.
+    For team members: returns all projects in their organization.
+    """
+    if getattr(current_user, "user_type", None) == "client":
+        # Use the existing function - perfect!
+        projects = crud.get_user_accessible_projects(
+            session=session, user_id=current_user.id, skip=0, limit=1000
+        )
+        return {"data": projects, "count": len(projects)}
+    elif getattr(current_user, "user_type", None) == "team_member":
+        if not current_user.organization_id:
+            return {"data": [], "count": 0}
+        projects = crud.get_projects_by_organization(
+            session=session, 
+            organization_id=current_user.organization_id, 
+            skip=0, 
+            limit=1000
+        )
+        return {"data": projects, "count": len(projects)}
+    else:
+        return {"data": [], "count": 0}
+
 @router.post("/{project_id}/access/invite-by-email")
 def invite_client_by_email(
     *,
@@ -260,3 +290,5 @@ def update_project_access_permissions(
         session=session, db_access=db_access, access_in=access_in
     )
     return access
+
+
