@@ -1,4 +1,5 @@
 import uuid
+from datetime import datetime, timezone
 
 from pydantic import EmailStr
 from sqlmodel import Field, Relationship, SQLModel
@@ -90,6 +91,19 @@ class ItemPublic(ItemBase):
 class ItemsPublic(SQLModel):
     data: list[ItemPublic]
     count: int
+
+
+# Database model, database table inferred from class name
+class ItemPurchase(SQLModel, table=True):
+    id: uuid.UUID = Field(default_factory=uuid.uuid4, primary_key=True)
+    item_id: uuid.UUID = Field(
+        foreign_key="item.id", nullable=False, ondelete="CASCADE"
+    )
+    user_id: uuid.UUID = Field(
+        foreign_key="user.id", nullable=False, ondelete="CASCADE"
+    )
+    quantity: int = Field(ge=1)
+    created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
 
 
 # Generic message
