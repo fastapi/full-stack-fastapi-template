@@ -18,7 +18,7 @@ dependencies = [
     "pydantic-settings<3.0.0,>=2.2.1",
     "sentry-sdk[fastapi]<2.0.0,>=1.40.6",
     "pyjwt<3.0.0,>=2.8.0",
-    "pwdlib[argon2]>=0.2.1",
+    "pwdlib[argon2,bcrypt]>=0.2.1",
 ]
 
 [tool.uv]
