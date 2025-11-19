@@ -20,14 +20,14 @@ jobs:
       with:
         ref: ${{ github.head_ref }}
         token: ${{ secrets.FULL_STACK_FASTAPI_TEMPLATE_REPO_TOKEN }}
-    - uses: actions/setup-node@v5
+    - uses: actions/setup-node@v6
       with:
         node-version: lts/*
     - uses: actions/setup-python@v6
       with:
         python-version: "3.10"
     - name: Install uv
-      uses: astral-sh/setup-uv@v6
+      uses: astral-sh/setup-uv@v7
       with:
         version: "0.4.15"
         enable-cache: true
