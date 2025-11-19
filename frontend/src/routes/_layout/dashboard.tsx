@@ -1,7 +1,7 @@
 import { Badge, Box, Card, Container, Flex, Grid, Heading, HStack, Stack, Text } from "@chakra-ui/react"
 import { Button } from "@/components/ui/button"
 import { createFileRoute, Link } from "@tanstack/react-router"
-import { FiCalendar, FiCheckCircle, FiClock, FiFolder, FiUsers, FiBriefcase } from "react-icons/fi"
+import { FiCalendar, FiCheckCircle, FiClock, FiFolder, FiUsers, FiBriefcase, FiUserPlus } from "react-icons/fi"
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query"
 import { useState } from "react"
 
