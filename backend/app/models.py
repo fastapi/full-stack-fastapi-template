@@ -1,4 +1,6 @@
 import uuid
+from datetime import datetime
+from typing import List
 
 from pydantic import EmailStr
 from sqlmodel import Field, Relationship, SQLModel
@@ -44,6 +46,7 @@ class User(UserBase, table=True):
     id: uuid.UUID = Field(default_factory=uuid.uuid4, primary_key=True)
     hashed_password: str
     items: list["Item"] = Relationship(back_populates="owner", cascade_delete=True)
+    images: list["Image"] = Relationship(back_populates="owner", cascade_delete=True)
 
 
 # Properties to return via API, id is always required
@@ -111,3 +114,112 @@ class TokenPayload(SQLModel):
 class NewPassword(SQLModel):
     token: str
     new_password: str = Field(min_length=8, max_length=128)
+
+
+# Shared properties for images
+class ImageBase(SQLModel):
+    filename: str = Field(max_length=255)
+    original_filename: str = Field(max_length=255)
+    content_type: str = Field(max_length=100)
+    file_size: int
+    width: int | None = Field(default=None)
+    height: int | None = Field(default=None)
+    s3_bucket: str = Field(max_length=255)
+    s3_key: str = Field(max_length=500)
+    s3_url: str = Field(max_length=1000)
+    processing_status: str = Field(
+        default="pending",
+        max_length=20,
+        description="Processing status: pending, processing, completed, failed"
+    )
+    alt_text: str | None = Field(default=None, max_length=500)
+    description: str | None = Field(default=None, max_length=1000)
+    tags: str | None = Field(default=None, max_length=500)
+
+
+# Properties to receive on image creation
+class ImageCreate(ImageBase):
+    pass
+
+
+# Properties to receive on image update
+class ImageUpdate(SQLModel):
+    alt_text: str | None = Field(default=None, max_length=500)
+    description: str | None = Field(default=None, max_length=1000)
+    tags: str | None = Field(default=None, max_length=500)
+
+
+# Database model for images
+class Image(ImageBase, table=True):
+    id: uuid.UUID = Field(default_factory=uuid.uuid4, primary_key=True)
+    owner_id: uuid.UUID = Field(
+        foreign_key="user.id", nullable=False, ondelete="CASCADE"
+    )
+    created_at: datetime | None = Field(default_factory=datetime.utcnow)
+    updated_at: datetime | None = Field(default_factory=datetime.utcnow)
+    owner: User | None = Relationship(back_populates="images")
+    variants: list["ImageVariant"] = Relationship(back_populates="image", cascade_delete=True)
+
+
+# Properties to return via API
+class ImagePublic(ImageBase):
+    id: uuid.UUID
+    owner_id: uuid.UUID
+
+
+class ImagesPublic(SQLModel):
+    data: list[ImagePublic]
+    count: int
+
+
+# Shared properties for image variants
+class ImageVariantBase(SQLModel):
+    variant_type: str = Field(
+        max_length=20,
+        description="Variant type: large, medium, thumb"
+    )
+    width: int | None = Field(default=None)
+    height: int | None = Field(default=None)
+    file_size: int
+    s3_bucket: str = Field(max_length=255)
+    s3_key: str = Field(max_length=500)
+    s3_url: str = Field(max_length=1000)
+    quality: int = Field(default=85)
+    format: str = Field(default="jpeg", max_length=10)
+
+
+# Database model for image variants
+class ImageVariant(ImageVariantBase, table=True):
+    id: uuid.UUID = Field(default_factory=uuid.uuid4, primary_key=True)
+    image_id: uuid.UUID = Field(
+        foreign_key="image.id", nullable=False, ondelete="CASCADE"
+    )
+    created_at: datetime | None = Field(default_factory=datetime.utcnow)
+    image: Image | None = Relationship(back_populates="variants")
+
+
+# Properties to return via API
+class ImageVariantPublic(ImageVariantBase):
+    id: uuid.UUID
+    image_id: uuid.UUID
+
+
+# Processing job model for background tasks
+class ImageProcessingJobBase(SQLModel):
+    status: str = Field(
+        default="pending",
+        max_length=20,
+        description="Job status: pending, processing, completed, failed"
+    )
+    error_message: str | None = Field(default=None, max_length=1000)
+    retry_count: int = Field(default=0)
+
+
+class ImageProcessingJob(ImageProcessingJobBase, table=True):
+    id: uuid.UUID = Field(default_factory=uuid.uuid4, primary_key=True)
+    image_id: uuid.UUID = Field(
+        foreign_key="image.id", nullable=False, ondelete="CASCADE"
+    )
+    image: Image | None = Relationship()
+
+
