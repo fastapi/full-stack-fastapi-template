@@ -4,3 +4,11 @@ node_modules/
 /playwright-report/
 /blob-report/
 /playwright/.cache/
+
+
+.opencode/*
+plans/*
+.claude/*
+.venv/
+/backend/plans
+/docs
