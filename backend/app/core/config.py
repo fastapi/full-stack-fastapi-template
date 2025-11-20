@@ -25,8 +25,8 @@ def parse_cors(v: Any) -> list[str] | str:
 
 class Settings(BaseSettings):
     model_config = SettingsConfigDict(
-        # Use top level .env file (one level above ./backend/)
-        env_file="../.env",
+        # Use top level .env file (one level above ./backend/), fallback to .env.dev
+        env_file=["../.env", "../.env.dev"],
         env_ignore_empty=True,
         extra="ignore",
     )
@@ -49,7 +49,13 @@ class Settings(BaseSettings):
         ]
 
     PROJECT_NAME: str
-    SENTRY_DSN: HttpUrl | None = None
+    # SENTRY_DSN: HttpUrl | None = None
+
+    # Redis Configuration
+    REDIS_URL: str = "redis://localhost:6379"
+    REDIS_PASSWORD: str | None = None
+    REDIS_DB: int = 0
+
     POSTGRES_SERVER: str
     POSTGRES_PORT: int = 5432
     POSTGRES_USER: str
@@ -94,6 +100,32 @@ class Settings(BaseSettings):
     FIRST_SUPERUSER: EmailStr
     FIRST_SUPERUSER_PASSWORD: str
 
+    # AWS S3 Configuration
+    AWS_ACCESS_KEY_ID: str = "changethis"
+    AWS_SECRET_ACCESS_KEY: str = "changethis"
+    AWS_REGION: str = "us-east-1"
+    AWS_S3_BUCKET: str = "changethis"
+    AWS_S3_BUCKET_URL: HttpUrl | None = None
+
+    # CloudFront Configuration
+    AWS_CLOUDFRONT_DOMAIN: str | None = None
+    AWS_CLOUDFRONT_KEY_PAIR_ID: str | None = None
+    AWS_CLOUDFRONT_PRIVATE_KEY_PATH: str | None = None
+
+    # File Upload Configuration
+    MAX_FILE_SIZE: int = 50 * 1024 * 1024  # 50MB
+    ALLOWED_IMAGE_TYPES: list[str] = ["image/jpeg", "image/png", "image/webp", "image/gif"]
+    ALLOWED_IMAGE_EXTENSIONS: list[str] = ["jpg", "jpeg", "png", "webp", "gif"]
+
+    # Image Processing Configuration
+    IMAGE_VARIANT_LARGE_SIZE: int = 1200
+    IMAGE_VARIANT_MEDIUM_SIZE: int = 800
+    IMAGE_VARIANT_THUMB_SIZE: int = 300
+    IMAGE_QUALITY_LARGE: int = 85
+    IMAGE_QUALITY_MEDIUM: int = 85
+    IMAGE_QUALITY_THUMB: int = 75
+    IMAGE_MAX_DIMENSIONS: tuple[int, int] = (10000, 10000)  # Prevent DOS attacks
+
     def _check_default_secret(self, var_name: str, value: str | None) -> None:
         if value == "changethis":
             message = (
@@ -112,6 +144,12 @@ class Settings(BaseSettings):
         self._check_default_secret(
             "FIRST_SUPERUSER_PASSWORD", self.FIRST_SUPERUSER_PASSWORD
         )
+
+        # Only check AWS secrets in production
+        if self.ENVIRONMENT != "local":
+            self._check_default_secret("AWS_ACCESS_KEY_ID", self.AWS_ACCESS_KEY_ID)
+            self._check_default_secret("AWS_SECRET_ACCESS_KEY", self.AWS_SECRET_ACCESS_KEY)
+            self._check_default_secret("AWS_S3_BUCKET", self.AWS_S3_BUCKET)
 
         return self
 

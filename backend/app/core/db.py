@@ -1,10 +1,44 @@
 from sqlmodel import Session, create_engine, select
+from contextlib import contextmanager
 
 from app import crud
 from app.core.config import settings
 from app.models import User, UserCreate
 
 engine = create_engine(str(settings.SQLALCHEMY_DATABASE_URI))
+
+
+def get_db_session():
+    """
+    Get a database session.
+
+    Returns:
+        Session: Database session object
+    """
+    return Session(engine)
+
+
+@contextmanager
+def get_db_context():
+    """
+    Context manager for database sessions.
+
+    Usage:
+        with get_db_context() as db:
+            # Database operations here
+
+    Yields:
+        Session: Database session object
+    """
+    session = Session(engine)
+    try:
+        yield session
+        session.commit()
+    except Exception:
+        session.rollback()
+        raise
+    finally:
+        session.close()
 
 
 # make sure all SQLModel models are imported (app.models) before initializing DB
