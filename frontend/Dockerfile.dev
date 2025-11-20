@@ -1,0 +1,26 @@
+# Development Dockerfile for Frontend
+FROM node:24
+
+WORKDIR /app
+
+# Copy package files
+COPY package*.json /app/
+
+# Install dependencies
+RUN npm install
+
+# Copy source code
+COPY ./ /app/
+
+# Set environment variables
+ARG VITE_API_URL=http://localhost:8000
+ARG NODE_ENV=development
+
+ENV VITE_API_URL=$VITE_API_URL
+ENV NODE_ENV=$NODE_ENV
+
+# Expose port
+EXPOSE 5173
+
+# Start development server
+CMD ["npm", "run", "dev", "--", "--host", "0.0.0.0", "--port", "5173"]
