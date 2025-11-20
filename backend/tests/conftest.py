@@ -7,16 +7,22 @@ from sqlmodel import Session, delete
 from app.core.config import settings
 from app.core.db import engine, init_db
 from app.main import app
-from app.models import Item, User
+from app.models import Item, User, Image, ImageVariant, ImageProcessingJob
 from tests.utils.user import authentication_token_from_email
 from tests.utils.utils import get_superuser_token_headers
 
 
-@pytest.fixture(scope="session", autouse=True)
+@pytest.fixture(scope="session")
 def db() -> Generator[Session, None, None]:
     with Session(engine) as session:
         init_db(session)
         yield session
+        statement = delete(ImageProcessingJob)
+        session.execute(statement)
+        statement = delete(ImageVariant)
+        session.execute(statement)
+        statement = delete(Image)
+        session.execute(statement)
         statement = delete(Item)
         session.execute(statement)
         statement = delete(User)
@@ -25,7 +31,7 @@ def db() -> Generator[Session, None, None]:
 
 
 @pytest.fixture(scope="module")
-def client() -> Generator[TestClient, None, None]:
+def client(db: Session) -> Generator[TestClient, None, None]:
     with TestClient(app) as c:
         yield c
 

@@ -27,5 +27,28 @@ def test_email(email_to: EmailStr) -> Message:
 
 
 @router.get("/health-check/")
-async def health_check() -> bool:
-    return True
+async def health_check() -> dict[str, bool]:
+    """
+    Health check endpoint including database and Redis status.
+    """
+    from app.api.deps import get_db
+    from sqlalchemy import text
+    from app.core.redis import redis_client
+
+    # Check database connection
+    db_status = False
+    try:
+        db = next(get_db())
+        db.execute(text("SELECT 1"))
+        db_status = True
+    except Exception:
+        pass
+
+    # Check Redis connection
+    redis_status = redis_client.ping()
+
+    return {
+        "database": db_status,
+        "redis": redis_status,
+        "overall": db_status and redis_status,
+    }
