@@ -10,6 +10,7 @@ export const system = createSystem(defaultConfig, {
       fontSize: "0.875rem",
       margin: 0,
       padding: 0,
+      colorPalette: 'purple',
     },
     ".main-link": {
       color: "ui.main",
@@ -18,14 +19,16 @@ export const system = createSystem(defaultConfig, {
   },
   theme: {
     tokens: {
-      colors: {
-        ui: {
-          main: { value: "#009688" },
-        },
+      fonts: {
+        body: { value: 'var(--font-geist)' },
       },
     },
-    recipes: {
-      button: buttonRecipe,
+    semanticTokens: {
+      radii: {
+        l1: { value: '0.125rem' },
+        l2: { value: '0.25rem' },
+        l3: { value: '0.375rem' },
+      },
     },
   },
 })
