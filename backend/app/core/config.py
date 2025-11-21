@@ -62,6 +62,13 @@ class Settings(BaseSettings):
     POSTGRES_PASSWORD: str = ""
     POSTGRES_DB: str = ""
 
+    # Test Database Configuration
+    POSTGRES_TEST_SERVER: str | None = None
+    POSTGRES_TEST_PORT: int = 5432
+    POSTGRES_TEST_USER: str | None = None
+    POSTGRES_TEST_PASSWORD: str | None = None
+    POSTGRES_TEST_DB: str = "test_lesmee"
+
     @computed_field  # type: ignore[prop-decorator]
     @property
     def SQLALCHEMY_DATABASE_URI(self) -> PostgresDsn:
@@ -73,6 +80,27 @@ class Settings(BaseSettings):
             port=self.POSTGRES_PORT,
             path=self.POSTGRES_DB,
         )
+
+    @computed_field  # type: ignore[prop-decorator]
+    @property
+    def TEST_DATABASE_URL(self) -> str:
+        """Database URL for testing environment."""
+        # Use test-specific PostgreSQL configuration if available,
+        # otherwise fallback to main config with test DB name
+        server = self.POSTGRES_TEST_SERVER or self.POSTGRES_SERVER
+        port = self.POSTGRES_TEST_PORT if self.POSTGRES_TEST_SERVER else self.POSTGRES_PORT
+        user = self.POSTGRES_TEST_USER or self.POSTGRES_USER
+        password = self.POSTGRES_TEST_PASSWORD or self.POSTGRES_PASSWORD
+        db = self.POSTGRES_TEST_DB
+
+        return str(PostgresDsn.build(
+            scheme="postgresql+psycopg",
+            username=user,
+            password=password,
+            host=server,
+            port=port,
+            path=db,
+        ))
 
     SMTP_TLS: bool = True
     SMTP_SSL: bool = False
