@@ -89,7 +89,6 @@ services:
     build:
       context: ./frontend
       args:
-        - VITE_API_URL=https://api.a-seashell-company.com
         - NODE_ENV=${NODE_ENV}
 
   playwright:

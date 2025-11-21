@@ -24,5 +24,14 @@
             "url": "http://localhost:5173",
             "webRoot": "${workspaceFolder}/frontend"
         },
+        {
+            "name": "Debug PWA Icon Generator",
+            "type": "debugpy",
+            "request": "launch",
+            "program": "${workspaceFolder}/epics/pwa-implementation/phase-2-branding/generate_icons.py",
+            "console": "integratedTerminal",
+            "cwd": "${workspaceFolder}",
+            "python": "/usr/local/bin/python3"
+        }
     ]
 }
