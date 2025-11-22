@@ -13,7 +13,7 @@
   "dependencies": {
     "@chakra-ui/react": "^3.27.0",
     "@emotion/react": "^11.14.0",
-    "@tanstack/react-query": "^5.90.2",
+    "@tanstack/react-query": "^5.90.7",
     "@tanstack/react-query-devtools": "^5.90.2",
     "@tanstack/react-router": "^1.131.50",
     "axios": "1.12.2",
