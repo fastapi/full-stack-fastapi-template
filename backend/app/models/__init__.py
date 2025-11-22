@@ -111,3 +111,7 @@ class TokenPayload(SQLModel):
 class NewPassword(SQLModel):
     token: str
     new_password: str = Field(min_length=8, max_length=128)
+from .document import Document, DocumentVersion, RetentionPolicy
+from .workflow import Workflow, WorkflowStep, AuditLog
+from .document_lock import DocumentLock
+from .workflow_instance import DocumentWorkflowInstance, WorkflowAction
