@@ -53,6 +53,7 @@
 
 ### Internal
 
+* ⬆ Bump pydantic from 2.12.3 to 2.12.4 in /backend. PR [#1978](https://github.com/fastapi/full-stack-fastapi-template/pull/1978) by [@dependabot[bot]](https://github.com/apps/dependabot).
 * ⬆ Bump js-yaml from 4.1.0 to 4.1.1 in /frontend. PR [#1983](https://github.com/fastapi/full-stack-fastapi-template/pull/1983) by [@dependabot[bot]](https://github.com/apps/dependabot).
 * ⬆ Bump actions/checkout from 5 to 6. PR [#1988](https://github.com/fastapi/full-stack-fastapi-template/pull/1988) by [@dependabot[bot]](https://github.com/apps/dependabot).
 * 👷 Upgrade `latest-changes` GitHub Action and pin `actions/checkout@v5`. PR [#2006](https://github.com/fastapi/full-stack-fastapi-template/pull/2006) by [@svlandeg](https://github.com/svlandeg).
