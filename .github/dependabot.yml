@@ -7,6 +7,7 @@ updates:
       interval: daily
     commit-message:
       prefix: ⬆
+    labels: [dependencies, internal]
   # Python uv
   - package-ecosystem: uv
     directory: /backend
@@ -14,6 +15,7 @@ updates:
       interval: weekly
     commit-message:
       prefix: ⬆
+    labels: [dependencies, internal]
   # npm
   - package-ecosystem: npm
     directory: /frontend
@@ -21,6 +23,7 @@ updates:
       interval: weekly
     commit-message:
       prefix: ⬆
+    labels: [dependencies, internal]
     ignore:
       - dependency-name: "@hey-api/openapi-ts"
   # Docker
@@ -32,6 +35,7 @@ updates:
       interval: weekly
     commit-message:
       prefix: ⬆
+    labels: [dependencies, internal]
   # Docker Compose
   - package-ecosystem: docker-compose
     directory: /
@@ -39,3 +43,4 @@ updates:
       interval: weekly
     commit-message:
       prefix: ⬆
+    labels: [dependencies, internal]
