@@ -32,7 +32,7 @@
     "@tanstack/router-devtools": "^1.139.3",
     "@tanstack/router-plugin": "^1.133.15",
     "@types/node": "^24.10.1",
-    "@types/react": "^19.1.16",
+    "@types/react": "^19.2.7",
     "@types/react-dom": "^19.2.3",
     "@vitejs/plugin-react-swc": "^4.2.2",
     "dotenv": "^17.2.3",
