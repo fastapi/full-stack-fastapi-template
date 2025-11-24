@@ -53,6 +53,7 @@
 
 ### Internal
 
+* ⬆ Bump @tanstack/router-devtools from 1.131.42 to 1.139.3 in /frontend. PR [#2001](https://github.com/fastapi/full-stack-fastapi-template/pull/2001) by [@dependabot[bot]](https://github.com/apps/dependabot).
 * ⬆ Bump typescript from 5.9.2 to 5.9.3 in /frontend. PR [#2002](https://github.com/fastapi/full-stack-fastapi-template/pull/2002) by [@dependabot[bot]](https://github.com/apps/dependabot).
 * ⬆ Bump @types/react-dom from 19.2.2 to 19.2.3 in /frontend. PR [#2004](https://github.com/fastapi/full-stack-fastapi-template/pull/2004) by [@dependabot[bot]](https://github.com/apps/dependabot).
 * ⬆ Bump @types/node from 24.10.0 to 24.10.1 in /frontend. PR [#2005](https://github.com/fastapi/full-stack-fastapi-template/pull/2005) by [@dependabot[bot]](https://github.com/apps/dependabot).
