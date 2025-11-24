@@ -53,6 +53,7 @@
 
 ### Internal
 
+* ⬆ Bump @chakra-ui/react from 3.29.0 to 3.30.0 in /frontend. PR [#1995](https://github.com/fastapi/full-stack-fastapi-template/pull/1995) by [@dependabot[bot]](https://github.com/apps/dependabot).
 * ⬆ Bump @tanstack/react-query-devtools from 5.90.2 to 5.91.0 in /frontend. PR [#1994](https://github.com/fastapi/full-stack-fastapi-template/pull/1994) by [@dependabot[bot]](https://github.com/apps/dependabot).
 * 🔧 Add labels to Dependabot updates. PR [#1992](https://github.com/fastapi/full-stack-fastapi-template/pull/1992) by [@alejsdev](https://github.com/alejsdev).
 * ⬆ Bump dotenv from 17.2.2 to 17.2.3 in /frontend. PR [#1957](https://github.com/fastapi/full-stack-fastapi-template/pull/1957) by [@dependabot[bot]](https://github.com/apps/dependabot).
