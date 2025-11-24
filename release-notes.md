@@ -53,6 +53,7 @@
 
 ### Internal
 
+* ⬆ Bump js-yaml from 4.1.0 to 4.1.1 in /frontend. PR [#1983](https://github.com/fastapi/full-stack-fastapi-template/pull/1983) by [@dependabot[bot]](https://github.com/apps/dependabot).
 * ⬆ Bump actions/checkout from 5 to 6. PR [#1988](https://github.com/fastapi/full-stack-fastapi-template/pull/1988) by [@dependabot[bot]](https://github.com/apps/dependabot).
 * 👷 Upgrade `latest-changes` GitHub Action and pin `actions/checkout@v5`. PR [#2006](https://github.com/fastapi/full-stack-fastapi-template/pull/2006) by [@svlandeg](https://github.com/svlandeg).
 * ⬆ Bump @vitejs/plugin-react-swc from 4.1.0 to 4.2.0 in /frontend. PR [#1958](https://github.com/fastapi/full-stack-fastapi-template/pull/1958) by [@dependabot[bot]](https://github.com/apps/dependabot).
