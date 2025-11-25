@@ -53,6 +53,7 @@
 
 ### Internal
 
+* ⬆ Bump actions/checkout from 5 to 6. PR [#2007](https://github.com/fastapi/full-stack-fastapi-template/pull/2007) by [@dependabot[bot]](https://github.com/apps/dependabot).
 * ⬆ Bump @types/react from 19.2.2 to 19.2.7 in /frontend. PR [#2003](https://github.com/fastapi/full-stack-fastapi-template/pull/2003) by [@dependabot[bot]](https://github.com/apps/dependabot).
 * ⬆ Bump @tanstack/router-devtools from 1.131.42 to 1.139.3 in /frontend. PR [#2001](https://github.com/fastapi/full-stack-fastapi-template/pull/2001) by [@dependabot[bot]](https://github.com/apps/dependabot).
 * ⬆ Bump typescript from 5.9.2 to 5.9.3 in /frontend. PR [#2002](https://github.com/fastapi/full-stack-fastapi-template/pull/2002) by [@dependabot[bot]](https://github.com/apps/dependabot).
