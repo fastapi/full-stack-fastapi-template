@@ -17,6 +17,7 @@ import { FiCalendar, FiImage, FiUser } from "react-icons/fi"
 
 import { GalleriesService, OpenAPI } from "@/client"
 import type { GalleryPublic } from "@/client"
+import useAuth from "@/hooks/useAuth"
 
 export const Route = createFileRoute("/_layout/galleries/")({
   component: GalleriesList,
@@ -149,6 +150,7 @@ function GalleryCard({ gallery }: { gallery: GalleryPublic }) {
 }
 
 function GalleriesList() {
+  const { user: currentUser } = useAuth()
   const { data, isLoading } = useQuery({
     queryKey: ["galleries"],
     queryFn: () => GalleriesService.readGalleries({ skip: 0, limit: 100 }),
@@ -165,6 +167,7 @@ function GalleriesList() {
   }
 
   if (galleries.length === 0) {
+    const isClient = currentUser?.user_type === "client"
     return (
       <Container maxW="full" p={6}>
         <Heading size="2xl" mb={6}>
@@ -178,7 +181,9 @@ function GalleriesList() {
             <VStack textAlign="center">
               <EmptyState.Title>No galleries yet</EmptyState.Title>
               <EmptyState.Description>
-                Galleries will appear here as you work on projects
+                {isClient
+                  ? "You don't have any galleries yet. Please wait for your team to add you to a project."
+                  : "Galleries will appear here as you work on projects"}
               </EmptyState.Description>
             </VStack>
           </EmptyState.Content>

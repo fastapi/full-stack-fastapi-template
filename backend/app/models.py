@@ -49,7 +49,6 @@ class UpdatePassword(SQLModel):
 class User(UserBase, table=True):
     id: uuid.UUID = Field(default_factory=uuid.uuid4, primary_key=True)
     hashed_password: str
-    items: list["Item"] = Relationship(back_populates="owner", cascade_delete=True)
     organization_id: uuid.UUID | None = Field(
         default=None, foreign_key="organization.id"
     )
@@ -66,42 +65,6 @@ class UserPublic(UserBase):
 
 class UsersPublic(SQLModel):
     data: list[UserPublic]
-    count: int
-
-
-# Shared properties
-class ItemBase(SQLModel):
-    title: str = Field(min_length=1, max_length=255)
-    description: str | None = Field(default=None, max_length=255)
-
-
-# Properties to receive on item creation
-class ItemCreate(ItemBase):
-    pass
-
-
-# Properties to receive on item update
-class ItemUpdate(ItemBase):
-    title: str | None = Field(default=None, min_length=1, max_length=255)  # type: ignore
-
-
-# Database model, database table inferred from class name
-class Item(ItemBase, table=True):
-    id: uuid.UUID = Field(default_factory=uuid.uuid4, primary_key=True)
-    owner_id: uuid.UUID = Field(
-        foreign_key="user.id", nullable=False, ondelete="CASCADE"
-    )
-    owner: User | None = Relationship(back_populates="items")
-
-
-# Properties to return via API, id is always required
-class ItemPublic(ItemBase):
-    id: uuid.UUID
-    owner_id: uuid.UUID
-
-
-class ItemsPublic(SQLModel):
-    data: list[ItemPublic]
     count: int
 
 
@@ -324,6 +287,12 @@ class ProjectAccessCreate(ProjectAccessBase):
     user_id: uuid.UUID
 
 
+class ProjectAccessInviteByEmail(ProjectAccessBase):
+    """Invite a client to a project by email - creates user if needed"""
+
+    email: EmailStr = Field(max_length=255)
+
+
 class ProjectAccessUpdate(SQLModel):
     role: str | None = Field(default=None, max_length=50)
     can_comment: bool | None = None
@@ -402,3 +371,30 @@ class OrganizationInvitationPublic(OrganizationInvitationBase):
 class OrganizationInvitationsPublic(SQLModel):
     data: list[OrganizationInvitationPublic]
     count: int
+
+
+# ============================================================================
+# PROJECT INVITATION MODELS (Pending Client Access)
+# ============================================================================
+
+
+class ProjectInvitationBase(SQLModel):
+    email: EmailStr = Field(max_length=255, index=True)
+    role: str = Field(default="viewer", max_length=50)
+    can_comment: bool = Field(default=True)
+    can_download: bool = Field(default=True)
+
+
+class ProjectInvitation(ProjectInvitationBase, table=True):
+    id: uuid.UUID = Field(default_factory=uuid.uuid4, primary_key=True)
+    created_at: datetime = Field(default_factory=datetime.utcnow)
+    project_id: uuid.UUID = Field(
+        foreign_key="project.id", nullable=False, ondelete="CASCADE"
+    )
+    project: Optional["Project"] = Relationship()
+
+
+class ProjectInvitationPublic(ProjectInvitationBase):
+    id: uuid.UUID
+    created_at: datetime
+    project_id: uuid.UUID

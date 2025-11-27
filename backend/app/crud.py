@@ -253,65 +253,6 @@ def delete_gallery(*, session: Session, gallery_id: uuid.UUID) -> None:
 
 
 # ============================================================================
-# PHOTO CRUD
-# ============================================================================
-
-
-def get_photos_by_gallery(
-    *, session: Session, gallery_id: uuid.UUID, skip: int = 0, limit: int = 100
-) -> list[Photo]:
-    statement = (
-        select(Photo)
-        .where(Photo.gallery_id == gallery_id)
-        .offset(skip)
-        .limit(limit)
-        .order_by(desc(Photo.created_at))
-    )
-    return list(session.exec(statement).all())
-
-
-def count_photos_in_gallery(*, session: Session, gallery_id: uuid.UUID) -> int:
-    statement = select(func.count()).select_from(Photo).where(Photo.gallery_id == gallery_id)
-    return session.exec(statement).one()
-
-
-def create_photo(*, session: Session, photo_in: PhotoCreate) -> Photo:
-    db_obj = Photo.model_validate(photo_in)
-    session.add(db_obj)
-    session.commit()
-    session.refresh(db_obj)
-
-    # update gallery photo_count
-    gallery = session.get(Gallery, photo_in.gallery_id)
-    if gallery:
-        gallery.photo_count = count_photos_in_gallery(session=session, gallery_id=photo_in.gallery_id)
-        session.add(gallery)
-        session.commit()
-    return db_obj
-
-
-def delete_photos(
-    *, session: Session, gallery_id: uuid.UUID, photo_ids: list[uuid.UUID]
-) -> int:
-    """Delete photos by ids for a given gallery. Returns number deleted."""
-    deleted = 0
-    for pid in photo_ids:
-        photo = session.get(Photo, pid)
-        if photo and photo.gallery_id == gallery_id:
-            session.delete(photo)
-            deleted += 1
-    if deleted:
-        session.commit()
-        # sync gallery count
-        gallery = session.get(Gallery, gallery_id)
-        if gallery:
-            gallery.photo_count = count_photos_in_gallery(session=session, gallery_id=gallery_id)
-            session.add(gallery)
-            session.commit()
-    return deleted
-
-
-# ============================================================================
 # PROJECT ACCESS CRUD
 # ============================================================================
 

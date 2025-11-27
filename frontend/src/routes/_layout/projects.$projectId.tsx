@@ -28,6 +28,7 @@ import { InviteClient } from "@/components/Projects/InviteClient"
 import { ClientAccessList } from "@/components/Projects/ClientAccessList"
 import { EditProject } from "@/components/Projects/EditProject"
 import { DeleteProject } from "@/components/Projects/DeleteProject"
+import { ProjectTimeline } from "@/components/Projects/ProjectTimeline"
 
 export const Route = createFileRoute("/_layout/projects/$projectId")({
   component: ProjectDetail,
@@ -249,32 +250,8 @@ function ProjectDetail() {
 
             {/* Timeline / Milestones */}
             <Card.Root>
-              <Card.Header>
-                <Heading size="lg">Project Progress</Heading>
-              </Card.Header>
               <Card.Body>
-                <Stack gap={4}>
-                  <Box>
-                    <Text fontWeight="semibold" mb={2}>Status</Text>
-                    <Badge size="lg" colorScheme={getStatusColor(project.status || 'pending')}>
-                      {getStatusLabel(project.status || 'pending')}
-                    </Badge>
-                  </Box>
-                  <Box>
-                    <Text fontWeight="semibold" mb={2}>Completion</Text>
-                    <Flex alignItems="center" gap={3}>
-                      <Box flex={1} h="8px" bg="bg.muted" borderRadius="full" overflow="hidden">
-                        <Box
-                          h="100%"
-                          w={`${project.progress || 0}%`}
-                          bg={(project.progress || 0) === 100 ? "green.500" : (project.progress || 0) >= 50 ? "blue.500" : "orange.500"}
-                          transition="width 0.3s"
-                        />
-                      </Box>
-                      <Text fontWeight="semibold">{project.progress || 0}%</Text>
-                    </Flex>
-                  </Box>
-                </Stack>
+                <ProjectTimeline project={project} />
               </Card.Body>
             </Card.Root>
           </Stack>
