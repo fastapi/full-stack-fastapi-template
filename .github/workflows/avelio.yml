@@ -1,0 +1,35 @@
+name: Avelio Contract Guard
+
+on:
+  pull_request:
+    paths:
+      - '**/*.py'
+      - '**/*.yaml'
+      - '**/*.yml'
+
+jobs:
+  avelio:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Install dependencies
+        run: pip install pyyaml
+
+      - name: Download Avelio core
+        run: |
+          curl -L https://raw.githubusercontent.com/Suttonfgh/Avelio/main/src/avelio_core.py -o avelio_core.py
+          curl -L https://raw.githubusercontent.com/Suttonfgh/Avelio/main/src/ast_parser.py -o ast_parser.py
+          curl -L https://raw.githubusercontent.com/Suttonfgh/Avelio/main/src/contract_validator.py -o contract_validator.py
+
+      - name: Run Avelio
+        run: python avelio_core.py
+        env:
+          BASE_DIR: ${{ github.workspace }}
