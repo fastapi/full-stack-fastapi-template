@@ -1,3 +1,6 @@
+x-backend-build: &backend-build
+  context: ./backend
+
 services:
 
   db:
@@ -44,8 +47,7 @@ services:
 
   prestart:
     image: '${DOCKER_IMAGE_BACKEND?Variable not set}:${TAG-latest}'
-    build:
-      context: ./backend
+    build: *backend-build
     networks:
       - traefik-public
       - default
@@ -78,8 +80,7 @@ services:
 
   backend:
     image: '${DOCKER_IMAGE_BACKEND?Variable not set}:${TAG-latest}'
-    build:
-      context: ./backend
+    build: *backend-build
     restart: always
     networks:
       - traefik-public
@@ -113,7 +114,7 @@ services:
       - POSTGRES_PASSWORD=${POSTGRES_PASSWORD?Variable not set}
       - SENTRY_DSN=${SENTRY_DSN}
       - PROJECT_NAME=${PROJECT_NAME?Variable not set}
-    command: bash -lc "alembic upgrade head && fastapi run --workers 4 app/main.py"
+    command: fastapi run --workers 4 app/main.py
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:8000/api/v1/utils/health-check/"]
       interval: 10s

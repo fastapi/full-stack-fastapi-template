@@ -1,7 +1,10 @@
+import os
 import uuid
+from pathlib import Path
 from typing import Any
 
 from fastapi import APIRouter, HTTPException
+from sqlmodel import select
 
 from app import crud
 from app.api.deps import CurrentUser, SessionDep
@@ -16,6 +19,15 @@ from app.models import (
 )
 
 router = APIRouter()
+
+
+def _gallery_storage_root() -> Path:
+    """Return the root directory where gallery photos are stored.
+
+    Mirrors the logic in app.api.routes.galleries.STORAGE_ROOT without importing it
+    directly here to avoid any circular import issues at app startup.
+    """
+    return Path(os.getenv("GALLERY_STORAGE_ROOT", "app_data/galleries")).resolve()
 
 
 @router.get("/", response_model=ProjectsPublic)
@@ -190,5 +202,36 @@ def delete_project(
     if project.organization_id != current_user.organization_id:
         raise HTTPException(status_code=403, detail="Not enough permissions")
 
+    # Before deleting the project from DB, remove gallery folders & photos from storage.
+    from app.models import Gallery
+
+    storage_root = _gallery_storage_root()
+
+    # Find all galleries for this project
+    statement = select(Gallery).where(Gallery.project_id == id)
+    galleries = session.exec(statement).all()
+
+    for gallery in galleries:
+        gallery_dir = storage_root / str(gallery.id)
+        if gallery_dir.exists() and gallery_dir.is_dir():
+            # Best-effort recursive delete of all files and subdirs
+            for root, dirs, files in os.walk(gallery_dir, topdown=False):
+                for name in files:
+                    try:
+                        (Path(root) / name).unlink()
+                    except OSError:
+                        pass
+                for name in dirs:
+                    try:
+                        (Path(root) / name).rmdir()
+                    except OSError:
+                        pass
+            try:
+                gallery_dir.rmdir()
+            except OSError:
+                # If something remains locked, ignore; DB rows will still be removed
+                pass
+
+    # Delete the project. DB-level cascading will remove galleries & photos.
     crud.delete_project(session=session, project_id=id)
     return Message(message="Project deleted successfully")

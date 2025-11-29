@@ -18,6 +18,7 @@ import { z } from "zod"
 
 import { ProjectsService, type ProjectPublic } from "@/client"
 import useAuth from "@/hooks/useAuth"
+import { CreateProject } from "@/components/Projects/CreateProject"
 
 const projectsSearchSchema = z.object({
   page: z.number().catch(1),
@@ -188,7 +189,7 @@ function Projects() {
             </Heading>
             <Text color="fg.muted">Manage all your photography projects</Text>
           </Box>
-          {/* TODO: Add "New Project" button here */}
+          <CreateProject />
         </Flex>
 
         {/* Projects Table */}

@@ -1,4 +1,5 @@
 import logging
+import sys
 
 from sqlmodel import Session
 
@@ -9,14 +10,22 @@ logger = logging.getLogger(__name__)
 
 
 def init() -> None:
-    with Session(engine) as session:
-        init_db(session)
+    try:
+        with Session(engine) as session:
+            init_db(session)
+    except Exception as e:
+        logger.error(f"Error in init_db: {e}", exc_info=True)
+        raise
 
 
 def main() -> None:
-    logger.info("Creating initial data")
-    init()
-    logger.info("Initial data created")
+    try:
+        logger.info("Creating initial data")
+        init()
+        logger.info("Initial data created")
+    except Exception as e:
+        logger.error(f"Failed to create initial data: {e}", exc_info=True)
+        sys.exit(1)
 
 
 if __name__ == "__main__":

@@ -61,6 +61,8 @@ export function CreateProject() {
       showSuccessToast("Project created successfully")
       queryClient.invalidateQueries({ queryKey: ["recentProjects"] })
       queryClient.invalidateQueries({ queryKey: ["dashboardStats"] })
+      // Also refresh projects list so the new project appears immediately
+      queryClient.invalidateQueries({ queryKey: ["projects"] })
       setOpen(false)
       reset()
     },

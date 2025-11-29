@@ -12,8 +12,8 @@ from app.models import (
     GalleryUpdate,
     Photo,
     PhotoCreate,
-    Item,
-    ItemCreate,
+    #Item,
+    #ItemCreate,
     Organization,
     OrganizationCreate,
     OrganizationUpdate,
@@ -22,6 +22,7 @@ from app.models import (
     ProjectAccessCreate,
     ProjectAccessUpdate,
     ProjectCreate,
+    ProjectInvitation,
     ProjectUpdate,
     User,
     UserCreate,
@@ -68,7 +69,7 @@ def authenticate(*, session: Session, email: str, password: str) -> User | None:
     return db_user
 
 
-def create_item(*, session: Session, item_in: ItemCreate, owner_id: uuid.UUID) -> Item:
+#def create_item(*, session: Session, item_in: ItemCreate, owner_id: uuid.UUID) -> Item:
     db_item = Item.model_validate(item_in, update={"owner_id": owner_id})
     session.add(db_item)
     session.commit()
@@ -252,6 +253,87 @@ def delete_gallery(*, session: Session, gallery_id: uuid.UUID) -> None:
         session.commit()
 
 
+def create_photo(*, session: Session, photo_in: PhotoCreate) -> Photo:
+    """Create a new photo record for a gallery and keep gallery.photo_count in sync."""
+    db_obj = Photo.model_validate(photo_in)
+    session.add(db_obj)
+    session.commit()
+    session.refresh(db_obj)
+
+    # Update gallery photo_count
+    gallery = session.get(Gallery, photo_in.gallery_id)
+    if gallery is not None:
+        # Recalculate from DB to avoid drift
+        gallery.photo_count = count_photos_in_gallery(
+            session=session, gallery_id=gallery.id
+        )
+        session.add(gallery)
+        session.commit()
+        session.refresh(gallery)
+
+    return db_obj
+
+
+def delete_photos(
+    *, session: Session, gallery_id: uuid.UUID, photo_ids: list[uuid.UUID]
+) -> int:
+    """Delete photos by ID for a gallery and update gallery.photo_count.
+
+    Returns the number of Photo rows deleted.
+    """
+    if not photo_ids:
+        return 0
+
+    # Only delete photos that belong to this gallery
+    from app.models import Photo  # local import to avoid circulars in some tools
+
+    statement = select(Photo).where(
+        Photo.gallery_id == gallery_id, Photo.id.in_(photo_ids)  # type: ignore[arg-type]
+    )
+    photos = list(session.exec(statement).all())
+    deleted_count = 0
+
+    for photo in photos:
+        session.delete(photo)
+        deleted_count += 1
+
+    # Update gallery photo_count after deletions
+    gallery = session.get(Gallery, gallery_id)
+    if gallery is not None:
+        gallery.photo_count = max(
+            0, count_photos_in_gallery(session=session, gallery_id=gallery.id)
+        )
+        session.add(gallery)
+
+    session.commit()
+
+    return deleted_count
+
+
+def get_photos_by_gallery(
+    *, session: Session, gallery_id: uuid.UUID, skip: int = 0, limit: int = 100
+) -> list[Photo]:
+    """Get photos belonging to a specific gallery."""
+    statement = (
+        select(Photo)
+        .where(Photo.gallery_id == gallery_id)
+        .offset(skip)
+        .limit(limit)
+        .order_by(desc(Photo.created_at))
+    )
+    return list(session.exec(statement).all())
+
+
+def count_photos_in_gallery(*, session: Session, gallery_id: uuid.UUID) -> int:
+    """Count how many photos are in a gallery."""
+    statement = (
+        select(func.count())
+        .select_from(Photo)
+        .where(Photo.gallery_id == gallery_id)
+    )
+    return session.exec(statement).one()
+
+
 # ============================================================================
 # PROJECT ACCESS CRUD
 # ============================================================================
@@ -367,6 +449,113 @@ def user_has_project_access(
     )
     count = session.exec(statement).one()
     return count > 0
+
+
+def invite_client_by_email(
+    *,
+    session: Session,
+    project_id: uuid.UUID,
+    email: str,
+    role: str = "viewer",
+    can_comment: bool = True,
+    can_download: bool = True,
+) -> tuple[ProjectAccess | None, bool]:
+    """
+    Invite a client to a project by email.
+    If user exists: grants immediate access and returns (access, False)
+    If user doesn't exist: creates a pending ProjectInvitation and returns (None, True)
+    """
+    # Check if user exists
+    user = get_user_by_email(session=session, email=email)
+    
+    if user:
+        # User exists - grant immediate access
+        # Check if access already exists
+        existing_access = get_project_access(
+            session=session, project_id=project_id, user_id=user.id
+        )
+        if existing_access:
+            # Update existing access
+            existing_access.role = role
+            existing_access.can_comment = can_comment
+            existing_access.can_download = can_download
+            session.add(existing_access)
+            session.commit()
+            session.refresh(existing_access)
+            return existing_access, False
+        
+        # Create new access
+        access_in = ProjectAccessCreate(
+            project_id=project_id,
+            user_id=user.id,
+            role=role,
+            can_comment=can_comment,
+            can_download=can_download,
+        )
+        access = create_project_access(session=session, access_in=access_in)
+        return access, False
+    else:
+        # User doesn't exist - create pending invitation
+        # Check if invitation already exists
+        existing_invitation = session.exec(
+            select(ProjectInvitation).where(
+                ProjectInvitation.project_id == project_id,
+                ProjectInvitation.email == email,
+            )
+        ).first()
+        
+        if existing_invitation:
+            # Update existing invitation
+            existing_invitation.role = role
+            existing_invitation.can_comment = can_comment
+            existing_invitation.can_download = can_download
+            session.add(existing_invitation)
+            session.commit()
+            session.refresh(existing_invitation)
+            return None, True
+        
+        # Create new invitation
+        invitation = ProjectInvitation(
+            project_id=project_id,
+            email=email,
+            role=role,
+            can_comment=can_comment,
+            can_download=can_download,
+        )
+        session.add(invitation)
+        session.commit()
+        session.refresh(invitation)
+        return None, True
+
+
+def process_pending_project_invitations(
+    *, session: Session, user_id: uuid.UUID, email: str
+) -> None:
+    """
+    Process pending project invitations for a newly created client user.
+    Finds all ProjectInvitation records for the email, creates ProjectAccess for each,
+    and deletes the invitations.
+    """
+    # Find all pending invitations for this email
+    statement = select(ProjectInvitation).where(ProjectInvitation.email == email)
+    invitations = session.exec(statement).all()
+
+    for invitation in invitations:
+        # Create project access
+        access_in = ProjectAccessCreate(
+            project_id=invitation.project_id,
+            user_id=user_id,
+            role=invitation.role,
+            can_comment=invitation.can_comment,
+            can_download=invitation.can_download,
+        )
+        create_project_access(session=session, access_in=access_in)
+        
+        # Delete the invitation
+        session.delete(invitation)
+    
+    # Commit all changes
+    session.commit()
 
 
 # ============================================================================

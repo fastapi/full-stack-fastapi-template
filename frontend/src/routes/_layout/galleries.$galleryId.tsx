@@ -172,12 +172,43 @@ function GalleryDetail() {
 
   const photos = photosData?.data ?? []
   const anySelected = Object.values(selected).some(Boolean)
+  const hasPhotos = photos.length > 0
+
+  // Lightbox state for viewing photos larger with details & navigation
+  const [isLightboxOpen, setIsLightboxOpen] = useState(false)
+  const [currentPhotoIndex, setCurrentPhotoIndex] = useState(0)
+
+  const openLightboxAt = (index: number) => {
+    if (!photos || photos.length === 0) return
+    setCurrentPhotoIndex(index)
+    setIsLightboxOpen(true)
+  }
+
+  const closeLightbox = () => setIsLightboxOpen(false)
+
+  const showPrevPhoto = () => {
+    if (!photos || photos.length === 0) return
+    setCurrentPhotoIndex((prev) =>
+      prev === 0 ? photos.length - 1 : prev - 1,
+    )
+  }
+
+  const showNextPhoto = () => {
+    if (!photos || photos.length === 0) return
+    setCurrentPhotoIndex((prev) =>
+      prev === photos.length - 1 ? 0 : prev + 1,
+    )
+  }
 
   const onSelectToggle = (id: string) => {
     setSelected((prev: Record<string, boolean>) => ({ ...prev, [id]: !prev[id] }))
   }
 
   const onDownloadAll = () => {
+    if (!hasPhotos) {
+      showErrorToast("There are no photos in this gallery to download")
+      return
+    }
     window.location.href = `${OpenAPI.BASE}/api/v1/galleries/${galleryId}/download-all`
   }
 
@@ -185,13 +216,19 @@ function GalleryDetail() {
     const ids = Object.entries(selected)
       .filter(([, v]) => v)
       .map(([k]) => k)
-    if (ids.length === 0) return
+    if (ids.length === 0) {
+      showErrorToast("Select at least one photo to download")
+      return
+    }
     const res = await fetch(`${OpenAPI.BASE}/api/v1/galleries/${galleryId}/photos/download`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ photo_ids: ids }),
     })
-    if (!res.ok) return
+    if (!res.ok) {
+      showErrorToast("Failed to download selected photos")
+      return
+    }
     const blob = await res.blob()
     const url = window.URL.createObjectURL(blob)
     const a = document.createElement("a")
@@ -281,7 +318,7 @@ function GalleryDetail() {
         {/* Actions and Photos */}
         <Flex gap={3} alignItems="center" justifyContent="space-between">
           <Flex gap={2}>
-            <Button variant="solid" onClick={onConfirmAllOpen}>
+            <Button variant="solid" onClick={onConfirmAllOpen} disabled={!hasPhotos}>
               Download all photos
             </Button>
             <Button variant="outline" onClick={onDownloadSelected} disabled={!anySelected}>
@@ -357,6 +394,75 @@ function GalleryDetail() {
           </DialogContent>
         </DialogRoot>
 
+        {/* Lightbox dialog for viewing photos larger with details and navigation */}
+        <DialogRoot open={isLightboxOpen} onOpenChange={(e: { open: boolean }) => {
+          if (!e.open) {
+            closeLightbox()
+          }
+        }}>
+          <DialogContent maxW="800px">
+            <DialogHeader>
+              <DialogTitle>Photo details</DialogTitle>
+            </DialogHeader>
+            <DialogBody>
+              {hasPhotos && photos[currentPhotoIndex] && (
+                <Stack gap={4}>
+                  <Box
+                    position="relative"
+                    w="100%"
+                    h="400px"
+                    bg="gray.100"
+                    borderRadius="md"
+                    overflow="hidden"
+                    display="flex"
+                    alignItems="center"
+                    justifyContent="center"
+                  >
+                    <img
+                      src={photos[currentPhotoIndex].url}
+                      alt={photos[currentPhotoIndex].filename}
+                      style={{ maxWidth: "100%", maxHeight: "100%", objectFit: "contain" }}
+                    />
+                    {/* Navigation arrows */}
+                    <Button
+                      position="absolute"
+                      left="8px"
+                      top="50%"
+                      transform="translateY(-50%)"
+                      variant="outline"
+                      onClick={showPrevPhoto}
+                    >
+                      ‹
+                    </Button>
+                    <Button
+                      position="absolute"
+                      right="8px"
+                      top="50%"
+                      transform="translateY(-50%)"
+                      variant="outline"
+                      onClick={showNextPhoto}
+                    >
+                      ›
+                    </Button>
+                  </Box>
+                  <Box> {/* TODO: Add file size and date added */ }
+                    <Text fontWeight="bold">Filename: {photos[currentPhotoIndex].filename}</Text>
+                    <Text>
+                      Size: unknown (file size is not tracked in the database)
+                    </Text>
+                    <Text>
+                      Date added: {gallery.date ?? "Unknown"}
+                    </Text>
+                  </Box>
+                </Stack>
+              )}
+            </DialogBody>
+            <DialogFooter>
+              <Button onClick={closeLightbox}>Close</Button>
+            </DialogFooter>
+          </DialogContent>
+        </DialogRoot>
+
         <Box>
           <Heading size="lg" mb={4}>
             Photos
@@ -372,7 +478,7 @@ function GalleryDetail() {
               }}
               gap={4}
             >
-              {photos.map((p: { id: string; filename: string; url: string }) => (
+              {photos.map((p: { id: string; filename: string; url: string }, index: number) => (
                 <Box
                   key={p.id}
                   position="relative"
@@ -383,6 +489,8 @@ function GalleryDetail() {
                   alignItems="center"
                   justifyContent="center"
                   overflow="hidden"
+                  onClick={() => openLightboxAt(index)}
+                  cursor="pointer"
                 >
                   <img
                     src={p.url}
