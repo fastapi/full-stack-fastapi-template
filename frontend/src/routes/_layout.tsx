@@ -29,5 +29,3 @@ function Layout() {
     </Flex>
   )
 }
-
-export default Layout

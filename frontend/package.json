@@ -18,6 +18,7 @@
     "@tanstack/react-router": "^1.131.41",
     "axios": "1.12.2",
     "form-data": "4.0.4",
+    "lindenmayer": "^1.5.4",
     "next-themes": "^0.4.6",
     "react": "^19.1.1",
     "react-dom": "^19.1.1",

@@ -128,5 +128,3 @@ function SignUp() {
     </Flex>
   )
 }
-
-export default SignUp
