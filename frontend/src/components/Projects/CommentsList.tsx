@@ -99,7 +99,7 @@ export function CommentsList({ projectId }: CommentsListProps) {
                       </Text>
                       <Flex align="center" gap={2}>
                         <Text fontSize="xs" color="fg.muted">
-                          {new Date(comment.created_at + "Z").toLocaleDateString("en-US", {
+                          {new Date(comment.created_at + "Z").toLocaleString("en-US", {
                             month: "short",
                             day: "numeric",
                             year: "numeric",

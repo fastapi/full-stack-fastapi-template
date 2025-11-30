@@ -71,12 +71,12 @@ def authenticate(*, session: Session, email: str, password: str) -> User | None:
     return db_user
 
 
-#def create_item(*, session: Session, item_in: ItemCreate, owner_id: uuid.UUID) -> Item:
-    db_item = Item.model_validate(item_in, update={"owner_id": owner_id})
-    session.add(db_item)
-    session.commit()
-    session.refresh(db_item)
-    return db_item
+# def create_item(*, session: Session, item_in: ItemCreate, owner_id: uuid.UUID) -> Item:
+#     db_item = Item.model_validate(item_in, update={"owner_id": owner_id})
+#     session.add(db_item)
+#     session.commit()
+#     session.refresh(db_item)
+#     return db_item
 
 
 # ============================================================================
@@ -291,7 +291,7 @@ def delete_photos(
     from app.models import Photo  # local import to avoid circulars in some tools
 
     statement = select(Photo).where(
-        Photo.gallery_id == gallery_id, Photo.id.in_(photo_ids)  # type: ignore[arg-type]
+        Photo.gallery_id == gallery_id, Photo.id.in_(photo_ids)  # type: ignore[attr-defined]
     )
     photos = list(session.exec(statement).all())
     deleted_count = 0
@@ -655,7 +655,7 @@ def get_comments_by_project(
         .where(Comment.project_id == project_id)
         .offset(skip)
         .limit(limit)
-        .order_by(Comment.created_at)
+        .order_by(Comment.created_at)  # type: ignore[arg-type]
     )
     return list(session.exec(statement).all())
 
