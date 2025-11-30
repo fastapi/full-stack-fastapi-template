@@ -101,8 +101,8 @@ jobs:
         DOMAIN=${{ secrets.EC2_HOST }}
         PROJECT_NAME=Mosaic Project
         STACK_NAME=mosaic-project-production
-        BACKEND_CORS_ORIGINS=http://${{ secrets.EC2_HOST }}:5173,http://${{ secrets.EC2_HOST }}:80,http://${{ secrets.EC2_HOST }}
-        FRONTEND_HOST=http://${{ secrets.EC2_HOST }}:5173
+        BACKEND_CORS_ORIGINS=http://${{ secrets.EC2_HOST }}:80,http://${{ secrets.EC2_HOST }}
+        FRONTEND_HOST=http://${{ secrets.EC2_HOST }}
         SECRET_KEY=${{ secrets.SECRET_KEY }}
         FIRST_SUPERUSER=${{ secrets.FIRST_SUPERUSER }}
         FIRST_SUPERUSER_PASSWORD=${{ secrets.FIRST_SUPERUSER_PASSWORD }}
@@ -115,6 +115,7 @@ jobs:
         SMTP_USER=
         SMTP_PASSWORD=
         EMAILS_FROM_EMAIL=
+        SENTRY_DSN=
         DOCKER_IMAGE_BACKEND=mosaic-backend
         DOCKER_IMAGE_FRONTEND=mosaic-frontend
         TAG=latest

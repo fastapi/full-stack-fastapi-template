@@ -20,8 +20,8 @@ ENVIRONMENT=production
 DOMAIN=$EC2_IP
 PROJECT_NAME=Mosaic Project
 STACK_NAME=mosaic-project-production
-BACKEND_CORS_ORIGINS=http://$EC2_IP:5173,http://$EC2_IP:80,http://$EC2_IP
-FRONTEND_HOST=http://$EC2_IP:5173
+BACKEND_CORS_ORIGINS=http://$EC2_IP:80,http://$EC2_IP
+FRONTEND_HOST=http://$EC2_IP
 SECRET_KEY=$(python3 -c "import secrets; print(secrets.token_urlsafe(32))")
 FIRST_SUPERUSER=admin@example.com
 FIRST_SUPERUSER_PASSWORD=$(python3 -c "import secrets; print(secrets.token_urlsafe(16))")
@@ -34,6 +34,7 @@ SMTP_HOST=
 SMTP_USER=
 SMTP_PASSWORD=
 EMAILS_FROM_EMAIL=
+SENTRY_DSN=
 DOCKER_IMAGE_BACKEND=mosaic-backend
 DOCKER_IMAGE_FRONTEND=mosaic-frontend
 TAG=latest
@@ -112,6 +113,9 @@ services:
         condition: service_completed_successfully
     build:
       context: ./backend
+    command: fastapi run --workers 4 app/main.py
+    volumes:
+      - ./backend/app_data:/app/app_data
     environment:
       - PROJECT_NAME=\${PROJECT_NAME}
       - DOMAIN=\${DOMAIN}
@@ -130,6 +134,7 @@ services:
       - POSTGRES_DB=\${POSTGRES_DB}
       - POSTGRES_USER=\${POSTGRES_USER}
       - POSTGRES_PASSWORD=\${POSTGRES_PASSWORD}
+      - SENTRY_DSN=\${SENTRY_DSN}
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:8000/api/v1/utils/health-check/"]
       interval: 10s
