@@ -1,4 +1,5 @@
 import Logo from "/assets/images/fastapi-logo.svg"
+import { Footer } from "./Footer"
 
 interface AuthLayoutProps {
   children: React.ReactNode
@@ -18,6 +19,7 @@ export function AuthLayout({ children }: AuthLayoutProps) {
         <div className="flex flex-1 items-center justify-center">
           <div className="w-full max-w-xs">{children}</div>
         </div>
+        <Footer />
       </div>
     </div>
   )
