@@ -98,7 +98,7 @@ function GalleryDetail() {
           filename: string; 
           url: string; 
           file_size: number; 
-          uploaded_at: string;
+          uploaded_at: string; // Date when photo was uploaded
         }[]; 
         count: number 
       }
@@ -223,18 +223,46 @@ function GalleryDetail() {
   }
 
   // Format date for display
+  // Backend stores dates in UTC using datetime.utcnow(), but FastAPI may serialize them
+  // without timezone info. We need to explicitly parse them as UTC.
   const formatDate = (dateString: string | undefined): string => {
     if (!dateString) return "Unknown"
     try {
-      const date = new Date(dateString)
+      // FastAPI/Pydantic serializes datetime to ISO format
+      // If the string doesn't have timezone info (no 'Z' or '+/-HH:MM'), 
+      // it's likely a naive UTC datetime, so we treat it as UTC
+      let dateStr = dateString.trim()
+      
+      // Check if it already has timezone info
+      const hasTimezone = dateStr.endsWith('Z') || 
+                          /[+-]\d{2}:\d{2}$/.test(dateStr) ||
+                          /[+-]\d{4}$/.test(dateStr)
+      
+      // If no timezone info, assume it's UTC and append 'Z'
+      if (!hasTimezone && dateStr.length > 0) {
+        // Remove any trailing milliseconds if present
+        dateStr = dateStr.replace(/\.\d+$/, '')
+        dateStr = dateStr + 'Z'
+      }
+      
+      const date = new Date(dateStr)
+      
+      // Check if date is valid
+      if (isNaN(date.getTime())) {
+        return "Invalid date"
+      }
+      
+      // Convert UTC date to local time for display
       return date.toLocaleDateString("en-US", {
         year: "numeric",
         month: "long",
         day: "numeric",
         hour: "2-digit",
         minute: "2-digit",
+        timeZoneName: "short",
       })
-    } catch {
+    } catch (error) {
+      console.error("Error formatting date:", error, dateString)
       return "Unknown"
     }
   }

@@ -255,7 +255,8 @@ def delete_gallery(*, session: Session, gallery_id: uuid.UUID) -> None:
 
 def create_photo(*, session: Session, photo_in: PhotoCreate) -> Photo:
     """Create a new photo record for a gallery and keep gallery.photo_count in sync."""
-    db_obj = Photo.model_validate(photo_in)
+    # Explicitly set uploaded_at to ensure it's not None (required by DB constraint)
+    db_obj = Photo.model_validate(photo_in, update={"uploaded_at": datetime.utcnow()})
     session.add(db_obj)
     session.commit()
     session.refresh(db_obj)
