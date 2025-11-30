@@ -29,6 +29,7 @@
     "@tanstack/react-query": "^5.90.7",
     "@tanstack/react-query-devtools": "^5.91.0",
     "@tanstack/react-router": "^1.131.50",
+    "@tanstack/react-router-devtools": "^1.139.12",
     "axios": "1.12.2",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
