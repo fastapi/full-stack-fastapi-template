@@ -24,6 +24,10 @@ export default function CoralGrowth() {
   const [iteration, setIteration] = useState(0)
   const [maxIterations, setMaxIterations] = useState(6)
   const [seed, setSeed] = useState(12345)
+  const [hue, setHue] = useState(180) // Base color hue (0-360)
+  const [fuzzyOffset, setFuzzyOffset] = useState(0.8) // Offset multiplier for fuzzy texture
+  const [fuzzyAlpha, setFuzzyAlpha] = useState(0.7) // Opacity of outer lines
+  const [fuzzyWidth, setFuzzyWidth] = useState(0.8) // Width multiplier for outer lines
 
   useEffect(() => {
     const canvas = canvasRef.current
@@ -44,7 +48,17 @@ export default function CoralGrowth() {
     const coralString = generateCoralLSystem(iteration, seed)
 
     // Render coral with turtle graphics
-    drawCoral(ctx, coralString, canvas.width, canvas.height, iteration)
+    drawCoral(
+      ctx,
+      coralString,
+      canvas.width,
+      canvas.height,
+      iteration,
+      hue,
+      fuzzyOffset,
+      fuzzyAlpha,
+      fuzzyWidth,
+    )
 
     // Animation loop - advance to next iteration
     const timer = setTimeout(() => {
@@ -52,7 +66,7 @@ export default function CoralGrowth() {
     }, 1200) // 1200ms between iterations (slower for coral)
 
     return () => clearTimeout(timer)
-  }, [iteration, maxIterations, seed])
+  }, [iteration, maxIterations, seed, hue, fuzzyOffset, fuzzyAlpha, fuzzyWidth])
 
   return (
     <VStack gap={4} align="stretch">
@@ -89,6 +103,71 @@ export default function CoralGrowth() {
               setSeed(val)
             }
           }}
+          bg="white"
+        />
+      </Box>
+
+      <Box p={4} bg="gray.50" borderRadius="md" boxShadow="sm">
+        <Text mb={2} fontWeight="medium">
+          Color (Hue: {hue}°)
+        </Text>
+        <Input
+          type="number"
+          value={hue}
+          onChange={(e) => {
+            const val = parseInt(e.target.value)
+            if (!isNaN(val) && val >= 0 && val <= 360) {
+              setHue(val)
+            }
+          }}
+          min={0}
+          max={360}
+          step={1}
+          bg="white"
+        />
+      </Box>
+
+      <Box p={4} bg="gray.50" borderRadius="md" boxShadow="sm">
+        <Text mb={2} fontWeight="medium">
+          Fuzzy Offset: {fuzzyOffset.toFixed(2)}
+        </Text>
+        <Input
+          type="range"
+          value={fuzzyOffset}
+          onChange={(e) => setFuzzyOffset(parseFloat(e.target.value))}
+          min={0}
+          max={2}
+          step={0.1}
+          bg="white"
+        />
+      </Box>
+
+      <Box p={4} bg="gray.50" borderRadius="md" boxShadow="sm">
+        <Text mb={2} fontWeight="medium">
+          Fuzzy Opacity: {fuzzyAlpha.toFixed(2)}
+        </Text>
+        <Input
+          type="range"
+          value={fuzzyAlpha}
+          onChange={(e) => setFuzzyAlpha(parseFloat(e.target.value))}
+          min={0}
+          max={1}
+          step={0.05}
+          bg="white"
+        />
+      </Box>
+
+      <Box p={4} bg="gray.50" borderRadius="md" boxShadow="sm">
+        <Text mb={2} fontWeight="medium">
+          Fuzzy Width: {fuzzyWidth.toFixed(2)}
+        </Text>
+        <Input
+          type="range"
+          value={fuzzyWidth}
+          onChange={(e) => setFuzzyWidth(parseFloat(e.target.value))}
+          min={0}
+          max={1}
+          step={0.05}
           bg="white"
         />
       </Box>
@@ -231,13 +310,19 @@ interface TurtleState {
  * - Variable thickness based on parameters
  * - Branching via state stack ([ and ])
  * - Asymmetric angles for organic appearance
- * - Color variation based on depth
+ * - Depth-based coloring (thicker/base = darker, thinner/tips = lighter)
+ * - Fuzzy organic texture (multiple offset parallel lines per branch)
+ * - Polyps (circles) at branch tips for organic appearance
  *
  * @param ctx - Canvas 2D context
  * @param commands - L-system result string with parameters
  * @param width - Canvas width
  * @param height - Canvas height
  * @param iteration - Current iteration (affects overall scale)
+ * @param hue - Base color hue (0-360)
+ * @param fuzzyOffset - Offset multiplier for fuzzy texture
+ * @param fuzzyAlpha - Opacity of outer fuzzy lines
+ * @param fuzzyWidth - Width multiplier for outer fuzzy lines
  */
 function drawCoral(
   ctx: CanvasRenderingContext2D,
@@ -245,6 +330,10 @@ function drawCoral(
   width: number,
   height: number,
   iteration: number,
+  hue: number,
+  fuzzyOffset: number,
+  fuzzyAlpha: number,
+  fuzzyWidth: number,
 ) {
   // Calculate base line length
   const baseLength = Math.min(width, height) / 8
@@ -280,14 +369,28 @@ function drawCoral(
 
           // Color based on depth (thickness) - thicker = darker (base), thinner = lighter (tips)
           const lightness = 40 + (1 - thickness) * 40 // 40-80% lightness
-          ctx.strokeStyle = `hsl(${180 + iteration * 10}, 70%, ${lightness}%)`
-          ctx.lineWidth = thickness * 8 // Scale thickness for visibility
+          const baseWidth = thickness * 8 // Scale thickness for visibility
           ctx.lineCap = "round"
 
-          ctx.beginPath()
-          ctx.moveTo(turtle.x, turtle.y)
-          ctx.lineTo(newX, newY)
-          ctx.stroke()
+          // Calculate perpendicular offset for fuzzy texture
+          const perpRadians = radians + Math.PI / 2
+          const offsetDist = baseWidth * fuzzyOffset
+
+          // Draw 3 parallel lines for organic fuzzy texture
+          for (let j = -1; j <= 1; j++) {
+            const offsetX = Math.cos(perpRadians) * offsetDist * j
+            const offsetY = Math.sin(perpRadians) * offsetDist * j
+
+            // Make outer lines slightly more transparent
+            const alpha = j === 0 ? 1.0 : fuzzyAlpha
+            ctx.strokeStyle = `hsla(${hue}, 70%, ${lightness}%, ${alpha})`
+            ctx.lineWidth = j === 0 ? baseWidth : baseWidth * fuzzyWidth
+
+            ctx.beginPath()
+            ctx.moveTo(turtle.x + offsetX, turtle.y + offsetY)
+            ctx.lineTo(newX + offsetX, newY + offsetY)
+            ctx.stroke()
+          }
 
           turtle.x = newX
           turtle.y = newY
@@ -335,6 +438,14 @@ function drawCoral(
         break
 
       case "]":
+        // Draw polyp at branch tip before popping state
+        const polyRadius = turtle.thickness * 12 // Circle size based on branch thickness
+        const lightness = 40 + (1 - turtle.thickness) * 40
+        ctx.fillStyle = `hsl(${hue}, 80%, ${lightness + 10}%)` // Brighter for visibility
+        ctx.beginPath()
+        ctx.arc(turtle.x, turtle.y, polyRadius, 0, Math.PI * 2)
+        ctx.fill()
+
         // Pop state (end branch, return to saved position)
         if (stateStack.length > 0) {
           const state = stateStack.pop()!
