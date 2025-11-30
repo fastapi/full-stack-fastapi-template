@@ -403,3 +403,52 @@ class ProjectInvitationPublic(ProjectInvitationBase):
     id: uuid.UUID
     created_at: datetime
     project_id: uuid.UUID
+
+
+
+# ============================================================================
+# COMMENT MODELS
+# ============================================================================
+
+
+class CommentBase(SQLModel):
+    content: str = Field(min_length=1, max_length=2000)
+
+
+class CommentCreate(CommentBase):
+    project_id: uuid.UUID
+
+
+class CommentUpdate(SQLModel):
+    content: str | None = Field(default=None, min_length=1, max_length=2000)
+
+
+class Comment(CommentBase, table=True):
+    id: uuid.UUID = Field(default_factory=uuid.uuid4, primary_key=True)
+    created_at: datetime = Field(default_factory=datetime.utcnow)
+    updated_at: datetime = Field(default_factory=datetime.utcnow)
+    project_id: uuid.UUID = Field(
+        foreign_key="project.id", nullable=False, ondelete="CASCADE"
+    )
+    user_id: uuid.UUID = Field(
+        foreign_key="user.id", nullable=False, ondelete="CASCADE"
+    )
+    project: Optional["Project"] = Relationship()
+    user: Optional["User"] = Relationship()
+
+
+class CommentPublic(CommentBase):
+    id: uuid.UUID
+    created_at: datetime
+    updated_at: datetime
+    project_id: uuid.UUID
+    user_id: uuid.UUID
+
+
+class CommentWithUser(CommentPublic):
+    user: UserPublic
+
+
+class CommentsPublic(SQLModel):
+    data: list[CommentWithUser]
+    count: int
