@@ -33,18 +33,18 @@ export default function CoralGrowth() {
     if (!ctx) return
 
     // Set canvas size
-    const size = Math.min(window.innerWidth - 40, 600)
+    const size = Math.min(window.innerWidth - 40, 800)
     canvas.width = size
     canvas.height = size
 
     // Clear canvas
     ctx.clearRect(0, 0, canvas.width, canvas.height)
 
-    // Generate coral L-system string with parametric rules
-    const coralString = generateCoralLSystem(iteration)
+    // Generate coral L-system string with stochastic parametric rules
+    const coralString = generateCoralLSystem(iteration, seed)
 
     // Render coral with turtle graphics
-    drawCoral(ctx, coralString, canvas.width, canvas.height, iteration, seed)
+    drawCoral(ctx, coralString, canvas.width, canvas.height, iteration)
 
     // Animation loop - advance to next iteration
     const timer = setTimeout(() => {
@@ -117,22 +117,49 @@ export default function CoralGrowth() {
 
 
 /**
- * Generate coral L-system string with parametric thickness
+ * Generate coral L-system string with parametric thickness using stochastic rules
  *
- * Uses manual string rewriting since lindenmayer library's parametric
- * support is complex. This implements:
+ * Uses manual string rewriting with multiple production rules and axioms selected
+ * probabilistically based on seed for organic, varied growth patterns.
  *
- * Axiom: F(1.0)
- * Rule: F(t) → F(t*0.85)[+(30)F(t*0.65)][-(35)F(t*0.65)]F(t*0.9)
+ * Axioms (seed-selected):
+ * - 25%: F(1.0) - Traditional central trunk
+ * - 25%: [-(45)F(0.8)][+(45)F(0.8)] - Branch from base, no trunk
+ * - 25%: [-(60)F(0.9)]F(0.4)[+(60)F(0.9)] - Tiny center with big side branches
+ * - 25%: [-(30)F(0.85)][F(0.6)][+(30)F(0.85)] - Three-way split from base
+ *
+ * Production Rules (probabilistic):
+ * - 60%: Normal branching - F(t*0.85)[+(30)F(t*0.65)][-(35)F(t*0.65)]F(t*0.9)
+ * - 25%: Dominant straight - F(t*0.95)F(t*0.92)
+ * - 10%: Asymmetric branching - F(t*0.85)[+(30)F(t*0.8)][-(35)F(t*0.5)]F(t*0.9)
+ * - 5%: Minimal growth - F(t*0.9)
  *
  * @param iterations - Number of growth iterations
+ * @param seed - Random seed for deterministic axiom and rule selection
  * @returns L-system command string with thickness annotations
  */
-function generateCoralLSystem(iterations: number): string {
-  // Start with axiom: F with thickness 1.0
-  let current = "F(1.0)"
+function generateCoralLSystem(iterations: number, seed: number): string {
+  // Select axiom based on seed for varied starting patterns
+  const axiomSelector = seededRandom(seed, 1)
+  let current: string
+
+  if (axiomSelector < 0.25) {
+    // Axiom A (25%): Traditional central trunk
+    current = "F(1.0)"
+  } else if (axiomSelector < 0.5) {
+    // Axiom B (25%): Branch from base, no central trunk
+    current = "[-(45)F(0.8)][+(45)F(0.8)]"
+  } else if (axiomSelector < 0.75) {
+    // Axiom C (25%): Tiny stub center with big side branches
+    current = "[-(60)F(0.9)]F(0.4)[+(60)F(0.9)]"
+  } else {
+    // Axiom D (25%): Three-way split from base
+    current = "[-(30)F(0.85)][F(0.6)][+(30)F(0.85)]"
+  }
 
   // Apply production rule for each iteration
+  let growthIndex = 0 // Track position for seeded randomness
+
   for (let i = 0; i < iterations; i++) {
     let next = ""
     let j = 0
@@ -143,8 +170,24 @@ function generateCoralLSystem(iterations: number): string {
         const closeIdx = current.indexOf(")", j)
         const thickness = parseFloat(current.substring(j + 2, closeIdx))
 
-        // Apply production rule: F(t) → F(t*0.85)[+(30)F(t*0.65)][-(35)F(t*0.65)]F(t*0.9)
-        next += `F(${thickness * 0.85})[+(30)F(${thickness * 0.65})][-(35)F(${thickness * 0.65})]F(${thickness * 0.9})`
+        // Use seeded random to select production rule
+        growthIndex++
+        const randomValue = seededRandom(seed, growthIndex)
+
+        // Apply stochastic production rules
+        if (randomValue < 0.6) {
+          // Rule A (60%): Normal balanced branching
+          next += `F(${thickness * 0.85})[+(30)F(${thickness * 0.65})][-(35)F(${thickness * 0.65})]F(${thickness * 0.9})`
+        } else if (randomValue < 0.85) {
+          // Rule B (25%): Dominant straight growth
+          next += `F(${thickness * 0.95})F(${thickness * 0.92})`
+        } else if (randomValue < 0.95) {
+          // Rule C (10%): Asymmetric branching (left branch dominant)
+          next += `F(${thickness * 0.85})[+(30)F(${thickness * 0.8})][-(35)F(${thickness * 0.5})]F(${thickness * 0.9})`
+        } else {
+          // Rule D (5%): Minimal growth
+          next += `F(${thickness * 0.9})`
+        }
 
         j = closeIdx + 1
       } else {
@@ -189,14 +232,12 @@ interface TurtleState {
  * - Branching via state stack ([ and ])
  * - Asymmetric angles for organic appearance
  * - Color variation based on depth
- * - Random branch dropout based on seed
  *
  * @param ctx - Canvas 2D context
  * @param commands - L-system result string with parameters
  * @param width - Canvas width
  * @param height - Canvas height
  * @param iteration - Current iteration (affects overall scale)
- * @param seed - Random seed for deterministic branch dropout
  */
 function drawCoral(
   ctx: CanvasRenderingContext2D,
@@ -204,7 +245,6 @@ function drawCoral(
   width: number,
   height: number,
   iteration: number,
-  seed: number,
 ) {
   // Calculate base line length
   const baseLength = Math.min(width, height) / 8
@@ -220,12 +260,6 @@ function drawCoral(
 
   // State stack for branching
   const stateStack: TurtleState[] = []
-
-  // Branch counter for seeded randomness
-  let branchIndex = 0
-
-  // Branch dropout probability (30% chance to drop a branch)
-  const dropoutProbability = 0.3
 
   // Process commands
   let i = 0
@@ -294,27 +328,11 @@ function drawCoral(
         break
       }
 
-      case "[": {
-        // Check if we should drop this branch using seeded random
-        branchIndex++
-        const randomValue = seededRandom(seed, branchIndex)
-
-        if (randomValue < dropoutProbability) {
-          // Drop this branch - skip to matching ]
-          let depth = 1
-          i++
-          while (i < commands.length && depth > 0) {
-            if (commands[i] === "[") depth++
-            if (commands[i] === "]") depth--
-            i++
-          }
-        } else {
-          // Keep this branch - push state
-          stateStack.push({ ...turtle })
-          i++
-        }
+      case "[":
+        // Push state (start branch)
+        stateStack.push({ ...turtle })
+        i++
         break
-      }
 
       case "]":
         // Pop state (end branch, return to saved position)
