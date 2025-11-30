@@ -29,6 +29,8 @@ import { ClientAccessList } from "@/components/Projects/ClientAccessList"
 import { EditProject } from "@/components/Projects/EditProject"
 import { DeleteProject } from "@/components/Projects/DeleteProject"
 import { ProjectTimeline } from "@/components/Projects/ProjectTimeline"
+import { AddComment } from "@/components/Projects/AddComment"
+import { CommentsList } from "@/components/Projects/CommentsList"
 
 export const Route = createFileRoute("/_layout/projects/$projectId")({
   component: ProjectDetail,
@@ -63,6 +65,21 @@ function ProjectDetail() {
   const { data: galleriesData } = useQuery({
     queryKey: ["projectGalleries", projectId],
     queryFn: () => GalleriesService.readGalleries({ projectId: projectId }),
+  })
+
+  // Fetch comments for this project
+  const { data: commentsData } = useQuery({
+    queryKey: ["projectComments", projectId],
+    queryFn: async () => {
+      const baseUrl = (import.meta.env.VITE_API_URL || "http://localhost:8000").replace(/\/$/, "")
+      const response = await fetch(`${baseUrl}/api/v1/comments/${projectId}`, {
+        headers: {
+          Authorization: `Bearer ${localStorage.getItem("access_token")}`,
+        },
+      })
+      if (!response.ok) return { data: [], count: 0 }
+      return response.json()
+    },
   })
 
   if (isLoading) {
@@ -163,7 +180,7 @@ function ProjectDetail() {
                 <FiMessageSquare size={20} />
                 <Box>
                   <Text fontSize="xs" color="fg.muted">Comments</Text>
-                  <Text fontWeight="semibold">0</Text>
+                  <Text fontWeight="semibold">{commentsData?.count || 0}</Text>
                 </Box>
               </Flex>
             </Card.Body>
@@ -254,6 +271,10 @@ function ProjectDetail() {
                 <ProjectTimeline project={project} />
               </Card.Body>
             </Card.Root>
+
+            {/* Comments Section - ADD THIS */}
+            <CommentsList projectId={projectId} />
+            
           </Stack>
 
           {/* Sidebar */}
@@ -322,17 +343,8 @@ function ProjectDetail() {
                       </Flex>
                     </Box>
                   )}
-                  <Box 
-                    p={3} 
-                    borderWidth="1px" 
-                    borderRadius="md"
-                    cursor="pointer"
-                    _hover={{ bg: "bg.subtle" }}
-                  >
-                    <Flex alignItems="center" gap={2}>
-                      <FiMessageSquare />
-                      <Text fontSize="sm">Add Comment</Text>
-                    </Flex>
+                  <Box borderWidth="1px" borderRadius="md">
+                    <AddComment projectId={projectId} />
                   </Box>
                   {currentUser?.user_type === "team_member" && (
                     <Box 

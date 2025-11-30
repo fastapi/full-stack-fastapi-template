@@ -10,6 +10,7 @@ from app.api.routes import (
     projects,
     users,
     utils,
+    comments,
 )
 from app.core.config import settings
 
@@ -27,12 +28,16 @@ api_router.include_router(
     project_access.router, prefix="/projects", tags=["project-access"]
 )
 
+api_router.include_router(comments.router, prefix="/comments", tags=["comments"])
+
 api_router.include_router(projects.router, prefix="/projects", tags=["projects"])
 
 api_router.include_router(
     invitations.router, prefix="/invitations", tags=["invitations"]
 )
+
 api_router.include_router(galleries.router, prefix="/galleries", tags=["galleries"])
+
 
 
 if settings.ENVIRONMENT == "local":

@@ -22,6 +22,8 @@ from app.models import (
     User,
     UserCreate,
     UserUpdate,
+    Comment,
+    CommentCreate,
 )
 
 
@@ -524,3 +526,62 @@ def get_dashboard_stats(
         team_members=team_members,
         completed_this_month=completed_this_month,
     )
+
+
+
+# ============================================================================
+# COMMENT CRUD
+# ============================================================================
+
+
+def create_comment(
+    *, session: Session, comment_in: CommentCreate, user_id: uuid.UUID
+) -> Comment:
+    """Create a new comment on a project"""
+    
+    db_obj = Comment.model_validate(comment_in, update={"user_id": user_id})
+    session.add(db_obj)
+    session.commit()
+    session.refresh(db_obj)
+    return db_obj
+
+
+def get_comments_by_project(
+    *, session: Session, project_id: uuid.UUID, skip: int = 0, limit: int = 100
+) -> list[Comment]:
+    """Get all comments for a project"""
+    
+    statement = (
+        select(Comment)
+        .where(Comment.project_id == project_id)
+        .offset(skip)
+        .limit(limit)
+        .order_by(Comment.created_at)
+    )
+    return list(session.exec(statement).all())
+
+
+def count_comments_by_project(*, session: Session, project_id: uuid.UUID) -> int:
+    """Count comments for a project"""
+    
+    statement = (
+        select(func.count())
+        .select_from(Comment)
+        .where(Comment.project_id == project_id)
+    )
+    return session.exec(statement).one()
+
+
+def get_comment(*, session: Session, comment_id: uuid.UUID) -> Comment | None:
+    """Get a single comment by ID"""
+    
+    return session.get(Comment, comment_id)
+
+
+def delete_comment(*, session: Session, comment_id: uuid.UUID) -> None:
+    """Delete a comment"""
+    
+    comment = session.get(Comment, comment_id)
+    if comment:
+        session.delete(comment)
+        session.commit()
