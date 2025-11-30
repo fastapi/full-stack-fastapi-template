@@ -90,25 +90,11 @@ jobs:
         ssh-keyscan -H ${{ secrets.EC2_HOST }} >> ~/.ssh/known_hosts
     
     - name: Deploy to EC2
-      env:
-        DOMAIN: ${{ secrets.DOMAIN_PRODUCTION }}
-        ENVIRONMENT: production
-        STACK_NAME: ${{ secrets.STACK_NAME_PRODUCTION }}
-        SECRET_KEY: ${{ secrets.SECRET_KEY }}
-        FIRST_SUPERUSER: ${{ secrets.FIRST_SUPERUSER }}
-        FIRST_SUPERUSER_PASSWORD: ${{ secrets.FIRST_SUPERUSER_PASSWORD }}
-        POSTGRES_PASSWORD: ${{ secrets.POSTGRES_PASSWORD }}
-        SMTP_HOST: ${{ secrets.SMTP_HOST }}
-        SMTP_USER: ${{ secrets.SMTP_USER }}
-        SMTP_PASSWORD: ${{ secrets.SMTP_PASSWORD }}
-        EMAILS_FROM_EMAIL: ${{ secrets.EMAILS_FROM_EMAIL }}
-        SENTRY_DSN: ${{ secrets.SENTRY_DSN }}
       run: |
         ssh ec2-user@${{ secrets.EC2_HOST }} 'bash -s' << 'ENDSSH'
         cd mosaic-project-cs4800 || cd mosaic-project-cs4800-main
         git pull origin main || git pull origin master
-        chmod +x scripts/deploy-traefik.sh
-        export DOMAIN="${{ secrets.DOMAIN_PRODUCTION }}"
+        chmod +x scripts/deploy-ip-based.sh
         export ENVIRONMENT=production
         export STACK_NAME="${{ secrets.STACK_NAME_PRODUCTION }}"
         export SECRET_KEY="${{ secrets.SECRET_KEY }}"
@@ -120,7 +106,7 @@ jobs:
         export SMTP_PASSWORD="${{ secrets.SMTP_PASSWORD }}"
         export EMAILS_FROM_EMAIL="${{ secrets.EMAILS_FROM_EMAIL }}"
         export SENTRY_DSN="${{ secrets.SENTRY_DSN }}"
-        ./scripts/deploy-traefik.sh
+        ./scripts/deploy-ip-based.sh ${{ secrets.EC2_HOST }}
         ENDSSH
     
     - name: Verify deployment
@@ -128,6 +114,6 @@ jobs:
         # Wait a bit for services to fully start
         sleep 10
         
-        # Test if the application is accessible (via Traefik/HTTPS)
-        curl -f https://api.${{ secrets.DOMAIN_PRODUCTION }}/api/v1/utils/health-check/ || echo "Backend not accessible"
-        curl -f https://dashboard.${{ secrets.DOMAIN_PRODUCTION }}/ || echo "Frontend not accessible"
+        # Test if the application is accessible (IP-based)
+        curl -f http://${{ secrets.EC2_HOST }}:8000/api/v1/utils/health-check/ || echo "Backend not accessible"
+        curl -f http://${{ secrets.EC2_HOST }}/ || echo "Frontend not accessible"
