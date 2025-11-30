@@ -251,11 +251,14 @@ class PhotoCreate(SQLModel):
     gallery_id: uuid.UUID
     filename: str = Field(min_length=1, max_length=255)
     url: str = Field(min_length=1, max_length=500)
+    file_size: int = Field(ge=0)  # File size in bytes
 
 
 class Photo(PhotoBase, table=True):
     id: uuid.UUID = Field(default_factory=uuid.uuid4, primary_key=True)
     created_at: datetime = Field(default_factory=datetime.utcnow)
+    uploaded_at: datetime = Field(default_factory=datetime.utcnow)  # When photo was uploaded
+    file_size: int = Field(default=0, ge=0)  # File size in bytes
     gallery_id: uuid.UUID = Field(
         foreign_key="gallery.id", nullable=False, ondelete="CASCADE"
     )
@@ -264,6 +267,8 @@ class Photo(PhotoBase, table=True):
 class PhotoPublic(PhotoBase):
     id: uuid.UUID
     created_at: datetime
+    uploaded_at: datetime
+    file_size: int
     gallery_id: uuid.UUID
 
 

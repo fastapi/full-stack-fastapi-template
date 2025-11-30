@@ -225,6 +225,7 @@ async def upload_gallery_photos(
             target_path = storage_dir / f"{stem}-{counter}{ext}"
             counter += 1
         content = await uf.read()
+        file_size = len(content)  # Get file size in bytes
         with open(target_path, "wb") as out:
             out.write(content)
 
@@ -236,6 +237,7 @@ async def upload_gallery_photos(
                 gallery_id=id,
                 filename=rel_filename,
                 url=f"/api/v1/galleries/{id}/photos/files/{rel_filename}",
+                file_size=file_size,
             ),
         )
         saved.append(photo)

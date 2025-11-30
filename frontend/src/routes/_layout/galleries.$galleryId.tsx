@@ -92,9 +92,18 @@ function GalleryDetail() {
         },
       })
       if (!res.ok) throw new Error("Failed to load photos")
-      const data = await res.json() as { data: { id: string; filename: string; url: string }[]; count: number }
+      const data = await res.json() as { 
+        data: { 
+          id: string; 
+          filename: string; 
+          url: string; 
+          file_size: number; 
+          uploaded_at: string;
+        }[]; 
+        count: number 
+      }
       // Convert relative URLs to absolute URLs
-      data.data = data.data.map((photo: { id: string; filename: string; url: string }) => ({
+      data.data = data.data.map((photo) => ({
         ...photo,
         url: photo.url.startsWith("http") ? photo.url : `${OpenAPI.BASE}${photo.url}`,
       }))
@@ -202,6 +211,32 @@ function GalleryDetail() {
 
   const onSelectToggle = (id: string) => {
     setSelected((prev: Record<string, boolean>) => ({ ...prev, [id]: !prev[id] }))
+  }
+
+  // Format file size for display
+  const formatFileSize = (bytes: number): string => {
+    if (bytes === 0) return "0 Bytes"
+    const k = 1024
+    const sizes = ["Bytes", "KB", "MB", "GB"]
+    const i = Math.floor(Math.log(bytes) / Math.log(k))
+    return Math.round((bytes / Math.pow(k, i)) * 100) / 100 + " " + sizes[i]
+  }
+
+  // Format date for display
+  const formatDate = (dateString: string | undefined): string => {
+    if (!dateString) return "Unknown"
+    try {
+      const date = new Date(dateString)
+      return date.toLocaleDateString("en-US", {
+        year: "numeric",
+        month: "long",
+        day: "numeric",
+        hour: "2-digit",
+        minute: "2-digit",
+      })
+    } catch {
+      return "Unknown"
+    }
   }
 
   const onDownloadAll = () => {
@@ -445,14 +480,28 @@ function GalleryDetail() {
                       ›
                     </Button>
                   </Box>
-                  <Box> {/* TODO: Add file size and date added */ }
-                    <Text fontWeight="bold">Filename: {photos[currentPhotoIndex].filename}</Text>
-                    <Text>
-                      Size: unknown (file size is not tracked in the database)
-                    </Text>
-                    <Text>
-                      Date added: {gallery.date ?? "Unknown"}
-                    </Text>
+                  <Box>
+                    <Stack gap={2}>
+                      <Text fontWeight="bold">Filename: {photos[currentPhotoIndex].filename}</Text>
+                      <Text>
+                        Size: {photos[currentPhotoIndex].file_size 
+                          ? formatFileSize(photos[currentPhotoIndex].file_size) 
+                          : "Unknown"}
+                      </Text>
+                      <Text>
+                        Date uploaded: {formatDate(photos[currentPhotoIndex].uploaded_at)}
+                      </Text>
+                      <Flex alignItems="center" gap={2} mt={2}>
+                        <Checkbox
+                          checked={!!selected[photos[currentPhotoIndex].id]}
+                          onCheckedChange={() => {
+                            onSelectToggle(photos[currentPhotoIndex].id)
+                          }}
+                        >
+                          Select this photo
+                        </Checkbox>
+                      </Flex>
+                    </Stack>
                   </Box>
                 </Stack>
               )}
@@ -478,7 +527,7 @@ function GalleryDetail() {
               }}
               gap={4}
             >
-              {photos.map((p: { id: string; filename: string; url: string }, index: number) => (
+              {photos.map((p: { id: string; filename: string; url: string; file_size?: number; uploaded_at?: string }, index: number) => (
                 <Box
                   key={p.id}
                   position="relative"
@@ -489,7 +538,14 @@ function GalleryDetail() {
                   alignItems="center"
                   justifyContent="center"
                   overflow="hidden"
-                  onClick={() => openLightboxAt(index)}
+                  onClick={(e: React.MouseEvent<HTMLDivElement>) => {
+                    // Don't open dialog if clicking on checkbox
+                    const target = e.target as HTMLElement
+                    if (target.closest('[role="checkbox"]') || target.closest('input[type="checkbox"]')) {
+                      return
+                    }
+                    openLightboxAt(index)
+                  }}
                   cursor="pointer"
                 >
                   <img
@@ -497,10 +553,23 @@ function GalleryDetail() {
                     alt={p.filename}
                     style={{ width: "100%", height: "100%", objectFit: "cover" }}
                   />
-                  <Box position="absolute" top="8px" left="8px" bg="whiteAlpha.800" borderRadius="md" p={1}>
+                  <Box 
+                    position="absolute" 
+                    top="8px" 
+                    left="8px" 
+                    bg="whiteAlpha.800" 
+                    borderRadius="md" 
+                    p={1}
+                    onClick={(e: React.MouseEvent<HTMLDivElement>) => {
+                      // Stop propagation so clicking checkbox doesn't open dialog
+                      e.stopPropagation()
+                    }}
+                  >
                     <Checkbox
                       checked={!!selected[p.id]}
-                      onCheckedChange={() => onSelectToggle(p.id)}
+                      onCheckedChange={() => {
+                        onSelectToggle(p.id)
+                      }}
                     >
                       Select
                     </Checkbox>
