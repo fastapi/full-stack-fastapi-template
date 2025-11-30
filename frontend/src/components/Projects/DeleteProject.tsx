@@ -1,19 +1,19 @@
-import { useState } from "react"
-import {
-  DialogRoot,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-  DialogBody,
-  DialogFooter,
-  DialogCloseTrigger,
-} from "@/components/ui/dialog"
-import { Button } from "@/components/ui/button"
 import { Text } from "@chakra-ui/react"
 import { useMutation, useQueryClient } from "@tanstack/react-query"
-import { ProjectsService, type ProjectPublic } from "@/client"
-import { FiTrash2 } from "react-icons/fi"
 import { useNavigate } from "@tanstack/react-router"
+import { useState } from "react"
+import { FiTrash2 } from "react-icons/fi"
+import { type ProjectPublic, ProjectsService } from "@/client"
+import { Button } from "@/components/ui/button"
+import {
+  DialogBody,
+  DialogCloseTrigger,
+  DialogContent,
+  DialogFooter,
+  DialogHeader,
+  DialogRoot,
+  DialogTitle,
+} from "@/components/ui/dialog"
 import useCustomToast from "@/hooks/useCustomToast"
 
 interface DeleteProjectProps {
@@ -39,7 +39,8 @@ export function DeleteProject({ project }: DeleteProjectProps) {
       navigate({ to: "/dashboard" })
     },
     onError: (error: any) => {
-      const message = error?.body?.detail || error?.message || "Failed to delete project"
+      const message =
+        error?.body?.detail || error?.message || "Failed to delete project"
       showErrorToast(message)
     },
   })
@@ -50,11 +51,7 @@ export function DeleteProject({ project }: DeleteProjectProps) {
 
   return (
     <DialogRoot open={open} onOpenChange={(e) => setOpen(e.open)}>
-      <Button
-        onClick={() => setOpen(true)}
-        colorScheme="red"
-        variant="outline"
-      >
+      <Button onClick={() => setOpen(true)} colorScheme="red" variant="outline">
         <FiTrash2 />
         Delete Project
       </Button>
@@ -67,8 +64,9 @@ export function DeleteProject({ project }: DeleteProjectProps) {
 
         <DialogBody>
           <Text>
-            Are you sure you want to delete <strong>{project.name}</strong>? This action cannot be undone.
-            All galleries and photos associated with this project will also be deleted.
+            Are you sure you want to delete <strong>{project.name}</strong>?
+            This action cannot be undone. All galleries and photos associated
+            with this project will also be deleted.
           </Text>
         </DialogBody>
 
@@ -88,4 +86,3 @@ export function DeleteProject({ project }: DeleteProjectProps) {
     </DialogRoot>
   )
 }
-

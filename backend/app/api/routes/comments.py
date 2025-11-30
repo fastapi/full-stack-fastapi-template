@@ -7,8 +7,8 @@ from app import crud
 from app.api.deps import CurrentUser, SessionDep
 from app.models import (
     CommentCreate,
-    CommentsPublic,
     CommentPublic,
+    CommentsPublic,
     CommentWithUser,
     Message,
     UserPublic,
@@ -81,18 +81,20 @@ def read_project_comments(
     comments = crud.get_comments_by_project(
         session=session, project_id=project_id, skip=skip, limit=limit
     )
-    
+
     # Attach user info to each comment
     from app.models import User
-    
+
     comments_with_user = []
     for comment in comments:
         user = session.get(User, comment.user_id)  # ← Use User, not UserPublic
         if user:
             comment_dict = comment.model_dump()
-            comment_dict["user"] = UserPublic.model_validate(user)  # Convert to UserPublic
+            comment_dict["user"] = UserPublic.model_validate(
+                user
+            )  # Convert to UserPublic
             comments_with_user.append(CommentWithUser(**comment_dict))
-    
+
     return CommentsPublic(data=comments_with_user, count=len(comments_with_user))
 
 
@@ -111,7 +113,9 @@ def delete_comment(
 
     # Only the author can delete their comment
     if comment.user_id != current_user.id:
-        raise HTTPException(status_code=403, detail="You can only delete your own comments")
+        raise HTTPException(
+            status_code=403, detail="You can only delete your own comments"
+        )
 
     crud.delete_comment(session=session, comment_id=comment_id)
     return Message(message="Comment deleted successfully")

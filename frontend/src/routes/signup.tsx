@@ -1,11 +1,18 @@
-import { Container, Heading, Input, NativeSelectRoot, NativeSelectField, Text } from "@chakra-ui/react"
+import {
+  Container,
+  Heading,
+  Input,
+  NativeSelectField,
+  NativeSelectRoot,
+  Text,
+} from "@chakra-ui/react"
 import {
   createFileRoute,
   Link as RouterLink,
   redirect,
 } from "@tanstack/react-router"
 import { type SubmitHandler, useForm } from "react-hook-form"
-import { FiLock, FiUser, FiMail } from "react-icons/fi"
+import { FiLock, FiMail, FiUser } from "react-icons/fi"
 
 import type { UserRegister } from "@/client"
 import { Button } from "@/components/ui/button"
@@ -79,10 +86,7 @@ function SignUp() {
         </Text>
       </div>
 
-      <Field
-        invalid={!!errors.full_name}
-        errorText={errors.full_name?.message}
-      >
+      <Field invalid={!!errors.full_name} errorText={errors.full_name?.message}>
         <InputGroup w="100%" startElement={<FiUser />}>
           <Input
             minLength={3}
@@ -110,7 +114,10 @@ function SignUp() {
 
       <Field label="Account Type">
         <NativeSelectRoot>
-          <NativeSelectField {...register("user_type")} defaultValue="team_member">
+          <NativeSelectField
+            {...register("user_type")}
+            defaultValue="team_member"
+          >
             <option value="team_member">Team Member</option>
             <option value="client">Client</option>
           </NativeSelectField>

@@ -103,7 +103,13 @@ function TeamLogin() {
       <RouterLink to="/recover-password" className="main-link">
         Forgot Password?
       </RouterLink>
-      <Button variant="solid" colorScheme="blue" type="submit" loading={isSubmitting} size="md">
+      <Button
+        variant="solid"
+        colorScheme="blue"
+        type="submit"
+        loading={isSubmitting}
+        size="md"
+      >
         Log In
       </Button>
       <Text>

@@ -16,9 +16,9 @@ import { createFileRoute, Link } from "@tanstack/react-router"
 import { FiCalendar, FiFolder } from "react-icons/fi"
 import { z } from "zod"
 
-import { ProjectsService, type ProjectPublic } from "@/client"
-import useAuth from "@/hooks/useAuth"
+import { type ProjectPublic, ProjectsService } from "@/client"
 import { CreateProject } from "@/components/Projects/CreateProject"
+import useAuth from "@/hooks/useAuth"
 
 const projectsSearchSchema = z.object({
   page: z.number().catch(1),
@@ -29,7 +29,10 @@ const PER_PAGE = 10
 function getProjectsQueryOptions({ page }: { page: number }) {
   return {
     queryFn: () =>
-      ProjectsService.readProjects({ skip: (page - 1) * PER_PAGE, limit: PER_PAGE }),
+      ProjectsService.readProjects({
+        skip: (page - 1) * PER_PAGE,
+        limit: PER_PAGE,
+      }),
     queryKey: ["projects", { page }],
   }
 }
@@ -55,7 +58,10 @@ function getStatusColor(status: string) {
 }
 
 function getStatusLabel(status: string) {
-  return status.split("_").map(word => word.charAt(0).toUpperCase() + word.slice(1)).join(" ")
+  return status
+    .split("_")
+    .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
+    .join(" ")
 }
 
 function ProjectsTable() {
@@ -84,7 +90,7 @@ function ProjectsTable() {
           <VStack textAlign="center">
             <EmptyState.Title>No projects yet</EmptyState.Title>
             <EmptyState.Description>
-              {isClient 
+              {isClient
                 ? "You don't have any projects yet. Please wait for your team to add you to a project."
                 : "Create your first project to get started"}
             </EmptyState.Description>
@@ -95,62 +101,63 @@ function ProjectsTable() {
   }
 
   return (
-    <>
-      <Table.Root size={{ base: "sm", md: "md" }}>
-        <Table.Header>
-          <Table.Row>
-            <Table.ColumnHeader>Project Name</Table.ColumnHeader>
-            <Table.ColumnHeader>Client</Table.ColumnHeader>
-            <Table.ColumnHeader>Status</Table.ColumnHeader>
-            <Table.ColumnHeader>Deadline</Table.ColumnHeader>
-            <Table.ColumnHeader>Progress</Table.ColumnHeader>
-          </Table.Row>
-        </Table.Header>
-        <Table.Body>
-          {projects.map((project: ProjectPublic) => (
-            <Table.Row
-              key={project.id}
-              opacity={isPlaceholderData ? 0.5 : 1}
-              _hover={{ bg: "bg.subtle", cursor: "pointer" }}
-            >
-              <Table.Cell>
-                <Link
-                  to="/projects/$projectId"
-                  params={{ projectId: project.id }}
-                  style={{ textDecoration: "none", color: "inherit" }}
-                >
-                  <Text fontWeight="semibold">{project.name}</Text>
-                </Link>
-              </Table.Cell>
-              <Table.Cell>
+    <Table.Root size={{ base: "sm", md: "md" }}>
+      <Table.Header>
+        <Table.Row>
+          <Table.ColumnHeader>Project Name</Table.ColumnHeader>
+          <Table.ColumnHeader>Client</Table.ColumnHeader>
+          <Table.ColumnHeader>Status</Table.ColumnHeader>
+          <Table.ColumnHeader>Deadline</Table.ColumnHeader>
+          <Table.ColumnHeader>Progress</Table.ColumnHeader>
+        </Table.Row>
+      </Table.Header>
+      <Table.Body>
+        {projects.map((project: ProjectPublic) => (
+          <Table.Row
+            key={project.id}
+            opacity={isPlaceholderData ? 0.5 : 1}
+            _hover={{ bg: "bg.subtle", cursor: "pointer" }}
+          >
+            <Table.Cell>
+              <Link
+                to="/projects/$projectId"
+                params={{ projectId: project.id }}
+                style={{ textDecoration: "none", color: "inherit" }}
+              >
+                <Text fontWeight="semibold">{project.name}</Text>
+              </Link>
+            </Table.Cell>
+            <Table.Cell>
+              <Text fontSize="sm" color="fg.muted">
+                {project.client_name}
+              </Text>
+            </Table.Cell>
+            <Table.Cell>
+              <Badge colorScheme={getStatusColor(project.status || "pending")}>
+                {getStatusLabel(project.status || "pending")}
+              </Badge>
+            </Table.Cell>
+            <Table.Cell>
+              {project.deadline ? (
+                <Flex alignItems="center" gap={1}>
+                  <FiCalendar size={14} />
+                  <Text fontSize="sm">{project.deadline}</Text>
+                </Flex>
+              ) : (
                 <Text fontSize="sm" color="fg.muted">
-                  {project.client_name}
+                  —
                 </Text>
-              </Table.Cell>
-              <Table.Cell>
-                <Badge colorScheme={getStatusColor(project.status || 'pending')}>
-                  {getStatusLabel(project.status || 'pending')}
-                </Badge>
-              </Table.Cell>
-              <Table.Cell>
-                {project.deadline ? (
-                  <Flex alignItems="center" gap={1}>
-                    <FiCalendar size={14} />
-                    <Text fontSize="sm">{project.deadline}</Text>
-                  </Flex>
-                ) : (
-                  <Text fontSize="sm" color="fg.muted">—</Text>
-                )}
-              </Table.Cell>
-              <Table.Cell>
-                <Flex alignItems="center" gap={2}>
-                  <Box
-                    w="100px"
-                    h="6px"
-                    bg="bg.muted"
-                    borderRadius="full"
-                    overflow="hidden"
-                  >
+              )}
+            </Table.Cell>
+            <Table.Cell>
+              <Flex alignItems="center" gap={2}>
+                <Box
+                  w="100px"
+                  h="6px"
+                  bg="bg.muted"
+                  borderRadius="full"
+                  overflow="hidden"
+                >
                   <Box
                     h="100%"
                     w={`${project.progress || 0}%`}
@@ -158,8 +165,8 @@ function ProjectsTable() {
                       (project.progress || 0) === 100
                         ? "green.500"
                         : (project.progress || 0) >= 50
-                        ? "blue.500"
-                        : "orange.500"
+                          ? "blue.500"
+                          : "orange.500"
                     }
                     transition="width 0.3s"
                   />
@@ -167,13 +174,12 @@ function ProjectsTable() {
                 <Text fontSize="sm" fontWeight="semibold">
                   {project.progress || 0}%
                 </Text>
-                </Flex>
-              </Table.Cell>
-            </Table.Row>
-          ))}
-        </Table.Body>
-      </Table.Root>
-    </>
+              </Flex>
+            </Table.Cell>
+          </Table.Row>
+        ))}
+      </Table.Body>
+    </Table.Root>
   )
 }
 

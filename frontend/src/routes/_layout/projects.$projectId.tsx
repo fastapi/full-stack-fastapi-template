@@ -1,36 +1,36 @@
-import { 
-  Badge, 
-  Box, 
-  Card, 
-  Container, 
-  Flex, 
-  Grid, 
-  Heading, 
-  HStack, 
-  Stack, 
-  Text,
-  Separator,
+import {
+  Badge,
+  Box,
+  Card,
+  Container,
+  Flex,
+  Grid,
+  Heading,
+  HStack,
   IconButton,
+  Separator,
+  Stack,
+  Text,
 } from "@chakra-ui/react"
 import { useQuery } from "@tanstack/react-query"
 import { createFileRoute, Link } from "@tanstack/react-router"
-import { 
-  FiArrowLeft, 
-  FiCalendar, 
-  FiImage, 
-  FiMessageSquare, 
+import {
+  FiArrowLeft,
+  FiCalendar,
+  FiImage,
+  FiMessageSquare,
   FiUsers,
 } from "react-icons/fi"
 
-import { ProjectsService, GalleriesService } from "@/client"
-import useAuth from "@/hooks/useAuth"
-import { InviteClient } from "@/components/Projects/InviteClient"
-import { ClientAccessList } from "@/components/Projects/ClientAccessList"
-import { EditProject } from "@/components/Projects/EditProject"
-import { DeleteProject } from "@/components/Projects/DeleteProject"
-import { ProjectTimeline } from "@/components/Projects/ProjectTimeline"
+import { GalleriesService, ProjectsService } from "@/client"
 import { AddComment } from "@/components/Projects/AddComment"
+import { ClientAccessList } from "@/components/Projects/ClientAccessList"
 import { CommentsList } from "@/components/Projects/CommentsList"
+import { DeleteProject } from "@/components/Projects/DeleteProject"
+import { EditProject } from "@/components/Projects/EditProject"
+import { InviteClient } from "@/components/Projects/InviteClient"
+import { ProjectTimeline } from "@/components/Projects/ProjectTimeline"
+import useAuth from "@/hooks/useAuth"
 
 export const Route = createFileRoute("/_layout/projects/$projectId")({
   component: ProjectDetail,
@@ -38,23 +38,32 @@ export const Route = createFileRoute("/_layout/projects/$projectId")({
 
 function getStatusColor(status: string) {
   switch (status) {
-    case "planning": return "blue"
-    case "in_progress": return "orange"
-    case "review": return "purple"
-    case "completed": return "green"
-    case "pending": return "gray"
-    default: return "gray"
+    case "planning":
+      return "blue"
+    case "in_progress":
+      return "orange"
+    case "review":
+      return "purple"
+    case "completed":
+      return "green"
+    case "pending":
+      return "gray"
+    default:
+      return "gray"
   }
 }
 
 function getStatusLabel(status: string) {
-  return status.split("_").map(word => word.charAt(0).toUpperCase() + word.slice(1)).join(" ")
+  return status
+    .split("_")
+    .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
+    .join(" ")
 }
 
 function ProjectDetail() {
   const { projectId } = Route.useParams()
   const { user: currentUser } = useAuth()
-  
+
   // Fetch project from backend
   const { data: project, isLoading } = useQuery({
     queryKey: ["project", projectId],
@@ -71,7 +80,9 @@ function ProjectDetail() {
   const { data: commentsData } = useQuery({
     queryKey: ["projectComments", projectId],
     queryFn: async () => {
-      const baseUrl = (import.meta.env.VITE_API_URL || "http://localhost:8000").replace(/\/$/, "")
+      const baseUrl = (
+        import.meta.env.VITE_API_URL || "http://localhost:8000"
+      ).replace(/\/$/, "")
       const response = await fetch(`${baseUrl}/api/v1/comments/${projectId}`, {
         headers: {
           Authorization: `Bearer ${localStorage.getItem("access_token")}`,
@@ -102,7 +113,7 @@ function ProjectDetail() {
   }
 
   const galleries = galleriesData?.data || []
-  
+
   // Get the project's gallery (should only be one per project)
   const projectGallery = galleries.length > 0 ? galleries[0] : null
 
@@ -140,8 +151,11 @@ function ProjectDetail() {
                     <InviteClient projectId={projectId} />
                   </>
                 )}
-                <Badge size="lg" colorScheme={getStatusColor(project.status || 'pending')}>
-                  {getStatusLabel(project.status || 'pending')}
+                <Badge
+                  size="lg"
+                  colorScheme={getStatusColor(project.status || "pending")}
+                >
+                  {getStatusLabel(project.status || "pending")}
                 </Badge>
               </Flex>
             </Flex>
@@ -155,8 +169,12 @@ function ProjectDetail() {
               <Flex alignItems="center" gap={3}>
                 <FiCalendar size={20} />
                 <Box>
-                  <Text fontSize="xs" color="fg.muted">Deadline</Text>
-                  <Text fontWeight="semibold">{project.deadline || "Not set"}</Text>
+                  <Text fontSize="xs" color="fg.muted">
+                    Deadline
+                  </Text>
+                  <Text fontWeight="semibold">
+                    {project.deadline || "Not set"}
+                  </Text>
                 </Box>
               </Flex>
             </Card.Body>
@@ -167,8 +185,12 @@ function ProjectDetail() {
               <Flex alignItems="center" gap={3}>
                 <FiImage size={20} />
                 <Box>
-                  <Text fontSize="xs" color="fg.muted">Gallery Photos</Text>
-                  <Text fontWeight="semibold">{projectGallery?.photo_count || 0}</Text>
+                  <Text fontSize="xs" color="fg.muted">
+                    Gallery Photos
+                  </Text>
+                  <Text fontWeight="semibold">
+                    {projectGallery?.photo_count || 0}
+                  </Text>
                 </Box>
               </Flex>
             </Card.Body>
@@ -179,7 +201,9 @@ function ProjectDetail() {
               <Flex alignItems="center" gap={3}>
                 <FiMessageSquare size={20} />
                 <Box>
-                  <Text fontSize="xs" color="fg.muted">Comments</Text>
+                  <Text fontSize="xs" color="fg.muted">
+                    Comments
+                  </Text>
                   <Text fontWeight="semibold">{commentsData?.count || 0}</Text>
                 </Box>
               </Flex>
@@ -191,7 +215,9 @@ function ProjectDetail() {
               <Flex alignItems="center" gap={3}>
                 <FiUsers size={20} />
                 <Box>
-                  <Text fontSize="xs" color="fg.muted">Progress</Text>
+                  <Text fontSize="xs" color="fg.muted">
+                    Progress
+                  </Text>
                   <Text fontWeight="semibold">{project.progress}%</Text>
                 </Box>
               </Flex>
@@ -212,35 +238,45 @@ function ProjectDetail() {
                   {project.description && (
                     <>
                       <Box>
-                        <Text fontWeight="semibold" mb={2}>Description</Text>
+                        <Text fontWeight="semibold" mb={2}>
+                          Description
+                        </Text>
                         <Text>{project.description}</Text>
                       </Box>
                       <Separator />
                     </>
                   )}
-                  
+
                   {project.budget && (
                     <>
                       <Box>
-                        <Text fontWeight="semibold" mb={2}>Budget</Text>
+                        <Text fontWeight="semibold" mb={2}>
+                          Budget
+                        </Text>
                         <Text>{project.budget}</Text>
                       </Box>
                       <Separator />
                     </>
                   )}
-                  
+
                   <Box>
-                    <Text fontWeight="semibold" mb={2}>Project Timeline</Text>
+                    <Text fontWeight="semibold" mb={2}>
+                      Project Timeline
+                    </Text>
                     <Stack gap={2}>
                       {project.start_date && (
                         <Flex alignItems="center" gap={2}>
-                          <Text fontSize="sm" color="fg.muted">Start Date:</Text>
+                          <Text fontSize="sm" color="fg.muted">
+                            Start Date:
+                          </Text>
                           <Text fontSize="sm">{project.start_date}</Text>
                         </Flex>
                       )}
                       {project.deadline && (
                         <Flex alignItems="center" gap={2}>
-                          <Text fontSize="sm" color="fg.muted">Deadline:</Text>
+                          <Text fontSize="sm" color="fg.muted">
+                            Deadline:
+                          </Text>
                           <Text fontSize="sm">{project.deadline}</Text>
                         </Flex>
                       )}
@@ -250,15 +286,21 @@ function ProjectDetail() {
                   <Separator />
 
                   <Box>
-                    <Text fontWeight="semibold" mb={2}>Gallery</Text>
+                    <Text fontWeight="semibold" mb={2}>
+                      Gallery
+                    </Text>
                     {projectGallery ? (
                       <Flex alignItems="center" gap={2}>
                         <FiImage size={14} />
                         <Text fontSize="sm">{projectGallery.name}</Text>
-                        <Badge size="sm" colorScheme="blue">{projectGallery.photo_count || 0} photos</Badge>
+                        <Badge size="sm" colorScheme="blue">
+                          {projectGallery.photo_count || 0} photos
+                        </Badge>
                       </Flex>
                     ) : (
-                      <Text fontSize="sm" color="fg.muted">No gallery yet</Text>
+                      <Text fontSize="sm" color="fg.muted">
+                        No gallery yet
+                      </Text>
                     )}
                   </Box>
                 </Stack>
@@ -274,7 +316,6 @@ function ProjectDetail() {
 
             {/* Comments Section - ADD THIS */}
             <CommentsList projectId={projectId} />
-            
           </Stack>
 
           {/* Sidebar */}
@@ -287,20 +328,28 @@ function ProjectDetail() {
               <Card.Body>
                 <Stack gap={3}>
                   <Box>
-                    <Text fontSize="xs" color="fg.muted" mb={1}>Created</Text>
-                    <Text fontSize="sm">{new Date(project.created_at).toLocaleDateString()}</Text>
+                    <Text fontSize="xs" color="fg.muted" mb={1}>
+                      Created
+                    </Text>
+                    <Text fontSize="sm">
+                      {new Date(project.created_at).toLocaleDateString()}
+                    </Text>
                   </Box>
                   <Box>
-                    <Text fontSize="xs" color="fg.muted" mb={1}>Last Updated</Text>
-                    <Text fontSize="sm">{new Date(project.updated_at).toLocaleDateString()}</Text>
+                    <Text fontSize="xs" color="fg.muted" mb={1}>
+                      Last Updated
+                    </Text>
+                    <Text fontSize="sm">
+                      {new Date(project.updated_at).toLocaleDateString()}
+                    </Text>
                   </Box>
                 </Stack>
               </Card.Body>
             </Card.Root>
 
             {/* Client Access List */}
-            <ClientAccessList 
-              projectId={projectId} 
+            <ClientAccessList
+              projectId={projectId}
               isTeamMember={currentUser?.user_type === "team_member"}
             />
 
@@ -312,14 +361,14 @@ function ProjectDetail() {
               <Card.Body>
                 <Stack gap={2}>
                   {projectGallery ? (
-                    <Link 
-                      to="/galleries/$galleryId" 
+                    <Link
+                      to="/galleries/$galleryId"
                       params={{ galleryId: projectGallery.id }}
                       style={{ textDecoration: "none", color: "inherit" }}
                     >
-                      <Box 
-                        p={3} 
-                        borderWidth="1px" 
+                      <Box
+                        p={3}
+                        borderWidth="1px"
                         borderRadius="md"
                         cursor="pointer"
                         _hover={{ bg: "bg.subtle" }}
@@ -331,9 +380,9 @@ function ProjectDetail() {
                       </Box>
                     </Link>
                   ) : (
-                    <Box 
-                      p={3} 
-                      borderWidth="1px" 
+                    <Box
+                      p={3}
+                      borderWidth="1px"
                       borderRadius="md"
                       opacity={0.5}
                     >
@@ -347,9 +396,9 @@ function ProjectDetail() {
                     <AddComment projectId={projectId} />
                   </Box>
                   {currentUser?.user_type === "team_member" && (
-                    <Box 
-                      p={3} 
-                      borderWidth="1px" 
+                    <Box
+                      p={3}
+                      borderWidth="1px"
                       borderRadius="md"
                       cursor="pointer"
                       _hover={{ bg: "bg.subtle" }}

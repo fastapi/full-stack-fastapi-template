@@ -1,5 +1,5 @@
-import { Box, Text, Flex, Badge } from "@chakra-ui/react"
-import { type ProjectPublic } from "@/client"
+import { Badge, Box, Flex, Text } from "@chakra-ui/react"
+import type { ProjectPublic } from "@/client"
 
 interface ProjectTimelineProps {
   project: ProjectPublic

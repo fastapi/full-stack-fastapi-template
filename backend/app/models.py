@@ -257,7 +257,9 @@ class PhotoCreate(SQLModel):
 class Photo(PhotoBase, table=True):
     id: uuid.UUID = Field(default_factory=uuid.uuid4, primary_key=True)
     created_at: datetime = Field(default_factory=datetime.utcnow)
-    uploaded_at: datetime = Field(default_factory=datetime.utcnow)  # When photo was uploaded
+    uploaded_at: datetime = Field(
+        default_factory=datetime.utcnow
+    )  # When photo was uploaded
     file_size: int = Field(default=0, ge=0)  # File size in bytes
     gallery_id: uuid.UUID = Field(
         foreign_key="gallery.id", nullable=False, ondelete="CASCADE"
@@ -275,6 +277,7 @@ class PhotoPublic(PhotoBase):
 class PhotosPublic(SQLModel):
     data: list[PhotoPublic]
     count: int
+
 
 # ============================================================================
 # PROJECT ACCESS (Client Invitations)
@@ -403,7 +406,6 @@ class ProjectInvitationPublic(ProjectInvitationBase):
     id: uuid.UUID
     created_at: datetime
     project_id: uuid.UUID
-
 
 
 # ============================================================================

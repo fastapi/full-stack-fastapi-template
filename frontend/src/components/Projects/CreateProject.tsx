@@ -1,22 +1,27 @@
+import {
+  Input,
+  NativeSelectField,
+  NativeSelectRoot,
+  Textarea,
+} from "@chakra-ui/react"
+import { useMutation, useQueryClient } from "@tanstack/react-query"
 import { useState } from "react"
 import { useForm } from "react-hook-form"
-import {
-  DialogRoot,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-  DialogBody,
-  DialogFooter,
-  DialogCloseTrigger,
-} from "@/components/ui/dialog"
-import { Button } from "@/components/ui/button"
-import { Field } from "@/components/ui/field"
-import { Input, Textarea, NativeSelectRoot, NativeSelectField } from "@chakra-ui/react"
-import { useMutation, useQueryClient } from "@tanstack/react-query"
-import { ProjectsService, type ProjectCreate } from "@/client"
 import { FiPlus } from "react-icons/fi"
-import useCustomToast from "@/hooks/useCustomToast"
+import { type ProjectCreate, ProjectsService } from "@/client"
+import { Button } from "@/components/ui/button"
+import {
+  DialogBody,
+  DialogCloseTrigger,
+  DialogContent,
+  DialogFooter,
+  DialogHeader,
+  DialogRoot,
+  DialogTitle,
+} from "@/components/ui/dialog"
+import { Field } from "@/components/ui/field"
 import useAuth from "@/hooks/useAuth"
+import useCustomToast from "@/hooks/useCustomToast"
 
 export function CreateProject() {
   const [open, setOpen] = useState(false)
@@ -49,7 +54,7 @@ export function CreateProject() {
       if (!currentUser?.organization_id) {
         throw new Error("No organization assigned. Please contact support.")
       }
-      
+
       return await ProjectsService.createProject({
         requestBody: {
           ...data,
@@ -68,7 +73,7 @@ export function CreateProject() {
     },
     onError: (error: any) => {
       let message = "Failed to create project"
-      
+
       if (error?.body?.detail) {
         if (Array.isArray(error.body.detail)) {
           // Handle validation errors (422)
@@ -79,7 +84,7 @@ export function CreateProject() {
       } else if (error?.message) {
         message = error.message
       }
-      
+
       showErrorToast(message)
     },
   })
@@ -99,10 +104,7 @@ export function CreateProject() {
 
   return (
     <DialogRoot open={open} onOpenChange={(e) => setOpen(e.open)} size="lg">
-      <Button
-        onClick={() => setOpen(true)}
-        colorScheme="blue"
-      >
+      <Button onClick={() => setOpen(true)} colorScheme="blue">
         <FiPlus />
         New Project
       </Button>
@@ -115,10 +117,14 @@ export function CreateProject() {
 
         <form onSubmit={handleSubmit(onSubmit)}>
           <DialogBody>
-            <div style={{ display: "flex", flexDirection: "column", gap: "16px" }}>
+            <div
+              style={{ display: "flex", flexDirection: "column", gap: "16px" }}
+            >
               <Field label="Project Name" required invalid={!!errors.name}>
                 <Input
-                  {...register("name", { required: "Project name is required" })}
+                  {...register("name", {
+                    required: "Project name is required",
+                  })}
                   placeholder="Enter project name"
                 />
               </Field>
@@ -131,9 +137,15 @@ export function CreateProject() {
                 />
               </Field>
 
-              <Field label="Client Name" required invalid={!!errors.client_name}>
+              <Field
+                label="Client Name"
+                required
+                invalid={!!errors.client_name}
+              >
                 <Input
-                  {...register("client_name", { required: "Client name is required" })}
+                  {...register("client_name", {
+                    required: "Client name is required",
+                  })}
                   placeholder="Enter client name"
                 />
               </Field>
@@ -159,24 +171,15 @@ export function CreateProject() {
               </Field>
 
               <Field label="Budget">
-                <Input
-                  {...register("budget")}
-                  placeholder="e.g. $5,000"
-                />
+                <Input {...register("budget")} placeholder="e.g. $5,000" />
               </Field>
 
               <Field label="Start Date">
-                <Input
-                  {...register("start_date")}
-                  type="date"
-                />
+                <Input {...register("start_date")} type="date" />
               </Field>
 
               <Field label="Deadline">
-                <Input
-                  {...register("deadline")}
-                  type="date"
-                />
+                <Input {...register("deadline")} type="date" />
               </Field>
             </div>
           </DialogBody>
@@ -198,4 +201,3 @@ export function CreateProject() {
     </DialogRoot>
   )
 }
-

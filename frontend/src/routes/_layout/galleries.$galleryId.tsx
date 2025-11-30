@@ -12,23 +12,23 @@ import {
   Text,
   useDisclosure,
 } from "@chakra-ui/react"
-import { Checkbox } from "@/components/ui/checkbox"
-import {
-  DialogRoot,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-  DialogBody,
-  DialogFooter,
-} from "@/components/ui/dialog"
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
 import { createFileRoute, Link } from "@tanstack/react-router"
+import type React from "react"
+import { useRef, useState } from "react"
 import { FiArrowLeft, FiCalendar, FiImage, FiUser } from "react-icons/fi"
-
-import { GalleriesService, ProjectsService, OpenAPI } from "@/client"
+import { GalleriesService, OpenAPI, ProjectsService } from "@/client"
+import { Checkbox } from "@/components/ui/checkbox"
+import {
+  DialogBody,
+  DialogContent,
+  DialogFooter,
+  DialogHeader,
+  DialogRoot,
+  DialogTitle,
+} from "@/components/ui/dialog"
 import useAuth from "@/hooks/useAuth"
 import useCustomToast from "@/hooks/useCustomToast"
-import React, { useRef, useState } from "react"
 
 export const Route = createFileRoute("/_layout/galleries/$galleryId")({
   component: GalleryDetail,
@@ -86,26 +86,31 @@ function GalleryDetail() {
   const { data: photosData, isLoading: isLoadingPhotos } = useQuery({
     queryKey: ["galleryPhotos", galleryId],
     queryFn: async () => {
-      const res = await fetch(`${OpenAPI.BASE}/api/v1/galleries/${galleryId}/photos`, {
-        headers: {
-          Authorization: `Bearer ${localStorage.getItem("access_token") ?? ""}`,
+      const res = await fetch(
+        `${OpenAPI.BASE}/api/v1/galleries/${galleryId}/photos`,
+        {
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem("access_token") ?? ""}`,
+          },
         },
-      })
+      )
       if (!res.ok) throw new Error("Failed to load photos")
-      const data = await res.json() as { 
-        data: { 
-          id: string; 
-          filename: string; 
-          url: string; 
-          file_size: number; 
-          uploaded_at: string; // Date when photo was uploaded
-        }[]; 
-        count: number 
+      const data = (await res.json()) as {
+        data: {
+          id: string
+          filename: string
+          url: string
+          file_size: number
+          uploaded_at: string // Date when photo was uploaded
+        }[]
+        count: number
       }
       // Convert relative URLs to absolute URLs
       data.data = data.data.map((photo) => ({
         ...photo,
-        url: photo.url.startsWith("http") ? photo.url : `${OpenAPI.BASE}${photo.url}`,
+        url: photo.url.startsWith("http")
+          ? photo.url
+          : `${OpenAPI.BASE}${photo.url}`,
       }))
       return data
     },
@@ -119,25 +124,30 @@ function GalleryDetail() {
       // Check max photos before upload
       const currentCount = photosData?.count ?? gallery?.photo_count ?? 0
       const filesToUpload = Array.from(files)
-      
+
       if (currentCount + filesToUpload.length > MAX_PHOTOS) {
         const remaining = MAX_PHOTOS - currentCount
         throw new Error(
           `Cannot upload ${filesToUpload.length} photos. Gallery can only hold ${MAX_PHOTOS} photos total. ` +
-          `Currently has ${currentCount} photos. You can upload ${remaining > 0 ? remaining : 0} more photo${remaining !== 1 ? "s" : ""}. ` +
-          `Please try again with fewer photos.`
+            `Currently has ${currentCount} photos. You can upload ${remaining > 0 ? remaining : 0} more photo${remaining !== 1 ? "s" : ""}. ` +
+            `Please try again with fewer photos.`,
         )
       }
 
       const form = new FormData()
-      filesToUpload.forEach((f) => form.append("files", f))
-      const res = await fetch(`${OpenAPI.BASE}/api/v1/galleries/${galleryId}/photos`, {
-        method: "POST",
-        headers: {
-          Authorization: `Bearer ${localStorage.getItem("access_token") ?? ""}`,
-        },
-        body: form,
+      filesToUpload.forEach((f) => {
+        form.append("files", f)
       })
+      const res = await fetch(
+        `${OpenAPI.BASE}/api/v1/galleries/${galleryId}/photos`,
+        {
+          method: "POST",
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem("access_token") ?? ""}`,
+          },
+          body: form,
+        },
+      )
       if (!res.ok) {
         const msg = await res.text()
         throw new Error(msg || "Upload failed")
@@ -157,14 +167,17 @@ function GalleryDetail() {
 
   const deleteMutation = useMutation({
     mutationFn: async (ids: string[]) => {
-      const res = await fetch(`${OpenAPI.BASE}/api/v1/galleries/${galleryId}/photos`, {
-        method: "DELETE",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${localStorage.getItem("access_token") ?? ""}`,
+      const res = await fetch(
+        `${OpenAPI.BASE}/api/v1/galleries/${galleryId}/photos`,
+        {
+          method: "DELETE",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${localStorage.getItem("access_token") ?? ""}`,
+          },
+          body: JSON.stringify({ photo_ids: ids }),
         },
-        body: JSON.stringify({ photo_ids: ids }),
-      })
+      )
       if (!res.ok) throw new Error("Delete failed")
       return res.json()
     },
@@ -197,20 +210,19 @@ function GalleryDetail() {
 
   const showPrevPhoto = () => {
     if (!photos || photos.length === 0) return
-    setCurrentPhotoIndex((prev) =>
-      prev === 0 ? photos.length - 1 : prev - 1,
-    )
+    setCurrentPhotoIndex((prev) => (prev === 0 ? photos.length - 1 : prev - 1))
   }
 
   const showNextPhoto = () => {
     if (!photos || photos.length === 0) return
-    setCurrentPhotoIndex((prev) =>
-      prev === photos.length - 1 ? 0 : prev + 1,
-    )
+    setCurrentPhotoIndex((prev) => (prev === photos.length - 1 ? 0 : prev + 1))
   }
 
   const onSelectToggle = (id: string) => {
-    setSelected((prev: Record<string, boolean>) => ({ ...prev, [id]: !prev[id] }))
+    setSelected((prev: Record<string, boolean>) => ({
+      ...prev,
+      [id]: !prev[id],
+    }))
   }
 
   // Format file size for display
@@ -219,7 +231,7 @@ function GalleryDetail() {
     const k = 1024
     const sizes = ["Bytes", "KB", "MB", "GB"]
     const i = Math.floor(Math.log(bytes) / Math.log(k))
-    return Math.round((bytes / Math.pow(k, i)) * 100) / 100 + " " + sizes[i]
+    return `${Math.round((bytes / k ** i) * 100) / 100} ${sizes[i]}`
   }
 
   // Format date for display
@@ -229,29 +241,30 @@ function GalleryDetail() {
     if (!dateString) return "Unknown"
     try {
       // FastAPI/Pydantic serializes datetime to ISO format
-      // If the string doesn't have timezone info (no 'Z' or '+/-HH:MM'), 
+      // If the string doesn't have timezone info (no 'Z' or '+/-HH:MM'),
       // it's likely a naive UTC datetime, so we treat it as UTC
       let dateStr = dateString.trim()
-      
+
       // Check if it already has timezone info
-      const hasTimezone = dateStr.endsWith('Z') || 
-                          /[+-]\d{2}:\d{2}$/.test(dateStr) ||
-                          /[+-]\d{4}$/.test(dateStr)
-      
+      const hasTimezone =
+        dateStr.endsWith("Z") ||
+        /[+-]\d{2}:\d{2}$/.test(dateStr) ||
+        /[+-]\d{4}$/.test(dateStr)
+
       // If no timezone info, assume it's UTC and append 'Z'
       if (!hasTimezone && dateStr.length > 0) {
         // Remove any trailing milliseconds if present
-        dateStr = dateStr.replace(/\.\d+$/, '')
-        dateStr = dateStr + 'Z'
+        dateStr = dateStr.replace(/\.\d+$/, "")
+        dateStr = `${dateStr}Z`
       }
-      
+
       const date = new Date(dateStr)
-      
+
       // Check if date is valid
-      if (isNaN(date.getTime())) {
+      if (Number.isNaN(date.getTime())) {
         return "Invalid date"
       }
-      
+
       // Convert UTC date to local time for display
       return date.toLocaleDateString("en-US", {
         year: "numeric",
@@ -283,11 +296,14 @@ function GalleryDetail() {
       showErrorToast("Select at least one photo to download")
       return
     }
-    const res = await fetch(`${OpenAPI.BASE}/api/v1/galleries/${galleryId}/photos/download`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ photo_ids: ids }),
-    })
+    const res = await fetch(
+      `${OpenAPI.BASE}/api/v1/galleries/${galleryId}/photos/download`,
+      {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ photo_ids: ids }),
+      },
+    )
     if (!res.ok) {
       showErrorToast("Failed to download selected photos")
       return
@@ -297,7 +313,9 @@ function GalleryDetail() {
     const a = document.createElement("a")
     a.href = url
     // Use project name in download filename
-    const projectName = project?.name ? project.name.replace(/[^a-z0-9]/gi, "_") : "Project"
+    const projectName = project?.name
+      ? project.name.replace(/[^a-z0-9]/gi, "_")
+      : "Project"
     a.download = `Mosaic-${projectName}-Photos.zip`
     document.body.appendChild(a)
     a.click()
@@ -340,7 +358,13 @@ function GalleryDetail() {
                 <Heading size="2xl" mb={2}>
                   {gallery.name}
                 </Heading>
-                <Flex gap={4} fontSize="sm" color="fg.muted" alignItems="center" flexWrap="wrap">
+                <Flex
+                  gap={4}
+                  fontSize="sm"
+                  color="fg.muted"
+                  alignItems="center"
+                  flexWrap="wrap"
+                >
                   {gallery.photographer && (
                     <Flex alignItems="center" gap={1}>
                       <FiUser />
@@ -371,7 +395,10 @@ function GalleryDetail() {
                   )}
                 </Flex>
               </Box>
-              <Badge size="lg" colorScheme={getStatusColor(gallery.status || "draft")}>
+              <Badge
+                size="lg"
+                colorScheme={getStatusColor(gallery.status || "draft")}
+              >
                 {getStatusLabel(gallery.status || "draft")}
               </Badge>
             </Flex>
@@ -381,10 +408,18 @@ function GalleryDetail() {
         {/* Actions and Photos */}
         <Flex gap={3} alignItems="center" justifyContent="space-between">
           <Flex gap={2}>
-            <Button variant="solid" onClick={onConfirmAllOpen} disabled={!hasPhotos}>
+            <Button
+              variant="solid"
+              onClick={onConfirmAllOpen}
+              disabled={!hasPhotos}
+            >
               Download all photos
             </Button>
-            <Button variant="outline" onClick={onDownloadSelected} disabled={!anySelected}>
+            <Button
+              variant="outline"
+              onClick={onDownloadSelected}
+              disabled={!anySelected}
+            >
               Download selected
             </Button>
             {isTeamMember && (
@@ -427,11 +462,14 @@ function GalleryDetail() {
           )}
         </Flex>
 
-        <DialogRoot open={isConfirmAllOpen} onOpenChange={(e: { open: boolean }) => {
-          if (!e.open) {
-            onConfirmAllClose()
-          }
-        }}>
+        <DialogRoot
+          open={isConfirmAllOpen}
+          onOpenChange={(e: { open: boolean }) => {
+            if (!e.open) {
+              onConfirmAllClose()
+            }
+          }}
+        >
           <DialogContent>
             <DialogHeader>
               <DialogTitle>Download all photos</DialogTitle>
@@ -458,11 +496,14 @@ function GalleryDetail() {
         </DialogRoot>
 
         {/* Lightbox dialog for viewing photos larger with details and navigation */}
-        <DialogRoot open={isLightboxOpen} onOpenChange={(e: { open: boolean }) => {
-          if (!e.open) {
-            closeLightbox()
-          }
-        }}>
+        <DialogRoot
+          open={isLightboxOpen}
+          onOpenChange={(e: { open: boolean }) => {
+            if (!e.open) {
+              closeLightbox()
+            }
+          }}
+        >
           <DialogContent maxW="800px">
             <DialogHeader>
               <DialogTitle>Photo details</DialogTitle>
@@ -484,7 +525,11 @@ function GalleryDetail() {
                     <img
                       src={photos[currentPhotoIndex].url}
                       alt={photos[currentPhotoIndex].filename}
-                      style={{ maxWidth: "100%", maxHeight: "100%", objectFit: "contain" }}
+                      style={{
+                        maxWidth: "100%",
+                        maxHeight: "100%",
+                        objectFit: "contain",
+                      }}
                     />
                     {/* Navigation arrows */}
                     <Button
@@ -510,14 +555,18 @@ function GalleryDetail() {
                   </Box>
                   <Box>
                     <Stack gap={2}>
-                      <Text fontWeight="bold">Filename: {photos[currentPhotoIndex].filename}</Text>
+                      <Text fontWeight="bold">
+                        Filename: {photos[currentPhotoIndex].filename}
+                      </Text>
                       <Text>
-                        Size: {photos[currentPhotoIndex].file_size 
-                          ? formatFileSize(photos[currentPhotoIndex].file_size) 
+                        Size:{" "}
+                        {photos[currentPhotoIndex].file_size
+                          ? formatFileSize(photos[currentPhotoIndex].file_size)
                           : "Unknown"}
                       </Text>
                       <Text>
-                        Date uploaded: {formatDate(photos[currentPhotoIndex].uploaded_at)}
+                        Date uploaded:{" "}
+                        {formatDate(photos[currentPhotoIndex].uploaded_at)}
                       </Text>
                       <Flex alignItems="center" gap={2} mt={2}>
                         <Checkbox
@@ -555,55 +604,73 @@ function GalleryDetail() {
               }}
               gap={4}
             >
-              {photos.map((p: { id: string; filename: string; url: string; file_size?: number; uploaded_at?: string }, index: number) => (
-                <Box
-                  key={p.id}
-                  position="relative"
-                  h="200px"
-                  bg="gray.100"
-                  borderRadius="md"
-                  display="flex"
-                  alignItems="center"
-                  justifyContent="center"
-                  overflow="hidden"
-                  onClick={(e: React.MouseEvent<HTMLDivElement>) => {
-                    // Don't open dialog if clicking on checkbox
-                    const target = e.target as HTMLElement
-                    if (target.closest('[role="checkbox"]') || target.closest('input[type="checkbox"]')) {
-                      return
-                    }
-                    openLightboxAt(index)
-                  }}
-                  cursor="pointer"
-                >
-                  <img
-                    src={p.url}
-                    alt={p.filename}
-                    style={{ width: "100%", height: "100%", objectFit: "cover" }}
-                  />
-                  <Box 
-                    position="absolute" 
-                    top="8px" 
-                    left="8px" 
-                    bg="whiteAlpha.800" 
-                    borderRadius="md" 
-                    p={1}
+              {photos.map(
+                (
+                  p: {
+                    id: string
+                    filename: string
+                    url: string
+                    file_size?: number
+                    uploaded_at?: string
+                  },
+                  index: number,
+                ) => (
+                  <Box
+                    key={p.id}
+                    position="relative"
+                    h="200px"
+                    bg="gray.100"
+                    borderRadius="md"
+                    display="flex"
+                    alignItems="center"
+                    justifyContent="center"
+                    overflow="hidden"
                     onClick={(e: React.MouseEvent<HTMLDivElement>) => {
-                      // Stop propagation so clicking checkbox doesn't open dialog
-                      e.stopPropagation()
+                      // Don't open dialog if clicking on checkbox
+                      const target = e.target as HTMLElement
+                      if (
+                        target.closest('[role="checkbox"]') ||
+                        target.closest('input[type="checkbox"]')
+                      ) {
+                        return
+                      }
+                      openLightboxAt(index)
                     }}
+                    cursor="pointer"
                   >
-                    <Checkbox
-                      checked={!!selected[p.id]}
-                      onCheckedChange={() => {
-                        onSelectToggle(p.id)
+                    <img
+                      src={p.url}
+                      alt={p.filename}
+                      style={{
+                        width: "100%",
+                        height: "100%",
+                        objectFit: "cover",
+                      }}
+                    />
+                    <Box
+                      position="absolute"
+                      top="8px"
+                      left="8px"
+                      bg="whiteAlpha.800"
+                      borderRadius="md"
+                      p={1}
+                      onClick={(e: React.MouseEvent<HTMLDivElement>) => {
+                        // Stop propagation so clicking checkbox doesn't open dialog
+                        e.stopPropagation()
                       }}
                     >
-                      Select
-                    </Checkbox>
+                      <Checkbox
+                        checked={!!selected[p.id]}
+                        onCheckedChange={() => {
+                          onSelectToggle(p.id)
+                        }}
+                      >
+                        Select
+                      </Checkbox>
+                    </Box>
                   </Box>
-                </Box>
-              ))}
+                ),
+              )}
             </Grid>
           ) : (
             <Box
@@ -613,7 +680,10 @@ function GalleryDetail() {
               borderColor="gray.300"
               borderRadius="md"
             >
-              <FiImage size={48} style={{ margin: "0 auto", color: "#CBD5E0" }} />
+              <FiImage
+                size={48}
+                style={{ margin: "0 auto", color: "#CBD5E0" }}
+              />
               <Text mt={4} color="fg.muted">
                 No photos in this gallery yet
               </Text>

@@ -1,12 +1,11 @@
+import os
 import uuid
+import zipfile
+from io import BytesIO
+from pathlib import Path
 from typing import Any
 
-import os
-from io import BytesIO
-import zipfile
-from pathlib import Path
-
-from fastapi import APIRouter, HTTPException, UploadFile, File, Body
+from fastapi import APIRouter, Body, File, HTTPException, UploadFile
 from fastapi.responses import FileResponse, StreamingResponse
 
 from app import crud
@@ -17,9 +16,9 @@ from app.models import (
     GalleryPublic,
     GalleryUpdate,
     Message,
-    PhotosPublic,
     PhotoCreate,
     PhotoPublic,
+    PhotosPublic,
 )
 
 router = APIRouter()
@@ -149,7 +148,11 @@ def create_gallery(
 
 @router.get("/{id}/photos", response_model=PhotosPublic)
 def list_gallery_photos(
-    session: SessionDep, current_user: CurrentUser, id: uuid.UUID, skip: int = 0, limit: int = 100
+    session: SessionDep,
+    current_user: CurrentUser,
+    id: uuid.UUID,
+    skip: int = 0,
+    limit: int = 100,
 ) -> Any:
     """List photos in a gallery. Visible to clients with access and team in org."""
     gallery = crud.get_gallery(session=session, gallery_id=id)
@@ -174,7 +177,9 @@ def list_gallery_photos(
         ):
             raise HTTPException(status_code=403, detail="Not enough permissions")
 
-    photos = crud.get_photos_by_gallery(session=session, gallery_id=id, skip=skip, limit=limit)
+    photos = crud.get_photos_by_gallery(
+        session=session, gallery_id=id, skip=skip, limit=limit
+    )
     return PhotosPublic(
         data=[PhotoPublic.model_validate(p) for p in photos], count=len(photos)
     )
@@ -191,7 +196,9 @@ async def upload_gallery_photos(
     # Permission: only team members
     user_type = getattr(current_user, "user_type", None)
     if user_type != "team_member":
-        raise HTTPException(status_code=403, detail="Only team members can upload photos")
+        raise HTTPException(
+            status_code=403, detail="Only team members can upload photos"
+        )
 
     gallery = crud.get_gallery(session=session, gallery_id=id)
     if not gallery:
@@ -257,7 +264,9 @@ def delete_gallery_photos(
     """Delete selected photos. Only team members. Also removes files from storage."""
     user_type = getattr(current_user, "user_type", None)
     if user_type != "team_member":
-        raise HTTPException(status_code=403, detail="Only team members can delete photos")
+        raise HTTPException(
+            status_code=403, detail="Only team members can delete photos"
+        )
 
     gallery = crud.get_gallery(session=session, gallery_id=id)
     if not gallery:
@@ -270,7 +279,6 @@ def delete_gallery_photos(
     # Remove files
     storage_dir = _gallery_storage_dir(id)
     deleted = 0
-    from sqlmodel import select
     from app.models import Photo
 
     for pid in photo_ids:
@@ -313,7 +321,9 @@ def download_all_photos(id: uuid.UUID, session: SessionDep) -> Any:
         project = crud.get_project(session=session, project_id=gallery.project_id)
         if project:
             # Sanitize project name for filename
-            project_name = "".join(c if c.isalnum() or c in (" ", "-", "_") else "_" for c in project.name)
+            project_name = "".join(
+                c if c.isalnum() or c in (" ", "-", "_") else "_" for c in project.name
+            )
             project_name = project_name.replace(" ", "_")
 
     memfile = BytesIO()
@@ -326,9 +336,7 @@ def download_all_photos(id: uuid.UUID, session: SessionDep) -> Any:
     return StreamingResponse(
         memfile,
         media_type="application/zip",
-        headers={
-            "Content-Disposition": f'attachment; filename="{filename}"'
-        },
+        headers={"Content-Disposition": f'attachment; filename="{filename}"'},
     )
 
 
@@ -350,11 +358,14 @@ def download_selected_photos(
         project = crud.get_project(session=session, project_id=gallery.project_id)
         if project:
             # Sanitize project name for filename
-            project_name = "".join(c if c.isalnum() or c in (" ", "-", "_") else "_" for c in project.name)
+            project_name = "".join(
+                c if c.isalnum() or c in (" ", "-", "_") else "_" for c in project.name
+            )
             project_name = project_name.replace(" ", "_")
 
     # Collect filenames by reading DB
     from app.models import Photo
+
     files: list[Path] = []
     for pid in photo_ids:
         photo = session.get(Photo, pid)
@@ -376,10 +387,9 @@ def download_selected_photos(
     return StreamingResponse(
         memfile,
         media_type="application/zip",
-        headers={
-            "Content-Disposition": f'attachment; filename="{filename}"'
-        },
+        headers={"Content-Disposition": f'attachment; filename="{filename}"'},
     )
+
 
 @router.get("/{id}", response_model=GalleryPublic)
 def read_gallery(session: SessionDep, current_user: CurrentUser, id: uuid.UUID) -> Any:

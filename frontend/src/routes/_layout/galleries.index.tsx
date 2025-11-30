@@ -14,9 +14,8 @@ import {
 import { useQuery } from "@tanstack/react-query"
 import { createFileRoute, Link } from "@tanstack/react-router"
 import { FiCalendar, FiImage, FiUser } from "react-icons/fi"
-
-import { GalleriesService, OpenAPI } from "@/client"
 import type { GalleryPublic } from "@/client"
+import { GalleriesService, OpenAPI } from "@/client"
 import useAuth from "@/hooks/useAuth"
 
 export const Route = createFileRoute("/_layout/galleries/")({
@@ -46,17 +45,25 @@ function GalleryCard({ gallery }: { gallery: GalleryPublic }) {
   const { data: photosData } = useQuery({
     queryKey: ["galleryFirstPhoto", gallery.id],
     queryFn: async () => {
-      const res = await fetch(`${OpenAPI.BASE}/api/v1/galleries/${gallery.id}/photos?skip=0&limit=1`, {
-        headers: {
-          Authorization: `Bearer ${localStorage.getItem("access_token") ?? ""}`,
+      const res = await fetch(
+        `${OpenAPI.BASE}/api/v1/galleries/${gallery.id}/photos?skip=0&limit=1`,
+        {
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem("access_token") ?? ""}`,
+          },
         },
-      })
+      )
       if (!res.ok) return null
-      const data = await res.json() as { data: { id: string; filename: string; url: string }[]; count: number }
+      const data = (await res.json()) as {
+        data: { id: string; filename: string; url: string }[]
+        count: number
+      }
       if (data.data && data.data.length > 0) {
         const photo = data.data[0]
         // Convert relative URL to absolute URL
-        const photoUrl = photo.url.startsWith("http") ? photo.url : `${OpenAPI.BASE}${photo.url}`
+        const photoUrl = photo.url.startsWith("http")
+          ? photo.url
+          : `${OpenAPI.BASE}${photo.url}`
         return photoUrl
       }
       return null
@@ -110,9 +117,9 @@ function GalleryCard({ gallery }: { gallery: GalleryPublic }) {
             position="absolute"
             top={2}
             left={2}
-            colorScheme={getStatusColor(gallery.status || 'pending')}
+            colorScheme={getStatusColor(gallery.status || "pending")}
           >
-            {getStatusLabel(gallery.status || 'pending')}
+            {getStatusLabel(gallery.status || "pending")}
           </Badge>
         </Box>
 
@@ -200,7 +207,9 @@ function GalleriesList() {
           <Heading size="2xl" mb={2}>
             Galleries
           </Heading>
-          <Text color="fg.muted">Browse all photo galleries from your projects</Text>
+          <Text color="fg.muted">
+            Browse all photo galleries from your projects
+          </Text>
         </Box>
 
         {/* Gallery Grid */}

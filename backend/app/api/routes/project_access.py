@@ -39,14 +39,15 @@ def read_my_projects(
         if not current_user.organization_id:
             return {"data": [], "count": 0}
         projects = crud.get_projects_by_organization(
-            session=session, 
-            organization_id=current_user.organization_id, 
-            skip=0, 
-            limit=1000
+            session=session,
+            organization_id=current_user.organization_id,
+            skip=0,
+            limit=1000,
         )
         return {"data": projects, "count": len(projects)}
     else:
         return {"data": [], "count": 0}
+
 
 @router.post("/{project_id}/access/invite-by-email")
 def invite_client_by_email(
@@ -290,5 +291,3 @@ def update_project_access_permissions(
         session=session, db_access=db_access, access_in=access_in
     )
     return access
-
-

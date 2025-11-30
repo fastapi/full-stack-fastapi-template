@@ -40,7 +40,9 @@ def init_db(session: Session) -> None:
             organization = crud.create_organization(
                 session=session, organization_in=organization_in
             )
-            logger.info(f"Created organization: {organization.name} (id: {organization.id})")
+            logger.info(
+                f"Created organization: {organization.name} (id: {organization.id})"
+            )
 
             # Create superuser and assign to their organization
             user_in = UserCreate(

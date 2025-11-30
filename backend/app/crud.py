@@ -6,17 +6,19 @@ from sqlmodel import Session, desc, func, or_, select
 
 from app.core.security import get_password_hash, verify_password
 from app.models import (
+    Comment,
+    CommentCreate,
     DashboardStats,
     Gallery,
     GalleryCreate,
     GalleryUpdate,
-    Photo,
-    PhotoCreate,
-    #Item,
-    #ItemCreate,
+    # Item,
+    # ItemCreate,
     Organization,
     OrganizationCreate,
     OrganizationUpdate,
+    Photo,
+    PhotoCreate,
     Project,
     ProjectAccess,
     ProjectAccessCreate,
@@ -27,8 +29,6 @@ from app.models import (
     User,
     UserCreate,
     UserUpdate,
-    Comment,
-    CommentCreate,
 )
 
 
@@ -291,7 +291,8 @@ def delete_photos(
     from app.models import Photo  # local import to avoid circulars in some tools
 
     statement = select(Photo).where(
-        Photo.gallery_id == gallery_id, Photo.id.in_(photo_ids)  # type: ignore[attr-defined]
+        Photo.gallery_id == gallery_id,
+        Photo.id.in_(photo_ids),  # type: ignore[attr-defined]
     )
     photos = list(session.exec(statement).all())
     deleted_count = 0
@@ -330,9 +331,7 @@ def get_photos_by_gallery(
 def count_photos_in_gallery(*, session: Session, gallery_id: uuid.UUID) -> int:
     """Count how many photos are in a gallery."""
     statement = (
-        select(func.count())
-        .select_from(Photo)
-        .where(Photo.gallery_id == gallery_id)
+        select(func.count()).select_from(Photo).where(Photo.gallery_id == gallery_id)
     )
     return session.exec(statement).one()
 
@@ -470,7 +469,7 @@ def invite_client_by_email(
     """
     # Check if user exists
     user = get_user_by_email(session=session, email=email)
-    
+
     if user:
         # User exists - grant immediate access
         # Check if access already exists
@@ -486,7 +485,7 @@ def invite_client_by_email(
             session.commit()
             session.refresh(existing_access)
             return existing_access, False
-        
+
         # Create new access
         access_in = ProjectAccessCreate(
             project_id=project_id,
@@ -506,7 +505,7 @@ def invite_client_by_email(
                 ProjectInvitation.email == email,
             )
         ).first()
-        
+
         if existing_invitation:
             # Update existing invitation
             existing_invitation.role = role
@@ -516,7 +515,7 @@ def invite_client_by_email(
             session.commit()
             session.refresh(existing_invitation)
             return None, True
-        
+
         # Create new invitation
         invitation = ProjectInvitation(
             project_id=project_id,
@@ -553,10 +552,10 @@ def process_pending_project_invitations(
             can_download=invitation.can_download,
         )
         create_project_access(session=session, access_in=access_in)
-        
+
         # Delete the invitation
         session.delete(invitation)
-    
+
     # Commit all changes
     session.commit()
 
@@ -627,7 +626,6 @@ def get_dashboard_stats(
     )
 
 
-
 # ============================================================================
 # COMMENT CRUD
 # ============================================================================
@@ -637,7 +635,7 @@ def create_comment(
     *, session: Session, comment_in: CommentCreate, user_id: uuid.UUID
 ) -> Comment:
     """Create a new comment on a project"""
-    
+
     db_obj = Comment.model_validate(comment_in, update={"user_id": user_id})
     session.add(db_obj)
     session.commit()
@@ -649,7 +647,7 @@ def get_comments_by_project(
     *, session: Session, project_id: uuid.UUID, skip: int = 0, limit: int = 100
 ) -> list[Comment]:
     """Get all comments for a project"""
-    
+
     statement = (
         select(Comment)
         .where(Comment.project_id == project_id)
@@ -662,7 +660,7 @@ def get_comments_by_project(
 
 def count_comments_by_project(*, session: Session, project_id: uuid.UUID) -> int:
     """Count comments for a project"""
-    
+
     statement = (
         select(func.count())
         .select_from(Comment)
@@ -673,13 +671,13 @@ def count_comments_by_project(*, session: Session, project_id: uuid.UUID) -> int
 
 def get_comment(*, session: Session, comment_id: uuid.UUID) -> Comment | None:
     """Get a single comment by ID"""
-    
+
     return session.get(Comment, comment_id)
 
 
 def delete_comment(*, session: Session, comment_id: uuid.UUID) -> None:
     """Delete a comment"""
-    
+
     comment = session.get(Comment, comment_id)
     if comment:
         session.delete(comment)

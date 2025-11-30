@@ -1,19 +1,19 @@
-import { useState } from "react"
-import { useForm } from "react-hook-form"
-import {
-  DialogRoot,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-  DialogBody,
-  DialogFooter,
-  DialogCloseTrigger,
-} from "@/components/ui/dialog"
-import { Button } from "@/components/ui/button"
-import { Field } from "@/components/ui/field"
 import { Textarea } from "@chakra-ui/react"
 import { useMutation, useQueryClient } from "@tanstack/react-query"
+import { useState } from "react"
+import { useForm } from "react-hook-form"
 import { FiMessageSquare } from "react-icons/fi"
+import { Button } from "@/components/ui/button"
+import {
+  DialogBody,
+  DialogCloseTrigger,
+  DialogContent,
+  DialogFooter,
+  DialogHeader,
+  DialogRoot,
+  DialogTitle,
+} from "@/components/ui/dialog"
+import { Field } from "@/components/ui/field"
 import useCustomToast from "@/hooks/useCustomToast"
 
 interface AddCommentProps {
@@ -38,7 +38,9 @@ export function AddComment({ projectId }: AddCommentProps) {
 
   const createMutation = useMutation({
     mutationFn: async (data: CommentFormData) => {
-      const baseUrl = (import.meta.env.VITE_API_URL || "http://localhost:8000").replace(/\/$/, "")
+      const baseUrl = (
+        import.meta.env.VITE_API_URL || "http://localhost:8000"
+      ).replace(/\/$/, "")
       const response = await fetch(`${baseUrl}/api/v1/comments/`, {
         method: "POST",
         headers: {
@@ -58,7 +60,9 @@ export function AddComment({ projectId }: AddCommentProps) {
     },
     onSuccess: () => {
       showSuccessToast("Comment added successfully")
-      queryClient.invalidateQueries({ queryKey: ["projectComments", projectId] })
+      queryClient.invalidateQueries({
+        queryKey: ["projectComments", projectId],
+      })
       queryClient.invalidateQueries({ queryKey: ["project", projectId] })
       reset()
       setOpen(false)

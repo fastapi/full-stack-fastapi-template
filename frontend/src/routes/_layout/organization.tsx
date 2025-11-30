@@ -1,10 +1,22 @@
-import { Badge, Box, Card, Container, Flex, Grid, Heading, HStack, Input, Stack, Text } from "@chakra-ui/react"
+import {
+  Badge,
+  Box,
+  Card,
+  Container,
+  Flex,
+  Grid,
+  Heading,
+  HStack,
+  Input,
+  Stack,
+  Text,
+} from "@chakra-ui/react"
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
+import { createFileRoute } from "@tanstack/react-router"
+import { useState } from "react"
+import { FiBriefcase, FiTrash2, FiUserPlus, FiUsers } from "react-icons/fi"
 import { Button } from "@/components/ui/button"
 import { Field } from "@/components/ui/field"
-import { createFileRoute } from "@tanstack/react-router"
-import { FiBriefcase, FiTrash2, FiUserPlus, FiUsers } from "react-icons/fi"
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query"
-import { useState } from "react"
 
 import useAuth from "@/hooks/useAuth"
 import useCustomToast from "@/hooks/useCustomToast"
@@ -20,18 +32,26 @@ function OrganizationPage() {
   const [inviteEmail, setInviteEmail] = useState("")
   const [orgName, setOrgName] = useState("")
 
-  const hasOrgId = currentUser && 'organization_id' in currentUser && currentUser.organization_id
+  const hasOrgId =
+    currentUser &&
+    "organization_id" in currentUser &&
+    currentUser.organization_id
 
   // Fetch organization members
   const { data: membersData } = useQuery({
     queryKey: ["orgMembers"],
     queryFn: async () => {
-      const baseUrl = (import.meta.env.VITE_API_URL || "http://localhost:8000").replace(/\/$/, "")
-      const response = await fetch(`${baseUrl}/api/v1/users/organization-members`, {
-        headers: {
-          Authorization: `Bearer ${localStorage.getItem("access_token")}`,
+      const baseUrl = (
+        import.meta.env.VITE_API_URL || "http://localhost:8000"
+      ).replace(/\/$/, "")
+      const response = await fetch(
+        `${baseUrl}/api/v1/users/organization-members`,
+        {
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem("access_token")}`,
+          },
         },
-      })
+      )
       if (!response.ok) return { data: [], count: 0 }
       return response.json()
     },
@@ -42,13 +62,15 @@ function OrganizationPage() {
   const { data: invitations } = useQuery({
     queryKey: ["invitations"],
     queryFn: async () => {
-      const baseUrl = (import.meta.env.VITE_API_URL || "http://localhost:8000").replace(/\/$/, "")
+      const baseUrl = (
+        import.meta.env.VITE_API_URL || "http://localhost:8000"
+      ).replace(/\/$/, "")
       try {
-      const response = await fetch(`${baseUrl}/api/v1/invitations/`, {
-        headers: {
-          Authorization: `Bearer ${localStorage.getItem("access_token")}`,
-        },
-      })
+        const response = await fetch(`${baseUrl}/api/v1/invitations/`, {
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem("access_token")}`,
+          },
+        })
         if (!response.ok) return { data: [], count: 0 }
         return response.json()
       } catch (error) {
@@ -63,7 +85,9 @@ function OrganizationPage() {
   // Send email invitation
   const inviteMutation = useMutation({
     mutationFn: async (email: string) => {
-      const baseUrl = (import.meta.env.VITE_API_URL || "http://localhost:8000").replace(/\/$/, "")
+      const baseUrl = (
+        import.meta.env.VITE_API_URL || "http://localhost:8000"
+      ).replace(/\/$/, "")
       const response = await fetch(`${baseUrl}/api/v1/invitations/`, {
         method: "POST",
         headers: {
@@ -91,7 +115,9 @@ function OrganizationPage() {
   // Remove member mutation
   const removeMemberMutation = useMutation({
     mutationFn: async (userId: string) => {
-      const baseUrl = (import.meta.env.VITE_API_URL || "http://localhost:8000").replace(/\/$/, "")
+      const baseUrl = (
+        import.meta.env.VITE_API_URL || "http://localhost:8000"
+      ).replace(/\/$/, "")
       const response = await fetch(`${baseUrl}/api/v1/users/${userId}`, {
         method: "DELETE",
         headers: {
@@ -113,14 +139,19 @@ function OrganizationPage() {
   // Create organization mutation
   const createOrgMutation = useMutation({
     mutationFn: async (name: string) => {
-      const baseUrl = (import.meta.env.VITE_API_URL || "http://localhost:8000").replace(/\/$/, "")
+      const baseUrl = (
+        import.meta.env.VITE_API_URL || "http://localhost:8000"
+      ).replace(/\/$/, "")
       const response = await fetch(`${baseUrl}/api/v1/organizations/`, {
         method: "POST",
         headers: {
           Authorization: `Bearer ${localStorage.getItem("access_token")}`,
           "Content-Type": "application/json",
         },
-        body: JSON.stringify({ name, description: `Organization for ${currentUser?.full_name || currentUser?.email}` }),
+        body: JSON.stringify({
+          name,
+          description: `Organization for ${currentUser?.full_name || currentUser?.email}`,
+        }),
       })
       if (!response.ok) {
         const error = await response.json()
@@ -139,7 +170,7 @@ function OrganizationPage() {
   })
 
   const handleInvite = () => {
-    if (inviteEmail && inviteEmail.includes("@")) {
+    if (inviteEmail?.includes("@")) {
       inviteMutation.mutate(inviteEmail)
     }
   }
@@ -163,7 +194,8 @@ function OrganizationPage() {
               Create Your Organization
             </Heading>
             <Text color="fg.muted">
-              You need to create an organization before you can invite team members.
+              You need to create an organization before you can invite team
+              members.
             </Text>
           </Card.Header>
           <Card.Body>
@@ -208,7 +240,8 @@ function OrganizationPage() {
           <Card.Header>
             <Heading size="lg">Authorize Email</Heading>
             <Text fontSize="sm" color="fg.muted">
-              Pre-authorize an email to join your organization. When they sign up, they'll be automatically added.
+              Pre-authorize an email to join your organization. When they sign
+              up, they'll be automatically added.
             </Text>
           </Card.Header>
           <Card.Body>

@@ -103,7 +103,13 @@ function ClientLogin() {
       <RouterLink to="/recover-password" className="main-link">
         Forgot Password?
       </RouterLink>
-      <Button variant="solid" colorScheme="purple" type="submit" loading={isSubmitting} size="md">
+      <Button
+        variant="solid"
+        colorScheme="purple"
+        type="submit"
+        loading={isSubmitting}
+        size="md"
+      >
         Log In
       </Button>
       <Text>

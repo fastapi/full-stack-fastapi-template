@@ -1,5 +1,5 @@
 import { Box, Card, Flex, Heading, Stack, Text } from "@chakra-ui/react"
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query"
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
 import { FiTrash2, FiUser } from "react-icons/fi"
 import { Button } from "@/components/ui/button"
 import useCustomToast from "@/hooks/useCustomToast"
@@ -9,7 +9,10 @@ interface ClientAccessListProps {
   isTeamMember: boolean
 }
 
-export function ClientAccessList({ projectId, isTeamMember }: ClientAccessListProps) {
+export function ClientAccessList({
+  projectId,
+  isTeamMember,
+}: ClientAccessListProps) {
   const { showSuccessToast, showErrorToast } = useCustomToast()
   const queryClient = useQueryClient()
 
@@ -17,14 +20,16 @@ export function ClientAccessList({ projectId, isTeamMember }: ClientAccessListPr
   const { data: accessList, isLoading } = useQuery({
     queryKey: ["projectAccess", projectId],
     queryFn: async () => {
-      const baseUrl = (import.meta.env.VITE_API_URL || "http://localhost:8000").replace(/\/$/, '')
+      const baseUrl = (
+        import.meta.env.VITE_API_URL || "http://localhost:8000"
+      ).replace(/\/$/, "")
       const response = await fetch(
         `${baseUrl}/api/v1/projects/${projectId}/access`,
         {
           headers: {
             Authorization: `Bearer ${localStorage.getItem("access_token")}`,
           },
-        }
+        },
       )
       if (!response.ok) {
         throw new Error("Failed to fetch access list")
@@ -37,7 +42,9 @@ export function ClientAccessList({ projectId, isTeamMember }: ClientAccessListPr
 
   const revokeMutation = useMutation({
     mutationFn: async (userId: string) => {
-      const baseUrl = (import.meta.env.VITE_API_URL || "http://localhost:8000").replace(/\/$/, '')
+      const baseUrl = (
+        import.meta.env.VITE_API_URL || "http://localhost:8000"
+      ).replace(/\/$/, "")
       const response = await fetch(
         `${baseUrl}/api/v1/projects/${projectId}/access/${userId}`,
         {
@@ -45,7 +52,7 @@ export function ClientAccessList({ projectId, isTeamMember }: ClientAccessListPr
           headers: {
             Authorization: `Bearer ${localStorage.getItem("access_token")}`,
           },
-        }
+        },
       )
       if (!response.ok) {
         const error = await response.json()
@@ -96,11 +103,7 @@ export function ClientAccessList({ projectId, isTeamMember }: ClientAccessListPr
               alignItems="center"
             >
               <Flex alignItems="center" gap={2}>
-                <Box
-                  p={2}
-                  bg="purple.subtle"
-                  borderRadius="full"
-                >
+                <Box p={2} bg="purple.subtle" borderRadius="full">
                   <FiUser />
                 </Box>
                 <Box>
@@ -134,4 +137,3 @@ export function ClientAccessList({ projectId, isTeamMember }: ClientAccessListPr
     </Card.Root>
   )
 }
-

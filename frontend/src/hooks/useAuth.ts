@@ -32,7 +32,8 @@ const useAuth = () => {
 
     onSuccess: (_, variables) => {
       // Redirect to appropriate login page based on user type
-      const loginPath = variables.user_type === "client" ? "/client-login" : "/team-login"
+      const loginPath =
+        variables.user_type === "client" ? "/client-login" : "/team-login"
       navigate({ to: loginPath })
     },
     onError: (err: ApiError) => {

@@ -18,7 +18,12 @@ function Navbar() {
       p={4}
     >
       <Link to="/">
-        <Heading size="2xl" fontWeight="bold" letterSpacing="tight" _hover={{ opacity: 0.8 }}>
+        <Heading
+          size="2xl"
+          fontWeight="bold"
+          letterSpacing="tight"
+          _hover={{ opacity: 0.8 }}
+        >
           Mosaic
         </Heading>
       </Link>

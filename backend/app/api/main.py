@@ -1,6 +1,7 @@
 from fastapi import APIRouter
 
 from app.api.routes import (
+    comments,
     galleries,
     invitations,
     login,
@@ -10,7 +11,6 @@ from app.api.routes import (
     projects,
     users,
     utils,
-    comments,
 )
 from app.core.config import settings
 
@@ -37,7 +37,6 @@ api_router.include_router(
 )
 
 api_router.include_router(galleries.router, prefix="/galleries", tags=["galleries"])
-
 
 
 if settings.ENVIRONMENT == "local":

@@ -1,6 +1,6 @@
 import { Box, Card, Flex, Heading, Stack, Text } from "@chakra-ui/react"
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query"
-import { FiMessageSquare, FiUser, FiTrash2 } from "react-icons/fi"
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
+import { FiMessageSquare, FiTrash2, FiUser } from "react-icons/fi"
 import { Button } from "@/components/ui/button"
 import useAuth from "@/hooks/useAuth"
 import useCustomToast from "@/hooks/useCustomToast"
@@ -17,7 +17,9 @@ export function CommentsList({ projectId }: CommentsListProps) {
   const { data: commentsData, isLoading } = useQuery({
     queryKey: ["projectComments", projectId],
     queryFn: async () => {
-      const baseUrl = (import.meta.env.VITE_API_URL || "http://localhost:8000").replace(/\/$/, "")
+      const baseUrl = (
+        import.meta.env.VITE_API_URL || "http://localhost:8000"
+      ).replace(/\/$/, "")
       const response = await fetch(`${baseUrl}/api/v1/comments/${projectId}`, {
         headers: {
           Authorization: `Bearer ${localStorage.getItem("access_token")}`,
@@ -30,7 +32,9 @@ export function CommentsList({ projectId }: CommentsListProps) {
 
   const deleteMutation = useMutation({
     mutationFn: async (commentId: string) => {
-      const baseUrl = (import.meta.env.VITE_API_URL || "http://localhost:8000").replace(/\/$/, "")
+      const baseUrl = (
+        import.meta.env.VITE_API_URL || "http://localhost:8000"
+      ).replace(/\/$/, "")
       const response = await fetch(`${baseUrl}/api/v1/comments/${commentId}`, {
         method: "DELETE",
         headers: {
@@ -42,7 +46,9 @@ export function CommentsList({ projectId }: CommentsListProps) {
     },
     onSuccess: () => {
       showSuccessToast("Comment deleted")
-      queryClient.invalidateQueries({ queryKey: ["projectComments", projectId] })
+      queryClient.invalidateQueries({
+        queryKey: ["projectComments", projectId],
+      })
     },
     onError: () => {
       showErrorToast("Failed to delete comment")
@@ -71,13 +77,17 @@ export function CommentsList({ projectId }: CommentsListProps) {
           <Heading size="lg">Comments</Heading>
           <Flex align="center" gap={2}>
             <FiMessageSquare />
-            <Text fontSize="sm" color="fg.muted">{comments.length} comments</Text>
+            <Text fontSize="sm" color="fg.muted">
+              {comments.length} comments
+            </Text>
           </Flex>
         </Flex>
       </Card.Header>
       <Card.Body>
         {comments.length === 0 ? (
-          <Text color="fg.muted">No comments yet. Be the first to comment!</Text>
+          <Text color="fg.muted">
+            No comments yet. Be the first to comment!
+          </Text>
         ) : (
           <Stack gap={4}>
             {comments.map((comment: any) => (
@@ -95,17 +105,22 @@ export function CommentsList({ projectId }: CommentsListProps) {
                   <Box flex={1}>
                     <Flex justify="space-between" align="center" mb={2}>
                       <Text fontWeight="semibold" fontSize="sm">
-                        {comment.user?.full_name || comment.user?.email || "Unknown User"}
+                        {comment.user?.full_name ||
+                          comment.user?.email ||
+                          "Unknown User"}
                       </Text>
                       <Flex align="center" gap={2}>
                         <Text fontSize="xs" color="fg.muted">
-                          {new Date(comment.created_at + "Z").toLocaleString("en-US", {
-                            month: "short",
-                            day: "numeric",
-                            year: "numeric",
-                            hour: "2-digit",
-                            minute: "2-digit",
-                          })}
+                          {new Date(`${comment.created_at}Z`).toLocaleString(
+                            "en-US",
+                            {
+                              month: "short",
+                              day: "numeric",
+                              year: "numeric",
+                              hour: "2-digit",
+                              minute: "2-digit",
+                            },
+                          )}
                         </Text>
                         {currentUser?.id === comment.user_id && (
                           <Button

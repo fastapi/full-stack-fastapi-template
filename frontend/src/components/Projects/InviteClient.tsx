@@ -1,18 +1,18 @@
-import { useState } from "react"
-import {
-  DialogRoot,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-  DialogBody,
-  DialogFooter,
-  DialogCloseTrigger,
-} from "@/components/ui/dialog"
-import { Button } from "@/components/ui/button"
-import { Field } from "@/components/ui/field"
 import { Input, Text } from "@chakra-ui/react"
 import { useMutation, useQueryClient } from "@tanstack/react-query"
+import { useState } from "react"
 import { FiUserPlus } from "react-icons/fi"
+import { Button } from "@/components/ui/button"
+import {
+  DialogBody,
+  DialogCloseTrigger,
+  DialogContent,
+  DialogFooter,
+  DialogHeader,
+  DialogRoot,
+  DialogTitle,
+} from "@/components/ui/dialog"
+import { Field } from "@/components/ui/field"
 import useCustomToast from "@/hooks/useCustomToast"
 
 interface InviteClientProps {
@@ -33,12 +33,14 @@ export function InviteClient({ projectId }: InviteClientProps) {
 
   const inviteMutation = useMutation({
     mutationFn: async (email: string) => {
-      const baseUrl = (import.meta.env.VITE_API_URL || "http://localhost:8000").replace(/\/$/, '')
+      const baseUrl = (
+        import.meta.env.VITE_API_URL || "http://localhost:8000"
+      ).replace(/\/$/, "")
       const url = `${baseUrl}/api/v1/projects/${projectId}/access/invite-by-email`
       const response = await fetch(url, {
         method: "POST",
         headers: {
-          "Authorization": `Bearer ${localStorage.getItem("access_token")}`,
+          Authorization: `Bearer ${localStorage.getItem("access_token")}`,
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
@@ -56,7 +58,9 @@ export function InviteClient({ projectId }: InviteClientProps) {
     },
     onSuccess: (data) => {
       if (data.is_pending) {
-        showSuccessToast("Invitation created! Client will get access when they sign up with this email.")
+        showSuccessToast(
+          "Invitation created! Client will get access when they sign up with this email.",
+        )
       } else {
         showSuccessToast("Client invited successfully!")
       }
@@ -77,7 +81,7 @@ export function InviteClient({ projectId }: InviteClientProps) {
       setEmailError("Email is required")
       return
     }
-    
+
     if (!validateEmail(email)) {
       setEmailError("Please enter a valid email address")
       return
@@ -113,8 +117,8 @@ export function InviteClient({ projectId }: InviteClientProps) {
         <DialogCloseTrigger />
 
         <DialogBody>
-          <Field 
-            label="Client Email" 
+          <Field
+            label="Client Email"
             invalid={!!emailError}
             errorText={emailError}
           >
@@ -127,8 +131,9 @@ export function InviteClient({ projectId }: InviteClientProps) {
             />
           </Field>
           <Text fontSize="sm" color="fg.muted" mt={2}>
-            Enter the client's email address. If they already have an account, they'll be added immediately. 
-            If not, they'll get access when they sign up with this email.
+            Enter the client's email address. If they already have an account,
+            they'll be added immediately. If not, they'll get access when they
+            sign up with this email.
           </Text>
         </DialogBody>
 
@@ -149,4 +154,3 @@ export function InviteClient({ projectId }: InviteClientProps) {
     </DialogRoot>
   )
 }
-
