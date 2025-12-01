@@ -29,6 +29,8 @@ import { Button } from "@/components/ui/button"
 import { Field } from "@/components/ui/field"
 import useAuth from "@/hooks/useAuth"
 import useCustomToast from "@/hooks/useCustomToast"
+import { ActivityFeed } from "@/components/Common/ActivityFeed"
+import { GalleryStatusWidget } from "@/components/Common/GalleryStatusWidget"
 
 export const Route = createFileRoute("/_layout/dashboard")({
   component: Dashboard,
@@ -356,39 +358,42 @@ function Dashboard() {
 
         {/* Stats Cards - Only for team members */}
         {isTeamMember && (
-          <Grid
-            templateColumns={{
-              base: "1fr",
-              md: "repeat(2, 1fr)",
-              lg: "repeat(4, 1fr)",
-            }}
-            gap={4}
-          >
-            <StatCard
-              icon={FiFolder}
-              label="Active Projects"
-              value={stats?.active_projects || 0}
-              colorScheme="blue"
-            />
-            <StatCard
-              icon={FiClock}
-              label="Upcoming Deadlines"
-              value={stats?.upcoming_deadlines || 0}
-              colorScheme="orange"
-            />
-            <StatCard
-              icon={FiUsers}
-              label="Team Members"
-              value={stats?.team_members || 0}
-              colorScheme="purple"
-            />
-            <StatCard
-              icon={FiCheckCircle}
-              label="Completed This Month"
-              value={stats?.completed_this_month || 0}
-              colorScheme="green"
-            />
-          </Grid>
+          <>
+            <Grid
+              templateColumns={{
+                base: "1fr",
+                md: "repeat(2, 1fr)",
+                lg: "repeat(4, 1fr)",
+              }}
+              gap={4}
+            >
+              <StatCard
+                icon={FiFolder}
+                label="Active Projects"
+                value={stats?.active_projects || 0}
+                colorScheme="blue"
+              />
+              <StatCard
+                icon={FiClock}
+                label="Upcoming Deadlines"
+                value={stats?.upcoming_deadlines || 0}
+                colorScheme="orange"
+              />
+              <StatCard
+                icon={FiUsers}
+                label="Team Members"
+                value={stats?.team_members || 0}
+                colorScheme="purple"
+              />
+              <StatCard
+                icon={FiCheckCircle}
+                label="Completed This Month"
+                value={stats?.completed_this_month || 0}
+                colorScheme="green"
+              />
+            </Grid>
+            <GalleryStatusWidget/>
+          </>
         )}
 
         {/* Client Stats - Stats Card */}
@@ -469,7 +474,7 @@ function Dashboard() {
             </Card.Root>
           )}
 
-        <Grid templateColumns={{ base: "1fr", lg: "2fr 1fr" }} gap={6}>
+        <Grid templateColumns={{ base: "1fr", lg: "2fr 1fr 1fr" }} gap={6}>
           {/* Recent Projects */}
           <Card.Root>
             <Card.Header>
@@ -579,6 +584,10 @@ function Dashboard() {
               )}
             </Card.Body>
           </Card.Root>
+          
+          {/* Activity Feed*/}
+          <ActivityFeed />
+
         </Grid>
       </Stack>
     </Container>

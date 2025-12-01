@@ -29,6 +29,8 @@ import {
 } from "@/components/ui/dialog"
 import useAuth from "@/hooks/useAuth"
 import useCustomToast from "@/hooks/useCustomToast"
+import { ApprovalHistory } from "@/components/Projects/ApprovalHistory"
+
 
 export const Route = createFileRoute("/_layout/galleries/$galleryId")({
   component: GalleryDetail,
@@ -943,6 +945,10 @@ function GalleryDetail() {
             </Box>
           )}
         </Box>
+        {/* Approval History Timeline */}
+        {gallery.status !== "draft" && gallery.status !== "processing" && (
+          <ApprovalHistory gallery={gallery} />
+        )}
       </Stack>
     </Container>
   )
