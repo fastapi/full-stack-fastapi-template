@@ -483,3 +483,123 @@ def delete_gallery(
 
     crud.delete_gallery(session=session, gallery_id=id)
     return Message(message="Gallery deleted successfully")
+
+
+@router.post("/{id}/submit-for-review", response_model=GalleryPublic)
+def submit_gallery_for_review(
+    session: SessionDep,
+    current_user: CurrentUser,
+    id: uuid.UUID,
+) -> Any:
+    """
+    Submit gallery for client review. Only team members can do this.
+    Changes status from draft/processing to pending_review.
+    """
+    user_type = getattr(current_user, "user_type", None)
+    if user_type != "team_member":
+        raise HTTPException(
+            status_code=403, detail="Only team members can submit for review"
+        )
+    
+    gallery = crud.get_gallery(session=session, gallery_id=id)
+    if not gallery:
+        raise HTTPException(status_code=404, detail="Gallery not found")
+    
+    # Check organization
+    project = crud.get_project(session=session, project_id=gallery.project_id)
+    if not project or project.organization_id != current_user.organization_id:
+        raise HTTPException(status_code=403, detail="Not enough permissions")
+    
+    # Update status
+    from app.models import GalleryUpdate
+    gallery = crud.update_gallery(
+        session=session,
+        db_gallery=gallery,
+        gallery_in=GalleryUpdate(status="pending_review")
+    )
+    return gallery
+
+
+@router.post("/{id}/approve", response_model=GalleryPublic)
+def approve_gallery(
+    session: SessionDep,
+    current_user: CurrentUser,
+    id: uuid.UUID,
+) -> Any:
+    """
+    Approve a gallery. Only clients with project access can approve.
+    Changes status to approved.
+    """
+    user_type = getattr(current_user, "user_type", None)
+    if user_type != "client":
+        raise HTTPException(
+            status_code=403, detail="Only clients can approve galleries"
+        )
+    
+    gallery = crud.get_gallery(session=session, gallery_id=id)
+    if not gallery:
+        raise HTTPException(status_code=404, detail="Gallery not found")
+    
+    # Check client has access to project
+    if not crud.user_has_project_access(
+        session=session, project_id=gallery.project_id, user_id=current_user.id
+    ):
+        raise HTTPException(status_code=403, detail="Not enough permissions")
+    
+    # Update status
+    from app.models import GalleryUpdate
+    gallery = crud.update_gallery(
+        session=session,
+        db_gallery=gallery,
+        gallery_in=GalleryUpdate(status="approved")
+    )
+    return gallery
+
+
+@router.post("/{id}/request-changes")
+def request_gallery_changes(
+    session: SessionDep,
+    current_user: CurrentUser,
+    id: uuid.UUID,
+    comment: str = Body(..., embed=True),
+) -> Any:
+    """
+    Request changes to a gallery. Only clients with project access.
+    Changes status to changes_requested and creates a comment.
+    """
+    user_type = getattr(current_user, "user_type", None)
+    if user_type != "client":
+        raise HTTPException(
+            status_code=403, detail="Only clients can request changes"
+        )
+    
+    gallery = crud.get_gallery(session=session, gallery_id=id)
+    if not gallery:
+        raise HTTPException(status_code=404, detail="Gallery not found")
+    
+    # Check client has access to project
+    if not crud.user_has_project_access(
+        session=session, project_id=gallery.project_id, user_id=current_user.id
+    ):
+        raise HTTPException(status_code=403, detail="Not enough permissions")
+    
+    # Create a comment with the requested changes
+    from app.models import CommentCreate
+    crud.create_comment(
+        session=session,
+        comment_in=CommentCreate(
+            project_id=gallery.project_id,
+            content=f"[Gallery: {gallery.name}] Changes requested: {comment}"
+        ),
+        user_id=current_user.id
+    )
+    
+    # Update status
+    from app.models import GalleryUpdate
+    gallery = crud.update_gallery(
+        session=session,
+        db_gallery=gallery,
+        gallery_in=GalleryUpdate(status="changes_requested")
+    )
+    
+    return {"message": "Changes requested successfully", "gallery": gallery}
