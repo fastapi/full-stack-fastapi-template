@@ -1,0 +1,31 @@
+[project]
+name = "app-async"
+version = "0.1.0"
+description = "async example app"
+readme = "README.md"
+requires-python = ">=3.13"
+dependencies = [
+    "alembic>=1.17.0",
+    "email-validator>=2.3.0",
+    "emails>=0.6",
+    "fastapi[standard]>=0.120.0",
+    "psycopg>=3.2.12",
+    "pwdlib[argon2]>=0.2.1",
+    "pydantic-settings>=2.11.0",
+    "pyjwt>=2.10.1",
+    "python-multipart>=0.0.20",
+    "sentry-sdk[fastapi]>=2.42.1",
+    "sqlmodel>=0.0.27",
+    "tenacity>=9.1.2",
+]
+
+[dependency-groups]
+dev = [
+    "coverage>=7.11.0",
+    "mypy>=1.18.2",
+    "pre-commit>=4.3.0",
+    "pytest>=8.4.2",
+    "ruff>=0.14.2",
+]
+
+
