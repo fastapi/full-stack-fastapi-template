@@ -3,6 +3,7 @@ import { createRootRoute, Outlet } from "@tanstack/react-router"
 import { TanStackRouterDevtools } from "@tanstack/react-router-devtools"
 
 import NotFound from "@/components/Common/NotFound"
+import ErrorComponent from "@/components/Common/ErrorComponent"
 
 export const Route = createRootRoute({
   component: () => (
@@ -13,4 +14,5 @@ export const Route = createRootRoute({
     </>
   ),
   notFoundComponent: () => <NotFound />,
+  errorComponent: () => <ErrorComponent/>,
 })
