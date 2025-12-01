@@ -161,3 +161,80 @@ def test_delete_gallery(db: Session) -> None:
 
     # Verify gallery is deleted
     assert crud.get_gallery(session=db, gallery_id=gallery_id) is None
+
+
+def test_get_galleries_by_organization(db: Session) -> None:
+    """Test retrieving all galleries for an organization"""
+    # Setup
+    org = crud.create_organization(
+        session=db, organization_in=OrganizationCreate(name=random_lower_string())
+    )
+    project1 = crud.create_project(
+        session=db,
+        project_in=ProjectCreate(
+            name="Project 1", client_name="Client 1", organization_id=org.id
+        ),
+    )
+    project2 = crud.create_project(
+        session=db,
+        project_in=ProjectCreate(
+            name="Project 2", client_name="Client 2", organization_id=org.id
+        ),
+    )
+
+    # Create galleries for different projects
+    crud.create_gallery(
+        session=db,
+        gallery_in=GalleryCreate(
+            name="Gallery 1", photo_count=10, project_id=project1.id
+        ),
+    )
+    crud.create_gallery(
+        session=db,
+        gallery_in=GalleryCreate(
+            name="Gallery 2", photo_count=20, project_id=project2.id
+        ),
+    )
+
+    # Retrieve galleries for organization
+    galleries = crud.get_galleries_by_organization(
+        session=db, organization_id=org.id
+    )
+
+    assert len(galleries) >= 2
+    gallery_names = [g.name for g in galleries]
+    assert "Gallery 1" in gallery_names
+    assert "Gallery 2" in gallery_names
+
+
+def test_count_galleries_by_organization(db: Session) -> None:
+    """Test counting galleries for an organization"""
+    # Setup
+    org = crud.create_organization(
+        session=db, organization_in=OrganizationCreate(name=random_lower_string())
+    )
+    project = crud.create_project(
+        session=db,
+        project_in=ProjectCreate(
+            name="Test Project", client_name="Client", organization_id=org.id
+        ),
+    )
+
+    # Initially should have 0 galleries
+    count = crud.count_galleries_by_organization(session=db, organization_id=org.id)
+    assert count == 0
+
+    # Create 3 galleries
+    for i in range(3):
+        crud.create_gallery(
+            session=db,
+            gallery_in=GalleryCreate(
+                name=f"Gallery {i}",
+                photo_count=i * 10,
+                project_id=project.id,
+            ),
+        )
+
+    # Should now have 3 galleries
+    count = crud.count_galleries_by_organization(session=db, organization_id=org.id)
+    assert count == 3
