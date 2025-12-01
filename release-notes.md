@@ -53,6 +53,7 @@
 
 ### Internal
 
+* ⬆ Bump @tanstack/router-plugin from 1.133.15 to 1.139.12 in /frontend. PR [#2012](https://github.com/fastapi/full-stack-fastapi-template/pull/2012) by [@dependabot[bot]](https://github.com/apps/dependabot).
 * ⬆ Bump form-data from 4.0.4 to 4.0.5 in /frontend. PR [#2011](https://github.com/fastapi/full-stack-fastapi-template/pull/2011) by [@dependabot[bot]](https://github.com/apps/dependabot).
 * ⬆ Bump actions/checkout from 5 to 6. PR [#2007](https://github.com/fastapi/full-stack-fastapi-template/pull/2007) by [@dependabot[bot]](https://github.com/apps/dependabot).
 * ⬆ Bump @types/react from 19.2.2 to 19.2.7 in /frontend. PR [#2003](https://github.com/fastapi/full-stack-fastapi-template/pull/2003) by [@dependabot[bot]](https://github.com/apps/dependabot).
