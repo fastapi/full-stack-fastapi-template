@@ -76,12 +76,19 @@ But it would be only to clean them up, leaving them won't really have any effect
 
 ### Automatically
 
-* Activate the backend virtual environment.
+* [Activate](../backend/README.md#general-workflow) the backend virtual environment.
 * From the top level project directory, run the script:
 
 ```bash
-./scripts/generate-client.sh
+bash ./scripts/generate-client.sh
 ```
+
+> [!TIP]
+> Alternatively, to ensure the virtual environment is used even if it’s not activated, run:
+>
+> ```bash
+> VIRTUAL_ENV=./backend/.venv uv run bash scripts/generate-client.sh
+> ```
 
 * Commit the changes.
 
