@@ -53,6 +53,7 @@
 
 ### Internal
 
+* ⬆ Bump playwright from v1.56.1-noble to v1.57.0-noble in /frontend. PR [#2016](https://github.com/fastapi/full-stack-fastapi-template/pull/2016) by [@dependabot[bot]](https://github.com/apps/dependabot).
 * ⬆️ Update schema version in `biome.json`. PR [#2017](https://github.com/fastapi/full-stack-fastapi-template/pull/2017) by [@alejsdev](https://github.com/alejsdev).
 * ⬆ Bump vite from 7.2.2 to 7.2.6 in /frontend. PR [#2015](https://github.com/fastapi/full-stack-fastapi-template/pull/2015) by [@dependabot[bot]](https://github.com/apps/dependabot).
 * ⬆ Bump @biomejs/biome from 2.3.7 to 2.3.8 in /frontend. PR [#2014](https://github.com/fastapi/full-stack-fastapi-template/pull/2014) by [@dependabot[bot]](https://github.com/apps/dependabot).
