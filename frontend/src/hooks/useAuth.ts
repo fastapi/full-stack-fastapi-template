@@ -1,25 +1,25 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
 import { useNavigate } from "@tanstack/react-router"
-import { useState } from "react"
 
 import {
   type Body_login_login_access_token as AccessToken,
-  type ApiError,
   LoginService,
   type UserPublic,
   type UserRegister,
   UsersService,
 } from "@/client"
 import { handleError } from "@/utils"
+import useCustomToast from "./useCustomToast"
 
 const isLoggedIn = () => {
   return localStorage.getItem("access_token") !== null
 }
 
 const useAuth = () => {
-  const [error, setError] = useState<string | null>(null)
   const navigate = useNavigate()
   const queryClient = useQueryClient()
+  const { showErrorToast } = useCustomToast()
+
   const { data: user } = useQuery<UserPublic | null, Error>({
     queryKey: ["currentUser"],
     queryFn: UsersService.readUserMe,
@@ -29,13 +29,10 @@ const useAuth = () => {
   const signUpMutation = useMutation({
     mutationFn: (data: UserRegister) =>
       UsersService.registerUser({ requestBody: data }),
-
     onSuccess: () => {
       navigate({ to: "/login" })
     },
-    onError: (err: ApiError) => {
-      handleError(err)
-    },
+    onError: handleError.bind(showErrorToast),
     onSettled: () => {
       queryClient.invalidateQueries({ queryKey: ["users"] })
     },
@@ -53,9 +50,7 @@ const useAuth = () => {
     onSuccess: () => {
       navigate({ to: "/" })
     },
-    onError: (err: ApiError) => {
-      handleError(err)
-    },
+    onError: handleError.bind(showErrorToast),
   })
 
   const logout = () => {
@@ -68,8 +63,6 @@ const useAuth = () => {
     loginMutation,
     logout,
     user,
-    error,
-    resetError: () => setError(null),
   }
 }
 
