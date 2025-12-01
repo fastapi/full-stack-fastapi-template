@@ -200,7 +200,7 @@ class GalleryBase(SQLModel):
     date: DateType | None = None
     photo_count: int = Field(default=0, ge=0)
     photographer: str | None = Field(default=None, max_length=255)
-    status: str = Field(default="draft", max_length=50)  # draft, processing, published
+    status: str = Field(default="draft", max_length=50)  # draft, processing, published, pending_review, approved, changes_requested
     cover_image_url: str | None = Field(default=None, max_length=500)
 
 

@@ -46,13 +46,26 @@ function getStatusColor(status: string) {
       return "orange"
     case "published":
       return "green"
+    case "pending_review":
+      return "blue"
+    case "approved":
+      return "green"
+    case "changes_requested":
+      return "red"
     default:
       return "gray"
   }
 }
 
 function getStatusLabel(status: string) {
-  return status.charAt(0).toUpperCase() + status.slice(1)
+  switch (status) {
+    case "pending_review":
+      return "Pending Review"
+    case "changes_requested":
+      return "Changes Requested"
+    default:
+      return status.charAt(0).toUpperCase() + status.slice(1)
+  }
 }
 
 function GalleryDetail() {
@@ -191,6 +204,123 @@ function GalleryDetail() {
       showErrorToast("Failed to delete photos")
     },
   })
+
+
+  // Submit for review mutation (team member)
+  const submitForReviewMutation = useMutation({
+    mutationFn: async () => {
+      const res = await fetch(
+        `${OpenAPI.BASE}/api/v1/galleries/${galleryId}/submit-for-review`,
+        {
+          method: "POST",
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem("access_token") ?? ""}`,
+          },
+        },
+      )
+      if (!res.ok) throw new Error("Failed to submit for review")
+      return res.json()
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["gallery", galleryId] })
+      showSuccessToast("Gallery submitted for client review!")
+    },
+    onError: () => {
+      showErrorToast("Failed to submit for review")
+    },
+  })
+
+  // Approve gallery mutation (client)
+  const approveGalleryMutation = useMutation({
+    mutationFn: async () => {
+      const res = await fetch(
+        `${OpenAPI.BASE}/api/v1/galleries/${galleryId}/approve`,
+        {
+          method: "POST",
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem("access_token") ?? ""}`,
+          },
+        },
+      )
+      if (!res.ok) throw new Error("Failed to approve gallery")
+      return res.json()
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["gallery", galleryId] })
+      showSuccessToast("Gallery approved!")
+    },
+    onError: () => {
+      showErrorToast("Failed to approve gallery")
+    },
+  })
+
+  // Request changes mutation (client)
+  const [changeComment, setChangeComment] = useState("")
+  const {
+    open: isChangesDialogOpen,
+    onOpen: onChangesDialogOpen,
+    onClose: onChangesDialogClose,
+  } = useDisclosure()
+
+  const requestChangesMutation = useMutation({
+    mutationFn: async (comment: string) => {
+      const res = await fetch(
+        `${OpenAPI.BASE}/api/v1/galleries/${galleryId}/request-changes`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${localStorage.getItem("access_token") ?? ""}`,
+          },
+          body: JSON.stringify({ comment }),
+        },
+      )
+      if (!res.ok) throw new Error("Failed to request changes")
+      return res.json()
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["gallery", galleryId] })
+      queryClient.invalidateQueries({ queryKey: ["projectComments", gallery?.project_id] })
+      setChangeComment("")
+      onChangesDialogClose()
+      showSuccessToast("Changes requested!")
+    },
+    onError: () => {
+      showErrorToast("Failed to request changes")
+    },
+  })
+
+
+  // Photo comment mutation
+  const photoCommentMutation = useMutation({
+    mutationFn: async ({ filename, comment }: { filename: string; comment: string }) => {
+      const res = await fetch(`${OpenAPI.BASE}/api/v1/comments/`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${localStorage.getItem("access_token") ?? ""}`,
+        },
+        body: JSON.stringify({
+          content: `[Photo: ${filename}] ${comment}`,
+          project_id: gallery?.project_id,
+        }),
+      })
+      if (!res.ok) throw new Error("Failed to post comment")
+      return res.json()
+    },
+    onSuccess: () => {
+      showSuccessToast("Comment added!")
+      queryClient.invalidateQueries({ queryKey: ["projectComments", gallery?.project_id] })
+    },
+    onError: () => {
+      showErrorToast("Failed to post comment")
+    },
+  })
+
+  const handlePhotoComment = (filename: string, comment: string) => {
+    photoCommentMutation.mutate({ filename, comment })
+  }
+
 
   const photos = photosData?.data ?? []
   const anySelected = Object.values(selected).some(Boolean)
@@ -406,8 +536,38 @@ function GalleryDetail() {
         </Flex>
 
         {/* Actions and Photos */}
-        <Flex gap={3} alignItems="center" justifyContent="space-between">
-          <Flex gap={2}>
+        <Flex gap={3} alignItems="center" justifyContent="space-between" flexWrap="wrap">
+          <Flex gap={2} flexWrap="wrap">
+            {/* Client Approval Buttons - only show when status is pending_review */}
+            {!isTeamMember && gallery.status === "pending_review" && (
+              <>
+                <Button
+                  colorScheme="green"
+                  onClick={() => approveGalleryMutation.mutate()}
+                  loading={approveGalleryMutation.isPending}
+                >
+                  Approve Gallery
+                </Button>
+                <Button
+                  colorScheme="orange"
+                  onClick={onChangesDialogOpen}
+                >
+                  Request Changes
+                </Button>
+              </>
+            )}
+
+            {/* Team Member Submit for Review Button */}
+            {isTeamMember && (gallery.status === "draft" || gallery.status === "processing" || gallery.status === "changes_requested") && (
+              <Button
+                colorScheme="blue"
+                onClick={() => submitForReviewMutation.mutate()}
+                loading={submitForReviewMutation.isPending}
+              >
+                Submit for Review
+              </Button>
+            )}
+
             <Button
               variant="solid"
               onClick={onConfirmAllOpen}
@@ -490,6 +650,62 @@ function GalleryDetail() {
                 }}
               >
                 Download
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </DialogRoot>
+
+        {/* Request Changes Dialog - ADD THIS */}
+        <DialogRoot
+          open={isChangesDialogOpen}
+          onOpenChange={(e: { open: boolean }) => {
+            if (!e.open) {
+              onChangesDialogClose()
+              setChangeComment("")
+            }
+          }}
+        >
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle>Request Changes</DialogTitle>
+            </DialogHeader>
+            <DialogBody>
+              <Stack gap={3}>
+                <Text>Please describe what changes you'd like to see in this gallery:</Text>
+                <textarea
+                  value={changeComment}
+                  onChange={(e) => setChangeComment(e.target.value)}
+                  placeholder="e.g., Please brighten photos 3-5, crop photo 8 differently..."
+                  rows={5}
+                  style={{
+                    width: "100%",
+                    padding: "8px",
+                    borderRadius: "4px",
+                    border: "1px solid #CBD5E0",
+                  }}
+                />
+              </Stack>
+            </DialogBody>
+            <DialogFooter>
+              <Button
+                onClick={() => {
+                  onChangesDialogClose()
+                  setChangeComment("")
+                }}
+              >
+                Cancel
+              </Button>
+              <Button
+                colorScheme="orange"
+                onClick={() => {
+                  if (changeComment.trim()) {
+                    requestChangesMutation.mutate(changeComment)
+                  }
+                }}
+                disabled={!changeComment.trim()}
+                loading={requestChangesMutation.isPending}
+              >
+                Submit Changes Request
               </Button>
             </DialogFooter>
           </DialogContent>
@@ -578,6 +794,38 @@ function GalleryDetail() {
                           Select this photo
                         </Checkbox>
                       </Flex>
+                    </Stack>
+                  </Box>
+
+                  {/* Add Comment Section */}
+                  <Box borderTopWidth="1px" pt={4}>
+                    <Text fontWeight="bold" mb={2}>Add Comment on This Photo</Text>
+                    <Stack gap={2}>
+                      <textarea
+                        placeholder="Leave feedback about this photo..."
+                        rows={3}
+                        style={{
+                          width: "100%",
+                          padding: "8px",
+                          borderRadius: "4px",
+                          border: "1px solid #CBD5E0",
+                        }}
+                        id="photo-comment-input"
+                      />
+                      <Button
+                        size="sm"
+                        colorScheme="blue"
+                        alignSelf="flex-end"
+                        onClick={() => {
+                          const input = document.getElementById("photo-comment-input") as HTMLTextAreaElement
+                          if (input && input.value.trim()) {
+                            handlePhotoComment(photos[currentPhotoIndex].filename, input.value)
+                            input.value = ""
+                          }
+                        }}
+                      >
+                        Post Comment
+                      </Button>
                     </Stack>
                   </Box>
                 </Stack>
