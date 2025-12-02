@@ -1,16 +1,16 @@
 import { zodResolver } from "@hookform/resolvers/zod"
 import { useMutation } from "@tanstack/react-query"
-import { createFileRoute, Link as RouterLink, redirect, useNavigate } from "@tanstack/react-router"
+import {
+  createFileRoute,
+  Link as RouterLink,
+  redirect,
+  useNavigate,
+} from "@tanstack/react-router"
 import { useForm } from "react-hook-form"
 import { z } from "zod"
 
 import { LoginService } from "@/client"
-import { isLoggedIn } from "@/hooks/useAuth"
-import useCustomToast from "@/hooks/useCustomToast"
-import { handleError } from "@/utils"
 import { AuthLayout } from "@/components/Common/AuthLayout"
-import { LoadingButton } from "@/components/ui/loading-button"
-import { PasswordInput } from "@/components/ui/password-input"
 import {
   Form,
   FormControl,
@@ -19,6 +19,11 @@ import {
   FormLabel,
   FormMessage,
 } from "@/components/ui/form"
+import { LoadingButton } from "@/components/ui/loading-button"
+import { PasswordInput } from "@/components/ui/password-input"
+import { isLoggedIn } from "@/hooks/useAuth"
+import useCustomToast from "@/hooks/useCustomToast"
+import { handleError } from "@/utils"
 
 const searchSchema = z.object({
   token: z.string().catch(""),
@@ -30,7 +35,9 @@ const formSchema = z
       .string()
       .min(1, { message: "Password is required" })
       .min(8, { message: "Password must be at least 8 characters" }),
-    confirm_password: z.string().min(1, { message: "Password confirmation is required" }),
+    confirm_password: z
+      .string()
+      .min(1, { message: "Password confirmation is required" }),
   })
   .refine((data) => data.new_password === data.confirm_password, {
     message: "The passwords don't match",

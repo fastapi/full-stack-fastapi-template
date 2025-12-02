@@ -1,8 +1,8 @@
 import { zodResolver } from "@hookform/resolvers/zod"
 import {
   createFileRoute,
-  redirect,
   Link as RouterLink,
+  redirect,
 } from "@tanstack/react-router"
 import { useForm } from "react-hook-form"
 import { z } from "zod"
@@ -112,10 +112,7 @@ function Login() {
               )}
             />
 
-            <LoadingButton
-              type="submit"
-              loading={loginMutation.isPending}
-            >
+            <LoadingButton type="submit" loading={loginMutation.isPending}>
               Log In
             </LoadingButton>
           </div>

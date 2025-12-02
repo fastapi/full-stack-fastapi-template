@@ -6,12 +6,7 @@ import {
 } from "@tanstack/react-router"
 import { useForm } from "react-hook-form"
 import { z } from "zod"
-
-import useAuth, { isLoggedIn } from "@/hooks/useAuth"
 import { AuthLayout } from "@/components/Common/AuthLayout"
-import { LoadingButton } from "@/components/ui/loading-button"
-import { Input } from "@/components/ui/input"
-import { PasswordInput } from "@/components/ui/password-input"
 import {
   Form,
   FormControl,
@@ -20,6 +15,10 @@ import {
   FormLabel,
   FormMessage,
 } from "@/components/ui/form"
+import { Input } from "@/components/ui/input"
+import { LoadingButton } from "@/components/ui/loading-button"
+import { PasswordInput } from "@/components/ui/password-input"
+import useAuth, { isLoggedIn } from "@/hooks/useAuth"
 
 const formSchema = z
   .object({
@@ -29,7 +28,9 @@ const formSchema = z
       .string()
       .min(1, { message: "Password is required" })
       .min(8, { message: "Password must be at least 8 characters" }),
-    confirm_password: z.string().min(1, { message: "Password confirmation is required" }),
+    confirm_password: z
+      .string()
+      .min(1, { message: "Password confirmation is required" }),
   })
   .refine((data) => data.password === data.confirm_password, {
     message: "The passwords don't match",
