@@ -71,7 +71,7 @@ export function ProjectTimeline({ project }: ProjectTimelineProps) {
       {/* Header */}
       <Flex justify="space-between" align="center" mb="4">
         <Box>
-          <Text fontSize="lg" fontWeight="bold">
+          <Text fontSize="lg" fontWeight="bold" color="#1E3A8A">
             Project Timeline
           </Text>
           <Text fontSize="sm" color="gray.500">

@@ -12,19 +12,22 @@ function Navbar() {
       justify="space-between"
       position="sticky"
       align="center"
-      bg="bg.muted"
+      bg="#1E3A8A"
       w="100%"
       top={0}
       p={4}
+      borderBottom="1px solid #1E40AF"
     >
       <Link to="/">
         <Heading
           size="2xl"
-          fontWeight="bold"
-          letterSpacing="tight"
-          _hover={{ opacity: 0.8 }}
+          fontWeight="700"
+          letterSpacing="wide"
+          color="#F59E0B"
+          fontFamily="'Poppins', sans-serif"
+          _hover={{ opacity: 0.9 }}
         >
-          Mosaic
+          MOSAIC
         </Heading>
       </Link>
       <Flex gap={2} alignItems="center">

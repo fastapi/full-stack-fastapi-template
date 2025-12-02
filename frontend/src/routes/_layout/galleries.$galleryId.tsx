@@ -458,7 +458,7 @@ function GalleryDetail() {
   if (isLoading) {
     return (
       <Container maxW="full" p={6}>
-        <Text>Loading gallery...</Text>
+        <Text color="#64748B">Loading gallery...</Text>
       </Container>
     )
   }
@@ -466,9 +466,9 @@ function GalleryDetail() {
   if (!gallery) {
     return (
       <Container maxW="full" p={6}>
-        <Text>Gallery not found</Text>
+        <Text color="#64748B">Gallery not found</Text>
         <Link to="/galleries">
-          <Text color="blue.500">← Back to Galleries</Text>
+          <Text color="#64748B">← Back to Galleries</Text>
         </Link>
       </Container>
     )
@@ -487,13 +487,13 @@ function GalleryDetail() {
           <Box flex={1}>
             <Flex justifyContent="space-between" alignItems="start">
               <Box>
-                <Heading size="2xl" mb={2}>
+                <Heading size="2xl" mb={2} color="#1E3A8A">
                   {gallery.name}
                 </Heading>
                 <Flex
                   gap={4}
                   fontSize="sm"
-                  color="fg.muted"
+                  color="#64748B"
                   alignItems="center"
                   flexWrap="wrap"
                 >
@@ -683,7 +683,7 @@ function GalleryDetail() {
                     width: "100%",
                     padding: "8px",
                     borderRadius: "4px",
-                    border: "1px solid #CBD5E0",
+                    border: "1px solid #E2E8F0",
                   }}
                 />
               </Stack>
@@ -722,7 +722,7 @@ function GalleryDetail() {
             }
           }}
         >
-          <DialogContent maxW="800px">
+          <DialogContent maxW="800px " bg="white">
             <DialogHeader>
               <DialogTitle>Photo details</DialogTitle>
             </DialogHeader>
@@ -733,7 +733,7 @@ function GalleryDetail() {
                     position="relative"
                     w="100%"
                     h="400px"
-                    bg="gray.100"
+                    bg="#E5E7EB"
                     borderRadius="md"
                     overflow="hidden"
                     display="flex"
@@ -807,10 +807,11 @@ function GalleryDetail() {
                         placeholder="Leave feedback about this photo..."
                         rows={3}
                         style={{
+                          backgroundColor: "rgba(226, 232, 240, 1)",
                           width: "100%",
                           padding: "8px",
                           borderRadius: "4px",
-                          border: "1px solid #CBD5E0",
+                          border: "1px solid #E2E8F0",
                         }}
                         id="photo-comment-input"
                       />
@@ -869,7 +870,7 @@ function GalleryDetail() {
                     key={p.id}
                     position="relative"
                     h="200px"
-                    bg="gray.100"
+                    bg="rgba(255, 255, 255, 0.9)"
                     borderRadius="md"
                     display="flex"
                     alignItems="center"
@@ -901,7 +902,7 @@ function GalleryDetail() {
                       position="absolute"
                       top="8px"
                       left="8px"
-                      bg="whiteAlpha.800"
+                      bg="#rgba(255, 255, 255, 0.9)"
                       borderRadius="md"
                       p={1}
                       onClick={(e: React.MouseEvent<HTMLDivElement>) => {
@@ -926,19 +927,19 @@ function GalleryDetail() {
             <Box
               p={12}
               textAlign="center"
-              border="2px dashed"
-              borderColor="gray.300"
+              border="2px dashed #E2E8F0"
+              borderColor="#E2E8F0"
               borderRadius="md"
             >
               <FiImage
                 size={48}
-                style={{ margin: "0 auto", color: "#CBD5E0" }}
+                style={{ margin: "0 auto", color: "#64748B" }}
               />
-              <Text mt={4} color="fg.muted">
+              <Text mt={4} color="#64748B">
                 No photos in this gallery yet
               </Text>
               {isTeamMember && (
-                <Text mt={2} color="fg.muted">
+                <Text mt={2} color="#64748B">
                   You can upload up to 20 photos.
                 </Text>
               )}

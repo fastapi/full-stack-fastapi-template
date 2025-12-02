@@ -44,7 +44,7 @@ const Sidebar = () => {
             <FaBars />
           </IconButton>
         </DrawerTrigger>
-        <DrawerContent maxW="xs">
+        <DrawerContent maxW="xs" bg="white">
           <DrawerCloseTrigger />
           <DrawerBody>
             <Flex flexDir="column" justify="space-between">
@@ -59,13 +59,18 @@ const Sidebar = () => {
                   gap={4}
                   px={4}
                   py={2}
+                  color="#64748B"
+                  _hover={{
+                    bg: "#F1F5F9",
+                    color: "#1E3A8A",
+                  }}
                 >
                   <FiLogOut />
                   <Text>Log Out</Text>
                 </Flex>
               </Box>
               {currentUser?.email && (
-                <Text fontSize="sm" p={2} truncate maxW="sm">
+                <Text fontSize="sm" p={2} truncate maxW="sm" color="#64748B">
                   Logged in as: {currentUser.email}
                 </Text>
               )}
@@ -76,11 +81,11 @@ const Sidebar = () => {
       </DrawerRoot>
 
       {/* Desktop */}
-
       <Box
         display={{ base: "none", md: "flex" }}
         position="sticky"
-        bg="bg.subtle"
+        bg="white"
+        borderRight="1px solid #E2E8F0"
         top={0}
         minW="xs"
         h="100vh"

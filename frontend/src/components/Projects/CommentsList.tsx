@@ -59,25 +59,25 @@ export function CommentsList({ projectId }: CommentsListProps) {
 
   if (isLoading) {
     return (
-      <Card.Root>
+      <Card.Root bg="white" borderColor="#E2E8F0" borderWidth="1px">
         <Card.Header>
-          <Heading size="lg">Comments</Heading>
+          <Heading size="lg" color="#1E3A8A" fontFamily="'Poppins', sans-serif">Comments</Heading>
         </Card.Header>
         <Card.Body>
-          <Text>Loading comments...</Text>
+          <Text color="#64748B">Loading comments...</Text>
         </Card.Body>
       </Card.Root>
     )
   }
 
   return (
-    <Card.Root>
+    <Card.Root bg="white" borderColor="#E2E8F0" borderWidth="1px">
       <Card.Header>
         <Flex justify="space-between" align="center">
-          <Heading size="lg">Comments</Heading>
+          <Heading size="lg" color="#1E3A8A" fontFamily="'Poppins', sans-serif">Comments</Heading>
           <Flex align="center" gap={2}>
-            <FiMessageSquare />
-            <Text fontSize="sm" color="fg.muted">
+            <FiMessageSquare color="#1E40AF" />
+            <Text fontSize="sm" color="#64748B">
               {comments.length} comments
             </Text>
           </Flex>
@@ -85,7 +85,7 @@ export function CommentsList({ projectId }: CommentsListProps) {
       </Card.Header>
       <Card.Body>
         {comments.length === 0 ? (
-          <Text color="fg.muted">
+          <Text color="#64748B">
             No comments yet. Be the first to comment!
           </Text>
         ) : (
@@ -95,22 +95,23 @@ export function CommentsList({ projectId }: CommentsListProps) {
                 key={comment.id}
                 p={4}
                 borderWidth="1px"
+                borderColor="#E2E8F0"
                 borderRadius="md"
-                bg="bg.subtle"
+                bg="white"
               >
                 <Flex gap={3}>
-                  <Box>
-                    <FiUser size={20} />
+                  <Box p={2} bg="#DBEAFE" borderRadius="full">
+                    <FiUser size={20} color="#1E40AF" />
                   </Box>
                   <Box flex={1}>
                     <Flex justify="space-between" align="center" mb={2}>
-                      <Text fontWeight="semibold" fontSize="sm">
+                      <Text fontWeight="semibold" fontSize="sm" color="#1E3A8A">
                         {comment.user?.full_name ||
                           comment.user?.email ||
                           "Unknown User"}
                       </Text>
                       <Flex align="center" gap={2}>
-                        <Text fontSize="xs" color="fg.muted">
+                        <Text fontSize="xs" color="#64748B">
                           {new Date(`${comment.created_at}Z`).toLocaleString(
                             "en-US",
                             {
@@ -135,7 +136,7 @@ export function CommentsList({ projectId }: CommentsListProps) {
                         )}
                       </Flex>
                     </Flex>
-                    <Text fontSize="sm">{comment.content}</Text>
+                    <Text fontSize="sm" color="#1E293B">{comment.content}</Text>
                   </Box>
                 </Flex>
               </Box>

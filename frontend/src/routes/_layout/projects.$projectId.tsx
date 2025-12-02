@@ -96,7 +96,7 @@ function ProjectDetail() {
   if (isLoading) {
     return (
       <Container maxW="full" p={6}>
-        <Text>Loading project...</Text>
+        <Text color="#64748B">Loading project...</Text>
       </Container>
     )
   }
@@ -104,9 +104,9 @@ function ProjectDetail() {
   if (!project) {
     return (
       <Container maxW="full" p={6}>
-        <Text>Project not found</Text>
+        <Text color="#64748B">Project not found</Text>
         <Link to="/">
-          <Text color="blue.500">← Back to Dashboard</Text>
+          <Text color="#1E3A8A" _hover={{ textDecoration: "underline" }}>← Back to Dashboard</Text>
         </Link>
       </Container>
     )
@@ -123,17 +123,17 @@ function ProjectDetail() {
         {/* Header with Back Button */}
         <Flex alignItems="center" gap={4}>
           <Link to="/">
-            <IconButton variant="ghost" aria-label="Back to dashboard">
+            <IconButton variant="ghost" aria-label="Back to dashboard" color="#1E3A8A">
               <FiArrowLeft />
             </IconButton>
           </Link>
           <Box flex={1}>
             <Flex justifyContent="space-between" alignItems="start">
               <Box>
-                <Heading size="2xl" mb={2}>
+                <Heading size="2xl" mb={2} color="#1E3A8A" fontFamily="'Poppins', sans-serif">
                   {project.name}
                 </Heading>
-                <HStack fontSize="sm" color="fg.muted">
+                <HStack fontSize="sm" color="#64748B">
                   <Text>Client: {project.client_name}</Text>
                   {project.client_email && (
                     <>
@@ -164,15 +164,17 @@ function ProjectDetail() {
 
         {/* Quick Stats */}
         <Grid templateColumns={{ base: "1fr", md: "repeat(4, 1fr)" }} gap={4}>
-          <Card.Root>
+          <Card.Root bg="white" borderColor="#E2E8F0" borderWidth="1px">
             <Card.Body>
               <Flex alignItems="center" gap={3}>
-                <FiCalendar size={20} />
+                <Box p={2} bg="#DBEAFE" borderRadius="md">
+                  <FiCalendar size={20} color="#1E40AF" />
+                </Box>
                 <Box>
-                  <Text fontSize="xs" color="fg.muted">
+                  <Text fontSize="xs" color="#64748B" fontWeight="500">
                     Deadline
                   </Text>
-                  <Text fontWeight="semibold">
+                  <Text fontWeight="semibold" color="#1E3A8A">
                     {project.deadline || "Not set"}
                   </Text>
                 </Box>
@@ -180,15 +182,17 @@ function ProjectDetail() {
             </Card.Body>
           </Card.Root>
 
-          <Card.Root>
+          <Card.Root bg="white" borderColor="#E2E8F0" borderWidth="1px">
             <Card.Body>
               <Flex alignItems="center" gap={3}>
-                <FiImage size={20} />
+                <Box p={2} bg="#DBEAFE" borderRadius="md">
+                  <FiImage size={20} color="#1E40AF" />
+                </Box>
                 <Box>
-                  <Text fontSize="xs" color="fg.muted">
+                  <Text fontSize="xs" color="#64748B" fontWeight="500">
                     Gallery Photos
                   </Text>
-                  <Text fontWeight="semibold">
+                  <Text fontWeight="semibold" color="#1E3A8A">
                     {projectGallery?.photo_count || 0}
                   </Text>
                 </Box>
@@ -196,29 +200,33 @@ function ProjectDetail() {
             </Card.Body>
           </Card.Root>
 
-          <Card.Root>
+          <Card.Root bg="white" borderColor="#E2E8F0" borderWidth="1px">
             <Card.Body>
               <Flex alignItems="center" gap={3}>
-                <FiMessageSquare size={20} />
+                <Box p={2} bg="#DBEAFE" borderRadius="md">
+                  <FiMessageSquare size={20} color="#1E40AF" />
+                </Box>
                 <Box>
-                  <Text fontSize="xs" color="fg.muted">
+                  <Text fontSize="xs" color="#64748B" fontWeight="500">
                     Comments
                   </Text>
-                  <Text fontWeight="semibold">{commentsData?.count || 0}</Text>
+                  <Text fontWeight="semibold" color="#1E3A8A">{commentsData?.count || 0}</Text>
                 </Box>
               </Flex>
             </Card.Body>
           </Card.Root>
 
-          <Card.Root>
+          <Card.Root bg="white" borderColor="#E2E8F0" borderWidth="1px">
             <Card.Body>
               <Flex alignItems="center" gap={3}>
-                <FiUsers size={20} />
+                <Box p={2} bg="#DBEAFE" borderRadius="md">
+                  <FiUsers size={20} color="#1E40AF" />
+                </Box>
                 <Box>
-                  <Text fontSize="xs" color="fg.muted">
+                  <Text fontSize="xs" color="#64748B" fontWeight="500">
                     Progress
                   </Text>
-                  <Text fontWeight="semibold">{project.progress}%</Text>
+                  <Text fontWeight="semibold" color="#1E3A8A">{project.progress}%</Text>
                 </Box>
               </Flex>
             </Card.Body>
@@ -229,76 +237,76 @@ function ProjectDetail() {
           {/* Main Content */}
           <Stack gap={6}>
             {/* Project Details */}
-            <Card.Root>
+            <Card.Root bg="white" borderColor="#E2E8F0" borderWidth="1px">
               <Card.Header>
-                <Heading size="lg">Project Details</Heading>
+                <Heading size="lg" color="#1E3A8A" fontFamily="'Poppins', sans-serif">Project Details</Heading>
               </Card.Header>
               <Card.Body>
                 <Stack gap={4}>
                   {project.description && (
                     <>
                       <Box>
-                        <Text fontWeight="semibold" mb={2}>
+                        <Text fontWeight="semibold" mb={2} color="#1E3A8A">
                           Description
                         </Text>
-                        <Text>{project.description}</Text>
+                        <Text color="#1E293B">{project.description}</Text>
                       </Box>
-                      <Separator />
+                      <Separator borderColor="#E2E8F0" />
                     </>
                   )}
 
                   {project.budget && (
                     <>
                       <Box>
-                        <Text fontWeight="semibold" mb={2}>
+                        <Text fontWeight="semibold" mb={2} color="#1E3A8A">
                           Budget
                         </Text>
-                        <Text>{project.budget}</Text>
+                        <Text color="#1E293B">{project.budget}</Text>
                       </Box>
-                      <Separator />
+                      <Separator borderColor="#E2E8F0" />
                     </>
                   )}
 
                   <Box>
-                    <Text fontWeight="semibold" mb={2}>
+                    <Text fontWeight="semibold" mb={2} color="#1E3A8A">
                       Project Timeline
                     </Text>
                     <Stack gap={2}>
                       {project.start_date && (
                         <Flex alignItems="center" gap={2}>
-                          <Text fontSize="sm" color="fg.muted">
+                          <Text fontSize="sm" color="#64748B">
                             Start Date:
                           </Text>
-                          <Text fontSize="sm">{project.start_date}</Text>
+                          <Text fontSize="sm" color="#1E293B">{project.start_date}</Text>
                         </Flex>
                       )}
                       {project.deadline && (
                         <Flex alignItems="center" gap={2}>
-                          <Text fontSize="sm" color="fg.muted">
+                          <Text fontSize="sm" color="#64748B">
                             Deadline:
                           </Text>
-                          <Text fontSize="sm">{project.deadline}</Text>
+                          <Text fontSize="sm" color="#1E293B">{project.deadline}</Text>
                         </Flex>
                       )}
                     </Stack>
                   </Box>
 
-                  <Separator />
+                  <Separator borderColor="#E2E8F0" />
 
                   <Box>
-                    <Text fontWeight="semibold" mb={2}>
+                    <Text fontWeight="semibold" mb={2} color="#1E3A8A">
                       Gallery
                     </Text>
                     {projectGallery ? (
                       <Flex alignItems="center" gap={2}>
-                        <FiImage size={14} />
-                        <Text fontSize="sm">{projectGallery.name}</Text>
+                        <FiImage size={14} color="#1E40AF" />
+                        <Text fontSize="sm" color="#1E293B">{projectGallery.name}</Text>
                         <Badge size="sm" colorScheme="blue">
                           {projectGallery.photo_count || 0} photos
                         </Badge>
                       </Flex>
                     ) : (
-                      <Text fontSize="sm" color="fg.muted">
+                      <Text fontSize="sm" color="#64748B">
                         No gallery yet
                       </Text>
                     )}
@@ -308,38 +316,38 @@ function ProjectDetail() {
             </Card.Root>
 
             {/* Timeline / Milestones */}
-            <Card.Root>
+            <Card.Root bg="white" borderColor="#E2E8F0" borderWidth="1px">
               <Card.Body>
                 <ProjectTimeline project={project} />
               </Card.Body>
             </Card.Root>
 
-            {/* Comments Section - ADD THIS */}
+            {/* Comments Section */}
             <CommentsList projectId={projectId} />
           </Stack>
 
           {/* Sidebar */}
           <Stack gap={6}>
             {/* Project Info */}
-            <Card.Root>
+            <Card.Root bg="white" borderColor="#E2E8F0" borderWidth="1px">
               <Card.Header>
-                <Heading size="lg">Project Info</Heading>
+                <Heading size="lg" color="#1E3A8A" fontFamily="'Poppins', sans-serif">Project Info</Heading>
               </Card.Header>
               <Card.Body>
                 <Stack gap={3}>
                   <Box>
-                    <Text fontSize="xs" color="fg.muted" mb={1}>
+                    <Text fontSize="xs" color="#64748B" mb={1} fontWeight="500">
                       Created
                     </Text>
-                    <Text fontSize="sm">
+                    <Text fontSize="sm" color="#1E293B">
                       {new Date(project.created_at).toLocaleDateString()}
                     </Text>
                   </Box>
                   <Box>
-                    <Text fontSize="xs" color="fg.muted" mb={1}>
+                    <Text fontSize="xs" color="#64748B" mb={1} fontWeight="500">
                       Last Updated
                     </Text>
-                    <Text fontSize="sm">
+                    <Text fontSize="sm" color="#1E293B">
                       {new Date(project.updated_at).toLocaleDateString()}
                     </Text>
                   </Box>
@@ -354,9 +362,9 @@ function ProjectDetail() {
             />
 
             {/* Quick Actions */}
-            <Card.Root>
+            <Card.Root bg="white" borderColor="#E2E8F0" borderWidth="1px">
               <Card.Header>
-                <Heading size="lg">Quick Actions</Heading>
+                <Heading size="lg" color="#1E3A8A" fontFamily="'Poppins', sans-serif">Quick Actions</Heading>
               </Card.Header>
               <Card.Body>
                 <Stack gap={2}>
@@ -369,13 +377,16 @@ function ProjectDetail() {
                       <Box
                         p={3}
                         borderWidth="1px"
+                        borderColor="#E2E8F0"
                         borderRadius="md"
                         cursor="pointer"
-                        _hover={{ bg: "bg.subtle" }}
+                        bg="white"
+                        _hover={{ bg: "#F8FAFC", borderColor: "#1E3A8A" }}
+                        transition="all 0.2s"
                       >
                         <Flex alignItems="center" gap={2}>
-                          <FiImage />
-                          <Text fontSize="sm">View Gallery</Text>
+                          <FiImage color="#1E40AF" />
+                          <Text fontSize="sm" color="#1E293B">View Gallery</Text>
                         </Flex>
                       </Box>
                     </Link>
@@ -383,29 +394,34 @@ function ProjectDetail() {
                     <Box
                       p={3}
                       borderWidth="1px"
+                      borderColor="#E2E8F0"
                       borderRadius="md"
                       opacity={0.5}
+                      bg="white"
                     >
                       <Flex alignItems="center" gap={2}>
-                        <FiImage />
-                        <Text fontSize="sm">No Gallery Yet</Text>
+                        <FiImage color="#64748B" />
+                        <Text fontSize="sm" color="#64748B">No Gallery Yet</Text>
                       </Flex>
                     </Box>
                   )}
-                  <Box borderWidth="1px" borderRadius="md">
+                  <Box borderWidth="1px" borderColor="#E2E8F0" borderRadius="md" bg="white">
                     <AddComment projectId={projectId} />
                   </Box>
                   {currentUser?.user_type === "team_member" && (
                     <Box
                       p={3}
                       borderWidth="1px"
+                      borderColor="#E2E8F0"
                       borderRadius="md"
                       cursor="pointer"
-                      _hover={{ bg: "bg.subtle" }}
+                      bg="white"
+                      _hover={{ bg: "#F8FAFC", borderColor: "#1E3A8A" }}
+                      transition="all 0.2s"
                     >
                       <Flex alignItems="center" gap={2}>
-                        <FiUsers />
-                        <Text fontSize="sm">Manage Team</Text>
+                        <FiUsers color="#1E40AF" />
+                        <Text fontSize="sm" color="#1E293B">Manage Team</Text>
                       </Flex>
                     </Box>
                   )}
