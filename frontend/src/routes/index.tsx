@@ -22,25 +22,24 @@ export const Route = createFileRoute("/")({
 
 function LandingPage() {
   return (
-    <Flex h="100vh" alignItems="center" justifyContent="center">
+    <Flex h="100vh" alignItems="center" justifyContent="center" bg="#F8FAFC">
       <Container maxW="6xl">
         <Flex direction="column" align="center" gap={8} py={20}>
           {/* Header */}
           <Box textAlign="center" mb={8}>
             <Heading
               size="6xl"
-              bgGradient="to-r"
-              gradientFrom="blue.400"
-              gradientTo="purple.500"
-              bgClip="text"
+              color="#1E3A8A"
               mb={4}
+              fontFamily="'Poppins', sans-serif"
+              fontWeight="700"
             >
-              Mosaic
+              MOSAIC
             </Heading>
-            <Text fontSize="2xl" color="fg.muted">
+            <Text fontSize="2xl" color="#64748B" fontWeight="500">
               Photography Project Management
             </Text>
-            <Text fontSize="lg" color="fg.muted" mt={2}>
+            <Text fontSize="lg" color="#64748B" mt={2}>
               Collaborate seamlessly on photography projects
             </Text>
           </Box>
@@ -58,31 +57,45 @@ function LandingPage() {
               flex="1"
               p={8}
               borderWidth="2px"
+              borderColor="#E2E8F0"
               borderRadius="xl"
-              bg="bg.subtle"
+              bg="white"
               transition="all 0.3s"
               _hover={{
-                borderColor: "blue.500",
+                borderColor: "#1E3A8A",
                 transform: "translateY(-4px)",
-                boxShadow: "lg",
+                boxShadow: "0 8px 16px rgba(30, 58, 138, 0.15)",
               }}
             >
               <Flex direction="column" align="center" gap={4}>
-                <Box p={4} bg="blue.subtle" borderRadius="full">
+                <Box 
+                  p={4} 
+                  bg="linear-gradient(135deg, #1E3A8A, #3B82F6)" 
+                  borderRadius="full"
+                  color="white"
+                >
                   <FiUsers size={48} />
                 </Box>
-                <Heading size="xl">Team Member</Heading>
-                <Text textAlign="center" color="fg.muted">
+                <Heading 
+                  size="xl" 
+                  color="#1E3A8A"
+                  fontFamily="'Poppins', sans-serif"
+                >
+                  Team Member
+                </Heading>
+                <Text textAlign="center" color="#64748B">
                   Access your organization's projects, manage galleries, and
                   collaborate with your team
                 </Text>
                 <RouterLink to="/team-login" style={{ width: "100%" }}>
                   <Button
-                    variant="solid"
-                    colorScheme="blue"
                     size="lg"
                     w="100%"
                     mt={4}
+                    bg="#1E3A8A"
+                    color="white"
+                    fontWeight="600"
+                    _hover={{ bg: "#1E40AF" }}
                   >
                     Team Login
                   </Button>
@@ -95,31 +108,45 @@ function LandingPage() {
               flex="1"
               p={8}
               borderWidth="2px"
+              borderColor="#E2E8F0"
               borderRadius="xl"
-              bg="bg.subtle"
+              bg="white"
               transition="all 0.3s"
               _hover={{
-                borderColor: "purple.500",
+                borderColor: "#F59E0B",
                 transform: "translateY(-4px)",
-                boxShadow: "lg",
+                boxShadow: "0 8px 16px rgba(245, 158, 11, 0.15)",
               }}
             >
               <Flex direction="column" align="center" gap={4}>
-                <Box p={4} bg="purple.subtle" borderRadius="full">
+                <Box 
+                  p={4} 
+                  bg="linear-gradient(135deg, #F59E0B, #FBBF24)" 
+                  borderRadius="full"
+                  color="#1E3A8A"
+                >
                   <FiBriefcase size={48} />
                 </Box>
-                <Heading size="xl">Client</Heading>
-                <Text textAlign="center" color="fg.muted">
+                <Heading 
+                  size="xl" 
+                  color="#1E3A8A"
+                  fontFamily="'Poppins', sans-serif"
+                >
+                  Client
+                </Heading>
+                <Text textAlign="center" color="#64748B">
                   View your projects, review galleries, and communicate with
                   your photography team
                 </Text>
                 <RouterLink to="/client-login" style={{ width: "100%" }}>
                   <Button
-                    variant="solid"
-                    colorScheme="purple"
                     size="lg"
                     w="100%"
                     mt={4}
+                    bg="#F59E0B"
+                    color="#1E3A8A"
+                    fontWeight="600"
+                    _hover={{ bg: "#D97706" }}
                   >
                     Client Login
                   </Button>
@@ -130,9 +157,16 @@ function LandingPage() {
 
           {/* Sign Up Link */}
           <Box mt={8} textAlign="center">
-            <Text fontSize="lg">
+            <Text fontSize="lg" color="#64748B">
               Don't have an account?{" "}
-              <RouterLink to="/signup" className="main-link">
+              <RouterLink 
+                to="/signup" 
+                style={{ 
+                  color: "#1E3A8A", 
+                  fontWeight: "600",
+                  textDecoration: "underline"
+                }}
+              >
                 Sign Up
               </RouterLink>
             </Text>

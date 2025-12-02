@@ -76,7 +76,7 @@ function ProjectsTable() {
   const projects = data?.data ?? []
 
   if (isLoading) {
-    return <Text>Loading projects...</Text>
+    return <Text color="#64748B">Loading projects...</Text>
   }
 
   if (projects.length === 0) {
@@ -85,11 +85,11 @@ function ProjectsTable() {
       <EmptyState.Root>
         <EmptyState.Content>
           <EmptyState.Indicator>
-            <FiFolder size={48} />
+            <FiFolder size={48} color="#64748B" />
           </EmptyState.Indicator>
           <VStack textAlign="center">
-            <EmptyState.Title>No projects yet</EmptyState.Title>
-            <EmptyState.Description>
+            <EmptyState.Title color="#1E3A8A">No projects yet</EmptyState.Title>
+            <EmptyState.Description color="#64748B">
               {isClient
                 ? "You don't have any projects yet. Please wait for your team to add you to a project."
                 : "Create your first project to get started"}
@@ -101,60 +101,64 @@ function ProjectsTable() {
   }
 
   return (
-    <Table.Root size={{ base: "sm", md: "md" }}>
+    <Table.Root size={{ base: "sm", md: "md" }} bg = "white">
       <Table.Header>
-        <Table.Row>
-          <Table.ColumnHeader>Project Name</Table.ColumnHeader>
-          <Table.ColumnHeader>Client</Table.ColumnHeader>
-          <Table.ColumnHeader>Status</Table.ColumnHeader>
-          <Table.ColumnHeader>Deadline</Table.ColumnHeader>
-          <Table.ColumnHeader>Progress</Table.ColumnHeader>
+        <Table.Row bg="#F8FAFC">
+          <Table.ColumnHeader color="#1E3A8A" fontWeight="600">Project Name</Table.ColumnHeader>
+          <Table.ColumnHeader color="#1E3A8A" fontWeight="600">Client</Table.ColumnHeader>
+          <Table.ColumnHeader color="#1E3A8A" fontWeight="600">Status</Table.ColumnHeader>
+          <Table.ColumnHeader color="#1E3A8A" fontWeight="600">Deadline</Table.ColumnHeader>
+          <Table.ColumnHeader color="#1E3A8A" fontWeight="600">Progress</Table.ColumnHeader>
         </Table.Row>
       </Table.Header>
-      <Table.Body>
+      <Table.Body bg = "white">
         {projects.map((project: ProjectPublic) => (
           <Table.Row
             key={project.id}
             opacity={isPlaceholderData ? 0.5 : 1}
-            _hover={{ bg: "bg.subtle", cursor: "pointer" }}
+            _hover={{ bg: "white", cursor: "pointer" }}
+            borderBottomWidth="1px"
+            borderBottomColor="#E2E8F0"
           >
-            <Table.Cell>
+            <Table.Cell bg = "white">
               <Link
                 to="/projects/$projectId"
                 params={{ projectId: project.id }}
-                style={{ textDecoration: "none", color: "inherit" }}
+                style={{ textDecoration: "none" }}
               >
-                <Text fontWeight="semibold">{project.name}</Text>
+                <Text fontWeight="semibold" color="#1E3A8A" _hover={{ textDecoration: "underline" }}>
+                  {project.name}
+                </Text>
               </Link>
             </Table.Cell>
-            <Table.Cell>
-              <Text fontSize="sm" color="fg.muted">
+            <Table.Cell bg = "white">
+              <Text fontSize="sm" color="#64748B">
                 {project.client_name}
               </Text>
             </Table.Cell>
-            <Table.Cell>
+            <Table.Cell bg = "white">
               <Badge colorScheme={getStatusColor(project.status || "pending")}>
                 {getStatusLabel(project.status || "pending")}
               </Badge>
             </Table.Cell>
-            <Table.Cell>
+            <Table.Cell bg = "white">
               {project.deadline ? (
                 <Flex alignItems="center" gap={1}>
-                  <FiCalendar size={14} />
-                  <Text fontSize="sm">{project.deadline}</Text>
+                  <FiCalendar size={14} color="#64748B" />
+                  <Text fontSize="sm" color="#1E293B">{project.deadline}</Text>
                 </Flex>
               ) : (
-                <Text fontSize="sm" color="fg.muted">
+                <Text fontSize="sm" color="#64748B">
                   —
                 </Text>
               )}
             </Table.Cell>
-            <Table.Cell>
+            <Table.Cell bg = "white">
               <Flex alignItems="center" gap={2}>
                 <Box
                   w="100px"
                   h="6px"
-                  bg="bg.muted"
+                  bg="#E2E8F0"
                   borderRadius="full"
                   overflow="hidden"
                 >
@@ -163,15 +167,15 @@ function ProjectsTable() {
                     w={`${project.progress || 0}%`}
                     bg={
                       (project.progress || 0) === 100
-                        ? "green.500"
+                        ? "#10B981"
                         : (project.progress || 0) >= 50
-                          ? "blue.500"
-                          : "orange.500"
+                          ? "#1E40AF"
+                          : "#F59E0B"
                     }
                     transition="width 0.3s"
                   />
                 </Box>
-                <Text fontSize="sm" fontWeight="semibold">
+                <Text fontSize="sm" fontWeight="semibold" color="#1E293B">
                   {project.progress || 0}%
                 </Text>
               </Flex>
@@ -190,16 +194,16 @@ function Projects() {
         {/* Header */}
         <Flex justifyContent="space-between" alignItems="center">
           <Box>
-            <Heading size="2xl" mb={2}>
+            <Heading size="2xl" mb={2} color="#1E3A8A" fontFamily="'Poppins', sans-serif">
               Projects
             </Heading>
-            <Text color="fg.muted">Manage all your photography projects</Text>
+            <Text color="#64748B">Manage all your photography projects</Text>
           </Box>
           <CreateProject />
         </Flex>
 
         {/* Projects Table */}
-        <Card.Root>
+        <Card.Root bg="white" borderColor="#E2E8F0" borderWidth="1px">
           <Card.Body p={0}>
             <ProjectsTable />
           </Card.Body>

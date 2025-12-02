@@ -177,12 +177,12 @@ export function ActivityFeed() {
 
   if (isLoading) {
     return (
-      <Card.Root>
+      <Card.Root bg="white" borderColor="#E2E8F0">
         <Card.Header>
-          <Heading size="lg">Recent Activity</Heading>
+          <Heading size="lg" color="#1E3A8A">Recent Activity</Heading>
         </Card.Header>
         <Card.Body>
-          <Text color="fg.muted">Loading activity...</Text>
+          <Text color="#64748B">Loading activity...</Text>
         </Card.Body>
       </Card.Root>
     )
@@ -191,13 +191,13 @@ export function ActivityFeed() {
   const items = activities || []
 
   return (
-    <Card.Root>
+    <Card.Root bg="white" borderColor="#E2E8F0">
       <Card.Header>
-        <Heading size="lg">Recent Activity</Heading>
+        <Heading size="lg" color="#1E3A8A">Recent Activity</Heading>
       </Card.Header>
       <Card.Body>
         {items.length === 0 ? (
-          <Text color="fg.muted">No recent activity</Text>
+          <Text color="#64748B">No recent activity</Text>
         ) : (
           <Stack gap={3}>
             {items.map((activity) => (
@@ -207,15 +207,17 @@ export function ActivityFeed() {
                 p={3}
                 borderRadius="md"
                 borderWidth="1px"
+                borderColor="#E2E8F0"
+                bg="white"
                 alignItems="start"
-                _hover={{ bg: "bg.subtle" }}
+                _hover={{ bg: "#F8FAFC" }}
               >
-                <Box mt={1}>{getIcon(activity.type)}</Box>
+                <Box mt={1} color="#1E3A8A">{getIcon(activity.type)}</Box>
                 <Box flex={1}>
-                  <Text fontSize="sm">
+                  <Text fontSize="sm" color="#1E293B">
                     <strong>{activity.userName || "Someone"}</strong> {activity.message}
                   </Text>
-                  <Text fontSize="xs" color="fg.muted" mt={1}>
+                  <Text fontSize="xs" color="#64748B" mt={1}>
                     {formatTimestamp(activity.timestamp)}
                   </Text>
                 </Box>

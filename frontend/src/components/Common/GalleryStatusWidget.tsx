@@ -25,50 +25,50 @@ export function GalleryStatusWidget() {
 
   if (isLoading) {
     return (
-      <Card.Root>
+      <Card.Root bg="white" borderColor="#E2E8F0">
         <Card.Header>
-          <Heading size="lg">Gallery Status</Heading>
+          <Heading size="lg" color="#1E3A8A">Gallery Status</Heading>
         </Card.Header>
         <Card.Body>
-          <Text color="fg.muted">Loading...</Text>
+          <Text color="#64748B">Loading...</Text>
         </Card.Body>
       </Card.Root>
     )
   }
 
   return (
-    <Card.Root>
+    <Card.Root bg="white" borderColor="#E2E8F0">
       <Card.Header>
-        <Heading size="lg">Gallery Status</Heading>
+        <Heading size="lg" color="#1E3A8A">Gallery Status</Heading>
       </Card.Header>
       <Card.Body>
         <Grid templateColumns="repeat(3, 1fr)" gap={4}>
-          <Flex direction="column" align="center" p={3} borderRadius="md" bg="blue.200">
-            <FiClock size={24} color="#2C5282" />
-            <Text fontSize="2xl" fontWeight="bold" mt={2} color="blue.800">
+          <Flex direction="column" align="center" p={3} borderRadius="md" bg="linear-gradient(135deg, #DBEAFE, #BFDBFE)">
+            <FiClock size={24} color="#1E40AF" />
+            <Text fontSize="2xl" fontWeight="bold" mt={2} color="#1E40AF">
               {pendingReview}
             </Text>
-            <Text fontSize="xs" color="blue.700" textAlign="center">
+            <Text fontSize="xs" color="#1E40AF" textAlign="center">
               Pending Review
             </Text>
           </Flex>
 
-          <Flex direction="column" align="center" p={3} borderRadius="md" bg="green.200">
-            <FiCheckCircle size={24} color="#276749" />
-            <Text fontSize="2xl" fontWeight="bold" mt={2} color="green.800">
+          <Flex direction="column" align="center" p={3} borderRadius="md" bg="linear-gradient(135deg, #D1FAE5, #A7F3D0)">
+            <FiCheckCircle size={24} color="#059669" />
+            <Text fontSize="2xl" fontWeight="bold" mt={2} color="#059669">
               {approved}
             </Text>
-            <Text fontSize="xs" color="green.700" textAlign="center">
+            <Text fontSize="xs" color="#059669" textAlign="center">
               Approved
             </Text>
           </Flex>
 
-          <Flex direction="column" align="center" p={3} borderRadius="md" bg="orange.200">
-            <FiAlertCircle size={24} color="#9C4221" />
-            <Text fontSize="2xl" fontWeight="bold" mt={2} color="orange.800">
+          <Flex direction="column" align="center" p={3} borderRadius="md" bg="linear-gradient(135deg, #FED7AA, #FDBA74)">
+            <FiAlertCircle size={24} color="#EA580C" />
+            <Text fontSize="2xl" fontWeight="bold" mt={2} color="#EA580C">
               {changesRequested}
             </Text>
-            <Text fontSize="xs" color="orange.700" textAlign="center">
+            <Text fontSize="xs" color="#EA580C" textAlign="center">
               Changes Needed
             </Text>
           </Flex>

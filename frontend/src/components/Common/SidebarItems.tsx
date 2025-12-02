@@ -70,22 +70,30 @@ const SidebarItems = ({ onClose }: SidebarItemsProps) => {
         gap={4}
         px={4}
         py={2}
+        borderRadius="md"
+        color="#64748B"
         _hover={{
-          background: "gray.subtle",
+          background: "#F1F5F9",
+          color: "#1E3A8A",
+        }}
+        _active={{
+          background: "#DBEAFE",
+          color: "#1E3A8A",
         }}
         alignItems="center"
         fontSize="sm"
+        transition="all 0.2s"
       >
         <Icon as={icon} alignSelf="center" />
-        <Text ml={2}>{title}</Text>
+        <Text ml={2} fontWeight="500">{title}</Text>
       </Flex>
     </RouterLink>
   ))
 
   return (
     <>
-      <Text fontSize="xs" px={4} py={2} fontWeight="bold">
-        Menu
+      <Text fontSize="xs" px={4} py={2} fontWeight="bold" color="#1E3A8A" letterSpacing="wide">
+        MENU
       </Text>
       <Box>{listItems}</Box>
     </>
