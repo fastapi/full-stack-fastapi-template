@@ -67,6 +67,7 @@ services:
       - run
       - --reload
       - "app/main.py"
+      - --proxy-headers
     develop:
       watch:
         - path: ./backend
