@@ -21,12 +21,13 @@ const UserMenu = () => {
           <MenuTrigger asChild p={2}>
             <Button 
               data-testid="user-menu" 
-              bg="#F59E0B"
+              bg="linear-gradient(135deg, #F59E0B, #FBBF24)"
               color="#1E3A8A"
               maxW="sm" 
               truncate
               fontWeight="600"
-              _hover={{ bg: "#D97706" }}
+              _hover={{ bg: "linear-gradient(135deg, #D97706, #F59E0B)" }}
+              boxShadow="0 2px 4px rgba(0,0,0,0.1)"
             >
               <FaUserAstronaut fontSize="18" />
               <Text>{user?.full_name || "User"}</Text>
