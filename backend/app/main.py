@@ -29,7 +29,7 @@ if settings.all_cors_origins:
         CORSMiddleware,
         allow_origins=settings.all_cors_origins,
         allow_credentials=True,
-        allow_methods=["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+        allow_methods=["GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH"],
         allow_headers=["Access-Control-Allow-Credentials", "Access-Control-Request-Headers", "Access-Control-Request-Method", "Origin", "Authorization"],
     )
 
