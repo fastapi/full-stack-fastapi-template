@@ -6,6 +6,14 @@ interface ApprovalHistoryProps {
 }
 
 export function ApprovalHistory({ gallery }: ApprovalHistoryProps) {
+  // Color mapping for Navy & Gold theme
+  const colorMap: Record<string, { bg: string; icon: string }> = {
+    gray: { bg: "#F1F5F9", icon: "#64748B" },
+    blue: { bg: "#DBEAFE", icon: "#1E40AF" },
+    green: { bg: "#D1FAE5", icon: "#059669" },
+    orange: { bg: "#FED7AA", icon: "#EA580C" },
+  }
+
   // Generate timeline based on gallery status
   const getTimeline = () => {
     const timeline = [
@@ -72,9 +80,9 @@ export function ApprovalHistory({ gallery }: ApprovalHistoryProps) {
   }
 
   return (
-    <Card.Root>
+    <Card.Root bg="white" borderColor="#E2E8F0">
       <Card.Header>
-        <Heading size="md">Approval History</Heading>
+        <Heading size="md" color="#1E3A8A">Approval History</Heading>
       </Card.Header>
       <Card.Body>
         <Stack gap={4}>
@@ -86,23 +94,23 @@ export function ApprovalHistory({ gallery }: ApprovalHistoryProps) {
                   w="40px"
                   h="40px"
                   borderRadius="full"
-                  bg={`${item.color}.100`}
+                  bg={colorMap[item.color].bg}
                   display="flex"
                   alignItems="center"
                   justifyContent="center"
-                  color={`${item.color}.600`}
+                  color={colorMap[item.color].icon}
                 >
                   {item.icon}
                 </Box>
                 {index < timeline.length - 1 && (
-                  <Box w="2px" h="40px" bg="gray.200" mt={2} />
+                  <Box w="2px" h="40px" bg="#E2E8F0" mt={2} />
                 )}
               </Flex>
 
               {/* Content */}
               <Box flex={1} pt={2}>
-                <Text fontWeight="semibold">{item.label}</Text>
-                <Text fontSize="xs" color="fg.muted">
+                <Text fontWeight="semibold" color="#1E293B">{item.label}</Text>
+                <Text fontSize="xs" color="#64748B">
                   {formatDate(item.timestamp)}
                 </Text>
               </Box>

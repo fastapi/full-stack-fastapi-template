@@ -70,26 +70,26 @@ export function ClientAccessList({
   })
 
   if (isLoading) {
-    return <Text>Loading...</Text>
+    return <Text color="#64748B">Loading...</Text>
   }
 
   if (!accessList || !Array.isArray(accessList) || accessList.length === 0) {
     return (
-      <Card.Root>
+      <Card.Root bg="white" borderColor="#E2E8F0" borderWidth="1px">
         <Card.Header>
-          <Heading size="md">Invited Clients</Heading>
+          <Heading size="md" color="#1E3A8A" fontFamily="'Poppins', sans-serif">Invited Clients</Heading>
         </Card.Header>
         <Card.Body>
-          <Text color="fg.muted">No clients invited yet</Text>
+          <Text color="#64748B">No clients invited yet</Text>
         </Card.Body>
       </Card.Root>
     )
   }
 
   return (
-    <Card.Root>
+    <Card.Root bg="white" borderColor="#E2E8F0" borderWidth="1px">
       <Card.Header>
-        <Heading size="md">Invited Clients</Heading>
+        <Heading size="md" color="#1E3A8A" fontFamily="'Poppins', sans-serif">Invited Clients</Heading>
       </Card.Header>
       <Card.Body>
         <Stack gap={3}>
@@ -98,22 +98,24 @@ export function ClientAccessList({
               key={access.id}
               p={3}
               borderWidth="1px"
+              borderColor="#E2E8F0"
               borderRadius="md"
+              bg="white"
               justifyContent="space-between"
               alignItems="center"
             >
               <Flex alignItems="center" gap={2}>
-                <Box p={2} bg="purple.subtle" borderRadius="full">
-                  <FiUser />
+                <Box p={2} bg="#FED7AA" borderRadius="full">
+                  <FiUser color="#EA580C" />
                 </Box>
                 <Box>
-                  <Text fontWeight="semibold" fontSize="sm">
+                  <Text fontWeight="semibold" fontSize="sm" color="#1E3A8A">
                     {access.user?.full_name || "No name"}
                   </Text>
-                  <Text fontSize="xs" color="fg.muted">
+                  <Text fontSize="xs" color="#64748B">
                     {access.user?.email}
                   </Text>
-                  <Text fontSize="xs" color="fg.muted">
+                  <Text fontSize="xs" color="#64748B">
                     Role: {access.role}
                   </Text>
                 </Box>

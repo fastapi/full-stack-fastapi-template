@@ -80,18 +80,21 @@ function GalleryCard({ gallery }: { gallery: GalleryPublic }) {
       style={{ textDecoration: "none", color: "inherit" }}
     >
       <Card.Root
+        bg="white"
+        borderColor="#E2E8F0"
         overflow="hidden"
         transition="all 0.2s"
         _hover={{
           transform: "translateY(-4px)",
-          boxShadow: "lg",
+          boxShadow: "0 8px 16px rgba(30, 58, 138, 0.15)",
           cursor: "pointer",
+          borderColor: "#1E3A8A",
         }}
       >
         {/* Gallery Cover Image */}
         <Box
           h="200px"
-          bg="gray.200"
+          bg="#E5E7EB"
           backgroundImage={coverImageUrl ? `url(${coverImageUrl})` : undefined}
           backgroundSize="cover"
           backgroundPosition="center"
@@ -101,7 +104,7 @@ function GalleryCard({ gallery }: { gallery: GalleryPublic }) {
             position="absolute"
             top={2}
             right={2}
-            bg="blackAlpha.700"
+            bg="rgba(30, 58, 138, 0.9)"
             px={2}
             py={1}
             borderRadius="md"
@@ -126,7 +129,7 @@ function GalleryCard({ gallery }: { gallery: GalleryPublic }) {
         {/* Gallery Info */}
         <Card.Body>
           <Stack gap={2}>
-            <Heading size="md" mb={1}>
+            <Heading size="md" mb={1} color="#1E3A8A">
               {gallery.name}
             </Heading>
             <Flex
@@ -134,7 +137,7 @@ function GalleryCard({ gallery }: { gallery: GalleryPublic }) {
               alignItems="center"
               pt={2}
               fontSize="xs"
-              color="fg.muted"
+              color="#64748B"
             >
               {gallery.photographer && (
                 <Flex alignItems="center" gap={1}>
@@ -204,10 +207,10 @@ function GalleriesList() {
       <Stack gap={6}>
         {/* Header */}
         <Box>
-          <Heading size="2xl" mb={2}>
+          <Heading size="2xl" mb={2} color="#1E3A8A">
             Galleries
           </Heading>
-          <Text color="fg.muted">
+          <Text color="#64748B">
             Browse all photo galleries from your projects
           </Text>
         </Box>

@@ -185,15 +185,17 @@ function OrganizationPage() {
   if (currentUser && !hasOrgId) {
     return (
       <Container maxW="md" centerContent py={20}>
-        <Card.Root w="full">
+        <Card.Root w="full" bg="white" borderColor="#E2E8F0" borderWidth="1px">
           <Card.Header textAlign="center">
             <Flex justifyContent="center" mb={4}>
-              <FiBriefcase size={48} />
+              <Box p={4} bg="#DBEAFE" borderRadius="full">
+                <FiBriefcase size={48} color="#1E40AF" />
+              </Box>
             </Flex>
-            <Heading size="xl" mb={2}>
+            <Heading size="xl" mb={2} color="#1E3A8A" fontFamily="'Poppins', sans-serif">
               Create Your Organization
             </Heading>
-            <Text color="fg.muted">
+            <Text color="#64748B">
               You need to create an organization before you can invite team
               members.
             </Text>
@@ -229,17 +231,17 @@ function OrganizationPage() {
     <Container maxW="full" p={6}>
       <Stack gap={6}>
         <Box>
-          <Heading size="2xl" mb={2}>
+          <Heading size="2xl" mb={2} color="#1E3A8A" fontFamily="'Poppins', sans-serif">
             Organization Management
           </Heading>
-          <Text color="fg.muted">Manage your team members and invitations</Text>
+          <Text color="#64748B">Manage your team members and invitations</Text>
         </Box>
 
         {/* Invite by Email */}
-        <Card.Root>
+        <Card.Root bg="white" borderColor="#E2E8F0" borderWidth="1px">
           <Card.Header>
-            <Heading size="lg">Authorize Email</Heading>
-            <Text fontSize="sm" color="fg.muted">
+            <Heading size="lg" color="#1E3A8A" fontFamily="'Poppins', sans-serif">Authorize Email</Heading>
+            <Text fontSize="sm" color="#64748B">
               Pre-authorize an email to join your organization. When they sign
               up, they'll be automatically added.
             </Text>
@@ -269,21 +271,21 @@ function OrganizationPage() {
 
         <Grid templateColumns={{ base: "1fr", lg: "repeat(2, 1fr)" }} gap={6}>
           {/* Current Members */}
-          <Card.Root>
+          <Card.Root bg="white" borderColor="#E2E8F0" borderWidth="1px">
             <Card.Header>
               <Flex justifyContent="space-between" alignItems="center">
                 <Box>
-                  <Heading size="lg">Team Members</Heading>
-                  <Text fontSize="sm" color="fg.muted">
+                  <Heading size="lg" color="#1E3A8A" fontFamily="'Poppins', sans-serif">Team Members</Heading>
+                  <Text fontSize="sm" color="#64748B">
                     {membersData?.count || 0} member(s)
                   </Text>
                 </Box>
-                <FiUsers size={24} />
+                <FiUsers size={24} color="#1E40AF" />
               </Flex>
             </Card.Header>
             <Card.Body>
               {!membersData?.data || membersData.data.length === 0 ? (
-                <Text color="fg.muted">No team members yet</Text>
+                <Text color="#64748B">No team members yet</Text>
               ) : (
                 <Stack gap={3}>
                   {membersData.data.map((member: any) => (
@@ -293,11 +295,13 @@ function OrganizationPage() {
                       alignItems="center"
                       p={3}
                       borderWidth="1px"
+                      borderColor="#E2E8F0"
                       borderRadius="md"
+                      bg="white"
                     >
                       <Box>
                         <HStack>
-                          <Text fontWeight="semibold">
+                          <Text fontWeight="semibold" color="#1E3A8A">
                             {member.full_name || member.email}
                           </Text>
                           {member.is_superuser && (
@@ -307,7 +311,7 @@ function OrganizationPage() {
                             <Badge colorScheme="blue">You</Badge>
                           )}
                         </HStack>
-                        <Text fontSize="sm" color="fg.muted">
+                        <Text fontSize="sm" color="#64748B">
                           {member.email}
                         </Text>
                       </Box>
@@ -329,16 +333,16 @@ function OrganizationPage() {
           </Card.Root>
 
           {/* Email Invitations */}
-          <Card.Root>
+          <Card.Root bg="white" borderColor="#E2E8F0" borderWidth="1px">
             <Card.Header>
-              <Heading size="lg">Authorized Emails</Heading>
-              <Text fontSize="sm" color="fg.muted">
+              <Heading size="lg" color="#1E3A8A" fontFamily="'Poppins', sans-serif">Authorized Emails</Heading>
+              <Text fontSize="sm" color="#64748B">
                 Pre-authorized emails that can join
               </Text>
             </Card.Header>
             <Card.Body>
               {!invitations?.data || invitations.data.length === 0 ? (
-                <Text color="fg.muted">No authorized emails</Text>
+                <Text color="#64748B">No authorized emails</Text>
               ) : (
                 <Stack gap={3}>
                   {invitations.data.map((inv: any) => (
@@ -348,11 +352,13 @@ function OrganizationPage() {
                       alignItems="center"
                       p={3}
                       borderWidth="1px"
+                      borderColor="#E2E8F0"
                       borderRadius="md"
+                      bg="white"
                     >
                       <Box>
-                        <Text fontWeight="semibold">{inv.email}</Text>
-                        <Text fontSize="sm" color="fg.muted">
+                        <Text fontWeight="semibold" color="#1E3A8A">{inv.email}</Text>
+                        <Text fontSize="sm" color="#64748B">
                           Added {new Date(inv.created_at).toLocaleDateString()}
                         </Text>
                       </Box>

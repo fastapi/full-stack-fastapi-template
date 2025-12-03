@@ -56,18 +56,32 @@ function StatCard({
   value: number
   colorScheme: string
 }) {
+  const bgColors: Record<string, string> = {
+    blue: "linear-gradient(135deg, #DBEAFE, #BFDBFE)",
+    orange: "linear-gradient(135deg, #FED7AA, #FDBA74)",
+    purple: "linear-gradient(135deg, #E9D5FF, #D8B4FE)",
+    green: "linear-gradient(135deg, #D1FAE5, #A7F3D0)",
+  }
+
+  const iconColors: Record<string, string> = {
+    blue: "#1E40AF",
+    orange: "#EA580C",
+    purple: "#7C3AED",
+    green: "#059669",
+  }
+ 
   return (
-    <Card.Root>
+    <Card.Root bg="white" borderColor="#E2E8F0" borderWidth="1px">
       <Card.Body>
         <Flex alignItems="center" gap={4}>
-          <Box p={3} bg={`${colorScheme}.subtle`} borderRadius="lg">
-            <Icon size={24} />
+          <Box p={3} bg={bgColors[colorScheme] || bgColors.blue} borderRadius="lg">
+            <Icon size={24} color={iconColors[colorScheme]} />
           </Box>
           <Box>
-            <Text fontSize="2xl" fontWeight="bold">
+            <Text fontSize="2xl" fontWeight="bold" color="#1E3A8A">
               {value}
             </Text>
-            <Text fontSize="sm" color="fg.muted">
+            <Text fontSize="sm" color="#64748B">
               {label}
             </Text>
           </Box>
@@ -272,7 +286,7 @@ function Dashboard() {
   if (isTeamMember && !hasOrgId) {
     return (
       <Container maxW="md" centerContent py={20}>
-        <Card.Root w="full">
+        <Card.Root w="full" bg="white" borderColor="#E2E8F0">
           <Card.Header textAlign="center">
             <Flex justifyContent="center" mb={4}>
               <FiBriefcase size={48} />
@@ -319,7 +333,7 @@ function Dashboard() {
   ) {
     return (
       <Container maxW="md" centerContent py={20}>
-        <Card.Root w="full">
+        <Card.Root w="full" bg="white" borderColor="#E2E8F0">
           <Card.Header textAlign="center">
             <Flex justifyContent="center" mb={4}>
               <FiFolder size={48} />
@@ -432,7 +446,7 @@ function Dashboard() {
         {isTeamMember &&
           currentUser?.organization_id &&
           pendingUsers?.data?.length > 0 && (
-            <Card.Root>
+            <Card.Root bg="white" borderColor="#E2E8F0">
               <Card.Header>
                 <Heading size="lg">Pending Team Members</Heading>
                 <Text fontSize="sm" color="fg.muted">
@@ -476,11 +490,11 @@ function Dashboard() {
 
         <Grid templateColumns={{ base: "1fr", lg: "2fr 1fr 1fr" }} gap={6}>
           {/* Recent Projects */}
-          <Card.Root>
+          <Card.Root bg="white" borderColor="#E2E8F0" borderWidth="1px">
             <Card.Header>
               <Heading size="lg">Recent Projects</Heading>
             </Card.Header>
-            <Card.Body>
+            <Card.Body >
               {recentProjects.length === 0 ? (
                 <Text color="fg.muted">
                   {isClient
@@ -501,11 +515,14 @@ function Dashboard() {
                         borderWidth="1px"
                         borderRadius="md"
                         transition="all 0.2s"
+                        bg = "white"
+                        borderColor="#E2E8F0"
                         _hover={{
                           bg: "bg.subtle",
                           cursor: "pointer",
                           transform: "translateY(-2px)",
                           boxShadow: "md",
+                          
                         }}
                       >
                         <Flex
@@ -546,7 +563,7 @@ function Dashboard() {
           </Card.Root>
 
           {/* Upcoming Deadlines */}
-          <Card.Root>
+          <Card.Root bg="white" borderColor="#E2E8F0">
             <Card.Header>
               <Heading size="lg">Upcoming Deadlines</Heading>
             </Card.Header>
@@ -563,12 +580,14 @@ function Dashboard() {
                       p={3}
                       borderWidth="1px"
                       borderRadius="md"
+                      bg ="white"
+                      borderColor="#E2E8F0"
                     >
-                      <Text fontWeight="semibold" fontSize="sm" mb={1}>
+                      <Text fontWeight="semibold" fontSize="sm" mb={1} color="#1E3A8A">
                         {deadline.project}
                       </Text>
                       <Flex justifyContent="space-between" alignItems="center">
-                        <Text fontSize="xs" color="fg.muted">
+                        <Text fontSize="xs" color="#64748B">
                           {deadline.date}
                         </Text>
                         <Badge
