@@ -28,9 +28,7 @@ function UserSettings() {
 
   return (
     <div>
-      <h1 className="text-2xl font-bold">
-        User Settings
-      </h1>
+      <h1 className="text-2xl font-bold">User Settings</h1>
 
       <Tabs defaultValue="my-profile">
         <TabsList>

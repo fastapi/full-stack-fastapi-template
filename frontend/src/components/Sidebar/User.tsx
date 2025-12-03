@@ -85,9 +85,7 @@ export function User({ user }: { user: any }) {
                 User Settings
               </DropdownMenuItem>
             </RouterLink>
-            <DropdownMenuItem
-              onClick={handleLogout}
-            >
+            <DropdownMenuItem onClick={handleLogout}>
               <LogOut />
               Log Out
             </DropdownMenuItem>

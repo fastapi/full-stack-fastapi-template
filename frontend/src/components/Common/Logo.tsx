@@ -30,12 +30,18 @@ export function Logo({
         <img
           src={fullLogo}
           alt="FastAPI"
-          className={cn("h-6 w-auto group-data-[collapsible=icon]:hidden", className)}
+          className={cn(
+            "h-6 w-auto group-data-[collapsible=icon]:hidden",
+            className,
+          )}
         />
         <img
           src={iconLogo}
           alt="FastAPI"
-          className={cn("size-5 hidden group-data-[collapsible=icon]:block", className)}
+          className={cn(
+            "size-5 hidden group-data-[collapsible=icon]:block",
+            className,
+          )}
         />
       </>
     ) : (
