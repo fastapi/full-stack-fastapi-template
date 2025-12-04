@@ -14,6 +14,13 @@ export const Route = createFileRoute("/_layout")({
       })
     }
   },
+  head: () => ({
+    meta: [
+      {
+        title: 'Loading...',
+      },
+    ],
+  })
 })
 
 function Layout() {

@@ -5,18 +5,19 @@ export const system = createSystem(defaultConfig, {
   globalCss: {
     html: {
       fontSize: "16px",
-      fontFamily: "'Inter', sans-serif",
+      fontFamily: "'Sora', sans-serif",
     },
     body: {
-      fontSize: "0.875rem",
+      fontSize: "1rem",
       margin: 0,
       padding: 0,
-      fontFamily: "'Inter', sans-serif",
+      fontFamily: "'Rubik', sans-serif",
       color: "#1E293B",
       background: "#F8FAFC",
+
     },
     "h1, h2, h3, h4, h5, h6": {
-      fontFamily: "'Poppins', sans-serif",
+      fontFamily: "Poppins, sans-serif",
       fontWeight: "600",
       color: "#1E3A8A",
     },
@@ -54,7 +55,7 @@ export const system = createSystem(defaultConfig, {
       },
       fonts: {
         heading: { value: "'Poppins', sans-serif" },
-        body: { value: "'Inter', sans-serif" },
+        body: { value: "'Rubik', sans-serif" },
       },
     },
     recipes: {

@@ -2,7 +2,7 @@ import { defineRecipe } from "@chakra-ui/react"
 
 export const buttonRecipe = defineRecipe({
   base: {
-    fontFamily: "'Inter', sans-serif",
+    fontFamily: "'Rubik', sans-serif",
     fontWeight: "600",
     borderRadius: "6px",
     transition: "all 0.2s",
