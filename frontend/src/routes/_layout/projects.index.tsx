@@ -188,6 +188,10 @@ function ProjectsTable() {
 }
 
 function Projects() {
+  const { user: currentUser } = useAuth()
+  const isTeamMember = currentUser?.user_type === "team_member"
+  const hasOrgId = Boolean(currentUser?.organization_id)
+
   return (
     <Container maxW="full" p={6}>
       <Stack gap={6}>
@@ -199,7 +203,7 @@ function Projects() {
             </Heading>
             <Text color="#64748B">Manage all your photography projects</Text>
           </Box>
-          <CreateProject />
+          {isTeamMember && hasOrgId && <CreateProject />}
         </Flex>
 
         {/* Projects Table */}

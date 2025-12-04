@@ -99,11 +99,14 @@ def create_project(
     Create new project.
     Only team members can create projects.
     """
-    if getattr(current_user, "user_type", None) != "team_member":
+    # Check user type - must be team_member
+    user_type = getattr(current_user, "user_type", None)
+    if user_type != "team_member":
         raise HTTPException(
             status_code=403, detail="Only team members can create projects"
         )
 
+    # Check user has an organization
     if not current_user.organization_id:
         raise HTTPException(
             status_code=400, detail="User is not part of an organization"
@@ -112,6 +115,14 @@ def create_project(
     # Ensure the project is being created for the user's organization
     if project_in.organization_id != current_user.organization_id:
         raise HTTPException(status_code=403, detail="Not enough permissions")
+
+    # Validate dates
+    if project_in.start_date and project_in.deadline:
+        if project_in.deadline < project_in.start_date:
+            raise HTTPException(
+                status_code=400,
+                detail="Deadline must be after or equal to start date",
+            )
 
     project = crud.create_project(session=session, project_in=project_in)
 

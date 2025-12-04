@@ -20,7 +20,11 @@ def get_superuser_token_headers(client: TestClient) -> dict[str, str]:
         "password": settings.FIRST_SUPERUSER_PASSWORD,
     }
     r = client.post(f"{settings.API_V1_STR}/login/access-token", data=login_data)
+    if r.status_code != 200:
+        raise Exception(f"Failed to login as superuser: {r.status_code} - {r.text}")
     tokens = r.json()
+    if "access_token" not in tokens:
+        raise KeyError(f"access_token not found in response: {tokens}")
     a_token = tokens["access_token"]
     headers = {"Authorization": f"Bearer {a_token}"}
     return headers

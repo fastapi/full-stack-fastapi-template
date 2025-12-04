@@ -500,16 +500,16 @@ def submit_gallery_for_review(
         raise HTTPException(
             status_code=403, detail="Only team members can submit for review"
         )
-    
+
     gallery = crud.get_gallery(session=session, gallery_id=id)
     if not gallery:
         raise HTTPException(status_code=404, detail="Gallery not found")
-    
+
     # Check organization
     project = crud.get_project(session=session, project_id=gallery.project_id)
     if not project or project.organization_id != current_user.organization_id:
         raise HTTPException(status_code=403, detail="Not enough permissions")
-    
+
     # Update status
     from app.models import GalleryUpdate
     gallery = crud.update_gallery(
@@ -535,17 +535,17 @@ def approve_gallery(
         raise HTTPException(
             status_code=403, detail="Only clients can approve galleries"
         )
-    
+
     gallery = crud.get_gallery(session=session, gallery_id=id)
     if not gallery:
         raise HTTPException(status_code=404, detail="Gallery not found")
-    
+
     # Check client has access to project
     if not crud.user_has_project_access(
         session=session, project_id=gallery.project_id, user_id=current_user.id
     ):
         raise HTTPException(status_code=403, detail="Not enough permissions")
-    
+
     # Update status
     from app.models import GalleryUpdate
     gallery = crud.update_gallery(
@@ -572,17 +572,17 @@ def request_gallery_changes(
         raise HTTPException(
             status_code=403, detail="Only clients can request changes"
         )
-    
+
     gallery = crud.get_gallery(session=session, gallery_id=id)
     if not gallery:
         raise HTTPException(status_code=404, detail="Gallery not found")
-    
+
     # Check client has access to project
     if not crud.user_has_project_access(
         session=session, project_id=gallery.project_id, user_id=current_user.id
     ):
         raise HTTPException(status_code=403, detail="Not enough permissions")
-    
+
     # Create a comment with the requested changes
     from app.models import CommentCreate
     crud.create_comment(
@@ -593,7 +593,7 @@ def request_gallery_changes(
         ),
         user_id=current_user.id
     )
-    
+
     # Update status
     from app.models import GalleryUpdate
     gallery = crud.update_gallery(
@@ -601,5 +601,5 @@ def request_gallery_changes(
         db_gallery=gallery,
         gallery_in=GalleryUpdate(status="changes_requested")
     )
-    
+
     return {"message": "Changes requested successfully", "gallery": gallery}

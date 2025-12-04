@@ -33,6 +33,7 @@ export function CreateProject() {
     register,
     handleSubmit,
     reset,
+    watch,
     formState: { errors },
   } = useForm<ProjectCreate>({
     defaultValues: {
@@ -90,14 +91,23 @@ export function CreateProject() {
   })
 
   const onSubmit = (data: ProjectCreate) => {
+    // Validate dates
+    if (data.start_date && data.deadline) {
+      const startDate = new Date(data.start_date)
+      const deadline = new Date(data.deadline)
+      if (deadline < startDate) {
+        showErrorToast("Deadline must be after start date")
+        return
+      }
+    }
+
     // Clean up empty strings to undefined for optional fields
     const cleanData = {
       ...data,
       description: data.description || undefined,
       client_email: data.client_email || undefined,
       budget: data.budget || undefined,
-      start_date: data.start_date || undefined,
-      deadline: data.deadline || undefined,
+      // start_date and deadline are now required, so keep them as-is
     }
     createMutation.mutate(cleanData)
   }
@@ -174,12 +184,37 @@ export function CreateProject() {
                 <Input {...register("budget")} placeholder="e.g. $5,000" />
               </Field>
 
-              <Field label="Start Date">
-                <Input {...register("start_date")} type="date" />
+              <Field
+                label="Start Date"
+                required
+                invalid={!!errors.start_date}
+              >
+                <Input
+                  {...register("start_date", {
+                    required: "Start date is required",
+                  })}
+                  type="date"
+                />
               </Field>
 
-              <Field label="Deadline">
-                <Input {...register("deadline")} type="date" />
+              <Field
+                label="Deadline"
+                required
+                invalid={!!errors.deadline}
+              >
+                <Input
+                  {...register("deadline", {
+                    required: "Deadline is required",
+                    validate: (value) => {
+                      const startDate = watch("start_date")
+                      if (startDate && value && new Date(value) < new Date(startDate)) {
+                        return "Deadline must be after start date"
+                      }
+                      return true
+                    },
+                  })}
+                  type="date"
+                />
               </Field>
             </div>
           </DialogBody>

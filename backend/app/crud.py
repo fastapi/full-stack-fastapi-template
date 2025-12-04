@@ -2,6 +2,7 @@ import uuid
 from datetime import datetime, timedelta
 from typing import Any
 
+from sqlalchemy.exc import PendingRollbackError
 from sqlmodel import Session, desc, func, or_, select
 
 from app.core.security import get_password_hash, verify_password
@@ -33,13 +34,23 @@ from app.models import (
 
 
 def create_user(*, session: Session, user_create: UserCreate) -> User:
-    db_obj = User.model_validate(
-        user_create, update={"hashed_password": get_password_hash(user_create.password)}
-    )
-    session.add(db_obj)
-    session.commit()
-    session.refresh(db_obj)
-    return db_obj
+    try:
+        db_obj = User.model_validate(
+            user_create, update={"hashed_password": get_password_hash(user_create.password)}
+        )
+        session.add(db_obj)
+        session.commit()
+        session.refresh(db_obj)
+        return db_obj
+    except PendingRollbackError:
+        session.rollback()
+        db_obj = User.model_validate(
+            user_create, update={"hashed_password": get_password_hash(user_create.password)}
+        )
+        session.add(db_obj)
+        session.commit()
+        session.refresh(db_obj)
+        return db_obj
 
 
 def update_user(*, session: Session, db_user: User, user_in: UserUpdate) -> Any:
@@ -57,9 +68,15 @@ def update_user(*, session: Session, db_user: User, user_in: UserUpdate) -> Any:
 
 
 def get_user_by_email(*, session: Session, email: str) -> User | None:
-    statement = select(User).where(User.email == email)
-    session_user = session.exec(statement).first()
-    return session_user
+    try:
+        statement = select(User).where(User.email == email)
+        session_user = session.exec(statement).first()
+        return session_user
+    except PendingRollbackError:
+        session.rollback()
+        statement = select(User).where(User.email == email)
+        session_user = session.exec(statement).first()
+        return session_user
 
 
 def authenticate(*, session: Session, email: str, password: str) -> User | None:
@@ -87,11 +104,19 @@ def authenticate(*, session: Session, email: str, password: str) -> User | None:
 def create_organization(
     *, session: Session, organization_in: OrganizationCreate
 ) -> Organization:
-    db_obj = Organization.model_validate(organization_in)
-    session.add(db_obj)
-    session.commit()
-    session.refresh(db_obj)
-    return db_obj
+    try:
+        db_obj = Organization.model_validate(organization_in)
+        session.add(db_obj)
+        session.commit()
+        session.refresh(db_obj)
+        return db_obj
+    except PendingRollbackError:
+        session.rollback()
+        db_obj = Organization.model_validate(organization_in)
+        session.add(db_obj)
+        session.commit()
+        session.refresh(db_obj)
+        return db_obj
 
 
 def get_organization(
@@ -126,15 +151,27 @@ def update_organization(
 
 
 def create_project(*, session: Session, project_in: ProjectCreate) -> Project:
-    db_obj = Project.model_validate(project_in)
-    session.add(db_obj)
-    session.commit()
-    session.refresh(db_obj)
-    return db_obj
+    try:
+        db_obj = Project.model_validate(project_in)
+        session.add(db_obj)
+        session.commit()
+        session.refresh(db_obj)
+        return db_obj
+    except PendingRollbackError:
+        session.rollback()
+        db_obj = Project.model_validate(project_in)
+        session.add(db_obj)
+        session.commit()
+        session.refresh(db_obj)
+        return db_obj
 
 
 def get_project(*, session: Session, project_id: uuid.UUID) -> Project | None:
-    return session.get(Project, project_id)
+    try:
+        return session.get(Project, project_id)
+    except PendingRollbackError:
+        session.rollback()
+        return session.get(Project, project_id)
 
 
 def get_projects_by_organization(
@@ -194,7 +231,11 @@ def create_gallery(*, session: Session, gallery_in: GalleryCreate) -> Gallery:
 
 
 def get_gallery(*, session: Session, gallery_id: uuid.UUID) -> Gallery | None:
-    return session.get(Gallery, gallery_id)
+    try:
+        return session.get(Gallery, gallery_id)
+    except PendingRollbackError:
+        session.rollback()
+        return session.get(Gallery, gallery_id)
 
 
 def get_galleries_by_project(
@@ -249,10 +290,19 @@ def update_gallery(
 
 
 def delete_gallery(*, session: Session, gallery_id: uuid.UUID) -> None:
-    gallery = session.get(Gallery, gallery_id)
-    if gallery:
-        session.delete(gallery)
-        session.commit()
+    from sqlalchemy.exc import PendingRollbackError
+
+    try:
+        gallery = session.get(Gallery, gallery_id)
+        if gallery:
+            session.delete(gallery)
+            session.commit()
+    except PendingRollbackError:
+        session.rollback()
+        gallery = session.get(Gallery, gallery_id)
+        if gallery:
+            session.delete(gallery)
+            session.commit()
 
 
 def create_photo(*, session: Session, photo_in: PhotoCreate) -> Photo:
@@ -671,14 +721,25 @@ def count_comments_by_project(*, session: Session, project_id: uuid.UUID) -> int
 
 def get_comment(*, session: Session, comment_id: uuid.UUID) -> Comment | None:
     """Get a single comment by ID"""
-
-    return session.get(Comment, comment_id)
+    try:
+        return session.get(Comment, comment_id)
+    except PendingRollbackError:
+        session.rollback()
+        return session.get(Comment, comment_id)
 
 
 def delete_comment(*, session: Session, comment_id: uuid.UUID) -> None:
     """Delete a comment"""
+    from sqlalchemy.exc import PendingRollbackError
 
-    comment = session.get(Comment, comment_id)
-    if comment:
-        session.delete(comment)
-        session.commit()
+    try:
+        comment = session.get(Comment, comment_id)
+        if comment:
+            session.delete(comment)
+            session.commit()
+    except PendingRollbackError:
+        session.rollback()
+        comment = session.get(Comment, comment_id)
+        if comment:
+            session.delete(comment)
+            session.commit()

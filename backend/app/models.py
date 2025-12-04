@@ -148,6 +148,8 @@ class ProjectBase(SQLModel):
 
 class ProjectCreate(ProjectBase):
     organization_id: uuid.UUID
+    start_date: DateType  # Required for project creation
+    deadline: DateType  # Required for project creation
 
 
 class ProjectUpdate(SQLModel):

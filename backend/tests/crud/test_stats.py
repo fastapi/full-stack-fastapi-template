@@ -9,6 +9,20 @@ from app.models import OrganizationCreate, ProjectCreate
 from tests.utils.utils import random_lower_string
 
 
+def _create_test_project_data(organization_id, **kwargs):
+    """Helper function to create ProjectCreate with required fields"""
+    today = date.today()
+    defaults = {
+        "name": f"Test Project {random_lower_string()}",
+        "client_name": f"Client {random_lower_string()}",
+        "start_date": today,
+        "deadline": today + timedelta(days=30),
+        "organization_id": organization_id,
+    }
+    defaults.update(kwargs)
+    return ProjectCreate(**defaults)
+
+
 def test_dashboard_stats_empty_organization(db: Session) -> None:
     """Test dashboard stats for an organization with no projects"""
     org_in = OrganizationCreate(name=random_lower_string())
@@ -31,38 +45,38 @@ def test_dashboard_stats_active_projects(db: Session) -> None:
     # Create projects with different statuses
     crud.create_project(
         session=db,
-        project_in=ProjectCreate(
+        project_in=_create_test_project_data(
+            organization_id=org.id,
             name="Project 1",
             client_name="Client 1",
             status="in_progress",
-            organization_id=org.id,
         ),
     )
     crud.create_project(
         session=db,
-        project_in=ProjectCreate(
+        project_in=_create_test_project_data(
+            organization_id=org.id,
             name="Project 2",
             client_name="Client 2",
             status="review",
-            organization_id=org.id,
         ),
     )
     crud.create_project(
         session=db,
-        project_in=ProjectCreate(
+        project_in=_create_test_project_data(
+            organization_id=org.id,
             name="Project 3",
             client_name="Client 3",
             status="planning",  # Not active
-            organization_id=org.id,
         ),
     )
     crud.create_project(
         session=db,
-        project_in=ProjectCreate(
+        project_in=_create_test_project_data(
+            organization_id=org.id,
             name="Project 4",
             client_name="Client 4",
             status="completed",  # Not active
-            organization_id=org.id,
         ),
     )
 
@@ -83,36 +97,39 @@ def test_dashboard_stats_upcoming_deadlines(db: Session) -> None:
     # Project with deadline in 5 days - should count
     crud.create_project(
         session=db,
-        project_in=ProjectCreate(
+        project_in=_create_test_project_data(
+            organization_id=org.id,
             name="Project Soon",
             client_name="Client",
             status="in_progress",
+            start_date=today,
             deadline=today + timedelta(days=5),
-            organization_id=org.id,
         ),
     )
 
     # Project with deadline in 30 days - should NOT count (too far)
     crud.create_project(
         session=db,
-        project_in=ProjectCreate(
+        project_in=_create_test_project_data(
+            organization_id=org.id,
             name="Project Later",
             client_name="Client",
             status="in_progress",
+            start_date=today,
             deadline=today + timedelta(days=30),
-            organization_id=org.id,
         ),
     )
 
     # Completed project with deadline in 7 days - should NOT count (completed)
     crud.create_project(
         session=db,
-        project_in=ProjectCreate(
+        project_in=_create_test_project_data(
+            organization_id=org.id,
             name="Project Done",
             client_name="Client",
             status="completed",
+            start_date=today,
             deadline=today + timedelta(days=7),
-            organization_id=org.id,
         ),
     )
 
@@ -131,22 +148,22 @@ def test_dashboard_stats_completed_this_month(db: Session) -> None:
     # Create completed projects
     _project1 = crud.create_project(
         session=db,
-        project_in=ProjectCreate(
+        project_in=_create_test_project_data(
+            organization_id=org.id,
             name="Completed Project",
             client_name="Client",
             status="completed",
-            organization_id=org.id,
         ),
     )
 
     # Also create a non-completed project
     crud.create_project(
         session=db,
-        project_in=ProjectCreate(
+        project_in=_create_test_project_data(
+            organization_id=org.id,
             name="In Progress Project",
             client_name="Client",
             status="in_progress",
-            organization_id=org.id,
         ),
     )
 

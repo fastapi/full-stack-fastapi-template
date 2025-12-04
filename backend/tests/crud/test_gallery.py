@@ -1,6 +1,6 @@
 """Unit tests for Gallery CRUD operations"""
 
-from datetime import date
+from datetime import date, timedelta
 
 from sqlmodel import Session
 
@@ -9,14 +9,28 @@ from app.models import GalleryCreate, GalleryUpdate, OrganizationCreate, Project
 from tests.utils.utils import random_lower_string
 
 
+def _create_test_project_data(organization_id, **kwargs):
+    """Helper function to create ProjectCreate with required fields"""
+    today = date.today()
+    defaults = {
+        "name": f"Test Project {random_lower_string()}",
+        "client_name": f"Client {random_lower_string()}",
+        "start_date": today,
+        "deadline": today + timedelta(days=30),
+        "organization_id": organization_id,
+    }
+    defaults.update(kwargs)
+    return ProjectCreate(**defaults)
+
+
 def test_create_gallery(db: Session) -> None:
     """Test creating a new gallery"""
     # Create organization and project first
     org_in = OrganizationCreate(name=random_lower_string())
     organization = crud.create_organization(session=db, organization_in=org_in)
 
-    project_in = ProjectCreate(
-        name="Test Project", client_name="Test Client", organization_id=organization.id
+    project_in = _create_test_project_data(
+        organization_id=organization.id, name="Test Project", client_name="Test Client"
     )
     project = crud.create_project(session=db, project_in=project_in)
 
