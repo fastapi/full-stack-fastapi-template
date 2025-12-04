@@ -64,10 +64,7 @@ export const columns: ColumnDef<UserTableData>[] = [
     header: () => <span className="sr-only">Actions</span>,
     cell: ({ row }) => (
       <div className="flex justify-end">
-        <UserActionsMenu
-          user={row.original}
-          disabled={row.original.isCurrentUser}
-        />
+        <UserActionsMenu user={row.original} />
       </div>
     ),
   },
