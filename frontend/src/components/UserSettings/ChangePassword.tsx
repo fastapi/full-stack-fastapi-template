@@ -55,7 +55,7 @@ const ChangePassword = () => {
     mutationFn: (data: UpdatePassword) =>
       UsersService.updatePasswordMe({ requestBody: data }),
     onSuccess: () => {
-      showSuccessToast("Password updated successfully.")
+      showSuccessToast("Password updated successfully")
       form.reset()
     },
     onError: handleError.bind(showErrorToast),
@@ -81,6 +81,7 @@ const ChangePassword = () => {
                 <FormLabel>Current Password</FormLabel>
                 <FormControl>
                   <PasswordInput
+                    data-testid="current-password-input"
                     placeholder="••••••••"
                     aria-invalid={fieldState.invalid}
                     {...field}
@@ -99,6 +100,7 @@ const ChangePassword = () => {
                 <FormLabel>New Password</FormLabel>
                 <FormControl>
                   <PasswordInput
+                    data-testid="new-password-input"
                     placeholder="••••••••"
                     aria-invalid={fieldState.invalid}
                     {...field}
@@ -117,6 +119,7 @@ const ChangePassword = () => {
                 <FormLabel>Confirm Password</FormLabel>
                 <FormControl>
                   <PasswordInput
+                    data-testid="confirm-password-input"
                     placeholder="••••••••"
                     aria-invalid={fieldState.invalid}
                     {...field}
