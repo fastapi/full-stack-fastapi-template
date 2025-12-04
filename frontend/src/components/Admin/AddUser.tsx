@@ -169,7 +169,8 @@ const AddUser = () => {
                 render={({ field }) => (
                   <FormItem>
                     <FormLabel>
-                      Confirm Password <span className="text-destructive">*</span>
+                      Confirm Password{" "}
+                      <span className="text-destructive">*</span>
                     </FormLabel>
                     <FormControl>
                       <Input

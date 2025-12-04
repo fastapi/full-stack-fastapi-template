@@ -1,8 +1,10 @@
 import type { ColumnDef } from "@tanstack/react-table"
 import { Check, Copy } from "lucide-react"
+
 import type { ItemPublic } from "@/client"
 import { Button } from "@/components/ui/button"
 import { useCopyToClipboard } from "@/hooks/useCopyToClipboard"
+import { cn } from "@/lib/utils"
 import { ItemActionsMenu } from "./ItemActionsMenu"
 
 function CopyId({ id }: { id: string }) {
@@ -49,7 +51,10 @@ export const columns: ColumnDef<ItemPublic>[] = [
       const description = row.original.description
       return (
         <span
-          className={`max-w-xs truncate block ${!description ? "text-muted-foreground italic" : "text-muted-foreground"}`}
+          className={cn(
+            "max-w-xs truncate block text-muted-foreground",
+            !description && "italic",
+          )}
         >
           {description || "No description"}
         </span>

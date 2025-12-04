@@ -97,7 +97,12 @@ const AddItem = () => {
                       Title <span className="text-destructive">*</span>
                     </FormLabel>
                     <FormControl>
-                      <Input placeholder="Title" type="text" {...field} required />
+                      <Input
+                        placeholder="Title"
+                        type="text"
+                        {...field}
+                        required
+                      />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -125,10 +130,7 @@ const AddItem = () => {
                   Cancel
                 </Button>
               </DialogClose>
-              <LoadingButton
-                type="submit"
-                loading={mutation.isPending}
-              >
+              <LoadingButton type="submit" loading={mutation.isPending}>
                 Save
               </LoadingButton>
             </DialogFooter>

@@ -57,9 +57,9 @@ export function DataTable<TData, TValue>({
                     {header.isPlaceholder
                       ? null
                       : flexRender(
-                        header.column.columnDef.header,
-                        header.getContext(),
-                      )}
+                          header.column.columnDef.header,
+                          header.getContext(),
+                        )}
                   </TableHead>
                 )
               })}
@@ -69,9 +69,7 @@ export function DataTable<TData, TValue>({
         <TableBody>
           {table.getRowModel().rows.length ? (
             table.getRowModel().rows.map((row) => (
-              <TableRow
-                key={row.id}
-              >
+              <TableRow key={row.id}>
                 {row.getVisibleCells().map((cell) => (
                   <TableCell key={cell.id}>
                     {flexRender(cell.column.columnDef.cell, cell.getContext())}
@@ -103,7 +101,7 @@ export function DataTable<TData, TValue>({
               to{" "}
               {Math.min(
                 (table.getState().pagination.pageIndex + 1) *
-                table.getState().pagination.pageSize,
+                  table.getState().pagination.pageSize,
                 data.length,
               )}{" "}
               of{" "}

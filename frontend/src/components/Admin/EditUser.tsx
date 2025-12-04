@@ -89,7 +89,7 @@ const EditUser = ({ user, onSuccess }: EditUserProps) => {
 
   const onSubmit = (data: FormData) => {
     // exclude confirm_password from submission data and remove password if empty
-    const { confirm_password, ...submitData } = data
+    const { confirm_password: _, ...submitData } = data
     if (!submitData.password) {
       delete submitData.password
     }
@@ -124,7 +124,12 @@ const EditUser = ({ user, onSuccess }: EditUserProps) => {
                       Email <span className="text-destructive">*</span>
                     </FormLabel>
                     <FormControl>
-                      <Input placeholder="Email" type="email" {...field} required />
+                      <Input
+                        placeholder="Email"
+                        type="email"
+                        {...field}
+                        required
+                      />
                     </FormControl>
                     <FormMessage />
                   </FormItem>

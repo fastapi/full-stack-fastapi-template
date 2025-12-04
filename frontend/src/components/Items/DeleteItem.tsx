@@ -28,9 +28,7 @@ const DeleteItem = ({ id, onSuccess }: DeleteItemProps) => {
   const [isOpen, setIsOpen] = useState(false)
   const queryClient = useQueryClient()
   const { showSuccessToast, showErrorToast } = useCustomToast()
-  const {
-    handleSubmit,
-  } = useForm()
+  const { handleSubmit } = useForm()
 
   const deleteItem = async (id: string) => {
     await ItemsService.deleteItem({ id: id })

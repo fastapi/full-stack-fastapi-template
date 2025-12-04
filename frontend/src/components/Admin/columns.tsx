@@ -1,6 +1,8 @@
 import type { ColumnDef } from "@tanstack/react-table"
+
 import type { UserPublic } from "@/client"
 import { Badge } from "@/components/ui/badge"
+import { cn } from "@/lib/utils"
 import { UserActionsMenu } from "./UserActionsMenu"
 
 export type UserTableData = UserPublic & {
@@ -16,7 +18,7 @@ export const columns: ColumnDef<UserTableData>[] = [
       return (
         <div className="flex items-center gap-2">
           <span
-            className={`font-medium ${!fullName ? "text-muted-foreground" : ""}`}
+            className={cn("font-medium", !fullName && "text-muted-foreground")}
           >
             {fullName || "N/A"}
           </span>
@@ -51,7 +53,10 @@ export const columns: ColumnDef<UserTableData>[] = [
     cell: ({ row }) => (
       <div className="flex items-center gap-2">
         <span
-          className={`size-2 rounded-full ${row.original.is_active ? "bg-green-500" : "bg-gray-400"}`}
+          className={cn(
+            "size-2 rounded-full",
+            row.original.is_active ? "bg-green-500" : "bg-gray-400",
+          )}
         />
         <span className={row.original.is_active ? "" : "text-muted-foreground"}>
           {row.original.is_active ? "Active" : "Inactive"}
