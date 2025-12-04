@@ -34,6 +34,13 @@ import useAuth from "@/hooks/useAuth"
 
 export const Route = createFileRoute("/_layout/projects/$projectId")({
   component: ProjectDetail,
+  head: () => ({
+    meta: [
+      {
+        title: 'Loading project details...',
+      },
+    ],
+})
 })
 
 function getStatusColor(status: string) {
@@ -70,6 +77,11 @@ function ProjectDetail() {
     queryFn: () => ProjectsService.readProject({ id: projectId }),
   })
 
+  // Set page title when project data is loaded
+    if (project) {
+      document.title = `${project.name}`
+    }
+  
   // Fetch galleries for this project
   const { data: galleriesData } = useQuery({
     queryKey: ["projectGalleries", projectId],

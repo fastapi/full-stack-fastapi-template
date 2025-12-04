@@ -34,6 +34,13 @@ import { GalleryStatusWidget } from "@/components/Common/GalleryStatusWidget"
 
 export const Route = createFileRoute("/_layout/dashboard")({
   component: Dashboard,
+  head: () => ({
+    meta: [
+      {
+        title: 'Dashboard',
+      },
+    ],
+})
 })
 
 // Helper to calculate days until deadline

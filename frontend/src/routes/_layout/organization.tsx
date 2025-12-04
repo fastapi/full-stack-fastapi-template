@@ -23,6 +23,13 @@ import useCustomToast from "@/hooks/useCustomToast"
 
 export const Route = createFileRoute("/_layout/organization")({
   component: OrganizationPage,
+  head: () => ({
+    meta: [
+      {
+        title: 'Organization',
+      },
+    ],
+})
 })
 
 function OrganizationPage() {

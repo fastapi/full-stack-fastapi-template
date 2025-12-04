@@ -24,6 +24,14 @@ export const Route = createFileRoute("/reset-password")({
       })
     }
   },
+  head: () => ({
+    meta: [
+      {
+        title: 'Reset Password',
+      },
+    ],
+  })
+  
 })
 
 function ResetPassword() {

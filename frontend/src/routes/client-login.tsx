@@ -24,6 +24,13 @@ export const Route = createFileRoute("/client-login")({
       })
     }
   },
+  head: () => ({
+    meta: [
+      {
+        title: 'Client Login',
+      },
+    ],
+  })
 })
 
 function ClientLogin() {

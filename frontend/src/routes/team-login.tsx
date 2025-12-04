@@ -24,6 +24,13 @@ export const Route = createFileRoute("/team-login")({
       })
     }
   },
+  head: () => ({
+    meta: [
+      {
+        title: 'Team Login',
+      },
+    ],
+  })
 })
 
 function TeamLogin() {

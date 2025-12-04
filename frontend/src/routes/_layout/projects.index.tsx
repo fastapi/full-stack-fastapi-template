@@ -40,6 +40,13 @@ function getProjectsQueryOptions({ page }: { page: number }) {
 export const Route = createFileRoute("/_layout/projects/")({
   component: Projects,
   validateSearch: (search) => projectsSearchSchema.parse(search),
+  head: () => ({
+    meta: [
+      {
+        title: 'Projects',
+      },
+    ],
+})
 })
 
 function getStatusColor(status: string) {

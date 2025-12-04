@@ -1,4 +1,4 @@
-import { createRootRoute, Outlet } from "@tanstack/react-router"
+import { createRootRoute, Outlet, HeadContent } from "@tanstack/react-router"
 import React, { Suspense } from "react"
 
 import NotFound from "@/components/Common/NotFound"
@@ -24,6 +24,7 @@ const TanStackDevtools =
 export const Route = createRootRoute({
   component: () => (
     <>
+      <HeadContent />
       <Outlet />
       <Suspense>
         <TanStackDevtools />
@@ -31,4 +32,21 @@ export const Route = createRootRoute({
     </>
   ),
   notFoundComponent: () => <NotFound />,
+  head: () => ({
+    meta: [
+      {
+        name: 'description',
+        content: 'Mosaic is a photography project planner made for photographers.',
+      },
+      {
+        title: 'Mosaic',
+      },
+    ],
+    links: [
+      {
+        rel: 'icon',
+        href: '/assets/images/mosaicm.png',
+      },
+    ],
+  }),
 })

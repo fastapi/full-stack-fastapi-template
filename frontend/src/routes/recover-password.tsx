@@ -25,6 +25,13 @@ export const Route = createFileRoute("/recover-password")({
       })
     }
   },
+  head: () => ({
+    meta: [
+      {
+        title: 'Recover Password',
+      },
+    ],
+  })
 })
 
 function RecoverPassword() {

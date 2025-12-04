@@ -38,6 +38,13 @@ export const Route = createFileRoute("/_layout/galleries/$galleryId")({
     // Pre-fetch gallery data
     return await GalleriesService.readGallery({ id: params.galleryId })
   },
+  head: () => ({
+    meta: [
+      {
+        title: 'Project Gallery',
+      },
+    ],
+})
 })
 
 function getStatusColor(status: string) {
@@ -96,6 +103,11 @@ function GalleryDetail() {
     queryFn: () => ProjectsService.readProject({ id: gallery!.project_id }),
     enabled: !!gallery?.project_id,
   })
+
+  // Set page title when gallery data is loaded
+    if (gallery) {
+      document.title = `${gallery.name}`
+    }
 
   // Fetch photos
   const { data: photosData, isLoading: isLoadingPhotos } = useQuery({

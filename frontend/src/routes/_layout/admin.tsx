@@ -30,6 +30,13 @@ function getUsersQueryOptions({ page }: { page: number }) {
 export const Route = createFileRoute("/_layout/admin")({
   component: Admin,
   validateSearch: (search) => usersSearchSchema.parse(search),
+  head: () => ({
+    meta: [
+      {
+        title: 'Admin',
+      },
+    ],
+})
 })
 
 function UsersTable() {

@@ -20,6 +20,13 @@ import useAuth from "@/hooks/useAuth"
 
 export const Route = createFileRoute("/_layout/galleries/")({
   component: GalleriesList,
+  head: () => ({
+    meta: [
+      {
+        title: 'Galleries',
+      },
+    ],
+  })
 })
 
 function getStatusColor(status: string) {

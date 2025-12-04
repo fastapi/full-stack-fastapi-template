@@ -18,6 +18,13 @@ export const Route = createFileRoute("/")({
       })
     }
   },
+  head: () => ({
+    meta: [
+      {
+        title: 'Mosaic',
+      },
+    ],
+  })
 })
 
 function LandingPage() {
