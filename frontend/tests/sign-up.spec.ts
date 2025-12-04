@@ -118,7 +118,7 @@ test("Sign up with mismatched passwords", async ({ page }) => {
   await fillForm(page, fullName, email, password, password2)
   await page.getByRole("button", { name: "Sign Up" }).click()
 
-  await expect(page.getByText("Passwords do not match")).toBeVisible()
+  await expect(page.getByText("The passwords don't match")).toBeVisible()
 })
 
 test("Sign up with missing full name", async ({ page }) => {
@@ -144,7 +144,7 @@ test("Sign up with missing email", async ({ page }) => {
   await fillForm(page, fullName, email, password, password)
   await page.getByRole("button", { name: "Sign Up" }).click()
 
-  await expect(page.getByText("Email is required")).toBeVisible()
+  await expect(page.getByText("Invalid email address")).toBeVisible()
 })
 
 test("Sign up with missing password", async ({ page }) => {

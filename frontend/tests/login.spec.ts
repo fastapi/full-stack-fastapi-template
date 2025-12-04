@@ -33,7 +33,7 @@ test("Forgot Password link is visible", async ({ page }) => {
   await page.goto("/login")
 
   await expect(
-    page.getByRole("link", { name: "Forgot password?" }),
+    page.getByRole("link", { name: "Forgot your password?" }),
   ).toBeVisible()
 })
 
