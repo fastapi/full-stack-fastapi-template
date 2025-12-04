@@ -43,7 +43,9 @@ test.describe("Edit user full name and email successfully", () => {
     await page.getByRole("button", { name: "Save" }).click()
     await expect(page.getByText("User updated successfully")).toBeVisible()
     // Check if the new name is displayed on the page
-    await expect(page.getByText(updatedName, { exact: true })).toBeVisible()
+    await expect(
+      page.locator("form").getByText(updatedName, { exact: true }),
+    ).toBeVisible()
   })
 
   test("Edit user email with a valid email", async ({ page }) => {
@@ -62,7 +64,9 @@ test.describe("Edit user full name and email successfully", () => {
     await page.getByLabel("Email").fill(updatedEmail)
     await page.getByRole("button", { name: "Save" }).click()
     await expect(page.getByText("User updated successfully")).toBeVisible()
-    await expect(page.getByText(updatedEmail, { exact: true })).toBeVisible()
+    await expect(
+      page.locator("form").getByText(updatedEmail, { exact: true }),
+    ).toBeVisible()
   })
 })
 
@@ -252,6 +256,7 @@ test("User can switch from light mode to dark mode and vice versa", async ({
   )
   expect(isLightMode).toBe(true)
 
+  await page.getByTestId("theme-button").click()
   await page.getByTestId("dark-mode").click()
   const isDarkMode = await page.evaluate(() =>
     document.documentElement.classList.contains("dark"),
@@ -284,6 +289,7 @@ test("Selected mode is preserved across sessions", async ({ page }) => {
   )
   expect(isLightMode).toBe(true)
 
+  await page.getByTestId("theme-button").click()
   await page.getByTestId("dark-mode").click()
   let isDarkMode = await page.evaluate(() =>
     document.documentElement.classList.contains("dark"),
