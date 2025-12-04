@@ -108,7 +108,11 @@ function ResetPassword() {
                 <FormItem>
                   <FormLabel>New Password</FormLabel>
                   <FormControl>
-                    <PasswordInput placeholder="New Password" {...field} />
+                    <PasswordInput
+                      data-testid="new-password-input"
+                      placeholder="New Password"
+                      {...field}
+                    />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -122,7 +126,11 @@ function ResetPassword() {
                 <FormItem>
                   <FormLabel>Confirm Password</FormLabel>
                   <FormControl>
-                    <PasswordInput placeholder="Confirm Password" {...field} />
+                    <PasswordInput
+                      data-testid="confirm-password-input"
+                      placeholder="Confirm Password"
+                      {...field}
+                    />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
