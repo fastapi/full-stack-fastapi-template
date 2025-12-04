@@ -91,7 +91,12 @@ function SignUp() {
                 <FormItem>
                   <FormLabel>Full Name</FormLabel>
                   <FormControl>
-                    <Input placeholder="User" type="text" {...field} />
+                    <Input
+                      data-testid="full-name-input"
+                      placeholder="User"
+                      type="text"
+                      {...field}
+                    />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -106,6 +111,7 @@ function SignUp() {
                   <FormLabel>Email</FormLabel>
                   <FormControl>
                     <Input
+                      data-testid="email-input"
                       placeholder="user@example.com"
                       type="email"
                       {...field}
@@ -123,7 +129,11 @@ function SignUp() {
                 <FormItem>
                   <FormLabel>Password</FormLabel>
                   <FormControl>
-                    <PasswordInput placeholder="Password" {...field} />
+                    <PasswordInput
+                      data-testid="password-input"
+                      placeholder="Password"
+                      {...field}
+                    />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -137,7 +147,11 @@ function SignUp() {
                 <FormItem>
                   <FormLabel>Confirm Password</FormLabel>
                   <FormControl>
-                    <PasswordInput placeholder="Confirm Password" {...field} />
+                    <PasswordInput
+                      data-testid="confirm-password-input"
+                      placeholder="Confirm Password"
+                      {...field}
+                    />
                   </FormControl>
                   <FormMessage />
                 </FormItem>

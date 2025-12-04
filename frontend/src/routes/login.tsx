@@ -80,6 +80,7 @@ function Login() {
                   <FormLabel>Email</FormLabel>
                   <FormControl>
                     <Input
+                      data-testid="email-input"
                       placeholder="user@example.com"
                       type="email"
                       {...field}
@@ -105,7 +106,11 @@ function Login() {
                     </RouterLink>
                   </div>
                   <FormControl>
-                    <PasswordInput placeholder="Password" {...field} />
+                    <PasswordInput
+                      data-testid="password-input"
+                      placeholder="Password"
+                      {...field}
+                    />
                   </FormControl>
                   <FormMessage className="text-xs" />
                 </FormItem>
