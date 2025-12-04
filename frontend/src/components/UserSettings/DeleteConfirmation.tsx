@@ -21,10 +21,7 @@ import { handleError } from "@/utils"
 const DeleteConfirmation = () => {
   const queryClient = useQueryClient()
   const { showSuccessToast, showErrorToast } = useCustomToast()
-  const {
-    handleSubmit,
-    formState: { isSubmitting },
-  } = useForm()
+  const { handleSubmit } = useForm()
   const { logout } = useAuth()
 
   const mutation = useMutation({
@@ -64,14 +61,14 @@ const DeleteConfirmation = () => {
 
           <DialogFooter className="mt-4">
             <DialogClose asChild>
-              <Button variant="outline" disabled={isSubmitting}>
+              <Button variant="outline" disabled={mutation.isPending}>
                 Cancel
               </Button>
             </DialogClose>
             <LoadingButton
               variant="destructive"
               type="submit"
-              loading={isSubmitting}
+              loading={mutation.isPending}
             >
               Delete
             </LoadingButton>
