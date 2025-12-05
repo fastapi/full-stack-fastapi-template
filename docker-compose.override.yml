@@ -101,6 +101,9 @@ services:
       args:
         - VITE_API_URL=http://localhost:8000
         - NODE_ENV=development
+    depends_on:
+      backend:
+        condition: service_healthy
 
   playwright:
     build:

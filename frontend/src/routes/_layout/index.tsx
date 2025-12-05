@@ -1,10 +1,17 @@
 import { Box, Container, Text } from "@chakra-ui/react"
-import { createFileRoute } from "@tanstack/react-router"
+import { createFileRoute, redirect } from "@tanstack/react-router"
 
-import useAuth from "@/hooks/useAuth"
+import useAuth, { isLoggedIn } from "@/hooks/useAuth"
 
 export const Route = createFileRoute("/_layout/")({
   component: Dashboard,
+  beforeLoad: async () => {
+    if (!isLoggedIn()) {
+      throw redirect({
+        to: "/login",
+      })
+    }
+  },
 })
 
 function Dashboard() {
