@@ -2,9 +2,9 @@ import { FaGithub, FaLinkedinIn } from "react-icons/fa"
 import { FaXTwitter } from "react-icons/fa6"
 
 const socialLinks = [
-  { icon: FaGithub, href: "https://github.com", label: "GitHub" },
-  { icon: FaXTwitter, href: "https://x.com", label: "X" },
-  { icon: FaLinkedinIn, href: "https://linkedin.com", label: "LinkedIn" },
+  { icon: FaGithub, href: "https://github.com/fastapi/fastapi", label: "GitHub" },
+  { icon: FaXTwitter, href: "https://x.com/fastapi", label: "X" },
+  { icon: FaLinkedinIn, href: "https://linkedin.com/company/fastapi", label: "LinkedIn" },
 ]
 
 export function Footer() {
