@@ -1,25 +1,30 @@
-import { Checkbox as ChakraCheckbox } from "@chakra-ui/react"
 import * as React from "react"
+import * as CheckboxPrimitive from "@radix-ui/react-checkbox"
+import { CheckIcon } from "lucide-react"
 
-export interface CheckboxProps extends ChakraCheckbox.RootProps {
-  icon?: React.ReactNode
-  inputProps?: React.InputHTMLAttributes<HTMLInputElement>
-  rootRef?: React.Ref<HTMLLabelElement>
+import { cn } from "@/lib/utils"
+
+function Checkbox({
+  className,
+  ...props
+}: React.ComponentProps<typeof CheckboxPrimitive.Root>) {
+  return (
+    <CheckboxPrimitive.Root
+      data-slot="checkbox"
+      className={cn(
+        "peer border-input dark:bg-input/30 data-[state=checked]:bg-primary data-[state=checked]:text-primary-foreground dark:data-[state=checked]:bg-primary data-[state=checked]:border-primary focus-visible:border-ring focus-visible:ring-ring/50 aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive size-4 shrink-0 rounded-[4px] border shadow-xs transition-shadow outline-none focus-visible:ring-[3px] disabled:cursor-not-allowed disabled:opacity-50",
+        className
+      )}
+      {...props}
+    >
+      <CheckboxPrimitive.Indicator
+        data-slot="checkbox-indicator"
+        className="grid place-content-center text-current transition-none"
+      >
+        <CheckIcon className="size-3.5" />
+      </CheckboxPrimitive.Indicator>
+    </CheckboxPrimitive.Root>
+  )
 }
 
-export const Checkbox = React.forwardRef<HTMLInputElement, CheckboxProps>(
-  function Checkbox(props, ref) {
-    const { icon, children, inputProps, rootRef, ...rest } = props
-    return (
-      <ChakraCheckbox.Root ref={rootRef} {...rest}>
-        <ChakraCheckbox.HiddenInput ref={ref} {...inputProps} />
-        <ChakraCheckbox.Control>
-          {icon || <ChakraCheckbox.Indicator />}
-        </ChakraCheckbox.Control>
-        {children != null && (
-          <ChakraCheckbox.Label>{children}</ChakraCheckbox.Label>
-        )}
-      </ChakraCheckbox.Root>
-    )
-  },
-)
+export { Checkbox }

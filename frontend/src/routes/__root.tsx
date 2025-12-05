@@ -1,34 +1,17 @@
+import { ReactQueryDevtools } from "@tanstack/react-query-devtools"
 import { createRootRoute, Outlet } from "@tanstack/react-router"
-import React, { Suspense } from "react"
-
+import { TanStackRouterDevtools } from "@tanstack/react-router-devtools"
+import ErrorComponent from "@/components/Common/ErrorComponent"
 import NotFound from "@/components/Common/NotFound"
-
-const loadDevtools = () =>
-  Promise.all([
-    import("@tanstack/router-devtools"),
-    import("@tanstack/react-query-devtools"),
-  ]).then(([routerDevtools, reactQueryDevtools]) => {
-    return {
-      default: () => (
-        <>
-          <routerDevtools.TanStackRouterDevtools />
-          <reactQueryDevtools.ReactQueryDevtools />
-        </>
-      ),
-    }
-  })
-
-const TanStackDevtools =
-  process.env.NODE_ENV === "production" ? () => null : React.lazy(loadDevtools)
 
 export const Route = createRootRoute({
   component: () => (
     <>
       <Outlet />
-      <Suspense>
-        <TanStackDevtools />
-      </Suspense>
+      <TanStackRouterDevtools position="bottom-right" />
+      <ReactQueryDevtools initialIsOpen={false} />
     </>
   ),
   notFoundComponent: () => <NotFound />,
+  errorComponent: () => <ErrorComponent />,
 })

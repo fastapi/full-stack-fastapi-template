@@ -1,39 +1,53 @@
-import { Table } from "@chakra-ui/react"
-import { SkeletonText } from "../ui/skeleton"
+import { Skeleton } from "@/components/ui/skeleton"
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table"
 
 const PendingUsers = () => (
-  <Table.Root size={{ base: "sm", md: "md" }}>
-    <Table.Header>
-      <Table.Row>
-        <Table.ColumnHeader w="sm">Full name</Table.ColumnHeader>
-        <Table.ColumnHeader w="sm">Email</Table.ColumnHeader>
-        <Table.ColumnHeader w="sm">Role</Table.ColumnHeader>
-        <Table.ColumnHeader w="sm">Status</Table.ColumnHeader>
-        <Table.ColumnHeader w="sm">Actions</Table.ColumnHeader>
-      </Table.Row>
-    </Table.Header>
-    <Table.Body>
-      {[...Array(5)].map((_, index) => (
-        <Table.Row key={index}>
-          <Table.Cell>
-            <SkeletonText noOfLines={1} />
-          </Table.Cell>
-          <Table.Cell>
-            <SkeletonText noOfLines={1} />
-          </Table.Cell>
-          <Table.Cell>
-            <SkeletonText noOfLines={1} />
-          </Table.Cell>
-          <Table.Cell>
-            <SkeletonText noOfLines={1} />
-          </Table.Cell>
-          <Table.Cell>
-            <SkeletonText noOfLines={1} />
-          </Table.Cell>
-        </Table.Row>
+  <Table>
+    <TableHeader>
+      <TableRow>
+        <TableHead>Full Name</TableHead>
+        <TableHead>Email</TableHead>
+        <TableHead>Role</TableHead>
+        <TableHead>Status</TableHead>
+        <TableHead>
+          <span className="sr-only">Actions</span>
+        </TableHead>
+      </TableRow>
+    </TableHeader>
+    <TableBody>
+      {Array.from({ length: 5 }).map((_, index) => (
+        <TableRow key={index}>
+          <TableCell>
+            <Skeleton className="h-4 w-32" />
+          </TableCell>
+          <TableCell>
+            <Skeleton className="h-4 w-40" />
+          </TableCell>
+          <TableCell>
+            <Skeleton className="h-5 w-20 rounded-full" />
+          </TableCell>
+          <TableCell>
+            <div className="flex items-center gap-2">
+              <Skeleton className="size-2 rounded-full" />
+              <Skeleton className="h-4 w-12" />
+            </div>
+          </TableCell>
+          <TableCell>
+            <div className="flex justify-end">
+              <Skeleton className="size-8 rounded-md" />
+            </div>
+          </TableCell>
+        </TableRow>
       ))}
-    </Table.Body>
-  </Table.Root>
+    </TableBody>
+  </Table>
 )
 
 export default PendingUsers

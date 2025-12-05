@@ -1,148 +1,144 @@
-import {
-  Button,
-  ButtonGroup,
-  DialogActionTrigger,
-  Input,
-  Text,
-  VStack,
-} from "@chakra-ui/react"
+import { zodResolver } from "@hookform/resolvers/zod"
 import { useMutation, useQueryClient } from "@tanstack/react-query"
+import { Pencil } from "lucide-react"
 import { useState } from "react"
-import { type SubmitHandler, useForm } from "react-hook-form"
-import { FaExchangeAlt } from "react-icons/fa"
+import { useForm } from "react-hook-form"
+import { z } from "zod"
 
-import { type ApiError, type ItemPublic, ItemsService } from "@/client"
-import useCustomToast from "@/hooks/useCustomToast"
-import { handleError } from "@/utils"
+import { type ItemPublic, ItemsService } from "@/client"
+import { Button } from "@/components/ui/button"
 import {
-  DialogBody,
-  DialogCloseTrigger,
+  Dialog,
+  DialogClose,
   DialogContent,
+  DialogDescription,
   DialogFooter,
   DialogHeader,
-  DialogRoot,
   DialogTitle,
-  DialogTrigger,
-} from "../ui/dialog"
-import { Field } from "../ui/field"
+} from "@/components/ui/dialog"
+import { DropdownMenuItem } from "@/components/ui/dropdown-menu"
+import {
+  Form,
+  FormControl,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from "@/components/ui/form"
+import { Input } from "@/components/ui/input"
+import { LoadingButton } from "@/components/ui/loading-button"
+import useCustomToast from "@/hooks/useCustomToast"
+import { handleError } from "@/utils"
+
+const formSchema = z.object({
+  title: z.string().min(1, { message: "Title is required" }),
+  description: z.string().optional(),
+})
+
+type FormData = z.infer<typeof formSchema>
 
 interface EditItemProps {
   item: ItemPublic
+  onSuccess: () => void
 }
 
-interface ItemUpdateForm {
-  title: string
-  description?: string
-}
-
-const EditItem = ({ item }: EditItemProps) => {
+const EditItem = ({ item, onSuccess }: EditItemProps) => {
   const [isOpen, setIsOpen] = useState(false)
   const queryClient = useQueryClient()
-  const { showSuccessToast } = useCustomToast()
-  const {
-    register,
-    handleSubmit,
-    reset,
-    formState: { errors, isSubmitting },
-  } = useForm<ItemUpdateForm>({
+  const { showSuccessToast, showErrorToast } = useCustomToast()
+
+  const form = useForm<FormData>({
+    resolver: zodResolver(formSchema),
     mode: "onBlur",
     criteriaMode: "all",
     defaultValues: {
-      ...item,
+      title: item.title,
       description: item.description ?? undefined,
     },
   })
 
   const mutation = useMutation({
-    mutationFn: (data: ItemUpdateForm) =>
+    mutationFn: (data: FormData) =>
       ItemsService.updateItem({ id: item.id, requestBody: data }),
     onSuccess: () => {
-      showSuccessToast("Item updated successfully.")
-      reset()
+      showSuccessToast("Item updated successfully")
       setIsOpen(false)
+      onSuccess()
     },
-    onError: (err: ApiError) => {
-      handleError(err)
-    },
+    onError: handleError.bind(showErrorToast),
     onSettled: () => {
       queryClient.invalidateQueries({ queryKey: ["items"] })
     },
   })
 
-  const onSubmit: SubmitHandler<ItemUpdateForm> = async (data) => {
+  const onSubmit = (data: FormData) => {
     mutation.mutate(data)
   }
 
   return (
-    <DialogRoot
-      size={{ base: "xs", md: "md" }}
-      placement="center"
-      open={isOpen}
-      onOpenChange={({ open }) => setIsOpen(open)}
-    >
-      <DialogTrigger asChild>
-        <Button variant="ghost">
-          <FaExchangeAlt fontSize="16px" />
-          Edit Item
-        </Button>
-      </DialogTrigger>
-      <DialogContent>
-        <form onSubmit={handleSubmit(onSubmit)}>
-          <DialogHeader>
-            <DialogTitle>Edit Item</DialogTitle>
-          </DialogHeader>
-          <DialogBody>
-            <Text mb={4}>Update the item details below.</Text>
-            <VStack gap={4}>
-              <Field
-                required
-                invalid={!!errors.title}
-                errorText={errors.title?.message}
-                label="Title"
-              >
-                <Input
-                  {...register("title", {
-                    required: "Title is required",
-                  })}
-                  placeholder="Title"
-                  type="text"
-                />
-              </Field>
+    <Dialog open={isOpen} onOpenChange={setIsOpen}>
+      <DropdownMenuItem
+        onSelect={(e) => e.preventDefault()}
+        onClick={() => setIsOpen(true)}
+      >
+        <Pencil />
+        Edit Item
+      </DropdownMenuItem>
+      <DialogContent className="sm:max-w-md">
+        <Form {...form}>
+          <form onSubmit={form.handleSubmit(onSubmit)}>
+            <DialogHeader>
+              <DialogTitle>Edit Item</DialogTitle>
+              <DialogDescription>
+                Update the item details below.
+              </DialogDescription>
+            </DialogHeader>
+            <div className="grid gap-4 py-4">
+              <FormField
+                control={form.control}
+                name="title"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>
+                      Title <span className="text-destructive">*</span>
+                    </FormLabel>
+                    <FormControl>
+                      <Input placeholder="Title" type="text" {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
 
-              <Field
-                invalid={!!errors.description}
-                errorText={errors.description?.message}
-                label="Description"
-              >
-                <Input
-                  {...register("description")}
-                  placeholder="Description"
-                  type="text"
-                />
-              </Field>
-            </VStack>
-          </DialogBody>
+              <FormField
+                control={form.control}
+                name="description"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Description</FormLabel>
+                    <FormControl>
+                      <Input placeholder="Description" type="text" {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+            </div>
 
-          <DialogFooter gap={2}>
-            <ButtonGroup>
-              <DialogActionTrigger asChild>
-                <Button
-                  variant="subtle"
-                  colorPalette="gray"
-                  disabled={isSubmitting}
-                >
+            <DialogFooter>
+              <DialogClose asChild>
+                <Button variant="outline" disabled={mutation.isPending}>
                   Cancel
                 </Button>
-              </DialogActionTrigger>
-              <Button variant="solid" type="submit" loading={isSubmitting}>
+              </DialogClose>
+              <LoadingButton type="submit" loading={mutation.isPending}>
                 Save
-              </Button>
-            </ButtonGroup>
-          </DialogFooter>
-        </form>
-        <DialogCloseTrigger />
+              </LoadingButton>
+            </DialogFooter>
+          </form>
+        </Form>
       </DialogContent>
-    </DialogRoot>
+    </Dialog>
   )
 }
 
