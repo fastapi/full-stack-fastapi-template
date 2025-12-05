@@ -59,7 +59,7 @@ function RecoverPassword() {
   const mutation = useMutation({
     mutationFn: recoverPassword,
     onSuccess: () => {
-      showSuccessToast("Password recovery email sent successfully.")
+      showSuccessToast("Password recovery email sent successfully")
       form.reset()
     },
     onError: handleError.bind(showErrorToast),

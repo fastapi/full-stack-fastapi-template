@@ -55,10 +55,11 @@ function Login() {
     },
   })
 
-  const onSubmit = async (data: FormData) => {
+  const onSubmit = (data: FormData) => {
     if (loginMutation.isPending) return
-    await loginMutation.mutateAsync(data)
+    loginMutation.mutate(data)
   }
+
 
   return (
     <AuthLayout>
