@@ -32,7 +32,7 @@
     "@tanstack/react-router": "^1.131.50",
     "@tanstack/react-router-devtools": "^1.139.12",
     "@tanstack/react-table": "^8.21.3",
-    "axios": "1.12.2",
+    "axios": "1.13.2",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
     "form-data": "4.0.5",
