@@ -1,35 +1,46 @@
-import { Table } from "@chakra-ui/react"
-import { SkeletonText } from "../ui/skeleton"
+import { Skeleton } from "@/components/ui/skeleton"
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table"
 
 const PendingItems = () => (
-  <Table.Root size={{ base: "sm", md: "md" }}>
-    <Table.Header>
-      <Table.Row>
-        <Table.ColumnHeader w="sm">ID</Table.ColumnHeader>
-        <Table.ColumnHeader w="sm">Title</Table.ColumnHeader>
-        <Table.ColumnHeader w="sm">Description</Table.ColumnHeader>
-        <Table.ColumnHeader w="sm">Actions</Table.ColumnHeader>
-      </Table.Row>
-    </Table.Header>
-    <Table.Body>
-      {[...Array(5)].map((_, index) => (
-        <Table.Row key={index}>
-          <Table.Cell>
-            <SkeletonText noOfLines={1} />
-          </Table.Cell>
-          <Table.Cell>
-            <SkeletonText noOfLines={1} />
-          </Table.Cell>
-          <Table.Cell>
-            <SkeletonText noOfLines={1} />
-          </Table.Cell>
-          <Table.Cell>
-            <SkeletonText noOfLines={1} />
-          </Table.Cell>
-        </Table.Row>
+  <Table>
+    <TableHeader>
+      <TableRow>
+        <TableHead>ID</TableHead>
+        <TableHead>Title</TableHead>
+        <TableHead>Description</TableHead>
+        <TableHead>
+          <span className="sr-only">Actions</span>
+        </TableHead>
+      </TableRow>
+    </TableHeader>
+    <TableBody>
+      {Array.from({ length: 5 }).map((_, index) => (
+        <TableRow key={index}>
+          <TableCell>
+            <Skeleton className="h-4 w-64 font-mono" />
+          </TableCell>
+          <TableCell>
+            <Skeleton className="h-4 w-32" />
+          </TableCell>
+          <TableCell>
+            <Skeleton className="h-4 w-48" />
+          </TableCell>
+          <TableCell>
+            <div className="flex justify-end">
+              <Skeleton className="size-8 rounded-md" />
+            </div>
+          </TableCell>
+        </TableRow>
       ))}
-    </Table.Body>
-  </Table.Root>
+    </TableBody>
+  </Table>
 )
 
 export default PendingItems

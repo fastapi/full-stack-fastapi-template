@@ -4,7 +4,7 @@ import { createUser } from "./utils/privateApi.ts"
 import { randomEmail, randomPassword } from "./utils/random"
 import { logInUser, logOutUser } from "./utils/user"
 
-const tabs = ["My profile", "Password", "Appearance"]
+const tabs = ["My profile", "Password", "Danger zone"]
 
 // User Information
 
@@ -44,7 +44,7 @@ test.describe("Edit user full name and email successfully", () => {
     await expect(page.getByText("User updated successfully")).toBeVisible()
     // Check if the new name is displayed on the page
     await expect(
-      page.getByLabel("My profile").getByText(updatedName, { exact: true }),
+      page.locator("form").getByText(updatedName, { exact: true }),
     ).toBeVisible()
   })
 
@@ -65,7 +65,7 @@ test.describe("Edit user full name and email successfully", () => {
     await page.getByRole("button", { name: "Save" }).click()
     await expect(page.getByText("User updated successfully")).toBeVisible()
     await expect(
-      page.getByLabel("My profile").getByText(updatedEmail, { exact: true }),
+      page.locator("form").getByText(updatedEmail, { exact: true }),
     ).toBeVisible()
   })
 })
@@ -88,7 +88,7 @@ test.describe("Edit user with invalid data", () => {
     await page.getByRole("button", { name: "Edit" }).click()
     await page.getByLabel("Email").fill(invalidEmail)
     await page.locator("body").click()
-    await expect(page.getByText("Email is required")).toBeVisible()
+    await expect(page.getByText("Invalid email address")).toBeVisible()
   })
 
   test("Cancel edit action restores original name", async ({ page }) => {
@@ -107,9 +107,7 @@ test.describe("Edit user with invalid data", () => {
     await page.getByLabel("Full name").fill(updatedName)
     await page.getByRole("button", { name: "Cancel" }).first().click()
     await expect(
-      page
-        .getByLabel("My profile")
-        .getByText(user.full_name as string, { exact: true }),
+      page.locator("form").getByText(user.full_name as string, { exact: true }),
     ).toBeVisible()
   })
 
@@ -129,7 +127,7 @@ test.describe("Edit user with invalid data", () => {
     await page.getByLabel("Email").fill(updatedEmail)
     await page.getByRole("button", { name: "Cancel" }).first().click()
     await expect(
-      page.getByLabel("My profile").getByText(email, { exact: true }),
+      page.locator("form").getByText(email, { exact: true }),
     ).toBeVisible()
   })
 })
@@ -151,11 +149,11 @@ test.describe("Change password successfully", () => {
 
     await page.goto("/settings")
     await page.getByRole("tab", { name: "Password" }).click()
-    await page.getByPlaceholder("Current Password").fill(password)
-    await page.getByPlaceholder("New Password").fill(NewPassword)
-    await page.getByPlaceholder("Confirm Password").fill(NewPassword)
-    await page.getByRole("button", { name: "Save" }).click()
-    await expect(page.getByText("Password updated successfully.")).toBeVisible()
+    await page.getByTestId("current-password-input").fill(password)
+    await page.getByTestId("new-password-input").fill(NewPassword)
+    await page.getByTestId("confirm-password-input").fill(NewPassword)
+    await page.getByRole("button", { name: "Update Password" }).click()
+    await expect(page.getByText("Password updated successfully")).toBeVisible()
 
     await logOutUser(page)
 
@@ -179,9 +177,10 @@ test.describe("Change password with invalid data", () => {
 
     await page.goto("/settings")
     await page.getByRole("tab", { name: "Password" }).click()
-    await page.getByPlaceholder("Current Password").fill(password)
-    await page.getByPlaceholder("New Password").fill(weakPassword)
-    await page.getByPlaceholder("Confirm Password").fill(weakPassword)
+    await page.getByTestId("current-password-input").fill(password)
+    await page.getByTestId("new-password-input").fill(weakPassword)
+    await page.getByTestId("confirm-password-input").fill(weakPassword)
+    await page.getByRole("button", { name: "Update Password" }).click()
     await expect(
       page.getByText("Password must be at least 8 characters"),
     ).toBeVisible()
@@ -202,11 +201,11 @@ test.describe("Change password with invalid data", () => {
 
     await page.goto("/settings")
     await page.getByRole("tab", { name: "Password" }).click()
-    await page.getByPlaceholder("Current Password").fill(password)
-    await page.getByPlaceholder("New Password").fill(newPassword)
-    await page.getByPlaceholder("Confirm Password").fill(confirmPassword)
-    await page.getByLabel("Password", { exact: true }).locator("form").click()
-    await expect(page.getByText("The passwords do not match")).toBeVisible()
+    await page.getByTestId("current-password-input").fill(password)
+    await page.getByTestId("new-password-input").fill(newPassword)
+    await page.getByTestId("confirm-password-input").fill(confirmPassword)
+    await page.getByRole("button", { name: "Update Password" }).click()
+    await expect(page.getByText("The passwords don't match")).toBeVisible()
   })
 
   test("Current password and new password are the same", async ({ page }) => {
@@ -220,10 +219,10 @@ test.describe("Change password with invalid data", () => {
 
     await page.goto("/settings")
     await page.getByRole("tab", { name: "Password" }).click()
-    await page.getByPlaceholder("Current Password").fill(password)
-    await page.getByPlaceholder("New Password").fill(password)
-    await page.getByPlaceholder("Confirm Password").fill(password)
-    await page.getByRole("button", { name: "Save" }).click()
+    await page.getByTestId("current-password-input").fill(password)
+    await page.getByTestId("new-password-input").fill(password)
+    await page.getByTestId("confirm-password-input").fill(password)
+    await page.getByRole("button", { name: "Update Password" }).click()
     await expect(
       page.getByText("New password cannot be the same as the current one"),
     ).toBeVisible()
@@ -232,76 +231,39 @@ test.describe("Change password with invalid data", () => {
 
 // Appearance
 
-test("Appearance tab is visible", async ({ page }) => {
+test("Appearance button is visible in sidebar", async ({ page }) => {
   await page.goto("/settings")
-  await page.getByRole("tab", { name: "Appearance" }).click()
-  await expect(page.getByLabel("Appearance")).toBeVisible()
+  await expect(page.getByTestId("theme-button")).toBeVisible()
 })
 
-test("User can switch from light mode to dark mode and vice versa", async ({
+test("User can switch between theme modes", async ({
   page,
 }) => {
   await page.goto("/settings")
-  await page.getByRole("tab", { name: "Appearance" }).click()
 
-  // Ensure the initial state is light mode
-  if (
-    await page.evaluate(() =>
-      document.documentElement.classList.contains("dark"),
-    )
-  ) {
-    await page
-      .locator("label")
-      .filter({ hasText: "Light Mode" })
-      .locator("span")
-      .first()
-      .click()
-  }
+  await page.getByTestId("theme-button").click()
+  await page.getByTestId("dark-mode").click()
+  await expect(page.locator("html")).toHaveClass(/dark/)
 
-  let isLightMode = await page.evaluate(() =>
-    document.documentElement.classList.contains("light"),
-  )
-  expect(isLightMode).toBe(true)
+  // wait for dropdown to close before reopening
+  await expect(page.getByTestId("dark-mode")).not.toBeVisible()
 
-  await page
-    .locator("label")
-    .filter({ hasText: "Dark Mode" })
-    .locator("span")
-    .first()
-    .click()
-  const isDarkMode = await page.evaluate(() =>
-    document.documentElement.classList.contains("dark"),
-  )
-  expect(isDarkMode).toBe(true)
-
-  await page
-    .locator("label")
-    .filter({ hasText: "Light Mode" })
-    .locator("span")
-    .first()
-    .click()
-  isLightMode = await page.evaluate(() =>
-    document.documentElement.classList.contains("light"),
-  )
-  expect(isLightMode).toBe(true)
+  await page.getByTestId("theme-button").click()
+  await page.getByTestId("light-mode").click()
+  await expect(page.locator("html")).toHaveClass(/light/)
 })
 
 test("Selected mode is preserved across sessions", async ({ page }) => {
   await page.goto("/settings")
-  await page.getByRole("tab", { name: "Appearance" }).click()
 
-  // Ensure the initial state is light mode
+  await page.getByTestId("theme-button").click()
   if (
     await page.evaluate(() =>
       document.documentElement.classList.contains("dark"),
     )
   ) {
-    await page
-      .locator("label")
-      .filter({ hasText: "Light Mode" })
-      .locator("span")
-      .first()
-      .click()
+    await page.getByTestId("light-mode").click()
+    await page.getByTestId("theme-button").click()
   }
 
   const isLightMode = await page.evaluate(() =>
@@ -309,12 +271,8 @@ test("Selected mode is preserved across sessions", async ({ page }) => {
   )
   expect(isLightMode).toBe(true)
 
-  await page
-    .locator("label")
-    .filter({ hasText: "Dark Mode" })
-    .locator("span")
-    .first()
-    .click()
+  await page.getByTestId("theme-button").click()
+  await page.getByTestId("dark-mode").click()
   let isDarkMode = await page.evaluate(() =>
     document.documentElement.classList.contains("dark"),
   )

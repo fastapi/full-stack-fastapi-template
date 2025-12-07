@@ -1,43 +1,45 @@
-import {
-  Box,
-  Button,
-  Container,
-  Flex,
-  Heading,
-  Input,
-  Text,
-} from "@chakra-ui/react"
+import { zodResolver } from "@hookform/resolvers/zod"
 import { useMutation, useQueryClient } from "@tanstack/react-query"
 import { useState } from "react"
-import { type SubmitHandler, useForm } from "react-hook-form"
+import { useForm } from "react-hook-form"
+import { z } from "zod"
 
+import { UsersService, type UserUpdateMe } from "@/client"
+import { Button } from "@/components/ui/button"
 import {
-  type ApiError,
-  type UserPublic,
-  UsersService,
-  type UserUpdateMe,
-} from "@/client"
+  Form,
+  FormControl,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from "@/components/ui/form"
+import { Input } from "@/components/ui/input"
+import { LoadingButton } from "@/components/ui/loading-button"
 import useAuth from "@/hooks/useAuth"
 import useCustomToast from "@/hooks/useCustomToast"
-import { emailPattern, handleError } from "@/utils"
-import { Field } from "../ui/field"
+import { cn } from "@/lib/utils"
+import { handleError } from "@/utils"
+
+const formSchema = z.object({
+  full_name: z.string().max(30).optional(),
+  email: z.email({ message: "Invalid email address" }),
+})
+
+type FormData = z.infer<typeof formSchema>
 
 const UserInformation = () => {
   const queryClient = useQueryClient()
-  const { showSuccessToast } = useCustomToast()
+  const { showSuccessToast, showErrorToast } = useCustomToast()
   const [editMode, setEditMode] = useState(false)
   const { user: currentUser } = useAuth()
-  const {
-    register,
-    handleSubmit,
-    reset,
-    getValues,
-    formState: { isSubmitting, errors, isDirty },
-  } = useForm<UserPublic>({
+
+  const form = useForm<FormData>({
+    resolver: zodResolver(formSchema),
     mode: "onBlur",
     criteriaMode: "all",
     defaultValues: {
-      full_name: currentUser?.full_name,
+      full_name: currentUser?.full_name ?? undefined,
       email: currentUser?.email,
     },
   })
@@ -50,98 +52,119 @@ const UserInformation = () => {
     mutationFn: (data: UserUpdateMe) =>
       UsersService.updateUserMe({ requestBody: data }),
     onSuccess: () => {
-      showSuccessToast("User updated successfully.")
+      showSuccessToast("User updated successfully")
+      toggleEditMode()
     },
-    onError: (err: ApiError) => {
-      handleError(err)
-    },
+    onError: handleError.bind(showErrorToast),
     onSettled: () => {
       queryClient.invalidateQueries()
     },
   })
 
-  const onSubmit: SubmitHandler<UserUpdateMe> = async (data) => {
-    mutation.mutate(data)
+  const onSubmit = (data: FormData) => {
+    const updateData: UserUpdateMe = {}
+
+    // only include fields that have changed
+    if (data.full_name !== currentUser?.full_name) {
+      updateData.full_name = data.full_name
+    }
+    if (data.email !== currentUser?.email) {
+      updateData.email = data.email
+    }
+
+    mutation.mutate(updateData)
   }
 
   const onCancel = () => {
-    reset()
+    form.reset()
     toggleEditMode()
   }
 
   return (
-    <Container maxW="full">
-      <Heading size="sm" py={4}>
-        User Information
-      </Heading>
-      <Box
-        w={{ sm: "full", md: "sm" }}
-        as="form"
-        onSubmit={handleSubmit(onSubmit)}
-      >
-        <Field label="Full name">
-          {editMode ? (
-            <Input
-              {...register("full_name", { maxLength: 30 })}
-              type="text"
-              size="md"
-            />
-          ) : (
-            <Text
-              fontSize="md"
-              py={2}
-              color={!currentUser?.full_name ? "gray" : "inherit"}
-              truncate
-              maxW="sm"
-            >
-              {currentUser?.full_name || "N/A"}
-            </Text>
-          )}
-        </Field>
-        <Field
-          mt={4}
-          label="Email"
-          invalid={!!errors.email}
-          errorText={errors.email?.message}
+    <div className="max-w-md">
+      <h3 className="text-lg font-semibold py-4">User Information</h3>
+      <Form {...form}>
+        <form
+          onSubmit={form.handleSubmit(onSubmit)}
+          className="flex flex-col gap-4"
         >
-          {editMode ? (
-            <Input
-              {...register("email", {
-                required: "Email is required",
-                pattern: emailPattern,
-              })}
-              type="email"
-              size="md"
-            />
-          ) : (
-            <Text fontSize="md" py={2} truncate maxW="sm">
-              {currentUser?.email}
-            </Text>
-          )}
-        </Field>
-        <Flex mt={4} gap={3}>
-          <Button
-            variant="solid"
-            onClick={toggleEditMode}
-            type={editMode ? "button" : "submit"}
-            loading={editMode ? isSubmitting : false}
-            disabled={editMode ? !isDirty || !getValues("email") : false}
-          >
-            {editMode ? "Save" : "Edit"}
-          </Button>
-          {editMode && (
-            <Button
-              variant="subtle"
-              colorPalette="gray"
-              onClick={onCancel}
-              disabled={isSubmitting}
-            >
-              Cancel
-            </Button>
-          )}
-        </Flex>
-      </Box>
-    </Container>
+          <FormField
+            control={form.control}
+            name="full_name"
+            render={({ field }) =>
+              editMode ? (
+                <FormItem>
+                  <FormLabel>Full name</FormLabel>
+                  <FormControl>
+                    <Input type="text" {...field} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              ) : (
+                <FormItem>
+                  <FormLabel>Full name</FormLabel>
+                  <p
+                    className={cn(
+                      "py-2 truncate max-w-sm",
+                      !field.value && "text-muted-foreground",
+                    )}
+                  >
+                    {field.value || "N/A"}
+                  </p>
+                </FormItem>
+              )
+            }
+          />
+
+          <FormField
+            control={form.control}
+            name="email"
+            render={({ field }) =>
+              editMode ? (
+                <FormItem>
+                  <FormLabel>Email</FormLabel>
+                  <FormControl>
+                    <Input type="email" {...field} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              ) : (
+                <FormItem>
+                  <FormLabel>Email</FormLabel>
+                  <p className="py-2 truncate max-w-sm">{field.value}</p>
+                </FormItem>
+              )
+            }
+          />
+
+          <div className="flex gap-3">
+            {editMode ? (
+              <>
+                <LoadingButton
+                  type="submit"
+                  loading={mutation.isPending}
+                  disabled={!form.formState.isDirty}
+                >
+                  Save
+                </LoadingButton>
+                <Button
+                  type="button"
+                  variant="outline"
+                  onClick={onCancel}
+                  disabled={mutation.isPending}
+                >
+                  Cancel
+                </Button>
+              </>
+            ) : (
+              <Button type="button" onClick={toggleEditMode}>
+                Edit
+              </Button>
+            )}
+          </div>
+        </form>
+      </Form>
+    </div>
   )
 }
 

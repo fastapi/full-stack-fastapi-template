@@ -4,21 +4,13 @@ import { randomPassword } from "./utils/random.ts"
 
 test.use({ storageState: { cookies: [], origins: [] } })
 
-type OptionsType = {
-  exact?: boolean
-}
-
 const fillForm = async (page: Page, email: string, password: string) => {
-  await page.getByPlaceholder("Email").fill(email)
-  await page.getByPlaceholder("Password", { exact: true }).fill(password)
+  await page.getByTestId("email-input").fill(email)
+  await page.getByTestId("password-input").fill(password)
 }
 
-const verifyInput = async (
-  page: Page,
-  placeholder: string,
-  options?: OptionsType,
-) => {
-  const input = page.getByPlaceholder(placeholder, options)
+const verifyInput = async (page: Page, testId: string) => {
+  const input = page.getByTestId(testId)
   await expect(input).toBeVisible()
   await expect(input).toHaveText("")
   await expect(input).toBeEditable()
@@ -27,8 +19,8 @@ const verifyInput = async (
 test("Inputs are visible, empty and editable", async ({ page }) => {
   await page.goto("/login")
 
-  await verifyInput(page, "Email")
-  await verifyInput(page, "Password", { exact: true })
+  await verifyInput(page, "email-input")
+  await verifyInput(page, "password-input")
 })
 
 test("Log In button is visible", async ({ page }) => {
@@ -41,7 +33,7 @@ test("Forgot Password link is visible", async ({ page }) => {
   await page.goto("/login")
 
   await expect(
-    page.getByRole("link", { name: "Forgot password?" }),
+    page.getByRole("link", { name: "Forgot your password?" }),
   ).toBeVisible()
 })
 

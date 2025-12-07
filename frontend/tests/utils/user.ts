@@ -8,10 +8,10 @@ export async function signUpNewUser(
 ) {
   await page.goto("/signup")
 
-  await page.getByPlaceholder("Full Name").fill(name)
-  await page.getByPlaceholder("Email").fill(email)
-  await page.getByPlaceholder("Password", { exact: true }).fill(password)
-  await page.getByPlaceholder("Confirm Password").fill(password)
+  await page.getByTestId("full-name-input").fill(name)
+  await page.getByTestId("email-input").fill(email)
+  await page.getByTestId("password-input").fill(password)
+  await page.getByTestId("confirm-password-input").fill(password)
   await page.getByRole("button", { name: "Sign Up" }).click()
   await page.goto("/login")
 }
@@ -19,8 +19,8 @@ export async function signUpNewUser(
 export async function logInUser(page: Page, email: string, password: string) {
   await page.goto("/login")
 
-  await page.getByPlaceholder("Email").fill(email)
-  await page.getByPlaceholder("Password", { exact: true }).fill(password)
+  await page.getByTestId("email-input").fill(email)
+  await page.getByTestId("password-input").fill(password)
   await page.getByRole("button", { name: "Log In" }).click()
   await page.waitForURL("/")
   await expect(
