@@ -41,7 +41,7 @@
     "react": "^19.1.1",
     "react-dom": "^19.2.0",
     "react-error-boundary": "^6.0.0",
-    "react-hook-form": "^7.67.0",
+    "react-hook-form": "^7.68.0",
     "react-icons": "^5.5.0",
     "sonner": "^2.0.7",
     "tailwind-merge": "^3.4.0",
