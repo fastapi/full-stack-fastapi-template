@@ -58,6 +58,7 @@
 
 ### Internal
 
+* ⬆ Bump axios from 1.12.2 to 1.13.2 in /frontend. PR [#2020](https://github.com/fastapi/full-stack-fastapi-template/pull/2020) by [@dependabot[bot]](https://github.com/apps/dependabot).
 * ⬆ Bump @tanstack/router-devtools from 1.139.3 to 1.139.12 in /frontend. PR [#2021](https://github.com/fastapi/full-stack-fastapi-template/pull/2021) by [@dependabot[bot]](https://github.com/apps/dependabot).
 * ⬆ Bump playwright from v1.56.1-noble to v1.57.0-noble in /frontend. PR [#2016](https://github.com/fastapi/full-stack-fastapi-template/pull/2016) by [@dependabot[bot]](https://github.com/apps/dependabot).
 * ⬆️ Update schema version in `biome.json`. PR [#2017](https://github.com/fastapi/full-stack-fastapi-template/pull/2017) by [@alejsdev](https://github.com/alejsdev).
