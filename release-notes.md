@@ -58,6 +58,7 @@
 
 ### Internal
 
+* ⬆ Bump @tanstack/router-devtools from 1.139.3 to 1.139.12 in /frontend. PR [#2021](https://github.com/fastapi/full-stack-fastapi-template/pull/2021) by [@dependabot[bot]](https://github.com/apps/dependabot).
 * ⬆ Bump playwright from v1.56.1-noble to v1.57.0-noble in /frontend. PR [#2016](https://github.com/fastapi/full-stack-fastapi-template/pull/2016) by [@dependabot[bot]](https://github.com/apps/dependabot).
 * ⬆️ Update schema version in `biome.json`. PR [#2017](https://github.com/fastapi/full-stack-fastapi-template/pull/2017) by [@alejsdev](https://github.com/alejsdev).
 * ⬆ Bump vite from 7.2.2 to 7.2.6 in /frontend. PR [#2015](https://github.com/fastapi/full-stack-fastapi-template/pull/2015) by [@dependabot[bot]](https://github.com/apps/dependabot).
