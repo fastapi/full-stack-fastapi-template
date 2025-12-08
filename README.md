@@ -11,7 +11,7 @@
     - 💾 [PostgreSQL](https://www.postgresql.org) as the SQL database.
 - 🚀 [React](https://react.dev) for the frontend.
     - 💃 Using TypeScript, hooks, Vite, and other parts of a modern frontend stack.
-    - 🎨 [Chakra UI](https://chakra-ui.com) for the frontend components.
+    - 🎨 [Tailwind CSS](https://tailwindcss.com) and [shadcn/ui](https://ui.shadcn.com) for the frontend components.
     - 🤖 An automatically generated frontend client.
     - 🧪 [Playwright](https://playwright.dev) for End-to-End testing.
     - 🦇 Dark mode support.
@@ -32,17 +32,10 @@
 
 [![API docs](img/dashboard.png)](https://github.com/fastapi/full-stack-fastapi-template)
 
-### Dashboard - Create User
-
-[![API docs](img/dashboard-create.png)](https://github.com/fastapi/full-stack-fastapi-template)
-
 ### Dashboard - Items
 
 [![API docs](img/dashboard-items.png)](https://github.com/fastapi/full-stack-fastapi-template)
 
-### Dashboard - User Settings
-
-[![API docs](img/dashboard-user-settings.png)](https://github.com/fastapi/full-stack-fastapi-template)
 
 ### Dashboard - Dark Mode
 
