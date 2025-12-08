@@ -10,15 +10,15 @@ docker compose watch
 
 * Now you can open your browser and interact with these URLs:
 
-Frontend, built with Docker, with routes handled based on the path: http://localhost:5173
+Frontend, built with Docker, with routes handled based on the path: <http://localhost:5173>
 
-Backend, JSON based web API based on OpenAPI: http://localhost:8000
+Backend, JSON based web API based on OpenAPI: <http://localhost:8000>
 
-Automatic interactive documentation with Swagger UI (from the OpenAPI backend): http://localhost:8000/docs
+Automatic interactive documentation with Swagger UI (from the OpenAPI backend): <http://localhost:8000/docs>
 
-Adminer, database web administration: http://localhost:8080
+Adminer, database web administration: <http://localhost:8080>
 
-Traefik UI, to see how the routes are being handled by the proxy: http://localhost:8090
+Traefik UI, to see how the routes are being handled by the proxy: <http://localhost:8090>
 
 **Note**: The first time you start your stack, it might take a minute for it to be ready. While the backend waits for the database to be ready and configures everything. You can check the logs to monitor it.
 
@@ -33,6 +33,18 @@ To check the logs of a specific service, add the name of the service, e.g.:
 ```bash
 docker compose logs backend
 ```
+
+## Mailcatcher
+
+Mailcatcher is a simple SMTP server that catches all emails sent by the backend during local development. Instead of sending real emails, they are captured and displayed in a web interface.
+
+This is useful for:
+
+* Testing email functionality during development
+* Verifying email content and formatting
+* Debugging email-related functionality without sending real emails
+
+The backend is automatically configured to use Mailcatcher when running with Docker Compose locally (SMTP on port 1025). All captured emails can be viewed at <http://localhost:1080>.
 
 ## Local Development
 
@@ -174,34 +186,34 @@ The production or staging URLs would use these same paths, but with your own dom
 
 Development URLs, for local development.
 
-Frontend: http://localhost:5173
+Frontend: <http://localhost:5173>
 
-Backend: http://localhost:8000
+Backend: <http://localhost:8000>
 
-Automatic Interactive Docs (Swagger UI): http://localhost:8000/docs
+Automatic Interactive Docs (Swagger UI): <http://localhost:8000/docs>
 
-Automatic Alternative Docs (ReDoc): http://localhost:8000/redoc
+Automatic Alternative Docs (ReDoc): <http://localhost:8000/redoc>
 
-Adminer: http://localhost:8080
+Adminer: <http://localhost:8080>
 
-Traefik UI: http://localhost:8090
+Traefik UI: <http://localhost:8090>
 
-MailCatcher: http://localhost:1080
+MailCatcher: <http://localhost:1080>
 
 ### Development URLs with `localhost.tiangolo.com` Configured
 
 Development URLs, for local development.
 
-Frontend: http://dashboard.localhost.tiangolo.com
+Frontend: <http://dashboard.localhost.tiangolo.com>
 
-Backend: http://api.localhost.tiangolo.com
+Backend: <http://api.localhost.tiangolo.com>
 
-Automatic Interactive Docs (Swagger UI): http://api.localhost.tiangolo.com/docs
+Automatic Interactive Docs (Swagger UI): <http://api.localhost.tiangolo.com/docs>
 
-Automatic Alternative Docs (ReDoc): http://api.localhost.tiangolo.com/redoc
+Automatic Alternative Docs (ReDoc): <http://api.localhost.tiangolo.com/redoc>
 
-Adminer: http://localhost.tiangolo.com:8080
+Adminer: <http://localhost.tiangolo.com:8080>
 
-Traefik UI: http://localhost.tiangolo.com:8090
+Traefik UI: <http://localhost.tiangolo.com:8090>
 
-MailCatcher: http://localhost.tiangolo.com:1080
+MailCatcher: <http://localhost.tiangolo.com:1080>
