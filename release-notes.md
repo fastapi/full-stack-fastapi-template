@@ -2,6 +2,8 @@
 
 ## Latest Changes
 
+## 0.9.0
+
 ### Features
 
 * ✨ Add meta title support to all pages. PR [#2039](https://github.com/fastapi/full-stack-fastapi-template/pull/2039) by [@alejsdev](https://github.com/alejsdev).
