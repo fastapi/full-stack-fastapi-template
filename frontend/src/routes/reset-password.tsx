@@ -57,6 +57,13 @@ export const Route = createFileRoute("/reset-password")({
       throw redirect({ to: "/login" })
     }
   },
+  head: () => ({
+    meta: [
+      {
+        title: "Reset Password - FastAPI Cloud",
+      },
+    ],
+  }),
 })
 
 function ResetPassword() {
