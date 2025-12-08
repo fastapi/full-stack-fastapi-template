@@ -121,3 +121,95 @@ def verify_password_reset_token(token: str) -> str | None:
         return str(decoded_token["sub"])
     except InvalidTokenError:
         return None
+
+
+# Activity Tracking Functions
+import uuid
+from sqlmodel import Session, func, select
+
+
+def calculate_item_score(*, session: Session, item_id: uuid.UUID) -> float:
+    """
+    Calculate activity score for an item based on recent activities.
+    Higher score means more trending.
+    """
+    from app.models import ItemActivity
+    
+    # Get activities from last 7 days
+    week_ago = datetime.now(timezone.utc) - timedelta(days=7)
+    
+    statement = (
+        select(func.count())
+        .select_from(ItemActivity)
+        .where(ItemActivity.item_id == item_id)
+        .where(ItemActivity.timestamp >= week_ago)
+    )
+    
+    activity_count = session.exec(statement).one()
+    
+    # Weight recent activities more heavily
+    day_ago = datetime.now(timezone.utc) - timedelta(days=1)
+    recent_statement = (
+        select(func.count())
+        .select_from(ItemActivity)
+        .where(ItemActivity.item_id == item_id)
+        .where(ItemActivity.timestamp >= day_ago)
+    )
+    
+    recent_count = session.exec(recent_statement).one()
+    
+    # Calculate weighted score
+    score = (activity_count * 1.0) + (recent_count * 5.0)
+    
+    return float(score)
+
+
+def get_related_items(*, session: Session, item: Any) -> list[Any]:
+    """
+    Get items related to the given item.
+    Related items are those owned by the same user.
+    This is used to update recommendation scores.
+    """
+    from app.models import Item
+    
+    # Find all items by the same owner (excluding the current item)
+    statement = (
+        select(Item)
+        .where(Item.owner_id == item.owner_id)
+        .where(Item.id != item.id)
+    )
+    
+    related_items = session.exec(statement).all()
+    
+    return list(related_items)
+
+
+def get_trending_items(
+    *, session: Session, limit: int = 10, owner_id: uuid.UUID | None = None
+) -> list[Any]:
+    """
+    Get trending items based on activity score.
+    Optionally filter by owner.
+    """
+    from app.models import Item
+    
+    statement = select(Item).order_by(Item.activity_score.desc()).limit(limit)
+    
+    if owner_id:
+        statement = statement.where(Item.owner_id == owner_id)
+    
+    items = session.exec(statement).all()
+    
+    return list(items)
+
+
+def increment_view_count(*, session: Session, item_id: uuid.UUID) -> None:
+    """Increment the view count for an item."""
+    from app.models import Item
+    
+    item = session.get(Item, item_id)
+    if item:
+        item.view_count += 1
+        item.last_accessed = datetime.now(timezone.utc)
+        session.add(item)
+        session.commit()

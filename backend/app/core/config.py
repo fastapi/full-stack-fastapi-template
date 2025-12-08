@@ -84,6 +84,9 @@ class Settings(BaseSettings):
         return self
 
     EMAIL_RESET_TOKEN_EXPIRE_HOURS: int = 48
+    
+    # Activity Tracking Feature
+    ENABLE_ACTIVITY_TRACKING: bool = True
 
     @computed_field  # type: ignore[prop-decorator]
     @property

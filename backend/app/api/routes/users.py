@@ -14,6 +14,7 @@ from app.core.config import settings
 from app.core.security import get_password_hash, verify_password
 from app.models import (
     Item,
+    ItemActivity,
     Message,
     UpdatePassword,
     User,
@@ -123,6 +124,35 @@ def read_user_me(current_user: CurrentUser) -> Any:
     Get current user.
     """
     return current_user
+
+
+@router.get("/me/activity-summary")
+def get_user_activity_summary(session: SessionDep, current_user: CurrentUser) -> Any:
+    """
+    Get activity summary for current user's items.
+    """
+    # Count total activities
+    activity_statement = (
+        select(func.count())
+        .select_from(ItemActivity)
+        .where(ItemActivity.user_id == current_user.id)
+    )
+    total_activities = session.exec(activity_statement).one()
+    
+    # Get item count and total views
+    item_statement = select(Item).where(Item.owner_id == current_user.id)
+    items = session.exec(item_statement).all()
+    
+    total_views = sum(item.view_count for item in items)
+    total_score = sum(item.activity_score for item in items)
+    
+    return {
+        "total_items": len(items),
+        "total_activities": total_activities,
+        "total_views": total_views,
+        "total_activity_score": total_score,
+        "average_score_per_item": total_score / len(items) if items else 0.0
+    }
 
 
 @router.delete("/me", response_model=Message)

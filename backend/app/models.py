@@ -1,4 +1,5 @@
 import uuid
+from datetime import datetime
 
 from pydantic import EmailStr
 from sqlmodel import Field, Relationship, SQLModel
@@ -79,12 +80,19 @@ class Item(ItemBase, table=True):
         foreign_key="user.id", nullable=False, ondelete="CASCADE"
     )
     owner: User | None = Relationship(back_populates="items")
+    # Activity tracking feature
+    activity_score: float = Field(default=0.0)
+    last_accessed: datetime | None = Field(default=None)
+    view_count: int = Field(default=0)
+    activities: list["ItemActivity"] = Relationship(back_populates="item", cascade_delete=True)
 
 
 # Properties to return via API, id is always required
 class ItemPublic(ItemBase):
     id: uuid.UUID
     owner_id: uuid.UUID
+    activity_score: float = 0.0
+    view_count: int = 0
 
 
 class ItemsPublic(SQLModel):
@@ -111,3 +119,37 @@ class TokenPayload(SQLModel):
 class NewPassword(SQLModel):
     token: str
     new_password: str = Field(min_length=8, max_length=128)
+
+
+# Activity Tracking Models
+class ItemActivityBase(SQLModel):
+    activity_type: str = Field(max_length=50)  # view, update, create, delete
+    activity_metadata: str | None = Field(default=None, max_length=500)
+
+
+class ItemActivityCreate(ItemActivityBase):
+    pass
+
+
+class ItemActivity(ItemActivityBase, table=True):
+    id: uuid.UUID = Field(default_factory=uuid.uuid4, primary_key=True)
+    item_id: uuid.UUID = Field(
+        foreign_key="item.id", nullable=False, ondelete="CASCADE"
+    )
+    user_id: uuid.UUID = Field(
+        foreign_key="user.id", nullable=False, ondelete="CASCADE"
+    )
+    timestamp: datetime = Field(default_factory=datetime.utcnow)
+    item: Item | None = Relationship(back_populates="activities")
+
+
+class ItemActivityPublic(ItemActivityBase):
+    id: uuid.UUID
+    item_id: uuid.UUID
+    user_id: uuid.UUID
+    timestamp: datetime
+
+
+class ItemActivitiesPublic(SQLModel):
+    data: list[ItemActivityPublic]
+    count: int
