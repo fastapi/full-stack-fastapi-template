@@ -58,6 +58,7 @@
 
 ### Internal
 
+* 🔥 Remove unused dependencies. PR [#2035](https://github.com/fastapi/full-stack-fastapi-template/pull/2035) by [@alejsdev](https://github.com/alejsdev).
 * ⬆ Bump react-dom from 19.2.0 to 19.2.1 in /frontend. PR [#2032](https://github.com/fastapi/full-stack-fastapi-template/pull/2032) by [@dependabot[bot]](https://github.com/apps/dependabot).
 * ⬆ Bump vite from 7.2.6 to 7.2.7 in /frontend. PR [#2033](https://github.com/fastapi/full-stack-fastapi-template/pull/2033) by [@dependabot[bot]](https://github.com/apps/dependabot).
 * ⬆ Bump @tanstack/router-plugin from 1.139.12 to 1.140.0 in /frontend. PR [#2034](https://github.com/fastapi/full-stack-fastapi-template/pull/2034) by [@dependabot[bot]](https://github.com/apps/dependabot).
