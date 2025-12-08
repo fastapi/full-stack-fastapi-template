@@ -20,6 +20,18 @@ Adminer, database web administration: http://localhost:8080
 
 Traefik UI, to see how the routes are being handled by the proxy: http://localhost:8090
 
+## Mailcatcher
+
+Mailcatcher is a simple SMTP server that catches all emails sent by the backend during local development. Instead of sending real emails, they are captured and displayed in a web interface.
+
+This is useful for:
+
+- Testing email functionality during development
+- Verifying email content and formatting
+- Debugging email-related functionality without sending real emails
+
+The backend is automatically configured to use Mailcatcher when running with Docker Compose locally (SMTP on port 1025). All captured emails can be viewed at http://localhost:1080.
+
 **Note**: The first time you start your stack, it might take a minute for it to be ready. While the backend waits for the database to be ready and configures everything. You can check the logs to monitor it.
 
 To check the logs, run (in another terminal):
