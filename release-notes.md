@@ -58,6 +58,7 @@
 
 ### Internal
 
+* ⬆ Bump lucide-react from 0.555.0 to 0.556.0 in /frontend. PR [#2031](https://github.com/fastapi/full-stack-fastapi-template/pull/2031) by [@dependabot[bot]](https://github.com/apps/dependabot).
 * 🔧 Add Tailwind CSS directives support in biome config. PR [#2029](https://github.com/fastapi/full-stack-fastapi-template/pull/2029) by [@alejsdev](https://github.com/alejsdev).
 * ⬆ Bump react-hook-form from 7.66.1 to 7.67.0 in /frontend. PR [#2018](https://github.com/fastapi/full-stack-fastapi-template/pull/2018) by [@dependabot[bot]](https://github.com/apps/dependabot).
 * ⬆ Bump @tanstack/react-query from 5.90.10 to 5.90.11 in /frontend. PR [#2019](https://github.com/fastapi/full-stack-fastapi-template/pull/2019) by [@dependabot[bot]](https://github.com/apps/dependabot).
