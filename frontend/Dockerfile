@@ -1,5 +1,5 @@
 # Stage 0, "build-stage", based on Node.js, to build and compile the frontend
-FROM node:24 AS build-stage
+FROM node:25 AS build-stage
 
 WORKDIR /app
 
