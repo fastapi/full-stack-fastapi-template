@@ -18,6 +18,13 @@ function getUsersQueryOptions() {
 
 export const Route = createFileRoute("/_layout/admin")({
   component: Admin,
+  head: () => ({
+    meta: [
+      {
+        title: "Admin - FastAPI Cloud",
+      },
+    ],
+  }),
 })
 
 function UsersTableContent() {

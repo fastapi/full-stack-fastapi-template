@@ -18,6 +18,13 @@ function getItemsQueryOptions() {
 
 export const Route = createFileRoute("/_layout/items")({
   component: Items,
+  head: () => ({
+    meta: [
+      {
+        title: "Items - FastAPI Cloud",
+      },
+    ],
+  }),
 })
 
 function ItemsTableContent() {
