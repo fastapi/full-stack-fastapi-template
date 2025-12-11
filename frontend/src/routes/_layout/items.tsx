@@ -1,146 +1,69 @@
-import {
-  Container,
-  EmptyState,
-  Flex,
-  Heading,
-  Table,
-  VStack,
-} from "@chakra-ui/react"
-import { useQuery } from "@tanstack/react-query"
-import { createFileRoute, useNavigate } from "@tanstack/react-router"
-import { FiSearch } from "react-icons/fi"
-import { z } from "zod"
+import { useSuspenseQuery } from "@tanstack/react-query"
+import { createFileRoute } from "@tanstack/react-router"
+import { Search } from "lucide-react"
+import { Suspense } from "react"
 
 import { ItemsService } from "@/client"
-import { ItemActionsMenu } from "@/components/Common/ItemActionsMenu"
+import { DataTable } from "@/components/Common/DataTable"
 import AddItem from "@/components/Items/AddItem"
+import { columns } from "@/components/Items/columns"
 import PendingItems from "@/components/Pending/PendingItems"
-import {
-  PaginationItems,
-  PaginationNextTrigger,
-  PaginationPrevTrigger,
-  PaginationRoot,
-} from "@/components/ui/pagination.tsx"
 
-const itemsSearchSchema = z.object({
-  page: z.number().catch(1),
-})
-
-const PER_PAGE = 5
-
-function getItemsQueryOptions({ page }: { page: number }) {
+function getItemsQueryOptions() {
   return {
-    queryFn: () =>
-      ItemsService.readItems({ skip: (page - 1) * PER_PAGE, limit: PER_PAGE }),
-    queryKey: ["items", { page }],
+    queryFn: () => ItemsService.readItems({ skip: 0, limit: 100 }),
+    queryKey: ["items"],
   }
 }
 
 export const Route = createFileRoute("/_layout/items")({
   component: Items,
-  validateSearch: (search) => itemsSearchSchema.parse(search),
+  head: () => ({
+    meta: [
+      {
+        title: "Items - FastAPI Cloud",
+      },
+    ],
+  }),
 })
 
-function ItemsTable() {
-  const navigate = useNavigate({ from: Route.fullPath })
-  const { page } = Route.useSearch()
+function ItemsTableContent() {
+  const { data: items } = useSuspenseQuery(getItemsQueryOptions())
 
-  const { data, isLoading, isPlaceholderData } = useQuery({
-    ...getItemsQueryOptions({ page }),
-    placeholderData: (prevData) => prevData,
-  })
-
-  const setPage = (page: number) => {
-    navigate({
-      to: "/items",
-      search: (prev) => ({ ...prev, page }),
-    })
-  }
-
-  const items = data?.data.slice(0, PER_PAGE) ?? []
-  const count = data?.count ?? 0
-
-  if (isLoading) {
-    return <PendingItems />
-  }
-
-  if (items.length === 0) {
+  if (items.data.length === 0) {
     return (
-      <EmptyState.Root>
-        <EmptyState.Content>
-          <EmptyState.Indicator>
-            <FiSearch />
-          </EmptyState.Indicator>
-          <VStack textAlign="center">
-            <EmptyState.Title>You don't have any items yet</EmptyState.Title>
-            <EmptyState.Description>
-              Add a new item to get started
-            </EmptyState.Description>
-          </VStack>
-        </EmptyState.Content>
-      </EmptyState.Root>
+      <div className="flex flex-col items-center justify-center text-center py-12">
+        <div className="rounded-full bg-muted p-4 mb-4">
+          <Search className="h-8 w-8 text-muted-foreground" />
+        </div>
+        <h3 className="text-lg font-semibold">You don't have any items yet</h3>
+        <p className="text-muted-foreground">Add a new item to get started</p>
+      </div>
     )
   }
 
+  return <DataTable columns={columns} data={items.data} />
+}
+
+function ItemsTable() {
   return (
-    <>
-      <Table.Root size={{ base: "sm", md: "md" }}>
-        <Table.Header>
-          <Table.Row>
-            <Table.ColumnHeader w="sm">ID</Table.ColumnHeader>
-            <Table.ColumnHeader w="sm">Title</Table.ColumnHeader>
-            <Table.ColumnHeader w="sm">Description</Table.ColumnHeader>
-            <Table.ColumnHeader w="sm">Actions</Table.ColumnHeader>
-          </Table.Row>
-        </Table.Header>
-        <Table.Body>
-          {items?.map((item) => (
-            <Table.Row key={item.id} opacity={isPlaceholderData ? 0.5 : 1}>
-              <Table.Cell truncate maxW="sm">
-                {item.id}
-              </Table.Cell>
-              <Table.Cell truncate maxW="sm">
-                {item.title}
-              </Table.Cell>
-              <Table.Cell
-                color={!item.description ? "gray" : "inherit"}
-                truncate
-                maxW="30%"
-              >
-                {item.description || "N/A"}
-              </Table.Cell>
-              <Table.Cell>
-                <ItemActionsMenu item={item} />
-              </Table.Cell>
-            </Table.Row>
-          ))}
-        </Table.Body>
-      </Table.Root>
-      <Flex justifyContent="flex-end" mt={4}>
-        <PaginationRoot
-          count={count}
-          pageSize={PER_PAGE}
-          onPageChange={({ page }) => setPage(page)}
-        >
-          <Flex>
-            <PaginationPrevTrigger />
-            <PaginationItems />
-            <PaginationNextTrigger />
-          </Flex>
-        </PaginationRoot>
-      </Flex>
-    </>
+    <Suspense fallback={<PendingItems />}>
+      <ItemsTableContent />
+    </Suspense>
   )
 }
 
 function Items() {
   return (
-    <Container maxW="full">
-      <Heading size="lg" pt={12}>
-        Items Management
-      </Heading>
-      <AddItem />
+    <div className="flex flex-col gap-6">
+      <div className="flex items-center justify-between">
+        <div>
+          <h1 className="text-2xl font-bold tracking-tight">Items</h1>
+          <p className="text-muted-foreground">Create and manage your items</p>
+        </div>
+        <AddItem />
+      </div>
       <ItemsTable />
-    </Container>
+    </div>
   )
 }

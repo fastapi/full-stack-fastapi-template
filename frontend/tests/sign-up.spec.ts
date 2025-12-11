@@ -4,10 +4,6 @@ import { randomEmail, randomPassword } from "./utils/random"
 
 test.use({ storageState: { cookies: [], origins: [] } })
 
-type OptionsType = {
-  exact?: boolean
-}
-
 const fillForm = async (
   page: Page,
   full_name: string,
@@ -15,18 +11,14 @@ const fillForm = async (
   password: string,
   confirm_password: string,
 ) => {
-  await page.getByPlaceholder("Full Name").fill(full_name)
-  await page.getByPlaceholder("Email").fill(email)
-  await page.getByPlaceholder("Password", { exact: true }).fill(password)
-  await page.getByPlaceholder("Confirm Password").fill(confirm_password)
+  await page.getByTestId("full-name-input").fill(full_name)
+  await page.getByTestId("email-input").fill(email)
+  await page.getByTestId("password-input").fill(password)
+  await page.getByTestId("confirm-password-input").fill(confirm_password)
 }
 
-const verifyInput = async (
-  page: Page,
-  placeholder: string,
-  options?: OptionsType,
-) => {
-  const input = page.getByPlaceholder(placeholder, options)
+const verifyInput = async (page: Page, testId: string) => {
+  const input = page.getByTestId(testId)
   await expect(input).toBeVisible()
   await expect(input).toHaveText("")
   await expect(input).toBeEditable()
@@ -35,10 +27,10 @@ const verifyInput = async (
 test("Inputs are visible, empty and editable", async ({ page }) => {
   await page.goto("/signup")
 
-  await verifyInput(page, "Full Name")
-  await verifyInput(page, "Email")
-  await verifyInput(page, "Password", { exact: true })
-  await verifyInput(page, "Confirm Password")
+  await verifyInput(page, "full-name-input")
+  await verifyInput(page, "email-input")
+  await verifyInput(page, "password-input")
+  await verifyInput(page, "confirm-password-input")
 })
 
 test("Sign Up button is visible", async ({ page }) => {
@@ -126,7 +118,7 @@ test("Sign up with mismatched passwords", async ({ page }) => {
   await fillForm(page, fullName, email, password, password2)
   await page.getByRole("button", { name: "Sign Up" }).click()
 
-  await expect(page.getByText("Passwords do not match")).toBeVisible()
+  await expect(page.getByText("The passwords don't match")).toBeVisible()
 })
 
 test("Sign up with missing full name", async ({ page }) => {
@@ -152,7 +144,7 @@ test("Sign up with missing email", async ({ page }) => {
   await fillForm(page, fullName, email, password, password)
   await page.getByRole("button", { name: "Sign Up" }).click()
 
-  await expect(page.getByText("Email is required")).toBeVisible()
+  await expect(page.getByText("Invalid email address")).toBeVisible()
 })
 
 test("Sign up with missing password", async ({ page }) => {

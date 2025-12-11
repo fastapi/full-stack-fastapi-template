@@ -1,129 +1,65 @@
-import { Badge, Container, Flex, Heading, Table } from "@chakra-ui/react"
-import { useQuery, useQueryClient } from "@tanstack/react-query"
-import { createFileRoute, useNavigate } from "@tanstack/react-router"
-import { z } from "zod"
+import { useSuspenseQuery } from "@tanstack/react-query"
+import { createFileRoute } from "@tanstack/react-router"
+import { Suspense } from "react"
 
 import { type UserPublic, UsersService } from "@/client"
 import AddUser from "@/components/Admin/AddUser"
-import { UserActionsMenu } from "@/components/Common/UserActionsMenu"
+import { columns, type UserTableData } from "@/components/Admin/columns"
+import { DataTable } from "@/components/Common/DataTable"
 import PendingUsers from "@/components/Pending/PendingUsers"
-import {
-  PaginationItems,
-  PaginationNextTrigger,
-  PaginationPrevTrigger,
-  PaginationRoot,
-} from "@/components/ui/pagination.tsx"
+import useAuth from "@/hooks/useAuth"
 
-const usersSearchSchema = z.object({
-  page: z.number().catch(1),
-})
-
-const PER_PAGE = 5
-
-function getUsersQueryOptions({ page }: { page: number }) {
+function getUsersQueryOptions() {
   return {
-    queryFn: () =>
-      UsersService.readUsers({ skip: (page - 1) * PER_PAGE, limit: PER_PAGE }),
-    queryKey: ["users", { page }],
+    queryFn: () => UsersService.readUsers({ skip: 0, limit: 100 }),
+    queryKey: ["users"],
   }
 }
 
 export const Route = createFileRoute("/_layout/admin")({
   component: Admin,
-  validateSearch: (search) => usersSearchSchema.parse(search),
+  head: () => ({
+    meta: [
+      {
+        title: "Admin - FastAPI Cloud",
+      },
+    ],
+  }),
 })
 
+function UsersTableContent() {
+  const { user: currentUser } = useAuth()
+  const { data: users } = useSuspenseQuery(getUsersQueryOptions())
+
+  const tableData: UserTableData[] = users.data.map((user: UserPublic) => ({
+    ...user,
+    isCurrentUser: currentUser?.id === user.id,
+  }))
+
+  return <DataTable columns={columns} data={tableData} />
+}
+
 function UsersTable() {
-  const queryClient = useQueryClient()
-  const currentUser = queryClient.getQueryData<UserPublic>(["currentUser"])
-  const navigate = useNavigate({ from: Route.fullPath })
-  const { page } = Route.useSearch()
-
-  const { data, isLoading, isPlaceholderData } = useQuery({
-    ...getUsersQueryOptions({ page }),
-    placeholderData: (prevData) => prevData,
-  })
-
-  const setPage = (page: number) => {
-    navigate({
-      to: "/admin",
-      search: (prev) => ({ ...prev, page }),
-    })
-  }
-
-  const users = data?.data.slice(0, PER_PAGE) ?? []
-  const count = data?.count ?? 0
-
-  if (isLoading) {
-    return <PendingUsers />
-  }
-
   return (
-    <>
-      <Table.Root size={{ base: "sm", md: "md" }}>
-        <Table.Header>
-          <Table.Row>
-            <Table.ColumnHeader w="sm">Full name</Table.ColumnHeader>
-            <Table.ColumnHeader w="sm">Email</Table.ColumnHeader>
-            <Table.ColumnHeader w="sm">Role</Table.ColumnHeader>
-            <Table.ColumnHeader w="sm">Status</Table.ColumnHeader>
-            <Table.ColumnHeader w="sm">Actions</Table.ColumnHeader>
-          </Table.Row>
-        </Table.Header>
-        <Table.Body>
-          {users?.map((user) => (
-            <Table.Row key={user.id} opacity={isPlaceholderData ? 0.5 : 1}>
-              <Table.Cell color={!user.full_name ? "gray" : "inherit"}>
-                {user.full_name || "N/A"}
-                {currentUser?.id === user.id && (
-                  <Badge ml="1" colorScheme="teal">
-                    You
-                  </Badge>
-                )}
-              </Table.Cell>
-              <Table.Cell truncate maxW="sm">
-                {user.email}
-              </Table.Cell>
-              <Table.Cell>
-                {user.is_superuser ? "Superuser" : "User"}
-              </Table.Cell>
-              <Table.Cell>{user.is_active ? "Active" : "Inactive"}</Table.Cell>
-              <Table.Cell>
-                <UserActionsMenu
-                  user={user}
-                  disabled={currentUser?.id === user.id}
-                />
-              </Table.Cell>
-            </Table.Row>
-          ))}
-        </Table.Body>
-      </Table.Root>
-      <Flex justifyContent="flex-end" mt={4}>
-        <PaginationRoot
-          count={count}
-          pageSize={PER_PAGE}
-          onPageChange={({ page }) => setPage(page)}
-        >
-          <Flex>
-            <PaginationPrevTrigger />
-            <PaginationItems />
-            <PaginationNextTrigger />
-          </Flex>
-        </PaginationRoot>
-      </Flex>
-    </>
+    <Suspense fallback={<PendingUsers />}>
+      <UsersTableContent />
+    </Suspense>
   )
 }
 
 function Admin() {
   return (
-    <Container maxW="full">
-      <Heading size="lg" pt={12}>
-        Users Management
-      </Heading>
-
-      <AddUser />
+    <div className="flex flex-col gap-6">
+      <div className="flex items-center justify-between">
+        <div>
+          <h1 className="text-2xl font-bold tracking-tight">Users</h1>
+          <p className="text-muted-foreground">
+            Manage user accounts and permissions
+          </p>
+        </div>
+        <AddUser />
+      </div>
       <UsersTable />
-    </Container>
+    </div>
   )
 }

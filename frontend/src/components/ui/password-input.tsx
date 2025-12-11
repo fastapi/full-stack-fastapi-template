@@ -1,162 +1,51 @@
-"use client"
+import * as React from "react"
+import { Eye, EyeOff } from "lucide-react"
 
-import type {
-  ButtonProps,
-  GroupProps,
-  InputProps,
-  StackProps,
-} from "@chakra-ui/react"
-import {
-  Box,
-  HStack,
-  IconButton,
-  Input,
-  Stack,
-  mergeRefs,
-  useControllableState,
-} from "@chakra-ui/react"
-import { forwardRef, useRef } from "react"
-import { FiEye, FiEyeOff } from "react-icons/fi"
-import { Field } from "./field"
-import { InputGroup } from "./input-group"
+import { cn } from "@/lib/utils"
+import { Button } from "./button"
 
-export interface PasswordVisibilityProps {
-  defaultVisible?: boolean
-  visible?: boolean
-  onVisibleChange?: (visible: boolean) => void
-  visibilityIcon?: { on: React.ReactNode; off: React.ReactNode }
+interface PasswordInputProps extends React.ComponentProps<"input"> {
+  error?: string
 }
 
-export interface PasswordInputProps
-  extends InputProps,
-    PasswordVisibilityProps {
-  rootProps?: GroupProps
-  startElement?: React.ReactNode
-  type: string
-  errors: any
-}
-
-export const PasswordInput = forwardRef<HTMLInputElement, PasswordInputProps>(
-  function PasswordInput(props, ref) {
-    const {
-      rootProps,
-      defaultVisible,
-      visible: visibleProp,
-      onVisibleChange,
-      visibilityIcon = { on: <FiEye />, off: <FiEyeOff /> },
-      startElement,
-      type,
-      errors,
-      ...rest
-    } = props
-
-    const [visible, setVisible] = useControllableState({
-      value: visibleProp,
-      defaultValue: defaultVisible || false,
-      onChange: onVisibleChange,
-    })
-
-    const inputRef = useRef<HTMLInputElement>(null)
+const PasswordInput = React.forwardRef<HTMLInputElement, PasswordInputProps>(
+  ({ className, error, ...props }, ref) => {
+    const [showPassword, setShowPassword] = React.useState(false)
 
     return (
-      <Field
-        invalid={!!errors[type]}
-        errorText={errors[type]?.message}
-        alignSelf="start"
-      >
-        <InputGroup
-          width="100%"
-          startElement={startElement}
-          endElement={
-            <VisibilityTrigger
-              disabled={rest.disabled}
-              onPointerDown={(e) => {
-                if (rest.disabled) return
-                if (e.button !== 0) return
-                e.preventDefault()
-                setVisible(!visible)
-              }}
-            >
-              {visible ? visibilityIcon.off : visibilityIcon.on}
-            </VisibilityTrigger>
-          }
-          {...rootProps}
+      <div className="relative">
+        <input
+          type={showPassword ? "text" : "password"}
+          data-slot="input"
+          className={cn(
+            "file:text-foreground placeholder:text-muted-foreground selection:bg-primary selection:text-primary-foreground dark:bg-input/30 border-input h-9 w-full min-w-0 rounded-md border bg-transparent px-3 py-1 pr-10 text-base shadow-xs transition-[color,box-shadow] outline-none file:inline-flex file:h-7 file:border-0 file:bg-transparent file:text-sm file:font-medium disabled:pointer-events-none disabled:cursor-not-allowed disabled:opacity-50 md:text-sm",
+            "focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px]",
+            "aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive",
+            className
+          )}
+          ref={ref}
+          aria-invalid={!!error}
+          {...props}
+        />
+        <Button
+          type="button"
+          variant="ghost"
+          size="icon-sm"
+          className="absolute right-0 top-0 h-full px-3 py-2 hover:bg-transparent"
+          onClick={() => setShowPassword(!showPassword)}
+          aria-label={showPassword ? "Hide password" : "Show password"}
         >
-          <Input
-            {...rest}
-            ref={mergeRefs(ref, inputRef)}
-            type={visible ? "text" : "password"}
-          />
-        </InputGroup>
-      </Field>
+          {showPassword ? (
+            <EyeOff className="h-4 w-4 text-muted-foreground" />
+          ) : (
+            <Eye className="h-4 w-4 text-muted-foreground" />
+          )}
+        </Button>
+      </div>
     )
-  },
-)
-
-const VisibilityTrigger = forwardRef<HTMLButtonElement, ButtonProps>(
-  function VisibilityTrigger(props, ref) {
-    return (
-      <IconButton
-        tabIndex={-1}
-        ref={ref}
-        me="-2"
-        aspectRatio="square"
-        size="sm"
-        variant="ghost"
-        height="calc(100% - {spacing.2})"
-        aria-label="Toggle password visibility"
-        color="inherit"
-        {...props}
-      />
-    )
-  },
-)
-
-interface PasswordStrengthMeterProps extends StackProps {
-  max?: number
-  value: number
-}
-
-export const PasswordStrengthMeter = forwardRef<
-  HTMLDivElement,
-  PasswordStrengthMeterProps
->(function PasswordStrengthMeter(props, ref) {
-  const { max = 4, value, ...rest } = props
-
-  const percent = (value / max) * 100
-  const { label, colorPalette } = getColorPalette(percent)
-
-  return (
-    <Stack align="flex-end" gap="1" ref={ref} {...rest}>
-      <HStack width="full" ref={ref} {...rest}>
-        {Array.from({ length: max }).map((_, index) => (
-          <Box
-            key={index}
-            height="1"
-            flex="1"
-            rounded="sm"
-            data-selected={index < value ? "" : undefined}
-            layerStyle="fill.subtle"
-            colorPalette="gray"
-            _selected={{
-              colorPalette,
-              layerStyle: "fill.solid",
-            }}
-          />
-        ))}
-      </HStack>
-      {label && <HStack textStyle="xs">{label}</HStack>}
-    </Stack>
-  )
-})
-
-function getColorPalette(percent: number) {
-  switch (true) {
-    case percent < 33:
-      return { label: "Low", colorPalette: "red" }
-    case percent < 66:
-      return { label: "Medium", colorPalette: "orange" }
-    default:
-      return { label: "High", colorPalette: "green" }
   }
-}
+)
+
+PasswordInput.displayName = "PasswordInput"
+
+export { PasswordInput }

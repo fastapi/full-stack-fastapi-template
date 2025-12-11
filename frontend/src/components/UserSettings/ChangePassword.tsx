@@ -1,80 +1,146 @@
-import { Box, Button, Container, Heading, VStack } from "@chakra-ui/react"
+import { zodResolver } from "@hookform/resolvers/zod"
 import { useMutation } from "@tanstack/react-query"
-import { type SubmitHandler, useForm } from "react-hook-form"
-import { FiLock } from "react-icons/fi"
+import { useForm } from "react-hook-form"
+import { z } from "zod"
 
-import { type ApiError, type UpdatePassword, UsersService } from "@/client"
+import { type UpdatePassword, UsersService } from "@/client"
+import {
+  Form,
+  FormControl,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from "@/components/ui/form"
+import { LoadingButton } from "@/components/ui/loading-button"
+import { PasswordInput } from "@/components/ui/password-input"
 import useCustomToast from "@/hooks/useCustomToast"
-import { confirmPasswordRules, handleError, passwordRules } from "@/utils"
-import { PasswordInput } from "../ui/password-input"
+import { handleError } from "@/utils"
 
-interface UpdatePasswordForm extends UpdatePassword {
-  confirm_password: string
-}
+const formSchema = z
+  .object({
+    current_password: z
+      .string()
+      .min(1, { message: "Password is required" })
+      .min(8, { message: "Password must be at least 8 characters" }),
+    new_password: z
+      .string()
+      .min(1, { message: "Password is required" })
+      .min(8, { message: "Password must be at least 8 characters" }),
+    confirm_password: z
+      .string()
+      .min(1, { message: "Password confirmation is required" }),
+  })
+  .refine((data) => data.new_password === data.confirm_password, {
+    message: "The passwords don't match",
+    path: ["confirm_password"],
+  })
+
+type FormData = z.infer<typeof formSchema>
 
 const ChangePassword = () => {
-  const { showSuccessToast } = useCustomToast()
-  const {
-    register,
-    handleSubmit,
-    reset,
-    getValues,
-    formState: { errors, isSubmitting },
-  } = useForm<UpdatePasswordForm>({
-    mode: "onBlur",
+  const { showSuccessToast, showErrorToast } = useCustomToast()
+  const form = useForm<FormData>({
+    resolver: zodResolver(formSchema),
+    mode: "onSubmit",
     criteriaMode: "all",
+    defaultValues: {
+      current_password: "",
+      new_password: "",
+      confirm_password: "",
+    },
   })
 
   const mutation = useMutation({
     mutationFn: (data: UpdatePassword) =>
       UsersService.updatePasswordMe({ requestBody: data }),
     onSuccess: () => {
-      showSuccessToast("Password updated successfully.")
-      reset()
+      showSuccessToast("Password updated successfully")
+      form.reset()
     },
-    onError: (err: ApiError) => {
-      handleError(err)
-    },
+    onError: handleError.bind(showErrorToast),
   })
 
-  const onSubmit: SubmitHandler<UpdatePasswordForm> = async (data) => {
+  const onSubmit = async (data: FormData) => {
     mutation.mutate(data)
   }
 
   return (
-    <Container maxW="full">
-      <Heading size="sm" py={4}>
-        Change Password
-      </Heading>
-      <Box as="form" onSubmit={handleSubmit(onSubmit)}>
-        <VStack gap={4} w={{ base: "100%", md: "sm" }}>
-          <PasswordInput
-            type="current_password"
-            startElement={<FiLock />}
-            {...register("current_password", passwordRules())}
-            placeholder="Current Password"
-            errors={errors}
+    <div className="max-w-md">
+      <h3 className="text-lg font-semibold py-4">Change Password</h3>
+      <Form {...form}>
+        <form
+          onSubmit={form.handleSubmit(onSubmit)}
+          className="flex flex-col gap-4"
+        >
+          <FormField
+            control={form.control}
+            name="current_password"
+            render={({ field, fieldState }) => (
+              <FormItem>
+                <FormLabel>Current Password</FormLabel>
+                <FormControl>
+                  <PasswordInput
+                    data-testid="current-password-input"
+                    placeholder="••••••••"
+                    aria-invalid={fieldState.invalid}
+                    {...field}
+                  />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
           />
-          <PasswordInput
-            type="new_password"
-            startElement={<FiLock />}
-            {...register("new_password", passwordRules())}
-            placeholder="New Password"
-            errors={errors}
+
+          <FormField
+            control={form.control}
+            name="new_password"
+            render={({ field, fieldState }) => (
+              <FormItem>
+                <FormLabel>New Password</FormLabel>
+                <FormControl>
+                  <PasswordInput
+                    data-testid="new-password-input"
+                    placeholder="••••••••"
+                    aria-invalid={fieldState.invalid}
+                    {...field}
+                  />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
           />
-          <PasswordInput
-            type="confirm_password"
-            startElement={<FiLock />}
-            {...register("confirm_password", confirmPasswordRules(getValues))}
-            placeholder="Confirm Password"
-            errors={errors}
+
+          <FormField
+            control={form.control}
+            name="confirm_password"
+            render={({ field, fieldState }) => (
+              <FormItem>
+                <FormLabel>Confirm Password</FormLabel>
+                <FormControl>
+                  <PasswordInput
+                    data-testid="confirm-password-input"
+                    placeholder="••••••••"
+                    aria-invalid={fieldState.invalid}
+                    {...field}
+                  />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
           />
-        </VStack>
-        <Button variant="solid" mt={4} type="submit" loading={isSubmitting}>
-          Save
-        </Button>
-      </Box>
-    </Container>
+
+          <LoadingButton
+            type="submit"
+            loading={mutation.isPending}
+            className="self-start"
+          >
+            Update Password
+          </LoadingButton>
+        </form>
+      </Form>
+    </div>
   )
 }
+
 export default ChangePassword
