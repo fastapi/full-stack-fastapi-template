@@ -18,5 +18,14 @@
 	// "customizations": {},
 
 	// Uncomment to connect as root instead. More info: https://aka.ms/dev-containers-non-root.
-	// "remoteUser": "root"
+	,
+	"remoteUser": "root"
+
+	// Mount the Docker Socket (Docker-outside-of-Docker) to enable Docker commands within the container.
+	,
+	"mounts": ["source=/var/run/docker.sock,target=/var/run/docker.sock,type=bind"],
+	"features": {
+		"ghcr.io/devcontainers/features/docker-outside-of-docker:1": {}
+	}
+
 }
