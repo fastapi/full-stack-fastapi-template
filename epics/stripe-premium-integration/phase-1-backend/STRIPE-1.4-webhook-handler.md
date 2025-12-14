@@ -1,18 +1,20 @@
 # STRIPE-1.4: Stripe Webhook Handler
 
+## Status: COMPLETE
+
 ## Summary
 Create a webhook endpoint that receives events from Stripe. When a checkout session completes successfully, create/update the PremiumUser record to grant premium status.
 
 ## Acceptance Criteria
-- [ ] POST `/api/v1/stripe/webhook` endpoint exists
-- [ ] Endpoint verifies Stripe webhook signature
-- [ ] Handles `checkout.session.completed` event
-- [ ] Creates PremiumUser record with is_premium=True
-- [ ] Extracts user_id from session metadata
-- [ ] Stores stripe_customer_id and payment_intent_id
-- [ ] Handles duplicate webhooks idempotently
-- [ ] Returns 200 to acknowledge receipt
-- [ ] Logs all webhook events for debugging
+- [x] POST `/api/v1/stripe/webhook` endpoint exists
+- [x] Endpoint verifies Stripe webhook signature
+- [x] Handles `checkout.session.completed` event
+- [x] Creates PremiumUser record with is_premium=True
+- [x] Extracts user_id from session metadata
+- [x] Stores stripe_customer_id and payment_intent_id
+- [x] Handles duplicate webhooks idempotently
+- [x] Returns 200 to acknowledge receipt
+- [x] Logs all webhook events for debugging
 
 ## Technical Details
 
@@ -69,12 +71,15 @@ async def handle_checkout_completed(
     Creates or updates PremiumUser record with payment details.
     Idempotent: safe to call multiple times for same session.
     """
-    user_id = checkout_session.get("metadata", {}).get("user_id")
-    if not user_id:
+    from uuid import UUID
+
+    user_id_str = checkout_session.get("metadata", {}).get("user_id")
+    if not user_id_str:
         logger.error("No user_id in checkout session metadata")
         return
 
-    user_id = int(user_id)
+    # Convert string back to UUID (stored as string in Stripe metadata)
+    user_id = UUID(user_id_str)
     stripe_customer_id = checkout_session.get("customer")
     payment_intent_id = checkout_session.get("payment_intent")
 
@@ -151,12 +156,13 @@ Example `checkout.session.completed` event:
       "payment_intent": "pi_xxxxx",
       "payment_status": "paid",
       "metadata": {
-        "user_id": "123"
+        "user_id": "550e8400-e29b-41d4-a716-446655440000"
       }
     }
   }
 }
 ```
+**Note:** `user_id` is stored as a UUID string in Stripe metadata and converted back to UUID in webhook handler.
 
 ## Dependencies
 - STRIPE-1.1 (PremiumUser model)

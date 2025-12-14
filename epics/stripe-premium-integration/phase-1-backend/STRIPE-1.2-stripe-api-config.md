@@ -1,14 +1,16 @@
 # STRIPE-1.2: Stripe API Configuration
 
+## Status: COMPLETE
+
 ## Summary
 Set up Stripe Python SDK and configuration, including environment variables and a utility module for Stripe operations.
 
 ## Acceptance Criteria
-- [ ] stripe Python package installed in backend
-- [ ] Environment variables added to .env and config
-- [ ] Stripe utility module created at `backend/app/core/stripe.py`
-- [ ] Stripe client initializes successfully on app startup
-- [ ] Configuration validates Stripe keys are present
+- [x] stripe Python package installed in backend (v14.0.1)
+- [x] Environment variables added to .env and config
+- [x] Stripe utility module created at `backend/app/premium_users/stripe.py` (changed from core/)
+- [x] Stripe client initializes successfully on app startup
+- [ ] Configuration validates Stripe keys are present (deferred - using placeholder keys)
 
 ## Technical Details
 

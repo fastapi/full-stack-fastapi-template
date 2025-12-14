@@ -9,6 +9,13 @@ export type Body_login_login_access_token = {
     client_secret?: (string | null);
 };
 
+/**
+ * Response containing Stripe Checkout URL.
+ */
+export type CheckoutSessionResponse = {
+    checkout_url: string;
+};
+
 export type HTTPValidationError = {
     detail?: Array<ValidationError>;
 };
@@ -170,6 +177,12 @@ export type PrivateCreateUserData = {
 };
 
 export type PrivateCreateUserResponse = (UserPublic);
+
+export type StripeCreateCheckoutSessionResponse = (CheckoutSessionResponse);
+
+export type StripeStripeWebhookResponse = ({
+    [key: string]: unknown;
+});
 
 export type UsersReadUsersData = {
     limit?: number;

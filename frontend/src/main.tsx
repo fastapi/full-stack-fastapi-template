@@ -17,7 +17,8 @@ OpenAPI.TOKEN = async () => {
 }
 
 const handleApiError = (error: Error) => {
-  if (error instanceof ApiError && [401, 403].includes(error.status)) {
+  // Only redirect on 401 (unauthorized), not 403 (forbidden/limit reached)
+  if (error instanceof ApiError && error.status === 401) { 
     localStorage.removeItem("access_token")
     window.location.href = "/login"
   }

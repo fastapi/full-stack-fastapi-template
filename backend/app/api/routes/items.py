@@ -1,11 +1,12 @@
 import uuid
 from typing import Any
 
-from fastapi import APIRouter, HTTPException
+from fastapi import APIRouter, HTTPException, status
 from sqlmodel import func, select
 
 from app.api.deps import CurrentUser, SessionDep
 from app.models import Item, ItemCreate, ItemPublic, ItemsPublic, ItemUpdate, Message
+from app.premium_users.service import FREE_TIER_ITEM_LIMIT, can_user_create_item
 
 router = APIRouter(prefix="/items", tags=["items"])
 
@@ -60,7 +61,15 @@ def create_item(
 ) -> Any:
     """
     Create new item.
+
+    Free users limited to 2 items. Premium users have no limit.
     """
+    if not can_user_create_item(session, current_user):
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail=f"Free tier limited to {FREE_TIER_ITEM_LIMIT} items. Upgrade to premium for unlimited items.",
+        )
+
     item = Item.model_validate(item_in, update={"owner_id": current_user.id})
     session.add(item)
     session.commit()

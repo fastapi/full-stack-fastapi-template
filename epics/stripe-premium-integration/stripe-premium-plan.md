@@ -137,16 +137,17 @@ Add a simple premium tier payment system that demonstrates Stripe integration pa
 ## Data Model Changes
 ```python
 # New PremiumUser table
+# Note: Uses UUID for primary key to match existing User/Item model patterns
 class PremiumUser(SQLModel, table=True):
     """
     Stores Stripe payment and premium status data.
     One-to-one relationship with User.
     """
-    premium_user_id: int | None = Field(default=None, primary_key=True)
-    user_id: int = Field(foreign_key="user.id", unique=True, index=True)
-    stripe_customer_id: str  # Stripe's customer ID
+    premium_user_id: uuid.UUID = Field(default_factory=uuid.uuid4, primary_key=True)
+    user_id: uuid.UUID = Field(foreign_key="user.id", unique=True, index=True)
+    stripe_customer_id: str  # Stripe's customer ID (cus_xxx)
     is_premium: bool = False  # Premium status flag
-    payment_intent_id: str | None = None  # Last successful payment
+    payment_intent_id: str | None = None  # Last successful payment (pi_xxx)
     paid_at: datetime | None = None  # When they became premium
     created_at: datetime = Field(default_factory=datetime.utcnow)
     updated_at: datetime = Field(default_factory=datetime.utcnow)

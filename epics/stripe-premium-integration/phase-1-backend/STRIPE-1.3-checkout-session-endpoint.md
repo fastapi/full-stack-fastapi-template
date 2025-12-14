@@ -1,16 +1,18 @@
 # STRIPE-1.3: Checkout Session Endpoint
 
+## Status: COMPLETE
+
 ## Summary
 Create an API endpoint that generates a Stripe Checkout Session for the $1 premium upgrade. Returns a URL that the frontend redirects to.
 
 ## Acceptance Criteria
-- [ ] POST `/api/v1/stripe/create-checkout-session` endpoint exists
-- [ ] Endpoint requires authentication (logged-in user)
-- [ ] Creates Stripe Checkout Session with correct price ($1.00)
-- [ ] Stores user_id in session metadata for webhook
-- [ ] Returns checkout URL to frontend
-- [ ] Handles errors gracefully (Stripe API failures)
-- [ ] Prevents already-premium users from purchasing again
+- [x] POST `/api/v1/stripe/create-checkout-session` endpoint exists
+- [x] Endpoint requires authentication (logged-in user)
+- [x] Creates Stripe Checkout Session with correct price ($1.00)
+- [x] Stores user_id in session metadata for webhook
+- [x] Returns checkout URL to frontend
+- [x] Handles errors gracefully (Stripe API failures)
+- [x] Prevents already-premium users from purchasing again
 
 ## Technical Details
 
@@ -87,7 +89,7 @@ def create_checkout_session(
             success_url=f"{settings.FRONTEND_HOST}/payment-success?session_id={{CHECKOUT_SESSION_ID}}",
             cancel_url=f"{settings.FRONTEND_HOST}/settings",
             metadata={
-                "user_id": str(current_user.id),
+                "user_id": str(current_user.id),  # UUID converted to string for Stripe metadata
             },
         )
 

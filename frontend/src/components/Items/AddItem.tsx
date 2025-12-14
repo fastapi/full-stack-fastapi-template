@@ -15,6 +15,7 @@ import { type ItemCreate, ItemsService } from "@/client"
 import type { ApiError } from "@/client/core/ApiError"
 import useCustomToast from "@/hooks/useCustomToast"
 import { handleError } from "@/utils"
+import UpgradeModal from "@/components/Premium/UpgradeModal"
 import {
   DialogBody,
   DialogCloseTrigger,
@@ -28,6 +29,7 @@ import { Field } from "../ui/field"
 
 const AddItem = () => {
   const [isOpen, setIsOpen] = useState(false)
+  const [showUpgradeModal, setShowUpgradeModal] = useState(false)
   const queryClient = useQueryClient()
   const { showSuccessToast } = useCustomToast()
   const {
@@ -53,7 +55,12 @@ const AddItem = () => {
       setIsOpen(false)
     },
     onError: (err: ApiError) => {
-      handleError(err)
+      if (err.status === 403) {
+        setIsOpen(false)
+        setShowUpgradeModal(true)
+      } else {
+        handleError(err)
+      }
     },
     onSettled: () => {
       queryClient.invalidateQueries({ queryKey: ["items"] })
@@ -65,6 +72,11 @@ const AddItem = () => {
   }
 
   return (
+    <>
+    <UpgradeModal
+      isOpen={showUpgradeModal}
+      onClose={() => setShowUpgradeModal(false)}
+    />
     <DialogRoot
       size={{ base: "xs", md: "md" }}
       placement="center"
@@ -137,6 +149,7 @@ const AddItem = () => {
         <DialogCloseTrigger />
       </DialogContent>
     </DialogRoot>
+    </>
   )
 }
 
