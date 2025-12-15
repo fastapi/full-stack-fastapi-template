@@ -4,6 +4,7 @@
 
 ### Internal
 
+* ⬆ Bump @tailwindcss/vite from 4.1.17 to 4.1.18 in /frontend. PR [#2049](https://github.com/fastapi/full-stack-fastapi-template/pull/2049) by [@dependabot[bot]](https://github.com/apps/dependabot).
 * ⬆ Bump vite from 7.2.7 to 7.3.0 in /frontend. PR [#2047](https://github.com/fastapi/full-stack-fastapi-template/pull/2047) by [@dependabot[bot]](https://github.com/apps/dependabot).
 * ⬆ Bump react-dom from 19.2.1 to 19.2.3 in /frontend. PR [#2046](https://github.com/fastapi/full-stack-fastapi-template/pull/2046) by [@dependabot[bot]](https://github.com/apps/dependabot).
 
