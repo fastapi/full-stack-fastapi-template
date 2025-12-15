@@ -52,7 +52,7 @@
     "@playwright/test": "1.57.0",
     "@tanstack/router-devtools": "^1.140.0",
     "@tanstack/router-plugin": "^1.140.0",
-    "@types/node": "^24.10.1",
+    "@types/node": "^25.0.2",
     "@types/react": "^19.2.7",
     "@types/react-dom": "^19.2.3",
     "@vitejs/plugin-react-swc": "^4.2.2",
