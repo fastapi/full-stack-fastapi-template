@@ -67,7 +67,6 @@ function Login() {
     loginMutation.mutate(data)
   }
 
-
   return (
     <AuthLayout>
       <Form {...form}>
