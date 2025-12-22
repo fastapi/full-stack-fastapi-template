@@ -4,6 +4,7 @@
 
 ### Internal
 
+* ⬆ Bump @biomejs/biome from 2.3.8 to 2.3.10 in /frontend. PR [#2061](https://github.com/fastapi/full-stack-fastapi-template/pull/2061) by [@dependabot[bot]](https://github.com/apps/dependabot).
 * ⬆ Bump @tanstack/react-router-devtools from 1.139.12 to 1.142.8 in /frontend. PR [#2063](https://github.com/fastapi/full-stack-fastapi-template/pull/2063) by [@dependabot[bot]](https://github.com/apps/dependabot).
 * ⬆ Bump zod from 4.1.13 to 4.2.1 in /frontend. PR [#2064](https://github.com/fastapi/full-stack-fastapi-template/pull/2064) by [@dependabot[bot]](https://github.com/apps/dependabot).
 * 👷 Configure coverage, error on main tests, don't wait for Smokeshow. PR [#2054](https://github.com/fastapi/full-stack-fastapi-template/pull/2054) by [@YuriiMotov](https://github.com/YuriiMotov).
