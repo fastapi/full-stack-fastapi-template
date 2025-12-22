@@ -47,7 +47,7 @@
     "zod": "^4.1.13"
   },
   "devDependencies": {
-    "@biomejs/biome": "^2.3.8",
+    "@biomejs/biome": "^2.3.10",
     "@hey-api/openapi-ts": "0.73.0",
     "@playwright/test": "1.57.0",
     "@tanstack/router-devtools": "^1.140.0",
