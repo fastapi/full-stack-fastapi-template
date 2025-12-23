@@ -48,9 +48,7 @@ jobs:
             pyproject.toml
             uv.lock
       - name: Install Dependencies
-        run: |
-          uv venv
-          uv pip install -r requirements.txt
+        run: uv sync
       - name: Run prek - pre-commit
         id: precommit
         run: uvx prek run --from-ref origin/${GITHUB_BASE_REF} --to-ref HEAD --show-diff-on-failure
