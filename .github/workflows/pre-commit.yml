@@ -50,10 +50,12 @@ jobs:
             uv.lock
       - name: Install Dependencies
         run: uv sync
+        working-directory: backend
       - name: Run prek - pre-commit
         id: precommit
         run: uvx prek run --from-ref origin/${GITHUB_BASE_REF} --to-ref HEAD --show-diff-on-failure
         continue-on-error: true
+        working-directory: backend
       - name: Commit and push changes
         if: env.HAS_SECRETS == 'true'
         run: |
