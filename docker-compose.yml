@@ -1,7 +1,7 @@
 services:
 
   db:
-    image: postgres:17
+    image: postgres:17-alpine
     restart: always
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER} -d ${POSTGRES_DB}"]
@@ -162,6 +162,15 @@ services:
 
       # Enable redirection for HTTP and HTTPS
       - traefik.http.routers.${STACK_NAME?Variable not set}-frontend-http.middlewares=https-redirect
+
+  postgresus:
+    image: rostislavdugin/postgresus:latest
+    ports:
+      - "4005:4005"
+    volumes:
+      - ./postgresus-data:/postgresus-data
+    restart: unless-stopped
+
 volumes:
   app-db-data:
 

@@ -1,5 +1,6 @@
 import secrets
 import warnings
+from pathlib import Path
 from typing import Annotated, Any, Literal
 
 from pydantic import (
@@ -15,6 +16,8 @@ from pydantic_settings import BaseSettings, SettingsConfigDict
 from typing_extensions import Self
 
 
+BASE_DIR = Path(__file__).resolve().parents[3]
+
 def parse_cors(v: Any) -> list[str] | str:
     if isinstance(v, str) and not v.startswith("["):
         return [i.strip() for i in v.split(",") if i.strip()]
@@ -25,12 +28,11 @@ def parse_cors(v: Any) -> list[str] | str:
 
 class Settings(BaseSettings):
     model_config = SettingsConfigDict(
-        # Use top level .env file (one level above ./backend/)
-        env_file="../.env",
+        env_file=BASE_DIR / ".env",
         env_ignore_empty=True,
         extra="ignore",
     )
-    API_V1_STR: str = "/api/v1"
+    API_V1_STR: str = ""
     SECRET_KEY: str = secrets.token_urlsafe(32)
     # 60 minutes * 24 hours * 8 days = 8 days
     ACCESS_TOKEN_EXPIRE_MINUTES: int = 60 * 24 * 8
@@ -49,7 +51,7 @@ class Settings(BaseSettings):
         ]
 
     PROJECT_NAME: str
-    SENTRY_DSN: HttpUrl | None = None
+    SENTRY_DSN: str | None = None
     POSTGRES_SERVER: str
     POSTGRES_PORT: int = 5432
     POSTGRES_USER: str
