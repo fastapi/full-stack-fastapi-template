@@ -43,6 +43,9 @@ test("User can reset password successfully using the link", async ({
   await page.getByTestId("email-input").fill(email)
 
   await page.getByRole("button", { name: "Continue" }).click()
+  await expect(
+    page.getByText("Password recovery email sent successfully"),
+  ).toBeVisible()
 
   const emailData = await findLastEmail({
     request,
@@ -98,6 +101,9 @@ test("Weak new password validation", async ({ page, request }) => {
   await page.goto("/recover-password")
   await page.getByTestId("email-input").fill(email)
   await page.getByRole("button", { name: "Continue" }).click()
+  await expect(
+    page.getByText("Password recovery email sent successfully"),
+  ).toBeVisible()
 
   const emailData = await findLastEmail({
     request,
