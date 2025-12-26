@@ -17,13 +17,6 @@ repos:
             )$
       - id: trailing-whitespace
         exclude: ^frontend/src/client/.*
-  - repo: https://github.com/charliermarsh/ruff-pre-commit
-    rev: v0.2.2
-    hooks:
-      - id: ruff
-        args:
-          - --fix
-      - id: ruff-format
   - repo: local
     hooks:
       - id: local-biome-check
@@ -33,6 +26,16 @@ repos:
         types: [text]
         files: ^frontend/
 
-ci:
-  autofix_commit_msg: 🎨 [pre-commit.ci] Auto format from pre-commit.com hooks
-  autoupdate_commit_msg: ⬆ [pre-commit.ci] pre-commit autoupdate
+      - id: local-ruff-check
+        name: ruff check
+        entry: uv run ruff check --force-exclude --fix --exit-non-zero-on-fix
+        require_serial: true
+        language: unsupported
+        types: [python]
+
+      - id: local-ruff-format
+        name: ruff format
+        entry: uv run ruff format --force-exclude --exit-non-zero-on-format
+        require_serial: true
+        language: unsupported
+        types: [python]
