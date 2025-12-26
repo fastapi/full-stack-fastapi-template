@@ -41,6 +41,9 @@ build-backend = "hatchling.build"
 strict = true
 exclude = ["venv", ".venv", "alembic"]
 
+[tool.pytest.ini_options]
+markers = ["enable_password_hashing: mark tests to not patch password hashing."]
+
 [tool.ruff]
 target-version = "py310"
 exclude = ["alembic"]
