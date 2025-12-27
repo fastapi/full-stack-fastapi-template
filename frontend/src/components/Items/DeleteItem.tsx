@@ -61,11 +61,11 @@ const DeleteItem = ({ id, onSuccess }: DeleteItemProps) => {
         <Trash2 />
         Delete Item
       </DropdownMenuItem>
-      <DialogContent className="sm:max-w-md">
+      <DialogContent className="sm:max-w-md" aria-describedby="delete-item-description">
         <form onSubmit={handleSubmit(onSubmit)}>
           <DialogHeader>
             <DialogTitle>Delete Item</DialogTitle>
-            <DialogDescription>
+            <DialogDescription id="delete-item-description">
               This item will be permanently deleted. Are you sure? You will not
               be able to undo this action.
             </DialogDescription>
