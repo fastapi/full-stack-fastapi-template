@@ -61,11 +61,11 @@ const DeleteUser = ({ id, onSuccess }: DeleteUserProps) => {
         <Trash2 />
         Delete User
       </DropdownMenuItem>
-      <DialogContent className="sm:max-w-md">
+      <DialogContent className="sm:max-w-md" aria-describedby="delete-user-description">
         <form onSubmit={handleSubmit(onSubmit)}>
           <DialogHeader>
             <DialogTitle>Delete User</DialogTitle>
-            <DialogDescription>
+            <DialogDescription id="delete-user-description">
               All items associated with this user will also be{" "}
               <strong>permanently deleted.</strong> Are you sure? You will not
               be able to undo this action.
