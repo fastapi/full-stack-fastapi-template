@@ -125,11 +125,11 @@ const EditItem = ({ item, onSuccess }: EditItemProps) => {
                   <FormItem>
                     <FormLabel>Description</FormLabel>
                     <FormControl>
-                      <Textarea 
-                        placeholder="Enter a description for your item" 
-                        className="resize-none" 
+                      <Textarea
+                        placeholder="Enter a description for your item"
+                        className="resize-none"
                         rows={3}
-                        {...field} 
+                        {...field}
                       />
                     </FormControl>
                     <FormMessage />
