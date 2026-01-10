@@ -75,7 +75,7 @@ const AddUser = () => {
     mutationFn: (data: UserCreate) =>
       UsersService.createUser({ requestBody: data }),
     onSuccess: () => {
-      showSuccessToast("User created successfully")
+      showSuccessToast("Good job. The user was added successfully.")
       form.reset()
       setIsOpen(false)
     },
@@ -113,7 +113,7 @@ const AddUser = () => {
                 render={({ field }) => (
                   <FormItem>
                     <FormLabel>
-                      Email <span className="text-destructive">*</span>
+                      Email ID<span className="text-destructive">*</span>
                     </FormLabel>
                     <FormControl>
                       <Input

@@ -5,7 +5,7 @@ import {
   QueryClientProvider,
 } from "@tanstack/react-query"
 import { createRouter, RouterProvider } from "@tanstack/react-router"
-import { StrictMode } from "react"
+import React, { StrictMode, useState } from "react"
 import ReactDOM from "react-dom/client"
 import { ApiError, OpenAPI } from "./client"
 import { ThemeProvider } from "./components/theme-provider"
@@ -44,9 +44,41 @@ ReactDOM.createRoot(document.getElementById("root")!).render(
   <StrictMode>
     <ThemeProvider defaultTheme="dark" storageKey="vite-ui-theme">
       <QueryClientProvider client={queryClient}>
+        {/* Small visible demo: dismissible banner and floating feedback button */}
+        <div style={{position: 'relative'}}>
+          <Banner />
+          <Fab />
+        </div>
         <RouterProvider router={router} />
         <Toaster richColors closeButton />
       </QueryClientProvider>
     </ThemeProvider>
   </StrictMode>,
 )
+
+function Banner() {
+  const [open, setOpen] = useState(true)
+  if (!open) return null
+  return (
+    <div className="card ui-update-banner" style={{maxWidth: 920, margin: '1rem auto'}}>
+      <div style={{display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 12}}>
+        <div>
+          <strong>UI updated</strong>
+          <div style={{opacity: 0.85}}>Refreshed typography, subtle background gradients, buttons, and cards.</div>
+        </div>
+        <div style={{display: 'flex', gap: 8}}>
+          <button className="btn" onClick={() => window.location.reload()}>Refresh</button>
+          <button className="btn" onClick={() => setOpen(false)}>Dismiss</button>
+        </div>
+      </div>
+    </div>
+  )
+}
+
+function Fab() {
+  return (
+    <a className="btn fab" href="mailto:dev@example.com" title="Send feedback">
+      Feedback
+    </a>
+  )
+}

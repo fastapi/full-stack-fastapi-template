@@ -42,6 +42,8 @@
 }
 
 :root {
+  --chakra-colors-brand-500: #3b82f6;  /* Your brand blue */
+  --chakra-colors-brand-400: #60a5fa;
   --radius: 0.625rem;
   --background: oklch(1 0 0);
   --foreground: oklch(0.145 0 0);
@@ -116,9 +118,97 @@
   }
   body {
     @apply bg-background text-foreground;
+    font-family: "Inter", ui-sans-serif, system-ui, -apple-system, "Segoe UI",
+      Roboto, "Helvetica Neue", Arial;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    transition: background-color 220ms ease, color 220ms ease;
+    background-image: radial-gradient(1000px 400px at 10% 10%, rgba(59,130,246,0.06), transparent),
+      radial-gradient(800px 300px at 90% 90%, rgba(99,102,241,0.04), transparent);
+    background-attachment: fixed;
   }
   button,
   [role="button"] {
     cursor: pointer;
+  }
+}
+
+/* Lightweight component helpers for consistent small UI polish */
+@layer components {
+  .card {
+    background: var(--color-card, white);
+    color: var(--color-card-foreground, inherit);
+    padding: 1rem;
+    border-radius: var(--radius-md);
+    border: 1px solid var(--color-border, rgba(0,0,0,0.06));
+    box-shadow: 0 6px 18px rgba(15,23,42,0.06);
+  }
+
+  .btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.5rem 0.9rem;
+    border-radius: calc(var(--radius) - 4px);
+    background-color: var(--chakra-colors-brand-500);
+    color: white;
+    border: none;
+    box-shadow: 0 6px 18px rgba(59,130,246,0.12);
+    transition: transform 160ms ease, box-shadow 160ms ease, opacity 160ms ease;
+  }
+
+  .btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 10px 28px rgba(59,130,246,0.14);
+  }
+
+  input,
+  textarea,
+  select {
+    border-radius: var(--radius-sm);
+    padding: 0.5rem 0.75rem;
+    border: 1px solid var(--color-border, rgba(0,0,0,0.06));
+    background: var(--color-input, transparent);
+    transition: box-shadow 160ms ease, border-color 160ms ease;
+  }
+
+  input:focus,
+  textarea:focus,
+  select:focus {
+    outline: none;
+    box-shadow: 0 6px 18px rgba(59,130,246,0.08);
+    border-color: var(--chakra-colors-brand-400);
+  }
+
+  a {
+    color: var(--chakra-colors-brand-500);
+    text-decoration: none;
+    transition: color 120ms ease, text-decoration 120ms ease;
+  }
+
+  a:hover {
+    text-decoration: underline;
+  }
+}
+
+/* Banner + FAB styles */
+@layer components {
+  .ui-update-banner {
+    border-left: 4px solid var(--chakra-colors-brand-500);
+    background: linear-gradient(180deg, rgba(59,130,246,0.04), transparent);
+    padding: 0.75rem 1rem;
+  }
+
+  .fab {
+    position: fixed;
+    right: 20px;
+    bottom: 20px;
+    z-index: 60;
+    padding: 0.65rem 0.9rem;
+    border-radius: 999px;
+    box-shadow: 0 12px 30px rgba(2,6,23,0.18);
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
   }
 }
