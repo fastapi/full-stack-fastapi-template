@@ -34,7 +34,7 @@ Este repositorio es un **portfolio personal DevOps/Cloud**. El objetivo es demos
 - Documentación técnica orientada a entrevistas
 
 ## Roadmap
-- [ ] Phase 1: Docker baseline
+- [X] Phase 1: Docker baseline
 - [ ] Phase 2: Kubernetes local (kind)
 - [ ] Phase 3: CI/CD
 - [ ] Phase 4: AWS EC2 + k3s deploy
