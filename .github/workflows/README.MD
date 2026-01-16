@@ -1,3 +1,5 @@
+![CI](https://github.com/AlfreMu/devops-portfolio-fastapi/actions/workflows/ci.yml/badge.svg)
+
 # Workflows (portfolio)
 
 Workflows del portfolio:
