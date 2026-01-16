@@ -1,0 +1,9 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: backend-config
+data:
+  PROJECT_NAME: "DevOps Portfolio FastAPI"
+  POSTGRES_SERVER: "db"
+  POSTGRES_USER: "postgres"
+  BACKEND_CORS_ORIGINS: '["http://localhost:5173","http://localhost:30080","http://localhost:8000"]'
