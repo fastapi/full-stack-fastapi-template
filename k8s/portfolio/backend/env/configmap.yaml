@@ -4,6 +4,8 @@ metadata:
   name: backend-config
 data:
   PROJECT_NAME: "DevOps Portfolio FastAPI"
-  POSTGRES_SERVER: "db"
+  POSTGRES_SERVER: "postgres"
+  POSTGRES_PORT: "5432"
+  POSTGRES_DB: "app"
   POSTGRES_USER: "postgres"
-  BACKEND_CORS_ORIGINS: '["http://localhost:5173","http://localhost:30080","http://localhost:8000"]'
+  BACKEND_CORS_ORIGINS: '["http://localhost:5173","http://localhost:18000"]'
