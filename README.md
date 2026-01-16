@@ -1,5 +1,7 @@
 # DevOps Portfolio — FastAPI Template (Docker + Kubernetes + CI/CD + AWS)
 
+![CI](https://github.com/AlfreMu/devops-portfolio-fastapi/actions/workflows/ci.yml/badge.svg)
+
 Este repositorio es un **portfolio personal DevOps/Cloud**. El objetivo es demostrar prácticas modernas de:
 - Docker
 - Kubernetes (kind en local / k3s en AWS EC2 — **sin EKS**)
@@ -35,7 +37,7 @@ Este repositorio es un **portfolio personal DevOps/Cloud**. El objetivo es demos
 
 ## Roadmap
 - [X] Phase 1: Docker baseline
-- [ ] Phase 2: Kubernetes local (kind)
+- [X] Phase 2: Kubernetes local (kind)
 - [ ] Phase 3: CI/CD
 - [ ] Phase 4: AWS EC2 + k3s deploy
 
