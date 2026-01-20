@@ -4,6 +4,7 @@
 
 ### Internal
 
+* 🔧 Migrate from npm to Bun. PR [#2097](https://github.com/fastapi/full-stack-fastapi-template/pull/2097) by [@alejsdev](https://github.com/alejsdev).
 * 🎨 Apply pre-commit fixes. PR [#2055](https://github.com/fastapi/full-stack-fastapi-template/pull/2055) by [@GniLudio](https://github.com/GniLudio).
 * 👷 Update pre-commit workflow. PR [#2096](https://github.com/fastapi/full-stack-fastapi-template/pull/2096) by [@alejsdev](https://github.com/alejsdev).
 * 🔧 Set up node monorepo. PR [#2095](https://github.com/fastapi/full-stack-fastapi-template/pull/2095) by [@alejsdev](https://github.com/alejsdev).
