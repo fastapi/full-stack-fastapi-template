@@ -45,7 +45,8 @@ services:
   prestart:
     image: '${DOCKER_IMAGE_BACKEND?Variable not set}:${TAG-latest}'
     build:
-      context: ./backend
+      context: .
+      dockerfile: backend/Dockerfile
     networks:
       - traefik-public
       - default
@@ -115,7 +116,8 @@ services:
       retries: 5
 
     build:
-      context: ./backend
+      context: .
+      dockerfile: backend/Dockerfile
     labels:
       - traefik.enable=true
       - traefik.docker.network=traefik-public
