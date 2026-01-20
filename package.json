@@ -4,8 +4,8 @@
   "workspaces": [
     "frontend"
   ],
-  "scripts": {
-    "dev": "npm run dev -w frontend",
-    "lint": "npm run lint --ws"
+ "scripts": {
+    "dev": "bun run --filter frontend dev",
+    "lint": "bun run --filter frontend lint"
   }
 }
