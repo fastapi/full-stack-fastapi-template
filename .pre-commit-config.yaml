@@ -35,7 +35,7 @@ repos:
 
       - id: local-ruff-format
         name: ruff format
-        entry: uv run ruff format --force-exclude --exit-non-zero-on-format
+        entry: uv run ruff format --force-exclude --check
         require_serial: true
         language: unsupported
         types: [python]
