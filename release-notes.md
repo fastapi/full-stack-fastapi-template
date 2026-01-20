@@ -4,6 +4,7 @@
 
 ### Internal
 
+* 🔧 Add tests scripts in `package.json`. PR [#2098](https://github.com/fastapi/full-stack-fastapi-template/pull/2098) by [@alejsdev](https://github.com/alejsdev).
 * 🔧 Migrate from npm to Bun. PR [#2097](https://github.com/fastapi/full-stack-fastapi-template/pull/2097) by [@alejsdev](https://github.com/alejsdev).
 * 🎨 Apply pre-commit fixes. PR [#2055](https://github.com/fastapi/full-stack-fastapi-template/pull/2055) by [@GniLudio](https://github.com/GniLudio).
 * 👷 Update pre-commit workflow. PR [#2096](https://github.com/fastapi/full-stack-fastapi-template/pull/2096) by [@alejsdev](https://github.com/alejsdev).
