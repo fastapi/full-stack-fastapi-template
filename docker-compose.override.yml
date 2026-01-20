@@ -60,7 +60,8 @@ services:
     ports:
       - "8000:8000"
     build:
-      context: ./backend
+      context: .
+      dockerfile: backend/Dockerfile
     # command: sleep infinity  # Infinite loop to keep container alive doing nothing
     command:
       - fastapi
@@ -71,7 +72,7 @@ services:
       watch:
         - path: ./backend
           action: sync
-          target: /app
+          target: /app/backend
           ignore:
             - ./backend/.venv
             - .venv
@@ -79,7 +80,7 @@ services:
           action: rebuild
     # TODO: remove once coverage is done locally
     volumes:
-      - ./backend/htmlcov:/app/htmlcov
+      - ./backend/htmlcov:/app/backend/htmlcov
     environment:
       SMTP_HOST: "mailcatcher"
       SMTP_PORT: "1025"
