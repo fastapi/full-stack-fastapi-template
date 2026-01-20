@@ -63,7 +63,6 @@ docker compose stop frontend
 And then start the local frontend development server:
 
 ```bash
-cd frontend
 npm run dev
 ```
 

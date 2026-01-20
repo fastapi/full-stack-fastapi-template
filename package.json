@@ -1,0 +1,11 @@
+{
+  "name": "fastapi-full-stack-template",
+  "private": true,
+  "workspaces": [
+    "frontend"
+  ],
+  "scripts": {
+    "dev": "npm run dev -w frontend",
+    "lint": "npm run lint --ws"
+  }
+}

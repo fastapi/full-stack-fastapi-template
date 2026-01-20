@@ -11,11 +11,6 @@ Before you begin, ensure that you have either the Node Version Manager (nvm) or 
 * After installing either nvm or fnm, proceed to the `frontend` directory:
 
 ```bash
-cd frontend
-```
-* If the Node.js version specified in the `.nvmrc` file isn't installed on your system, you can install it using the appropriate command:
-
-```bash
 # If using fnm
 fnm install
 
