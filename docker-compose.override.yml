@@ -98,15 +98,16 @@ services:
     ports:
       - "5173:80"
     build:
-      context: ./frontend
+      context: .
+      dockerfile: frontend/Dockerfile
       args:
         - VITE_API_URL=http://localhost:8000
         - NODE_ENV=development
 
   playwright:
     build:
-      context: ./frontend
-      dockerfile: Dockerfile.playwright
+      context: .
+      dockerfile: frontend/Dockerfile.playwright
       args:
         - VITE_API_URL=http://backend:8000
         - NODE_ENV=production
@@ -123,8 +124,8 @@ services:
       - PLAYWRIGHT_HTML_HOST=0.0.0.0
       - CI=${CI}
     volumes:
-      - ./frontend/blob-report:/app/blob-report
-      - ./frontend/test-results:/app/test-results
+      - ./frontend/blob-report:/app/frontend/blob-report
+      - ./frontend/test-results:/app/frontend/test-results
     ports:
       - 9323:9323
 
