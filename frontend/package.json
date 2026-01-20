@@ -8,7 +8,9 @@
     "build": "tsc -p tsconfig.build.json && vite build",
     "lint": "biome check --write --unsafe --no-errors-on-unmatched --files-ignore-unknown=true ./",
     "preview": "vite preview",
-    "generate-client": "openapi-ts"
+    "generate-client": "openapi-ts",
+    "test": "bunx playwright test",
+    "test:ui": "bunx playwright test --ui"
   },
   "dependencies": {
     "@hookform/resolvers": "^5.2.2",
