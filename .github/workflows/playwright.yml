@@ -48,9 +48,7 @@ jobs:
       fail-fast: false
     steps:
     - uses: actions/checkout@v6
-    - uses: actions/setup-node@v6
-      with:
-        node-version: lts/*
+    - uses: oven-sh/setup-bun@v2
     - uses: actions/setup-python@v6
       with:
         python-version: '3.10'
@@ -66,7 +64,7 @@ jobs:
         enable-cache: true
     - run: uv sync
       working-directory: backend
-    - run: npm ci
+    - run: bun ci
       working-directory: frontend
     - run: uv run bash scripts/generate-client.sh
       env:
@@ -94,11 +92,9 @@ jobs:
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v6
-    - uses: actions/setup-node@v6
-      with:
-        node-version: 20
+    - uses: oven-sh/setup-bun@v2
     - name: Install dependencies
-      run: npm ci
+      run: bun ci
     - name: Download blob reports from GitHub Actions Artifacts
       uses: actions/download-artifact@v7
       with:
