@@ -1,5 +1,5 @@
 {
-  "name": "fastapi-cloud",
+  "name": "fastapi-full-stack-template",
   "private": true,
   "workspaces": [
     "frontend"
