@@ -236,9 +236,7 @@ test("Appearance button is visible in sidebar", async ({ page }) => {
   await expect(page.getByTestId("theme-button")).toBeVisible()
 })
 
-test("User can switch between theme modes", async ({
-  page,
-}) => {
+test("User can switch between theme modes", async ({ page }) => {
   await page.goto("/settings")
 
   await page.getByTestId("theme-button").click()
