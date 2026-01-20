@@ -4,6 +4,7 @@
 
 ### Internal
 
+* Revert "🔧 Update pre-commit-config.yaml ruff format to use --check". PR [#2091](https://github.com/fastapi/full-stack-fastapi-template/pull/2091) by [@alejsdev](https://github.com/alejsdev).
 * 🔧 Update pre-commit-config.yaml ruff format to use --check. PR [#2077](https://github.com/fastapi/full-stack-fastapi-template/pull/2077) by [@ryansydnor](https://github.com/ryansydnor).
 * ⬆ Bump actions/checkout from 5 to 6. PR [#2074](https://github.com/fastapi/full-stack-fastapi-template/pull/2074) by [@dependabot[bot]](https://github.com/apps/dependabot).
 * 👷 Add pre-commit workflow. PR [#2056](https://github.com/fastapi/full-stack-fastapi-template/pull/2056) by [@YuriiMotov](https://github.com/YuriiMotov).
