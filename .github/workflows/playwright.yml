@@ -74,7 +74,7 @@ jobs:
     - run: docker compose build
     - run: docker compose down -v --remove-orphans
     - name: Run Playwright tests
-      run: docker compose run --rm playwright npx playwright test --fail-on-flaky-tests --trace=retain-on-failure --shard=${{ matrix.shardIndex }}/${{ matrix.shardTotal }}
+      run: docker compose run --rm playwright bunx playwright test --fail-on-flaky-tests --trace=retain-on-failure --shard=${{ matrix.shardIndex }}/${{ matrix.shardTotal }}
     - run: docker compose down -v --remove-orphans
     - name: Upload blob report to GitHub Actions Artifacts
       if: ${{ !cancelled() }}
@@ -106,7 +106,7 @@ jobs:
         pattern: blob-report-*
         merge-multiple: true
     - name: Merge into HTML Report
-      run: npx playwright merge-reports --reporter html ./all-blob-reports
+      run: bunx playwright merge-reports --reporter html ./all-blob-reports
       working-directory: frontend
     - name: Upload HTML report
       uses: actions/upload-artifact@v6

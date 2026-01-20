@@ -37,9 +37,7 @@ jobs:
         # To be able to commit it needs the head branch of the PR, the remote one
           ref: ${{ github.event.pull_request.head.sha }}
           fetch-depth: 0
-      - uses: actions/setup-node@v6
-        with:
-          node-version: lts/*
+      - uses: oven-sh/setup-bun@v2
       - name: Set up Python
         uses: actions/setup-python@v6
         with:
@@ -54,7 +52,7 @@ jobs:
       - name: Install backend dependencies
         run: uv sync --all-packages
       - name: Install frontend dependencies
-        run: npm ci
+        run: bun ci
       - name: Run prek - pre-commit
         id: precommit
         run: uvx prek run --from-ref origin/${GITHUB_BASE_REF} --to-ref HEAD --show-diff-on-failure
