@@ -4,6 +4,7 @@
 
 ### Internal
 
+* 🔧 Set up node monorepo. PR [#2095](https://github.com/fastapi/full-stack-fastapi-template/pull/2095) by [@alejsdev](https://github.com/alejsdev).
 * 🧑‍💻 Implement uv workspaces. PR [#2090](https://github.com/fastapi/full-stack-fastapi-template/pull/2090) by [@alejsdev](https://github.com/alejsdev).
 * 🔧 Update biome.json schema version. PR [#2092](https://github.com/fastapi/full-stack-fastapi-template/pull/2092) by [@alejsdev](https://github.com/alejsdev).
 * Revert "🔧 Update pre-commit-config.yaml ruff format to use --check". PR [#2091](https://github.com/fastapi/full-stack-fastapi-template/pull/2091) by [@alejsdev](https://github.com/alejsdev).
