@@ -4,6 +4,21 @@
 
 ### Internal
 
+* 👷 Update pre-commit workflow. PR [#2096](https://github.com/fastapi/full-stack-fastapi-template/pull/2096) by [@alejsdev](https://github.com/alejsdev).
+* 🔧 Set up node monorepo. PR [#2095](https://github.com/fastapi/full-stack-fastapi-template/pull/2095) by [@alejsdev](https://github.com/alejsdev).
+* 🧑‍💻 Implement uv workspaces. PR [#2090](https://github.com/fastapi/full-stack-fastapi-template/pull/2090) by [@alejsdev](https://github.com/alejsdev).
+* 🔧 Update biome.json schema version. PR [#2092](https://github.com/fastapi/full-stack-fastapi-template/pull/2092) by [@alejsdev](https://github.com/alejsdev).
+* Revert "🔧 Update pre-commit-config.yaml ruff format to use --check". PR [#2091](https://github.com/fastapi/full-stack-fastapi-template/pull/2091) by [@alejsdev](https://github.com/alejsdev).
+* 🔧 Update pre-commit-config.yaml ruff format to use --check. PR [#2077](https://github.com/fastapi/full-stack-fastapi-template/pull/2077) by [@ryansydnor](https://github.com/ryansydnor).
+* ⬆ Bump actions/checkout from 5 to 6. PR [#2074](https://github.com/fastapi/full-stack-fastapi-template/pull/2074) by [@dependabot[bot]](https://github.com/apps/dependabot).
+* 👷 Add pre-commit workflow. PR [#2056](https://github.com/fastapi/full-stack-fastapi-template/pull/2056) by [@YuriiMotov](https://github.com/YuriiMotov).
+* ⬆ Bump @tanstack/router-devtools from 1.140.0 to 1.142.8 in /frontend. PR [#2060](https://github.com/fastapi/full-stack-fastapi-template/pull/2060) by [@dependabot[bot]](https://github.com/apps/dependabot).
+* ⬆ Bump @tanstack/react-router from 1.141.2 to 1.142.8 in /frontend. PR [#2062](https://github.com/fastapi/full-stack-fastapi-template/pull/2062) by [@dependabot[bot]](https://github.com/apps/dependabot).
+* ⬆ Bump @biomejs/biome from 2.3.8 to 2.3.10 in /frontend. PR [#2061](https://github.com/fastapi/full-stack-fastapi-template/pull/2061) by [@dependabot[bot]](https://github.com/apps/dependabot).
+* ⬆ Bump @tanstack/react-router-devtools from 1.139.12 to 1.142.8 in /frontend. PR [#2063](https://github.com/fastapi/full-stack-fastapi-template/pull/2063) by [@dependabot[bot]](https://github.com/apps/dependabot).
+* ⬆ Bump zod from 4.1.13 to 4.2.1 in /frontend. PR [#2064](https://github.com/fastapi/full-stack-fastapi-template/pull/2064) by [@dependabot[bot]](https://github.com/apps/dependabot).
+* 👷 Configure coverage, error on main tests, don't wait for Smokeshow. PR [#2054](https://github.com/fastapi/full-stack-fastapi-template/pull/2054) by [@YuriiMotov](https://github.com/YuriiMotov).
+* 👷 Run Smokeshow always, even on test failures. PR [#2053](https://github.com/fastapi/full-stack-fastapi-template/pull/2053) by [@YuriiMotov](https://github.com/YuriiMotov).
 * ⬆ Bump @tanstack/react-router from 1.140.0 to 1.141.2 in /frontend. PR [#2045](https://github.com/fastapi/full-stack-fastapi-template/pull/2045) by [@dependabot[bot]](https://github.com/apps/dependabot).
 * ⬆ Bump actions/download-artifact from 6 to 7. PR [#2051](https://github.com/fastapi/full-stack-fastapi-template/pull/2051) by [@dependabot[bot]](https://github.com/apps/dependabot).
 * ⬆ Bump actions/upload-artifact from 5 to 6. PR [#2050](https://github.com/fastapi/full-stack-fastapi-template/pull/2050) by [@dependabot[bot]](https://github.com/apps/dependabot).
