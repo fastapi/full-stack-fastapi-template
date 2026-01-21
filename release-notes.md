@@ -4,6 +4,7 @@
 
 ### Internal
 
+* 🔧 Update dependabot configuration for package ecosystems. PR [#2100](https://github.com/fastapi/full-stack-fastapi-template/pull/2100) by [@alejsdev](https://github.com/alejsdev).
 * 🔧 Update Biome schema version to 2.3.11. PR [#2099](https://github.com/fastapi/full-stack-fastapi-template/pull/2099) by [@alejsdev](https://github.com/alejsdev).
 * 🔧 Add tests scripts in `package.json`. PR [#2098](https://github.com/fastapi/full-stack-fastapi-template/pull/2098) by [@alejsdev](https://github.com/alejsdev).
 * 🔧 Migrate from npm to Bun. PR [#2097](https://github.com/fastapi/full-stack-fastapi-template/pull/2097) by [@alejsdev](https://github.com/alejsdev).
