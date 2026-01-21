@@ -4,6 +4,7 @@
 
 ### Internal
 
+* ⬆ Bump lucide-react from 0.556.0 to 0.562.0. PR [#2101](https://github.com/fastapi/full-stack-fastapi-template/pull/2101) by [@dependabot[bot]](https://github.com/apps/dependabot).
 * 🔧 Update dependabot configuration for package ecosystems. PR [#2100](https://github.com/fastapi/full-stack-fastapi-template/pull/2100) by [@alejsdev](https://github.com/alejsdev).
 * 🔧 Update Biome schema version to 2.3.11. PR [#2099](https://github.com/fastapi/full-stack-fastapi-template/pull/2099) by [@alejsdev](https://github.com/alejsdev).
 * 🔧 Add tests scripts in `package.json`. PR [#2098](https://github.com/fastapi/full-stack-fastapi-template/pull/2098) by [@alejsdev](https://github.com/alejsdev).
