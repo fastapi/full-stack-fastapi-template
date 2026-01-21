@@ -10,15 +10,15 @@ updates:
     labels: [dependencies, internal]
   # Python uv
   - package-ecosystem: uv
-    directory: /backend
+    directory: /
     schedule:
       interval: weekly
     commit-message:
       prefix: ⬆
     labels: [dependencies, internal]
-  # npm
-  - package-ecosystem: npm
-    directory: /frontend
+  # bun
+  - package-ecosystem: bun
+    directory: /
     schedule:
       interval: weekly
     commit-message:
