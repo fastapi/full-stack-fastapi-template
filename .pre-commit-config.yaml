@@ -39,3 +39,10 @@ repos:
         require_serial: true
         language: unsupported
         types: [python]
+
+      - id: generate-frontend-sdk
+        name: Generate Frontend SDK
+        entry: bun run --filter frontend generate-client
+        pass_filenames: false
+        language: unsupported
+        files: ^backend/.*$
