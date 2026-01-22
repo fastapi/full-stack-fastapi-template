@@ -242,7 +242,8 @@ def test_update_password_me(
     user_db = db.exec(user_query).first()
     assert user_db
     assert user_db.email == settings.FIRST_SUPERUSER
-    assert verify_password(new_password, user_db.hashed_password)
+    verified, _ = verify_password(new_password, user_db.hashed_password)
+    assert verified
 
     # Revert to the old password to keep consistency in test
     old_data = {
@@ -257,7 +258,10 @@ def test_update_password_me(
     db.refresh(user_db)
 
     assert r.status_code == 200
-    assert verify_password(settings.FIRST_SUPERUSER_PASSWORD, user_db.hashed_password)
+    verified, _ = verify_password(
+        settings.FIRST_SUPERUSER_PASSWORD, user_db.hashed_password
+    )
+    assert verified
 
 
 def test_update_password_me_incorrect_password(
@@ -331,7 +335,8 @@ def test_register_user(client: TestClient, db: Session) -> None:
     assert user_db
     assert user_db.email == username
     assert user_db.full_name == full_name
-    assert verify_password(password, user_db.hashed_password)
+    verified, _ = verify_password(password, user_db.hashed_password)
+    assert verified
 
 
 def test_register_user_already_exists_error(client: TestClient) -> None:
