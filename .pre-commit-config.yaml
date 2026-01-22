@@ -45,4 +45,4 @@ repos:
         entry: bash ./scripts/generate-client.sh
         pass_filenames: false
         language: unsupported
-        files: ^backend/.*$
+        files: ^backend/.*$|^scripts/generate-client\.sh$
