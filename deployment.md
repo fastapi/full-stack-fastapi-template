@@ -109,47 +109,17 @@ Now that you have Traefik in place you can deploy your FastAPI project with Dock
 
 **Note**: You might want to jump ahead to the section about Continuous Deployment with GitHub Actions.
 
+## Copy the Code
+
+```bash
+rsync -av --filter=":- .gitignore" ./ root@your-server.example.com:/root/code/app/
+```
+
+Note: `--filter=":- .gitignore"` tells `rsync` to use the same rules as git, ignore files ignored by git, like the Python virtual environment.
+
 ## Environment Variables
 
 You need to set some environment variables first.
-
-Set the `ENVIRONMENT`, by default `local` (for development), but when deploying to a server you would put something like `staging` or `production`:
-
-```bash
-export ENVIRONMENT=production
-```
-
-Set the `DOMAIN`, by default `localhost` (for development), but when deploying you would use your own domain, for example:
-
-```bash
-export DOMAIN=fastapi-project.example.com
-```
-
-You can set several variables, like:
-
-* `PROJECT_NAME`: The name of the project, used in the API for the docs and emails.
-* `STACK_NAME`: The name of the stack used for Docker Compose labels and project name, this should be different for `staging`, `production`, etc. You could use the same domain replacing dots with dashes, e.g. `fastapi-project-example-com` and `staging-fastapi-project-example-com`.
-* `BACKEND_CORS_ORIGINS`: A list of allowed CORS origins separated by commas.
-* `SECRET_KEY`: The secret key for the FastAPI project, used to sign tokens.
-* `FIRST_SUPERUSER`: The email of the first superuser, this superuser will be the one that can create new users.
-* `FIRST_SUPERUSER_PASSWORD`: The password of the first superuser.
-* `SMTP_HOST`: The SMTP server host to send emails, this would come from your email provider (E.g. Mailgun, Sparkpost, Sendgrid, etc).
-* `SMTP_USER`: The SMTP server user to send emails.
-* `SMTP_PASSWORD`: The SMTP server password to send emails.
-* `EMAILS_FROM_EMAIL`: The email account to send emails from.
-* `POSTGRES_SERVER`: The hostname of the PostgreSQL server. You can leave the default of `db`, provided by the same Docker Compose. You normally wouldn't need to change this unless you are using a third-party provider.
-* `POSTGRES_PORT`: The port of the PostgreSQL server. You can leave the default. You normally wouldn't need to change this unless you are using a third-party provider.
-* `POSTGRES_PASSWORD`: The Postgres password.
-* `POSTGRES_USER`: The Postgres user, you can leave the default.
-* `POSTGRES_DB`: The database name to use for this application. You can leave the default of `app`.
-* `SENTRY_DSN`: The DSN for Sentry, if you are using it.
-
-## GitHub Actions Environment Variables
-
-There are some environment variables only used by GitHub Actions that you can configure:
-
-* `LATEST_CHANGES`: Used by the GitHub Action [latest-changes](https://github.com/tiangolo/latest-changes) to automatically add release notes based on the PRs merged. It's a personal access token, read the docs for details.
-* `SMOKESHOW_AUTH_KEY`: Used to handle and publish the code coverage using [Smokeshow](https://github.com/samuelcolvin/smokeshow), follow their instructions to create a (free) Smokeshow key.
 
 ### Generate secret keys
 
@@ -163,11 +133,76 @@ python -c "import secrets; print(secrets.token_urlsafe(32))"
 
 Copy the content and use that as password / secret key. And run that again to generate another secure key.
 
+### Required Environment Variables
+
+Set the `ENVIRONMENT`, by default `local` (for development), but when deploying to a server you would put something like `staging` or `production`:
+
+```bash
+export ENVIRONMENT=production
+```
+
+Set the `DOMAIN`, by default `localhost` (for development), but when deploying you would use your own domain, for example:
+
+```bash
+export DOMAIN=fastapi-project.example.com
+```
+
+Set the `POSTGRES_PASSWORD` to something different than `changethis`:
+
+```bash
+export POSTGRES_PASSWORD="changethis"
+```
+
+Set the `SECRET_KEY`, used to sign tokens:
+
+```bash
+export SECRET_KEY="changethis"
+```
+
+Note: you can use the Python command above to generate a secure secret key.
+
+Set the `FIRST_SUPER_USER_PASSWORD` to something different than `changethis`:
+
+```bash
+export FIRST_SUPERUSER_PASSWORD="changethis"
+```
+
+Set the `BACKEND_CORS_ORIGINS` to include your domain:
+
+```bash
+export BACKEND_CORS_ORIGINS="https://dashboard.${DOMAIN?Variable not set},https://api.${DOMAIN?Variable not set}"
+```
+
+You can set several other environment variables:
+
+* `PROJECT_NAME`: The name of the project, used in the API for the docs and emails.
+* `STACK_NAME`: The name of the stack used for Docker Compose labels and project name, this should be different for `staging`, `production`, etc. You could use the same domain replacing dots with dashes, e.g. `fastapi-project-example-com` and `staging-fastapi-project-example-com`.
+* `BACKEND_CORS_ORIGINS`: A list of allowed CORS origins separated by commas.
+* `FIRST_SUPERUSER`: The email of the first superuser, this superuser will be the one that can create new users.
+* `SMTP_HOST`: The SMTP server host to send emails, this would come from your email provider (E.g. Mailgun, Sparkpost, Sendgrid, etc).
+* `SMTP_USER`: The SMTP server user to send emails.
+* `SMTP_PASSWORD`: The SMTP server password to send emails.
+* `EMAILS_FROM_EMAIL`: The email account to send emails from.
+* `POSTGRES_SERVER`: The hostname of the PostgreSQL server. You can leave the default of `db`, provided by the same Docker Compose. You normally wouldn't need to change this unless you are using a third-party provider.
+* `POSTGRES_PORT`: The port of the PostgreSQL server. You can leave the default. You normally wouldn't need to change this unless you are using a third-party provider.
+* `POSTGRES_USER`: The Postgres user, you can leave the default.
+* `POSTGRES_DB`: The database name to use for this application. You can leave the default of `app`.
+* `SENTRY_DSN`: The DSN for Sentry, if you are using it.
+
+## GitHub Actions Environment Variables
+
+There are some environment variables only used by GitHub Actions that you can configure:
+
+* `LATEST_CHANGES`: Used by the GitHub Action [latest-changes](https://github.com/tiangolo/latest-changes) to automatically add release notes based on the PRs merged. It's a personal access token, read the docs for details.
+* `SMOKESHOW_AUTH_KEY`: Used to handle and publish the code coverage using [Smokeshow](https://github.com/samuelcolvin/smokeshow), follow their instructions to create a (free) Smokeshow key.
+
 ### Deploy with Docker Compose
 
 With the environment variables in place, you can deploy with Docker Compose:
 
 ```bash
+cd /root/code/app/
+docker compose -f compose.yml build
 docker compose -f compose.yml up -d
 ```
 
