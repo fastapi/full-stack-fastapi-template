@@ -7,7 +7,7 @@ DOMAIN=${DOMAIN?Variable not set} \
 STACK_NAME=${STACK_NAME?Variable not set} \
 TAG=${TAG?Variable not set} \
 docker-compose \
--f docker-compose.yml \
+-f compose.yml \
 config > docker-stack.yml
 
 docker-auto-labels docker-stack.yml
