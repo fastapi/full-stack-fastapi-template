@@ -47,5 +47,9 @@ jobs:
               "invalid": {
                 "delay": 0,
                 "message": "This was marked as invalid and will be closed now. If this is an error, please provide additional details."
+              },
+              "maybe-ai": {
+                "delay": 0,
+                "message": "This was marked as potentially AI generated and will be closed now. If this is an error, please provide additional details, make sure to read the docs about contributing and AI."
               }
             }
