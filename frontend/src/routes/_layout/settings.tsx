@@ -1,21 +1,26 @@
-import { Container, Heading, Tabs } from "@chakra-ui/react"
 import { createFileRoute } from "@tanstack/react-router"
 
-import Appearance from "@/components/UserSettings/Appearance"
 import ChangePassword from "@/components/UserSettings/ChangePassword"
 import DeleteAccount from "@/components/UserSettings/DeleteAccount"
 import UserInformation from "@/components/UserSettings/UserInformation"
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import useAuth from "@/hooks/useAuth"
 
 const tabsConfig = [
   { value: "my-profile", title: "My profile", component: UserInformation },
   { value: "password", title: "Password", component: ChangePassword },
-  { value: "appearance", title: "Appearance", component: Appearance },
   { value: "danger-zone", title: "Danger zone", component: DeleteAccount },
 ]
 
 export const Route = createFileRoute("/_layout/settings")({
   component: UserSettings,
+  head: () => ({
+    meta: [
+      {
+        title: "Settings - FastAPI Cloud",
+      },
+    ],
+  }),
 })
 
 function UserSettings() {
@@ -29,25 +34,28 @@ function UserSettings() {
   }
 
   return (
-    <Container maxW="full">
-      <Heading size="lg" textAlign={{ base: "center", md: "left" }} py={12}>
-        User Settings
-      </Heading>
+    <div className="flex flex-col gap-6">
+      <div>
+        <h1 className="text-2xl font-bold tracking-tight">User Settings</h1>
+        <p className="text-muted-foreground">
+          Manage your account settings and preferences
+        </p>
+      </div>
 
-      <Tabs.Root defaultValue="my-profile" variant="subtle">
-        <Tabs.List>
+      <Tabs defaultValue="my-profile">
+        <TabsList>
           {finalTabs.map((tab) => (
-            <Tabs.Trigger key={tab.value} value={tab.value}>
+            <TabsTrigger key={tab.value} value={tab.value}>
               {tab.title}
-            </Tabs.Trigger>
+            </TabsTrigger>
           ))}
-        </Tabs.List>
+        </TabsList>
         {finalTabs.map((tab) => (
-          <Tabs.Content key={tab.value} value={tab.value}>
+          <TabsContent key={tab.value} value={tab.value}>
             <tab.component />
-          </Tabs.Content>
+          </TabsContent>
         ))}
-      </Tabs.Root>
-    </Container>
+      </Tabs>
+    </div>
   )
 }

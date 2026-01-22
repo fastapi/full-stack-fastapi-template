@@ -22,7 +22,7 @@ jobs:
     outputs:
       changed: ${{ steps.filter.outputs.changed }}
     steps:
-    - uses: actions/checkout@v5
+    - uses: actions/checkout@v6
     # For pull requests it's not necessary to checkout the code but for the main branch it is
     - uses: dorny/paths-filter@v3
       id: filter
@@ -47,11 +47,9 @@ jobs:
         shardTotal: [4]
       fail-fast: false
     steps:
-    - uses: actions/checkout@v5
-    - uses: actions/setup-node@v4
-      with:
-        node-version: lts/*
-    - uses: actions/setup-python@v5
+    - uses: actions/checkout@v6
+    - uses: oven-sh/setup-bun@v2
+    - uses: actions/setup-python@v6
       with:
         python-version: '3.10'
     - name: Setup tmate session
@@ -60,13 +58,13 @@ jobs:
       with:
         limit-access-to-actor: true
     - name: Install uv
-      uses: astral-sh/setup-uv@v6
+      uses: astral-sh/setup-uv@v7
       with:
         version: "0.4.15"
         enable-cache: true
     - run: uv sync
       working-directory: backend
-    - run: npm ci
+    - run: bun ci
       working-directory: frontend
     - run: uv run bash scripts/generate-client.sh
       env:
@@ -74,11 +72,11 @@ jobs:
     - run: docker compose build
     - run: docker compose down -v --remove-orphans
     - name: Run Playwright tests
-      run: docker compose run --rm playwright npx playwright test --fail-on-flaky-tests --trace=retain-on-failure --shard=${{ matrix.shardIndex }}/${{ matrix.shardTotal }}
+      run: docker compose run --rm playwright bunx playwright test --fail-on-flaky-tests --trace=retain-on-failure --shard=${{ matrix.shardIndex }}/${{ matrix.shardTotal }}
     - run: docker compose down -v --remove-orphans
     - name: Upload blob report to GitHub Actions Artifacts
       if: ${{ !cancelled() }}
-      uses: actions/upload-artifact@v4
+      uses: actions/upload-artifact@v6
       with:
         name: blob-report-${{ matrix.shardIndex }}
         path: frontend/blob-report
@@ -93,24 +91,21 @@ jobs:
     if: ${{ !cancelled() && needs.changes.outputs.changed == 'true' }}
     runs-on: ubuntu-latest
     steps:
-    - uses: actions/checkout@v5
-    - uses: actions/setup-node@v4
-      with:
-        node-version: 20
+    - uses: actions/checkout@v6
+    - uses: oven-sh/setup-bun@v2
     - name: Install dependencies
-      run: npm ci
-      working-directory: frontend
+      run: bun ci
     - name: Download blob reports from GitHub Actions Artifacts
-      uses: actions/download-artifact@v5
+      uses: actions/download-artifact@v7
       with:
         path: frontend/all-blob-reports
         pattern: blob-report-*
         merge-multiple: true
     - name: Merge into HTML Report
-      run: npx playwright merge-reports --reporter html ./all-blob-reports
+      run: bunx playwright merge-reports --reporter html ./all-blob-reports
       working-directory: frontend
     - name: Upload HTML report
-      uses: actions/upload-artifact@v4
+      uses: actions/upload-artifact@v6
       with:
         name: html-report--attempt-${{ github.run_attempt }}
         path: frontend/playwright-report

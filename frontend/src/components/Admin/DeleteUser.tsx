@@ -1,30 +1,34 @@
-import { Button, DialogTitle, Text } from "@chakra-ui/react"
 import { useMutation, useQueryClient } from "@tanstack/react-query"
+import { Trash2 } from "lucide-react"
 import { useState } from "react"
 import { useForm } from "react-hook-form"
-import { FiTrash2 } from "react-icons/fi"
 
 import { UsersService } from "@/client"
+import { Button } from "@/components/ui/button"
 import {
-  DialogActionTrigger,
-  DialogBody,
-  DialogCloseTrigger,
+  Dialog,
+  DialogClose,
   DialogContent,
+  DialogDescription,
   DialogFooter,
   DialogHeader,
-  DialogRoot,
-  DialogTrigger,
+  DialogTitle,
 } from "@/components/ui/dialog"
+import { DropdownMenuItem } from "@/components/ui/dropdown-menu"
+import { LoadingButton } from "@/components/ui/loading-button"
 import useCustomToast from "@/hooks/useCustomToast"
+import { handleError } from "@/utils"
 
-const DeleteUser = ({ id }: { id: string }) => {
+interface DeleteUserProps {
+  id: string
+  onSuccess: () => void
+}
+
+const DeleteUser = ({ id, onSuccess }: DeleteUserProps) => {
   const [isOpen, setIsOpen] = useState(false)
   const queryClient = useQueryClient()
   const { showSuccessToast, showErrorToast } = useCustomToast()
-  const {
-    handleSubmit,
-    formState: { isSubmitting },
-  } = useForm()
+  const { handleSubmit } = useForm()
 
   const deleteUser = async (id: string) => {
     await UsersService.deleteUser({ userId: id })
@@ -35,10 +39,9 @@ const DeleteUser = ({ id }: { id: string }) => {
     onSuccess: () => {
       showSuccessToast("The user was deleted successfully")
       setIsOpen(false)
+      onSuccess()
     },
-    onError: () => {
-      showErrorToast("An error occurred while deleting the user")
-    },
+    onError: handleError.bind(showErrorToast),
     onSettled: () => {
       queryClient.invalidateQueries()
     },
@@ -49,55 +52,43 @@ const DeleteUser = ({ id }: { id: string }) => {
   }
 
   return (
-    <DialogRoot
-      size={{ base: "xs", md: "md" }}
-      placement="center"
-      role="alertdialog"
-      open={isOpen}
-      onOpenChange={({ open }) => setIsOpen(open)}
-    >
-      <DialogTrigger asChild>
-        <Button variant="ghost" size="sm" colorPalette="red">
-          <FiTrash2 fontSize="16px" />
-          Delete User
-        </Button>
-      </DialogTrigger>
-      <DialogContent>
+    <Dialog open={isOpen} onOpenChange={setIsOpen}>
+      <DropdownMenuItem
+        variant="destructive"
+        onSelect={(e) => e.preventDefault()}
+        onClick={() => setIsOpen(true)}
+      >
+        <Trash2 />
+        Delete User
+      </DropdownMenuItem>
+      <DialogContent className="sm:max-w-md">
         <form onSubmit={handleSubmit(onSubmit)}>
           <DialogHeader>
             <DialogTitle>Delete User</DialogTitle>
-          </DialogHeader>
-          <DialogBody>
-            <Text mb={4}>
+            <DialogDescription>
               All items associated with this user will also be{" "}
               <strong>permanently deleted.</strong> Are you sure? You will not
               be able to undo this action.
-            </Text>
-          </DialogBody>
+            </DialogDescription>
+          </DialogHeader>
 
-          <DialogFooter gap={2}>
-            <DialogActionTrigger asChild>
-              <Button
-                variant="subtle"
-                colorPalette="gray"
-                disabled={isSubmitting}
-              >
+          <DialogFooter className="mt-4">
+            <DialogClose asChild>
+              <Button variant="outline" disabled={mutation.isPending}>
                 Cancel
               </Button>
-            </DialogActionTrigger>
-            <Button
-              variant="solid"
-              colorPalette="red"
+            </DialogClose>
+            <LoadingButton
+              variant="destructive"
               type="submit"
-              loading={isSubmitting}
+              loading={mutation.isPending}
             >
               Delete
-            </Button>
+            </LoadingButton>
           </DialogFooter>
-          <DialogCloseTrigger />
         </form>
       </DialogContent>
-    </DialogRoot>
+    </Dialog>
   )
 }
 

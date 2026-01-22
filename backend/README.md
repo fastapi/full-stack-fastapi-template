@@ -97,7 +97,7 @@ To test the backend run:
 $ bash ./scripts/test.sh
 ```
 
-The tests run with Pytest, modify and add tests to `./backend/app/tests/`.
+The tests run with Pytest, modify and add tests to `./backend/tests/`.
 
 If you use GitHub Actions the tests will run automatically.
 

@@ -10,15 +10,15 @@ docker compose watch
 
 * Now you can open your browser and interact with these URLs:
 
-Frontend, built with Docker, with routes handled based on the path: http://localhost:5173
+Frontend, built with Docker, with routes handled based on the path: <http://localhost:5173>
 
-Backend, JSON based web API based on OpenAPI: http://localhost:8000
+Backend, JSON based web API based on OpenAPI: <http://localhost:8000>
 
-Automatic interactive documentation with Swagger UI (from the OpenAPI backend): http://localhost:8000/docs
+Automatic interactive documentation with Swagger UI (from the OpenAPI backend): <http://localhost:8000/docs>
 
-Adminer, database web administration: http://localhost:8080
+Adminer, database web administration: <http://localhost:8080>
 
-Traefik UI, to see how the routes are being handled by the proxy: http://localhost:8090
+Traefik UI, to see how the routes are being handled by the proxy: <http://localhost:8090>
 
 **Note**: The first time you start your stack, it might take a minute for it to be ready. While the backend waits for the database to be ready and configures everything. You can check the logs to monitor it.
 
@@ -33,6 +33,18 @@ To check the logs of a specific service, add the name of the service, e.g.:
 ```bash
 docker compose logs backend
 ```
+
+## Mailcatcher
+
+Mailcatcher is a simple SMTP server that catches all emails sent by the backend during local development. Instead of sending real emails, they are captured and displayed in a web interface.
+
+This is useful for:
+
+* Testing email functionality during development
+* Verifying email content and formatting
+* Debugging email-related functionality without sending real emails
+
+The backend is automatically configured to use Mailcatcher when running with Docker Compose locally (SMTP on port 1025). All captured emails can be viewed at <http://localhost:1080>.
 
 ## Local Development
 
@@ -51,8 +63,7 @@ docker compose stop frontend
 And then start the local frontend development server:
 
 ```bash
-cd frontend
-npm run dev
+bun run dev
 ```
 
 Or you could stop the `backend` Docker Compose service:
@@ -122,24 +133,26 @@ One way to do it could be to add each environment variable to your CI/CD system,
 
 ## Pre-commits and code linting
 
-we are using a tool called [pre-commit](https://pre-commit.com/) for code linting and formatting.
+we are using a tool called [prek](https://prek.j178.dev/) (modern alternative to [Pre-commit](https://pre-commit.com/)) for code linting and formatting.
 
 When you install it, it runs right before making a commit in git. This way it ensures that the code is consistent and formatted even before it is committed.
 
 You can find a file `.pre-commit-config.yaml` with configurations at the root of the project.
 
-#### Install pre-commit to run automatically
+#### Install prek to run automatically
 
-`pre-commit` is already part of the dependencies of the project, but you could also install it globally if you prefer to, following [the official pre-commit docs](https://pre-commit.com/).
+`prek` is already part of the dependencies of the project.
 
-After having the `pre-commit` tool installed and available, you need to "install" it in the local repository, so that it runs automatically before each commit.
+After having the `prek` tool installed and available, you need to "install" it in the local repository, so that it runs automatically before each commit.
 
-Using `uv`, you could do it with:
+Using `uv`, you could do it with (make sure you are inside `backend` folder):
 
 ```bash
-❯ uv run pre-commit install
-pre-commit installed at .git/hooks/pre-commit
+❯ uv run prek install -f
+prek installed at `../.git/hooks/pre-commit`
 ```
+
+The `-f` flag forces the installation, in case there was already a `pre-commit` hook previously installed.
 
 Now whenever you try to commit, e.g. with:
 
@@ -147,23 +160,24 @@ Now whenever you try to commit, e.g. with:
 git commit
 ```
 
-...pre-commit will run and check and format the code you are about to commit, and will ask you to add that code (stage it) with git again before committing.
+...prek will run and check and format the code you are about to commit, and will ask you to add that code (stage it) with git again before committing.
 
 Then you can `git add` the modified/fixed files again and now you can commit.
 
-#### Running pre-commit hooks manually
+#### Running prek hooks manually
 
-you can also run `pre-commit` manually on all the files, you can do it using `uv` with:
+you can also run `prek` manually on all the files, you can do it using `uv` with:
 
 ```bash
-❯ uv run pre-commit run --all-files
+❯ uv run prek run --all-files
 check for added large files..............................................Passed
 check toml...............................................................Passed
 check yaml...............................................................Passed
+fix end of files.........................................................Passed
+trim trailing whitespace.................................................Passed
 ruff.....................................................................Passed
 ruff-format..............................................................Passed
-eslint...................................................................Passed
-prettier.................................................................Passed
+biome check..............................................................Passed
 ```
 
 ## URLs
@@ -174,34 +188,34 @@ The production or staging URLs would use these same paths, but with your own dom
 
 Development URLs, for local development.
 
-Frontend: http://localhost:5173
+Frontend: <http://localhost:5173>
 
-Backend: http://localhost:8000
+Backend: <http://localhost:8000>
 
-Automatic Interactive Docs (Swagger UI): http://localhost:8000/docs
+Automatic Interactive Docs (Swagger UI): <http://localhost:8000/docs>
 
-Automatic Alternative Docs (ReDoc): http://localhost:8000/redoc
+Automatic Alternative Docs (ReDoc): <http://localhost:8000/redoc>
 
-Adminer: http://localhost:8080
+Adminer: <http://localhost:8080>
 
-Traefik UI: http://localhost:8090
+Traefik UI: <http://localhost:8090>
 
-MailCatcher: http://localhost:1080
+MailCatcher: <http://localhost:1080>
 
 ### Development URLs with `localhost.tiangolo.com` Configured
 
 Development URLs, for local development.
 
-Frontend: http://dashboard.localhost.tiangolo.com
+Frontend: <http://dashboard.localhost.tiangolo.com>
 
-Backend: http://api.localhost.tiangolo.com
+Backend: <http://api.localhost.tiangolo.com>
 
-Automatic Interactive Docs (Swagger UI): http://api.localhost.tiangolo.com/docs
+Automatic Interactive Docs (Swagger UI): <http://api.localhost.tiangolo.com/docs>
 
-Automatic Alternative Docs (ReDoc): http://api.localhost.tiangolo.com/redoc
+Automatic Alternative Docs (ReDoc): <http://api.localhost.tiangolo.com/redoc>
 
-Adminer: http://localhost.tiangolo.com:8080
+Adminer: <http://localhost.tiangolo.com:8080>
 
-Traefik UI: http://localhost.tiangolo.com:8090
+Traefik UI: <http://localhost.tiangolo.com:8090>
 
-MailCatcher: http://localhost.tiangolo.com:1080
+MailCatcher: <http://localhost.tiangolo.com:1080>

@@ -1,48 +1,16 @@
 # FastAPI Project - Frontend
 
-The frontend is built with [Vite](https://vitejs.dev/), [React](https://reactjs.org/), [TypeScript](https://www.typescriptlang.org/), [TanStack Query](https://tanstack.com/query), [TanStack Router](https://tanstack.com/router) and [Chakra UI](https://chakra-ui.com/).
+The frontend is built with [Vite](https://vitejs.dev/), [React](https://reactjs.org/), [TypeScript](https://www.typescriptlang.org/), [TanStack Query](https://tanstack.com/query), [TanStack Router](https://tanstack.com/router) and [Tailwind CSS](https://tailwindcss.com/).
 
-## Frontend development
+## Requirements
 
-Before you begin, ensure that you have either the Node Version Manager (nvm) or Fast Node Manager (fnm) installed on your system.
+- [Bun](https://bun.sh/) (recommended) or [Node.js](https://nodejs.org/)
 
-* To install fnm follow the [official fnm guide](https://github.com/Schniz/fnm#installation). If you prefer nvm, you can install it using the [official nvm guide](https://github.com/nvm-sh/nvm#installing-and-updating).
-
-* After installing either nvm or fnm, proceed to the `frontend` directory:
+## Quick Start
 
 ```bash
-cd frontend
-```
-* If the Node.js version specified in the `.nvmrc` file isn't installed on your system, you can install it using the appropriate command:
-
-```bash
-# If using fnm
-fnm install
-
-# If using nvm
-nvm install
-```
-
-* Once the installation is complete, switch to the installed version:
-
-```bash
-# If using fnm
-fnm use
-
-# If using nvm
-nvm use
-```
-
-* Within the `frontend` directory, install the necessary NPM packages:
-
-```bash
-npm install
-```
-
-* And start the live server with the following `npm` script:
-
-```bash
-npm run dev
+bun install
+bun run dev
 ```
 
 * Then open your browser at http://localhost:5173/.
@@ -94,7 +62,7 @@ But it would be only to clean them up, leaving them won't really have any effect
 * To generate the frontend client, run:
 
 ```bash
-npm run generate-client
+bun run generate-client
 ```
 
 * Commit the changes.
@@ -121,7 +89,6 @@ The frontend code is structured as follows:
 * `frontend/src/components` -  The different components of the frontend.
 * `frontend/src/hooks` - Custom hooks.
 * `frontend/src/routes` - The different routes of the frontend which include the pages.
-* `theme.tsx` - The Chakra UI custom theme.
 
 ## End-to-End Testing with Playwright
 
@@ -134,13 +101,13 @@ docker compose up -d --wait backend
 Then, you can run the tests with the following command:
 
 ```bash
-npx playwright test
+bunx playwright test
 ```
 
 You can also run your tests in UI mode to see the browser and interact with it running:
 
 ```bash
-npx playwright test --ui
+bunx playwright test --ui
 ```
 
 To stop and remove the Docker Compose stack and clean the data created in tests, use the following command:
