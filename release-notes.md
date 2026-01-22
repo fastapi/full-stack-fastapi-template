@@ -8,6 +8,7 @@
 
 ### Refactors
 
+* ✅ Use proper `is_active` field in `test_user.py`. PR [#1479](https://github.com/fastapi/full-stack-fastapi-template/pull/1479) by [@nauanbek](https://github.com/nauanbek).
 * ♻️ Simplify reset password logic by removing duplicate code. PR [#1440](https://github.com/fastapi/full-stack-fastapi-template/pull/1440) by [@youneshenniwrites](https://github.com/youneshenniwrites).
 
 ### Internal
