@@ -66,13 +66,13 @@ jobs:
           if git diff --staged --quiet; then
             echo "No changes to commit"
           else
-            git commit -m "🎨 Auto format"
+            git commit -m "🎨 Auto format and update with pre-commit"
             git push
           fi
       - uses: pre-commit-ci/lite-action@v1.1.0
         if: env.HAS_SECRETS == 'false'
         with:
-          msg: 🎨 Auto format
+          msg: 🎨 Auto format and update with pre-commit
       - name: Error out on pre-commit errors
         if: steps.precommit.outcome == 'failure'
         run: exit 1
