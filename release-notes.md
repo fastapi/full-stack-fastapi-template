@@ -8,6 +8,7 @@
 
 ### Refactors
 
+* 🐛Update `items.py` to return status code `403` in case of insufficient permissions. PR [#1543](https://github.com/fastapi/full-stack-fastapi-template/pull/1543) by [@jpizquierdo](https://github.com/jpizquierdo).
 * ✅ Use proper `is_active` field in `test_user.py`. PR [#1479](https://github.com/fastapi/full-stack-fastapi-template/pull/1479) by [@nauanbek](https://github.com/nauanbek).
 * ♻️ Simplify reset password logic by removing duplicate code. PR [#1440](https://github.com/fastapi/full-stack-fastapi-template/pull/1440) by [@youneshenniwrites](https://github.com/youneshenniwrites).
 
