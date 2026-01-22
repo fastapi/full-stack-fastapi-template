@@ -258,7 +258,9 @@ def test_update_password_me(
     db.refresh(user_db)
 
     assert r.status_code == 200
-    verified, _ = verify_password(settings.FIRST_SUPERUSER_PASSWORD, user_db.hashed_password)
+    verified, _ = verify_password(
+        settings.FIRST_SUPERUSER_PASSWORD, user_db.hashed_password
+    )
     assert verified
 
 
