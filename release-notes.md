@@ -8,6 +8,7 @@
 
 ### Refactors
 
+* 🔒️ Ensure authentication takes constant time, to avoid enumeration attacks. PR [#2105](https://github.com/fastapi/full-stack-fastapi-template/pull/2105) by [@tiangolo](https://github.com/tiangolo).
 * ✨ Use pwdlib with Argon2 by default, adding logic (and tests) to autoupdate old passwords using Bcrypt. PR [#2104](https://github.com/fastapi/full-stack-fastapi-template/pull/2104) by [@tiangolo](https://github.com/tiangolo).
 * ✅ Fix incorrect mocking in unit tests (issue #1780). PR [#1781](https://github.com/fastapi/full-stack-fastapi-template/pull/1781) by [@vicaya](https://github.com/vicaya).
 * 🐛Update `items.py` to return status code `403` in case of insufficient permissions. PR [#1543](https://github.com/fastapi/full-stack-fastapi-template/pull/1543) by [@jpizquierdo](https://github.com/jpizquierdo).
