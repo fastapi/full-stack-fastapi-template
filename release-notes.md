@@ -23,6 +23,7 @@
 
 ### Internal
 
+* 🔥 Remove old unused scripts. PR [#2107](https://github.com/fastapi/full-stack-fastapi-template/pull/2107) by [@tiangolo](https://github.com/tiangolo).
 * 👷 Add `maybe-ai` for issue manager. PR [#2103](https://github.com/fastapi/full-stack-fastapi-template/pull/2103) by [@tiangolo](https://github.com/tiangolo).
 * ⬆️ Bump uv to 0.9.26 in Dockerfile. PR [#2102](https://github.com/fastapi/full-stack-fastapi-template/pull/2102) by [@alejsdev](https://github.com/alejsdev).
 * ⬆ Bump lucide-react from 0.556.0 to 0.562.0. PR [#2101](https://github.com/fastapi/full-stack-fastapi-template/pull/2101) by [@dependabot[bot]](https://github.com/apps/dependabot).
