@@ -42,7 +42,7 @@ repos:
 
       - id: generate-frontend-sdk
         name: Generate Frontend SDK
-        entry: bun run --filter frontend generate-client
+        entry: bash ./scripts/generate-client.sh
         pass_filenames: false
         language: unsupported
         files: ^backend/.*$
