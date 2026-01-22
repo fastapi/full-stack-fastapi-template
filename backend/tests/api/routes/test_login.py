@@ -59,7 +59,9 @@ def test_recovery_password(
             headers=normal_user_token_headers,
         )
         assert r.status_code == 200
-        assert r.json() == {"message": "If that email is registered, we sent a password recovery link"}
+        assert r.json() == {
+            "message": "If that email is registered, we sent a password recovery link"
+        }
 
 
 def test_recovery_password_user_not_exits(
@@ -72,7 +74,9 @@ def test_recovery_password_user_not_exits(
     )
     # Should return 200 with generic message to prevent email enumeration attacks
     assert r.status_code == 200
-    assert r.json() == {"message": "If that email is registered, we sent a password recovery link"}
+    assert r.json() == {
+        "message": "If that email is registered, we sent a password recovery link"
+    }
 
 
 def test_reset_password(client: TestClient, db: Session) -> None:
