@@ -8,6 +8,7 @@
 
 ### Refactors
 
+* 🔧 Update the frontend build context for prod with the new top level setup. PR [#2108](https://github.com/fastapi/full-stack-fastapi-template/pull/2108) by [@tiangolo](https://github.com/tiangolo).
 * 🚚 Rename Docker Compose files to new names, `compose.yml`. PR [#2106](https://github.com/fastapi/full-stack-fastapi-template/pull/2106) by [@tiangolo](https://github.com/tiangolo).
 * 🔒️ Ensure authentication takes constant time, to avoid enumeration attacks. PR [#2105](https://github.com/fastapi/full-stack-fastapi-template/pull/2105) by [@tiangolo](https://github.com/tiangolo).
 * ✨ Use pwdlib with Argon2 by default, adding logic (and tests) to autoupdate old passwords using Bcrypt. PR [#2104](https://github.com/fastapi/full-stack-fastapi-template/pull/2104) by [@tiangolo](https://github.com/tiangolo).
