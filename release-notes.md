@@ -6,6 +6,10 @@
 
 * 🐛 Handle non-existing user IDs in `read_user_by_id`. PR [#1396](https://github.com/fastapi/full-stack-fastapi-template/pull/1396) by [@saltie2193](https://github.com/saltie2193).
 
+### Refactors
+
+* ♻️ Simplify reset password logic by removing duplicate code. PR [#1440](https://github.com/fastapi/full-stack-fastapi-template/pull/1440) by [@youneshenniwrites](https://github.com/youneshenniwrites).
+
 ### Internal
 
 * ⬆️ Bump uv to 0.9.26 in Dockerfile. PR [#2102](https://github.com/fastapi/full-stack-fastapi-template/pull/2102) by [@alejsdev](https://github.com/alejsdev).
