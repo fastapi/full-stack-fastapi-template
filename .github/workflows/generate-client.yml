@@ -26,9 +26,6 @@ jobs:
         python-version: "3.10"
     - name: Install uv
       uses: astral-sh/setup-uv@v7
-      with:
-        version: "0.4.15"
-        enable-cache: true
     - name: Install dependencies
       run: bun ci
     - run: uv sync
