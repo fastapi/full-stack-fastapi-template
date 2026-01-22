@@ -3,7 +3,6 @@
         "attilabuti.vscode-mjml",
         "ms-python.python",
         "ms-python.debugpy",
-        "elagil.pre-commit-helper",
         "charliermarsh.ruff"
     ]
 }
