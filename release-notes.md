@@ -28,6 +28,7 @@
 
 ### Internal
 
+* 🔧 Add recommended VS Code extensions. PR [#1386](https://github.com/fastapi/full-stack-fastapi-template/pull/1386) by [@tobiase](https://github.com/tobiase).
 * 🎨 Format Python scripts tests. PR [#2112](https://github.com/fastapi/full-stack-fastapi-template/pull/2112) by [@tiangolo](https://github.com/tiangolo).
 * 🔨 Generate frontend SDK on pre-commit, remove custom workflow. PR [#2111](https://github.com/fastapi/full-stack-fastapi-template/pull/2111) by [@tiangolo](https://github.com/tiangolo).
 * 🔨 Update generate-client.sh and docs. PR [#2110](https://github.com/fastapi/full-stack-fastapi-template/pull/2110) by [@tiangolo](https://github.com/tiangolo).
