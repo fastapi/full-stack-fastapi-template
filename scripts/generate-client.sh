@@ -4,8 +4,8 @@ set -e
 set -x
 
 cd backend
-python -c "import app.main; import json; print(json.dumps(app.main.app.openapi()))" > ../openapi.json
+uv run python -c "import app.main; import json; print(json.dumps(app.main.app.openapi()))" > ../openapi.json
 cd ..
 mv openapi.json frontend/
-npm run -w frontend generate-client
-npm run lint
+bun run --filter frontend generate-client
+bun run lint

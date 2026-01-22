@@ -26,16 +26,12 @@ jobs:
         python-version: "3.10"
     - name: Install uv
       uses: astral-sh/setup-uv@v7
-      with:
-        version: "0.4.15"
-        enable-cache: true
     - name: Install dependencies
       run: bun ci
     - run: uv sync
       working-directory: backend
-    - run: uv run bash scripts/generate-client.sh
+    - run: bash scripts/generate-client.sh
       env:
-        VIRTUAL_ENV: backend/.venv
         SECRET_KEY: just-for-generating-client
         POSTGRES_PASSWORD: just-for-generating-client
         FIRST_SUPERUSER_PASSWORD: just-for-generating-client
