@@ -39,3 +39,10 @@ repos:
         require_serial: true
         language: unsupported
         types: [python]
+
+      - id: generate-frontend-sdk
+        name: Generate Frontend SDK
+        entry: bash ./scripts/generate-client.sh
+        pass_filenames: false
+        language: unsupported
+        files: ^backend/.*$|^scripts/generate-client\.sh$
