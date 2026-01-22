@@ -22,6 +22,10 @@
 * ⬆ Bump postgres from 17 to 18. PR [#1910](https://github.com/fastapi/full-stack-fastapi-template/pull/1910) by [@dependabot[bot]](https://github.com/apps/dependabot).
 * ⬆ Bump traefik from 3.0 to 3.6. PR [#1973](https://github.com/fastapi/full-stack-fastapi-template/pull/1973) by [@dependabot[bot]](https://github.com/apps/dependabot).
 
+### Docs
+
+* 📝 Update deployment docs. PR [#2109](https://github.com/fastapi/full-stack-fastapi-template/pull/2109) by [@tiangolo](https://github.com/tiangolo).
+
 ### Internal
 
 * 🔥 Remove old unused scripts. PR [#2107](https://github.com/fastapi/full-stack-fastapi-template/pull/2107) by [@tiangolo](https://github.com/tiangolo).
