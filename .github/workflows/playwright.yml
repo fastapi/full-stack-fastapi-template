@@ -59,16 +59,11 @@ jobs:
         limit-access-to-actor: true
     - name: Install uv
       uses: astral-sh/setup-uv@v7
-      with:
-        version: "0.4.15"
-        enable-cache: true
     - run: uv sync
       working-directory: backend
     - run: bun ci
       working-directory: frontend
-    - run: uv run bash scripts/generate-client.sh
-      env:
-        VIRTUAL_ENV: backend/.venv
+    - run: bash scripts/generate-client.sh
     - run: docker compose build
     - run: docker compose down -v --remove-orphans
     - name: Run Playwright tests
