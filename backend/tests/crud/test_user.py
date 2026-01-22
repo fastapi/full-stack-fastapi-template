@@ -88,4 +88,5 @@ def test_update_user(db: Session) -> None:
     user_2 = db.get(User, user.id)
     assert user_2
     assert user.email == user_2.email
-    assert verify_password(new_password, user_2.hashed_password)
+    verified, _ = verify_password(new_password, user_2.hashed_password)
+    assert verified
