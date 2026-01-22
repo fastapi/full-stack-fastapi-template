@@ -17,6 +17,7 @@
 
 ### Upgrades
 
+* ⬆ Bump postgres from 17 to 18. PR [#1910](https://github.com/fastapi/full-stack-fastapi-template/pull/1910) by [@dependabot[bot]](https://github.com/apps/dependabot).
 * ⬆ Bump traefik from 3.0 to 3.6. PR [#1973](https://github.com/fastapi/full-stack-fastapi-template/pull/1973) by [@dependabot[bot]](https://github.com/apps/dependabot).
 
 ### Internal
