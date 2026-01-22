@@ -48,7 +48,7 @@ But it would be only to clean them up, leaving them won't really have any effect
 * From the top level project directory, run the script:
 
 ```bash
-./scripts/generate-client.sh
+bash ./scripts/generate-client.sh
 ```
 
 * Commit the changes.
