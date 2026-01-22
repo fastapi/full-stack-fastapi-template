@@ -1,0 +1,15 @@
+{
+    "recommendations": [
+        "astral-sh.ty",
+        "biomejs.biome",
+        "bradlc.vscode-tailwindcss",
+        "charliermarsh.ruff",
+        "docker.docker",
+        "github.vscode-github-actions",
+        "mjmlio.vscode-mjml",
+        "ms-playwright.playwright",
+        "ms-python.debugpy",
+        "ms-python.python",
+        "tombi-toml.tombi"
+    ]
+}
