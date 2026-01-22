@@ -32,7 +32,7 @@ mkdir -p /root/code/traefik-public/
 Copy the Traefik Docker Compose file to your server. You could do it by running the command `rsync` in your local terminal:
 
 ```bash
-rsync -a docker-compose.traefik.yml root@your-server.example.com:/root/code/traefik-public/
+rsync -a compose.traefik.yml root@your-server.example.com:/root/code/traefik-public/
 ```
 
 ### Traefik Public Network
@@ -97,10 +97,10 @@ Go to the directory where you copied the Traefik Docker Compose file in your rem
 cd /root/code/traefik-public/
 ```
 
-Now with the environment variables set and the `docker-compose.traefik.yml` in place, you can start the Traefik Docker Compose running the following command:
+Now with the environment variables set and the `compose.traefik.yml` in place, you can start the Traefik Docker Compose running the following command:
 
 ```bash
-docker compose -f docker-compose.traefik.yml up -d
+docker compose -f compose.traefik.yml up -d
 ```
 
 ## Deploy the FastAPI Project
@@ -168,10 +168,10 @@ Copy the content and use that as password / secret key. And run that again to ge
 With the environment variables in place, you can deploy with Docker Compose:
 
 ```bash
-docker compose -f docker-compose.yml up -d
+docker compose -f compose.yml up -d
 ```
 
-For production you wouldn't want to have the overrides in `docker-compose.override.yml`, that's why we explicitly specify `docker-compose.yml` as the file to use.
+For production you wouldn't want to have the overrides in `compose.override.yml`, that's why we explicitly specify `compose.yml` as the file to use.
 
 ## Continuous Deployment (CD)
 

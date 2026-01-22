@@ -32,7 +32,7 @@ jobs:
             - backend/**
             - frontend/**
             - .env
-            - docker-compose*.yml
+            - compose*.yml
             - .github/workflows/playwright.yml
 
   test-playwright:

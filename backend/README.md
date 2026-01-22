@@ -37,7 +37,7 @@ The setup is also already configured so you can run the tests through the VS Cod
 
 ## Docker Compose Override
 
-During development, you can change Docker Compose settings that will only affect the local development environment in the file `docker-compose.override.yml`.
+During development, you can change Docker Compose settings that will only affect the local development environment in the file `compose.override.yml`.
 
 The changes to that file only affect the local development environment, not the production environment. So, you can add "temporary" changes that help the development workflow.
 
