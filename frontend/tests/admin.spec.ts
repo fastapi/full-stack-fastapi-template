@@ -191,9 +191,7 @@ test.describe("Admin page access control", () => {
 
     await page.goto("/admin")
 
-    await expect(
-      page.getByRole("heading", { name: "Users" }),
-    ).not.toBeVisible()
+    await expect(page.getByRole("heading", { name: "Users" })).not.toBeVisible()
     await expect(page).not.toHaveURL(/\/admin/)
   })
 
