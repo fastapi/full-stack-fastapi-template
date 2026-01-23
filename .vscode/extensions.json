@@ -8,7 +8,6 @@
         "github.vscode-github-actions",
         "mjmlio.vscode-mjml",
         "ms-playwright.playwright",
-        "ms-python.debugpy",
         "ms-python.python",
         "tombi-toml.tombi"
     ]
