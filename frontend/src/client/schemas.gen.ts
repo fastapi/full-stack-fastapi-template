@@ -126,6 +126,18 @@ export const ItemPublicSchema = {
             type: 'string',
             format: 'uuid',
             title: 'Owner Id'
+        },
+        created_at: {
+            anyOf: [
+                {
+                    type: 'string',
+                    format: 'date-time'
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Created At'
         }
     },
     type: 'object',
@@ -352,6 +364,18 @@ export const UserPublicSchema = {
             type: 'string',
             format: 'uuid',
             title: 'Id'
+        },
+        created_at: {
+            anyOf: [
+                {
+                    type: 'string',
+                    format: 'date-time'
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Created At'
         }
     },
     type: 'object',
