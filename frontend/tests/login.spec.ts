@@ -69,8 +69,6 @@ test("Log in with invalid password", async ({ page }) => {
   await expect(page.getByText("Incorrect email or password")).toBeVisible()
 })
 
-// Log out
-
 test("Successful log out", async ({ page }) => {
   await page.goto("/login")
 
