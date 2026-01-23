@@ -14,6 +14,7 @@
 
 ### Fixes
 
+* 🐛 Add user authentication check in admin route to restrict access for non-superusers. PR [#2145](https://github.com/fastapi/full-stack-fastapi-template/pull/2145) by [@alejsdev](https://github.com/alejsdev).
 * 🐛 Handle non-existing user IDs in `read_user_by_id`. PR [#1396](https://github.com/fastapi/full-stack-fastapi-template/pull/1396) by [@saltie2193](https://github.com/saltie2193).
 
 ### Refactors
