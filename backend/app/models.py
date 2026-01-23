@@ -59,6 +59,7 @@ class User(UserBase, table=True):
 # Properties to return via API, id is always required
 class UserPublic(UserBase):
     id: uuid.UUID
+    created_at: datetime | None = None
 
 
 class UsersPublic(SQLModel):
@@ -99,6 +100,7 @@ class Item(ItemBase, table=True):
 class ItemPublic(ItemBase):
     id: uuid.UUID
     owner_id: uuid.UUID
+    created_at: datetime | None = None
 
 
 class ItemsPublic(SQLModel):
