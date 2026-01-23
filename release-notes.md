@@ -2,6 +2,15 @@
 
 ## Latest Changes
 
+### Features
+
+* 🔧 Migrate from npm to Bun. PR [#2097](https://github.com/fastapi/full-stack-fastapi-template/pull/2097) by [@alejsdev](https://github.com/alejsdev).
+* 🔧 Set up node monorepo. PR [#2095](https://github.com/fastapi/full-stack-fastapi-template/pull/2095) by [@alejsdev](https://github.com/alejsdev).
+* 🧑‍💻 Implement uv workspaces. PR [#2090](https://github.com/fastapi/full-stack-fastapi-template/pull/2090) by [@alejsdev](https://github.com/alejsdev).
+* 🔧 Add recommended VS Code extensions. PR [#1386](https://github.com/fastapi/full-stack-fastapi-template/pull/1386) by [@tobiase](https://github.com/tobiase).
+* ✨ Use pwdlib with Argon2 by default, adding logic (and tests) to autoupdate old passwords using Bcrypt. PR [#2104](https://github.com/fastapi/full-stack-fastapi-template/pull/2104) by [@tiangolo](https://github.com/tiangolo).
+* 🔨 Generate frontend SDK on pre-commit, remove custom workflow. PR [#2111](https://github.com/fastapi/full-stack-fastapi-template/pull/2111) by [@tiangolo](https://github.com/tiangolo).
+
 ### Fixes
 
 * 🐛 Handle non-existing user IDs in `read_user_by_id`. PR [#1396](https://github.com/fastapi/full-stack-fastapi-template/pull/1396) by [@saltie2193](https://github.com/saltie2193).
@@ -11,7 +20,6 @@
 * 🔧 Update the frontend build context for prod with the new top level setup. PR [#2108](https://github.com/fastapi/full-stack-fastapi-template/pull/2108) by [@tiangolo](https://github.com/tiangolo).
 * 🚚 Rename Docker Compose files to new names, `compose.yml`. PR [#2106](https://github.com/fastapi/full-stack-fastapi-template/pull/2106) by [@tiangolo](https://github.com/tiangolo).
 * 🔒️ Ensure authentication takes constant time, to avoid enumeration attacks. PR [#2105](https://github.com/fastapi/full-stack-fastapi-template/pull/2105) by [@tiangolo](https://github.com/tiangolo).
-* ✨ Use pwdlib with Argon2 by default, adding logic (and tests) to autoupdate old passwords using Bcrypt. PR [#2104](https://github.com/fastapi/full-stack-fastapi-template/pull/2104) by [@tiangolo](https://github.com/tiangolo).
 * ✅ Fix incorrect mocking in unit tests (issue #1780). PR [#1781](https://github.com/fastapi/full-stack-fastapi-template/pull/1781) by [@vicaya](https://github.com/vicaya).
 * 🐛Update `items.py` to return status code `403` in case of insufficient permissions. PR [#1543](https://github.com/fastapi/full-stack-fastapi-template/pull/1543) by [@jpizquierdo](https://github.com/jpizquierdo).
 * ✅ Use proper `is_active` field in `test_user.py`. PR [#1479](https://github.com/fastapi/full-stack-fastapi-template/pull/1479) by [@nauanbek](https://github.com/nauanbek).
@@ -28,9 +36,7 @@
 
 ### Internal
 
-* 🔧 Add recommended VS Code extensions. PR [#1386](https://github.com/fastapi/full-stack-fastapi-template/pull/1386) by [@tobiase](https://github.com/tobiase).
 * 🎨 Format Python scripts tests. PR [#2112](https://github.com/fastapi/full-stack-fastapi-template/pull/2112) by [@tiangolo](https://github.com/tiangolo).
-* 🔨 Generate frontend SDK on pre-commit, remove custom workflow. PR [#2111](https://github.com/fastapi/full-stack-fastapi-template/pull/2111) by [@tiangolo](https://github.com/tiangolo).
 * 🔨 Update generate-client.sh and docs. PR [#2110](https://github.com/fastapi/full-stack-fastapi-template/pull/2110) by [@tiangolo](https://github.com/tiangolo).
 * 🔥 Remove old unused scripts. PR [#2107](https://github.com/fastapi/full-stack-fastapi-template/pull/2107) by [@tiangolo](https://github.com/tiangolo).
 * 👷 Add `maybe-ai` for issue manager. PR [#2103](https://github.com/fastapi/full-stack-fastapi-template/pull/2103) by [@tiangolo](https://github.com/tiangolo).
@@ -39,11 +45,8 @@
 * 🔧 Update dependabot configuration for package ecosystems. PR [#2100](https://github.com/fastapi/full-stack-fastapi-template/pull/2100) by [@alejsdev](https://github.com/alejsdev).
 * 🔧 Update Biome schema version to 2.3.11. PR [#2099](https://github.com/fastapi/full-stack-fastapi-template/pull/2099) by [@alejsdev](https://github.com/alejsdev).
 * 🔧 Add tests scripts in `package.json`. PR [#2098](https://github.com/fastapi/full-stack-fastapi-template/pull/2098) by [@alejsdev](https://github.com/alejsdev).
-* 🔧 Migrate from npm to Bun. PR [#2097](https://github.com/fastapi/full-stack-fastapi-template/pull/2097) by [@alejsdev](https://github.com/alejsdev).
 * 🎨 Apply pre-commit fixes. PR [#2055](https://github.com/fastapi/full-stack-fastapi-template/pull/2055) by [@GniLudio](https://github.com/GniLudio).
 * 👷 Update pre-commit workflow. PR [#2096](https://github.com/fastapi/full-stack-fastapi-template/pull/2096) by [@alejsdev](https://github.com/alejsdev).
-* 🔧 Set up node monorepo. PR [#2095](https://github.com/fastapi/full-stack-fastapi-template/pull/2095) by [@alejsdev](https://github.com/alejsdev).
-* 🧑‍💻 Implement uv workspaces. PR [#2090](https://github.com/fastapi/full-stack-fastapi-template/pull/2090) by [@alejsdev](https://github.com/alejsdev).
 * 🔧 Update biome.json schema version. PR [#2092](https://github.com/fastapi/full-stack-fastapi-template/pull/2092) by [@alejsdev](https://github.com/alejsdev).
 * Revert "🔧 Update pre-commit-config.yaml ruff format to use --check". PR [#2091](https://github.com/fastapi/full-stack-fastapi-template/pull/2091) by [@alejsdev](https://github.com/alejsdev).
 * 🔧 Update pre-commit-config.yaml ruff format to use --check. PR [#2077](https://github.com/fastapi/full-stack-fastapi-template/pull/2077) by [@ryansydnor](https://github.com/ryansydnor).
