@@ -2,6 +2,8 @@
 
 ## Latest Changes
 
+## 0.10.0
+
 ### Features
 
 * ✅ Add items and admin tests, and refactor existing ones. PR [#2146](https://github.com/fastapi/full-stack-fastapi-template/pull/2146) by [@alejsdev](https://github.com/alejsdev).
