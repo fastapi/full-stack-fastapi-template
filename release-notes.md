@@ -4,6 +4,7 @@
 
 ### Internal
 
+* ⬆ Bump @types/node from 25.0.9 to 25.0.10. PR [#2149](https://github.com/fastapi/full-stack-fastapi-template/pull/2149) by [@dependabot[bot]](https://github.com/apps/dependabot).
 * ⬆ Bump @tanstack/react-router-devtools from 1.153.2 to 1.156.0. PR [#2147](https://github.com/fastapi/full-stack-fastapi-template/pull/2147) by [@dependabot[bot]](https://github.com/apps/dependabot).
 
 ## 0.10.0
