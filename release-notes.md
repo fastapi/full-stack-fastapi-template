@@ -2,6 +2,10 @@
 
 ## Latest Changes
 
+### Internal
+
+* ⬆ Bump @tanstack/react-router-devtools from 1.153.2 to 1.156.0. PR [#2147](https://github.com/fastapi/full-stack-fastapi-template/pull/2147) by [@dependabot[bot]](https://github.com/apps/dependabot).
+
 ## 0.10.0
 
 ### Features
