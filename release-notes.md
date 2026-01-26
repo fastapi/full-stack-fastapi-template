@@ -4,6 +4,7 @@
 
 ### Internal
 
+* ⬆️ Bump biome schema version to 2.3.12 in biome.json. PR [#2154](https://github.com/fastapi/full-stack-fastapi-template/pull/2154) by [@alejsdev](https://github.com/alejsdev).
 * ⬆ Bump @biomejs/biome from 2.3.11 to 2.3.12. PR [#2153](https://github.com/fastapi/full-stack-fastapi-template/pull/2153) by [@dependabot[bot]](https://github.com/apps/dependabot).
 * ⬆ Bump playwright from v1.57.0-noble to v1.58.0-noble in /frontend. PR [#2150](https://github.com/fastapi/full-stack-fastapi-template/pull/2150) by [@dependabot[bot]](https://github.com/apps/dependabot).
 * ⬆ Bump @tanstack/react-router from 1.153.2 to 1.156.0. PR [#2152](https://github.com/fastapi/full-stack-fastapi-template/pull/2152) by [@dependabot[bot]](https://github.com/apps/dependabot).
