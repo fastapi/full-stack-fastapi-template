@@ -4,6 +4,7 @@
 
 ### Internal
 
+* ⬆ Bump @tanstack/react-router from 1.153.2 to 1.156.0. PR [#2152](https://github.com/fastapi/full-stack-fastapi-template/pull/2152) by [@dependabot[bot]](https://github.com/apps/dependabot).
 * ⬆ Bump zod from 4.3.5 to 4.3.6. PR [#2151](https://github.com/fastapi/full-stack-fastapi-template/pull/2151) by [@dependabot[bot]](https://github.com/apps/dependabot).
 * ⬆ Bump @types/node from 25.0.9 to 25.0.10. PR [#2149](https://github.com/fastapi/full-stack-fastapi-template/pull/2149) by [@dependabot[bot]](https://github.com/apps/dependabot).
 * ⬆ Bump @tanstack/react-router-devtools from 1.153.2 to 1.156.0. PR [#2147](https://github.com/fastapi/full-stack-fastapi-template/pull/2147) by [@dependabot[bot]](https://github.com/apps/dependabot).
