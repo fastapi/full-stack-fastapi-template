@@ -12,6 +12,12 @@ services:
     ports:
       - "80:80"
       - "8090:8080"
+    healthcheck:
+      test: ["CMD", "traefik", "healthcheck", "--ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 3
+      start_period: 5s
     # Duplicate the command from compose.yml to add --api.insecure=true
     command:
       # Enable Docker in Traefik, so that it reads labels from Docker services
@@ -34,6 +40,8 @@ services:
       - --api
       # Enable the Dashboard and API in insecure mode for local development
       - --api.insecure=true
+      # Enable ping endpoint for health checks
+      - --ping=true
     labels:
       # Enable Traefik for this service, to make it available in the public network
       - traefik.enable=true
@@ -59,6 +67,9 @@ services:
     restart: "no"
     ports:
       - "8000:8000"
+    depends_on:
+      proxy:
+        condition: service_healthy
     build:
       context: .
       dockerfile: backend/Dockerfile
