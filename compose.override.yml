@@ -99,11 +99,27 @@ services:
       - "5173:80"
     build:
       context: .
-      dockerfile: frontend/Dockerfile
+      dockerfile: frontend/Dockerfile.dev
       args:
         - VITE_API_URL=http://localhost:8000
         - NODE_ENV=development
-
+    command:
+      - bun
+      - run
+      - dev
+      - "--host"
+      - "--port"
+      - "80"
+    develop:
+      watch:
+        - path: ./frontend
+          action: sync
+          target: /app/frontend
+          ignore:
+            - ./frontend/node_modules
+            - node_modules
+        - path: ./frontend/package.json
+          action: rebuild
   playwright:
     build:
       context: .
