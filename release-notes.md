@@ -2,6 +2,10 @@
 
 ## Latest Changes
 
+### Docs
+
+* 📝 Add `CONTRIBUTING.md`. PR [#2159](https://github.com/fastapi/full-stack-fastapi-template/pull/2159) by [@alejsdev](https://github.com/alejsdev).
+
 ### Internal
 
 * ⬆️ Bump biome schema version to 2.3.12 in biome.json. PR [#2154](https://github.com/fastapi/full-stack-fastapi-template/pull/2154) by [@alejsdev](https://github.com/alejsdev).
