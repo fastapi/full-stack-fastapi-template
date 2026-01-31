@@ -7,6 +7,7 @@ import { type UpdatePassword, UsersService } from "@/client"
 import {
   Form,
   FormControl,
+  FormDescription,
   FormField,
   FormItem,
   FormLabel,
@@ -17,32 +18,50 @@ import { PasswordInput } from "@/components/ui/password-input"
 import useCustomToast from "@/hooks/useCustomToast"
 import { handleError } from "@/utils"
 
-const formSchema = z
+const PASSWORD_MIN_LENGTH = 8
+
+const passwordSchema = z
+  .string()
+  .min(1, { message: "Password is required" })
+  .min(PASSWORD_MIN_LENGTH, {
+    message: `Password must be at least ${PASSWORD_MIN_LENGTH} characters`,
+  })
+
+const changePasswordSchema = z
   .object({
-    current_password: z
-      .string()
-      .min(1, { message: "Password is required" })
-      .min(8, { message: "Password must be at least 8 characters" }),
-    new_password: z
-      .string()
-      .min(1, { message: "Password is required" })
-      .min(8, { message: "Password must be at least 8 characters" }),
+    current_password: passwordSchema,
+    new_password: passwordSchema,
     confirm_password: z
       .string()
-      .min(1, { message: "Password confirmation is required" }),
+      .min(1, { message: "Please confirm your new password" }),
   })
   .refine((data) => data.new_password === data.confirm_password, {
-    message: "The passwords don't match",
+    message: "Passwords do not match",
     path: ["confirm_password"],
   })
+  .refine((data) => data.new_password !== data.current_password, {
+    message: "New password cannot be the same as the current one",
+    path: ["new_password"],
+  })
 
-type FormData = z.infer<typeof formSchema>
+type ChangePasswordFormData = z.infer<typeof changePasswordSchema>
 
-const ChangePassword = () => {
+export interface ChangePasswordProps {
+  /** Called after password is updated successfully (e.g. to close a dialog) */
+  onSuccess?: () => void
+  /** When true, omits the heading and adjusts layout for use inside a dialog */
+  embedded?: boolean
+}
+
+export default function ChangePassword({
+  onSuccess,
+  embedded,
+}: ChangePasswordProps) {
   const { showSuccessToast, showErrorToast } = useCustomToast()
-  const form = useForm<FormData>({
-    resolver: zodResolver(formSchema),
-    mode: "onSubmit",
+
+  const form = useForm<ChangePasswordFormData>({
+    resolver: zodResolver(changePasswordSchema),
+    mode: "onBlur",
     criteriaMode: "all",
     defaultValues: {
       current_password: "",
@@ -57,33 +76,42 @@ const ChangePassword = () => {
     onSuccess: () => {
       showSuccessToast("Password updated successfully")
       form.reset()
+      onSuccess?.()
     },
     onError: handleError.bind(showErrorToast),
   })
 
-  const onSubmit = async (data: FormData) => {
+  const onSubmit = (data: ChangePasswordFormData) => {
+    if (mutation.isPending) return
     mutation.mutate(data)
   }
 
   return (
-    <div className="max-w-md">
-      <h3 className="text-lg font-semibold py-4">Change Password</h3>
+    <div className={embedded ? "pt-1" : "max-w-md"}>
+      {!embedded && (
+        <h2 className="text-lg font-semibold tracking-tight pb-4">
+          Change password
+        </h2>
+      )}
       <Form {...form}>
         <form
           onSubmit={form.handleSubmit(onSubmit)}
-          className="flex flex-col gap-4"
+          noValidate
+          className="flex flex-col gap-6"
         >
           <FormField
             control={form.control}
             name="current_password"
             render={({ field, fieldState }) => (
               <FormItem>
-                <FormLabel>Current Password</FormLabel>
+                <FormLabel>Current password</FormLabel>
                 <FormControl>
                   <PasswordInput
                     data-testid="current-password-input"
                     placeholder="••••••••"
+                    autoComplete="current-password"
                     aria-invalid={fieldState.invalid}
+                    disabled={mutation.isPending}
                     {...field}
                   />
                 </FormControl>
@@ -97,15 +125,20 @@ const ChangePassword = () => {
             name="new_password"
             render={({ field, fieldState }) => (
               <FormItem>
-                <FormLabel>New Password</FormLabel>
+                <FormLabel>New password</FormLabel>
                 <FormControl>
                   <PasswordInput
                     data-testid="new-password-input"
                     placeholder="••••••••"
+                    autoComplete="new-password"
                     aria-invalid={fieldState.invalid}
+                    disabled={mutation.isPending}
                     {...field}
                   />
                 </FormControl>
+                <FormDescription>
+                  At least {PASSWORD_MIN_LENGTH} characters
+                </FormDescription>
                 <FormMessage />
               </FormItem>
             )}
@@ -116,12 +149,14 @@ const ChangePassword = () => {
             name="confirm_password"
             render={({ field, fieldState }) => (
               <FormItem>
-                <FormLabel>Confirm Password</FormLabel>
+                <FormLabel>Confirm new password</FormLabel>
                 <FormControl>
                   <PasswordInput
                     data-testid="confirm-password-input"
                     placeholder="••••••••"
+                    autoComplete="new-password"
                     aria-invalid={fieldState.invalid}
+                    disabled={mutation.isPending}
                     {...field}
                   />
                 </FormControl>
@@ -133,14 +168,13 @@ const ChangePassword = () => {
           <LoadingButton
             type="submit"
             loading={mutation.isPending}
-            className="self-start"
+            disabled={!form.formState.isDirty || mutation.isPending}
+            className={embedded ? "w-full sm:w-auto" : "w-full sm:w-auto"}
           >
-            Update Password
+            Update password
           </LoadingButton>
         </form>
       </Form>
     </div>
   )
 }
-
-export default ChangePassword
