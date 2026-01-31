@@ -20,6 +20,7 @@ app = FastAPI(
     generate_unique_id_function=custom_generate_unique_id,
 )
 
+
 @app.get("/healthz", include_in_schema=False)
 def healthz() -> dict[str, str]:
     return {"status": "ok"}
