@@ -28,3 +28,6 @@ openapi.json
 /blob-report/
 /playwright/.cache/
 /playwright/.auth/
+
+# node modules
+/node_modules/
