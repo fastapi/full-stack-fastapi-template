@@ -8,6 +8,7 @@
 
 ### Internal
 
+* ⬆ Bump @tanstack/router-devtools from 1.153.2 to 1.157.17. PR [#2166](https://github.com/fastapi/full-stack-fastapi-template/pull/2166) by [@dependabot[bot]](https://github.com/apps/dependabot).
 * ⬆ Bump @types/node from 25.0.10 to 25.1.0. PR [#2168](https://github.com/fastapi/full-stack-fastapi-template/pull/2168) by [@dependabot[bot]](https://github.com/apps/dependabot).
 * ⬆ Bump axios from 1.13.2 to 1.13.4. PR [#2164](https://github.com/fastapi/full-stack-fastapi-template/pull/2164) by [@dependabot[bot]](https://github.com/apps/dependabot).
 * ⬆️ Bump biome schema version to 2.3.12 in biome.json. PR [#2154](https://github.com/fastapi/full-stack-fastapi-template/pull/2154) by [@alejsdev](https://github.com/alejsdev).
