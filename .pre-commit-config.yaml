@@ -40,6 +40,13 @@ repos:
         language: unsupported
         types: [python]
 
+      - id: local-mypy
+        name: mypy check
+        entry: uv run mypy backend/app
+        require_serial: true
+        language: unsupported
+        pass_filenames: false
+
       - id: generate-frontend-sdk
         name: Generate Frontend SDK
         entry: bash ./scripts/generate-client.sh
