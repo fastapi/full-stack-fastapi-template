@@ -137,8 +137,8 @@ async def login(
     await db.commit()
 
     # Create tokens
-    access_token = create_access_token(data={"sub": str(user.id), "email": user.email})
-    refresh_token = create_refresh_token(data={"sub": str(user.id)})
+    access_token = create_access_token(data={"sub": str(user.user_id), "email": user.email})
+    refresh_token = create_refresh_token(data={"sub": str(user.user_id)})
 
     logger.info(f"User logged in: {user.email}")
 
