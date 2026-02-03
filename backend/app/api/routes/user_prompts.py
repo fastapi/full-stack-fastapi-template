@@ -8,7 +8,7 @@ import json
 
 from app.services.local_ai_services import local_model_service
 from app.models.prompts_schemas import PromptRequest, PromptResponse, AlternativePromptsResponse, ReferencePromptRequest
-from app.core.db import BrandPromptRecord, get_db
+from app.core.db import BrandPromptTable, get_db
 from app.config.prompts import system_prompts
 
 
@@ -27,8 +27,8 @@ async def create_prompt(
     """
     try:
         # Check for existing prompt with same idempotency key
-        stmt = select(BrandPromptRecord).where(
-            BrandPromptRecord.idempotency_key == request.idempotency_key
+        stmt = select(BrandPromptTable).where(
+            BrandPromptTable.idempotency_key == request.idempotency_key
         )
         result = await database.execute(stmt)
         existing_prompt: PromptResponse = result.scalar_one_or_none()
@@ -48,7 +48,7 @@ async def create_prompt(
             )
 
         # Create new prompt record with pending status
-        new_prompt = BrandPromptRecord(
+        new_prompt = BrandPromptTable(
             prompt=request.prompt,
             project_name=request.project_name,
             user_id=request.user_id,
@@ -96,7 +96,7 @@ async def get_prompt_by_id(
         database: AsyncSession = Depends(get_db)
 ):
     """Retrieve a specific prompt by ID"""
-    stmt = select(BrandPromptRecord).where(BrandPromptRecord.id == prompt_id)
+    stmt = select(BrandPromptTable).where(BrandPromptTable.id == prompt_id)
     result = await database.execute(stmt)
     prompt = result.scalar_one_or_none()
 
@@ -124,7 +124,7 @@ async def get_prompts_by_company_id(
     Retrieve a list of prompts belongs to a company ID
     Todo: consider pagination
     """
-    stmt = select(BrandPromptRecord).where(BrandPromptRecord.company_id == company_id)
+    stmt = select(BrandPromptTable).where(BrandPromptTable.company_id == company_id)
     result = await database.execute(stmt)
 
     prompts = result.scalars().all()

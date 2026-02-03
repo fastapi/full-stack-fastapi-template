@@ -7,34 +7,32 @@ import {
 import { createRouter, RouterProvider } from "@tanstack/react-router"
 import { StrictMode } from "react"
 import ReactDOM from "react-dom/client"
-import { ApiError, OpenAPI } from "./client"
-import { ThemeProvider } from "./components/theme-provider"
-import { Toaster } from "./components/ui/sonner"
 import "./index.css"
 import { routeTree } from "./routeTree.gen"
+import { TanStackRouterDevtools } from '@tanstack/router-devtools'
 
-OpenAPI.BASE = import.meta.env.VITE_API_URL
-OpenAPI.TOKEN = async () => {
-  return localStorage.getItem("access_token") || ""
-}
 
-const handleApiError = (error: Error) => {
-  if (error instanceof ApiError && [401, 403].includes(error.status)) {
-    localStorage.removeItem("access_token")
-    window.location.href = "/login"
-  }
-}
-
+// Create a query client
 const queryClient = new QueryClient({
-  queryCache: new QueryCache({
-    onError: handleApiError,
-  }),
-  mutationCache: new MutationCache({
-    onError: handleApiError,
-  }),
+  defaultOptions: {
+    queries: {
+      retry: 1,
+      refetchOnWindowFocus: false,
+      staleTime: 5 * 60 * 1000, // 5 minutes
+    },
+  },
 })
 
-const router = createRouter({ routeTree })
+// Create router instance
+const router = createRouter({
+  routeTree,
+  context: {
+    queryClient,
+  },
+  defaultPreload: 'intent',
+})
+
+// Register router for type safety
 declare module "@tanstack/react-router" {
   interface Register {
     router: typeof router
@@ -43,11 +41,9 @@ declare module "@tanstack/react-router" {
 
 ReactDOM.createRoot(document.getElementById("root")!).render(
   <StrictMode>
-    <ThemeProvider defaultTheme="dark" storageKey="vite-ui-theme">
       <QueryClientProvider client={queryClient}>
         <RouterProvider router={router} />
-        <Toaster richColors closeButton />
+        <TanStackRouterDevtools router={router} />
       </QueryClientProvider>
-    </ThemeProvider>
   </StrictMode>,
 )

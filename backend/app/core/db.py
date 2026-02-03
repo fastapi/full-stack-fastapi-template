@@ -1,6 +1,6 @@
 from sqlalchemy.ext.asyncio import create_async_engine, AsyncSession, async_sessionmaker
-from sqlalchemy.orm import declarative_base
-from sqlalchemy import Column, Integer, String, Text, DateTime, Index, Boolean
+from sqlalchemy.orm import declarative_base, relationship
+from sqlalchemy import Column, Integer, String, Text, DateTime, Index, Boolean, ForeignKey, func
 from datetime import datetime, timezone
 from app.config import settings
 import logging
@@ -27,7 +27,7 @@ AsyncSessionLocal = async_sessionmaker(
 
 
 # Database Models
-class BrandPromptRecord(Base):
+class BrandPromptTable(Base):
     """
     The prompts table in the database
     """
@@ -40,8 +40,8 @@ class BrandPromptRecord(Base):
     user_id = Column(String(100), nullable=False, index=True)
     company_id = Column(String(100), nullable=False, index=True)
     idempotency_key = Column(String(100), nullable=False, unique=True, index=True)
-    created_at = Column(DateTime, default=datetime.now(timezone.utc), nullable=False)
-    updated_at = Column(DateTime, default=datetime.now(timezone.utc), onupdate=datetime.now(timezone.utc), nullable=False)
+    created_at = Column(DateTime, default=func.now(timezone.utc), nullable=False)
+    updated_at = Column(DateTime, onupdate=func.now(timezone.utc), nullable=True)
     is_active = Column(Boolean, default=True, nullable=False, index=False)
 
     # Composite indexes for common queries
@@ -54,20 +54,58 @@ class BrandPromptRecord(Base):
     )
 
 
-class UsersRecord(Base):
+class UsersTable(Base):
     """
-    The users table in the database
+    The users profile table in the database
     """
     __tablename__ = settings.db_users_table_name
 
-    id = Column(Integer, primary_key=True, index=True, autoincrement=True)
-    user_id = Column(String(100), nullable=False, index=True)
-    username = Column(String(100), nullable=False, index=True)
-    email = Column(String(100), nullable=False, index=True)
-    created_at = Column(DateTime, default=datetime.now(timezone.utc), nullable=False)
-    last_active = Column(DateTime, default=datetime.now(timezone.utc))
-    company_id = Column(String(100), nullable=True, index=True)
+    user_id = Column(String(100), primary_key=True, nullable=False, index=True, unique=True)
+    user_name = Column(String(100), nullable=True)
+    email = Column(String(100), nullable=False, index=True, unique=True)
+    created_at = Column(DateTime(timezone=True), default=func.now(), nullable=False)
+    updated_at = Column(DateTime(timezone=True), nullable=False, default=func.now(), onupdate=func.now())
+
     is_active = Column(Boolean, default=True)
+    is_verified = Column(Boolean, default=False)
+
+    password_hash = Column(String(255), nullable=False)
+
+    # relationship with cascading delete
+    profile = relationship("UsersProfileTable", backref="user", cascade="all, delete-orphan", passive_deletes=True)
+    security = relationship("UsersSecurityTable", backref="user", cascade="all, delete-orphan", passive_deletes=True)
+    sessions = relationship("UsersSessionTable", backref="user", cascade="all, delete-orphan", passive_deletes=True)
+
+    # Composite indexes for common queries
+    __table_args__ = (Index('idx_email', 'email', 'email'),)
+
+
+class UsersProfileTable(Base):
+    """
+    The users profile table in the database
+    """
+    __tablename__ = settings.db_users_profile_table_name
+
+    id = Column(Integer, primary_key=True, index=True, autoincrement=True)
+    user_id = Column(
+        String(100),
+        ForeignKey(f"{settings.db_users_table_name}.user_id", ondelete="CASCADE"),
+        nullable=False,
+        index=True
+    )
+    first_name = Column(String(100), nullable=False)
+    middle_name = Column(String(100), nullable=True)
+    last_name = Column(String(100), nullable=False)
+
+    email = Column(String(100), nullable=False, index=True)
+    phone = Column(String(100), nullable=True)
+
+    created_at = Column(DateTime, default=func.now(timezone.utc), nullable=False)
+    updated_at = Column(DateTime, nullable=True, onupdate=func.now(timezone.utc))
+
+    company_id = Column(String(100), nullable=True, index=True)
+    job_title = Column(String(100), nullable=True)
+    avatar_url = Column(String(255), nullable=True)
 
     # Composite indexes for common queries
     __table_args__ = (
@@ -77,7 +115,57 @@ class UsersRecord(Base):
     )
 
 
-class CompaniesRecord(Base):
+class UsersSecurityTable(Base):
+    # Store user security related information in the database
+    __tablename__ = settings.db_users_security_table_name
+
+    id = Column(Integer, primary_key=True, index=True, autoincrement=True)
+    user_id = Column(
+        String(100),
+        ForeignKey(f"{settings.db_users_table_name}.user_id", ondelete="CASCADE"),
+        nullable=False,
+        index=True
+    )
+    last_login = Column(DateTime(timezone=True), default=func.now(), onupdate=func.now())
+
+    verification_token = Column(String(255), nullable=True)
+    verification_token_expires = Column(DateTime, nullable=True)
+
+    password_reset_token = Column(String(255), nullable=True)
+    password_reset_token_expires = Column(DateTime, nullable=True)
+
+
+
+class UsersSessionTable(Base):
+    """
+    Store user security related information in the database
+    """
+    __tablename__ = settings.db_users_session_table_name
+
+    id = Column(Integer, primary_key=True, index=True, autoincrement=True)
+    user_id = Column(
+        String(100),
+        ForeignKey(f"{settings.db_users_table_name}.user_id", ondelete="CASCADE"),
+        nullable=False,
+        index=True
+    )
+
+    refresh_token = Column(String(500), nullable=True)
+    device_info = Column(String(255), nullable=True)
+    ip_address = Column(String(255), nullable=True)
+
+    created_at = Column(DateTime(timezone=True), default=func.now(), nullable=False)
+    expired_at = Column(DateTime, nullable=False)
+    last_used_at = Column(DateTime, nullable=True)
+
+    # Composite indexes for common queries
+    __table_args__ = (
+        Index('idx_user_id', 'user_id', 'user_id'),
+        Index('idx_refresh_token', 'refresh_token', 'refresh_token')
+    )
+
+
+class CompaniesTable(Base):
     """
        The companies table in the database
        """
@@ -91,8 +179,8 @@ class CompaniesRecord(Base):
     website = Column(String(100), nullable=True)
     phone = Column(String(100), nullable=True)
     address = Column(String(100), nullable=True)
-    created_at = Column(DateTime, default=datetime.now(timezone.utc), nullable=False)
-    updated_at = Column(DateTime, default=datetime.now(timezone.utc), nullable=False)
+    created_at = Column(DateTime, default=func.now(timezone.utc), nullable=False)
+    updated_at = Column(DateTime, onupdate=func.now(timezone.utc))
     is_active = Column(Boolean, default=True)
 
     # Composite indexes for common queries

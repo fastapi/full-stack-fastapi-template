@@ -15,9 +15,15 @@ anthropic>=0.76.0
 pydantic==2.9.0
 pydantic-settings==2.5.2
 python-dotenv==1.0.1
+pydantic[email]==2.9.0
+
+# encrytion and hash
+python-jose[cryptography]==3.3.0
+passlib[bcrypt]==1.7.4
 
 # Utilities
 python-multipart==0.0.9
+python-nanoid==2.0.0
 
 # Development/Testing (optional)
 pytest==8.3.0

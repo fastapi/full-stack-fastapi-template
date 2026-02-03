@@ -1,4 +1,5 @@
 from pydantic_settings import BaseSettings, SettingsConfigDict
+from typing import Optional
 
 
 class BaseConfig(BaseSettings):
@@ -19,15 +20,30 @@ class BaseConfig(BaseSettings):
     # Database Settings (common structure)
     mysql_host: str = "localhost"
     mysql_port: int = 3306
-    mysql_user: str = ""
+    mysql_user: str = "root"
     mysql_password: str = ""
     mysql_database: str = "kila_intelligence"
     mysql_pool_size: int = 10
     mysql_max_overflow: int = 20
 
+    # JWT settings
+    secret_key: str = ""
+    algorithm: str = "HS256"
+    access_token_expires_minutes: int = 60
+    refresh_token_expires_days: int = 7
+
+    # Email (optional, for verification)
+    smtp_host: Optional[str] = None
+    smtp_port: Optional[int] = None
+    smtp_user: Optional[str] = None
+    smtp_password: Optional[str] = None
+
     # Database tables setting
     db_companies_table_name: str = "companies"
     db_users_table_name: str = "users"
+    db_users_profile_table_name: str = "users_profile"
+    db_users_security_table_name: str = "users_security"
+    db_users_session_table_name: str = "users_session"
     db_brand_prompts_table_name: str = "brand_prompts"
     db_projects_table_name: str = "projects"
 

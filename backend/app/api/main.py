@@ -1,11 +1,12 @@
 from fastapi import APIRouter
 import logging
-from app.api.routes import user_prompts
+from api.routes import user_prompts, auth
 from app.config import settings
 
 
 api_router = APIRouter()
 api_router.include_router(user_prompts.router, tags=["prompts"])
+api_router.include_router(auth.router, tags=["authentication"])
 
 
 # Private routes router (e.g., for debugging)

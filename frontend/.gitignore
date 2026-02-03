@@ -31,3 +31,4 @@ openapi.json
 
 # node modules
 /node_modules/
+src/routeTree.gen.ts
