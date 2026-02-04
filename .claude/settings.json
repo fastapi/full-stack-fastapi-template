@@ -1,0 +1,15 @@
+{
+  "hooks": {
+    "PreToolUse": [
+      {
+        "matcher": "Read",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "{\n  \"permissions\": {\n    \"deny\": [\n      \"Read(.env*)\",\n      \"Edit(.env*)\"\n    ]\n  }\n}"
+          }
+        ]
+      }
+    ]
+  }
+}

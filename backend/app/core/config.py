@@ -50,6 +50,12 @@ class Settings(BaseSettings):
 
     PROJECT_NAME: str
     SENTRY_DSN: HttpUrl | None = None
+
+    # OMDB API Configuration
+    OMDB_API_KEY: str | None = None
+    OMDB_BASE_URL: str = "http://www.omdbapi.com/"
+    OMDB_CACHE_TTL_DAYS: int = 30
+
     POSTGRES_SERVER: str
     POSTGRES_PORT: int = 5432
     POSTGRES_USER: str

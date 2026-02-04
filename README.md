@@ -1,233 +1,408 @@
-# Full Stack FastAPI Template
+# Vantage
 
-<a href="https://github.com/fastapi/full-stack-fastapi-template/actions?query=workflow%3A%22Test+Docker+Compose%22" target="_blank"><img src="https://github.com/fastapi/full-stack-fastapi-template/workflows/Test%20Docker%20Compose/badge.svg" alt="Test Docker Compose"></a>
-<a href="https://github.com/fastapi/full-stack-fastapi-template/actions?query=workflow%3A%22Test+Backend%22" target="_blank"><img src="https://github.com/fastapi/full-stack-fastapi-template/workflows/Test%20Backend/badge.svg" alt="Test Backend"></a>
-<a href="https://coverage-badge.samuelcolvin.workers.dev/redirect/fastapi/full-stack-fastapi-template" target="_blank"><img src="https://coverage-badge.samuelcolvin.workers.dev/fastapi/full-stack-fastapi-template.svg" alt="Coverage"></a>
+A social movie club platform with an Art Deco-inspired design. Discover movies, build watchlists, rate films, and connect with friends through shared cinema experiences.
 
-## Technology Stack and Features
+## Overview
 
-- ⚡ [**FastAPI**](https://fastapi.tiangolo.com) for the Python backend API.
-  - 🧰 [SQLModel](https://sqlmodel.tiangolo.com) for the Python SQL database interactions (ORM).
-  - 🔍 [Pydantic](https://docs.pydantic.dev), used by FastAPI, for the data validation and settings management.
-  - 💾 [PostgreSQL](https://www.postgresql.org) as the SQL database.
-- 🚀 [React](https://react.dev) for the frontend.
-  - 💃 Using TypeScript, hooks, [Vite](https://vitejs.dev), and other parts of a modern frontend stack.
-  - 🎨 [Tailwind CSS](https://tailwindcss.com) and [shadcn/ui](https://ui.shadcn.com) for the frontend components.
-  - 🤖 An automatically generated frontend client.
-  - 🧪 [Playwright](https://playwright.dev) for End-to-End testing.
-  - 🦇 Dark mode support.
-- 🐋 [Docker Compose](https://www.docker.com) for development and production.
-- 🔒 Secure password hashing by default.
-- 🔑 JWT (JSON Web Token) authentication.
-- 📫 Email based password recovery.
-- 📬 [Mailcatcher](https://mailcatcher.me) for local email testing during development.
-- ✅ Tests with [Pytest](https://pytest.org).
-- 📞 [Traefik](https://traefik.io) as a reverse proxy / load balancer.
-- 🚢 Deployment instructions using Docker Compose, including how to set up a frontend Traefik proxy to handle automatic HTTPS certificates.
-- 🏭 CI (continuous integration) and CD (continuous deployment) based on GitHub Actions.
+Vantage is a full-stack web application that enables teams and friend groups to:
 
-### Dashboard Login
+- **Discover Movies** - Search and explore films via OMDB API integration with local caching
+- **Personal Watchlists** - Track movies you want to watch and mark ones you've seen
+- **Rate & Review** - Rate movies on a 5-star scale with your personal collection
+- **Movie Clubs** (Coming Soon) - Create clubs with shared watchlists and voting
+- **Watch Parties** (Coming Soon) - Schedule events and coordinate viewing sessions
+- **Discussions** (Coming Soon) - Threaded forums for movie discussions
 
-[![API docs](img/login.png)](https://github.com/fastapi/full-stack-fastapi-template)
+Built on the [Full Stack FastAPI Template](https://github.com/fastapi/full-stack-fastapi-template) with modern React frontend.
 
-### Dashboard - Admin
+## Tech Stack
 
-[![API docs](img/dashboard.png)](https://github.com/fastapi/full-stack-fastapi-template)
+### Backend
+| Technology | Purpose |
+|------------|---------|
+| FastAPI | Python web framework with async support |
+| PostgreSQL | Primary database |
+| SQLModel | ORM combining SQLAlchemy + Pydantic |
+| Alembic | Database migrations |
+| JWT | Authentication tokens |
+| httpx | Async HTTP client for OMDB API |
+| Sentry | Error tracking (optional) |
 
-### Dashboard - Items
+### Frontend
+| Technology | Purpose |
+|------------|---------|
+| React 19 | UI framework |
+| TypeScript | Type safety |
+| Vite | Build tool and dev server |
+| TanStack Router | Type-safe routing |
+| TanStack Query | Server state management |
+| Tailwind CSS | Utility-first styling |
+| shadcn/ui | Component library (Radix UI + Tailwind) |
+| Playwright | End-to-end testing |
 
-[![API docs](img/dashboard-items.png)](https://github.com/fastapi/full-stack-fastapi-template)
+### Infrastructure
+| Technology | Purpose |
+|------------|---------|
+| Docker Compose | Container orchestration |
+| Traefik | Reverse proxy with automatic HTTPS |
+| Adminer | Database administration UI |
+| Mailcatcher | Email testing in development |
 
-### Dashboard - Dark Mode
+## Installation
 
-[![API docs](img/dashboard-dark.png)](https://github.com/fastapi/full-stack-fastapi-template)
+### Prerequisites
 
-### Interactive API Documentation
+- **Docker** and **Docker Compose** (recommended)
+- **Python 3.10+** (for local backend development)
+- **Bun** or **Node.js 18+** (for frontend development)
+- **uv** (Python package manager)
 
-[![API docs](img/docs.png)](https://github.com/fastapi/full-stack-fastapi-template)
+### Quick Start with Docker
 
-## How To Use It
+1. **Clone the repository**
+   ```bash
+   git clone <repository-url>
+   cd vantage
+   ```
 
-You can **just fork or clone** this repository and use it as is.
+2. **Configure environment variables**
+   ```bash
+   cp .env.example .env
+   ```
 
-✨ It just works. ✨
+   Edit `.env` and set required values:
+   ```env
+   # Generate a secure key
+   SECRET_KEY=<run: python -c "import secrets; print(secrets.token_urlsafe(32))">
 
-### How to Use a Private Repository
+   # Admin account
+   FIRST_SUPERUSER=admin@example.com
+   FIRST_SUPERUSER_PASSWORD=<your-password>
 
-If you want to have a private repository, GitHub won't allow you to simply fork it as it doesn't allow changing the visibility of forks.
+   # Database
+   POSTGRES_PASSWORD=<your-password>
 
-But you can do the following:
+   # OMDB API (get free key at http://www.omdbapi.com/apikey.aspx)
+   OMDB_API_KEY=<your-api-key>
+   ```
 
-- Create a new GitHub repo, for example `my-full-stack`.
-- Clone this repository manually, set the name with the name of the project you want to use, for example `my-full-stack`:
+3. **Start the application**
+   ```bash
+   docker compose watch
+   ```
 
+4. **Access the services**
+   | Service | URL |
+   |---------|-----|
+   | Frontend | http://localhost:5173 |
+   | Backend API | http://localhost:8000 |
+   | API Documentation | http://localhost:8000/docs |
+   | Database Admin | http://localhost:8080 |
+   | Email Inbox | http://localhost:1080 |
+   | Traefik Dashboard | http://localhost:8090 |
+
+### Local Development Setup
+
+#### Backend
 ```bash
-git clone git@github.com:fastapi/full-stack-fastapi-template.git my-full-stack
+cd backend
+uv sync                          # Install dependencies
+source .venv/bin/activate        # Activate virtual environment
+fastapi dev app/main.py          # Start dev server (port 8000)
 ```
 
-- Enter into the new directory:
-
+#### Frontend
 ```bash
-cd my-full-stack
+cd frontend
+bun install                      # Install dependencies
+bun run dev                      # Start dev server (port 5173)
 ```
 
-- Set the new origin to your new repository, copy it from the GitHub interface, for example:
+### Environment Variables Reference
 
-```bash
-git remote set-url origin git@github.com:octocat/my-full-stack.git
+| Variable | Description | Default |
+|----------|-------------|---------|
+| `PROJECT_NAME` | Application name | Vantage |
+| `ENVIRONMENT` | Environment mode | local |
+| `DOMAIN` | Primary domain | localhost |
+| `SECRET_KEY` | JWT signing key | (required) |
+| `POSTGRES_SERVER` | Database host | db |
+| `POSTGRES_PORT` | Database port | 5432 |
+| `POSTGRES_DB` | Database name | app |
+| `POSTGRES_USER` | Database user | postgres |
+| `POSTGRES_PASSWORD` | Database password | (required) |
+| `OMDB_API_KEY` | OMDB API key | (required) |
+| `OMDB_CACHE_TTL_DAYS` | Movie cache duration | 30 |
+| `SMTP_HOST` | Mail server host | mailcatcher |
+| `SMTP_PORT` | Mail server port | 1025 |
+| `BACKEND_CORS_ORIGINS` | Allowed origins (JSON array) | ["http://localhost:5173"] |
+
+## Project Structure
+
+```
+vantage/
+├── backend/                      # FastAPI backend application
+│   ├── app/
+│   │   ├── main.py              # Application entry point
+│   │   ├── models.py            # SQLModel database models
+│   │   ├── crud.py              # Database operations
+│   │   ├── api/
+│   │   │   ├── main.py          # API router configuration
+│   │   │   ├── deps.py          # Dependency injection
+│   │   │   └── routes/          # API endpoint handlers
+│   │   │       ├── login.py     # Authentication
+│   │   │       ├── users.py     # User management
+│   │   │       ├── movies.py    # Movie search & details
+│   │   │       ├── ratings.py   # Movie ratings
+│   │   │       └── watchlist.py # Personal watchlist
+│   │   ├── core/
+│   │   │   ├── config.py        # Settings with Pydantic
+│   │   │   ├── security.py      # Password hashing & JWT
+│   │   │   └── db.py            # Database connection
+│   │   ├── services/
+│   │   │   └── omdb.py          # OMDB API client
+│   │   └── alembic/             # Database migrations
+│   ├── tests/                    # Backend test suite
+│   └── pyproject.toml           # Python dependencies
+│
+├── frontend/                     # React frontend application
+│   ├── src/
+│   │   ├── main.tsx             # Application entry point
+│   │   ├── routes/              # TanStack Router pages
+│   │   │   ├── __root.tsx       # Root layout
+│   │   │   ├── _layout.tsx      # Authenticated layout
+│   │   │   └── _layout/
+│   │   │       ├── index.tsx    # Dashboard
+│   │   │       ├── movies.tsx   # Movie search
+│   │   │       ├── movies.$imdbId.tsx  # Movie details
+│   │   │       ├── watchlist.tsx       # Personal watchlist
+│   │   │       ├── ratings.tsx  # Rating history
+│   │   │       └── settings.tsx # User settings
+│   │   ├── components/
+│   │   │   ├── Movies/          # Movie components
+│   │   │   ├── Ratings/         # Rating components
+│   │   │   ├── ui/              # shadcn/ui components
+│   │   │   └── Sidebar/         # Navigation
+│   │   ├── client/              # Auto-generated API client
+│   │   └── hooks/               # Custom React hooks
+│   ├── package.json             # Node dependencies
+│   └── playwright.config.ts     # E2E test configuration
+│
+├── scripts/                      # Utility scripts
+│   └── generate-client.sh       # Generate TypeScript API client
+│
+├── compose.yml                   # Docker Compose configuration
+├── compose.override.yml          # Development overrides
+├── .env.example                  # Environment template
+├── development.md                # Development guide
+├── deployment.md                 # Deployment guide
+└── SPEC.md                       # Product specification
 ```
 
-- Add this repo as another "remote" to allow you to get updates later:
+## System Design
 
-```bash
-git remote add upstream git@github.com:fastapi/full-stack-fastapi-template.git
+### Architecture Overview
+
+```
+┌─────────────────────────────────────────────────────────────────┐
+│                         Client Browser                          │
+└─────────────────────────────┬───────────────────────────────────┘
+                              │
+┌─────────────────────────────▼───────────────────────────────────┐
+│                      Traefik Proxy                              │
+│                   (Routing & HTTPS)                             │
+└──────────┬─────────────────────────────────────┬────────────────┘
+           │                                     │
+┌──────────▼──────────┐              ┌───────────▼───────────────┐
+│   Frontend (Vite)   │              │   Backend (FastAPI)       │
+│   React + TS        │◄────────────►│   Python 3.10+            │
+│   Port 5173         │   REST API   │   Port 8000               │
+└─────────────────────┘              └───────────┬───────────────┘
+                                                 │
+                         ┌───────────────────────┼───────────────┐
+                         │                       │               │
+              ┌──────────▼──────────┐ ┌─────────▼─────────┐     │
+              │   PostgreSQL        │ │   OMDB API        │     │
+              │   Database          │ │   (External)      │     │
+              │   Port 5432         │ └───────────────────┘     │
+              └─────────────────────┘                           │
+                                      ┌─────────────────────────┘
+                                      │
+                           ┌──────────▼──────────┐
+                           │   Mailcatcher       │
+                           │   (Dev SMTP)        │
+                           │   Port 1025/1080    │
+                           └─────────────────────┘
 ```
 
-- Push the code to your new repository:
+### Data Flow
 
-```bash
-git push -u origin master
+1. **Authentication**: JWT-based with access tokens stored client-side
+2. **API Communication**: RESTful endpoints with auto-generated TypeScript client from OpenAPI schema
+3. **Movie Data**: OMDB API integration with 30-day local cache in PostgreSQL
+4. **State Management**: TanStack Query for server state with automatic caching and revalidation
+
+### Database Schema
+
+```
+┌──────────────┐       ┌──────────────────┐       ┌──────────────┐
+│    User      │       │  UserWatchlist   │       │    Movie     │
+├──────────────┤       ├──────────────────┤       ├──────────────┤
+│ id           │──┐    │ id               │    ┌──│ id           │
+│ email        │  │    │ user_id       ───┼────┤  │ imdb_id      │
+│ hashed_pass  │  └────┼─ user_id         │    │  │ title        │
+│ full_name    │       │ movie_id      ───┼────┘  │ year         │
+│ is_active    │       │ status           │       │ poster       │
+│ is_superuser │       │ added_at         │       │ plot         │
+│ created_at   │       └──────────────────┘       │ actors       │
+└──────────────┘                                  │ director     │
+       │           ┌──────────────────┐           │ imdb_rating  │
+       │           │     Rating       │           │ cached_at    │
+       │           ├──────────────────┤           └──────────────┘
+       │           │ id               │                  │
+       └───────────┼─ user_id         │                  │
+                   │ movie_id      ───┼──────────────────┘
+                   │ score (1-5)      │
+                   │ created_at       │
+                   └──────────────────┘
 ```
 
-### Update From the Original Template
+### API Endpoints
 
-After cloning the repository, and after doing changes, you might want to get the latest changes from this original template.
+#### Authentication
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| POST | `/api/v1/login/access-token` | Login and get JWT token |
+| POST | `/api/v1/signup` | Register new user |
+| POST | `/api/v1/password-recovery/{email}` | Request password reset |
+| POST | `/api/v1/reset-password/` | Reset password with token |
 
-- Make sure you added the original repository as a remote, you can check it with:
+#### Users
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| GET | `/api/v1/users/me` | Get current user profile |
+| PATCH | `/api/v1/users/me` | Update current user |
+| GET | `/api/v1/users/` | List users (admin) |
+| DELETE | `/api/v1/users/{id}` | Delete user (admin) |
 
-```bash
-git remote -v
+#### Movies
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| GET | `/api/v1/movies/search` | Search movies (query, year, type) |
+| GET | `/api/v1/movies/{imdb_id}` | Get movie details |
 
-origin    git@github.com:octocat/my-full-stack.git (fetch)
-origin    git@github.com:octocat/my-full-stack.git (push)
-upstream    git@github.com:fastapi/full-stack-fastapi-template.git (fetch)
-upstream    git@github.com:fastapi/full-stack-fastapi-template.git (push)
-```
+#### Watchlist
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| GET | `/api/v1/users/me/watchlist` | Get personal watchlist |
+| POST | `/api/v1/users/me/watchlist` | Add movie to watchlist |
+| PATCH | `/api/v1/users/me/watchlist/{id}` | Update watchlist item |
+| DELETE | `/api/v1/users/me/watchlist/{id}` | Remove from watchlist |
 
-- Pull the latest changes without merging:
-
-```bash
-git pull --no-commit upstream master
-```
-
-This will download the latest changes from this template without committing them, that way you can check everything is right before committing.
-
-- If there are conflicts, solve them in your editor.
-
-- Once you are done, commit the changes:
-
-```bash
-git merge --continue
-```
-
-### Configure
-
-You can then update configs in the `.env` files to customize your configurations.
-
-Before deploying it, make sure you change at least the values for:
-
-- `SECRET_KEY`
-- `FIRST_SUPERUSER_PASSWORD`
-- `POSTGRES_PASSWORD`
-
-You can (and should) pass these as environment variables from secrets.
-
-Read the [deployment.md](./deployment.md) docs for more details.
-
-### Generate Secret Keys
-
-Some environment variables in the `.env` file have a default value of `changethis`.
-
-You have to change them with a secret key, to generate secret keys you can run the following command:
-
-```bash
-python -c "import secrets; print(secrets.token_urlsafe(32))"
-```
-
-Copy the content and use that as password / secret key. And run that again to generate another secure key.
-
-## How To Use It - Alternative With Copier
-
-This repository also supports generating a new project using [Copier](https://copier.readthedocs.io).
-
-It will copy all the files, ask you configuration questions, and update the `.env` files with your answers.
-
-### Install Copier
-
-You can install Copier with:
-
-```bash
-pip install copier
-```
-
-Or better, if you have [`pipx`](https://pipx.pypa.io/), you can run it with:
-
-```bash
-pipx install copier
-```
-
-**Note**: If you have `pipx`, installing copier is optional, you could run it directly.
-
-### Generate a Project With Copier
-
-Decide a name for your new project's directory, you will use it below. For example, `my-awesome-project`.
-
-Go to the directory that will be the parent of your project, and run the command with your project's name:
-
-```bash
-copier copy https://github.com/fastapi/full-stack-fastapi-template my-awesome-project --trust
-```
-
-If you have `pipx` and you didn't install `copier`, you can run it directly:
-
-```bash
-pipx run copier copy https://github.com/fastapi/full-stack-fastapi-template my-awesome-project --trust
-```
-
-**Note** the `--trust` option is necessary to be able to execute a [post-creation script](https://github.com/fastapi/full-stack-fastapi-template/blob/master/.copier/update_dotenv.py) that updates your `.env` files.
-
-### Input Variables
-
-Copier will ask you for some data, you might want to have at hand before generating the project.
-
-But don't worry, you can just update any of that in the `.env` files afterwards.
-
-The input variables, with their default values (some auto generated) are:
-
-- `project_name`: (default: `"FastAPI Project"`) The name of the project, shown to API users (in .env).
-- `stack_name`: (default: `"fastapi-project"`) The name of the stack used for Docker Compose labels and project name (no spaces, no periods) (in .env).
-- `secret_key`: (default: `"changethis"`) The secret key for the project, used for security, stored in .env, you can generate one with the method above.
-- `first_superuser`: (default: `"admin@example.com"`) The email of the first superuser (in .env).
-- `first_superuser_password`: (default: `"changethis"`) The password of the first superuser (in .env).
-- `smtp_host`: (default: "") The SMTP server host to send emails, you can set it later in .env.
-- `smtp_user`: (default: "") The SMTP server user to send emails, you can set it later in .env.
-- `smtp_password`: (default: "") The SMTP server password to send emails, you can set it later in .env.
-- `emails_from_email`: (default: `"info@example.com"`) The email account to send emails from, you can set it later in .env.
-- `postgres_password`: (default: `"changethis"`) The password for the PostgreSQL database, stored in .env, you can generate one with the method above.
-- `sentry_dsn`: (default: "") The DSN for Sentry, if you are using it, you can set it later in .env.
-
-## Backend Development
-
-Backend docs: [backend/README.md](./backend/README.md).
-
-## Frontend Development
-
-Frontend docs: [frontend/README.md](./frontend/README.md).
-
-## Deployment
-
-Deployment docs: [deployment.md](./deployment.md).
+#### Ratings
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| GET | `/api/v1/ratings/me` | Get user's ratings |
+| POST | `/api/v1/ratings/` | Create/update rating |
+| DELETE | `/api/v1/ratings/{id}` | Delete rating |
 
 ## Development
 
-General development docs: [development.md](./development.md).
+### Database Migrations
 
-This includes using Docker Compose, custom local domains, `.env` configurations, etc.
+```bash
+# Create a new migration
+docker compose exec backend alembic revision --autogenerate -m "Description"
 
-## Release Notes
+# Apply migrations
+docker compose exec backend alembic upgrade head
 
-Check the file [release-notes.md](./release-notes.md).
+# Rollback one migration
+docker compose exec backend alembic downgrade -1
+```
+
+### Regenerate API Client
+
+After modifying backend endpoints, regenerate the TypeScript client:
+
+```bash
+./scripts/generate-client.sh
+# Or from frontend directory:
+bun run generate-client
+```
+
+### Running Tests
+
+**Backend (pytest)**
+```bash
+docker compose exec backend pytest
+# With coverage
+docker compose exec backend pytest --cov=app
+```
+
+**Frontend (Playwright E2E)**
+```bash
+cd frontend
+bun run test        # Headless mode
+bun run test:ui     # Interactive mode
+```
+
+### Code Quality
+
+Pre-commit hooks are configured for:
+- **Backend**: Ruff (linting/formatting), mypy (type checking)
+- **Frontend**: Biome (linting/formatting)
+
+```bash
+# Run all hooks manually
+uv run prek run --all-files
+
+# Install hooks
+uv run prek install -f
+```
+
+## Deployment
+
+See [deployment.md](deployment.md) for production deployment instructions covering:
+
+- Docker Compose production configuration
+- Traefik setup with automatic HTTPS
+- Environment variables for production
+- GitHub Actions CI/CD
+
+### Quick Production Setup
+
+1. Configure production `.env` with secure secrets
+2. Set up DNS records for your domain
+3. Create Traefik proxy network:
+   ```bash
+   docker network create traefik-public
+   ```
+4. Deploy:
+   ```bash
+   docker compose -f compose.yml up -d
+   ```
+
+## Roadmap
+
+- [x] **Phase 1**: OMDB integration, movie search, personal watchlist
+- [x] **Phase 2**: Movie ratings, user profiles
+- [ ] **Phase 3**: Movie clubs with shared watchlists and voting
+- [ ] **Phase 4**: Written reviews and discussion forums
+- [ ] **Phase 5**: Watch party scheduling and events
+- [ ] **Phase 6**: Notifications, activity feeds, achievements
+
+## Contributing
+
+See [CONTRIBUTING.md](CONTRIBUTING.md) for guidelines on:
+- Opening issues and discussions
+- Submitting pull requests
+- Code style and testing requirements
 
 ## License
 
-The Full Stack FastAPI Template is licensed under the terms of the MIT license.
+MIT License - see [LICENSE](LICENSE) for details.
+
+---
+
+**Vantage** - Bringing friends together through cinema.

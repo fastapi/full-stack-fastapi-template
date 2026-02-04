@@ -15,9 +15,13 @@ import { Route as RecoverPasswordRouteImport } from './routes/recover-password'
 import { Route as LoginRouteImport } from './routes/login'
 import { Route as LayoutRouteImport } from './routes/_layout'
 import { Route as LayoutIndexRouteImport } from './routes/_layout/index'
+import { Route as LayoutWatchlistRouteImport } from './routes/_layout/watchlist'
 import { Route as LayoutSettingsRouteImport } from './routes/_layout/settings'
+import { Route as LayoutRatingsRouteImport } from './routes/_layout/ratings'
+import { Route as LayoutMoviesRouteImport } from './routes/_layout/movies'
 import { Route as LayoutItemsRouteImport } from './routes/_layout/items'
 import { Route as LayoutAdminRouteImport } from './routes/_layout/admin'
+import { Route as LayoutMoviesImdbIdRouteImport } from './routes/_layout/movies.$imdbId'
 
 const SignupRoute = SignupRouteImport.update({
   id: '/signup',
@@ -48,9 +52,24 @@ const LayoutIndexRoute = LayoutIndexRouteImport.update({
   path: '/',
   getParentRoute: () => LayoutRoute,
 } as any)
+const LayoutWatchlistRoute = LayoutWatchlistRouteImport.update({
+  id: '/watchlist',
+  path: '/watchlist',
+  getParentRoute: () => LayoutRoute,
+} as any)
 const LayoutSettingsRoute = LayoutSettingsRouteImport.update({
   id: '/settings',
   path: '/settings',
+  getParentRoute: () => LayoutRoute,
+} as any)
+const LayoutRatingsRoute = LayoutRatingsRouteImport.update({
+  id: '/ratings',
+  path: '/ratings',
+  getParentRoute: () => LayoutRoute,
+} as any)
+const LayoutMoviesRoute = LayoutMoviesRouteImport.update({
+  id: '/movies',
+  path: '/movies',
   getParentRoute: () => LayoutRoute,
 } as any)
 const LayoutItemsRoute = LayoutItemsRouteImport.update({
@@ -63,16 +82,25 @@ const LayoutAdminRoute = LayoutAdminRouteImport.update({
   path: '/admin',
   getParentRoute: () => LayoutRoute,
 } as any)
+const LayoutMoviesImdbIdRoute = LayoutMoviesImdbIdRouteImport.update({
+  id: '/$imdbId',
+  path: '/$imdbId',
+  getParentRoute: () => LayoutMoviesRoute,
+} as any)
 
 export interface FileRoutesByFullPath {
+  '/': typeof LayoutIndexRoute
   '/login': typeof LoginRoute
   '/recover-password': typeof RecoverPasswordRoute
   '/reset-password': typeof ResetPasswordRoute
   '/signup': typeof SignupRoute
   '/admin': typeof LayoutAdminRoute
   '/items': typeof LayoutItemsRoute
+  '/movies': typeof LayoutMoviesRouteWithChildren
+  '/ratings': typeof LayoutRatingsRoute
   '/settings': typeof LayoutSettingsRoute
-  '/': typeof LayoutIndexRoute
+  '/watchlist': typeof LayoutWatchlistRoute
+  '/movies/$imdbId': typeof LayoutMoviesImdbIdRoute
 }
 export interface FileRoutesByTo {
   '/login': typeof LoginRoute
@@ -81,8 +109,12 @@ export interface FileRoutesByTo {
   '/signup': typeof SignupRoute
   '/admin': typeof LayoutAdminRoute
   '/items': typeof LayoutItemsRoute
+  '/movies': typeof LayoutMoviesRouteWithChildren
+  '/ratings': typeof LayoutRatingsRoute
   '/settings': typeof LayoutSettingsRoute
+  '/watchlist': typeof LayoutWatchlistRoute
   '/': typeof LayoutIndexRoute
+  '/movies/$imdbId': typeof LayoutMoviesImdbIdRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -93,20 +125,28 @@ export interface FileRoutesById {
   '/signup': typeof SignupRoute
   '/_layout/admin': typeof LayoutAdminRoute
   '/_layout/items': typeof LayoutItemsRoute
+  '/_layout/movies': typeof LayoutMoviesRouteWithChildren
+  '/_layout/ratings': typeof LayoutRatingsRoute
   '/_layout/settings': typeof LayoutSettingsRoute
+  '/_layout/watchlist': typeof LayoutWatchlistRoute
   '/_layout/': typeof LayoutIndexRoute
+  '/_layout/movies/$imdbId': typeof LayoutMoviesImdbIdRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
+    | '/'
     | '/login'
     | '/recover-password'
     | '/reset-password'
     | '/signup'
     | '/admin'
     | '/items'
+    | '/movies'
+    | '/ratings'
     | '/settings'
-    | '/'
+    | '/watchlist'
+    | '/movies/$imdbId'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/login'
@@ -115,8 +155,12 @@ export interface FileRouteTypes {
     | '/signup'
     | '/admin'
     | '/items'
+    | '/movies'
+    | '/ratings'
     | '/settings'
+    | '/watchlist'
     | '/'
+    | '/movies/$imdbId'
   id:
     | '__root__'
     | '/_layout'
@@ -126,8 +170,12 @@ export interface FileRouteTypes {
     | '/signup'
     | '/_layout/admin'
     | '/_layout/items'
+    | '/_layout/movies'
+    | '/_layout/ratings'
     | '/_layout/settings'
+    | '/_layout/watchlist'
     | '/_layout/'
+    | '/_layout/movies/$imdbId'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -171,7 +219,7 @@ declare module '@tanstack/react-router' {
     '/_layout': {
       id: '/_layout'
       path: ''
-      fullPath: ''
+      fullPath: '/'
       preLoaderRoute: typeof LayoutRouteImport
       parentRoute: typeof rootRouteImport
     }
@@ -182,11 +230,32 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof LayoutIndexRouteImport
       parentRoute: typeof LayoutRoute
     }
+    '/_layout/watchlist': {
+      id: '/_layout/watchlist'
+      path: '/watchlist'
+      fullPath: '/watchlist'
+      preLoaderRoute: typeof LayoutWatchlistRouteImport
+      parentRoute: typeof LayoutRoute
+    }
     '/_layout/settings': {
       id: '/_layout/settings'
       path: '/settings'
       fullPath: '/settings'
       preLoaderRoute: typeof LayoutSettingsRouteImport
+      parentRoute: typeof LayoutRoute
+    }
+    '/_layout/ratings': {
+      id: '/_layout/ratings'
+      path: '/ratings'
+      fullPath: '/ratings'
+      preLoaderRoute: typeof LayoutRatingsRouteImport
+      parentRoute: typeof LayoutRoute
+    }
+    '/_layout/movies': {
+      id: '/_layout/movies'
+      path: '/movies'
+      fullPath: '/movies'
+      preLoaderRoute: typeof LayoutMoviesRouteImport
       parentRoute: typeof LayoutRoute
     }
     '/_layout/items': {
@@ -203,20 +272,45 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof LayoutAdminRouteImport
       parentRoute: typeof LayoutRoute
     }
+    '/_layout/movies/$imdbId': {
+      id: '/_layout/movies/$imdbId'
+      path: '/$imdbId'
+      fullPath: '/movies/$imdbId'
+      preLoaderRoute: typeof LayoutMoviesImdbIdRouteImport
+      parentRoute: typeof LayoutMoviesRoute
+    }
   }
 }
+
+interface LayoutMoviesRouteChildren {
+  LayoutMoviesImdbIdRoute: typeof LayoutMoviesImdbIdRoute
+}
+
+const LayoutMoviesRouteChildren: LayoutMoviesRouteChildren = {
+  LayoutMoviesImdbIdRoute: LayoutMoviesImdbIdRoute,
+}
+
+const LayoutMoviesRouteWithChildren = LayoutMoviesRoute._addFileChildren(
+  LayoutMoviesRouteChildren,
+)
 
 interface LayoutRouteChildren {
   LayoutAdminRoute: typeof LayoutAdminRoute
   LayoutItemsRoute: typeof LayoutItemsRoute
+  LayoutMoviesRoute: typeof LayoutMoviesRouteWithChildren
+  LayoutRatingsRoute: typeof LayoutRatingsRoute
   LayoutSettingsRoute: typeof LayoutSettingsRoute
+  LayoutWatchlistRoute: typeof LayoutWatchlistRoute
   LayoutIndexRoute: typeof LayoutIndexRoute
 }
 
 const LayoutRouteChildren: LayoutRouteChildren = {
   LayoutAdminRoute: LayoutAdminRoute,
   LayoutItemsRoute: LayoutItemsRoute,
+  LayoutMoviesRoute: LayoutMoviesRouteWithChildren,
+  LayoutRatingsRoute: LayoutRatingsRoute,
   LayoutSettingsRoute: LayoutSettingsRoute,
+  LayoutWatchlistRoute: LayoutWatchlistRoute,
   LayoutIndexRoute: LayoutIndexRoute,
 }
 

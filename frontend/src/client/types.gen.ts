@@ -40,6 +40,54 @@ export type Message = {
     message: string;
 };
 
+export type MoviePublic = {
+    imdb_id: string;
+    title: string;
+    year?: (string | null);
+    rated?: (string | null);
+    released?: (string | null);
+    runtime?: (string | null);
+    genre?: (string | null);
+    director?: (string | null);
+    writer?: (string | null);
+    actors?: (string | null);
+    plot?: (string | null);
+    language?: (string | null);
+    country?: (string | null);
+    awards?: (string | null);
+    poster_url?: (string | null);
+    imdb_rating?: (string | null);
+    imdb_votes?: (string | null);
+    box_office?: (string | null);
+    id: string;
+    fetched_at: string;
+};
+
+/**
+ * Aggregated rating statistics for a movie
+ */
+export type MovieRatingStats = {
+    movie_id: string;
+    average_rating: number;
+    rating_count: number;
+};
+
+export type MovieSearchPublic = {
+    data: Array<MovieSearchResult>;
+    total_results: number;
+};
+
+/**
+ * Lightweight movie result from OMDB search
+ */
+export type MovieSearchResult = {
+    imdb_id: string;
+    title: string;
+    year?: (string | null);
+    poster_url?: (string | null);
+    type?: (string | null);
+};
+
 export type NewPassword = {
     token: string;
     new_password: string;
@@ -50,6 +98,41 @@ export type PrivateUserCreate = {
     password: string;
     full_name: string;
     is_verified?: boolean;
+};
+
+export type RatingCreate = {
+    movie_imdb_id: string;
+    score: number;
+    club_id?: (string | null);
+};
+
+export type RatingPublic = {
+    score: number;
+    id: string;
+    movie_id: string;
+    created_at: string;
+    updated_at: string;
+};
+
+export type RatingsPublic = {
+    data: Array<RatingWithMovie>;
+    count: number;
+};
+
+export type RatingUpdate = {
+    score?: (number | null);
+};
+
+/**
+ * Rating with full movie details
+ */
+export type RatingWithMovie = {
+    score: number;
+    id: string;
+    movie_id: string;
+    created_at: string;
+    updated_at: string;
+    movie: MoviePublic;
 };
 
 export type Token = {
@@ -103,11 +186,52 @@ export type UserUpdateMe = {
     email?: (string | null);
 };
 
+export type UserWatchlistCreate = {
+    movie_imdb_id: string;
+    status?: WatchlistStatus;
+    notes?: (string | null);
+};
+
+export type UserWatchlistPublic = {
+    status?: WatchlistStatus;
+    notes?: (string | null);
+    id: string;
+    movie_id: string;
+    watched_at?: (string | null);
+    added_at: string;
+};
+
+export type UserWatchlistsPublic = {
+    data: Array<UserWatchlistWithMovie>;
+    count: number;
+};
+
+export type UserWatchlistUpdate = {
+    status?: (WatchlistStatus | null);
+    notes?: (string | null);
+    watched_at?: (string | null);
+};
+
+/**
+ * Watchlist entry with full movie details
+ */
+export type UserWatchlistWithMovie = {
+    status?: WatchlistStatus;
+    notes?: (string | null);
+    id: string;
+    movie_id: string;
+    watched_at?: (string | null);
+    added_at: string;
+    movie: MoviePublic;
+};
+
 export type ValidationError = {
     loc: Array<(string | number)>;
     msg: string;
     type: string;
 };
+
+export type WatchlistStatus = 'want_to_watch' | 'watched';
 
 export type ItemsReadItemsData = {
     limit?: number;
@@ -167,11 +291,74 @@ export type LoginRecoverPasswordHtmlContentData = {
 
 export type LoginRecoverPasswordHtmlContentResponse = (string);
 
+export type MoviesSearchMoviesData = {
+    /**
+     * Page number
+     */
+    page?: number;
+    /**
+     * Search query
+     */
+    q: string;
+    /**
+     * Filter by type: movie, series, episode
+     */
+    type?: (string | null);
+    /**
+     * Filter by year
+     */
+    year?: (string | null);
+};
+
+export type MoviesSearchMoviesResponse = (MovieSearchPublic);
+
+export type MoviesGetMovieData = {
+    imdbId: string;
+    /**
+     * Force refresh from OMDB
+     */
+    refresh?: boolean;
+};
+
+export type MoviesGetMovieResponse = (MoviePublic);
+
+export type MoviesGetMovieRatingsData = {
+    imdbId: string;
+};
+
+export type MoviesGetMovieRatingsResponse = (MovieRatingStats);
+
 export type PrivateCreateUserData = {
     requestBody: PrivateUserCreate;
 };
 
 export type PrivateCreateUserResponse = (UserPublic);
+
+export type RatingsCreateRatingData = {
+    requestBody: RatingCreate;
+};
+
+export type RatingsCreateRatingResponse = (RatingPublic);
+
+export type RatingsGetMyRatingsData = {
+    limit?: number;
+    skip?: number;
+};
+
+export type RatingsGetMyRatingsResponse = (RatingsPublic);
+
+export type RatingsUpdateRatingData = {
+    ratingId: string;
+    requestBody: RatingUpdate;
+};
+
+export type RatingsUpdateRatingResponse = (RatingPublic);
+
+export type RatingsDeleteRatingData = {
+    ratingId: string;
+};
+
+export type RatingsDeleteRatingResponse = (Message);
 
 export type UsersReadUsersData = {
     limit?: number;
@@ -234,3 +421,33 @@ export type UtilsTestEmailData = {
 export type UtilsTestEmailResponse = (Message);
 
 export type UtilsHealthCheckResponse = (boolean);
+
+export type WatchlistGetMyWatchlistData = {
+    limit?: number;
+    skip?: number;
+    /**
+     * Filter by status
+     */
+    status?: (WatchlistStatus | null);
+};
+
+export type WatchlistGetMyWatchlistResponse = (UserWatchlistsPublic);
+
+export type WatchlistAddToWatchlistData = {
+    requestBody: UserWatchlistCreate;
+};
+
+export type WatchlistAddToWatchlistResponse = (UserWatchlistPublic);
+
+export type WatchlistUpdateWatchlistEntryData = {
+    requestBody: UserWatchlistUpdate;
+    watchlistId: string;
+};
+
+export type WatchlistUpdateWatchlistEntryResponse = (UserWatchlistPublic);
+
+export type WatchlistRemoveFromWatchlistData = {
+    watchlistId: string;
+};
+
+export type WatchlistRemoveFromWatchlistResponse = (Message);

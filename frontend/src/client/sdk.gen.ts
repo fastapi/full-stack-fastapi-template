@@ -3,7 +3,7 @@
 import type { CancelablePromise } from './core/CancelablePromise';
 import { OpenAPI } from './core/OpenAPI';
 import { request as __request } from './core/request';
-import type { ItemsReadItemsData, ItemsReadItemsResponse, ItemsCreateItemData, ItemsCreateItemResponse, ItemsReadItemData, ItemsReadItemResponse, ItemsUpdateItemData, ItemsUpdateItemResponse, ItemsDeleteItemData, ItemsDeleteItemResponse, LoginLoginAccessTokenData, LoginLoginAccessTokenResponse, LoginTestTokenResponse, LoginRecoverPasswordData, LoginRecoverPasswordResponse, LoginResetPasswordData, LoginResetPasswordResponse, LoginRecoverPasswordHtmlContentData, LoginRecoverPasswordHtmlContentResponse, PrivateCreateUserData, PrivateCreateUserResponse, UsersReadUsersData, UsersReadUsersResponse, UsersCreateUserData, UsersCreateUserResponse, UsersReadUserMeResponse, UsersDeleteUserMeResponse, UsersUpdateUserMeData, UsersUpdateUserMeResponse, UsersUpdatePasswordMeData, UsersUpdatePasswordMeResponse, UsersRegisterUserData, UsersRegisterUserResponse, UsersReadUserByIdData, UsersReadUserByIdResponse, UsersUpdateUserData, UsersUpdateUserResponse, UsersDeleteUserData, UsersDeleteUserResponse, UtilsTestEmailData, UtilsTestEmailResponse, UtilsHealthCheckResponse } from './types.gen';
+import type { ItemsReadItemsData, ItemsReadItemsResponse, ItemsCreateItemData, ItemsCreateItemResponse, ItemsReadItemData, ItemsReadItemResponse, ItemsUpdateItemData, ItemsUpdateItemResponse, ItemsDeleteItemData, ItemsDeleteItemResponse, LoginLoginAccessTokenData, LoginLoginAccessTokenResponse, LoginTestTokenResponse, LoginRecoverPasswordData, LoginRecoverPasswordResponse, LoginResetPasswordData, LoginResetPasswordResponse, LoginRecoverPasswordHtmlContentData, LoginRecoverPasswordHtmlContentResponse, MoviesSearchMoviesData, MoviesSearchMoviesResponse, MoviesGetMovieData, MoviesGetMovieResponse, MoviesGetMovieRatingsData, MoviesGetMovieRatingsResponse, PrivateCreateUserData, PrivateCreateUserResponse, RatingsCreateRatingData, RatingsCreateRatingResponse, RatingsGetMyRatingsData, RatingsGetMyRatingsResponse, RatingsUpdateRatingData, RatingsUpdateRatingResponse, RatingsDeleteRatingData, RatingsDeleteRatingResponse, UsersReadUsersData, UsersReadUsersResponse, UsersCreateUserData, UsersCreateUserResponse, UsersReadUserMeResponse, UsersDeleteUserMeResponse, UsersUpdateUserMeData, UsersUpdateUserMeResponse, UsersUpdatePasswordMeData, UsersUpdatePasswordMeResponse, UsersRegisterUserData, UsersRegisterUserResponse, UsersReadUserByIdData, UsersReadUserByIdResponse, UsersUpdateUserData, UsersUpdateUserResponse, UsersDeleteUserData, UsersDeleteUserResponse, UtilsTestEmailData, UtilsTestEmailResponse, UtilsHealthCheckResponse, WatchlistGetMyWatchlistData, WatchlistGetMyWatchlistResponse, WatchlistAddToWatchlistData, WatchlistAddToWatchlistResponse, WatchlistUpdateWatchlistEntryData, WatchlistUpdateWatchlistEntryResponse, WatchlistRemoveFromWatchlistData, WatchlistRemoveFromWatchlistResponse } from './types.gen';
 
 export class ItemsService {
     /**
@@ -213,6 +213,83 @@ export class LoginService {
     }
 }
 
+export class MoviesService {
+    /**
+     * Search Movies
+     * Search movies via OMDB API.
+     * Results are not cached (search results change frequently).
+     * @param data The data for the request.
+     * @param data.q Search query
+     * @param data.year Filter by year
+     * @param data.type Filter by type: movie, series, episode
+     * @param data.page Page number
+     * @returns MovieSearchPublic Successful Response
+     * @throws ApiError
+     */
+    public static searchMovies(data: MoviesSearchMoviesData): CancelablePromise<MoviesSearchMoviesResponse> {
+        return __request(OpenAPI, {
+            method: 'GET',
+            url: '/api/v1/movies/search',
+            query: {
+                q: data.q,
+                year: data.year,
+                type: data.type,
+                page: data.page
+            },
+            errors: {
+                422: 'Validation Error'
+            }
+        });
+    }
+    
+    /**
+     * Get Movie
+     * Get movie details by IMDB ID.
+     * Fetches from OMDB and caches if not already cached or stale.
+     * @param data The data for the request.
+     * @param data.imdbId
+     * @param data.refresh Force refresh from OMDB
+     * @returns MoviePublic Successful Response
+     * @throws ApiError
+     */
+    public static getMovie(data: MoviesGetMovieData): CancelablePromise<MoviesGetMovieResponse> {
+        return __request(OpenAPI, {
+            method: 'GET',
+            url: '/api/v1/movies/{imdb_id}',
+            path: {
+                imdb_id: data.imdbId
+            },
+            query: {
+                refresh: data.refresh
+            },
+            errors: {
+                422: 'Validation Error'
+            }
+        });
+    }
+    
+    /**
+     * Get Movie Ratings
+     * Get aggregated rating stats for a movie.
+     * @param data The data for the request.
+     * @param data.imdbId
+     * @returns MovieRatingStats Successful Response
+     * @throws ApiError
+     */
+    public static getMovieRatings(data: MoviesGetMovieRatingsData): CancelablePromise<MoviesGetMovieRatingsResponse> {
+        return __request(OpenAPI, {
+            method: 'GET',
+            url: '/api/v1/movies/{imdb_id}/ratings',
+            path: {
+                imdb_id: data.imdbId
+            },
+            errors: {
+                422: 'Validation Error'
+            }
+        });
+    }
+}
+
 export class PrivateService {
     /**
      * Create User
@@ -228,6 +305,97 @@ export class PrivateService {
             url: '/api/v1/private/users/',
             body: data.requestBody,
             mediaType: 'application/json',
+            errors: {
+                422: 'Validation Error'
+            }
+        });
+    }
+}
+
+export class RatingsService {
+    /**
+     * Create Rating
+     * Create or update a rating for a movie.
+     * Only one rating per user per movie is allowed (upsert behavior).
+     * @param data The data for the request.
+     * @param data.requestBody
+     * @returns RatingPublic Successful Response
+     * @throws ApiError
+     */
+    public static createRating(data: RatingsCreateRatingData): CancelablePromise<RatingsCreateRatingResponse> {
+        return __request(OpenAPI, {
+            method: 'POST',
+            url: '/api/v1/ratings/',
+            body: data.requestBody,
+            mediaType: 'application/json',
+            errors: {
+                422: 'Validation Error'
+            }
+        });
+    }
+    
+    /**
+     * Get My Ratings
+     * Get current user's ratings with movie details.
+     * @param data The data for the request.
+     * @param data.skip
+     * @param data.limit
+     * @returns RatingsPublic Successful Response
+     * @throws ApiError
+     */
+    public static getMyRatings(data: RatingsGetMyRatingsData = {}): CancelablePromise<RatingsGetMyRatingsResponse> {
+        return __request(OpenAPI, {
+            method: 'GET',
+            url: '/api/v1/ratings/me',
+            query: {
+                skip: data.skip,
+                limit: data.limit
+            },
+            errors: {
+                422: 'Validation Error'
+            }
+        });
+    }
+    
+    /**
+     * Update Rating
+     * Update a rating score.
+     * @param data The data for the request.
+     * @param data.ratingId
+     * @param data.requestBody
+     * @returns RatingPublic Successful Response
+     * @throws ApiError
+     */
+    public static updateRating(data: RatingsUpdateRatingData): CancelablePromise<RatingsUpdateRatingResponse> {
+        return __request(OpenAPI, {
+            method: 'PATCH',
+            url: '/api/v1/ratings/{rating_id}',
+            path: {
+                rating_id: data.ratingId
+            },
+            body: data.requestBody,
+            mediaType: 'application/json',
+            errors: {
+                422: 'Validation Error'
+            }
+        });
+    }
+    
+    /**
+     * Delete Rating
+     * Delete a rating.
+     * @param data The data for the request.
+     * @param data.ratingId
+     * @returns Message Successful Response
+     * @throws ApiError
+     */
+    public static deleteRating(data: RatingsDeleteRatingData): CancelablePromise<RatingsDeleteRatingResponse> {
+        return __request(OpenAPI, {
+            method: 'DELETE',
+            url: '/api/v1/ratings/{rating_id}',
+            path: {
+                rating_id: data.ratingId
+            },
             errors: {
                 422: 'Validation Error'
             }
@@ -463,6 +631,99 @@ export class UtilsService {
         return __request(OpenAPI, {
             method: 'GET',
             url: '/api/v1/utils/health-check/'
+        });
+    }
+}
+
+export class WatchlistService {
+    /**
+     * Get My Watchlist
+     * Get current user's watchlist with movie details.
+     * @param data The data for the request.
+     * @param data.status Filter by status
+     * @param data.skip
+     * @param data.limit
+     * @returns UserWatchlistsPublic Successful Response
+     * @throws ApiError
+     */
+    public static getMyWatchlist(data: WatchlistGetMyWatchlistData = {}): CancelablePromise<WatchlistGetMyWatchlistResponse> {
+        return __request(OpenAPI, {
+            method: 'GET',
+            url: '/api/v1/users/me/watchlist/',
+            query: {
+                status: data.status,
+                skip: data.skip,
+                limit: data.limit
+            },
+            errors: {
+                422: 'Validation Error'
+            }
+        });
+    }
+    
+    /**
+     * Add To Watchlist
+     * Add a movie to personal watchlist.
+     * Movie will be fetched and cached from OMDB if not already cached.
+     * @param data The data for the request.
+     * @param data.requestBody
+     * @returns UserWatchlistPublic Successful Response
+     * @throws ApiError
+     */
+    public static addToWatchlist(data: WatchlistAddToWatchlistData): CancelablePromise<WatchlistAddToWatchlistResponse> {
+        return __request(OpenAPI, {
+            method: 'POST',
+            url: '/api/v1/users/me/watchlist/',
+            body: data.requestBody,
+            mediaType: 'application/json',
+            errors: {
+                422: 'Validation Error'
+            }
+        });
+    }
+    
+    /**
+     * Update Watchlist Entry
+     * Update a watchlist entry (status, notes, watched_at).
+     * @param data The data for the request.
+     * @param data.watchlistId
+     * @param data.requestBody
+     * @returns UserWatchlistPublic Successful Response
+     * @throws ApiError
+     */
+    public static updateWatchlistEntry(data: WatchlistUpdateWatchlistEntryData): CancelablePromise<WatchlistUpdateWatchlistEntryResponse> {
+        return __request(OpenAPI, {
+            method: 'PATCH',
+            url: '/api/v1/users/me/watchlist/{watchlist_id}',
+            path: {
+                watchlist_id: data.watchlistId
+            },
+            body: data.requestBody,
+            mediaType: 'application/json',
+            errors: {
+                422: 'Validation Error'
+            }
+        });
+    }
+    
+    /**
+     * Remove From Watchlist
+     * Remove a movie from personal watchlist.
+     * @param data The data for the request.
+     * @param data.watchlistId
+     * @returns Message Successful Response
+     * @throws ApiError
+     */
+    public static removeFromWatchlist(data: WatchlistRemoveFromWatchlistData): CancelablePromise<WatchlistRemoveFromWatchlistResponse> {
+        return __request(OpenAPI, {
+            method: 'DELETE',
+            url: '/api/v1/users/me/watchlist/{watchlist_id}',
+            path: {
+                watchlist_id: data.watchlistId
+            },
+            errors: {
+                422: 'Validation Error'
+            }
         });
     }
 }

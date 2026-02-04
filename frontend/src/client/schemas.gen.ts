@@ -208,6 +208,316 @@ export const MessageSchema = {
     title: 'Message'
 } as const;
 
+export const MoviePublicSchema = {
+    properties: {
+        imdb_id: {
+            type: 'string',
+            maxLength: 20,
+            title: 'Imdb Id'
+        },
+        title: {
+            type: 'string',
+            maxLength: 500,
+            title: 'Title'
+        },
+        year: {
+            anyOf: [
+                {
+                    type: 'string',
+                    maxLength: 10
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Year'
+        },
+        rated: {
+            anyOf: [
+                {
+                    type: 'string',
+                    maxLength: 20
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Rated'
+        },
+        released: {
+            anyOf: [
+                {
+                    type: 'string',
+                    maxLength: 50
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Released'
+        },
+        runtime: {
+            anyOf: [
+                {
+                    type: 'string',
+                    maxLength: 20
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Runtime'
+        },
+        genre: {
+            anyOf: [
+                {
+                    type: 'string',
+                    maxLength: 255
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Genre'
+        },
+        director: {
+            anyOf: [
+                {
+                    type: 'string',
+                    maxLength: 500
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Director'
+        },
+        writer: {
+            anyOf: [
+                {
+                    type: 'string',
+                    maxLength: 1000
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Writer'
+        },
+        actors: {
+            anyOf: [
+                {
+                    type: 'string',
+                    maxLength: 1000
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Actors'
+        },
+        plot: {
+            anyOf: [
+                {
+                    type: 'string'
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Plot'
+        },
+        language: {
+            anyOf: [
+                {
+                    type: 'string',
+                    maxLength: 255
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Language'
+        },
+        country: {
+            anyOf: [
+                {
+                    type: 'string',
+                    maxLength: 255
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Country'
+        },
+        awards: {
+            anyOf: [
+                {
+                    type: 'string',
+                    maxLength: 500
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Awards'
+        },
+        poster_url: {
+            anyOf: [
+                {
+                    type: 'string',
+                    maxLength: 1000
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Poster Url'
+        },
+        imdb_rating: {
+            anyOf: [
+                {
+                    type: 'string',
+                    maxLength: 10
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Imdb Rating'
+        },
+        imdb_votes: {
+            anyOf: [
+                {
+                    type: 'string',
+                    maxLength: 20
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Imdb Votes'
+        },
+        box_office: {
+            anyOf: [
+                {
+                    type: 'string',
+                    maxLength: 50
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Box Office'
+        },
+        id: {
+            type: 'string',
+            format: 'uuid',
+            title: 'Id'
+        },
+        fetched_at: {
+            type: 'string',
+            format: 'date-time',
+            title: 'Fetched At'
+        }
+    },
+    type: 'object',
+    required: ['imdb_id', 'title', 'id', 'fetched_at'],
+    title: 'MoviePublic'
+} as const;
+
+export const MovieRatingStatsSchema = {
+    properties: {
+        movie_id: {
+            type: 'string',
+            format: 'uuid',
+            title: 'Movie Id'
+        },
+        average_rating: {
+            type: 'number',
+            title: 'Average Rating'
+        },
+        rating_count: {
+            type: 'integer',
+            title: 'Rating Count'
+        }
+    },
+    type: 'object',
+    required: ['movie_id', 'average_rating', 'rating_count'],
+    title: 'MovieRatingStats',
+    description: 'Aggregated rating statistics for a movie'
+} as const;
+
+export const MovieSearchPublicSchema = {
+    properties: {
+        data: {
+            items: {
+                '$ref': '#/components/schemas/MovieSearchResult'
+            },
+            type: 'array',
+            title: 'Data'
+        },
+        total_results: {
+            type: 'integer',
+            title: 'Total Results'
+        }
+    },
+    type: 'object',
+    required: ['data', 'total_results'],
+    title: 'MovieSearchPublic'
+} as const;
+
+export const MovieSearchResultSchema = {
+    properties: {
+        imdb_id: {
+            type: 'string',
+            title: 'Imdb Id'
+        },
+        title: {
+            type: 'string',
+            title: 'Title'
+        },
+        year: {
+            anyOf: [
+                {
+                    type: 'string'
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Year'
+        },
+        poster_url: {
+            anyOf: [
+                {
+                    type: 'string'
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Poster Url'
+        },
+        type: {
+            anyOf: [
+                {
+                    type: 'string'
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Type'
+        }
+    },
+    type: 'object',
+    required: ['imdb_id', 'title'],
+    title: 'MovieSearchResult',
+    description: 'Lightweight movie result from OMDB search'
+} as const;
+
 export const NewPasswordSchema = {
     properties: {
         token: {
@@ -249,6 +559,148 @@ export const PrivateUserCreateSchema = {
     type: 'object',
     required: ['email', 'password', 'full_name'],
     title: 'PrivateUserCreate'
+} as const;
+
+export const RatingCreateSchema = {
+    properties: {
+        movie_imdb_id: {
+            type: 'string',
+            maxLength: 20,
+            title: 'Movie Imdb Id'
+        },
+        score: {
+            type: 'number',
+            maximum: 5,
+            minimum: 1,
+            title: 'Score'
+        },
+        club_id: {
+            anyOf: [
+                {
+                    type: 'string',
+                    format: 'uuid'
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Club Id'
+        }
+    },
+    type: 'object',
+    required: ['movie_imdb_id', 'score'],
+    title: 'RatingCreate'
+} as const;
+
+export const RatingPublicSchema = {
+    properties: {
+        score: {
+            type: 'number',
+            maximum: 5,
+            minimum: 1,
+            title: 'Score'
+        },
+        id: {
+            type: 'string',
+            format: 'uuid',
+            title: 'Id'
+        },
+        movie_id: {
+            type: 'string',
+            format: 'uuid',
+            title: 'Movie Id'
+        },
+        created_at: {
+            type: 'string',
+            format: 'date-time',
+            title: 'Created At'
+        },
+        updated_at: {
+            type: 'string',
+            format: 'date-time',
+            title: 'Updated At'
+        }
+    },
+    type: 'object',
+    required: ['score', 'id', 'movie_id', 'created_at', 'updated_at'],
+    title: 'RatingPublic'
+} as const;
+
+export const RatingUpdateSchema = {
+    properties: {
+        score: {
+            anyOf: [
+                {
+                    type: 'number',
+                    maximum: 5,
+                    minimum: 1
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Score'
+        }
+    },
+    type: 'object',
+    title: 'RatingUpdate'
+} as const;
+
+export const RatingWithMovieSchema = {
+    properties: {
+        score: {
+            type: 'number',
+            maximum: 5,
+            minimum: 1,
+            title: 'Score'
+        },
+        id: {
+            type: 'string',
+            format: 'uuid',
+            title: 'Id'
+        },
+        movie_id: {
+            type: 'string',
+            format: 'uuid',
+            title: 'Movie Id'
+        },
+        created_at: {
+            type: 'string',
+            format: 'date-time',
+            title: 'Created At'
+        },
+        updated_at: {
+            type: 'string',
+            format: 'date-time',
+            title: 'Updated At'
+        },
+        movie: {
+            '$ref': '#/components/schemas/MoviePublic'
+        }
+    },
+    type: 'object',
+    required: ['score', 'id', 'movie_id', 'created_at', 'updated_at', 'movie'],
+    title: 'RatingWithMovie',
+    description: 'Rating with full movie details'
+} as const;
+
+export const RatingsPublicSchema = {
+    properties: {
+        data: {
+            items: {
+                '$ref': '#/components/schemas/RatingWithMovie'
+            },
+            type: 'array',
+            title: 'Data'
+        },
+        count: {
+            type: 'integer',
+            title: 'Count'
+        }
+    },
+    type: 'object',
+    required: ['data', 'count'],
+    title: 'RatingsPublic'
 } as const;
 
 export const TokenSchema = {
@@ -502,6 +954,201 @@ export const UserUpdateMeSchema = {
     title: 'UserUpdateMe'
 } as const;
 
+export const UserWatchlistCreateSchema = {
+    properties: {
+        movie_imdb_id: {
+            type: 'string',
+            maxLength: 20,
+            title: 'Movie Imdb Id'
+        },
+        status: {
+            '$ref': '#/components/schemas/WatchlistStatus',
+            default: 'want_to_watch'
+        },
+        notes: {
+            anyOf: [
+                {
+                    type: 'string',
+                    maxLength: 1000
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Notes'
+        }
+    },
+    type: 'object',
+    required: ['movie_imdb_id'],
+    title: 'UserWatchlistCreate'
+} as const;
+
+export const UserWatchlistPublicSchema = {
+    properties: {
+        status: {
+            '$ref': '#/components/schemas/WatchlistStatus',
+            default: 'want_to_watch'
+        },
+        notes: {
+            anyOf: [
+                {
+                    type: 'string',
+                    maxLength: 1000
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Notes'
+        },
+        id: {
+            type: 'string',
+            format: 'uuid',
+            title: 'Id'
+        },
+        movie_id: {
+            type: 'string',
+            format: 'uuid',
+            title: 'Movie Id'
+        },
+        watched_at: {
+            anyOf: [
+                {
+                    type: 'string',
+                    format: 'date-time'
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Watched At'
+        },
+        added_at: {
+            type: 'string',
+            format: 'date-time',
+            title: 'Added At'
+        }
+    },
+    type: 'object',
+    required: ['id', 'movie_id', 'added_at'],
+    title: 'UserWatchlistPublic'
+} as const;
+
+export const UserWatchlistUpdateSchema = {
+    properties: {
+        status: {
+            anyOf: [
+                {
+                    '$ref': '#/components/schemas/WatchlistStatus'
+                },
+                {
+                    type: 'null'
+                }
+            ]
+        },
+        notes: {
+            anyOf: [
+                {
+                    type: 'string',
+                    maxLength: 1000
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Notes'
+        },
+        watched_at: {
+            anyOf: [
+                {
+                    type: 'string',
+                    format: 'date-time'
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Watched At'
+        }
+    },
+    type: 'object',
+    title: 'UserWatchlistUpdate'
+} as const;
+
+export const UserWatchlistWithMovieSchema = {
+    properties: {
+        status: {
+            '$ref': '#/components/schemas/WatchlistStatus',
+            default: 'want_to_watch'
+        },
+        notes: {
+            anyOf: [
+                {
+                    type: 'string',
+                    maxLength: 1000
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Notes'
+        },
+        id: {
+            type: 'string',
+            format: 'uuid',
+            title: 'Id'
+        },
+        movie_id: {
+            type: 'string',
+            format: 'uuid',
+            title: 'Movie Id'
+        },
+        watched_at: {
+            anyOf: [
+                {
+                    type: 'string',
+                    format: 'date-time'
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Watched At'
+        },
+        added_at: {
+            type: 'string',
+            format: 'date-time',
+            title: 'Added At'
+        },
+        movie: {
+            '$ref': '#/components/schemas/MoviePublic'
+        }
+    },
+    type: 'object',
+    required: ['id', 'movie_id', 'added_at', 'movie'],
+    title: 'UserWatchlistWithMovie',
+    description: 'Watchlist entry with full movie details'
+} as const;
+
+export const UserWatchlistsPublicSchema = {
+    properties: {
+        data: {
+            items: {
+                '$ref': '#/components/schemas/UserWatchlistWithMovie'
+            },
+            type: 'array',
+            title: 'Data'
+        },
+        count: {
+            type: 'integer',
+            title: 'Count'
+        }
+    },
+    type: 'object',
+    required: ['data', 'count'],
+    title: 'UserWatchlistsPublic'
+} as const;
+
 export const UsersPublicSchema = {
     properties: {
         data: {
@@ -549,4 +1196,10 @@ export const ValidationErrorSchema = {
     type: 'object',
     required: ['loc', 'msg', 'type'],
     title: 'ValidationError'
+} as const;
+
+export const WatchlistStatusSchema = {
+    type: 'string',
+    enum: ['want_to_watch', 'watched'],
+    title: 'WatchlistStatus'
 } as const;
