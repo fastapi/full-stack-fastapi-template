@@ -57,6 +57,594 @@ export const Body_login_login_access_tokenSchema = {
     title: 'Body_login-login_access_token'
 } as const;
 
+export const ClubCreateSchema = {
+    properties: {
+        name: {
+            type: 'string',
+            maxLength: 100,
+            minLength: 1,
+            title: 'Name'
+        },
+        description: {
+            anyOf: [
+                {
+                    type: 'string',
+                    maxLength: 1000
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Description'
+        },
+        visibility: {
+            '$ref': '#/components/schemas/ClubVisibility',
+            default: 'public'
+        },
+        rules: {
+            anyOf: [
+                {
+                    type: 'string',
+                    maxLength: 2000
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Rules'
+        },
+        theme_color: {
+            anyOf: [
+                {
+                    type: 'string',
+                    maxLength: 20
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Theme Color'
+        }
+    },
+    type: 'object',
+    required: ['name'],
+    title: 'ClubCreate'
+} as const;
+
+export const ClubMemberPublicSchema = {
+    properties: {
+        role: {
+            '$ref': '#/components/schemas/MemberRole',
+            default: 'member'
+        },
+        id: {
+            type: 'string',
+            format: 'uuid',
+            title: 'Id'
+        },
+        club_id: {
+            type: 'string',
+            format: 'uuid',
+            title: 'Club Id'
+        },
+        user_id: {
+            type: 'string',
+            format: 'uuid',
+            title: 'User Id'
+        },
+        joined_at: {
+            type: 'string',
+            format: 'date-time',
+            title: 'Joined At'
+        }
+    },
+    type: 'object',
+    required: ['id', 'club_id', 'user_id', 'joined_at'],
+    title: 'ClubMemberPublic'
+} as const;
+
+export const ClubMemberWithUserSchema = {
+    properties: {
+        role: {
+            '$ref': '#/components/schemas/MemberRole',
+            default: 'member'
+        },
+        id: {
+            type: 'string',
+            format: 'uuid',
+            title: 'Id'
+        },
+        club_id: {
+            type: 'string',
+            format: 'uuid',
+            title: 'Club Id'
+        },
+        user_id: {
+            type: 'string',
+            format: 'uuid',
+            title: 'User Id'
+        },
+        joined_at: {
+            type: 'string',
+            format: 'date-time',
+            title: 'Joined At'
+        },
+        user: {
+            '$ref': '#/components/schemas/UserPublic'
+        }
+    },
+    type: 'object',
+    required: ['id', 'club_id', 'user_id', 'joined_at', 'user'],
+    title: 'ClubMemberWithUser',
+    description: 'Club member with user details'
+} as const;
+
+export const ClubPublicSchema = {
+    properties: {
+        name: {
+            type: 'string',
+            maxLength: 100,
+            minLength: 1,
+            title: 'Name'
+        },
+        description: {
+            anyOf: [
+                {
+                    type: 'string',
+                    maxLength: 1000
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Description'
+        },
+        cover_image_url: {
+            anyOf: [
+                {
+                    type: 'string',
+                    maxLength: 1000
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Cover Image Url'
+        },
+        visibility: {
+            '$ref': '#/components/schemas/ClubVisibility',
+            default: 'public'
+        },
+        rules: {
+            anyOf: [
+                {
+                    type: 'string',
+                    maxLength: 2000
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Rules'
+        },
+        theme_color: {
+            anyOf: [
+                {
+                    type: 'string',
+                    maxLength: 20
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Theme Color'
+        },
+        id: {
+            type: 'string',
+            format: 'uuid',
+            title: 'Id'
+        },
+        created_at: {
+            type: 'string',
+            format: 'date-time',
+            title: 'Created At'
+        },
+        updated_at: {
+            type: 'string',
+            format: 'date-time',
+            title: 'Updated At'
+        }
+    },
+    type: 'object',
+    required: ['name', 'id', 'created_at', 'updated_at'],
+    title: 'ClubPublic'
+} as const;
+
+export const ClubUpdateSchema = {
+    properties: {
+        name: {
+            anyOf: [
+                {
+                    type: 'string',
+                    maxLength: 100,
+                    minLength: 1
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Name'
+        },
+        description: {
+            anyOf: [
+                {
+                    type: 'string',
+                    maxLength: 1000
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Description'
+        },
+        cover_image_url: {
+            anyOf: [
+                {
+                    type: 'string',
+                    maxLength: 1000
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Cover Image Url'
+        },
+        visibility: {
+            anyOf: [
+                {
+                    '$ref': '#/components/schemas/ClubVisibility'
+                },
+                {
+                    type: 'null'
+                }
+            ]
+        },
+        rules: {
+            anyOf: [
+                {
+                    type: 'string',
+                    maxLength: 2000
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Rules'
+        },
+        theme_color: {
+            anyOf: [
+                {
+                    type: 'string',
+                    maxLength: 20
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Theme Color'
+        }
+    },
+    type: 'object',
+    title: 'ClubUpdate'
+} as const;
+
+export const ClubVisibilitySchema = {
+    type: 'string',
+    enum: ['public', 'private', 'invite_only'],
+    title: 'ClubVisibility'
+} as const;
+
+export const ClubWatchlistCreateSchema = {
+    properties: {
+        movie_imdb_id: {
+            type: 'string',
+            maxLength: 20,
+            title: 'Movie Imdb Id'
+        },
+        notes: {
+            anyOf: [
+                {
+                    type: 'string',
+                    maxLength: 1000
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Notes'
+        }
+    },
+    type: 'object',
+    required: ['movie_imdb_id'],
+    title: 'ClubWatchlistCreate'
+} as const;
+
+export const ClubWatchlistPublicSchema = {
+    properties: {
+        notes: {
+            anyOf: [
+                {
+                    type: 'string',
+                    maxLength: 1000
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Notes'
+        },
+        id: {
+            type: 'string',
+            format: 'uuid',
+            title: 'Id'
+        },
+        club_id: {
+            type: 'string',
+            format: 'uuid',
+            title: 'Club Id'
+        },
+        movie_id: {
+            type: 'string',
+            format: 'uuid',
+            title: 'Movie Id'
+        },
+        added_by_user_id: {
+            type: 'string',
+            format: 'uuid',
+            title: 'Added By User Id'
+        },
+        added_at: {
+            type: 'string',
+            format: 'date-time',
+            title: 'Added At'
+        }
+    },
+    type: 'object',
+    required: ['id', 'club_id', 'movie_id', 'added_by_user_id', 'added_at'],
+    title: 'ClubWatchlistPublic'
+} as const;
+
+export const ClubWatchlistVotePublicSchema = {
+    properties: {
+        vote_type: {
+            '$ref': '#/components/schemas/VoteType'
+        },
+        id: {
+            type: 'string',
+            format: 'uuid',
+            title: 'Id'
+        },
+        watchlist_entry_id: {
+            type: 'string',
+            format: 'uuid',
+            title: 'Watchlist Entry Id'
+        },
+        user_id: {
+            type: 'string',
+            format: 'uuid',
+            title: 'User Id'
+        },
+        created_at: {
+            type: 'string',
+            format: 'date-time',
+            title: 'Created At'
+        }
+    },
+    type: 'object',
+    required: ['vote_type', 'id', 'watchlist_entry_id', 'user_id', 'created_at'],
+    title: 'ClubWatchlistVotePublic'
+} as const;
+
+export const ClubWatchlistWithMovieSchema = {
+    properties: {
+        notes: {
+            anyOf: [
+                {
+                    type: 'string',
+                    maxLength: 1000
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Notes'
+        },
+        id: {
+            type: 'string',
+            format: 'uuid',
+            title: 'Id'
+        },
+        club_id: {
+            type: 'string',
+            format: 'uuid',
+            title: 'Club Id'
+        },
+        movie_id: {
+            type: 'string',
+            format: 'uuid',
+            title: 'Movie Id'
+        },
+        added_by_user_id: {
+            type: 'string',
+            format: 'uuid',
+            title: 'Added By User Id'
+        },
+        added_at: {
+            type: 'string',
+            format: 'date-time',
+            title: 'Added At'
+        },
+        movie: {
+            '$ref': '#/components/schemas/MoviePublic'
+        },
+        upvotes: {
+            type: 'integer',
+            title: 'Upvotes',
+            default: 0
+        },
+        downvotes: {
+            type: 'integer',
+            title: 'Downvotes',
+            default: 0
+        },
+        user_vote: {
+            anyOf: [
+                {
+                    '$ref': '#/components/schemas/VoteType'
+                },
+                {
+                    type: 'null'
+                }
+            ]
+        }
+    },
+    type: 'object',
+    required: ['id', 'club_id', 'movie_id', 'added_by_user_id', 'added_at', 'movie'],
+    title: 'ClubWatchlistWithMovie',
+    description: 'Club watchlist entry with movie details and vote counts'
+} as const;
+
+export const ClubWatchlistsPublicSchema = {
+    properties: {
+        data: {
+            items: {
+                '$ref': '#/components/schemas/ClubWatchlistWithMovie'
+            },
+            type: 'array',
+            title: 'Data'
+        },
+        count: {
+            type: 'integer',
+            title: 'Count'
+        }
+    },
+    type: 'object',
+    required: ['data', 'count'],
+    title: 'ClubWatchlistsPublic'
+} as const;
+
+export const ClubWithMembersSchema = {
+    properties: {
+        name: {
+            type: 'string',
+            maxLength: 100,
+            minLength: 1,
+            title: 'Name'
+        },
+        description: {
+            anyOf: [
+                {
+                    type: 'string',
+                    maxLength: 1000
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Description'
+        },
+        cover_image_url: {
+            anyOf: [
+                {
+                    type: 'string',
+                    maxLength: 1000
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Cover Image Url'
+        },
+        visibility: {
+            '$ref': '#/components/schemas/ClubVisibility',
+            default: 'public'
+        },
+        rules: {
+            anyOf: [
+                {
+                    type: 'string',
+                    maxLength: 2000
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Rules'
+        },
+        theme_color: {
+            anyOf: [
+                {
+                    type: 'string',
+                    maxLength: 20
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Theme Color'
+        },
+        id: {
+            type: 'string',
+            format: 'uuid',
+            title: 'Id'
+        },
+        created_at: {
+            type: 'string',
+            format: 'date-time',
+            title: 'Created At'
+        },
+        updated_at: {
+            type: 'string',
+            format: 'date-time',
+            title: 'Updated At'
+        },
+        members: {
+            items: {
+                '$ref': '#/components/schemas/ClubMemberWithUser'
+            },
+            type: 'array',
+            title: 'Members'
+        },
+        member_count: {
+            type: 'integer',
+            title: 'Member Count'
+        }
+    },
+    type: 'object',
+    required: ['name', 'id', 'created_at', 'updated_at', 'members', 'member_count'],
+    title: 'ClubWithMembers',
+    description: 'Club with member list'
+} as const;
+
+export const ClubsPublicSchema = {
+    properties: {
+        data: {
+            items: {
+                '$ref': '#/components/schemas/ClubPublic'
+            },
+            type: 'array',
+            title: 'Data'
+        },
+        count: {
+            type: 'integer',
+            title: 'Count'
+        }
+    },
+    type: 'object',
+    required: ['data', 'count'],
+    title: 'ClubsPublic'
+} as const;
+
 export const HTTPValidationErrorSchema = {
     properties: {
         detail: {
@@ -194,6 +782,12 @@ export const ItemsPublicSchema = {
     type: 'object',
     required: ['data', 'count'],
     title: 'ItemsPublic'
+} as const;
+
+export const MemberRoleSchema = {
+    type: 'string',
+    enum: ['owner', 'admin', 'member', 'pending'],
+    title: 'MemberRole'
 } as const;
 
 export const MessageSchema = {
@@ -1196,6 +1790,12 @@ export const ValidationErrorSchema = {
     type: 'object',
     required: ['loc', 'msg', 'type'],
     title: 'ValidationError'
+} as const;
+
+export const VoteTypeSchema = {
+    type: 'string',
+    enum: ['upvote', 'downvote'],
+    title: 'VoteType'
 } as const;
 
 export const WatchlistStatusSchema = {

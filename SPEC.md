@@ -689,18 +689,18 @@ CREATE INDEX idx_event_club_start ON event(club_id, start_time);
 
 ## Development Phases
 
-### Phase 1: Foundation (MVP)
-- [ ] OMDB integration (search, cache, display)
-- [ ] Movie details page
-- [ ] Personal watchlist (want to watch, watched)
-- [ ] Basic star ratings
-- [ ] Art Deco theme implementation
+### Phase 1: Foundation (MVP) ✅
+- [x] OMDB integration (search, cache, display)
+- [x] Movie details page
+- [x] Personal watchlist (want to watch, watched)
+- [x] Basic star ratings
+- [x] Art Deco theme implementation
 
-### Phase 2: Clubs Core
-- [ ] Club CRUD operations
-- [ ] Club membership (join, leave, invite)
-- [ ] Club watchlist with voting
-- [ ] Basic club dashboard
+### Phase 2: Clubs Core ✅
+- [x] Club CRUD operations
+- [x] Club membership (join, leave, role management)
+- [x] Club watchlist with voting
+- [x] Basic club dashboard
 
 ### Phase 3: Social Features
 - [ ] Written reviews with spoiler tags

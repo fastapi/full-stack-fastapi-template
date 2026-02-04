@@ -20,8 +20,10 @@ import { Route as LayoutSettingsRouteImport } from './routes/_layout/settings'
 import { Route as LayoutRatingsRouteImport } from './routes/_layout/ratings'
 import { Route as LayoutMoviesRouteImport } from './routes/_layout/movies'
 import { Route as LayoutItemsRouteImport } from './routes/_layout/items'
+import { Route as LayoutClubsRouteImport } from './routes/_layout/clubs'
 import { Route as LayoutAdminRouteImport } from './routes/_layout/admin'
 import { Route as LayoutMoviesImdbIdRouteImport } from './routes/_layout/movies.$imdbId'
+import { Route as LayoutClubsClubIdRouteImport } from './routes/_layout/clubs.$clubId'
 
 const SignupRoute = SignupRouteImport.update({
   id: '/signup',
@@ -77,6 +79,11 @@ const LayoutItemsRoute = LayoutItemsRouteImport.update({
   path: '/items',
   getParentRoute: () => LayoutRoute,
 } as any)
+const LayoutClubsRoute = LayoutClubsRouteImport.update({
+  id: '/clubs',
+  path: '/clubs',
+  getParentRoute: () => LayoutRoute,
+} as any)
 const LayoutAdminRoute = LayoutAdminRouteImport.update({
   id: '/admin',
   path: '/admin',
@@ -87,6 +94,11 @@ const LayoutMoviesImdbIdRoute = LayoutMoviesImdbIdRouteImport.update({
   path: '/$imdbId',
   getParentRoute: () => LayoutMoviesRoute,
 } as any)
+const LayoutClubsClubIdRoute = LayoutClubsClubIdRouteImport.update({
+  id: '/$clubId',
+  path: '/$clubId',
+  getParentRoute: () => LayoutClubsRoute,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof LayoutIndexRoute
@@ -95,11 +107,13 @@ export interface FileRoutesByFullPath {
   '/reset-password': typeof ResetPasswordRoute
   '/signup': typeof SignupRoute
   '/admin': typeof LayoutAdminRoute
+  '/clubs': typeof LayoutClubsRouteWithChildren
   '/items': typeof LayoutItemsRoute
   '/movies': typeof LayoutMoviesRouteWithChildren
   '/ratings': typeof LayoutRatingsRoute
   '/settings': typeof LayoutSettingsRoute
   '/watchlist': typeof LayoutWatchlistRoute
+  '/clubs/$clubId': typeof LayoutClubsClubIdRoute
   '/movies/$imdbId': typeof LayoutMoviesImdbIdRoute
 }
 export interface FileRoutesByTo {
@@ -108,12 +122,14 @@ export interface FileRoutesByTo {
   '/reset-password': typeof ResetPasswordRoute
   '/signup': typeof SignupRoute
   '/admin': typeof LayoutAdminRoute
+  '/clubs': typeof LayoutClubsRouteWithChildren
   '/items': typeof LayoutItemsRoute
   '/movies': typeof LayoutMoviesRouteWithChildren
   '/ratings': typeof LayoutRatingsRoute
   '/settings': typeof LayoutSettingsRoute
   '/watchlist': typeof LayoutWatchlistRoute
   '/': typeof LayoutIndexRoute
+  '/clubs/$clubId': typeof LayoutClubsClubIdRoute
   '/movies/$imdbId': typeof LayoutMoviesImdbIdRoute
 }
 export interface FileRoutesById {
@@ -124,12 +140,14 @@ export interface FileRoutesById {
   '/reset-password': typeof ResetPasswordRoute
   '/signup': typeof SignupRoute
   '/_layout/admin': typeof LayoutAdminRoute
+  '/_layout/clubs': typeof LayoutClubsRouteWithChildren
   '/_layout/items': typeof LayoutItemsRoute
   '/_layout/movies': typeof LayoutMoviesRouteWithChildren
   '/_layout/ratings': typeof LayoutRatingsRoute
   '/_layout/settings': typeof LayoutSettingsRoute
   '/_layout/watchlist': typeof LayoutWatchlistRoute
   '/_layout/': typeof LayoutIndexRoute
+  '/_layout/clubs/$clubId': typeof LayoutClubsClubIdRoute
   '/_layout/movies/$imdbId': typeof LayoutMoviesImdbIdRoute
 }
 export interface FileRouteTypes {
@@ -141,11 +159,13 @@ export interface FileRouteTypes {
     | '/reset-password'
     | '/signup'
     | '/admin'
+    | '/clubs'
     | '/items'
     | '/movies'
     | '/ratings'
     | '/settings'
     | '/watchlist'
+    | '/clubs/$clubId'
     | '/movies/$imdbId'
   fileRoutesByTo: FileRoutesByTo
   to:
@@ -154,12 +174,14 @@ export interface FileRouteTypes {
     | '/reset-password'
     | '/signup'
     | '/admin'
+    | '/clubs'
     | '/items'
     | '/movies'
     | '/ratings'
     | '/settings'
     | '/watchlist'
     | '/'
+    | '/clubs/$clubId'
     | '/movies/$imdbId'
   id:
     | '__root__'
@@ -169,12 +191,14 @@ export interface FileRouteTypes {
     | '/reset-password'
     | '/signup'
     | '/_layout/admin'
+    | '/_layout/clubs'
     | '/_layout/items'
     | '/_layout/movies'
     | '/_layout/ratings'
     | '/_layout/settings'
     | '/_layout/watchlist'
     | '/_layout/'
+    | '/_layout/clubs/$clubId'
     | '/_layout/movies/$imdbId'
   fileRoutesById: FileRoutesById
 }
@@ -265,6 +289,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof LayoutItemsRouteImport
       parentRoute: typeof LayoutRoute
     }
+    '/_layout/clubs': {
+      id: '/_layout/clubs'
+      path: '/clubs'
+      fullPath: '/clubs'
+      preLoaderRoute: typeof LayoutClubsRouteImport
+      parentRoute: typeof LayoutRoute
+    }
     '/_layout/admin': {
       id: '/_layout/admin'
       path: '/admin'
@@ -279,8 +310,27 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof LayoutMoviesImdbIdRouteImport
       parentRoute: typeof LayoutMoviesRoute
     }
+    '/_layout/clubs/$clubId': {
+      id: '/_layout/clubs/$clubId'
+      path: '/$clubId'
+      fullPath: '/clubs/$clubId'
+      preLoaderRoute: typeof LayoutClubsClubIdRouteImport
+      parentRoute: typeof LayoutClubsRoute
+    }
   }
 }
+
+interface LayoutClubsRouteChildren {
+  LayoutClubsClubIdRoute: typeof LayoutClubsClubIdRoute
+}
+
+const LayoutClubsRouteChildren: LayoutClubsRouteChildren = {
+  LayoutClubsClubIdRoute: LayoutClubsClubIdRoute,
+}
+
+const LayoutClubsRouteWithChildren = LayoutClubsRoute._addFileChildren(
+  LayoutClubsRouteChildren,
+)
 
 interface LayoutMoviesRouteChildren {
   LayoutMoviesImdbIdRoute: typeof LayoutMoviesImdbIdRoute
@@ -296,6 +346,7 @@ const LayoutMoviesRouteWithChildren = LayoutMoviesRoute._addFileChildren(
 
 interface LayoutRouteChildren {
   LayoutAdminRoute: typeof LayoutAdminRoute
+  LayoutClubsRoute: typeof LayoutClubsRouteWithChildren
   LayoutItemsRoute: typeof LayoutItemsRoute
   LayoutMoviesRoute: typeof LayoutMoviesRouteWithChildren
   LayoutRatingsRoute: typeof LayoutRatingsRoute
@@ -306,6 +357,7 @@ interface LayoutRouteChildren {
 
 const LayoutRouteChildren: LayoutRouteChildren = {
   LayoutAdminRoute: LayoutAdminRoute,
+  LayoutClubsRoute: LayoutClubsRouteWithChildren,
   LayoutItemsRoute: LayoutItemsRoute,
   LayoutMoviesRoute: LayoutMoviesRouteWithChildren,
   LayoutRatingsRoute: LayoutRatingsRoute,

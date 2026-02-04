@@ -2,7 +2,28 @@
 
 ## Latest Changes
 
+### Features
+
+* ✨ Add Movie Clubs feature with shared watchlists and voting. Users can now create clubs, invite members, manage roles (owner/admin/member), add movies to club watchlists, and vote on what to watch next.
+
+* 🎨 Rebrand from "FastAPI" to "Vantage" - Updated all branding including logos, page titles, and footer throughout the application.
+
+### Backend
+
+* 🗃️ Add Club models: `Club`, `ClubMember`, `ClubWatchlist`, `ClubWatchlistVote` with full CRUD API endpoints.
+* 🗃️ Add enums: `ClubVisibility` (public/private/invite_only), `MemberRole` (owner/admin/member/pending), `VoteType` (upvote/downvote).
+* 🔗 Add foreign key relationship from `Rating.club_id` to `Club` for club-context ratings.
+
+### Frontend
+
+* 📱 Add 8 new Club components: `ClubCard`, `CreateClubDialog`, `ClubHeader`, `ClubWatchlistCard`, `MemberList`, `MemberRoleBadge`, `VoteButtons`, `AddMovieToClubDialog`.
+* 🛣️ Add new routes: `/clubs` (list page) and `/clubs/:clubId` (detail page).
+* 🧭 Add "My Clubs" to sidebar navigation (prominent 2nd position).
+* 🏠 Add clubs section to dashboard with quick access to user's clubs.
+* 🧩 Add missing UI components: `Textarea`, `AlertDialog`.
+
 ### Docs
+
 
 * 📝 Add `CONTRIBUTING.md`. PR [#2159](https://github.com/fastapi/full-stack-fastapi-template/pull/2159) by [@alejsdev](https://github.com/alejsdev).
 

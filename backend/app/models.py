@@ -13,6 +13,24 @@ class WatchlistStatus(str, enum.Enum):
     WATCHED = "watched"
 
 
+class ClubVisibility(str, enum.Enum):
+    PUBLIC = "public"
+    PRIVATE = "private"
+    INVITE_ONLY = "invite_only"
+
+
+class MemberRole(str, enum.Enum):
+    OWNER = "owner"
+    ADMIN = "admin"
+    MEMBER = "member"
+    PENDING = "pending"
+
+
+class VoteType(str, enum.Enum):
+    UPVOTE = "upvote"
+    DOWNVOTE = "downvote"
+
+
 def get_datetime_utc() -> datetime:
     return datetime.now(timezone.utc)
 
@@ -65,6 +83,9 @@ class User(UserBase, table=True):
         back_populates="user", cascade_delete=True
     )
     ratings: list["Rating"] = Relationship(back_populates="user", cascade_delete=True)
+    club_memberships: list["ClubMember"] = Relationship(
+        back_populates="user", cascade_delete=True
+    )
 
 
 # Properties to return via API, id is always required
@@ -159,6 +180,9 @@ class Movie(MovieBase, table=True):
         back_populates="movie", cascade_delete=True
     )
     ratings: list["Rating"] = Relationship(back_populates="movie", cascade_delete=True)
+    club_watchlist_entries: list["ClubWatchlist"] = Relationship(
+        back_populates="movie", cascade_delete=True
+    )
 
 
 class MoviePublic(MovieBase):
@@ -232,7 +256,7 @@ class UserWatchlist(UserWatchlistBase, table=True):
 
     # Relationships
     user: User | None = Relationship(back_populates="watchlist_entries")
-    movie: "Movie | None" = Relationship(back_populates="watchlist_entries")
+    movie: Movie | None = Relationship(back_populates="watchlist_entries")
 
 
 class UserWatchlistPublic(UserWatchlistBase):
@@ -278,7 +302,9 @@ class Rating(RatingBase, table=True):
     movie_id: uuid.UUID = Field(
         foreign_key="movie.id", nullable=False, ondelete="CASCADE"
     )
-    club_id: uuid.UUID | None = Field(default=None)  # FK to Club added in Phase 2
+    club_id: uuid.UUID | None = Field(
+        default=None, foreign_key="club.id", ondelete="SET NULL"
+    )
     created_at: datetime = Field(
         default_factory=get_datetime_utc,
         sa_type=DateTime(timezone=True),  # type: ignore
@@ -290,7 +316,7 @@ class Rating(RatingBase, table=True):
 
     # Relationships
     user: User | None = Relationship(back_populates="ratings")
-    movie: "Movie | None" = Relationship(back_populates="ratings")
+    movie: Movie | None = Relationship(back_populates="ratings")
 
 
 class RatingPublic(RatingBase):
@@ -309,6 +335,219 @@ class RatingWithMovie(RatingPublic):
 class RatingsPublic(SQLModel):
     data: list[RatingWithMovie]
     count: int
+
+
+# ============================================================================
+# CLUB MODELS
+# ============================================================================
+
+
+class ClubBase(SQLModel):
+    name: str = Field(min_length=1, max_length=100)
+    description: str | None = Field(default=None, max_length=1000)
+    cover_image_url: str | None = Field(default=None, max_length=1000)
+    visibility: ClubVisibility = ClubVisibility.PUBLIC
+    rules: str | None = Field(default=None, max_length=2000)
+    theme_color: str | None = Field(default=None, max_length=20)
+
+
+class ClubCreate(SQLModel):
+    name: str = Field(min_length=1, max_length=100)
+    description: str | None = Field(default=None, max_length=1000)
+    visibility: ClubVisibility = ClubVisibility.PUBLIC
+    rules: str | None = Field(default=None, max_length=2000)
+    theme_color: str | None = Field(default=None, max_length=20)
+
+
+class ClubUpdate(SQLModel):
+    name: str | None = Field(default=None, min_length=1, max_length=100)
+    description: str | None = Field(default=None, max_length=1000)
+    cover_image_url: str | None = Field(default=None, max_length=1000)
+    visibility: ClubVisibility | None = None
+    rules: str | None = Field(default=None, max_length=2000)
+    theme_color: str | None = Field(default=None, max_length=20)
+
+
+class Club(ClubBase, table=True):
+    id: uuid.UUID = Field(default_factory=uuid.uuid4, primary_key=True)
+    created_at: datetime = Field(
+        default_factory=get_datetime_utc,
+        sa_type=DateTime(timezone=True),  # type: ignore
+    )
+    updated_at: datetime = Field(
+        default_factory=get_datetime_utc,
+        sa_type=DateTime(timezone=True),  # type: ignore
+    )
+
+    # Relationships
+    members: list["ClubMember"] = Relationship(
+        back_populates="club", cascade_delete=True
+    )
+    watchlist_entries: list["ClubWatchlist"] = Relationship(
+        back_populates="club", cascade_delete=True
+    )
+    ratings: list["Rating"] = Relationship(
+        sa_relationship_kwargs={"foreign_keys": "[Rating.club_id]"}
+    )
+
+
+class ClubPublic(ClubBase):
+    id: uuid.UUID
+    created_at: datetime
+    updated_at: datetime
+
+
+class ClubsPublic(SQLModel):
+    data: list[ClubPublic]
+    count: int
+
+
+# ============================================================================
+# CLUB MEMBER MODELS
+# ============================================================================
+
+
+class ClubMemberBase(SQLModel):
+    role: MemberRole = MemberRole.MEMBER
+
+
+class ClubMember(ClubMemberBase, table=True):
+    __tablename__ = "club_member"
+
+    id: uuid.UUID = Field(default_factory=uuid.uuid4, primary_key=True)
+    club_id: uuid.UUID = Field(
+        foreign_key="club.id", nullable=False, ondelete="CASCADE"
+    )
+    user_id: uuid.UUID = Field(
+        foreign_key="user.id", nullable=False, ondelete="CASCADE"
+    )
+    joined_at: datetime = Field(
+        default_factory=get_datetime_utc,
+        sa_type=DateTime(timezone=True),  # type: ignore
+    )
+
+    # Relationships
+    club: Club | None = Relationship(back_populates="members")
+    user: User | None = Relationship(back_populates="club_memberships")
+
+
+class ClubMemberPublic(ClubMemberBase):
+    id: uuid.UUID
+    club_id: uuid.UUID
+    user_id: uuid.UUID
+    joined_at: datetime
+
+
+class ClubMemberWithUser(ClubMemberPublic):
+    """Club member with user details"""
+    user: UserPublic
+
+
+class ClubMembersPublic(SQLModel):
+    data: list[ClubMemberWithUser]
+    count: int
+
+
+class ClubWithMembers(ClubPublic):
+    """Club with member list"""
+    members: list[ClubMemberWithUser]
+    member_count: int
+
+
+# ============================================================================
+# CLUB WATCHLIST MODELS
+# ============================================================================
+
+
+class ClubWatchlistBase(SQLModel):
+    notes: str | None = Field(default=None, max_length=1000)
+
+
+class ClubWatchlistCreate(SQLModel):
+    movie_imdb_id: str = Field(max_length=20)
+    notes: str | None = Field(default=None, max_length=1000)
+
+
+class ClubWatchlist(ClubWatchlistBase, table=True):
+    __tablename__ = "club_watchlist"
+
+    id: uuid.UUID = Field(default_factory=uuid.uuid4, primary_key=True)
+    club_id: uuid.UUID = Field(
+        foreign_key="club.id", nullable=False, ondelete="CASCADE"
+    )
+    movie_id: uuid.UUID = Field(
+        foreign_key="movie.id", nullable=False, ondelete="CASCADE"
+    )
+    added_by_user_id: uuid.UUID = Field(
+        foreign_key="user.id", nullable=False, ondelete="CASCADE"
+    )
+    added_at: datetime = Field(
+        default_factory=get_datetime_utc,
+        sa_type=DateTime(timezone=True),  # type: ignore
+    )
+
+    # Relationships
+    club: Club | None = Relationship(back_populates="watchlist_entries")
+    movie: Movie | None = Relationship(back_populates="club_watchlist_entries")
+    votes: list["ClubWatchlistVote"] = Relationship(
+        back_populates="watchlist_entry", cascade_delete=True
+    )
+
+
+class ClubWatchlistPublic(ClubWatchlistBase):
+    id: uuid.UUID
+    club_id: uuid.UUID
+    movie_id: uuid.UUID
+    added_by_user_id: uuid.UUID
+    added_at: datetime
+
+
+class ClubWatchlistWithMovie(ClubWatchlistPublic):
+    """Club watchlist entry with movie details and vote counts"""
+    movie: MoviePublic
+    upvotes: int = 0
+    downvotes: int = 0
+    user_vote: VoteType | None = None
+
+
+class ClubWatchlistsPublic(SQLModel):
+    data: list[ClubWatchlistWithMovie]
+    count: int
+
+
+# ============================================================================
+# CLUB WATCHLIST VOTE MODELS
+# ============================================================================
+
+
+class ClubWatchlistVoteBase(SQLModel):
+    vote_type: VoteType
+
+
+class ClubWatchlistVote(ClubWatchlistVoteBase, table=True):
+    __tablename__ = "club_watchlist_vote"
+
+    id: uuid.UUID = Field(default_factory=uuid.uuid4, primary_key=True)
+    watchlist_entry_id: uuid.UUID = Field(
+        foreign_key="club_watchlist.id", nullable=False, ondelete="CASCADE"
+    )
+    user_id: uuid.UUID = Field(
+        foreign_key="user.id", nullable=False, ondelete="CASCADE"
+    )
+    created_at: datetime = Field(
+        default_factory=get_datetime_utc,
+        sa_type=DateTime(timezone=True),  # type: ignore
+    )
+
+    # Relationships
+    watchlist_entry: ClubWatchlist | None = Relationship(back_populates="votes")
+
+
+class ClubWatchlistVotePublic(ClubWatchlistVoteBase):
+    id: uuid.UUID
+    watchlist_entry_id: uuid.UUID
+    user_id: uuid.UUID
+    created_at: datetime
 
 
 # Generic message

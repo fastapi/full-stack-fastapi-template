@@ -1,4 +1,4 @@
-import { Briefcase, Film, Home, ListVideo, Star, Users } from "lucide-react"
+import { Briefcase, Film, Home, ListVideo, Star, Users, Users2 } from "lucide-react"
 
 import { SidebarAppearance } from "@/components/Common/Appearance"
 import { Logo } from "@/components/Common/Logo"
@@ -14,6 +14,7 @@ import { User } from "./User"
 
 const baseItems: Item[] = [
   { icon: Home, title: "Dashboard", path: "/" },
+  { icon: Users2, title: "My Clubs", path: "/clubs" },
   { icon: Film, title: "Movies", path: "/movies" },
   { icon: ListVideo, title: "Watchlist", path: "/watchlist" },
   { icon: Star, title: "My Ratings", path: "/ratings" },

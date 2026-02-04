@@ -9,6 +9,122 @@ export type Body_login_login_access_token = {
     client_secret?: (string | null);
 };
 
+export type ClubCreate = {
+    name: string;
+    description?: (string | null);
+    visibility?: ClubVisibility;
+    rules?: (string | null);
+    theme_color?: (string | null);
+};
+
+export type ClubMemberPublic = {
+    role?: MemberRole;
+    id: string;
+    club_id: string;
+    user_id: string;
+    joined_at: string;
+};
+
+/**
+ * Club member with user details
+ */
+export type ClubMemberWithUser = {
+    role?: MemberRole;
+    id: string;
+    club_id: string;
+    user_id: string;
+    joined_at: string;
+    user: UserPublic;
+};
+
+export type ClubPublic = {
+    name: string;
+    description?: (string | null);
+    cover_image_url?: (string | null);
+    visibility?: ClubVisibility;
+    rules?: (string | null);
+    theme_color?: (string | null);
+    id: string;
+    created_at: string;
+    updated_at: string;
+};
+
+export type ClubsPublic = {
+    data: Array<ClubPublic>;
+    count: number;
+};
+
+export type ClubUpdate = {
+    name?: (string | null);
+    description?: (string | null);
+    cover_image_url?: (string | null);
+    visibility?: (ClubVisibility | null);
+    rules?: (string | null);
+    theme_color?: (string | null);
+};
+
+export type ClubVisibility = 'public' | 'private' | 'invite_only';
+
+export type ClubWatchlistCreate = {
+    movie_imdb_id: string;
+    notes?: (string | null);
+};
+
+export type ClubWatchlistPublic = {
+    notes?: (string | null);
+    id: string;
+    club_id: string;
+    movie_id: string;
+    added_by_user_id: string;
+    added_at: string;
+};
+
+export type ClubWatchlistsPublic = {
+    data: Array<ClubWatchlistWithMovie>;
+    count: number;
+};
+
+export type ClubWatchlistVotePublic = {
+    vote_type: VoteType;
+    id: string;
+    watchlist_entry_id: string;
+    user_id: string;
+    created_at: string;
+};
+
+/**
+ * Club watchlist entry with movie details and vote counts
+ */
+export type ClubWatchlistWithMovie = {
+    notes?: (string | null);
+    id: string;
+    club_id: string;
+    movie_id: string;
+    added_by_user_id: string;
+    added_at: string;
+    movie: MoviePublic;
+    upvotes?: number;
+    downvotes?: number;
+    user_vote?: (VoteType | null);
+};
+
+/**
+ * Club with member list
+ */
+export type ClubWithMembers = {
+    name: string;
+    description?: (string | null);
+    cover_image_url?: (string | null);
+    visibility?: ClubVisibility;
+    rules?: (string | null);
+    theme_color?: (string | null);
+    id: string;
+    created_at: string;
+    updated_at: string;
+    members: Array<ClubMemberWithUser>;
+    member_count: number;
+};
+
 export type HTTPValidationError = {
     detail?: Array<ValidationError>;
 };
@@ -35,6 +151,8 @@ export type ItemUpdate = {
     title?: (string | null);
     description?: (string | null);
 };
+
+export type MemberRole = 'owner' | 'admin' | 'member' | 'pending';
 
 export type Message = {
     message: string;
@@ -231,7 +349,98 @@ export type ValidationError = {
     type: string;
 };
 
+export type VoteType = 'upvote' | 'downvote';
+
 export type WatchlistStatus = 'want_to_watch' | 'watched';
+
+export type ClubsListClubsData = {
+    limit?: number;
+    skip?: number;
+};
+
+export type ClubsListClubsResponse = (ClubsPublic);
+
+export type ClubsCreateClubData = {
+    requestBody: ClubCreate;
+};
+
+export type ClubsCreateClubResponse = (ClubPublic);
+
+export type ClubsGetClubData = {
+    clubId: string;
+};
+
+export type ClubsGetClubResponse = (ClubWithMembers);
+
+export type ClubsUpdateClubData = {
+    clubId: string;
+    requestBody: ClubUpdate;
+};
+
+export type ClubsUpdateClubResponse = (ClubPublic);
+
+export type ClubsDeleteClubData = {
+    clubId: string;
+};
+
+export type ClubsDeleteClubResponse = (Message);
+
+export type ClubsJoinClubData = {
+    clubId: string;
+};
+
+export type ClubsJoinClubResponse = (ClubMemberPublic);
+
+export type ClubsLeaveClubData = {
+    clubId: string;
+};
+
+export type ClubsLeaveClubResponse = (Message);
+
+export type ClubsUpdateMemberRoleData = {
+    clubId: string;
+    role: MemberRole;
+    userId: string;
+};
+
+export type ClubsUpdateMemberRoleResponse = (ClubMemberPublic);
+
+export type ClubsRemoveMemberData = {
+    clubId: string;
+    userId: string;
+};
+
+export type ClubsRemoveMemberResponse = (Message);
+
+export type ClubsGetClubWatchlistData = {
+    clubId: string;
+    limit?: number;
+    skip?: number;
+};
+
+export type ClubsGetClubWatchlistResponse = (ClubWatchlistsPublic);
+
+export type ClubsAddToClubWatchlistData = {
+    clubId: string;
+    requestBody: ClubWatchlistCreate;
+};
+
+export type ClubsAddToClubWatchlistResponse = (ClubWatchlistPublic);
+
+export type ClubsRemoveFromClubWatchlistData = {
+    clubId: string;
+    entryId: string;
+};
+
+export type ClubsRemoveFromClubWatchlistResponse = (Message);
+
+export type ClubsVoteOnWatchlistEntryData = {
+    clubId: string;
+    entryId: string;
+    voteType: VoteType;
+};
+
+export type ClubsVoteOnWatchlistEntryResponse = (ClubWatchlistVotePublic);
 
 export type ItemsReadItemsData = {
     limit?: number;

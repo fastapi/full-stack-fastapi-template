@@ -9,7 +9,7 @@ Vantage is a full-stack web application that enables teams and friend groups to:
 - **Discover Movies** - Search and explore films via OMDB API integration with local caching
 - **Personal Watchlists** - Track movies you want to watch and mark ones you've seen
 - **Rate & Review** - Rate movies on a 5-star scale with your personal collection
-- **Movie Clubs** (Coming Soon) - Create clubs with shared watchlists and voting
+- **Movie Clubs** - Create clubs with shared watchlists, member management, and voting
 - **Watch Parties** (Coming Soon) - Schedule events and coordinate viewing sessions
 - **Discussions** (Coming Soon) - Threaded forums for movie discussions
 
@@ -154,7 +154,8 @@ vantage/
 │   │   │       ├── users.py     # User management
 │   │   │       ├── movies.py    # Movie search & details
 │   │   │       ├── ratings.py   # Movie ratings
-│   │   │       └── watchlist.py # Personal watchlist
+│   │   │       ├── watchlist.py # Personal watchlist
+│   │   │       └── clubs.py     # Movie clubs
 │   │   ├── core/
 │   │   │   ├── config.py        # Settings with Pydantic
 │   │   │   ├── security.py      # Password hashing & JWT
@@ -173,6 +174,8 @@ vantage/
 │   │   │   ├── _layout.tsx      # Authenticated layout
 │   │   │   └── _layout/
 │   │   │       ├── index.tsx    # Dashboard
+│   │   │       ├── clubs.tsx    # Movie clubs list
+│   │   │       ├── clubs.$clubId.tsx   # Club details
 │   │   │       ├── movies.tsx   # Movie search
 │   │   │       ├── movies.$imdbId.tsx  # Movie details
 │   │   │       ├── watchlist.tsx       # Personal watchlist
@@ -180,6 +183,7 @@ vantage/
 │   │   │       └── settings.tsx # User settings
 │   │   ├── components/
 │   │   │   ├── Movies/          # Movie components
+│   │   │   ├── Clubs/           # Club components
 │   │   │   ├── Ratings/         # Rating components
 │   │   │   ├── ui/              # shadcn/ui components
 │   │   │   └── Sidebar/         # Navigation
@@ -262,9 +266,33 @@ vantage/
        │           │ id               │                  │
        └───────────┼─ user_id         │                  │
                    │ movie_id      ───┼──────────────────┘
+                   │ club_id (opt)    │
                    │ score (1-5)      │
                    │ created_at       │
                    └──────────────────┘
+
+┌──────────────┐       ┌──────────────────┐       ┌──────────────────┐
+│    Club      │       │   ClubMember     │       │  ClubWatchlist   │
+├──────────────┤       ├──────────────────┤       ├──────────────────┤
+│ id           │──┐    │ id               │       │ id               │
+│ name         │  │    │ club_id       ───┼───────┼─ club_id         │
+│ description  │  └────┼─ club_id         │       │ movie_id      ───┼──► Movie
+│ visibility   │       │ user_id       ───┼──► User │ added_by_user_id │
+│ rules        │       │ role             │       │ notes            │
+│ theme_color  │       │ joined_at        │       │ added_at         │
+│ created_at   │       └──────────────────┘       └──────────────────┘
+│ updated_at   │                                          │
+└──────────────┘       ┌──────────────────────────────────┘
+                       │
+               ┌───────▼──────────┐
+               │ ClubWatchlistVote│
+               ├──────────────────┤
+               │ id               │
+               │ watchlist_entry_id
+               │ user_id       ───┼──► User
+               │ vote_type        │
+               │ created_at       │
+               └──────────────────┘
 ```
 
 ### API Endpoints
@@ -305,6 +333,23 @@ vantage/
 | GET | `/api/v1/ratings/me` | Get user's ratings |
 | POST | `/api/v1/ratings/` | Create/update rating |
 | DELETE | `/api/v1/ratings/{id}` | Delete rating |
+
+#### Clubs
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| GET | `/api/v1/clubs/` | List clubs (public + user's clubs) |
+| POST | `/api/v1/clubs/` | Create new club |
+| GET | `/api/v1/clubs/{club_id}` | Get club with members |
+| PATCH | `/api/v1/clubs/{club_id}` | Update club (admin/owner) |
+| DELETE | `/api/v1/clubs/{club_id}` | Delete club (owner only) |
+| POST | `/api/v1/clubs/{club_id}/join` | Join club |
+| DELETE | `/api/v1/clubs/{club_id}/leave` | Leave club |
+| PATCH | `/api/v1/clubs/{club_id}/members/{user_id}` | Update member role |
+| DELETE | `/api/v1/clubs/{club_id}/members/{user_id}` | Remove member |
+| GET | `/api/v1/clubs/{club_id}/watchlist` | Get club watchlist |
+| POST | `/api/v1/clubs/{club_id}/watchlist` | Add movie to watchlist |
+| DELETE | `/api/v1/clubs/{club_id}/watchlist/{entry_id}` | Remove from watchlist |
+| POST | `/api/v1/clubs/{club_id}/watchlist/{entry_id}/vote` | Vote on movie |
 
 ## Development
 
@@ -387,7 +432,7 @@ See [deployment.md](deployment.md) for production deployment instructions coveri
 
 - [x] **Phase 1**: OMDB integration, movie search, personal watchlist
 - [x] **Phase 2**: Movie ratings, user profiles
-- [ ] **Phase 3**: Movie clubs with shared watchlists and voting
+- [x] **Phase 3**: Movie clubs with shared watchlists and voting
 - [ ] **Phase 4**: Written reviews and discussion forums
 - [ ] **Phase 5**: Watch party scheduling and events
 - [ ] **Phase 6**: Notifications, activity feeds, achievements

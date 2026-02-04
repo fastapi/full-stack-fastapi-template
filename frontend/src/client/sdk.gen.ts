@@ -3,7 +3,312 @@
 import type { CancelablePromise } from './core/CancelablePromise';
 import { OpenAPI } from './core/OpenAPI';
 import { request as __request } from './core/request';
-import type { ItemsReadItemsData, ItemsReadItemsResponse, ItemsCreateItemData, ItemsCreateItemResponse, ItemsReadItemData, ItemsReadItemResponse, ItemsUpdateItemData, ItemsUpdateItemResponse, ItemsDeleteItemData, ItemsDeleteItemResponse, LoginLoginAccessTokenData, LoginLoginAccessTokenResponse, LoginTestTokenResponse, LoginRecoverPasswordData, LoginRecoverPasswordResponse, LoginResetPasswordData, LoginResetPasswordResponse, LoginRecoverPasswordHtmlContentData, LoginRecoverPasswordHtmlContentResponse, MoviesSearchMoviesData, MoviesSearchMoviesResponse, MoviesGetMovieData, MoviesGetMovieResponse, MoviesGetMovieRatingsData, MoviesGetMovieRatingsResponse, PrivateCreateUserData, PrivateCreateUserResponse, RatingsCreateRatingData, RatingsCreateRatingResponse, RatingsGetMyRatingsData, RatingsGetMyRatingsResponse, RatingsUpdateRatingData, RatingsUpdateRatingResponse, RatingsDeleteRatingData, RatingsDeleteRatingResponse, UsersReadUsersData, UsersReadUsersResponse, UsersCreateUserData, UsersCreateUserResponse, UsersReadUserMeResponse, UsersDeleteUserMeResponse, UsersUpdateUserMeData, UsersUpdateUserMeResponse, UsersUpdatePasswordMeData, UsersUpdatePasswordMeResponse, UsersRegisterUserData, UsersRegisterUserResponse, UsersReadUserByIdData, UsersReadUserByIdResponse, UsersUpdateUserData, UsersUpdateUserResponse, UsersDeleteUserData, UsersDeleteUserResponse, UtilsTestEmailData, UtilsTestEmailResponse, UtilsHealthCheckResponse, WatchlistGetMyWatchlistData, WatchlistGetMyWatchlistResponse, WatchlistAddToWatchlistData, WatchlistAddToWatchlistResponse, WatchlistUpdateWatchlistEntryData, WatchlistUpdateWatchlistEntryResponse, WatchlistRemoveFromWatchlistData, WatchlistRemoveFromWatchlistResponse } from './types.gen';
+import type { ClubsListClubsData, ClubsListClubsResponse, ClubsCreateClubData, ClubsCreateClubResponse, ClubsGetClubData, ClubsGetClubResponse, ClubsUpdateClubData, ClubsUpdateClubResponse, ClubsDeleteClubData, ClubsDeleteClubResponse, ClubsJoinClubData, ClubsJoinClubResponse, ClubsLeaveClubData, ClubsLeaveClubResponse, ClubsUpdateMemberRoleData, ClubsUpdateMemberRoleResponse, ClubsRemoveMemberData, ClubsRemoveMemberResponse, ClubsGetClubWatchlistData, ClubsGetClubWatchlistResponse, ClubsAddToClubWatchlistData, ClubsAddToClubWatchlistResponse, ClubsRemoveFromClubWatchlistData, ClubsRemoveFromClubWatchlistResponse, ClubsVoteOnWatchlistEntryData, ClubsVoteOnWatchlistEntryResponse, ItemsReadItemsData, ItemsReadItemsResponse, ItemsCreateItemData, ItemsCreateItemResponse, ItemsReadItemData, ItemsReadItemResponse, ItemsUpdateItemData, ItemsUpdateItemResponse, ItemsDeleteItemData, ItemsDeleteItemResponse, LoginLoginAccessTokenData, LoginLoginAccessTokenResponse, LoginTestTokenResponse, LoginRecoverPasswordData, LoginRecoverPasswordResponse, LoginResetPasswordData, LoginResetPasswordResponse, LoginRecoverPasswordHtmlContentData, LoginRecoverPasswordHtmlContentResponse, MoviesSearchMoviesData, MoviesSearchMoviesResponse, MoviesGetMovieData, MoviesGetMovieResponse, MoviesGetMovieRatingsData, MoviesGetMovieRatingsResponse, PrivateCreateUserData, PrivateCreateUserResponse, RatingsCreateRatingData, RatingsCreateRatingResponse, RatingsGetMyRatingsData, RatingsGetMyRatingsResponse, RatingsUpdateRatingData, RatingsUpdateRatingResponse, RatingsDeleteRatingData, RatingsDeleteRatingResponse, UsersReadUsersData, UsersReadUsersResponse, UsersCreateUserData, UsersCreateUserResponse, UsersReadUserMeResponse, UsersDeleteUserMeResponse, UsersUpdateUserMeData, UsersUpdateUserMeResponse, UsersUpdatePasswordMeData, UsersUpdatePasswordMeResponse, UsersRegisterUserData, UsersRegisterUserResponse, UsersReadUserByIdData, UsersReadUserByIdResponse, UsersUpdateUserData, UsersUpdateUserResponse, UsersDeleteUserData, UsersDeleteUserResponse, UtilsTestEmailData, UtilsTestEmailResponse, UtilsHealthCheckResponse, WatchlistGetMyWatchlistData, WatchlistGetMyWatchlistResponse, WatchlistAddToWatchlistData, WatchlistAddToWatchlistResponse, WatchlistUpdateWatchlistEntryData, WatchlistUpdateWatchlistEntryResponse, WatchlistRemoveFromWatchlistData, WatchlistRemoveFromWatchlistResponse } from './types.gen';
+
+export class ClubsService {
+    /**
+     * List Clubs
+     * List all public clubs and clubs the user is a member of.
+     * @param data The data for the request.
+     * @param data.skip
+     * @param data.limit
+     * @returns ClubsPublic Successful Response
+     * @throws ApiError
+     */
+    public static listClubs(data: ClubsListClubsData = {}): CancelablePromise<ClubsListClubsResponse> {
+        return __request(OpenAPI, {
+            method: 'GET',
+            url: '/api/v1/clubs/',
+            query: {
+                skip: data.skip,
+                limit: data.limit
+            },
+            errors: {
+                422: 'Validation Error'
+            }
+        });
+    }
+    
+    /**
+     * Create Club
+     * Create a new club. The creator becomes the owner.
+     * @param data The data for the request.
+     * @param data.requestBody
+     * @returns ClubPublic Successful Response
+     * @throws ApiError
+     */
+    public static createClub(data: ClubsCreateClubData): CancelablePromise<ClubsCreateClubResponse> {
+        return __request(OpenAPI, {
+            method: 'POST',
+            url: '/api/v1/clubs/',
+            body: data.requestBody,
+            mediaType: 'application/json',
+            errors: {
+                422: 'Validation Error'
+            }
+        });
+    }
+    
+    /**
+     * Get Club
+     * Get club details with member list.
+     * @param data The data for the request.
+     * @param data.clubId
+     * @returns ClubWithMembers Successful Response
+     * @throws ApiError
+     */
+    public static getClub(data: ClubsGetClubData): CancelablePromise<ClubsGetClubResponse> {
+        return __request(OpenAPI, {
+            method: 'GET',
+            url: '/api/v1/clubs/{club_id}',
+            path: {
+                club_id: data.clubId
+            },
+            errors: {
+                422: 'Validation Error'
+            }
+        });
+    }
+    
+    /**
+     * Update Club
+     * Update club details. Requires admin or owner.
+     * @param data The data for the request.
+     * @param data.clubId
+     * @param data.requestBody
+     * @returns ClubPublic Successful Response
+     * @throws ApiError
+     */
+    public static updateClub(data: ClubsUpdateClubData): CancelablePromise<ClubsUpdateClubResponse> {
+        return __request(OpenAPI, {
+            method: 'PATCH',
+            url: '/api/v1/clubs/{club_id}',
+            path: {
+                club_id: data.clubId
+            },
+            body: data.requestBody,
+            mediaType: 'application/json',
+            errors: {
+                422: 'Validation Error'
+            }
+        });
+    }
+    
+    /**
+     * Delete Club
+     * Delete a club. Requires owner.
+     * @param data The data for the request.
+     * @param data.clubId
+     * @returns Message Successful Response
+     * @throws ApiError
+     */
+    public static deleteClub(data: ClubsDeleteClubData): CancelablePromise<ClubsDeleteClubResponse> {
+        return __request(OpenAPI, {
+            method: 'DELETE',
+            url: '/api/v1/clubs/{club_id}',
+            path: {
+                club_id: data.clubId
+            },
+            errors: {
+                422: 'Validation Error'
+            }
+        });
+    }
+    
+    /**
+     * Join Club
+     * Join a club. For invite-only clubs, creates pending membership.
+     * @param data The data for the request.
+     * @param data.clubId
+     * @returns ClubMemberPublic Successful Response
+     * @throws ApiError
+     */
+    public static joinClub(data: ClubsJoinClubData): CancelablePromise<ClubsJoinClubResponse> {
+        return __request(OpenAPI, {
+            method: 'POST',
+            url: '/api/v1/clubs/{club_id}/join',
+            path: {
+                club_id: data.clubId
+            },
+            errors: {
+                422: 'Validation Error'
+            }
+        });
+    }
+    
+    /**
+     * Leave Club
+     * Leave a club.
+     * @param data The data for the request.
+     * @param data.clubId
+     * @returns Message Successful Response
+     * @throws ApiError
+     */
+    public static leaveClub(data: ClubsLeaveClubData): CancelablePromise<ClubsLeaveClubResponse> {
+        return __request(OpenAPI, {
+            method: 'DELETE',
+            url: '/api/v1/clubs/{club_id}/leave',
+            path: {
+                club_id: data.clubId
+            },
+            errors: {
+                422: 'Validation Error'
+            }
+        });
+    }
+    
+    /**
+     * Update Member Role
+     * Update a member's role. Requires admin (for member changes) or owner (for admin changes).
+     * @param data The data for the request.
+     * @param data.clubId
+     * @param data.userId
+     * @param data.role
+     * @returns ClubMemberPublic Successful Response
+     * @throws ApiError
+     */
+    public static updateMemberRole(data: ClubsUpdateMemberRoleData): CancelablePromise<ClubsUpdateMemberRoleResponse> {
+        return __request(OpenAPI, {
+            method: 'PATCH',
+            url: '/api/v1/clubs/{club_id}/members/{user_id}',
+            path: {
+                club_id: data.clubId,
+                user_id: data.userId
+            },
+            query: {
+                role: data.role
+            },
+            errors: {
+                422: 'Validation Error'
+            }
+        });
+    }
+    
+    /**
+     * Remove Member
+     * Remove a member from the club. Requires admin or owner.
+     * @param data The data for the request.
+     * @param data.clubId
+     * @param data.userId
+     * @returns Message Successful Response
+     * @throws ApiError
+     */
+    public static removeMember(data: ClubsRemoveMemberData): CancelablePromise<ClubsRemoveMemberResponse> {
+        return __request(OpenAPI, {
+            method: 'DELETE',
+            url: '/api/v1/clubs/{club_id}/members/{user_id}',
+            path: {
+                club_id: data.clubId,
+                user_id: data.userId
+            },
+            errors: {
+                422: 'Validation Error'
+            }
+        });
+    }
+    
+    /**
+     * Get Club Watchlist
+     * Get club's watchlist with movies and vote counts.
+     * @param data The data for the request.
+     * @param data.clubId
+     * @param data.skip
+     * @param data.limit
+     * @returns ClubWatchlistsPublic Successful Response
+     * @throws ApiError
+     */
+    public static getClubWatchlist(data: ClubsGetClubWatchlistData): CancelablePromise<ClubsGetClubWatchlistResponse> {
+        return __request(OpenAPI, {
+            method: 'GET',
+            url: '/api/v1/clubs/{club_id}/watchlist',
+            path: {
+                club_id: data.clubId
+            },
+            query: {
+                skip: data.skip,
+                limit: data.limit
+            },
+            errors: {
+                422: 'Validation Error'
+            }
+        });
+    }
+    
+    /**
+     * Add To Club Watchlist
+     * Add a movie to the club's watchlist.
+     * @param data The data for the request.
+     * @param data.clubId
+     * @param data.requestBody
+     * @returns ClubWatchlistPublic Successful Response
+     * @throws ApiError
+     */
+    public static addToClubWatchlist(data: ClubsAddToClubWatchlistData): CancelablePromise<ClubsAddToClubWatchlistResponse> {
+        return __request(OpenAPI, {
+            method: 'POST',
+            url: '/api/v1/clubs/{club_id}/watchlist',
+            path: {
+                club_id: data.clubId
+            },
+            body: data.requestBody,
+            mediaType: 'application/json',
+            errors: {
+                422: 'Validation Error'
+            }
+        });
+    }
+    
+    /**
+     * Remove From Club Watchlist
+     * Remove a movie from the club's watchlist.
+     * Requires admin/owner or being the user who added it.
+     * @param data The data for the request.
+     * @param data.clubId
+     * @param data.entryId
+     * @returns Message Successful Response
+     * @throws ApiError
+     */
+    public static removeFromClubWatchlist(data: ClubsRemoveFromClubWatchlistData): CancelablePromise<ClubsRemoveFromClubWatchlistResponse> {
+        return __request(OpenAPI, {
+            method: 'DELETE',
+            url: '/api/v1/clubs/{club_id}/watchlist/{entry_id}',
+            path: {
+                club_id: data.clubId,
+                entry_id: data.entryId
+            },
+            errors: {
+                422: 'Validation Error'
+            }
+        });
+    }
+    
+    /**
+     * Vote On Watchlist Entry
+     * Vote on a watchlist entry. Toggle if voting same type again.
+     * @param data The data for the request.
+     * @param data.clubId
+     * @param data.entryId
+     * @param data.voteType
+     * @returns ClubWatchlistVotePublic Successful Response
+     * @throws ApiError
+     */
+    public static voteOnWatchlistEntry(data: ClubsVoteOnWatchlistEntryData): CancelablePromise<ClubsVoteOnWatchlistEntryResponse> {
+        return __request(OpenAPI, {
+            method: 'POST',
+            url: '/api/v1/clubs/{club_id}/watchlist/{entry_id}/vote',
+            path: {
+                club_id: data.clubId,
+                entry_id: data.entryId
+            },
+            query: {
+                vote_type: data.voteType
+            },
+            errors: {
+                422: 'Validation Error'
+            }
+        });
+    }
+}
 
 export class ItemsService {
     /**
