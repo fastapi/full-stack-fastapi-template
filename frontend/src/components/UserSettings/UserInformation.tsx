@@ -1,6 +1,6 @@
 import { zodResolver } from "@hookform/resolvers/zod"
 import { useMutation, useQueryClient } from "@tanstack/react-query"
-import { useState } from "react"
+import { useState, useRef, type ChangeEvent } from "react"
 import { useForm } from "react-hook-form"
 import { z } from "zod"
 
@@ -33,6 +33,40 @@ const UserInformation = () => {
   const { showSuccessToast, showErrorToast } = useCustomToast()
   const [editMode, setEditMode] = useState(false)
   const { user: currentUser } = useAuth()
+
+  const fileInputRef = useRef<HTMLInputElement>(null)
+
+  const handleAvatarClick = () => {
+    fileInputRef.current?.click()
+  }
+
+  const handleFileChange = async (event: ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0]
+    if (!file) return
+
+    const formData = new FormData()
+    formData.append("file", file)
+
+    try {
+        const token = localStorage.getItem("access_token")
+        const response = await fetch(`${import.meta.env.VITE_API_URL}/api/v1/users/me/avatar`, {
+            method: "POST",
+            headers: {
+                Authorization: `Bearer ${token}`,
+            },
+            body: formData,
+        })
+
+        if (!response.ok) {
+            throw new Error("Failed to upload avatar")
+        }
+        
+        showSuccessToast("Avatar updated successfully")
+        queryClient.invalidateQueries({ queryKey: ["currentUser"] })
+    } catch (error) {
+        showErrorToast("Error uploading avatar")
+    }
+  }
 
   const form = useForm<FormData>({
     resolver: zodResolver(formSchema),
@@ -83,6 +117,37 @@ const UserInformation = () => {
   return (
     <div className="max-w-md">
       <h3 className="text-lg font-semibold py-4">User Information</h3>
+      
+      <div className="flex items-center gap-4 mb-6">
+          <div 
+              className="relative w-24 h-24 rounded-full overflow-hidden bg-gray-100 border border-gray-200"
+          >
+              {currentUser?.avatar_url ? (
+                  <img 
+                      src={`${import.meta.env.VITE_API_URL}${currentUser.avatar_url}`} 
+                      alt="Avatar" 
+                      className="w-full h-full object-cover"
+                  />
+              ) : (
+                  <div className="flex items-center justify-center h-full text-3xl font-bold text-gray-300 uppercase">
+                      {currentUser?.full_name?.charAt(0) || currentUser?.email?.charAt(0) || "?"}
+                  </div>
+              )}
+          </div>
+          <div className="flex flex-col gap-2">
+            <Button variant="outline" size="sm" onClick={handleAvatarClick}>
+                Change Avatar
+            </Button>
+            <input 
+                type="file" 
+                ref={fileInputRef} 
+                className="hidden" 
+                accept="image/*"
+                onChange={handleFileChange}
+            />
+          </div>
+      </div>
+
       <Form {...form}>
         <form
           onSubmit={form.handleSubmit(onSubmit)}

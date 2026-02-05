@@ -11,6 +11,7 @@ services:
       timeout: 10s
     volumes:
       - app-db-data:/var/lib/postgresql/data/pgdata
+      - app-static-data:/app/backend/app/static
     env_file:
       - .env
     environment:
@@ -114,6 +115,9 @@ services:
       interval: 10s
       timeout: 5s
       retries: 5
+    
+    volumes:
+      - app-static-data:/app/backend/app/static
 
     build:
       context: .
@@ -167,6 +171,7 @@ services:
       - traefik.http.routers.${STACK_NAME?Variable not set}-frontend-http.middlewares=https-redirect
 volumes:
   app-db-data:
+  app-static-data:
 
 networks:
   traefik-public:
