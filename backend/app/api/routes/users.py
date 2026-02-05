@@ -1,9 +1,9 @@
-import uuid
 import shutil
+import uuid
 from pathlib import Path
 from typing import Any
 
-from fastapi import APIRouter, Depends, HTTPException, UploadFile, File
+from fastapi import APIRouter, Depends, File, HTTPException, UploadFile
 from sqlmodel import col, delete, func, select
 
 from app import crud
@@ -103,10 +103,7 @@ def update_user_me(
 
 @router.post("/me/avatar", response_model=UserPublic)
 def update_user_avatar(
-    *,
-    session: SessionDep,
-    current_user: CurrentUser,
-    file: UploadFile = File(...)
+    *, session: SessionDep, current_user: CurrentUser, file: UploadFile = File(...)
 ) -> Any:
     """
     Upload user avatar.
@@ -114,15 +111,15 @@ def update_user_avatar(
     # Ensure upload directory exists
     upload_dir = Path("app/static/uploads")
     upload_dir.mkdir(parents=True, exist_ok=True)
-    
+
     # Generate unique filename
     file_ext = Path(file.filename).suffix if file.filename else ""
     file_name = f"{current_user.id}_{uuid.uuid4()}{file_ext}"
     file_path = upload_dir / file_name
-    
+
     with file_path.open("wb") as buffer:
         shutil.copyfileobj(file.file, buffer)
-        
+
     # Update user profile
     # Assuming served at /static/uploads/
     avatar_url = f"/static/uploads/{file_name}"

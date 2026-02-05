@@ -9,6 +9,10 @@ export type Body_login_login_access_token = {
     client_secret?: (string | null);
 };
 
+export type Body_users_update_user_avatar = {
+    file: (Blob | File);
+};
+
 export type HTTPValidationError = {
     detail?: Array<ValidationError>;
 };
@@ -67,6 +71,7 @@ export type UserCreate = {
     is_active?: boolean;
     is_superuser?: boolean;
     full_name?: (string | null);
+    avatar_url?: (string | null);
     password: string;
 };
 
@@ -96,6 +101,7 @@ export type UserUpdate = {
     is_active?: boolean;
     is_superuser?: boolean;
     full_name?: (string | null);
+    avatar_url?: (string | null);
     password?: (string | null);
 };
 
@@ -196,6 +202,12 @@ export type UsersUpdateUserMeData = {
 };
 
 export type UsersUpdateUserMeResponse = (UserPublic);
+
+export type UsersUpdateUserAvatarData = {
+    formData: Body_users_update_user_avatar;
+};
+
+export type UsersUpdateUserAvatarResponse = (UserPublic);
 
 export type UsersUpdatePasswordMeData = {
     requestBody: UpdatePassword;

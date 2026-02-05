@@ -57,6 +57,19 @@ export const Body_login_login_access_tokenSchema = {
     title: 'Body_login-login_access_token'
 } as const;
 
+export const Body_users_update_user_avatarSchema = {
+    properties: {
+        file: {
+            type: 'string',
+            format: 'binary',
+            title: 'File'
+        }
+    },
+    type: 'object',
+    required: ['file'],
+    title: 'Body_users-update_user_avatar'
+} as const;
+
 export const HTTPValidationErrorSchema = {
     properties: {
         detail: {
@@ -318,6 +331,18 @@ export const UserCreateSchema = {
             ],
             title: 'Full Name'
         },
+        avatar_url: {
+            anyOf: [
+                {
+                    type: 'string',
+                    maxLength: 500
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Avatar Url'
+        },
         password: {
             type: 'string',
             maxLength: 128,
@@ -359,6 +384,18 @@ export const UserPublicSchema = {
                 }
             ],
             title: 'Full Name'
+        },
+        avatar_url: {
+            anyOf: [
+                {
+                    type: 'string',
+                    maxLength: 500
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Avatar Url'
         },
         id: {
             type: 'string',
@@ -451,6 +488,18 @@ export const UserUpdateSchema = {
                 }
             ],
             title: 'Full Name'
+        },
+        avatar_url: {
+            anyOf: [
+                {
+                    type: 'string',
+                    maxLength: 500
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Avatar Url'
         },
         password: {
             anyOf: [
