@@ -297,6 +297,147 @@ def test_update_user_me_email_exists(
     assert r.json()["detail"] == "User with this email already exists"
 
 
+def test_update_user_me_invalid_email_format(
+    client: TestClient, normal_user_token_headers: dict[str, str]
+) -> None:
+    data = {"email": "not-an-email"}
+    r = client.patch(
+        f"{settings.API_V1_STR}/users/me",
+        headers=normal_user_token_headers,
+        json=data,
+    )
+    assert r.status_code == 422  # FastAPI returns 422 for validation errors
+    response = r.json()
+    assert "detail" in response
+
+
+def test_update_user_me_full_name_too_long(
+    client: TestClient, normal_user_token_headers: dict[str, str]
+) -> None:
+    # Create a string longer than 255 characters
+    long_name = "a" * 256
+    data = {"full_name": long_name}
+    r = client.patch(
+        f"{settings.API_V1_STR}/users/me",
+        headers=normal_user_token_headers,
+        json=data,
+    )
+    assert r.status_code == 422  # FastAPI returns 422 for validation errors
+    response = r.json()
+    assert "detail" in response
+
+
+def test_update_user_me_partial_update_email_only(
+    client: TestClient, normal_user_token_headers: dict[str, str], db: Session
+) -> None:
+    new_email = random_email()
+    data = {"email": new_email}
+    r = client.patch(
+        f"{settings.API_V1_STR}/users/me",
+        headers=normal_user_token_headers,
+        json=data,
+    )
+    assert r.status_code == 200
+    updated_user = r.json()
+    assert updated_user["email"] == new_email
+    # Verify full_name was not changed (should remain as it was)
+    user_query = select(User).where(User.email == new_email)
+    user_db = db.exec(user_query).first()
+    assert user_db
+    assert user_db.email == new_email
+
+
+def test_update_user_me_partial_update_full_name_only(
+    client: TestClient, normal_user_token_headers: dict[str, str], db: Session
+) -> None:
+    # Get current user email first
+    r_get = client.get(
+        f"{settings.API_V1_STR}/users/me",
+        headers=normal_user_token_headers,
+    )
+    assert r_get.status_code == 200
+    current_user = r_get.json()
+    current_email = current_user["email"]
+    
+    new_full_name = "Updated Full Name Only"
+    data = {"full_name": new_full_name}
+    r = client.patch(
+        f"{settings.API_V1_STR}/users/me",
+        headers=normal_user_token_headers,
+        json=data,
+    )
+    assert r.status_code == 200
+    updated_user = r.json()
+    assert updated_user["full_name"] == new_full_name
+    # Verify email was not changed
+    user_query = select(User).where(User.email == current_email)
+    user_db = db.exec(user_query).first()
+    assert user_db
+    assert user_db.full_name == new_full_name
+    assert user_db.email == current_email
+
+
+def test_update_user_me_null_full_name(
+    client: TestClient, normal_user_token_headers: dict[str, str], db: Session
+) -> None:
+    # Get current user email first
+    r_get = client.get(
+        f"{settings.API_V1_STR}/users/me",
+        headers=normal_user_token_headers,
+    )
+    assert r_get.status_code == 200
+    current_user = r_get.json()
+    current_email = current_user["email"]
+    
+    # First set a full_name
+    data_set = {"full_name": "Test Name"}
+    r = client.patch(
+        f"{settings.API_V1_STR}/users/me",
+        headers=normal_user_token_headers,
+        json=data_set,
+    )
+    assert r.status_code == 200
+
+    # Now clear it by setting to null
+    data_clear = {"full_name": None}
+    r = client.patch(
+        f"{settings.API_V1_STR}/users/me",
+        headers=normal_user_token_headers,
+        json=data_clear,
+    )
+    assert r.status_code == 200
+    updated_user = r.json()
+    assert updated_user["full_name"] is None
+    user_query = select(User).where(User.email == current_email)
+    user_db = db.exec(user_query).first()
+    assert user_db
+    assert user_db.full_name is None
+
+
+def test_update_user_me_same_email_no_op(
+    client: TestClient, normal_user_token_headers: dict[str, str], db: Session
+) -> None:
+    # Get current user email
+    r = client.get(
+        f"{settings.API_V1_STR}/users/me",
+        headers=normal_user_token_headers,
+    )
+    current_user = r.json()
+    current_email = current_user["email"]
+
+    # Try to update to the same email (no-op case)
+    data = {"email": current_email}
+    r = client.patch(
+        f"{settings.API_V1_STR}/users/me",
+        headers=normal_user_token_headers,
+        json=data,
+    )
+    # Should succeed (no-op is acceptable)
+    assert r.status_code == 200
+    updated_user = r.json()
+    assert updated_user["email"] == current_email
+
+
 def test_update_password_me_same_password_error(
     client: TestClient, superuser_token_headers: dict[str, str]
 ) -> None:

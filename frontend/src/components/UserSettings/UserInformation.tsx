@@ -4,7 +4,7 @@ import { useState } from "react"
 import { useForm } from "react-hook-form"
 import { z } from "zod"
 
-import { UsersService, type UserUpdateMe } from "@/client"
+import { ApiError, UsersService, type UserUpdateMe } from "@/client"
 import { Button } from "@/components/ui/button"
 import {
   Form,
@@ -22,7 +22,7 @@ import { cn } from "@/lib/utils"
 import { handleError } from "@/utils"
 
 const formSchema = z.object({
-  full_name: z.string().max(30).optional(),
+  full_name: z.string().max(255).optional(),
   email: z.email({ message: "Invalid email address" }),
 })
 
@@ -53,9 +53,19 @@ const UserInformation = () => {
       UsersService.updateUserMe({ requestBody: data }),
     onSuccess: () => {
       showSuccessToast("User updated successfully")
+      queryClient.invalidateQueries()
       toggleEditMode()
     },
-    onError: handleError.bind(showErrorToast),
+    onError: (error) => {
+      // Enhanced error handling for better user feedback
+      if (error instanceof ApiError && error.status === 409) {
+        showErrorToast("This email address is already in use. Please choose a different email.")
+      } else if (error instanceof ApiError) {
+        handleError.bind(showErrorToast)(error)
+      } else {
+        showErrorToast("An unexpected error occurred. Please try again.")
+      }
+    },
     onSettled: () => {
       queryClient.invalidateQueries()
     },
@@ -76,7 +86,11 @@ const UserInformation = () => {
   }
 
   const onCancel = () => {
-    form.reset()
+    // Reset form to original values from currentUser
+    form.reset({
+      full_name: currentUser?.full_name ?? undefined,
+      email: currentUser?.email,
+    })
     toggleEditMode()
   }
 

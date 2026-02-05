@@ -60,6 +60,86 @@ test.describe("Edit user profile", () => {
 
     await expect(page.getByText("Invalid email address")).toBeVisible()
   })
+
+  test("Edit user full_name with valid name (255 chars max)", async ({
+    page,
+  }) => {
+    const longName = "A".repeat(255)
+    await page.getByRole("button", { name: "Edit" }).click()
+    await page.getByLabel("Full name").fill(longName)
+    await page.getByRole("button", { name: "Save" }).click()
+
+    await expect(page.getByText("User updated successfully")).toBeVisible()
+    await expect(
+      page.locator("form").getByText(longName, { exact: true }),
+    ).toBeVisible()
+  })
+
+  test("Edit user full_name exceeding 255 chars shows validation error", async ({
+    page,
+  }) => {
+    const tooLongName = "A".repeat(256)
+    await page.getByRole("button", { name: "Edit" }).click()
+    await page.getByLabel("Full name").fill(tooLongName)
+    await page.locator("body").click()
+
+    // Zod validation should catch this client-side
+    await expect(
+      page.getByText(/String must contain at most 255 character/i),
+    ).toBeVisible()
+  })
+
+  test("Partial update - email only", async ({ page }) => {
+    const newEmail = randomEmail()
+    // Get original full_name before edit
+    const originalNameElement = page
+      .locator("form")
+      .getByText(/N\/A|.*/, { exact: false })
+      .filter({ hasText: /^(?!Email)/ })
+      .first()
+    const originalName = (await originalNameElement.textContent()) || ""
+
+    await page.getByRole("button", { name: "Edit" }).click()
+    await page.getByLabel("Email").fill(newEmail)
+    await page.getByRole("button", { name: "Save" }).click()
+
+    await expect(page.getByText("User updated successfully")).toBeVisible()
+    await expect(
+      page.locator("form").getByText(newEmail, { exact: true }),
+    ).toBeVisible()
+    // Full name should remain unchanged (check in view mode)
+    if (originalName && originalName !== "N/A") {
+      await expect(
+        page.locator("form").getByText(originalName.trim(), { exact: false }),
+      ).toBeVisible()
+    }
+  })
+
+  test("Partial update - full_name only", async ({ page }) => {
+    const newName = "Updated Name Only"
+    // Get original email from the form (in view mode, email is displayed as text)
+    const originalEmailText = await page
+      .locator("form")
+      .getByLabel("Email")
+      .locator("..")
+      .locator("p")
+      .textContent()
+
+    await page.getByRole("button", { name: "Edit" }).click()
+    await page.getByLabel("Full name").fill(newName)
+    await page.getByRole("button", { name: "Save" }).click()
+
+    await expect(page.getByText("User updated successfully")).toBeVisible()
+    await expect(
+      page.locator("form").getByText(newName, { exact: true }),
+    ).toBeVisible()
+    // Email should remain unchanged - verify it's still displayed
+    if (originalEmailText) {
+      await expect(
+        page.locator("form").getByText(originalEmailText.trim(), { exact: true }),
+      ).toBeVisible()
+    }
+  })
 })
 
 test.describe("Edit user email", () => {
@@ -82,6 +162,33 @@ test.describe("Edit user email", () => {
     await expect(page.getByText("User updated successfully")).toBeVisible()
     await expect(
       page.locator("form").getByText(updatedEmail, { exact: true }),
+    ).toBeVisible()
+  })
+
+  test("Edit user email with duplicate email shows error", async ({
+    page,
+  }) => {
+    const email1 = randomEmail()
+    const email2 = randomEmail()
+    const password = randomPassword()
+
+    // Create two users
+    await createUser({ email: email1, password })
+    await createUser({ email: email2, password: randomPassword() })
+
+    // Login as first user
+    await logInUser(page, email1, password)
+    await page.goto("/settings")
+    await page.getByRole("tab", { name: "My profile" }).click()
+
+    // Try to update email to second user's email
+    await page.getByRole("button", { name: "Edit" }).click()
+    await page.getByLabel("Email").fill(email2)
+    await page.getByRole("button", { name: "Save" }).click()
+
+    // Should show error about duplicate email
+    await expect(
+      page.getByText(/email.*already.*use|already.*exists/i),
     ).toBeVisible()
   })
 })

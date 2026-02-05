@@ -1,0 +1,30 @@
+﻿# full-stack-fastapi-template Development Guidelines
+
+Auto-generated from all feature plans. Last updated: 2026-02-04
+
+## Active Technologies
+
+- Python >=3.10,<4.0 + FastAPI >=0.114.2, SQLModel >=0.0.21, Pydantic >2.0, React 19+, TypeScript 5.9+ (001-user-profile-management)
+
+## Project Structure
+
+```text
+backend/
+frontend/
+tests/
+```
+
+## Commands
+
+cd src; pytest; ruff check .
+
+## Code Style
+
+Python >=3.10,<4.0: Follow standard conventions
+
+## Recent Changes
+
+- 001-user-profile-management: Added Python >=3.10,<4.0 + FastAPI >=0.114.2, SQLModel >=0.0.21, Pydantic >2.0, React 19+, TypeScript 5.9+
+
+<!-- MANUAL ADDITIONS START -->
+<!-- MANUAL ADDITIONS END -->
