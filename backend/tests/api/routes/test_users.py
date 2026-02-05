@@ -358,7 +358,7 @@ def test_update_user_me_partial_update_full_name_only(
     assert r_get.status_code == 200
     current_user = r_get.json()
     current_email = current_user["email"]
-    
+
     new_full_name = "Updated Full Name Only"
     data = {"full_name": new_full_name}
     r = client.patch(
@@ -388,7 +388,7 @@ def test_update_user_me_null_full_name(
     assert r_get.status_code == 200
     current_user = r_get.json()
     current_email = current_user["email"]
-    
+
     # First set a full_name
     data_set = {"full_name": "Test Name"}
     r = client.patch(

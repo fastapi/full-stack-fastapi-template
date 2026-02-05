@@ -59,7 +59,9 @@ const UserInformation = () => {
     onError: (error) => {
       // Enhanced error handling for better user feedback
       if (error instanceof ApiError && error.status === 409) {
-        showErrorToast("This email address is already in use. Please choose a different email.")
+        showErrorToast(
+          "This email address is already in use. Please choose a different email.",
+        )
       } else if (error instanceof ApiError) {
         handleError.bind(showErrorToast)(error)
       } else {

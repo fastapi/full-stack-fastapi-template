@@ -1,8 +1,8 @@
 # Feature Specification: User Profile Management
 
-**Feature Branch**: `001-user-profile-management`  
-**Created**: 2025-01-27  
-**Status**: Draft  
+**Feature Branch**: `001-user-profile-management`
+**Created**: 2025-01-27
+**Status**: Draft
 **Input**: User description: "Add user profile management with view and update of basic profile fields (no avatar upload)"
 
 ## User Scenarios & Testing *(mandatory)*
@@ -48,19 +48,19 @@ Authenticated users can update their email address and full name through a user-
 
 - What happens when a user attempts to update their email to the same email they already have?
   - System should accept the update (no-op) or show a message that no changes were made
-  
+
 - How does the system handle concurrent updates when a user has multiple browser tabs open?
   - Last write wins, or system shows appropriate conflict handling
-  
+
 - What happens when network connectivity is lost during profile update?
   - User sees an error message, changes are not saved, user can retry
-  
+
 - How does the system handle very long full names (approaching 255 character limit)?
   - System validates length and shows appropriate error if exceeded
-  
+
 - What happens when a user clears their full name field completely?
   - System accepts empty/null full name as valid (since it's optional)
-  
+
 - How does the system handle profile view/update when user account is deactivated?
   - System prevents access and shows appropriate error message
 

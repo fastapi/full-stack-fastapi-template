@@ -1,7 +1,7 @@
 # Quickstart: User Profile Management
 
-**Feature**: User Profile Management  
-**Date**: 2025-01-27  
+**Feature**: User Profile Management
+**Date**: 2025-01-27
 **Phase**: 1 - Design & Contracts
 
 ## Integration Scenarios

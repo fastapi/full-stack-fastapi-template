@@ -136,7 +136,9 @@ test.describe("Edit user profile", () => {
     // Email should remain unchanged - verify it's still displayed
     if (originalEmailText) {
       await expect(
-        page.locator("form").getByText(originalEmailText.trim(), { exact: true }),
+        page
+          .locator("form")
+          .getByText(originalEmailText.trim(), { exact: true }),
       ).toBeVisible()
     }
   })
@@ -165,9 +167,7 @@ test.describe("Edit user email", () => {
     ).toBeVisible()
   })
 
-  test("Edit user email with duplicate email shows error", async ({
-    page,
-  }) => {
+  test("Edit user email with duplicate email shows error", async ({ page }) => {
     const email1 = randomEmail()
     const email2 = randomEmail()
     const password = randomPassword()

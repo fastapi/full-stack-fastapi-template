@@ -1,7 +1,7 @@
 # Research: User Profile Management
 
-**Feature**: User Profile Management  
-**Date**: 2025-01-27  
+**Feature**: User Profile Management
+**Date**: 2025-01-27
 **Phase**: 0 - Outline & Research
 
 ## Overview
@@ -57,7 +57,7 @@ This feature enhances existing user profile management functionality. The backen
 - Enhanced error handling and user feedback
 - Better edge case handling
 
-**Alternatives Considered**: 
+**Alternatives Considered**:
 - Rewrite component: Rejected - existing structure is good, incremental improvements preferred
 - Leave as-is: Rejected - validation mismatch and missing edge cases violate spec
 
@@ -75,7 +75,7 @@ This feature enhances existing user profile management functionality. The backen
 
 **Rationale**: Specification requires consistency between frontend and backend validation (FR-007). Frontend should prevent invalid data before submission.
 
-**Alternatives Considered**: 
+**Alternatives Considered**:
 - Backend-only validation: Rejected - violates UX best practices (users should see errors immediately)
 - Different limits: Rejected - violates spec requirement FR-007
 

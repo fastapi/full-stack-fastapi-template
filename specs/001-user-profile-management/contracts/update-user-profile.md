@@ -1,8 +1,8 @@
 # API Contract: Update User Profile
 
-**Endpoint**: `PATCH /api/v1/users/me`  
-**Method**: PATCH  
-**Authentication**: Required (JWT Bearer token)  
+**Endpoint**: `PATCH /api/v1/users/me`
+**Method**: PATCH
+**Authentication**: Required (JWT Bearer token)
 **Feature**: User Profile Management
 
 ## Description
@@ -133,68 +133,68 @@ User account is deactivated.
 
 ### TC-PATCH-001: Successful Email Update
 
-**Given**: User is authenticated  
-**When**: PATCH request updates email to a new, unique email  
+**Given**: User is authenticated
+**When**: PATCH request updates email to a new, unique email
 **Then**: Email is updated, response contains updated profile with status 200
 
 ### TC-PATCH-002: Successful Full Name Update
 
-**Given**: User is authenticated  
-**When**: PATCH request updates full_name  
+**Given**: User is authenticated
+**When**: PATCH request updates full_name
 **Then**: Full name is updated, response contains updated profile with status 200
 
 ### TC-PATCH-003: Partial Update (Email Only)
 
-**Given**: User is authenticated  
-**When**: PATCH request includes only email field  
+**Given**: User is authenticated
+**When**: PATCH request includes only email field
 **Then**: Only email is updated, full_name remains unchanged
 
 ### TC-PATCH-004: Partial Update (Full Name Only)
 
-**Given**: User is authenticated  
-**When**: PATCH request includes only full_name field  
+**Given**: User is authenticated
+**When**: PATCH request includes only full_name field
 **Then**: Only full_name is updated, email remains unchanged
 
 ### TC-PATCH-005: Clear Full Name (Set to Null)
 
-**Given**: User has a full_name set  
-**When**: PATCH request sets full_name to null  
+**Given**: User has a full_name set
+**When**: PATCH request sets full_name to null
 **Then**: Full name is cleared, response shows null full_name
 
 ### TC-PATCH-006: Duplicate Email Error
 
-**Given**: User is authenticated, another user has email "existing@example.com"  
-**When**: PATCH request updates email to "existing@example.com"  
+**Given**: User is authenticated, another user has email "existing@example.com"
+**When**: PATCH request updates email to "existing@example.com"
 **Then**: Response is 409 Conflict with error message
 
 ### TC-PATCH-007: Invalid Email Format
 
-**Given**: User is authenticated  
-**When**: PATCH request includes invalid email format  
+**Given**: User is authenticated
+**When**: PATCH request includes invalid email format
 **Then**: Response is 400 Bad Request with validation error
 
 ### TC-PATCH-008: Full Name Too Long
 
-**Given**: User is authenticated  
-**When**: PATCH request includes full_name exceeding 255 characters  
+**Given**: User is authenticated
+**When**: PATCH request includes full_name exceeding 255 characters
 **Then**: Response is 400 Bad Request with validation error
 
 ### TC-PATCH-009: Update to Same Email
 
-**Given**: User's current email is "user@example.com"  
-**When**: PATCH request updates email to "user@example.com"  
+**Given**: User's current email is "user@example.com"
+**When**: PATCH request updates email to "user@example.com"
 **Then**: Update succeeds (no-op) or shows message that no changes were made
 
 ### TC-PATCH-010: Empty Request Body
 
-**Given**: User is authenticated  
-**When**: PATCH request has empty body  
+**Given**: User is authenticated
+**When**: PATCH request has empty body
 **Then**: No fields are updated, response returns current profile data
 
 ### TC-PATCH-011: Unauthenticated Request
 
-**Given**: User is not authenticated  
-**When**: PATCH request is made without Authorization header  
+**Given**: User is not authenticated
+**When**: PATCH request is made without Authorization header
 **Then**: Response is 401 Unauthorized
 
 ## Implementation Notes

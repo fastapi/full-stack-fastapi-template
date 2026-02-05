@@ -1,8 +1,8 @@
 # API Contract: Get User Profile
 
-**Endpoint**: `GET /api/v1/users/me`  
-**Method**: GET  
-**Authentication**: Required (JWT Bearer token)  
+**Endpoint**: `GET /api/v1/users/me`
+**Method**: GET
+**Authentication**: Required (JWT Bearer token)
 **Feature**: User Profile Management
 
 ## Description
@@ -83,20 +83,20 @@ User account is deactivated.
 
 ### TC-GET-001: Successful Profile Retrieval
 
-**Given**: User is authenticated  
-**When**: GET request is made to `/api/v1/users/me`  
+**Given**: User is authenticated
+**When**: GET request is made to `/api/v1/users/me`
 **Then**: Response contains user's profile data with status 200
 
 ### TC-GET-002: Unauthenticated Request
 
-**Given**: User is not authenticated  
-**When**: GET request is made without Authorization header  
+**Given**: User is not authenticated
+**When**: GET request is made without Authorization header
 **Then**: Response is 401 Unauthorized
 
 ### TC-GET-003: Profile with Null Full Name
 
-**Given**: User has null full_name  
-**When**: GET request retrieves profile  
+**Given**: User has null full_name
+**When**: GET request retrieves profile
 **Then**: Response contains `full_name: null` or field is omitted
 
 ## Implementation Notes
