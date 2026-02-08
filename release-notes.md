@@ -8,6 +8,7 @@
 
 ### Internal
 
+* ⬆ Bump playwright from v1.58.0-noble to v1.58.2-noble in /frontend. PR [#2175](https://github.com/fastapi/full-stack-fastapi-template/pull/2175) by [@dependabot[bot]](https://github.com/apps/dependabot).
 * 👷 Run mypy by pre-commit. PR [#2169](https://github.com/fastapi/full-stack-fastapi-template/pull/2169) by [@YuriiMotov](https://github.com/YuriiMotov).
 * ⬆ Bump @tanstack/router-devtools from 1.153.2 to 1.157.17. PR [#2166](https://github.com/fastapi/full-stack-fastapi-template/pull/2166) by [@dependabot[bot]](https://github.com/apps/dependabot).
 * ⬆ Bump @types/node from 25.0.10 to 25.1.0. PR [#2168](https://github.com/fastapi/full-stack-fastapi-template/pull/2168) by [@dependabot[bot]](https://github.com/apps/dependabot).
