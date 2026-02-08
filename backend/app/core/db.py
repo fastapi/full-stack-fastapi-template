@@ -135,7 +135,6 @@ class UsersSecurityTable(Base):
     password_reset_token_expires = Column(DateTime, nullable=True)
 
 
-
 class UsersSessionTable(Base):
     """
     Store user security related information in the database
@@ -222,6 +221,103 @@ class PromptRunningStatus(Base):
         default="pending"
     )
 """
+
+
+class BrandSearchResultTable(Base):
+    __tablename__ = settings.DB_BRAND_SEARCH_RESULT_TABLE_NAME
+
+    # columns
+    id = Column(Integer, primary_key=True, index=True, autoincrement=True)
+    search_instance_id = Column(String(100), nullable=False, index=True)
+    user_prompt_id = Column(String(100), nullable=False)
+    user_prompt = Column(Text, nullable=False)
+    search_target_brand_id = Column(String(100), nullable=False, index=True)
+    search_target_brand_name = Column(String(100), nullable=False)
+    user_id = Column(String(100), nullable=False, index=True)
+    company_id = Column(String(100), nullable=False, index=True)
+    idempotency_key = Column(String(100), nullable=False, unique=True, index=True)
+    search_return_brand_name = Column(String(100), nullable=False)
+    search_return_reason = Column(String(300), nullable=True)
+    search_return_ranking = Column(Integer, nullable=False)
+    search_return_reference_sources = Column(String(300), nullable=True)
+    search_return_customer_review = Column(String(500), nullable=True)
+    search_date = Column(DateTime, default=datetime.now().date(), nullable=False)
+    model = Column(String(100), nullable=False)
+
+    # index
+    __table_args__ = (
+        Index('idx_user_prompt_id', 'user_prompt_id', 'user_prompt_id'),
+        Index('idx_company_id', 'company_id', 'company_id'),
+        Index('idx_search_target_brand_id', 'search_target_brand_id', 'search_target_brand_id'),
+        Index('idx_search_instance_id', "search_instance_id", "search_instance_id"),
+        Index("idx_search_date", "search_date", "search_date")
+    )
+
+
+class BrandSearchVisibilityTable(Base):
+    __tablename__ = settings.DB_BRAND_SEARCH_VISIBILITY_TABLE_NAME
+
+    id = Column(Integer, primary_key=True, autoincrement=True)
+    brand_id = Column(String(100), nullable=False, index=True)
+    brand_name = Column(String(100), nullable=False, index=True)
+    datetime_created = Column(DateTime, nullable=False, default=datetime.now(timezone.utc))
+    search_date = Column(DateTime, nullable=False, index=True)
+    total_search_count = Column(Integer, nullable=False)
+    search_visibility_count = Column(Integer, nullable=False)
+
+    __table_args__ = (
+        Index('idx_brand_id', 'brand_id', 'brand_id'),
+        Index('idx_brand_name', 'brand_name', 'brand_name'),
+        Index('idx_search_date', 'search_date', 'search_date'),
+    )
+
+
+class BrandSearchRankingTable(Base):
+    __tablename__ = settings.DB_BRAND_SEARCH_RANKING_TABLE_NAME
+
+    id = Column(Integer, primary_key=True, autoincrement=True)
+    brand_id = Column(String(100), nullable=False, index=True)
+    brand_name = Column(String(100), nullable=False, index=True)
+    search_instance_id = Column(String(100), nullable=False)
+    datetime_created = Column(DateTime, nullable=False,
+                              default=datetime.now(timezone.utc))
+    search_date = Column(DateTime, nullable=False, index=True)
+    search_return_brand_name = Column(String(100), nullable=True)
+    search_ranking = Column(Integer, nullable=False)
+
+    __table_args__ = (
+        Index('idx_brand_id', 'brand_id', 'brand_id'),
+        Index('idx_brand_name', 'brand_name', 'brand_name'),
+        Index('idx_search_date', 'search_date', 'search_date')
+    )
+
+
+class BrandPromptRecordTable(Base):
+    """
+    The prompts table in the database
+    """
+    __tablename__ = settings.DB_BRAND_PROMPTS_TABLE_NAME
+
+    id = Column(Integer, primary_key=True, index=True, autoincrement=True)
+    prompt = Column(Text, nullable=False)
+    prompt_id = Column(String(100), nullable=False, index=True)
+    brand_id = Column(String(100), nullable=False)
+    brand_name = Column(String(100), nullable=False)
+    user_id = Column(String(100), nullable=False, index=True)
+    company_id = Column(String(100), nullable=False, index=True)
+    idempotency_key = Column(String(100), nullable=False, unique=True, index=True)
+    created_datetime = Column(DateTime, default=datetime.now(timezone.utc), nullable=False)
+    updated_datetime = Column(DateTime, default=datetime.now(timezone.utc), onupdate=datetime.now(timezone.utc), nullable=False)
+    is_active = Column(Boolean, default=True, nullable=False, index=False)
+
+    # Composite indexes for common queries
+    __table_args__ = (
+        Index('idx_user_id', 'user_id', 'user_id'),
+        Index('idx_idempotency_key', 'idempotency_key', 'idempotency_key'),
+        Index('idx_company_id', 'company_id', 'company_id'),
+        Index('idx_brand_id', 'brand_id', 'brand_id'),
+        Index('idx_brand_name', 'brand_name', 'brand_name')
+    )
 
 
 # Dependency for database sessions

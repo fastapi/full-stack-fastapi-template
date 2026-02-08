@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import { Menu, X, ChevronDown } from 'lucide-react'
+import { Button } from '@/components/ui/button'
 
 interface HeaderProps {
   onOpenAuth: (mode: 'signin' | 'signup') => void
@@ -24,9 +25,9 @@ export default function Header({ onOpenAuth }: HeaderProps) {
           <div className="flex items-center">
             <div className="flex items-center space-x-2">
               <div className="w-8 h-8 bg-gradient-to-br from-blue-600 to-purple-600 rounded-lg flex items-center justify-center">
-                <span className="text-white font-bold text-lg">S</span>
+                <span className="text-white font-bold text-lg">K</span>
               </div>
-              <span className="text-xl font-bold text-gray-900 dark:text-white">SaaSPro</span>
+              <span className="text-xl font-bold text-gray-900 dark:text-white">Kila</span>
             </div>
           </div>
 
@@ -34,14 +35,13 @@ export default function Header({ onOpenAuth }: HeaderProps) {
           <nav className="hidden md:flex items-center space-x-8">
             {/* Product Dropdown */}
             <div className="relative">
-              <button
-                className="flex items-center space-x-1 text-gray-700 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400 transition"
+              <Button variant={"ghost"}
                 onMouseEnter={() => setProductDropdownOpen(true)}
                 onMouseLeave={() => setProductDropdownOpen(false)}
               >
                 <span>Products</span>
                 <ChevronDown size={16} />
-              </button>
+              </Button>
 
               {productDropdownOpen && (
                 <div
@@ -72,18 +72,12 @@ export default function Header({ onOpenAuth }: HeaderProps) {
 
           {/* Right Side - Auth Buttons */}
           <div className="hidden md:flex items-center space-x-4">
-            <button
-              onClick={() => onOpenAuth('signin')}
-              className="text-gray-700 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400 transition font-medium"
-            >
+            <Button onClick={() => onOpenAuth('signin')} variant={"ghost"} size={"sm"}>
               Sign In
-            </button>
-            <button
-              onClick={() => onOpenAuth('signup')}
-              className="bg-blue-600 text-white px-6 py-2 rounded-lg hover:bg-blue-700 transition font-medium"
-            >
+            </Button>
+            <Button onClick={() => onOpenAuth('signup')} size={"sm"}>
               Sign Up Free
-            </button>
+            </Button>
           </div>
 
           {/* Mobile menu button */}
@@ -117,18 +111,8 @@ export default function Header({ onOpenAuth }: HeaderProps) {
               <a href="#pricing" className="px-2 text-gray-700 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400 transition">
                 Pricing
               </a>
-              <button
-                onClick={() => onOpenAuth('signin')}
-                className="text-left px-2 text-gray-700 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400 transition"
-              >
-                Sign In
-              </button>
-              <button
-                onClick={() => onOpenAuth('signup')}
-                className="bg-blue-600 text-white px-6 py-2 rounded-lg hover:bg-blue-700 transition w-full"
-              >
-                Sign Up Free
-              </button>
+              <Button variant={"ghost"} onClick={() => onOpenAuth('signin')}>Sign In</Button>
+              <Button onClick={() => onOpenAuth('signup')}>Sign Up Free</Button>
             </nav>
           </div>
         )}

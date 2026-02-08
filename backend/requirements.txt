@@ -29,3 +29,7 @@ python-nanoid==2.0.0
 pytest==8.3.0
 pytest-asyncio==0.24.0
 httpx==0.27.0
+
+# dataframes, array calculation
+numpy==2.4.2
+pandas==3.0.0

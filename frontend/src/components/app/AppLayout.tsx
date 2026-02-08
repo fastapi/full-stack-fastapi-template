@@ -1,7 +1,7 @@
 // src/components/app/AppLayout.tsx
 import { useState } from 'react'
 import { Link, useLocation, useNavigate } from '@tanstack/react-router'
-import { LayoutDashboard, FolderKanban, Users, Search, LogOut, Menu, X, User } from 'lucide-react'
+import { LayoutDashboard, FolderKanban, Users, Search, LogOut, Menu, X, User, ArchiveX } from 'lucide-react'
 import { toast } from 'sonner'
 
 export default function AppLayout({ children }: { children: React.ReactNode }) {
@@ -11,9 +11,10 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
   const userName = localStorage.getItem('userName') || 'User'
 
   const menuItems = [
-    { name: 'Dashboard', icon: LayoutDashboard, path: '/app/dashboard' },
+    { name: 'Dashboard', icon: LayoutDashboard, path: '/app/dashboard/dashboard' },
     { name: 'Projects', icon: FolderKanban, path: '/app/projects' },
     { name: 'User Management', icon: Users, path: '/app/users' },
+    { name: 'Example Dashboard', icon: ArchiveX, path: '/app/dashboard/exampledashboard' },
   ]
 
   const handleLogout = () => {
