@@ -38,15 +38,6 @@ class BaseConfig(BaseSettings):
     smtp_user: Optional[str] = None
     smtp_password: Optional[str] = None
 
-    # Database tables setting
-    db_companies_table_name: str = "companies"
-    db_users_table_name: str = "users"
-    db_users_profile_table_name: str = "users_profile"
-    db_users_security_table_name: str = "users_security"
-    db_users_session_table_name: str = "users_session"
-    db_brand_prompts_table_name: str = "brand_prompts"
-    db_projects_table_name: str = "projects"
-
     # AI Model Settings
     ai_model_url: str = "http://localhost:11434"
     ai_model_api_key: str = ''

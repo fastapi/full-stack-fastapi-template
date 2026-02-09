@@ -3,8 +3,9 @@ from sqlalchemy import select, and_
 from sqlalchemy.ext.asyncio import AsyncSession
 import logging
 
-from app.core.db import get_db, BrandSearchVisibilityTable, BrandSearchRankingTable
-from app. models.brand_visibility import VisibilityDataPoint, VisibilityResponse
+from kila_models import BrandSearchVisibilityTable, BrandSearchRankingTable
+from app.core.db import get_db
+from app.models.brand_visibility import VisibilityDataPoint, VisibilityResponse
 from app.models.brand_ranking import RankingDataPoint, RankingResponse
 from app.models.brand_score import BrandScoreDataPoint, BrandScoreResponse
 from app.models.shared_model import TimeRangeQuery

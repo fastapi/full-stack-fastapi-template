@@ -4,7 +4,7 @@ from sqlalchemy import select
 from datetime import datetime, timezone
 from nanoid import generate
 from app.core.db import get_db
-from app.core.db import UsersTable
+from kila_models.models import UsersTable
 from app.models.user_auth import UserSignupRequest, UserLoginRequest, UserResponse, TokenResponse
 from app.utils.auth import hash_password, verify_password, create_access_token, create_refresh_token
 import logging
