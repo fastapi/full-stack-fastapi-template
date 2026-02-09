@@ -8,6 +8,7 @@
 
 ### Internal
 
+* ⬆ Bump lucide-react from 0.562.0 to 0.563.0. PR [#2176](https://github.com/fastapi/full-stack-fastapi-template/pull/2176) by [@dependabot[bot]](https://github.com/apps/dependabot).
 * ⬆ Bump @tanstack/react-query from 5.90.19 to 5.90.20. PR [#2174](https://github.com/fastapi/full-stack-fastapi-template/pull/2174) by [@dependabot[bot]](https://github.com/apps/dependabot).
 * ⬆ Bump playwright from v1.58.0-noble to v1.58.2-noble in /frontend. PR [#2175](https://github.com/fastapi/full-stack-fastapi-template/pull/2175) by [@dependabot[bot]](https://github.com/apps/dependabot).
 * 👷 Run mypy by pre-commit. PR [#2169](https://github.com/fastapi/full-stack-fastapi-template/pull/2169) by [@YuriiMotov](https://github.com/YuriiMotov).
