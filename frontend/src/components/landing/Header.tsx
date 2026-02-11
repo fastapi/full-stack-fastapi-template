@@ -1,9 +1,9 @@
-import { useState } from 'react'
-import { Menu, X, ChevronDown } from 'lucide-react'
-import { Button } from '@/components/ui/button'
+import { ChevronDown, Menu, X } from "lucide-react"
+import { useState } from "react"
+import { Button } from "@/components/ui/button"
 
 interface HeaderProps {
-  onOpenAuth: (mode: 'signin' | 'signup') => void
+  onOpenAuth: (mode: "signin" | "signup") => void
 }
 
 export default function Header({ onOpenAuth }: HeaderProps) {
@@ -11,10 +11,10 @@ export default function Header({ onOpenAuth }: HeaderProps) {
   const [productDropdownOpen, setProductDropdownOpen] = useState(false)
 
   const products = [
-    { name: 'Analytics Dashboard', href: '#analytics' },
-    { name: 'Project Management', href: '#projects' },
-    { name: 'Team Collaboration', href: '#collaboration' },
-    { name: 'API Integration', href: '#api' },
+    { name: "Analytics Dashboard", href: "#analytics" },
+    { name: "Project Management", href: "#projects" },
+    { name: "Team Collaboration", href: "#collaboration" },
+    { name: "API Integration", href: "#api" },
   ]
 
   return (
@@ -27,7 +27,9 @@ export default function Header({ onOpenAuth }: HeaderProps) {
               <div className="w-8 h-8 bg-gradient-to-br from-blue-600 to-purple-600 rounded-lg flex items-center justify-center">
                 <span className="text-white font-bold text-lg">K</span>
               </div>
-              <span className="text-xl font-bold text-gray-900 dark:text-white">Kila</span>
+              <span className="text-xl font-bold text-gray-900 dark:text-white">
+                Kila
+              </span>
             </div>
           </div>
 
@@ -35,7 +37,8 @@ export default function Header({ onOpenAuth }: HeaderProps) {
           <nav className="hidden md:flex items-center space-x-8">
             {/* Product Dropdown */}
             <div className="relative">
-              <Button variant={"ghost"}
+              <Button
+                variant={"ghost"}
                 onMouseEnter={() => setProductDropdownOpen(true)}
                 onMouseLeave={() => setProductDropdownOpen(false)}
               >
@@ -62,20 +65,30 @@ export default function Header({ onOpenAuth }: HeaderProps) {
               )}
             </div>
 
-            <a href="#company" className="font-display text-gray-700 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400 transition">
+            <a
+              href="#company"
+              className="font-display text-gray-700 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400 transition"
+            >
               Company
             </a>
-            <a href="#pricing" className="text-gray-700 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400 transition">
+            <a
+              href="#pricing"
+              className="text-gray-700 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400 transition"
+            >
               Pricing
             </a>
           </nav>
 
           {/* Right Side - Auth Buttons */}
           <div className="hidden md:flex items-center space-x-4">
-            <Button onClick={() => onOpenAuth('signin')} variant={"ghost"} size={"sm"}>
+            <Button
+              onClick={() => onOpenAuth("signin")}
+              variant={"ghost"}
+              size={"sm"}
+            >
               Sign In
             </Button>
-            <Button onClick={() => onOpenAuth('signup')} size={"sm"}>
+            <Button onClick={() => onOpenAuth("signup")} size={"sm"}>
               Sign Up Free
             </Button>
           </div>
@@ -94,7 +107,9 @@ export default function Header({ onOpenAuth }: HeaderProps) {
           <div className="md:hidden py-4 border-t border-gray-200 dark:border-gray-800">
             <nav className="flex flex-col space-y-4">
               <div className="space-y-2">
-                <div className="text-sm font-semibold text-gray-500 dark:text-gray-400 px-2">Products</div>
+                <div className="text-sm font-semibold text-gray-500 dark:text-gray-400 px-2">
+                  Products
+                </div>
                 {products.map((product) => (
                   <a
                     key={product.name}
@@ -105,14 +120,22 @@ export default function Header({ onOpenAuth }: HeaderProps) {
                   </a>
                 ))}
               </div>
-              <a href="#company" className="px-2 text-gray-700 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400 transition">
+              <a
+                href="#company"
+                className="px-2 text-gray-700 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400 transition"
+              >
                 Company
               </a>
-              <a href="#pricing" className="px-2 text-gray-700 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400 transition">
+              <a
+                href="#pricing"
+                className="px-2 text-gray-700 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400 transition"
+              >
                 Pricing
               </a>
-              <Button variant={"ghost"} onClick={() => onOpenAuth('signin')}>Sign In</Button>
-              <Button onClick={() => onOpenAuth('signup')}>Sign Up Free</Button>
+              <Button variant={"ghost"} onClick={() => onOpenAuth("signin")}>
+                Sign In
+              </Button>
+              <Button onClick={() => onOpenAuth("signup")}>Sign Up Free</Button>
             </nav>
           </div>
         )}

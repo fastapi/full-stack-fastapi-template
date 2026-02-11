@@ -1,27 +1,40 @@
 // src/components/app/AppLayout.tsx
-import { useState } from 'react'
-import { Link, useLocation, useNavigate } from '@tanstack/react-router'
-import { LayoutDashboard, FolderKanban, Users, Search, LogOut, Menu, X, User, ArchiveX } from 'lucide-react'
-import { toast } from 'sonner'
+
+import { Link, useLocation, useNavigate } from "@tanstack/react-router"
+import {
+  FolderKanban,
+  LayoutDashboard,
+  LogOut,
+  Menu,
+  Search,
+  User,
+  Users,
+  X,
+} from "lucide-react"
+import { useState } from "react"
+import { toast } from "sonner"
 
 export default function AppLayout({ children }: { children: React.ReactNode }) {
   const [sidebarOpen, setSidebarOpen] = useState(true)
   const location = useLocation()
   const navigate = useNavigate()
-  const userName = localStorage.getItem('userName') || 'User'
+  const userName = localStorage.getItem("userName") || "User"
 
   const menuItems = [
-    { name: 'Dashboard', icon: LayoutDashboard, path: '/app/dashboard/dashboard' },
-    { name: 'Projects', icon: FolderKanban, path: '/app/projects' },
-    { name: 'User Management', icon: Users, path: '/app/users' },
-    { name: 'Example Dashboard', icon: ArchiveX, path: '/app/dashboard/exampledashboard' },
+    {
+      name: "Dashboard",
+      icon: LayoutDashboard,
+      path: "/app/dashboard/dashboard",
+    },
+    { name: "Projects", icon: FolderKanban, path: "/app/projects" },
+    { name: "User Management", icon: Users, path: "/app/users" },
   ]
 
   const handleLogout = () => {
-    localStorage.removeItem('isAuthenticated')
-    localStorage.removeItem('userName')
-    toast.success('Logged out successfully')
-    navigate({ to: '/' })
+    localStorage.removeItem("isAuthenticated")
+    localStorage.removeItem("userName")
+    toast.success("Logged out successfully")
+    navigate({ to: "/" })
   }
 
   return (
@@ -29,7 +42,7 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
       {/* Sidebar */}
       <aside
         className={`${
-          sidebarOpen ? 'w-64' : 'w-20'
+          sidebarOpen ? "w-64" : "w-20"
         } bg-white dark:bg-gray-800 border-r border-gray-200 dark:border-gray-700 transition-all duration-300 flex flex-col`}
       >
         {/* Logo */}
@@ -37,13 +50,15 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
           {sidebarOpen ? (
             <div className="flex items-center space-x-2">
               <div className="w-8 h-8 bg-gradient-to-br from-blue-600 to-purple-600 rounded-lg flex items-center justify-center">
-                <span className="text-white font-bold text-lg">S</span>
+                <span className="text-white font-bold text-lg">K</span>
               </div>
-              <span className="text-xl font-bold text-gray-900 dark:text-white">SaaSPro</span>
+              <span className="text-xl font-bold text-gray-900 dark:text-white">
+                Kila
+              </span>
             </div>
           ) : (
             <div className="w-8 h-8 bg-gradient-to-br from-blue-600 to-purple-600 rounded-lg flex items-center justify-center">
-              <span className="text-white font-bold text-lg">S</span>
+              <span className="text-white font-bold text-lg">K</span>
             </div>
           )}
           <button
@@ -66,12 +81,14 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
                 to={item.path}
                 className={`flex items-center px-3 py-2 rounded-lg transition ${
                   isActive
-                    ? 'bg-blue-50 dark:bg-blue-900/20 text-blue-600 dark:text-blue-400'
-                    : 'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700'
+                    ? "bg-blue-50 dark:bg-blue-900/20 text-blue-600 dark:text-blue-400"
+                    : "text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700"
                 }`}
               >
                 <Icon size={20} />
-                {sidebarOpen && <span className="ml-3 font-medium">{item.name}</span>}
+                {sidebarOpen && (
+                  <span className="ml-3 font-medium">{item.name}</span>
+                )}
               </Link>
             )
           })}
@@ -96,7 +113,10 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
           {/* Search Bar */}
           <div className="flex-1 max-w-2xl">
             <div className="relative">
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" size={20} />
+              <Search
+                className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400"
+                size={20}
+              />
               <input
                 type="text"
                 placeholder="Search..."
@@ -108,8 +128,12 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
           {/* User Profile */}
           <div className="flex items-center space-x-4">
             <div className="text-right hidden sm:block">
-              <div className="text-sm font-medium text-gray-900 dark:text-white">{userName}</div>
-              <div className="text-xs text-gray-500 dark:text-gray-400">Administrator</div>
+              <div className="text-sm font-medium text-gray-900 dark:text-white">
+                {userName}
+              </div>
+              <div className="text-xs text-gray-500 dark:text-gray-400">
+                Administrator
+              </div>
             </div>
             <div className="w-10 h-10 bg-gradient-to-br from-blue-500 to-purple-500 rounded-full flex items-center justify-center text-white font-bold">
               <User size={20} />
@@ -118,9 +142,7 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
         </header>
 
         {/* Page Content */}
-        <main className="flex-1 overflow-y-auto p-6">
-          {children}
-        </main>
+        <main className="flex-1 overflow-y-auto p-6">{children}</main>
       </div>
     </div>
   )

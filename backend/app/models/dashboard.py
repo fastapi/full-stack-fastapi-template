@@ -1,0 +1,151 @@
+"""
+Dashboard Pydantic schemas for API request/response models.
+
+This module defines the data transfer objects (DTOs) used by the dashboard API endpoints.
+These schemas handle validation and serialization of dashboard-related data.
+"""
+
+from pydantic import BaseModel, Field, ConfigDict
+from typing import Optional
+from datetime import date
+
+
+class AwarenessScoreResponse(BaseModel):
+    """
+    Response schema for brand awareness score data.
+
+    This schema represents the current and previous awareness scores
+    retrieved from the BrandAwarenessWeeklyPerformanceTable.
+
+    Attributes:
+        brand_id: Unique identifier for the brand
+        brand_name: Display name of the brand
+        current_score: The latest awareness score (0-100 scale from database)
+        previous_score: The previous period's awareness score for trend calculation
+        normalized_score: Score converted to 0-10 scale for gauge display
+        previous_normalized_score: Previous score on 0-10 scale
+        current_date: Date of the current score measurement
+        previous_date: Date of the previous score measurement
+        has_previous: Whether previous period data exists for trend calculation
+    """
+    brand_id: str = Field(..., description="Unique identifier for the brand")
+    brand_name: str = Field(..., description="Display name of the brand")
+    current_score: float = Field(..., description="Current awareness score (0-100 scale)")
+    previous_score: Optional[float] = Field(None, description="Previous awareness score")
+    normalized_score: float = Field(..., description="Score normalized to 0-10 scale")
+    previous_normalized_score: Optional[float] = Field(None, description="Previous score on 0-10 scale")
+    current_date: date = Field(..., description="Date of current score")
+    previous_date: Optional[date] = Field(None, description="Date of previous score")
+    has_previous: bool = Field(False, description="Whether previous data exists")
+
+    model_config = ConfigDict(from_attributes=True)
+
+
+class ConsistencyIndexResponse(BaseModel):
+    """
+    Response schema for brand consistency index data.
+
+    Similar to AwarenessScoreResponse but for the consistency index metric.
+
+    Attributes:
+        brand_id: Unique identifier for the brand
+        brand_name: Display name of the brand
+        current_index: The latest consistency index (0-100 scale from database)
+        previous_index: The previous period's consistency index
+        normalized_index: Index converted to 0-10 scale for gauge display
+        previous_normalized_index: Previous index on 0-10 scale
+        current_date: Date of the current index measurement
+        previous_date: Date of the previous index measurement
+        has_previous: Whether previous period data exists
+    """
+    brand_id: str = Field(..., description="Unique identifier for the brand")
+    brand_name: str = Field(..., description="Display name of the brand")
+    current_index: float = Field(..., description="Current consistency index (0-100 scale)")
+    previous_index: Optional[float] = Field(None, description="Previous consistency index")
+    normalized_index: float = Field(..., description="Index normalized to 0-10 scale")
+    previous_normalized_index: Optional[float] = Field(None, description="Previous index on 0-10 scale")
+    current_date: date = Field(..., description="Date of current index")
+    previous_date: Optional[date] = Field(None, description="Date of previous index")
+    has_previous: bool = Field(False, description="Whether previous data exists")
+
+    model_config = ConfigDict(from_attributes=True)
+
+
+class DashboardMetricsResponse(BaseModel):
+    """
+    Combined response schema for all dashboard metrics.
+
+    This schema aggregates awareness score and consistency index
+    into a single response for efficient data fetching.
+
+    Attributes:
+        awareness: Brand awareness score data
+        consistency: Brand consistency index data
+    """
+    awareness: Optional[AwarenessScoreResponse] = Field(None, description="Awareness score data")
+    consistency: Optional[ConsistencyIndexResponse] = Field(None, description="Consistency index data")
+
+    model_config = ConfigDict(from_attributes=True)
+
+
+class HistoricalDataPoint(BaseModel):
+    """
+    A single data point in the historical trend.
+
+    Attributes:
+        date: The date of this data point (ISO format string for JSON serialization)
+        awareness_score: Brand awareness score (0-10 normalized scale)
+        consistency_index: Brand consistency index (0-10 normalized scale)
+    """
+    date: str = Field(..., description="Date of this data point (YYYY-MM-DD format)")
+    awareness_score: float = Field(..., description="Awareness score on 0-10 scale")
+    consistency_index: float = Field(..., description="Consistency index on 0-10 scale")
+
+    model_config = ConfigDict(from_attributes=True)
+
+
+class MetricStatistics(BaseModel):
+    """
+    Statistical summary for a metric over a time period.
+
+    Attributes:
+        average: Average value over the period
+        highest: Maximum value in the period
+        lowest: Minimum value in the period
+        median: Median value in the period
+        average_growth: Average week-over-week growth rate (percentage)
+    """
+    average: float = Field(..., description="Average value")
+    highest: float = Field(..., description="Highest value")
+    lowest: float = Field(..., description="Lowest value")
+    median: float = Field(..., description="Median value")
+    average_growth: float = Field(..., description="Average growth rate (%)")
+
+    model_config = ConfigDict(from_attributes=True)
+
+
+class HistoricalTrendsResponse(BaseModel):
+    """
+    Response schema for historical trends data.
+
+    Contains time series data points plus statistical summaries
+    for both awareness score and consistency index.
+
+    Attributes:
+        brand_id: Brand identifier
+        brand_name: Brand display name
+        data_points: List of historical data points
+        awareness_stats: Statistical summary for awareness scores
+        consistency_stats: Statistical summary for consistency indices
+        start_date: Start of the queried period
+        end_date: End of the queried period
+    """
+    brand_id: str = Field(..., description="Brand identifier")
+    brand_name: str = Field(..., description="Brand display name")
+    data_points: list[HistoricalDataPoint] = Field(default_factory=list, description="Historical data points")
+    awareness_stats: Optional[MetricStatistics] = Field(None, description="Awareness score statistics")
+    consistency_stats: Optional[MetricStatistics] = Field(None, description="Consistency index statistics")
+    start_date: str = Field(..., description="Start date of the query period")
+    end_date: str = Field(..., description="End date of the query period")
+
+    model_config = ConfigDict(from_attributes=True)

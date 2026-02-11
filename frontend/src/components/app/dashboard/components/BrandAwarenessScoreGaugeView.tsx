@@ -1,148 +1,413 @@
-import React, { useState } from 'react';
-import { Activity, DollarSign, Users, TrendingUp } from 'lucide-react';
+/**
+ * BrandAwarenessScoreGaugeView Component
+ *
+ * This component displays the current brand consistency index with:
+ * - Large index number with trend indicator
+ * - Health gauge visualization (0-10 scale)
+ * - Color-coded legend for index interpretation
+ *
+ * Data is fetched from the backend API and cached locally for 10 hours
+ * to minimize unnecessary API calls when navigating between pages.
+ *
+ * Index Health Levels:
+ * - Low: 0-3 (Red)
+ * - Moderate: 3-5 (Yellow/Orange)
+ * - Good: 5-7 (Lime)
+ * - High: 7-10 (Green)
+ */
 
+import { Loader2, Minus, TrendingDown, TrendingUp } from "lucide-react"
+import { useEffect, useState } from "react"
+import {
+  type ConsistencyIndexResponse,
+  dashboardAPI,
+} from "@/clients/dashboard"
+
+/**
+ * Props interface for the GaugeChart component
+ */
+interface GaugeChartProps {
+  value: number // Index value (0-10 scale)
+  max?: number // Maximum value for the gauge (default: 10)
+}
 
 export function BrandAwarenessScoreGaugeView() {
-    /* brand awareness score */
-    const [currentScore, setCurrentScore] = useState(7.8);
+  // ============================================================================
+  // State Management
+  // ============================================================================
 
-    // Gauge component
-    const GaugeChart = ({ value, max = 10 }) => {
-        const percentage = (value / max) * 100;
-        const rotation = (percentage / 100) * 180 - 90;
+  // Store the consistency index data from API
+  const [indexData, setIndexData] = useState<ConsistencyIndexResponse | null>(
+    null,
+  )
 
-        // Calculate color based on value (green gradient)
-        const getColor = (val) => {
-            const ratio = val / max;
-            if (ratio < 0.3) return '#ef4444'; // red
-            if (ratio < 0.5) return '#f59e0b'; // orange
-            if (ratio < 0.7) return '#eab308'; // yellow
-            if (ratio < 0.85) return '#84cc16'; // light green
-            return '#22c55e'; // green
-        };
+  // Loading state for showing spinner during API call
+  const [isLoading, setIsLoading] = useState<boolean>(true)
 
-        return (
-            <div className="relative w-64 h-32 mx-auto">
-                <svg viewBox="0 0 200 100" className="w-full h-full">
-                    {/* Background arc */}
-                    <path
-                        d="M 20 90 A 80 80 0 0 1 180 90"
-                        fill="none"
-                        stroke="#e5e7eb"
-                        strokeWidth="20"
-                        strokeLinecap="round"
-                    />
+  // Error state for displaying error messages
+  const [error, setError] = useState<string | null>(null)
 
-                    {/* Gradient definition */}
-                    <defs>
-                        <linearGradient id="gaugeGradient" x1="0%" y1="0%" x2="100%" y2="0%">
-                            <stop offset="0%" stopColor="#ef4444" />
-                            <stop offset="25%" stopColor="#f59e0b" />
-                            <stop offset="50%" stopColor="#eab308" />
-                            <stop offset="75%" stopColor="#84cc16" />
-                            <stop offset="100%" stopColor="#22c55e" />
-                        </linearGradient>
-                    </defs>
+  // ============================================================================
+  // Data Fetching
+  // ============================================================================
 
-                    {/* Colored arc */}
-                    <path
-                        d="M 20 90 A 80 80 0 0 1 180 90"
-                        fill="none"
-                        stroke="url(#gaugeGradient)"
-                        strokeWidth="20"
-                        strokeLinecap="round"
-                        strokeDasharray={`${percentage * 2.51}, 1000`}
-                    />
+  /**
+   * Fetch consistency index data when component mounts
+   *
+   * The dashboardAPI.getConsistencyIndex() method handles caching internally:
+   * - First checks localStorage for cached data
+   * - If cache is valid (< 10 hours old), returns cached data
+   * - Otherwise, makes API call and caches the result
+   */
+  useEffect(() => {
+    const fetchConsistencyIndex = async () => {
+      try {
+        setIsLoading(true)
+        setError(null)
 
-                    {/* Indicator needle */}
-                    <line
-                        x1="100"
-                        y1="90"
-                        x2="100"
-                        y2="30"
-                        stroke={getColor(value)}
-                        strokeWidth="3"
-                        strokeLinecap="round"
-                        transform={`rotate(${rotation} 100 90)`}
-                    />
+        // Fetch data from API (with automatic caching)
+        // The API client will return cached data if available and not expired
+        const data = await dashboardAPI.getConsistencyIndex()
 
-                    {/* Center circle */}
-                    <circle cx="100" cy="90" r="8" fill={getColor(value)} />
+        // Update state with fetched data
+        setIndexData(data)
 
-                    {/* Scale markers */}
-                    {[0, 2, 4, 6, 8, 10].map((num) => {
-                        const angle = (num / max) * 180 - 90;
-                        const rad = (angle * Math.PI) / 180;
-                        const x = 100 + 75 * Math.cos(rad);
-                        const y = 90 + 75 * Math.sin(rad);
-                        return (
-                            <text
-                                key={num}
-                                x={x}
-                                y={y + 5}
-                                textAnchor="middle"
-                                className="text-xs fill-gray-600"
-                            >
-                                {num}
-                            </text>
-                        );
-                    })}
-                </svg>
+        console.log("[BrandAwarenessScoreGaugeView] Data loaded:", data)
+      } catch (err) {
+        // Handle errors gracefully
+        const errorMessage =
+          err instanceof Error
+            ? err.message
+            : "Failed to load consistency index"
+        setError(errorMessage)
+        console.error("[BrandAwarenessScoreGaugeView] Error:", err)
+      } finally {
+        // Always clear loading state
+        setIsLoading(false)
+      }
+    }
 
-                {/* Score display */}
-                <div className="absolute bottom-0 left-1/2 transform -translate-x-1/2 text-center">
-                    <div className="text-3xl font-bold" style={{ color: getColor(value) }}>
-                        {value.toFixed(1)}
-                    </div>
-                    <div className="text-xs text-gray-500">Score</div>
-                </div>
-            </div>
-        );
-    };
+    // Execute the fetch function
+    fetchConsistencyIndex()
+  }, []) // Empty dependency array means this runs once on mount
 
-    // Custom tooltip for charts
-    const CustomTooltip = ({ active, payload }) => {
-        if (active && payload && payload.length) {
-            return (
-                <div className="bg-white p-3 border border-gray-200 rounded-lg shadow-lg">
-                    <p className="text-sm font-medium">{payload[0].payload.date}</p>
-                    <p className="text-sm text-blue-600">
-                        Score: <span className="font-bold">{payload[0].value}</span>
-                    </p>
-                    {payload[1] && (
-                        <p className={`text-sm ${payload[1].value >= 0 ? 'text-green-600' : 'text-red-600'}`}>
-                            Growth: <span className="font-bold">{payload[1].value.toFixed(2)}%</span>
-                        </p>
-                    )}
-                </div>
-            );
-        }
-        return null;
-    };
+  // ============================================================================
+  // Trend Calculation Functions
+  // ============================================================================
+
+  /**
+   * Determine the trend direction based on current and previous indices
+   *
+   * @returns 'up' | 'down' | 'flat' based on index comparison
+   */
+  const getTrend = (): "up" | "down" | "flat" => {
+    // If no data or no previous index, return flat
+    if (
+      !indexData ||
+      !indexData.has_previous ||
+      indexData.previous_normalized_index === null
+    ) {
+      return "flat"
+    }
+
+    const diff =
+      indexData.normalized_index - indexData.previous_normalized_index
+
+    // Use threshold to avoid showing trend for tiny changes
+    if (Math.abs(diff) < 0.05) return "flat"
+    return diff > 0 ? "up" : "down"
+  }
+
+  /**
+   * Get the appropriate trend icon component based on trend direction
+   *
+   * @returns React component for the trend icon
+   */
+  const getTrendIcon = () => {
+    const trend = getTrend()
+    const iconClass = "h-6 w-6"
+
+    switch (trend) {
+      case "up":
+        return <TrendingUp className={`${iconClass} text-green-600`} />
+      case "down":
+        return <TrendingDown className={`${iconClass} text-red-600`} />
+      default:
+        return <Minus className={`${iconClass} text-gray-600`} />
+    }
+  }
+
+  /**
+   * Get the CSS color class for the trend text
+   *
+   * @returns Tailwind CSS class for text color
+   */
+  const getTrendColor = (): string => {
+    const trend = getTrend()
+    switch (trend) {
+      case "up":
+        return "text-green-600"
+      case "down":
+        return "text-red-600"
+      default:
+        return "text-gray-600"
+    }
+  }
+
+  /**
+   * Calculate the index difference for display
+   *
+   * @returns The absolute difference between current and previous indices
+   */
+  const getIndexDiff = (): number => {
+    if (
+      !indexData ||
+      !indexData.has_previous ||
+      indexData.previous_normalized_index === null
+    ) {
+      return 0
+    }
+    return Math.abs(
+      indexData.normalized_index - indexData.previous_normalized_index,
+    )
+  }
+
+  // ============================================================================
+  // Gauge Chart Component
+  // ============================================================================
+
+  /**
+   * GaugeChart - Semi-circular gauge visualization
+   *
+   * Displays an index on a colored arc with:
+   * - Gradient background from red to green
+   * - Animated needle pointing to current value
+   * - Scale markers (0, 2, 4, 6, 8, 10)
+   *
+   * @param value - The index to display (0-10 scale)
+   * @param max - Maximum value for the gauge (default: 10)
+   */
+  const GaugeChart = ({ value, max = 10 }: GaugeChartProps) => {
+    // Calculate percentage for arc fill
+    const percentage = (value / max) * 100
+
+    // Calculate needle rotation angle (-90 to 90 degrees)
+    const rotation = (percentage / 100) * 180 - 90
+
+    /**
+     * Get color based on index value
+     * Matches the health level definitions:
+     * - Low (0-3): Red
+     * - Moderate (3-5): Orange/Yellow
+     * - Good (5-7): Lime
+     * - High (7-10): Green
+     */
+    const getColor = (val: number): string => {
+      const ratio = val / max
+      if (ratio < 0.3) return "#ef4444" // Red - Low
+      if (ratio < 0.5) return "#f59e0b" // Orange - Moderate
+      if (ratio < 0.7) return "#eab308" // Yellow/Lime - Good
+      if (ratio < 0.85) return "#84cc16" // Light green
+      return "#22c55e" // Green - High
+    }
 
     return (
-        /* Section 2: Gauge Chart */
-        <div className="rounded-md bg-gradient-to-b p-6 border border-gray-200 h-full w-full">
-            <h3 className="text-md font-semibold mb-4">Score Health</h3>
-            <GaugeChart value={currentScore} max={10}/>
-            <div className="flex justify-center gap-8 mt-4 text-xs">
-                <div className="flex items-center gap-2">
-                    <div className="w-4 h-4 rounded-full bg-red-500"></div>
-                    <span>Poor (0-3)</span>
-                </div>
-                <div className="flex items-center gap-2">
-                    <div className="w-4 h-4 rounded-full bg-yellow-500"></div>
-                    <span>Fair (3-5)</span>
-                </div>
-                <div className="flex items-center gap-2">
-                    <div className="w-4 h-4 rounded-full bg-lime-500"></div>
-                    <span>Good (5-7)</span>
-                </div>
-                <div className="flex items-center gap-2">
-                    <div className="w-4 h-4 rounded-full bg-green-500"></div>
-                    <span>Excellent (7-10)</span>
-                </div>
-            </div>
+      <div className="relative w-64 h-32 mx-auto">
+        <svg viewBox="0 0 200 100" className="w-full h-full">
+          {/* Background arc - gray track */}
+          <path
+            d="M 20 90 A 80 80 0 0 1 180 90"
+            fill="none"
+            stroke="#e5e7eb"
+            strokeWidth="20"
+            strokeLinecap="round"
+          />
+
+          {/* Gradient definition for the colored arc */}
+          <defs>
+            <linearGradient
+              id="gaugeGradientConsistency"
+              x1="0%"
+              y1="0%"
+              x2="100%"
+              y2="0%"
+            >
+              <stop offset="0%" stopColor="#ef4444" /> {/* Red */}
+              <stop offset="25%" stopColor="#f59e0b" /> {/* Orange */}
+              <stop offset="50%" stopColor="#eab308" /> {/* Yellow */}
+              <stop offset="75%" stopColor="#84cc16" /> {/* Lime */}
+              <stop offset="100%" stopColor="#22c55e" /> {/* Green */}
+            </linearGradient>
+          </defs>
+
+          {/* Colored arc - fills based on percentage */}
+          <path
+            d="M 20 90 A 80 80 0 0 1 180 90"
+            fill="none"
+            stroke="url(#gaugeGradientConsistency)"
+            strokeWidth="20"
+            strokeLinecap="round"
+            strokeDasharray={`${percentage * 2.51}, 1000`}
+          />
+
+          {/* Indicator needle - points to current value */}
+          <line
+            x1="100"
+            y1="90"
+            x2="100"
+            y2="30"
+            stroke={getColor(value)}
+            strokeWidth="3"
+            strokeLinecap="round"
+            transform={`rotate(${rotation} 100 90)`}
+          />
+
+          {/* Center circle - needle base */}
+          <circle cx="100" cy="90" r="8" fill={getColor(value)} />
+
+          {/* Scale markers - numbers around the arc */}
+          {[0, 2, 4, 6, 8, 10].map((num) => {
+            const angle = (num / max) * 180 - 90
+            const rad = (angle * Math.PI) / 180
+            const x = 100 + 75 * Math.cos(rad)
+            const y = 90 + 75 * Math.sin(rad)
+            return (
+              <text
+                key={num}
+                x={x}
+                y={y + 5}
+                textAnchor="middle"
+                className="text-xs fill-gray-600"
+              >
+                {num}
+              </text>
+            )
+          })}
+        </svg>
+      </div>
+    )
+  }
+
+  // ============================================================================
+  // Loading State Render
+  // ============================================================================
+
+  if (isLoading) {
+    return (
+      <div className="rounded-md bg-gradient-to-b p-6 border border-gray-200 h-full w-full">
+        <div className="flex justify-start">
+          <h3 className="text-md font-semibold mb-4">
+            Current Consistency Index
+          </h3>
         </div>
-    );
+        {/* Loading spinner centered in the card */}
+        <div className="flex flex-col items-center justify-center h-64">
+          <Loader2 className="h-12 w-12 animate-spin text-blue-600" />
+          <p className="mt-4 text-sm text-gray-500">
+            Loading consistency index...
+          </p>
+        </div>
+      </div>
+    )
+  }
+
+  // ============================================================================
+  // Error State Render
+  // ============================================================================
+
+  if (error) {
+    return (
+      <div className="rounded-md bg-gradient-to-b p-6 border border-gray-200 h-full w-full">
+        <div className="flex justify-start">
+          <h3 className="text-md font-semibold mb-4">
+            Current Consistency Index
+          </h3>
+        </div>
+        {/* Error message centered in the card */}
+        <div className="flex flex-col items-center justify-center h-64">
+          <div className="text-red-500 text-center">
+            <p className="font-medium">Failed to load data</p>
+            <p className="text-sm mt-2">{error}</p>
+          </div>
+        </div>
+      </div>
+    )
+  }
+
+  // ============================================================================
+  // No Data State Render
+  // ============================================================================
+
+  if (!indexData) {
+    return (
+      <div className="rounded-md bg-gradient-to-b p-6 border border-gray-200 h-full w-full">
+        <div className="flex justify-start">
+          <h3 className="text-md font-semibold mb-4">
+            Current Consistency Index
+          </h3>
+        </div>
+        {/* No data message centered in the card */}
+        <div className="flex flex-col items-center justify-center h-64">
+          <p className="text-gray-500">No consistency index data available</p>
+        </div>
+      </div>
+    )
+  }
+
+  // ============================================================================
+  // Main Render with Data
+  // ============================================================================
+
+  return (
+    /* Current Consistency Index */
+    <div className="rounded-md bg-gradient-to-b p-6 border border-gray-200 h-full w-full">
+      <div className="flex justify-start">
+        <h3 className="text-md font-semibold mb-4">
+          Current Consistency Index
+        </h3>
+      </div>
+
+      {/* Index and Trend */}
+      <div className="flex items-center justify-center gap-4 mb-6">
+        <div className="text-6xl font-bold text-blue-600">
+          {indexData.normalized_index.toFixed(1)}
+        </div>
+        <div className="flex flex-col items-center">
+          {getTrendIcon()}
+          <span className={`text-sm font-medium ${getTrendColor()}`}>
+            {getIndexDiff().toFixed(2)}
+          </span>
+        </div>
+      </div>
+      <p className="text-center text-sm text-gray-500 mb-6">
+        {getTrend() === "up"
+          ? "Improving"
+          : getTrend() === "down"
+            ? "Declining"
+            : "Stable"}{" "}
+        from previous period
+      </p>
+
+      {/* Consistency Gauge */}
+      <GaugeChart value={indexData.normalized_index} max={10} />
+      <div className="flex justify-center gap-6 mt-4 text-xs flex-wrap">
+        <div className="flex items-center gap-2">
+          <div className="w-3 h-3 rounded-full bg-red-500" />
+          <span>Low (0-3)</span>
+        </div>
+        <div className="flex items-center gap-2">
+          <div className="w-3 h-3 rounded-full bg-yellow-500" />
+          <span>Moderate (3-5)</span>
+        </div>
+        <div className="flex items-center gap-2">
+          <div className="w-3 h-3 rounded-full bg-lime-500" />
+          <span>Good (5-7)</span>
+        </div>
+        <div className="flex items-center gap-2">
+          <div className="w-3 h-3 rounded-full bg-green-500" />
+          <span>High (7-10)</span>
+        </div>
+      </div>
+    </div>
+  )
 }

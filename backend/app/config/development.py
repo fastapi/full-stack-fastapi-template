@@ -15,8 +15,15 @@ class DevelopmentConfig(BaseConfig):
     # Logging - More verbose in dev
     log_level: str = "DEBUG"
 
-    # CORS - Allow all in development
-    allowed_origins: list[str] = ["*"]
+    # CORS - Allow localhost in development
+    allowed_origins: list[str] = [
+        "http://localhost:3000",
+        "http://localhost:3001",
+        "http://localhost:3002",
+        "http://localhost:5173",
+        "http://127.0.0.1:3000",
+        "http://127.0.0.1:5173",
+    ]
 
     # Rate limiting - Disabled in dev
     rate_limit_enabled: bool = False

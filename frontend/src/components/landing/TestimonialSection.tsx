@@ -1,18 +1,40 @@
-import { useState, useEffect } from 'react'
+import { useEffect, useState } from "react"
 
 export default function TestimonialSection() {
   const [current, setCurrent] = useState(0)
 
   const testimonials = [
-    { quote: "This platform transformed our workflows. Game-changing!", author: "Sarah Chen", role: "CEO, TechCorp" },
-    { quote: "Best investment we made. ROI in the first month.", author: "Michael Ross", role: "CTO, InnovateLabs" },
-    { quote: "Exceptional support. They care about our success.", author: "Emily Stone", role: "VP Operations, DataFlow" }
+    {
+      quote: "This platform transformed our workflows. Game-changing!",
+      author: "Sarah Chen",
+      role: "CEO, TechCorp",
+    },
+    {
+      quote: "Best investment we made. ROI in the first month.",
+      author: "Michael Ross",
+      role: "CTO, InnovateLabs",
+    },
+    {
+      quote: "Exceptional support. They care about our success.",
+      author: "Emily Stone",
+      role: "VP Operations, DataFlow",
+    },
   ]
 
-  const logos = ['TechCorp', 'InnovateLabs', 'DataFlow', 'CloudSync', 'StartupHub', 'ScaleUp']
+  const logos = [
+    "TechCorp",
+    "InnovateLabs",
+    "DataFlow",
+    "CloudSync",
+    "StartupHub",
+    "ScaleUp",
+  ]
 
   useEffect(() => {
-    const interval = setInterval(() => setCurrent((prev) => (prev + 1) % testimonials.length), 5000)
+    const interval = setInterval(
+      () => setCurrent((prev) => (prev + 1) % testimonials.length),
+      5000,
+    )
     return () => clearInterval(interval)
   }, [])
 
@@ -33,8 +55,12 @@ export default function TestimonialSection() {
               {testimonials[current].author.charAt(0)}
             </div>
             <div>
-              <div className="font-bold text-gray-900 dark:text-white">{testimonials[current].author}</div>
-              <div className="text-gray-600 dark:text-gray-400 text-sm">{testimonials[current].role}</div>
+              <div className="font-bold text-gray-900 dark:text-white">
+                {testimonials[current].author}
+              </div>
+              <div className="text-gray-600 dark:text-gray-400 text-sm">
+                {testimonials[current].role}
+              </div>
             </div>
           </div>
         </div>
@@ -45,8 +71,13 @@ export default function TestimonialSection() {
           </h3>
           <div className="flex flex-wrap justify-center gap-8">
             {logos.map((logo, idx) => (
-              <div key={idx} className="bg-white dark:bg-gray-900 px-6 py-4 rounded-lg border border-gray-200 dark:border-gray-700">
-                <span className="font-bold text-gray-700 dark:text-gray-300">{logo}</span>
+              <div
+                key={idx}
+                className="bg-white dark:bg-gray-900 px-6 py-4 rounded-lg border border-gray-200 dark:border-gray-700"
+              >
+                <span className="font-bold text-gray-700 dark:text-gray-300">
+                  {logo}
+                </span>
               </div>
             ))}
           </div>

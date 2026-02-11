@@ -24,7 +24,7 @@ dependencies = [
     "sqlalchemy[asyncio]>=2.0.0",
     "aiomysql>=0.2.0",
     "anthropic[aiohttp]>=0.76.0",
-    "kila-models>=0.1.0"
+    "kila-models>=0.1.0",
 ]
 
 [tool.uv]
@@ -36,6 +36,9 @@ dev-dependencies = [
     "types-passlib<2.0.0.0,>=1.7.7.20240106",
     "coverage<8.0.0,>=7.4.3",
 ]
+
+[tool.uv.sources]
+kila-models = { path = "../../kila-models", editable = true }
 
 [build-system]
 requires = ["hatchling"]

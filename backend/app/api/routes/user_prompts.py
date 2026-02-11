@@ -8,7 +8,8 @@ import json
 
 from app.services.local_ai_services import local_model_service
 from app.models.prompts_schemas import PromptRequest, PromptResponse, AlternativePromptsResponse, ReferencePromptRequest
-from app.core.db import BrandPromptTable, get_db
+from kila_models.models import BrandPromptTable
+from app.core.db import get_db
 from app.config.prompts import system_prompts
 
 

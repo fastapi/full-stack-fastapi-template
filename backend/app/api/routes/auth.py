@@ -1,10 +1,10 @@
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.ext.asyncio import AsyncSession
-from sqlalchemy import select
+from sqlalchemy import select, exists
 from datetime import datetime, timezone
 from nanoid import generate
 from app.core.db import get_db
-from kila_models.models import UsersTable
+from kila_models.models import UsersTable, UsersProfileTable
 from app.models.user_auth import UserSignupRequest, UserLoginRequest, UserResponse, TokenResponse
 from app.utils.auth import hash_password, verify_password, create_access_token, create_refresh_token
 import logging
@@ -58,11 +58,22 @@ async def signup(
     access_token = create_access_token(data={"sub": str(new_user.user_id), "email": new_user.email})
     refresh_token = create_refresh_token(data={"sub": str(new_user.user_id)})
 
+    # New users don't have profiles yet
+    user_response = UserResponse(
+        user_id=new_user.user_id,
+        email=new_user.email,
+        user_name=new_user.user_name,
+        is_active=new_user.is_active,
+        is_verified=new_user.is_verified,
+        created_at=new_user.created_at,
+        profile_complete=False
+    )
+
     # Return user data and tokens
     return TokenResponse(
         access_token=access_token,
         refresh_token=refresh_token,
-        user=UserResponse.model_validate(new_user)
+        user=user_response
     )
 
 
@@ -136,14 +147,29 @@ async def login(
     user.last_login = datetime.now(timezone.utc)
     await db.commit()
 
+    # Check if user has a profile
+    profile_stmt = select(exists().where(UsersProfileTable.user_id == user.user_id))
+    profile_result = await db.execute(profile_stmt)
+    has_profile = profile_result.scalar()
+
     # Create tokens
     access_token = create_access_token(data={"sub": str(user.user_id), "email": user.email})
     refresh_token = create_refresh_token(data={"sub": str(user.user_id)})
 
     logger.info(f"User logged in: {user.email}")
 
+    user_response = UserResponse(
+        user_id=user.user_id,
+        email=user.email,
+        user_name=user.user_name,
+        is_active=user.is_active,
+        is_verified=user.is_verified,
+        created_at=user.created_at,
+        profile_complete=has_profile
+    )
+
     return TokenResponse(
         access_token=access_token,
         refresh_token=refresh_token,
-        user=UserResponse.from_orm(user)
+        user=user_response
     )

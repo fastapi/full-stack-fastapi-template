@@ -1,17 +1,17 @@
-import { useState } from 'react'
-import Header from './Header'
-import Hero from './Hero'
-import ProductSection from './ProductSection'
-import TestimonialSection from './TestimonialSection'
-import PricingSection from './PricingSection'
-import Footer from './Footer'
-import AuthDialog from './AuthDialog'
+import { useState } from "react"
+import AuthDialog from "./AuthDialog"
+import Footer from "./Footer"
+import Header from "./Header"
+import Hero from "./Hero"
+import PricingSection from "./PricingSection"
+import ProductSection from "./ProductSection"
+import TestimonialSection from "./TestimonialSection"
 
 export default function LandingPage() {
   const [authDialogOpen, setAuthDialogOpen] = useState(false)
-  const [authMode, setAuthMode] = useState<'signin' | 'signup'>('signin')
+  const [authMode, setAuthMode] = useState<"signin" | "signup">("signin")
 
-  const openAuthDialog = (mode: 'signin' | 'signup') => {
+  const openAuthDialog = (mode: "signin" | "signup") => {
     setAuthMode(mode)
     setAuthDialogOpen(true)
   }
