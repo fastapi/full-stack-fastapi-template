@@ -149,3 +149,62 @@ class HistoricalTrendsResponse(BaseModel):
     end_date: str = Field(..., description="End date of the query period")
 
     model_config = ConfigDict(from_attributes=True)
+
+
+class UserBrand(BaseModel):
+    """
+    Schema for a brand accessible by the user.
+
+    Attributes:
+        brand_id: Unique identifier for the brand
+        brand_name: Display name of the brand
+        project_id: Project this brand belongs to
+        project_name: Display name of the project
+        user_role: User's role in the project (owner or monitor)
+    """
+    brand_id: str = Field(..., description="Unique identifier for the brand")
+    brand_name: str = Field(..., description="Display name of the brand")
+    project_id: str = Field(..., description="Project this brand belongs to")
+    project_name: str = Field(..., description="Display name of the project")
+    user_role: str = Field(..., description="User's role in the project")
+
+    model_config = ConfigDict(from_attributes=True)
+
+
+class UserBrandsResponse(BaseModel):
+    """
+    Response schema for user's accessible brands.
+
+    This schema returns all brands the user can view based on
+    their project memberships (as owner or monitor).
+
+    Attributes:
+        brands: List of accessible brands
+        total_count: Total number of brands
+    """
+    brands: list[UserBrand] = Field(default_factory=list, description="List of accessible brands")
+    total_count: int = Field(0, description="Total number of brands")
+
+    model_config = ConfigDict(from_attributes=True)
+
+
+class DetailMetricsDataPoint(BaseModel):
+    """A single data point for detail metrics (visibility + ranking)."""
+    date: str = Field(..., description="Date of this data point (YYYY-MM-DD format)")
+    visibility_rate: float = Field(..., description="Visibility rate as percentage (0-100)")
+    avg_ranking: float = Field(..., description="Average ranking for the day")
+
+    model_config = ConfigDict(from_attributes=True)
+
+
+class DetailMetricsResponse(BaseModel):
+    """Response schema for detail metrics (visibility + ranking trends)."""
+    brand_id: str = Field(..., description="Brand identifier")
+    brand_name: str = Field(..., description="Brand display name")
+    data_points: list[DetailMetricsDataPoint] = Field(default_factory=list, description="Time series data points")
+    visibility_stats: Optional[MetricStatistics] = Field(None, description="Visibility rate statistics")
+    ranking_stats: Optional[MetricStatistics] = Field(None, description="Ranking statistics")
+    start_date: str = Field(..., description="Start date of the query period")
+    end_date: str = Field(..., description="End date of the query period")
+
+    model_config = ConfigDict(from_attributes=True)

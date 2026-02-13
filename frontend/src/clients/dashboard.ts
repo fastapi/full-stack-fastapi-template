@@ -21,6 +21,7 @@ const CACHE_EXPIRATION_HOURS = 10 // Cache expires after 10 hours
 const CACHE_KEY_AWARENESS = "dashboard_awareness_score"
 const CACHE_KEY_CONSISTENCY = "dashboard_consistency_index"
 const CACHE_KEY_METRICS = "dashboard_metrics"
+const CACHE_KEY_USER_BRANDS = "dashboard_user_brands"
 
 /**
  * Interface for cached data wrapper
@@ -111,6 +112,25 @@ export interface HistoricalTrendsResponse {
 export type TimeRange = "1month" | "1quarter" | "1year" | "ytd" | "custom"
 
 /**
+ * A brand accessible by the user
+ */
+export interface UserBrand {
+  brand_id: string
+  brand_name: string
+  project_id: string
+  project_name: string
+  user_role: string
+}
+
+/**
+ * Response interface for user brands API
+ */
+export interface UserBrandsResponse {
+  brands: UserBrand[]
+  total_count: number
+}
+
+/**
  * Parameters for historical trends query
  */
 export interface HistoricalTrendsParams {
@@ -118,6 +138,38 @@ export interface HistoricalTrendsParams {
   startDate?: string // ISO date string for custom range
   endDate?: string // ISO date string for custom range
   brandId?: string
+}
+
+/**
+ * A single data point for detail metrics (visibility + ranking)
+ */
+export interface DetailMetricsDataPoint {
+  date: string // ISO date string (YYYY-MM-DD)
+  visibility_rate: number // Percentage (0-100)
+  avg_ranking: number // Average ranking for the day
+}
+
+/**
+ * Response interface for detail metrics API
+ */
+export interface DetailMetricsResponse {
+  brand_id: string
+  brand_name: string
+  data_points: DetailMetricsDataPoint[]
+  visibility_stats: MetricStatistics | null
+  ranking_stats: MetricStatistics | null
+  start_date: string
+  end_date: string
+}
+
+/**
+ * Parameters for detail metrics query
+ */
+export interface DetailMetricsParams {
+  timeRange: TimeRange
+  startDate?: string
+  endDate?: string
+  brandId: string
 }
 
 /**
@@ -540,6 +592,151 @@ class DashboardAPI {
       localStorage.removeItem(key)
     }
     console.log("[DashboardAPI] Historical trends cache cleared")
+  }
+
+  /**
+   * Fetch brands accessible by the current user
+   *
+   * This method retrieves all brands from projects where the user
+   * is either an owner or a monitor. Data is cached for 10 hours.
+   *
+   * @param forceRefresh - If true, bypasses cache and fetches fresh data
+   * @returns UserBrandsResponse with list of accessible brands
+   * @throws Error if API call fails
+   */
+  async getUserBrands(forceRefresh: boolean = false): Promise<UserBrandsResponse> {
+    // Check cache first (unless force refresh is requested)
+    if (!forceRefresh) {
+      const cached = this.getCachedData<UserBrandsResponse>(CACHE_KEY_USER_BRANDS)
+      if (cached) {
+        return cached
+      }
+    }
+
+    console.log("[DashboardAPI] Fetching user brands from API...")
+
+    const url = `${this.baseUrl}${this.apiPrefix}/dashboard/user-brands`
+
+    // Make API request
+    const response = await fetch(url, {
+      method: "GET",
+      headers: this.getAuthHeaders(),
+    })
+
+    // Handle authentication errors
+    if (response.status === 401) {
+      throw new Error("Unauthorized - Please log in again")
+    }
+
+    // Handle other errors
+    if (!response.ok) {
+      const error: ApiError = await response.json()
+      throw new Error(error.detail || "Failed to fetch user brands")
+    }
+
+    // Parse response
+    const data: UserBrandsResponse = await response.json()
+
+    // Cache the result
+    this.setCachedData(CACHE_KEY_USER_BRANDS, data)
+
+    console.log("[DashboardAPI] User brands fetched successfully", {
+      count: data.total_count,
+    })
+
+    return data
+  }
+
+  /**
+   * Clear user brands cache
+   * Useful when project/brand assignments have changed
+   */
+  clearUserBrandsCache(): void {
+    localStorage.removeItem(CACHE_KEY_USER_BRANDS)
+    console.log("[DashboardAPI] User brands cache cleared")
+  }
+
+  /**
+   * Generate a cache key for detail metrics based on query parameters
+   */
+  private getDetailMetricsCacheKey(params: DetailMetricsParams): string {
+    const { timeRange, startDate, endDate, brandId } = params
+    if (timeRange === "custom") {
+      return `dashboard_detail_custom_${startDate}_${endDate}_${brandId}`
+    }
+    return `dashboard_detail_${timeRange}_${brandId}`
+  }
+
+  /**
+   * Fetch detail metrics (visibility + ranking) from API
+   */
+  async getDetailMetrics(
+    params: DetailMetricsParams,
+    forceRefresh: boolean = false,
+  ): Promise<DetailMetricsResponse> {
+    const cacheKey = this.getDetailMetricsCacheKey(params)
+
+    if (!forceRefresh) {
+      const cached = this.getCachedData<DetailMetricsResponse>(cacheKey)
+      if (cached) {
+        return cached
+      }
+    }
+
+    console.log("[DashboardAPI] Fetching detail metrics from API...", params)
+
+    const queryParams = new URLSearchParams()
+    queryParams.append("brand_id", params.brandId)
+    queryParams.append("time_range", params.timeRange)
+
+    if (params.timeRange === "custom") {
+      if (!params.startDate || !params.endDate) {
+        throw new Error(
+          "Start date and end date are required for custom time range",
+        )
+      }
+      queryParams.append("start_date", params.startDate)
+      queryParams.append("end_date", params.endDate)
+    }
+
+    const url = `${this.baseUrl}${this.apiPrefix}/dashboard/detail-metrics?${queryParams.toString()}`
+
+    const response = await fetch(url, {
+      method: "GET",
+      headers: this.getAuthHeaders(),
+    })
+
+    if (response.status === 401) {
+      throw new Error("Unauthorized - Please log in again")
+    }
+
+    if (!response.ok) {
+      const error: ApiError = await response.json()
+      throw new Error(error.detail || "Failed to fetch detail metrics")
+    }
+
+    const data: DetailMetricsResponse = await response.json()
+
+    this.setCachedData(cacheKey, data)
+
+    console.log("[DashboardAPI] Detail metrics fetched successfully", {
+      dataPoints: data.data_points.length,
+      brandName: data.brand_name,
+    })
+
+    return data
+  }
+
+  /**
+   * Clear detail metrics cache for all time ranges
+   */
+  clearDetailMetricsCache(): void {
+    const timeRanges: TimeRange[] = ["1month", "1quarter", "1year", "ytd"]
+    for (const range of timeRanges) {
+      const key = `dashboard_detail_${range}_all`
+      localStorage.removeItem(key)
+    }
+    console.log("[DashboardAPI] Detail metrics cache cleared")
   }
 }
 

@@ -1,12 +1,13 @@
 /**
- * BrandAwarenessScoreHistoricalView Component
+ * DetailMetricsView Component
  *
- * Displays historical trends for brand awareness score and consistency index.
+ * Displays historical trends for brand visibility rate and ranking.
  * Features:
  * - Time range selection (1 Month, 1 Quarter, 1 Year, YTD, Custom)
  * - Line and Bar chart visualizations
+ * - Dual Y-axis: visibility (left, %), ranking (right, inverted)
+ * - Click legend to toggle individual metrics
  * - Statistical summaries for both metrics
- * - Data caching with 10-hour expiration
  */
 
 import { ChartColumnBig, ChartLine, Loader2 } from "lucide-react"
@@ -25,89 +26,70 @@ import {
 } from "recharts"
 import {
   dashboardAPI,
-  type HistoricalTrendsResponse,
+  type DetailMetricsResponse,
   type MetricStatistics,
   type TimeRange,
 } from "@/clients/dashboard"
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs"
 
-/**
- * Chart data point format for Recharts
- */
 interface ChartDataPoint {
   date: string
   displayDate: string
-  awarenessScore: number
-  consistencyIndex: number
+  visibilityRate: number
+  avgRanking: number
 }
 
-/**
- * Format ISO date string to display format (MM/DD)
- */
 const formatDateForDisplay = (isoDate: string): string => {
   const date = new Date(isoDate)
   return `${date.getMonth() + 1}/${date.getDate()}`
 }
 
-/**
- * Transform API response to chart-friendly format
- */
 const transformDataForChart = (
-  response: HistoricalTrendsResponse,
+  response: DetailMetricsResponse,
 ): ChartDataPoint[] => {
   return response.data_points.map((point) => ({
     date: point.date,
     displayDate: formatDateForDisplay(point.date),
-    awarenessScore: point.awareness_score,
-    consistencyIndex: point.consistency_index,
+    visibilityRate: point.visibility_rate,
+    avgRanking: point.avg_ranking,
   }))
 }
 
-interface BrandAwarenessScoreHistoricalViewProps {
-  brandId?: string
+interface DetailMetricsViewProps {
+  brandId: string
   timeRange: TimeRange
   customStartDate?: string
   customEndDate?: string
 }
 
-export function BrandAwarenessScoreHistoricalView({
+export function DetailMetricsView({
   brandId,
   timeRange,
   customStartDate,
   customEndDate,
-}: BrandAwarenessScoreHistoricalViewProps) {
-  // ============================================================================
-  // State Management
-  // ============================================================================
-
+}: DetailMetricsViewProps) {
   const [chartData, setChartData] = useState<ChartDataPoint[]>([])
   const [chartType, setChartType] = useState<"line" | "bar">("line")
   const [isLoading, setIsLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
-  const [awarenessStats, setAwarenessStats] = useState<MetricStatistics | null>(
+  const [visibilityStats, setVisibilityStats] =
+    useState<MetricStatistics | null>(null)
+  const [rankingStats, setRankingStats] = useState<MetricStatistics | null>(
     null,
   )
-  const [consistencyStats, setConsistencyStats] =
-    useState<MetricStatistics | null>(null)
+  const [hiddenSeries, setHiddenSeries] = useState<Set<string>>(new Set())
 
-  // ============================================================================
-  // Data Fetching
-  // ============================================================================
-
-  /**
-   * Fetch historical trends data when time range or brand changes
-   */
   useEffect(() => {
     if (timeRange === "custom" && (!customStartDate || !customEndDate)) {
       return
     }
 
-    const fetchHistoricalTrends = async () => {
+    const fetchDetailMetrics = async () => {
       try {
         setIsLoading(true)
         setError(null)
 
-        const data = await dashboardAPI.getHistoricalTrends({
+        const data = await dashboardAPI.getDetailMetrics({
           timeRange,
           brandId,
           startDate: customStartDate,
@@ -116,32 +98,43 @@ export function BrandAwarenessScoreHistoricalView({
 
         const chartPoints = transformDataForChart(data)
         setChartData(chartPoints)
-        setAwarenessStats(data.awareness_stats)
-        setConsistencyStats(data.consistency_stats)
+        setVisibilityStats(data.visibility_stats)
+        setRankingStats(data.ranking_stats)
 
-        console.log("[HistoricalView] Data loaded:", {
+        console.log("[DetailMetrics] Data loaded:", {
           points: chartPoints.length,
-          awarenessStats: data.awareness_stats,
-          consistencyStats: data.consistency_stats,
         })
       } catch (err) {
         const errorMessage =
           err instanceof Error
             ? err.message
-            : "Failed to load historical trends"
+            : "Failed to load detail metrics"
         setError(errorMessage)
-        console.error("[HistoricalView] Error:", err)
+        console.error("[DetailMetrics] Error:", err)
       } finally {
         setIsLoading(false)
       }
     }
 
-    fetchHistoricalTrends()
+    fetchDetailMetrics()
   }, [timeRange, brandId, customStartDate, customEndDate])
 
-  // ============================================================================
-  // Custom Tooltip Component
-  // ============================================================================
+  const handleLegendClick = (dataKey: string) => {
+    setHiddenSeries((prev) => {
+      const next = new Set(prev)
+      if (next.has(dataKey)) {
+        next.delete(dataKey)
+      } else {
+        next.add(dataKey)
+      }
+      return next
+    })
+  }
+
+  // Compute max ranking for Y-axis domain
+  const maxRanking = chartData.length > 0
+    ? Math.ceil(Math.max(...chartData.map((d) => d.avgRanking), 1))
+    : 10
 
   const CustomTooltip = ({
     active,
@@ -161,10 +154,15 @@ export function BrandAwarenessScoreHistoricalView({
           <p className="text-sm font-medium mb-2">{payload[0].payload.date}</p>
           {payload.map((entry, index) => (
             <p key={index} className="text-sm" style={{ color: entry.color }}>
-              {entry.dataKey === "awarenessScore"
-                ? "Awareness Score"
-                : "Consistency Index"}
-              : <span className="font-bold">{entry.value.toFixed(2)}</span>
+              {entry.dataKey === "visibilityRate"
+                ? "Visibility Rate"
+                : "Avg Ranking"}
+              :{" "}
+              <span className="font-bold">
+                {entry.dataKey === "visibilityRate"
+                  ? `${entry.value.toFixed(1)}%`
+                  : entry.value.toFixed(1)}
+              </span>
             </p>
           ))}
         </div>
@@ -173,20 +171,50 @@ export function BrandAwarenessScoreHistoricalView({
     return null
   }
 
-  // ============================================================================
-  // Statistics Display Component
-  // ============================================================================
+  const legendItems = [
+    { dataKey: "visibilityRate", label: "Visibility Rate", color: "#3b82f6" },
+    { dataKey: "avgRanking", label: "Avg Ranking", color: "#f97316" },
+  ]
+
+  const CustomLegend = () => {
+    return (
+      <div className="flex justify-center gap-6 mt-2">
+        {legendItems.map((item) => {
+          const isHidden = hiddenSeries.has(item.dataKey)
+          return (
+            <button
+              key={item.dataKey}
+              type="button"
+              className="flex items-center gap-2 text-sm cursor-pointer transition-colors"
+              onClick={() => handleLegendClick(item.dataKey)}
+            >
+              <span
+                className="inline-block w-3 h-3 rounded-full"
+                style={{ backgroundColor: isHidden ? "#d1d5db" : item.color }}
+              />
+              <span style={{ color: isHidden ? "#9ca3af" : "#374151" }}>
+                {item.label}
+              </span>
+            </button>
+          )
+        })}
+      </div>
+    )
+  }
 
   const StatisticsRow = ({
     title,
     stats,
     color,
+    unit,
   }: {
     title: string
     stats: MetricStatistics | null
     color: string
+    unit?: string
   }) => {
     if (!stats) return null
+    const suffix = unit || ""
 
     return (
       <div className="mt-4">
@@ -195,25 +223,25 @@ export function BrandAwarenessScoreHistoricalView({
           <div>
             <div className="text-xs text-gray-500">Average</div>
             <div className="text-lg font-bold text-gray-600">
-              {stats.average.toFixed(2)}
+              {stats.average.toFixed(2)}{suffix}
             </div>
           </div>
           <div>
             <div className="text-xs text-gray-500">Highest</div>
             <div className="text-lg font-bold text-gray-600">
-              {stats.highest.toFixed(2)}
+              {stats.highest.toFixed(2)}{suffix}
             </div>
           </div>
           <div>
             <div className="text-xs text-gray-500">Lowest</div>
             <div className="text-lg font-bold text-gray-600">
-              {stats.lowest.toFixed(2)}
+              {stats.lowest.toFixed(2)}{suffix}
             </div>
           </div>
           <div>
             <div className="text-xs text-gray-500">Median</div>
             <div className="text-lg font-bold text-gray-600">
-              {stats.median.toFixed(2)}
+              {stats.median.toFixed(2)}{suffix}
             </div>
           </div>
           <div>
@@ -232,32 +260,28 @@ export function BrandAwarenessScoreHistoricalView({
     )
   }
 
-  // ============================================================================
-  // Loading State
-  // ============================================================================
-
   if (isLoading) {
     return (
       <div className="rounded-md bg-gradient-to-b p-6 border border-gray-200 h-full w-full">
-        <h3 className="text-md font-semibold mb-4">Historical Trends</h3>
+        <h3 className="text-md font-semibold mb-4">
+          Visibility &amp; Ranking Trends
+        </h3>
         <div className="flex flex-col items-center justify-center h-96">
           <Loader2 className="h-12 w-12 animate-spin text-blue-600" />
           <p className="mt-4 text-sm text-gray-500">
-            Loading historical trends...
+            Loading detail metrics...
           </p>
         </div>
       </div>
     )
   }
 
-  // ============================================================================
-  // Error State
-  // ============================================================================
-
   if (error && chartData.length === 0) {
     return (
       <div className="rounded-md bg-gradient-to-b p-6 border border-gray-200 h-full w-full">
-        <h3 className="text-md font-semibold mb-4">Historical Trends</h3>
+        <h3 className="text-md font-semibold mb-4">
+          Visibility &amp; Ranking Trends
+        </h3>
         <div className="flex flex-col items-center justify-center h-96">
           <div className="text-red-500 text-center">
             <p className="font-medium">Failed to load data</p>
@@ -268,13 +292,14 @@ export function BrandAwarenessScoreHistoricalView({
     )
   }
 
-  // ============================================================================
-  // Main Render
-  // ============================================================================
+  const showVisibility = !hiddenSeries.has("visibilityRate")
+  const showRanking = !hiddenSeries.has("avgRanking")
 
   return (
     <div className="rounded-md bg-gradient-to-b p-6 border border-gray-200 h-full w-full">
-      <h3 className="text-md font-semibold mb-4">Historical Trends</h3>
+      <h3 className="text-md font-semibold mb-4">
+        Visibility &amp; Ranking Trends
+      </h3>
 
       <div className="space-y-4 mb-6">
         {/* Chart Type Selection */}
@@ -308,14 +333,14 @@ export function BrandAwarenessScoreHistoricalView({
           </div>
         </div>
 
-        {/* Error message for inline errors */}
+        {/* Inline error */}
         {error && chartData.length > 0 && (
           <div className="text-red-500 text-sm p-2 bg-red-50 rounded">
             {error}
           </div>
         )}
 
-        {/* Chart Display */}
+        {/* Chart */}
         <div className="w-full h-96 bg-gray-50 rounded-lg p-4">
           {chartData.length === 0 ? (
             <div className="flex items-center justify-center h-full text-gray-500">
@@ -332,35 +357,54 @@ export function BrandAwarenessScoreHistoricalView({
                     style={{ fontSize: "12px" }}
                   />
                   <YAxis
-                    domain={[0, 10]}
-                    stroke="#6b7280"
+                    yAxisId="left"
+                    domain={[0, 100]}
+                    stroke="#3b82f6"
                     style={{ fontSize: "12px" }}
                     label={{
-                      value: "Score (0-10)",
+                      value: "Visibility (%)",
                       angle: -90,
                       position: "insideLeft",
-                      style: { fontSize: "12px" },
+                      style: { fontSize: "12px", fill: "#3b82f6" },
+                    }}
+                  />
+                  <YAxis
+                    yAxisId="right"
+                    orientation="right"
+                    domain={[1, maxRanking + 1]}
+                    reversed
+                    stroke="#f97316"
+                    style={{ fontSize: "12px" }}
+                    label={{
+                      value: "Ranking",
+                      angle: 90,
+                      position: "insideRight",
+                      style: { fontSize: "12px", fill: "#f97316" },
                     }}
                   />
                   <Tooltip content={<CustomTooltip />} />
-                  <Legend />
+                  <Legend content={<CustomLegend />} />
                   <Line
+                    yAxisId="left"
                     type="monotone"
-                    dataKey="awarenessScore"
+                    dataKey="visibilityRate"
                     stroke="#3b82f6"
                     strokeWidth={3}
-                    dot={{ fill: "#3b82f6", r: 4 }}
-                    activeDot={{ r: 6 }}
-                    name="Awareness Score"
+                    dot={{ fill: "#3b82f6", r: 3 }}
+                    activeDot={{ r: 5 }}
+                    name="Visibility Rate"
+                    hide={!showVisibility}
                   />
                   <Line
+                    yAxisId="right"
                     type="monotone"
-                    dataKey="consistencyIndex"
-                    stroke="#8b5cf6"
+                    dataKey="avgRanking"
+                    stroke="#f97316"
                     strokeWidth={3}
-                    dot={{ fill: "#8b5cf6", r: 4 }}
-                    activeDot={{ r: 6 }}
-                    name="Consistency Index"
+                    dot={{ fill: "#f97316", r: 3 }}
+                    activeDot={{ r: 5 }}
+                    name="Avg Ranking"
+                    hide={!showRanking}
                   />
                 </LineChart>
               ) : (
@@ -372,29 +416,48 @@ export function BrandAwarenessScoreHistoricalView({
                     style={{ fontSize: "12px" }}
                   />
                   <YAxis
-                    domain={[0, 10]}
-                    stroke="#6b7280"
+                    yAxisId="left"
+                    domain={[0, 100]}
+                    stroke="#3b82f6"
                     style={{ fontSize: "12px" }}
                     label={{
-                      value: "Score (0-10)",
+                      value: "Visibility (%)",
                       angle: -90,
                       position: "insideLeft",
-                      style: { fontSize: "12px" },
+                      style: { fontSize: "12px", fill: "#3b82f6" },
+                    }}
+                  />
+                  <YAxis
+                    yAxisId="right"
+                    orientation="right"
+                    domain={[1, maxRanking + 1]}
+                    reversed
+                    stroke="#f97316"
+                    style={{ fontSize: "12px" }}
+                    label={{
+                      value: "Ranking",
+                      angle: 90,
+                      position: "insideRight",
+                      style: { fontSize: "12px", fill: "#f97316" },
                     }}
                   />
                   <Tooltip content={<CustomTooltip />} />
-                  <Legend />
+                  <Legend content={<CustomLegend />} />
                   <Bar
-                    dataKey="awarenessScore"
+                    yAxisId="left"
+                    dataKey="visibilityRate"
                     fill="#3b82f6"
-                    name="Awareness Score"
+                    name="Visibility Rate"
                     radius={[4, 4, 0, 0]}
+                    hide={!showVisibility}
                   />
                   <Bar
-                    dataKey="consistencyIndex"
-                    fill="#8b5cf6"
-                    name="Consistency Index"
+                    yAxisId="right"
+                    dataKey="avgRanking"
+                    fill="#f97316"
+                    name="Avg Ranking"
                     radius={[4, 4, 0, 0]}
+                    hide={!showRanking}
                   />
                 </BarChart>
               )}
@@ -405,14 +468,15 @@ export function BrandAwarenessScoreHistoricalView({
         {/* Statistics Summary */}
         <div className="border-t pt-4 mt-4">
           <StatisticsRow
-            title="Brand Awareness Score Statistics"
-            stats={awarenessStats}
+            title="Visibility Rate Statistics"
+            stats={visibilityStats}
             color="text-blue-600"
+            unit="%"
           />
           <StatisticsRow
-            title="Brand Stability Index Statistics"
-            stats={consistencyStats}
-            color="text-purple-600"
+            title="Ranking Statistics"
+            stats={rankingStats}
+            color="text-orange-600"
           />
         </div>
       </div>

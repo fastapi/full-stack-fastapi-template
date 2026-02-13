@@ -310,32 +310,52 @@ async def setup_project(
             # Use a default or generate one
             company_id = f"company_{current_user.user_id}"
 
-        # Step 1: Generate project ID with prefix
+        # Step 1: Check if this brand already exists in a project owned by this user
+        brand_name_lower = setup_data.brand_name.strip().lower()
+        existing_project_query = (
+            select(BrandPromptTable.project_id, BrandPromptTable.brand_id)
+            .where(
+                func.lower(BrandPromptTable.brand_name) == brand_name_lower,
+                BrandPromptTable.user_id == current_user.user_id,
+                BrandPromptTable.is_active == True
+            )
+            .limit(1)
+        )
+        existing_project_result = await db.execute(existing_project_query)
+        existing_project_row = existing_project_result.first()
+
+        if existing_project_row:
+            # Brand already used in an existing project — find the project name
+            project_query = select(ProjectsRecord.project_name).where(
+                ProjectsRecord.project_id == existing_project_row.project_id,
+                ProjectsRecord.is_active == True
+            )
+            project_result = await db.execute(project_query)
+            existing_project_name = project_result.scalar_one_or_none() or "Unknown"
+
+            logger.info(
+                f"Brand '{setup_data.brand_name}' already exists in project "
+                f"'{existing_project_name}' for user: {current_user.user_id}"
+            )
+            raise HTTPException(
+                status_code=status.HTTP_409_CONFLICT,
+                detail=f"Brand \"{setup_data.brand_name.strip()}\" already exists in project \"{existing_project_name}\". Please edit the existing project instead of creating a new one."
+            )
+
+        # Step 2: Generate project ID with prefix
         project_id = generate_id("P_")
 
-        # Step 2: Check if brand exists (case-insensitive)
-        brand_name_lower = setup_data.brand_name.strip().lower()
-        brand_query = select(BrandsTable).where(
-            func.lower(BrandsTable.brand_name) == brand_name_lower
+        # Step 3: Create new brand with B_ prefix
+        brand_id = generate_id("B_")
+        new_brand = BrandsTable(
+            brand_id=brand_id,
+            brand_name=setup_data.brand_name.strip(),
+            created_by=current_user.user_id
         )
-        brand_result = await db.execute(brand_query)
-        existing_brand = brand_result.scalar_one_or_none()
+        db.add(new_brand)
+        logger.info(f"Creating new brand: {brand_id} for user: {current_user.user_id}")
 
-        if existing_brand:
-            brand_id = existing_brand.brand_id
-            logger.info(f"Using existing brand: {brand_id}")
-        else:
-            # Create new brand with B_ prefix
-            brand_id = generate_id("B_")
-            new_brand = BrandsTable(
-                brand_id=brand_id,
-                brand_name=setup_data.brand_name.strip(),
-                created_by=current_user.user_id
-            )
-            db.add(new_brand)
-            logger.info(f"Creating new brand: {brand_id}")
-
-        # Step 3: Create project
+        # Step 4: Create project
         new_project = ProjectsRecord(
             project_id=project_id,
             project_name=setup_data.project_name.strip(),
@@ -347,7 +367,7 @@ async def setup_project(
         db.add(new_project)
         logger.info(f"Creating project: {project_id}")
 
-        # Step 4: Create project-user relationship with OWNER role
+        # Step 5: Create project-user relationship with OWNER role
         project_user = ProjectUserTable(
             project_id=project_id,
             user_id=current_user.user_id,
@@ -356,7 +376,7 @@ async def setup_project(
         db.add(project_user)
         logger.info(f"Creating project-user relationship: {project_id} -> {current_user.user_id} (OWNER)")
 
-        # Step 5: Create brand prompts for each segment (each segment is a separate row)
+        # Step 6: Create brand prompts for each segment (each segment is a separate row)
         prompt_count = 0
         for segment in setup_data.segments:
             if segment.segment_name.strip() and segment.prompts.strip():
@@ -395,6 +415,9 @@ async def setup_project(
             message="Project setup completed successfully"
         )
 
+    except HTTPException:
+        # Re-raise HTTP exceptions (e.g. 409 Conflict) without wrapping
+        raise
     except Exception as e:
         await db.rollback()
         logger.error(f"Failed to setup project: {e}")
@@ -543,17 +566,18 @@ async def update_project_full(
         project.is_active = update_data.is_active
         logger.info(f"Updating project: {project_id}")
 
-        # Step 2: Check if brand exists (case-insensitive)
+        # Step 2: Check if brand already exists for this user (case-insensitive name + same user)
         brand_name_lower = update_data.brand_name.strip().lower()
         brand_query = select(BrandsTable).where(
-            func.lower(BrandsTable.brand_name) == brand_name_lower
+            func.lower(BrandsTable.brand_name) == brand_name_lower,
+            BrandsTable.created_by == current_user.user_id
         )
         brand_result = await db.execute(brand_query)
         existing_brand = brand_result.scalar_one_or_none()
 
         if existing_brand:
             brand_id = existing_brand.brand_id
-            logger.info(f"Using existing brand: {brand_id}")
+            logger.info(f"Using existing brand: {brand_id} (user already owns this brand)")
         else:
             # Create new brand with B_ prefix
             brand_id = generate_id("B_")
@@ -563,7 +587,7 @@ async def update_project_full(
                 created_by=current_user.user_id
             )
             db.add(new_brand)
-            logger.info(f"Creating new brand: {brand_id}")
+            logger.info(f"Creating new brand: {brand_id} for user: {current_user.user_id}")
 
         # Step 3: Delete existing prompts for this project
         delete_stmt = delete(BrandPromptTable).where(

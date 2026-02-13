@@ -10,10 +10,11 @@
  * - Data fetched from backend API with caching
  */
 
-import { Loader2, Pencil, Plus, Trash2 } from "lucide-react"
+import { AlertCircle, Loader2, Pencil, Plus, Trash2 } from "lucide-react"
 import { useCallback, useEffect, useState } from "react"
 import { toast } from "sonner"
-import { type Project, projectsAPI } from "@/clients/projects"
+import { type ApiConflictError, type Project, projectsAPI } from "@/clients/projects"
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
 import {
   type ProjectEditFormData,
   ProjectEditForm,
@@ -67,6 +68,7 @@ export default function Projects() {
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [deletingProject, setDeletingProject] = useState<Project | null>(null)
   const [isDeleting, setIsDeleting] = useState(false)
+  const [brandConflictMessage, setBrandConflictMessage] = useState<string | null>(null)
 
   // ============================================================================
   // Data Fetching
@@ -101,11 +103,13 @@ export default function Projects() {
 
   const handleAddNewProject = () => {
     setEditingProject(null) // Close edit form if open
+    setBrandConflictMessage(null) // Clear any previous conflict message
     setShowSetupForm(true)
   }
 
   const handleCancelSetup = () => {
     setShowSetupForm(false)
+    setBrandConflictMessage(null)
   }
 
   const handleEditProject = (project: Project) => {
@@ -163,6 +167,7 @@ export default function Projects() {
 
     try {
       setIsSubmitting(true)
+      setBrandConflictMessage(null)
 
       // Transform form data to API format and call setupProject
       const result = await projectsAPI.setupProject({
@@ -189,9 +194,16 @@ export default function Projects() {
       const freshData = await projectsAPI.getProjects(true)
       setProjects(freshData.projects)
     } catch (err) {
-      const errorMessage =
-        err instanceof Error ? err.message : "Failed to create project"
-      toast.error(errorMessage)
+      if ((err as ApiConflictError).isConflict) {
+        // Brand already exists in another project — show info box
+        setBrandConflictMessage(
+          err instanceof Error ? err.message : "Brand already exists in another project"
+        )
+      } else {
+        const errorMessage =
+          err instanceof Error ? err.message : "Failed to create project"
+        toast.error(errorMessage)
+      }
       console.error("[Projects] Error setting up project:", err)
     } finally {
       setIsSubmitting(false)
@@ -363,6 +375,19 @@ export default function Projects() {
           )}
         </CardContent>
       </Card>
+
+      {/* Brand Conflict Info Box */}
+      {brandConflictMessage && showSetupForm && (
+        <div className="mt-4">
+          <Alert className="border-amber-300 bg-amber-50">
+            <AlertCircle className="h-4 w-4 text-amber-600" />
+            <AlertTitle className="text-amber-800">Brand Already Exists</AlertTitle>
+            <AlertDescription className="text-amber-700">
+              {brandConflictMessage}
+            </AlertDescription>
+          </Alert>
+        </div>
+      )}
 
       {/* Project Setup Form (shown when adding new project) */}
       {showSetupForm && (

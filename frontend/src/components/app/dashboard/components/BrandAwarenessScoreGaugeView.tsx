@@ -31,7 +31,11 @@ interface GaugeChartProps {
   max?: number // Maximum value for the gauge (default: 10)
 }
 
-export function BrandAwarenessScoreGaugeView() {
+interface BrandAwarenessScoreGaugeViewProps {
+  brandId?: string
+}
+
+export function BrandAwarenessScoreGaugeView({ brandId }: BrandAwarenessScoreGaugeViewProps) {
   // ============================================================================
   // State Management
   // ============================================================================
@@ -67,7 +71,7 @@ export function BrandAwarenessScoreGaugeView() {
 
         // Fetch data from API (with automatic caching)
         // The API client will return cached data if available and not expired
-        const data = await dashboardAPI.getConsistencyIndex()
+        const data = await dashboardAPI.getConsistencyIndex(brandId)
 
         // Update state with fetched data
         setIndexData(data)
@@ -89,7 +93,7 @@ export function BrandAwarenessScoreGaugeView() {
 
     // Execute the fetch function
     fetchConsistencyIndex()
-  }, []) // Empty dependency array means this runs once on mount
+  }, [brandId]) // Re-fetch when brandId changes
 
   // ============================================================================
   // Trend Calculation Functions

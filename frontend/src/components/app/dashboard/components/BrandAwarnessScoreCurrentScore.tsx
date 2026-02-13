@@ -28,7 +28,11 @@ interface GaugeChartProps {
   max?: number // Maximum value for the gauge (default: 10)
 }
 
-export function BrandAwarenessScoreCurrentScore() {
+interface BrandAwarenessScoreCurrentScoreProps {
+  brandId?: string
+}
+
+export function BrandAwarenessScoreCurrentScore({ brandId }: BrandAwarenessScoreCurrentScoreProps) {
   // ============================================================================
   // State Management
   // ============================================================================
@@ -64,7 +68,7 @@ export function BrandAwarenessScoreCurrentScore() {
 
         // Fetch data from API (with automatic caching)
         // The API client will return cached data if available and not expired
-        const data = await dashboardAPI.getAwarenessScore()
+        const data = await dashboardAPI.getAwarenessScore(brandId)
 
         // Update state with fetched data
         setScoreData(data)
@@ -84,7 +88,7 @@ export function BrandAwarenessScoreCurrentScore() {
 
     // Execute the fetch function
     fetchAwarenessScore()
-  }, []) // Empty dependency array means this runs once on mount
+  }, [brandId]) // Re-fetch when brandId changes
 
   // ============================================================================
   // Trend Calculation Functions

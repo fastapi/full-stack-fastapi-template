@@ -149,6 +149,13 @@ export interface ApiError {
 }
 
 /**
+ * Error type for 409 Conflict responses (e.g. brand already exists)
+ */
+export interface ApiConflictError extends Error {
+  isConflict: boolean
+}
+
+/**
  * Projects API Client Class
  */
 class ProjectsAPI {
@@ -331,6 +338,13 @@ class ProjectsAPI {
 
     if (response.status === 401) {
       throw new Error("Unauthorized - Please log in again")
+    }
+
+    if (response.status === 409) {
+      const error: ApiError = await response.json()
+      const conflictError = new Error(error.detail || "Brand already exists in another project")
+      ;(conflictError as ApiConflictError).isConflict = true
+      throw conflictError
     }
 
     if (!response.ok) {
