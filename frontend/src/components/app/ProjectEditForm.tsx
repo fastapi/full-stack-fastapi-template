@@ -1,16 +1,18 @@
 /**
  * ProjectEditForm Component
  *
- * Form for editing an existing project with brand monitoring settings.
+ * Form for viewing and editing an existing project with brand monitoring settings.
  * Features:
- * - Two tabs: Project Information and Brand Setting (same as ProjectSetupForm)
+ * - Two tabs: Project Information and Brand Setting
+ * - View-only mode by default (all fields disabled)
+ * - Edit button in the tab row to enable editing
  * - Project Information: Name, Description, and Active status toggle
  * - Brand Setting: Brand name and up to 3 segments with prompts
  * - Content persists when switching between tabs
  * - Loads existing data from backend on mount
  */
 
-import { Loader2, Plus, Sparkles, X } from "lucide-react"
+import { Loader2, Pencil, Plus, Sparkles, X } from "lucide-react"
 import { useEffect, useState } from "react"
 import {
   type Project,
@@ -88,6 +90,7 @@ export function ProjectEditForm({
   const [activeTab, setActiveTab] = useState<string>("project-info")
   const [isLoading, setIsLoading] = useState(true)
   const [loadError, setLoadError] = useState<string | null>(null)
+  const [isEditMode, setIsEditMode] = useState(false)
 
   // Form data state - persists across tab switches
   const [formData, setFormData] = useState<ProjectEditFormData>({
@@ -104,7 +107,7 @@ export function ProjectEditForm({
     ],
   })
 
-  // Original data for comparison
+  // Original data for comparison and reset
   const [originalData, setOriginalData] = useState<ProjectEditFormData | null>(
     null,
   )
@@ -161,6 +164,23 @@ export function ProjectEditForm({
   // ============================================================================
   // Event Handlers
   // ============================================================================
+
+  /**
+   * Enable edit mode
+   */
+  const handleEnableEdit = () => {
+    setIsEditMode(true)
+  }
+
+  /**
+   * Cancel editing and revert to original data
+   */
+  const handleCancelEdit = () => {
+    if (originalData) {
+      setFormData(originalData)
+    }
+    setIsEditMode(false)
+  }
 
   /**
    * Update project information fields
@@ -292,7 +312,7 @@ export function ProjectEditForm({
     return (
       <Card className="mt-6">
         <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-4">
-          <CardTitle className="text-xl font-bold">Edit Project</CardTitle>
+          <CardTitle className="text-xl font-bold">Project Detail</CardTitle>
           <Button variant="ghost" size="sm" onClick={onCancel} type="button">
             <X className="h-4 w-4" />
           </Button>
@@ -317,7 +337,7 @@ export function ProjectEditForm({
     return (
       <Card className="mt-6">
         <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-4">
-          <CardTitle className="text-xl font-bold">Edit Project</CardTitle>
+          <CardTitle className="text-xl font-bold">Project Detail</CardTitle>
           <Button variant="ghost" size="sm" onClick={onCancel} type="button">
             <X className="h-4 w-4" />
           </Button>
@@ -341,17 +361,31 @@ export function ProjectEditForm({
   return (
     <Card className="mt-6">
       <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-4">
-        <CardTitle className="text-xl font-bold">Edit Project</CardTitle>
+        <CardTitle className="text-xl font-bold">Project Detail</CardTitle>
         <Button variant="ghost" size="sm" onClick={onCancel} type="button">
           <X className="h-4 w-4" />
         </Button>
       </CardHeader>
       <CardContent>
         <Tabs value={activeTab} onValueChange={setActiveTab}>
-          <TabsList className="grid w-full grid-cols-2 mb-6">
-            <TabsTrigger value="project-info">Project Information</TabsTrigger>
-            <TabsTrigger value="brand-setting">Brand Setting</TabsTrigger>
-          </TabsList>
+          {/* Tabs row with Edit button */}
+          <div className="flex items-center justify-between mb-6">
+            <TabsList className="grid w-[400px] grid-cols-2">
+              <TabsTrigger value="project-info">Project Information</TabsTrigger>
+              <TabsTrigger value="brand-setting">Brand Setting</TabsTrigger>
+            </TabsList>
+            {!isEditMode && (
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={handleEnableEdit}
+                type="button"
+              >
+                <Pencil className="h-4 w-4 mr-2" />
+                Edit
+              </Button>
+            )}
+          </div>
 
           {/* ================================================================ */}
           {/* Project Information Tab */}
@@ -367,6 +401,7 @@ export function ProjectEditForm({
                 onChange={(e) =>
                   handleProjectInfoChange("projectName", e.target.value)
                 }
+                disabled={!isEditMode}
               />
             </div>
 
@@ -382,13 +417,14 @@ export function ProjectEditForm({
               </div>
               <textarea
                 id="edit-project-description"
-                className="w-full min-h-[120px] px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 resize-none"
+                className="w-full min-h-[120px] px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 resize-none disabled:bg-gray-50 disabled:text-gray-500"
                 placeholder="Describe your project (optional)"
                 value={formData.projectDescription}
                 onChange={(e) =>
                   handleProjectInfoChange("projectDescription", e.target.value)
                 }
                 maxLength={MAX_DESCRIPTION_LENGTH}
+                disabled={!isEditMode}
               />
             </div>
 
@@ -400,6 +436,7 @@ export function ProjectEditForm({
                 onCheckedChange={(checked) =>
                   handleActiveChange(checked === true)
                 }
+                disabled={!isEditMode}
               />
               <div className="space-y-0.5">
                 <Label
@@ -416,16 +453,18 @@ export function ProjectEditForm({
               </div>
             </div>
 
-            {/* Next Button */}
-            <div className="flex justify-end pt-4">
-              <Button
-                onClick={handleNext}
-                disabled={!formData.projectName.trim()}
-                type="button"
-              >
-                Next
-              </Button>
-            </div>
+            {/* Next Button - only show in edit mode */}
+            {isEditMode && (
+              <div className="flex justify-end pt-4">
+                <Button
+                  onClick={handleNext}
+                  disabled={!formData.projectName.trim()}
+                  type="button"
+                >
+                  Next
+                </Button>
+              </div>
+            )}
           </TabsContent>
 
           {/* ================================================================ */}
@@ -440,6 +479,7 @@ export function ProjectEditForm({
                 placeholder="Enter brand name"
                 value={formData.brandName}
                 onChange={(e) => handleBrandNameChange(e.target.value)}
+                disabled={!isEditMode}
               />
             </div>
 
@@ -462,7 +502,7 @@ export function ProjectEditForm({
                     <span className="text-sm font-medium text-gray-700">
                       Segment {index + 1}
                     </span>
-                    {formData.segments.length > 1 && (
+                    {isEditMode && formData.segments.length > 1 && (
                       <Button
                         variant="ghost"
                         size="sm"
@@ -491,6 +531,7 @@ export function ProjectEditForm({
                           e.target.value,
                         )
                       }
+                      disabled={!isEditMode}
                     />
                   </div>
 
@@ -501,7 +542,7 @@ export function ProjectEditForm({
                     </Label>
                     <textarea
                       id={`edit-segment-prompts-${segment.id}`}
-                      className="w-full min-h-[100px] px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 resize-none"
+                      className="w-full min-h-[100px] px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 resize-none disabled:bg-gray-50 disabled:text-gray-500"
                       placeholder="Enter prompts for AI search (e.g., What are the best brands for...)"
                       value={segment.prompts}
                       onChange={(e) =>
@@ -511,25 +552,29 @@ export function ProjectEditForm({
                           e.target.value,
                         )
                       }
+                      disabled={!isEditMode}
                     />
                   </div>
 
-                  {/* Give Me Suggestion Button */}
-                  <div className="flex justify-end">
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      onClick={() => handleGetSuggestion(segment.id)}
-                      disabled={!segment.prompts.trim()}
-                      type="button"
-                    >
-                      <Sparkles className="h-4 w-4 mr-2" />
-                      Give Me Suggestion
-                    </Button>
-                  </div>
+                  {/* Give Me Suggestion Button - only show in edit mode */}
+                  {isEditMode && (
+                    <div className="flex justify-end">
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => handleGetSuggestion(segment.id)}
+                        disabled={!segment.prompts.trim()}
+                        type="button"
+                      >
+                        <Sparkles className="h-4 w-4 mr-2" />
+                        Give Me Suggestion
+                      </Button>
+                    </div>
+                  )}
 
-                  {/* Add Segment Button */}
-                  {index === formData.segments.length - 1 &&
+                  {/* Add Segment Button - only show in edit mode */}
+                  {isEditMode &&
+                    index === formData.segments.length - 1 &&
                     formData.segments.length < MAX_SEGMENTS && (
                       <TooltipProvider>
                         <Tooltip>
@@ -554,19 +599,21 @@ export function ProjectEditForm({
               ))}
             </div>
 
-            {/* Save & Submit Button */}
-            <div className="flex justify-end gap-3 pt-4 border-t">
-              <Button variant="outline" onClick={onCancel} type="button">
-                Cancel
-              </Button>
-              <Button
-                onClick={handleSubmit}
-                disabled={!isFormValid()}
-                type="button"
-              >
-                Save Changes
-              </Button>
-            </div>
+            {/* Save & Submit Button - only show in edit mode */}
+            {isEditMode && (
+              <div className="flex justify-end gap-3 pt-4 border-t">
+                <Button variant="outline" onClick={handleCancelEdit} type="button">
+                  Cancel
+                </Button>
+                <Button
+                  onClick={handleSubmit}
+                  disabled={!isFormValid()}
+                  type="button"
+                >
+                  Save &amp; Submit
+                </Button>
+              </div>
+            )}
           </TabsContent>
         </Tabs>
       </CardContent>

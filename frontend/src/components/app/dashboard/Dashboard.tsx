@@ -8,6 +8,7 @@ import {
   dashboardAPI,
 } from "@/clients/dashboard"
 import { BrandAwarenessScore } from "@/components/app/dashboard/components/BrandAwarenessScore"
+import { CompetitorMetricsView } from "@/components/app/dashboard/components/CompetitorMetricsView"
 import { DetailMetricsView } from "@/components/app/dashboard/components/DetailMetricsView"
 import { Button } from "@/components/ui/button"
 import {
@@ -208,6 +209,7 @@ export default function Dashboard() {
                 <TabsList>
                   <TabsTrigger value="awareness">Awareness</TabsTrigger>
                   <TabsTrigger value="detail-metrics">Detail Metrics</TabsTrigger>
+                  <TabsTrigger value="competitors">Competitors</TabsTrigger>
                 </TabsList>
 
                 {/* Global Time Range Selection */}
@@ -356,6 +358,33 @@ export default function Dashboard() {
                   </CardHeader>
                   <CardContent className="space-y-8">
                     <DetailMetricsView
+                      brandId={selectedBrandId}
+                      timeRange={timeRange}
+                      customStartDate={customDateApplied?.start}
+                      customEndDate={customDateApplied?.end}
+                    />
+                  </CardContent>
+                </Card>
+              </TabsContent>
+
+              <TabsContent value="competitors">
+                <Card className="shadow-lg">
+                  <CardHeader>
+                    <CardTitle className="text-2xl font-bold">
+                      Competitor Analysis
+                      {selectedBrand && (
+                        <span className="ml-2 text-lg font-normal text-slate-500">
+                          - {selectedBrand.brand_name}
+                        </span>
+                      )}
+                    </CardTitle>
+                    <CardDescription>
+                      Analyze competitor visibility and ranking in AI search results
+                    </CardDescription>
+                    <div className="h-px w-full bg-slate-200 shadow-[0_4px_6px_-1px_rgba(0,0,0,0.1)]" />
+                  </CardHeader>
+                  <CardContent className="space-y-8">
+                    <CompetitorMetricsView
                       brandId={selectedBrandId}
                       timeRange={timeRange}
                       customStartDate={customDateApplied?.start}

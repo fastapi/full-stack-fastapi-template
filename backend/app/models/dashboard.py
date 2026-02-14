@@ -208,3 +208,42 @@ class DetailMetricsResponse(BaseModel):
     end_date: str = Field(..., description="End date of the query period")
 
     model_config = ConfigDict(from_attributes=True)
+
+
+class CompetitorBrand(BaseModel):
+    """A competitor brand associated with a user's brand."""
+    brand_id: str = Field(..., description="The user's brand ID (search_target_brand_id)")
+    competitor_brand_name: str = Field(..., description="Competitor brand name")
+
+    model_config = ConfigDict(from_attributes=True)
+
+
+class CompetitorListResponse(BaseModel):
+    """Response schema for listing competitors of a brand."""
+    brand_id: str = Field(..., description="The user's brand ID")
+    competitors: list[CompetitorBrand] = Field(default_factory=list, description="List of competitors")
+    total_count: int = Field(0, description="Total number of competitors")
+
+    model_config = ConfigDict(from_attributes=True)
+
+
+class CompetitorMetricsDataPoint(BaseModel):
+    """A single data point for competitor metrics (visibility + ranking)."""
+    date: str = Field(..., description="Date of this data point (YYYY-MM-DD format)")
+    visibility_rate: float = Field(..., description="Competitor visibility rate as percentage (0-100)")
+    avg_ranking: float = Field(..., description="Average ranking for the day")
+
+    model_config = ConfigDict(from_attributes=True)
+
+
+class CompetitorMetricsResponse(BaseModel):
+    """Response schema for competitor metrics (visibility + ranking trends)."""
+    brand_id: str = Field(..., description="The user's brand ID")
+    competitor_brand_name: str = Field(..., description="Competitor brand name")
+    data_points: list[CompetitorMetricsDataPoint] = Field(default_factory=list, description="Time series data points")
+    visibility_stats: Optional[MetricStatistics] = Field(None, description="Visibility rate statistics")
+    ranking_stats: Optional[MetricStatistics] = Field(None, description="Ranking statistics")
+    start_date: str = Field(..., description="Start date of the query period")
+    end_date: str = Field(..., description="End date of the query period")
+
+    model_config = ConfigDict(from_attributes=True)

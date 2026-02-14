@@ -103,7 +103,7 @@ export default function AuthDialog({
         toast.success(`Welcome, ${response.user.full_name}!`)
         onOpenChange(false)
         // Route guard will redirect to profile-setup if needed
-        navigate({ to: "/app/dashboard/dashboard" })
+        navigate({ to: "/app/projects" })
       } else {
         // Call login API
         const response = await authAPI.login({
@@ -124,7 +124,7 @@ export default function AuthDialog({
         toast.success(`Welcome back, ${response.user.full_name}!`)
         onOpenChange(false)
         // Route guard will redirect to profile-setup if needed
-        navigate({ to: "/app/dashboard/dashboard" })
+        navigate({ to: "/app/projects" })
       }
     } catch (error) {
       console.error("Auth error:", error)

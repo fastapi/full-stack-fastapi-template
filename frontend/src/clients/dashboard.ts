@@ -173,6 +173,56 @@ export interface DetailMetricsParams {
 }
 
 /**
+ * A competitor brand associated with a user's brand
+ */
+export interface CompetitorBrand {
+  brand_id: string
+  competitor_brand_name: string
+}
+
+/**
+ * Response interface for competitor list API
+ */
+export interface CompetitorListResponse {
+  brand_id: string
+  competitors: CompetitorBrand[]
+  total_count: number
+}
+
+/**
+ * A single data point for competitor metrics (visibility + ranking)
+ */
+export interface CompetitorMetricsDataPoint {
+  date: string
+  visibility_rate: number
+  avg_ranking: number
+}
+
+/**
+ * Response interface for competitor metrics API
+ */
+export interface CompetitorMetricsResponse {
+  brand_id: string
+  competitor_brand_name: string
+  data_points: CompetitorMetricsDataPoint[]
+  visibility_stats: MetricStatistics | null
+  ranking_stats: MetricStatistics | null
+  start_date: string
+  end_date: string
+}
+
+/**
+ * Parameters for competitor metrics query
+ */
+export interface CompetitorMetricsParams {
+  brandId: string
+  competitorBrandName: string
+  timeRange: TimeRange
+  startDate?: string
+  endDate?: string
+}
+
+/**
  * Standard API error response interface
  */
 export interface ApiError {
@@ -737,6 +787,138 @@ class DashboardAPI {
       localStorage.removeItem(key)
     }
     console.log("[DashboardAPI] Detail metrics cache cleared")
+  }
+
+  /**
+   * Generate a cache key for competitor list
+   */
+  private getCompetitorsCacheKey(brandId: string): string {
+    return `dashboard_competitors_${brandId}`
+  }
+
+  /**
+   * Fetch competitors for a brand
+   */
+  async getCompetitors(
+    brandId: string,
+    forceRefresh: boolean = false,
+  ): Promise<CompetitorListResponse> {
+    const cacheKey = this.getCompetitorsCacheKey(brandId)
+
+    if (!forceRefresh) {
+      const cached = this.getCachedData<CompetitorListResponse>(cacheKey)
+      if (cached) {
+        return cached
+      }
+    }
+
+    console.log("[DashboardAPI] Fetching competitors from API...", { brandId })
+
+    const url = `${this.baseUrl}${this.apiPrefix}/dashboard/competitors?brand_id=${encodeURIComponent(brandId)}`
+
+    const response = await fetch(url, {
+      method: "GET",
+      headers: this.getAuthHeaders(),
+    })
+
+    if (response.status === 401) {
+      throw new Error("Unauthorized - Please log in again")
+    }
+
+    if (!response.ok) {
+      const error: ApiError = await response.json()
+      throw new Error(error.detail || "Failed to fetch competitors")
+    }
+
+    const data: CompetitorListResponse = await response.json()
+
+    this.setCachedData(cacheKey, data)
+
+    console.log("[DashboardAPI] Competitors fetched successfully", {
+      count: data.total_count,
+    })
+
+    return data
+  }
+
+  /**
+   * Generate a cache key for competitor metrics
+   */
+  private getCompetitorMetricsCacheKey(params: CompetitorMetricsParams): string {
+    const { timeRange, startDate, endDate, brandId, competitorBrandName } = params
+    if (timeRange === "custom") {
+      return `dashboard_comp_metrics_custom_${startDate}_${endDate}_${brandId}_${competitorBrandName}`
+    }
+    return `dashboard_comp_metrics_${timeRange}_${brandId}_${competitorBrandName}`
+  }
+
+  /**
+   * Fetch competitor metrics (visibility + ranking) from API
+   */
+  async getCompetitorMetrics(
+    params: CompetitorMetricsParams,
+    forceRefresh: boolean = false,
+  ): Promise<CompetitorMetricsResponse> {
+    const cacheKey = this.getCompetitorMetricsCacheKey(params)
+
+    if (!forceRefresh) {
+      const cached = this.getCachedData<CompetitorMetricsResponse>(cacheKey)
+      if (cached) {
+        return cached
+      }
+    }
+
+    console.log("[DashboardAPI] Fetching competitor metrics from API...", params)
+
+    const queryParams = new URLSearchParams()
+    queryParams.append("brand_id", params.brandId)
+    queryParams.append("competitor_brand_name", params.competitorBrandName)
+    queryParams.append("time_range", params.timeRange)
+
+    if (params.timeRange === "custom") {
+      if (!params.startDate || !params.endDate) {
+        throw new Error(
+          "Start date and end date are required for custom time range",
+        )
+      }
+      queryParams.append("start_date", params.startDate)
+      queryParams.append("end_date", params.endDate)
+    }
+
+    const url = `${this.baseUrl}${this.apiPrefix}/dashboard/competitor-metrics?${queryParams.toString()}`
+
+    const response = await fetch(url, {
+      method: "GET",
+      headers: this.getAuthHeaders(),
+    })
+
+    if (response.status === 401) {
+      throw new Error("Unauthorized - Please log in again")
+    }
+
+    if (!response.ok) {
+      const error: ApiError = await response.json()
+      throw new Error(error.detail || "Failed to fetch competitor metrics")
+    }
+
+    const data: CompetitorMetricsResponse = await response.json()
+
+    this.setCachedData(cacheKey, data)
+
+    console.log("[DashboardAPI] Competitor metrics fetched successfully", {
+      dataPoints: data.data_points.length,
+      competitor: data.competitor_brand_name,
+    })
+
+    return data
+  }
+
+  /**
+   * Clear competitors cache for a brand
+   */
+  clearCompetitorsCache(brandId: string): void {
+    localStorage.removeItem(this.getCompetitorsCacheKey(brandId))
+    console.log("[DashboardAPI] Competitors cache cleared for brand:", brandId)
   }
 }
 

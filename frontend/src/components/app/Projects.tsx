@@ -10,7 +10,7 @@
  * - Data fetched from backend API with caching
  */
 
-import { AlertCircle, Loader2, Pencil, Plus, Trash2 } from "lucide-react"
+import { AlertCircle, Eye, Loader2, Plus, Trash2 } from "lucide-react"
 import { useCallback, useEffect, useState } from "react"
 import { toast } from "sonner"
 import { type ApiConflictError, type Project, projectsAPI } from "@/clients/projects"
@@ -112,7 +112,7 @@ export default function Projects() {
     setBrandConflictMessage(null)
   }
 
-  const handleEditProject = (project: Project) => {
+  const handleViewProject = (project: Project) => {
     setShowSetupForm(false) // Close setup form if open
     setEditingProject(project)
   }
@@ -324,7 +324,7 @@ export default function Projects() {
                   <TableHead className="max-w-[300px]">Description</TableHead>
                   <TableHead className="w-[150px]">Created At</TableHead>
                   <TableHead className="w-[80px] text-center">Active</TableHead>
-                  <TableHead className="w-[60px] text-center">Edit</TableHead>
+                  <TableHead className="w-[60px] text-center">Detail</TableHead>
                   <TableHead className="w-[60px] text-center">Delete</TableHead>
                 </TableRow>
               </TableHeader>
@@ -350,11 +350,11 @@ export default function Projects() {
                       <Button
                         variant="ghost"
                         size="sm"
-                        onClick={() => handleEditProject(project)}
+                        onClick={() => handleViewProject(project)}
                         className="h-8 w-8 p-0"
-                        aria-label={`Edit project ${project.project_name}`}
+                        aria-label={`View project ${project.project_name} details`}
                       >
-                        <Pencil className="h-4 w-4" />
+                        <Eye className="h-4 w-4" />
                       </Button>
                     </TableCell>
                     <TableCell className="text-center">

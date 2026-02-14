@@ -35,6 +35,10 @@ from app.models.dashboard import (
     UserBrandsResponse,
     DetailMetricsDataPoint,
     DetailMetricsResponse,
+    CompetitorBrand,
+    CompetitorListResponse,
+    CompetitorMetricsDataPoint,
+    CompetitorMetricsResponse,
 )
 from kila_models.models import (
     UsersTable,
@@ -44,6 +48,9 @@ from kila_models.models import (
     ProjectUserTable,
     ProjectsRecord,
     BrandPromptTable,
+    BrandCompetitorsTable,
+    BrandSearchCompetitorsVisibilityTable,
+    BrandSearchCompetitorsRankingTable,
 )
 
 
@@ -782,6 +789,194 @@ async def get_detail_metrics(
 
     logger.info(
         f"Returning {len(data_points)} detail metrics data points for brand: {brand_name}"
+    )
+
+    return response
+
+
+@router.get("/competitors", response_model=CompetitorListResponse)
+async def get_competitors(
+    brand_id: str = Query(..., description="Brand ID to get competitors for"),
+    db: AsyncSession = Depends(get_db),
+    current_user: UsersTable = Depends(get_current_user)
+):
+    """
+    Retrieve the list of competitors for a brand.
+
+    Queries BrandCompetitorsTable to find all competitor brand names
+    associated with the given brand_id.
+    """
+    logger.info(
+        f"Fetching competitors for user: {current_user.user_id}, brand_id: {brand_id}"
+    )
+
+    query = (
+        select(BrandCompetitorsTable)
+        .where(BrandCompetitorsTable.brand_id == brand_id)
+        .order_by(asc(BrandCompetitorsTable.competitor_brand_name))
+    )
+
+    result = await db.execute(query)
+    records = result.scalars().all()
+
+    competitors = [
+        CompetitorBrand(
+            brand_id=rec.brand_id,
+            competitor_brand_name=rec.competitor_brand_name,
+        )
+        for rec in records
+    ]
+
+    logger.info(f"Found {len(competitors)} competitors for brand_id: {brand_id}")
+
+    return CompetitorListResponse(
+        brand_id=brand_id,
+        competitors=competitors,
+        total_count=len(competitors),
+    )
+
+
+@router.get("/competitor-metrics", response_model=CompetitorMetricsResponse)
+async def get_competitor_metrics(
+    brand_id: str = Query(..., description="The user's brand ID"),
+    competitor_brand_name: str = Query(..., description="Competitor brand name"),
+    time_range: TimeRange = Query(
+        TimeRange.ONE_MONTH,
+        description="Predefined time range for the query"
+    ),
+    start_date: Optional[date] = Query(
+        None,
+        description="Custom start date (required if time_range is 'custom')"
+    ),
+    end_date: Optional[date] = Query(
+        None,
+        description="Custom end date (required if time_range is 'custom')"
+    ),
+    db: AsyncSession = Depends(get_db),
+    current_user: UsersTable = Depends(get_current_user)
+):
+    """
+    Retrieve competitor metrics (visibility rate and ranking) for a specific competitor.
+
+    Returns daily time series data for the competitor's visibility rate
+    (competitor_visibility_count / total_search_count as percentage) and
+    average ranking, along with statistical summaries.
+    """
+    logger.info(
+        f"Fetching competitor metrics for user: {current_user.user_id}, "
+        f"brand_id: {brand_id}, competitor: {competitor_brand_name}, "
+        f"time_range: {time_range}"
+    )
+
+    # Determine date range
+    if time_range == TimeRange.CUSTOM:
+        if not start_date or not end_date:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="start_date and end_date are required for custom time range"
+            )
+        query_start_date = start_date
+        query_end_date = end_date
+    else:
+        query_start_date, query_end_date = get_date_range_for_time_range(time_range)
+
+    # ---- Query competitor visibility data ----
+    vis_query = (
+        select(BrandSearchCompetitorsVisibilityTable)
+        .where(
+            BrandSearchCompetitorsVisibilityTable.search_target_brand_id == brand_id,
+            BrandSearchCompetitorsVisibilityTable.competitor_brand_name == competitor_brand_name,
+            BrandSearchCompetitorsVisibilityTable.search_date >= query_start_date,
+            BrandSearchCompetitorsVisibilityTable.search_date <= query_end_date,
+        )
+        .order_by(asc(BrandSearchCompetitorsVisibilityTable.search_date))
+    )
+    vis_result = await db.execute(vis_query)
+    vis_records = vis_result.scalars().all()
+
+    # Group visibility by date
+    vis_by_date: dict[str, list] = {}
+    for rec in vis_records:
+        d = rec.search_date.date().isoformat() if hasattr(rec.search_date, 'date') else str(rec.search_date)
+        vis_by_date.setdefault(d, []).append(rec)
+
+    # ---- Query competitor ranking data ----
+    rank_query = (
+        select(BrandSearchCompetitorsRankingTable)
+        .where(
+            BrandSearchCompetitorsRankingTable.search_target_brand_id == brand_id,
+            BrandSearchCompetitorsRankingTable.competitor_brand_name == competitor_brand_name,
+            BrandSearchCompetitorsRankingTable.search_date >= query_start_date,
+            BrandSearchCompetitorsRankingTable.search_date <= query_end_date,
+        )
+        .order_by(asc(BrandSearchCompetitorsRankingTable.search_date))
+    )
+    rank_result = await db.execute(rank_query)
+    rank_records = rank_result.scalars().all()
+
+    # Group ranking by date
+    rank_by_date: dict[str, list] = {}
+    for rec in rank_records:
+        d = rec.search_date.date().isoformat() if hasattr(rec.search_date, 'date') else str(rec.search_date)
+        rank_by_date.setdefault(d, []).append(rec)
+
+    # ---- Build data points ----
+    all_dates = sorted(set(list(vis_by_date.keys()) + list(rank_by_date.keys())))
+
+    data_points = []
+    visibility_values = []
+    ranking_values = []
+
+    for d in all_dates:
+        # Visibility rate for this date
+        vis_recs = vis_by_date.get(d, [])
+        if vis_recs:
+            total_search = sum(r.total_search_count for r in vis_recs)
+            total_visible = sum(r.competitor_visibility_count for r in vis_recs)
+            vis_rate = (total_visible / total_search * 100) if total_search > 0 else 0.0
+        else:
+            vis_rate = 0.0
+
+        # Average ranking for this date
+        rank_recs = rank_by_date.get(d, [])
+        if rank_recs:
+            avg_rank = sum(r.search_ranking for r in rank_recs) / len(rank_recs)
+        else:
+            avg_rank = 0.0
+
+        data_points.append(CompetitorMetricsDataPoint(
+            date=d,
+            visibility_rate=round(vis_rate, 2),
+            avg_ranking=round(avg_rank, 2)
+        ))
+
+        visibility_values.append(round(vis_rate, 2))
+        ranking_values.append(round(avg_rank, 2))
+
+    # ---- Calculate statistics ----
+    visibility_stats = calculate_statistics(visibility_values)
+    ranking_stats = calculate_statistics(ranking_values)
+
+    if not data_points:
+        logger.warning(
+            f"No competitor metrics data found for brand_id: {brand_id}, "
+            f"competitor: {competitor_brand_name}, "
+            f"date range: {query_start_date} to {query_end_date}"
+        )
+
+    response = CompetitorMetricsResponse(
+        brand_id=brand_id,
+        competitor_brand_name=competitor_brand_name,
+        data_points=data_points,
+        visibility_stats=visibility_stats,
+        ranking_stats=ranking_stats,
+        start_date=query_start_date.isoformat(),
+        end_date=query_end_date.isoformat()
+    )
+
+    logger.info(
+        f"Returning {len(data_points)} competitor metrics data points "
+        f"for competitor: {competitor_brand_name}"
     )
 
     return response

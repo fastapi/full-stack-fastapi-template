@@ -8,7 +8,6 @@ import {
   Menu,
   Search,
   User,
-  Users,
   X,
 } from "lucide-react"
 import { useState } from "react"
@@ -18,16 +17,33 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
   const [sidebarOpen, setSidebarOpen] = useState(true)
   const location = useLocation()
   const navigate = useNavigate()
-  const userName = localStorage.getItem("userName") || "User"
+
+  // Get user's first name from stored user object
+  const getUserFirstName = (): string => {
+    try {
+      const userStr = localStorage.getItem("user")
+      if (userStr) {
+        const user = JSON.parse(userStr)
+        // Try first_name first (from profile), then fall back to user_name or full_name
+        if (user.first_name) return user.first_name
+        if (user.full_name) return user.full_name.split(" ")[0]
+        if (user.user_name) return user.user_name.split(" ")[0]
+      }
+    } catch {
+      // Ignore parse errors
+    }
+    return "User"
+  }
+  const userFirstName = getUserFirstName()
 
   const menuItems = [
+    { name: "Projects", icon: FolderKanban, path: "/app/projects" },
     {
       name: "Dashboard",
       icon: LayoutDashboard,
       path: "/app/dashboard/dashboard",
     },
-    { name: "Projects", icon: FolderKanban, path: "/app/projects" },
-    { name: "User Management", icon: Users, path: "/app/users" },
+    { name: "My Profile", icon: User, path: "/app/users" },
   ]
 
   const handleLogout = () => {
@@ -129,10 +145,7 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
           <div className="flex items-center space-x-4">
             <div className="text-right hidden sm:block">
               <div className="text-sm font-medium text-gray-900 dark:text-white">
-                {userName}
-              </div>
-              <div className="text-xs text-gray-500 dark:text-gray-400">
-                Administrator
+                {userFirstName}
               </div>
             </div>
             <div className="w-10 h-10 bg-gradient-to-br from-blue-500 to-purple-500 rounded-full flex items-center justify-center text-white font-bold">

@@ -170,7 +170,7 @@ function ProfileSetup() {
       }
 
       toast.success("Profile setup complete!")
-      navigate({ to: "/app/dashboard/dashboard" })
+      navigate({ to: "/app/projects" })
     } catch (error) {
       console.error("Profile setup error:", error)
       const errorMessage =
