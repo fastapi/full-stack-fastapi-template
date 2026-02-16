@@ -16,6 +16,7 @@
 
 ### Internal
 
+* ⬆ Bump @tanstack/react-router-devtools from 1.157.17 to 1.159.10. PR [#2188](https://github.com/fastapi/full-stack-fastapi-template/pull/2188) by [@dependabot[bot]](https://github.com/apps/dependabot).
 * ⬆️ Bump biome schema version from 2.3.12 to 2.3.14. PR [#2178](https://github.com/fastapi/full-stack-fastapi-template/pull/2178) by [@alejsdev](https://github.com/alejsdev).
 * ⬆ Bump @biomejs/biome from 2.3.12 to 2.3.14. PR [#2177](https://github.com/fastapi/full-stack-fastapi-template/pull/2177) by [@dependabot[bot]](https://github.com/apps/dependabot).
 * ⬆ Bump lucide-react from 0.562.0 to 0.563.0. PR [#2176](https://github.com/fastapi/full-stack-fastapi-template/pull/2176) by [@dependabot[bot]](https://github.com/apps/dependabot).
