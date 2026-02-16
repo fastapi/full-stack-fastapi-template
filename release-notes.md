@@ -16,6 +16,7 @@
 
 ### Internal
 
+* ⬆ Bump dotenv from 17.2.3 to 17.3.1. PR [#2185](https://github.com/fastapi/full-stack-fastapi-template/pull/2185) by [@dependabot[bot]](https://github.com/apps/dependabot).
 * ⬆ Bump @tanstack/router-devtools from 1.157.17 to 1.159.10. PR [#2186](https://github.com/fastapi/full-stack-fastapi-template/pull/2186) by [@dependabot[bot]](https://github.com/apps/dependabot).
 * ⬆ Bump @tanstack/react-router-devtools from 1.157.17 to 1.159.10. PR [#2188](https://github.com/fastapi/full-stack-fastapi-template/pull/2188) by [@dependabot[bot]](https://github.com/apps/dependabot).
 * ⬆️ Bump biome schema version from 2.3.12 to 2.3.14. PR [#2178](https://github.com/fastapi/full-stack-fastapi-template/pull/2178) by [@alejsdev](https://github.com/alejsdev).
