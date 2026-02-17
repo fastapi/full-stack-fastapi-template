@@ -2,8 +2,11 @@
 
 import { Link, useLocation, useNavigate } from "@tanstack/react-router"
 import {
+  ChevronDown,
+  ChevronRight,
   FolderKanban,
   LayoutDashboard,
+  Lightbulb,
   LogOut,
   Menu,
   Search,
@@ -13,8 +16,16 @@ import {
 import { useState } from "react"
 import { toast } from "sonner"
 
+interface MenuItem {
+  name: string
+  icon: React.ComponentType<{ size?: number }>
+  path?: string
+  children?: { name: string; path: string }[]
+}
+
 export default function AppLayout({ children }: { children: React.ReactNode }) {
   const [sidebarOpen, setSidebarOpen] = useState(true)
+  const [expandedMenus, setExpandedMenus] = useState<Set<string>>(new Set(["Dashboard"]))
   const location = useLocation()
   const navigate = useNavigate()
 
@@ -24,7 +35,6 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
       const userStr = localStorage.getItem("user")
       if (userStr) {
         const user = JSON.parse(userStr)
-        // Try first_name first (from profile), then fall back to user_name or full_name
         if (user.first_name) return user.first_name
         if (user.full_name) return user.full_name.split(" ")[0]
         if (user.user_name) return user.user_name.split(" ")[0]
@@ -36,15 +46,32 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
   }
   const userFirstName = getUserFirstName()
 
-  const menuItems = [
+  const menuItems: MenuItem[] = [
     { name: "Projects", icon: FolderKanban, path: "/app/projects" },
     {
       name: "Dashboard",
       icon: LayoutDashboard,
-      path: "/app/dashboard/dashboard",
+      children: [
+        { name: "Brand Overview", path: "/app/dashboard/overview" },
+        { name: "Performance Detail", path: "/app/dashboard/performance" },
+        { name: "Competitive Analysis", path: "/app/dashboard/competitors" },
+      ],
     },
+    { name: "Insight", icon: Lightbulb, path: "/app/insight" },
     { name: "My Profile", icon: User, path: "/app/users" },
   ]
+
+  const toggleMenu = (name: string) => {
+    setExpandedMenus((prev) => {
+      const next = new Set(prev)
+      if (next.has(name)) {
+        next.delete(name)
+      } else {
+        next.add(name)
+      }
+      return next
+    })
+  }
 
   const handleLogout = () => {
     localStorage.removeItem("isAuthenticated")
@@ -89,14 +116,80 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
         <nav className="flex-1 px-2 py-4 space-y-1">
           {menuItems.map((item) => {
             const Icon = item.icon
-            const isActive = location.pathname === item.path
+            const hasChildren = item.children && item.children.length > 0
+            const isExpanded = expandedMenus.has(item.name)
+            const isParentActive = hasChildren
+              ? item.children!.some((child) => location.pathname === child.path)
+              : location.pathname === item.path
 
+            if (hasChildren) {
+              return (
+                <div key={item.name}>
+                  {/* Parent item - toggles expand/collapse */}
+                  <button
+                    onClick={() => {
+                      if (sidebarOpen) {
+                        toggleMenu(item.name)
+                      } else {
+                        // When sidebar is collapsed, expand sidebar and menu
+                        setSidebarOpen(true)
+                        setExpandedMenus((prev) => new Set(prev).add(item.name))
+                      }
+                    }}
+                    className={`flex items-center w-full px-3 py-2 rounded-lg transition ${
+                      isParentActive
+                        ? "bg-blue-50 dark:bg-blue-900/20 text-blue-600 dark:text-blue-400"
+                        : "text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700"
+                    }`}
+                  >
+                    <Icon size={20} />
+                    {sidebarOpen && (
+                      <>
+                        <span className="ml-3 font-medium flex-1 text-left">{item.name}</span>
+                        {isExpanded ? (
+                          <ChevronDown size={16} className="ml-auto" />
+                        ) : (
+                          <ChevronRight size={16} className="ml-auto" />
+                        )}
+                      </>
+                    )}
+                  </button>
+
+                  {/* Child items */}
+                  {sidebarOpen && isExpanded && (
+                    <div className="mt-1 ml-4 space-y-1">
+                      {item.children!.map((child) => {
+                        const isChildActive = location.pathname === child.path
+                        return (
+                          <Link
+                            key={child.path}
+                            to={child.path}
+                            className={`flex items-center pl-6 pr-3 py-1.5 rounded-lg transition text-sm ${
+                              isChildActive
+                                ? "bg-blue-50 dark:bg-blue-900/20 text-blue-600 dark:text-blue-400 font-medium"
+                                : "text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700"
+                            }`}
+                          >
+                            <span className="w-1.5 h-1.5 rounded-full mr-3 flex-shrink-0" style={{
+                              backgroundColor: isChildActive ? "#3b82f6" : "#9ca3af",
+                            }} />
+                            {child.name}
+                          </Link>
+                        )
+                      })}
+                    </div>
+                  )}
+                </div>
+              )
+            }
+
+            // Simple item (no children)
             return (
               <Link
                 key={item.path}
-                to={item.path}
+                to={item.path!}
                 className={`flex items-center px-3 py-2 rounded-lg transition ${
-                  isActive
+                  isParentActive
                     ? "bg-blue-50 dark:bg-blue-900/20 text-blue-600 dark:text-blue-400"
                     : "text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700"
                 }`}

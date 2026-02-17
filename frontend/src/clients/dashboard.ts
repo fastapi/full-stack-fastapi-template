@@ -18,8 +18,6 @@ const API_PREFIX: string = "/api/v1"
 
 // Cache configuration
 const CACHE_EXPIRATION_HOURS = 10 // Cache expires after 10 hours
-const CACHE_KEY_AWARENESS = "dashboard_awareness_score"
-const CACHE_KEY_CONSISTENCY = "dashboard_consistency_index"
 const CACHE_KEY_METRICS = "dashboard_metrics"
 const CACHE_KEY_USER_BRANDS = "dashboard_user_brands"
 
@@ -138,6 +136,7 @@ export interface HistoricalTrendsParams {
   startDate?: string // ISO date string for custom range
   endDate?: string // ISO date string for custom range
   brandId?: string
+  segment?: string
 }
 
 /**
@@ -170,6 +169,7 @@ export interface DetailMetricsParams {
   startDate?: string
   endDate?: string
   brandId: string
+  segment?: string
 }
 
 /**
@@ -217,6 +217,226 @@ export interface CompetitorMetricsResponse {
 export interface CompetitorMetricsParams {
   brandId: string
   competitorBrandName: string
+  timeRange: TimeRange
+  startDate?: string
+  endDate?: string
+  segment?: string
+}
+
+/**
+ * Response interface for brand segments API
+ */
+export interface BrandSegmentsResponse {
+  brand_id: string
+  segments: string[]
+}
+
+/**
+ * A single data point for brand overview time series
+ */
+export interface BrandOverviewDataPoint {
+  date: string
+  awareness_score: number
+  share_of_visibility: number
+  search_share_index: number
+  position_strength: number
+  search_momentum: number
+}
+
+/**
+ * Summary for a single metric with current value and change
+ */
+export interface BrandOverviewMetricSummary {
+  current_value: number
+  previous_value: number | null
+  change: number | null
+  has_previous: boolean
+}
+
+/**
+ * Summary of all 5 metrics
+ */
+export interface BrandOverviewSummary {
+  awareness_score: BrandOverviewMetricSummary
+  share_of_visibility: BrandOverviewMetricSummary
+  search_share_index: BrandOverviewMetricSummary
+  position_strength: BrandOverviewMetricSummary
+  search_momentum: BrandOverviewMetricSummary
+}
+
+/**
+ * Response for brand overview endpoint
+ */
+export interface BrandOverviewResponse {
+  brand_id: string
+  brand_name: string
+  summary: BrandOverviewSummary
+  data_points: BrandOverviewDataPoint[]
+  start_date: string
+  end_date: string
+}
+
+/**
+ * Parameters for brand overview query
+ */
+export interface BrandOverviewParams {
+  brandId: string
+  timeRange: TimeRange
+  startDate?: string
+  endDate?: string
+  segment?: string
+}
+
+/**
+ * A single segment's latest metrics
+ */
+export interface SegmentMetricsRow {
+  segment: string
+  awareness_score: number
+  share_of_visibility: number
+  search_share_index: number
+  position_strength: number
+  search_momentum: number
+  consistency_index: number
+}
+
+/**
+ * Response for segment metrics endpoint
+ */
+export interface SegmentMetricsResponse {
+  brand_id: string
+  brand_name: string
+  segments: SegmentMetricsRow[]
+}
+
+/**
+ * Parameters for segment metrics query
+ */
+export interface SegmentMetricsParams {
+  brandId: string
+  timeRange: TimeRange
+  startDate?: string
+  endDate?: string
+}
+
+/**
+ * A single row in the performance detail table with date
+ */
+export interface PerformanceDetailRow {
+  segment: string
+  awareness_score: number
+  share_of_visibility: number
+  search_share_index: number
+  position_strength: number
+  search_momentum: number
+  date: string // YYYY-MM-DD
+}
+
+/**
+ * Response for performance detail table endpoint
+ */
+export interface PerformanceDetailTableResponse {
+  brand_id: string
+  brand_name: string
+  rows: PerformanceDetailRow[]
+}
+
+/**
+ * Parameters for performance detail table query
+ */
+export interface PerformanceDetailTableParams {
+  brandId: string
+  timeRange: TimeRange
+  startDate?: string
+  endDate?: string
+}
+
+/**
+ * A single data point for competitor awareness time series
+ */
+export interface CompetitorAwarenessDataPoint {
+  date: string
+  awareness_score: number
+  share_of_visibility: number
+  search_share_index: number
+  position_strength: number
+  search_momentum: number
+}
+
+/**
+ * Response for competitor awareness endpoint
+ */
+export interface CompetitorAwarenessResponse {
+  brand_id: string
+  competitor_brand_name: string
+  data_points: CompetitorAwarenessDataPoint[]
+  start_date: string
+  end_date: string
+}
+
+/**
+ * Parameters for competitor awareness query
+ */
+export interface CompetitorAwarenessParams {
+  brandId: string
+  competitorBrandName: string
+  timeRange: TimeRange
+  startDate?: string
+  endDate?: string
+  segment: string
+}
+
+/**
+ * A single row in the competitor detail table with segment gap
+ */
+export interface CompetitorDetailRow {
+  segment: string
+  awareness_score: number
+  share_of_visibility: number
+  search_share_index: number
+  position_strength: number
+  search_momentum: number
+  date: string
+  segment_gap: number | null
+}
+
+/**
+ * Response for competitor detail table endpoint
+ */
+export interface CompetitorDetailTableResponse {
+  brand_id: string
+  brand_name: string
+  competitor_brand_name: string
+  rows: CompetitorDetailRow[]
+}
+
+/**
+ * Parameters for competitor detail table query
+ */
+export interface CompetitorDetailTableParams {
+  brandId: string
+  competitorBrandName: string
+  timeRange: TimeRange
+  startDate?: string
+  endDate?: string
+}
+
+/**
+ * Response for top competitor endpoint
+ */
+export interface TopCompetitorResponse {
+  brand_id: string
+  segment: string
+  top_competitor_name: string | null
+  avg_awareness_score: number | null
+}
+
+/**
+ * Parameters for top competitor query
+ */
+export interface TopCompetitorParams {
+  brandId: string
+  segment: string
   timeRange: TimeRange
   startDate?: string
   endDate?: string
@@ -343,8 +563,6 @@ class DashboardAPI {
    * Useful when user wants to force refresh
    */
   public clearCache(): void {
-    localStorage.removeItem(CACHE_KEY_AWARENESS)
-    localStorage.removeItem(CACHE_KEY_CONSISTENCY)
     localStorage.removeItem(CACHE_KEY_METRICS)
     console.log("[DashboardAPI] All dashboard cache cleared")
   }
@@ -352,22 +570,22 @@ class DashboardAPI {
   /**
    * Fetch awareness score data from API
    *
-   * This method first checks the local cache. If valid cached data exists,
-   * it returns that. Otherwise, it makes an API call and caches the result.
-   *
    * @param brandId - Optional brand ID to filter results
+   * @param segment - Segment name to filter by (default: "All-Segment")
    * @param forceRefresh - If true, bypasses cache and fetches fresh data
    * @returns AwarenessScoreResponse or null if no data exists
    * @throws Error if API call fails
    */
   async getAwarenessScore(
     brandId?: string,
+    segment: string = "All-Segment",
     forceRefresh: boolean = false,
   ): Promise<AwarenessScoreResponse | null> {
+    const cacheKey = `dashboard_awareness_${brandId || "all"}_${segment}`
+
     // Check cache first (unless force refresh is requested)
     if (!forceRefresh) {
-      const cached =
-        this.getCachedData<AwarenessScoreResponse>(CACHE_KEY_AWARENESS)
+      const cached = this.getCachedData<AwarenessScoreResponse>(cacheKey)
       if (cached) {
         return cached
       }
@@ -375,11 +593,14 @@ class DashboardAPI {
 
     console.log("[DashboardAPI] Fetching awareness score from API...")
 
-    // Build URL with optional brand_id query parameter
-    let url = `${this.baseUrl}${this.apiPrefix}/dashboard/awareness-score`
+    // Build URL with query parameters
+    const queryParams = new URLSearchParams()
     if (brandId) {
-      url += `?brand_id=${encodeURIComponent(brandId)}`
+      queryParams.append("brand_id", brandId)
     }
+    queryParams.append("segment", segment)
+
+    const url = `${this.baseUrl}${this.apiPrefix}/dashboard/awareness-score?${queryParams.toString()}`
 
     // Make API request
     const response = await fetch(url, {
@@ -403,7 +624,7 @@ class DashboardAPI {
 
     // Cache the result if data exists
     if (data) {
-      this.setCachedData(CACHE_KEY_AWARENESS, data)
+      this.setCachedData(cacheKey, data)
     }
 
     console.log("[DashboardAPI] Awareness score fetched successfully")
@@ -413,23 +634,22 @@ class DashboardAPI {
   /**
    * Fetch consistency index data from API
    *
-   * This method first checks the local cache. If valid cached data exists,
-   * it returns that. Otherwise, it makes an API call and caches the result.
-   *
    * @param brandId - Optional brand ID to filter results
+   * @param segment - Segment name to filter by (default: "All-Segment")
    * @param forceRefresh - If true, bypasses cache and fetches fresh data
    * @returns ConsistencyIndexResponse or null if no data exists
    * @throws Error if API call fails
    */
   async getConsistencyIndex(
     brandId?: string,
+    segment: string = "All-Segment",
     forceRefresh: boolean = false,
   ): Promise<ConsistencyIndexResponse | null> {
+    const cacheKey = `dashboard_consistency_${brandId || "all"}_${segment}`
+
     // Check cache first (unless force refresh is requested)
     if (!forceRefresh) {
-      const cached = this.getCachedData<ConsistencyIndexResponse>(
-        CACHE_KEY_CONSISTENCY,
-      )
+      const cached = this.getCachedData<ConsistencyIndexResponse>(cacheKey)
       if (cached) {
         return cached
       }
@@ -437,11 +657,14 @@ class DashboardAPI {
 
     console.log("[DashboardAPI] Fetching consistency index from API...")
 
-    // Build URL with optional brand_id query parameter
-    let url = `${this.baseUrl}${this.apiPrefix}/dashboard/consistency-index`
+    // Build URL with query parameters
+    const queryParams = new URLSearchParams()
     if (brandId) {
-      url += `?brand_id=${encodeURIComponent(brandId)}`
+      queryParams.append("brand_id", brandId)
     }
+    queryParams.append("segment", segment)
+
+    const url = `${this.baseUrl}${this.apiPrefix}/dashboard/consistency-index?${queryParams.toString()}`
 
     // Make API request
     const response = await fetch(url, {
@@ -465,7 +688,7 @@ class DashboardAPI {
 
     // Cache the result if data exists
     if (data) {
-      this.setCachedData(CACHE_KEY_CONSISTENCY, data)
+      this.setCachedData(cacheKey, data)
     }
 
     console.log("[DashboardAPI] Consistency index fetched successfully")
@@ -474,9 +697,6 @@ class DashboardAPI {
 
   /**
    * Fetch all dashboard metrics in a single API call
-   *
-   * This is the recommended method for initial dashboard load as it
-   * reduces the number of API calls from 2 to 1.
    *
    * @param brandId - Optional brand ID to filter results
    * @param forceRefresh - If true, bypasses cache and fetches fresh data
@@ -527,39 +747,26 @@ class DashboardAPI {
     // Cache the combined result
     this.setCachedData(CACHE_KEY_METRICS, data)
 
-    // Also cache individual components for granular access
-    if (data.awareness) {
-      this.setCachedData(CACHE_KEY_AWARENESS, data.awareness)
-    }
-    if (data.consistency) {
-      this.setCachedData(CACHE_KEY_CONSISTENCY, data.consistency)
-    }
-
     console.log("[DashboardAPI] Dashboard metrics fetched successfully")
     return data
   }
 
   /**
    * Generate a cache key for historical trends based on query parameters
-   *
-   * @param params - The query parameters
-   * @returns A unique cache key string
    */
   private getHistoricalTrendsCacheKey(params: HistoricalTrendsParams): string {
-    const { timeRange, startDate, endDate, brandId } = params
+    const { timeRange, startDate, endDate, brandId, segment } = params
+    const seg = segment || "All-Segment"
     if (timeRange === "custom") {
-      return `dashboard_historical_custom_${startDate}_${endDate}_${brandId || "all"}`
+      return `dashboard_historical_custom_${startDate}_${endDate}_${brandId || "all"}_${seg}`
     }
-    return `dashboard_historical_${timeRange}_${brandId || "all"}`
+    return `dashboard_historical_${timeRange}_${brandId || "all"}_${seg}`
   }
 
   /**
    * Fetch historical trends data from API
    *
-   * This method retrieves time series data for awareness score and consistency index
-   * along with statistical summaries. Data is cached based on the query parameters.
-   *
-   * @param params - Query parameters including time range and optional dates
+   * @param params - Query parameters including time range, optional dates, and segment
    * @param forceRefresh - If true, bypasses cache and fetches fresh data
    * @returns HistoricalTrendsResponse with data points and statistics
    * @throws Error if API call fails or custom range is missing dates
@@ -596,6 +803,10 @@ class DashboardAPI {
 
     if (params.brandId) {
       queryParams.append("brand_id", params.brandId)
+    }
+
+    if (params.segment) {
+      queryParams.append("segment", params.segment)
     }
 
     const url = `${this.baseUrl}${this.apiPrefix}/dashboard/historical-trends?${queryParams.toString()}`
@@ -646,9 +857,6 @@ class DashboardAPI {
 
   /**
    * Fetch brands accessible by the current user
-   *
-   * This method retrieves all brands from projects where the user
-   * is either an owner or a monitor. Data is cached for 10 hours.
    *
    * @param forceRefresh - If true, bypasses cache and fetches fresh data
    * @returns UserBrandsResponse with list of accessible brands
@@ -707,14 +915,65 @@ class DashboardAPI {
   }
 
   /**
+   * Fetch segments for a brand
+   *
+   * @param brandId - Brand ID to get segments for
+   * @param forceRefresh - If true, bypasses cache and fetches fresh data
+   * @returns BrandSegmentsResponse with list of segment names
+   * @throws Error if API call fails
+   */
+  async getBrandSegments(
+    brandId: string,
+    forceRefresh: boolean = false,
+  ): Promise<BrandSegmentsResponse> {
+    const cacheKey = `dashboard_segments_${brandId}`
+
+    if (!forceRefresh) {
+      const cached = this.getCachedData<BrandSegmentsResponse>(cacheKey)
+      if (cached) {
+        return cached
+      }
+    }
+
+    console.log("[DashboardAPI] Fetching brand segments from API...", { brandId })
+
+    const url = `${this.baseUrl}${this.apiPrefix}/dashboard/brand-segments?brand_id=${encodeURIComponent(brandId)}`
+
+    const response = await fetch(url, {
+      method: "GET",
+      headers: this.getAuthHeaders(),
+    })
+
+    if (response.status === 401) {
+      throw new Error("Unauthorized - Please log in again")
+    }
+
+    if (!response.ok) {
+      const error: ApiError = await response.json()
+      throw new Error(error.detail || "Failed to fetch brand segments")
+    }
+
+    const data: BrandSegmentsResponse = await response.json()
+
+    this.setCachedData(cacheKey, data)
+
+    console.log("[DashboardAPI] Brand segments fetched successfully", {
+      count: data.segments.length,
+    })
+
+    return data
+  }
+
+  /**
    * Generate a cache key for detail metrics based on query parameters
    */
   private getDetailMetricsCacheKey(params: DetailMetricsParams): string {
-    const { timeRange, startDate, endDate, brandId } = params
+    const { timeRange, startDate, endDate, brandId, segment } = params
+    const seg = segment || "all"
     if (timeRange === "custom") {
-      return `dashboard_detail_custom_${startDate}_${endDate}_${brandId}`
+      return `dashboard_detail_custom_${startDate}_${endDate}_${brandId}_${seg}`
     }
-    return `dashboard_detail_${timeRange}_${brandId}`
+    return `dashboard_detail_${timeRange}_${brandId}_${seg}`
   }
 
   /**
@@ -747,6 +1006,10 @@ class DashboardAPI {
       }
       queryParams.append("start_date", params.startDate)
       queryParams.append("end_date", params.endDate)
+    }
+
+    if (params.segment) {
+      queryParams.append("segment", params.segment)
     }
 
     const url = `${this.baseUrl}${this.apiPrefix}/dashboard/detail-metrics?${queryParams.toString()}`
@@ -845,11 +1108,12 @@ class DashboardAPI {
    * Generate a cache key for competitor metrics
    */
   private getCompetitorMetricsCacheKey(params: CompetitorMetricsParams): string {
-    const { timeRange, startDate, endDate, brandId, competitorBrandName } = params
+    const { timeRange, startDate, endDate, brandId, competitorBrandName, segment } = params
+    const seg = segment || "all"
     if (timeRange === "custom") {
-      return `dashboard_comp_metrics_custom_${startDate}_${endDate}_${brandId}_${competitorBrandName}`
+      return `dashboard_comp_metrics_custom_${startDate}_${endDate}_${brandId}_${competitorBrandName}_${seg}`
     }
-    return `dashboard_comp_metrics_${timeRange}_${brandId}_${competitorBrandName}`
+    return `dashboard_comp_metrics_${timeRange}_${brandId}_${competitorBrandName}_${seg}`
   }
 
   /**
@@ -883,6 +1147,10 @@ class DashboardAPI {
       }
       queryParams.append("start_date", params.startDate)
       queryParams.append("end_date", params.endDate)
+    }
+
+    if (params.segment) {
+      queryParams.append("segment", params.segment)
     }
 
     const url = `${this.baseUrl}${this.apiPrefix}/dashboard/competitor-metrics?${queryParams.toString()}`
@@ -919,6 +1187,418 @@ class DashboardAPI {
   clearCompetitorsCache(brandId: string): void {
     localStorage.removeItem(this.getCompetitorsCacheKey(brandId))
     console.log("[DashboardAPI] Competitors cache cleared for brand:", brandId)
+  }
+
+  /**
+   * Generate a cache key for brand overview
+   */
+  private getBrandOverviewCacheKey(params: BrandOverviewParams): string {
+    const { timeRange, startDate, endDate, brandId, segment } = params
+    const seg = segment || "All-Segment"
+    if (timeRange === "custom") {
+      return `dashboard_overview_custom_${startDate}_${endDate}_${brandId}_${seg}`
+    }
+    return `dashboard_overview_${timeRange}_${brandId}_${seg}`
+  }
+
+  /**
+   * Fetch brand overview data (metric summaries + time series)
+   */
+  async getBrandOverview(
+    params: BrandOverviewParams,
+    forceRefresh: boolean = false,
+  ): Promise<BrandOverviewResponse> {
+    const cacheKey = this.getBrandOverviewCacheKey(params)
+
+    if (!forceRefresh) {
+      const cached = this.getCachedData<BrandOverviewResponse>(cacheKey)
+      if (cached) {
+        return cached
+      }
+    }
+
+    console.log("[DashboardAPI] Fetching brand overview from API...", params)
+
+    const queryParams = new URLSearchParams()
+    queryParams.append("brand_id", params.brandId)
+    queryParams.append("time_range", params.timeRange)
+
+    if (params.timeRange === "custom") {
+      if (!params.startDate || !params.endDate) {
+        throw new Error("Start date and end date are required for custom time range")
+      }
+      queryParams.append("start_date", params.startDate)
+      queryParams.append("end_date", params.endDate)
+    }
+
+    if (params.segment) {
+      queryParams.append("segment", params.segment)
+    }
+
+    const url = `${this.baseUrl}${this.apiPrefix}/dashboard/brand-overview?${queryParams.toString()}`
+
+    const response = await fetch(url, {
+      method: "GET",
+      headers: this.getAuthHeaders(),
+    })
+
+    if (response.status === 401) {
+      throw new Error("Unauthorized - Please log in again")
+    }
+
+    if (!response.ok) {
+      const error: ApiError = await response.json()
+      throw new Error(error.detail || "Failed to fetch brand overview")
+    }
+
+    const data: BrandOverviewResponse = await response.json()
+    this.setCachedData(cacheKey, data)
+
+    console.log("[DashboardAPI] Brand overview fetched successfully", {
+      dataPoints: data.data_points.length,
+      brandName: data.brand_name,
+    })
+
+    return data
+  }
+
+  /**
+   * Generate a cache key for segment metrics
+   */
+  private getSegmentMetricsCacheKey(params: SegmentMetricsParams): string {
+    const { timeRange, startDate, endDate, brandId } = params
+    if (timeRange === "custom") {
+      return `dashboard_seg_metrics_custom_${startDate}_${endDate}_${brandId}`
+    }
+    return `dashboard_seg_metrics_${timeRange}_${brandId}`
+  }
+
+  /**
+   * Fetch per-segment metrics breakdown
+   */
+  async getSegmentMetrics(
+    params: SegmentMetricsParams,
+    forceRefresh: boolean = false,
+  ): Promise<SegmentMetricsResponse> {
+    const cacheKey = this.getSegmentMetricsCacheKey(params)
+
+    if (!forceRefresh) {
+      const cached = this.getCachedData<SegmentMetricsResponse>(cacheKey)
+      if (cached) {
+        return cached
+      }
+    }
+
+    console.log("[DashboardAPI] Fetching segment metrics from API...", params)
+
+    const queryParams = new URLSearchParams()
+    queryParams.append("brand_id", params.brandId)
+    queryParams.append("time_range", params.timeRange)
+
+    if (params.timeRange === "custom") {
+      if (!params.startDate || !params.endDate) {
+        throw new Error("Start date and end date are required for custom time range")
+      }
+      queryParams.append("start_date", params.startDate)
+      queryParams.append("end_date", params.endDate)
+    }
+
+    const url = `${this.baseUrl}${this.apiPrefix}/dashboard/segment-metrics?${queryParams.toString()}`
+
+    const response = await fetch(url, {
+      method: "GET",
+      headers: this.getAuthHeaders(),
+    })
+
+    if (response.status === 401) {
+      throw new Error("Unauthorized - Please log in again")
+    }
+
+    if (!response.ok) {
+      const error: ApiError = await response.json()
+      throw new Error(error.detail || "Failed to fetch segment metrics")
+    }
+
+    const data: SegmentMetricsResponse = await response.json()
+    this.setCachedData(cacheKey, data)
+
+    console.log("[DashboardAPI] Segment metrics fetched successfully", {
+      segments: data.segments.length,
+    })
+
+    return data
+  }
+
+  /**
+   * Generate a cache key for performance detail table
+   */
+  private getPerformanceDetailTableCacheKey(params: PerformanceDetailTableParams): string {
+    const { timeRange, startDate, endDate, brandId } = params
+    if (timeRange === "custom") {
+      return `dashboard_perf_detail_custom_${startDate}_${endDate}_${brandId}`
+    }
+    return `dashboard_perf_detail_${timeRange}_${brandId}`
+  }
+
+  /**
+   * Fetch performance detail table data (all segment rows with dates)
+   */
+  async getPerformanceDetailTable(
+    params: PerformanceDetailTableParams,
+    forceRefresh: boolean = false,
+  ): Promise<PerformanceDetailTableResponse> {
+    const cacheKey = this.getPerformanceDetailTableCacheKey(params)
+
+    if (!forceRefresh) {
+      const cached = this.getCachedData<PerformanceDetailTableResponse>(cacheKey)
+      if (cached) {
+        return cached
+      }
+    }
+
+    console.log("[DashboardAPI] Fetching performance detail table from API...", params)
+
+    const queryParams = new URLSearchParams()
+    queryParams.append("brand_id", params.brandId)
+    queryParams.append("time_range", params.timeRange)
+
+    if (params.timeRange === "custom") {
+      if (!params.startDate || !params.endDate) {
+        throw new Error("Start date and end date are required for custom time range")
+      }
+      queryParams.append("start_date", params.startDate)
+      queryParams.append("end_date", params.endDate)
+    }
+
+    const url = `${this.baseUrl}${this.apiPrefix}/dashboard/performance-detail-table?${queryParams.toString()}`
+
+    const response = await fetch(url, {
+      method: "GET",
+      headers: this.getAuthHeaders(),
+    })
+
+    if (response.status === 401) {
+      throw new Error("Unauthorized - Please log in again")
+    }
+
+    if (!response.ok) {
+      const error: ApiError = await response.json()
+      throw new Error(error.detail || "Failed to fetch performance detail table")
+    }
+
+    const data: PerformanceDetailTableResponse = await response.json()
+    this.setCachedData(cacheKey, data)
+
+    console.log("[DashboardAPI] Performance detail table fetched successfully", {
+      rows: data.rows.length,
+    })
+
+    return data
+  }
+
+  /**
+   * Generate a cache key for competitor awareness
+   */
+  private getCompetitorAwarenessCacheKey(params: CompetitorAwarenessParams): string {
+    const { timeRange, startDate, endDate, brandId, competitorBrandName, segment } = params
+    if (timeRange === "custom") {
+      return `dashboard_comp_aware_custom_${startDate}_${endDate}_${brandId}_${competitorBrandName}_${segment}`
+    }
+    return `dashboard_comp_aware_${timeRange}_${brandId}_${competitorBrandName}_${segment}`
+  }
+
+  /**
+   * Fetch competitor awareness time series (5 metrics)
+   */
+  async getCompetitorAwareness(
+    params: CompetitorAwarenessParams,
+    forceRefresh: boolean = false,
+  ): Promise<CompetitorAwarenessResponse> {
+    const cacheKey = this.getCompetitorAwarenessCacheKey(params)
+
+    if (!forceRefresh) {
+      const cached = this.getCachedData<CompetitorAwarenessResponse>(cacheKey)
+      if (cached) {
+        return cached
+      }
+    }
+
+    console.log("[DashboardAPI] Fetching competitor awareness from API...", params)
+
+    const queryParams = new URLSearchParams()
+    queryParams.append("brand_id", params.brandId)
+    queryParams.append("competitor_brand_name", params.competitorBrandName)
+    queryParams.append("time_range", params.timeRange)
+    queryParams.append("segment", params.segment)
+
+    if (params.timeRange === "custom") {
+      if (!params.startDate || !params.endDate) {
+        throw new Error("Start date and end date are required for custom time range")
+      }
+      queryParams.append("start_date", params.startDate)
+      queryParams.append("end_date", params.endDate)
+    }
+
+    const url = `${this.baseUrl}${this.apiPrefix}/dashboard/competitor-awareness?${queryParams.toString()}`
+
+    const response = await fetch(url, {
+      method: "GET",
+      headers: this.getAuthHeaders(),
+    })
+
+    if (response.status === 401) {
+      throw new Error("Unauthorized - Please log in again")
+    }
+
+    if (!response.ok) {
+      const error: ApiError = await response.json()
+      throw new Error(error.detail || "Failed to fetch competitor awareness")
+    }
+
+    const data: CompetitorAwarenessResponse = await response.json()
+    this.setCachedData(cacheKey, data)
+
+    console.log("[DashboardAPI] Competitor awareness fetched successfully", {
+      dataPoints: data.data_points.length,
+    })
+
+    return data
+  }
+
+  /**
+   * Generate a cache key for competitor detail table
+   */
+  private getCompetitorDetailTableCacheKey(params: CompetitorDetailTableParams): string {
+    const { timeRange, startDate, endDate, brandId, competitorBrandName } = params
+    if (timeRange === "custom") {
+      return `dashboard_comp_detail_custom_${startDate}_${endDate}_${brandId}_${competitorBrandName}`
+    }
+    return `dashboard_comp_detail_${timeRange}_${brandId}_${competitorBrandName}`
+  }
+
+  /**
+   * Fetch competitor detail table data (all segment rows with dates and segment gap)
+   */
+  async getCompetitorDetailTable(
+    params: CompetitorDetailTableParams,
+    forceRefresh: boolean = false,
+  ): Promise<CompetitorDetailTableResponse> {
+    const cacheKey = this.getCompetitorDetailTableCacheKey(params)
+
+    if (!forceRefresh) {
+      const cached = this.getCachedData<CompetitorDetailTableResponse>(cacheKey)
+      if (cached) {
+        return cached
+      }
+    }
+
+    console.log("[DashboardAPI] Fetching competitor detail table from API...", params)
+
+    const queryParams = new URLSearchParams()
+    queryParams.append("brand_id", params.brandId)
+    queryParams.append("competitor_brand_name", params.competitorBrandName)
+    queryParams.append("time_range", params.timeRange)
+
+    if (params.timeRange === "custom") {
+      if (!params.startDate || !params.endDate) {
+        throw new Error("Start date and end date are required for custom time range")
+      }
+      queryParams.append("start_date", params.startDate)
+      queryParams.append("end_date", params.endDate)
+    }
+
+    const url = `${this.baseUrl}${this.apiPrefix}/dashboard/competitor-detail-table?${queryParams.toString()}`
+
+    const response = await fetch(url, {
+      method: "GET",
+      headers: this.getAuthHeaders(),
+    })
+
+    if (response.status === 401) {
+      throw new Error("Unauthorized - Please log in again")
+    }
+
+    if (!response.ok) {
+      const error: ApiError = await response.json()
+      throw new Error(error.detail || "Failed to fetch competitor detail table")
+    }
+
+    const data: CompetitorDetailTableResponse = await response.json()
+    this.setCachedData(cacheKey, data)
+
+    console.log("[DashboardAPI] Competitor detail table fetched successfully", {
+      rows: data.rows.length,
+    })
+
+    return data
+  }
+
+  /**
+   * Generate a cache key for top competitor
+   */
+  private getTopCompetitorCacheKey(params: TopCompetitorParams): string {
+    const { timeRange, startDate, endDate, brandId, segment } = params
+    if (timeRange === "custom") {
+      return `dashboard_top_comp_custom_${startDate}_${endDate}_${brandId}_${segment}`
+    }
+    return `dashboard_top_comp_${timeRange}_${brandId}_${segment}`
+  }
+
+  /**
+   * Fetch top competitor by awareness score for a brand + segment + time range
+   */
+  async getTopCompetitor(
+    params: TopCompetitorParams,
+    forceRefresh: boolean = false,
+  ): Promise<TopCompetitorResponse> {
+    const cacheKey = this.getTopCompetitorCacheKey(params)
+
+    if (!forceRefresh) {
+      const cached = this.getCachedData<TopCompetitorResponse>(cacheKey)
+      if (cached) {
+        return cached
+      }
+    }
+
+    console.log("[DashboardAPI] Fetching top competitor from API...", params)
+
+    const queryParams = new URLSearchParams()
+    queryParams.append("brand_id", params.brandId)
+    queryParams.append("segment", params.segment)
+    queryParams.append("time_range", params.timeRange)
+
+    if (params.timeRange === "custom") {
+      if (!params.startDate || !params.endDate) {
+        throw new Error("Start date and end date are required for custom time range")
+      }
+      queryParams.append("start_date", params.startDate)
+      queryParams.append("end_date", params.endDate)
+    }
+
+    const url = `${this.baseUrl}${this.apiPrefix}/dashboard/top-competitor?${queryParams.toString()}`
+
+    const response = await fetch(url, {
+      method: "GET",
+      headers: this.getAuthHeaders(),
+    })
+
+    if (response.status === 401) {
+      throw new Error("Unauthorized - Please log in again")
+    }
+
+    if (!response.ok) {
+      const error: ApiError = await response.json()
+      throw new Error(error.detail || "Failed to fetch top competitor")
+    }
+
+    const data: TopCompetitorResponse = await response.json()
+    this.setCachedData(cacheKey, data)
+
+    console.log("[DashboardAPI] Top competitor fetched successfully", {
+      topCompetitor: data.top_competitor_name,
+    })
+
+    return data
   }
 }
 

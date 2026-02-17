@@ -33,9 +33,10 @@ interface GaugeChartProps {
 
 interface BrandAwarenessScoreGaugeViewProps {
   brandId?: string
+  segment?: string
 }
 
-export function BrandAwarenessScoreGaugeView({ brandId }: BrandAwarenessScoreGaugeViewProps) {
+export function BrandAwarenessScoreGaugeView({ brandId, segment = "All-Segment" }: BrandAwarenessScoreGaugeViewProps) {
   // ============================================================================
   // State Management
   // ============================================================================
@@ -71,7 +72,7 @@ export function BrandAwarenessScoreGaugeView({ brandId }: BrandAwarenessScoreGau
 
         // Fetch data from API (with automatic caching)
         // The API client will return cached data if available and not expired
-        const data = await dashboardAPI.getConsistencyIndex(brandId)
+        const data = await dashboardAPI.getConsistencyIndex(brandId, segment)
 
         // Update state with fetched data
         setIndexData(data)
@@ -93,7 +94,7 @@ export function BrandAwarenessScoreGaugeView({ brandId }: BrandAwarenessScoreGau
 
     // Execute the fetch function
     fetchConsistencyIndex()
-  }, [brandId]) // Re-fetch when brandId changes
+  }, [brandId, segment]) // Re-fetch when brandId or segment changes
 
   // ============================================================================
   // Trend Calculation Functions

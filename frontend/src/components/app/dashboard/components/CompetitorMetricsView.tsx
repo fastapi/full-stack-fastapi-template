@@ -1,11 +1,12 @@
 /**
  * CompetitorMetricsView Component
  *
- * Displays competitor visibility rate and ranking trends.
+ * Displays competitor visibility rate and ranking score trends.
  * Features:
+ * - Segment selector dropdown to filter by segment
  * - Dropdown to select a competitor brand
  * - Line and Bar chart visualizations
- * - Dual Y-axis: visibility (left, %), ranking (right, inverted)
+ * - Dual Y-axis: visibility (left, %), ranking score (right, 0-10)
  * - Click legend to toggle individual metrics
  * - Statistical summaries for both metrics
  */
@@ -25,6 +26,7 @@ import {
   YAxis,
 } from "recharts"
 import {
+  type BrandSegmentsResponse,
   dashboardAPI,
   type CompetitorBrand,
   type CompetitorMetricsResponse,
@@ -76,6 +78,10 @@ export function CompetitorMetricsView({
   customStartDate,
   customEndDate,
 }: CompetitorMetricsViewProps) {
+  const [segments, setSegments] = useState<string[]>([])
+  const [selectedSegment, setSelectedSegment] = useState<string | null>(null)
+  const [isLoadingSegments, setIsLoadingSegments] = useState(false)
+
   const [competitors, setCompetitors] = useState<CompetitorBrand[]>([])
   const [selectedCompetitor, setSelectedCompetitor] = useState<string | null>(null)
   const [isLoadingCompetitors, setIsLoadingCompetitors] = useState(true)
@@ -91,6 +97,36 @@ export function CompetitorMetricsView({
     null,
   )
   const [hiddenSeries, setHiddenSeries] = useState<Set<string>>(new Set())
+
+  // Fetch segments when brandId changes
+  useEffect(() => {
+    if (!brandId) {
+      setSegments([])
+      setSelectedSegment(null)
+      return
+    }
+
+    const fetchSegments = async () => {
+      try {
+        setIsLoadingSegments(true)
+        const data: BrandSegmentsResponse = await dashboardAPI.getBrandSegments(brandId)
+        setSegments(data.segments)
+        if (data.segments.length > 0) {
+          setSelectedSegment(data.segments[0])
+        } else {
+          setSelectedSegment(null)
+        }
+      } catch (err) {
+        console.error("[CompetitorMetrics] Error fetching segments:", err)
+        setSegments([])
+        setSelectedSegment(null)
+      } finally {
+        setIsLoadingSegments(false)
+      }
+    }
+
+    fetchSegments()
+  }, [brandId])
 
   // Fetch competitors when brandId changes
   useEffect(() => {
@@ -123,7 +159,7 @@ export function CompetitorMetricsView({
     fetchCompetitors()
   }, [brandId])
 
-  // Fetch metrics when competitor or time range changes
+  // Fetch metrics when competitor, segment, or time range changes
   useEffect(() => {
     if (!selectedCompetitor) return
     if (timeRange === "custom" && (!customStartDate || !customEndDate)) return
@@ -139,6 +175,7 @@ export function CompetitorMetricsView({
           timeRange,
           startDate: customStartDate,
           endDate: customEndDate,
+          segment: selectedSegment || undefined,
         })
 
         const chartPoints = transformDataForChart(data)
@@ -162,7 +199,7 @@ export function CompetitorMetricsView({
     }
 
     fetchMetrics()
-  }, [selectedCompetitor, timeRange, brandId, customStartDate, customEndDate])
+  }, [selectedCompetitor, selectedSegment, timeRange, brandId, customStartDate, customEndDate])
 
   const handleLegendClick = (dataKey: string) => {
     setHiddenSeries((prev) => {
@@ -175,11 +212,6 @@ export function CompetitorMetricsView({
       return next
     })
   }
-
-  // Compute max ranking for Y-axis domain
-  const maxRanking = chartData.length > 0
-    ? Math.ceil(Math.max(...chartData.map((d) => d.avgRanking), 1))
-    : 10
 
   const CustomTooltip = ({
     active,
@@ -201,7 +233,7 @@ export function CompetitorMetricsView({
             <p key={index} className="text-sm" style={{ color: entry.color }}>
               {entry.dataKey === "visibilityRate"
                 ? "Visibility Rate"
-                : "Avg Ranking"}
+                : "Ranking Score"}
               :{" "}
               <span className="font-bold">
                 {entry.dataKey === "visibilityRate"
@@ -218,7 +250,7 @@ export function CompetitorMetricsView({
 
   const legendItems = [
     { dataKey: "visibilityRate", label: "Visibility Rate", color: "#3b82f6" },
-    { dataKey: "avgRanking", label: "Avg Ranking", color: "#f97316" },
+    { dataKey: "avgRanking", label: "Ranking Score", color: "#f97316" },
   ]
 
   const CustomLegend = () => {
@@ -314,22 +346,50 @@ export function CompetitorMetricsView({
         Competitor Visibility &amp; Ranking Trends
       </h3>
 
-      {/* Competitor Selector */}
-      <div className="mb-6">
-        {isLoadingCompetitors ? (
-          <div className="flex items-center gap-2 text-slate-500">
-            <Loader2 className="h-4 w-4 animate-spin" />
-            <span>Loading competitors...</span>
-          </div>
-        ) : competitorsError ? (
-          <div className="text-red-500 text-sm">{competitorsError}</div>
-        ) : competitors.length === 0 ? (
-          <div className="text-slate-500 text-sm">
-            No competitors found for this brand.
-          </div>
-        ) : (
-          <div className="flex items-center gap-3">
-            <span className="text-sm font-medium text-gray-700">Competitor:</span>
+      {/* Segment & Competitor Selectors */}
+      <div className="flex flex-wrap items-center gap-6 mb-6">
+        {/* Segment Selector */}
+        <div className="flex items-center gap-3">
+          <span className="text-sm font-medium text-gray-700">Segment:</span>
+          {isLoadingSegments ? (
+            <div className="flex items-center gap-2 text-slate-500">
+              <Loader2 className="h-4 w-4 animate-spin" />
+              <span className="text-sm">Loading...</span>
+            </div>
+          ) : segments.length > 0 ? (
+            <Select
+              value={selectedSegment || undefined}
+              onValueChange={setSelectedSegment}
+            >
+              <SelectTrigger className="w-[300px]">
+                <SelectValue placeholder="Select a segment" />
+              </SelectTrigger>
+              <SelectContent>
+                {segments.map((seg) => (
+                  <SelectItem key={seg} value={seg}>
+                    {seg}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          ) : (
+            <span className="text-sm text-slate-500">No segments available</span>
+          )}
+        </div>
+
+        {/* Competitor Selector */}
+        <div className="flex items-center gap-3">
+          <span className="text-sm font-medium text-gray-700">Competitor:</span>
+          {isLoadingCompetitors ? (
+            <div className="flex items-center gap-2 text-slate-500">
+              <Loader2 className="h-4 w-4 animate-spin" />
+              <span className="text-sm">Loading...</span>
+            </div>
+          ) : competitorsError ? (
+            <div className="text-red-500 text-sm">{competitorsError}</div>
+          ) : competitors.length === 0 ? (
+            <span className="text-sm text-slate-500">No competitors found</span>
+          ) : (
             <Select
               value={selectedCompetitor || undefined}
               onValueChange={setSelectedCompetitor}
@@ -348,8 +408,8 @@ export function CompetitorMetricsView({
                 ))}
               </SelectContent>
             </Select>
-          </div>
-        )}
+          )}
+        </div>
       </div>
 
       {/* Loading state for metrics */}
@@ -444,12 +504,11 @@ export function CompetitorMetricsView({
                     <YAxis
                       yAxisId="right"
                       orientation="right"
-                      domain={[1, maxRanking + 1]}
-                      reversed
+                      domain={[0, 10]}
                       stroke="#f97316"
                       style={{ fontSize: "12px" }}
                       label={{
-                        value: "Ranking",
+                        value: "Ranking Score (0-10)",
                         angle: 90,
                         position: "insideRight",
                         style: { fontSize: "12px", fill: "#f97316" },
@@ -476,7 +535,7 @@ export function CompetitorMetricsView({
                       strokeWidth={3}
                       dot={{ fill: "#f97316", r: 3 }}
                       activeDot={{ r: 5 }}
-                      name="Avg Ranking"
+                      name="Ranking Score"
                       hide={!showRanking}
                     />
                   </LineChart>
@@ -503,12 +562,11 @@ export function CompetitorMetricsView({
                     <YAxis
                       yAxisId="right"
                       orientation="right"
-                      domain={[1, maxRanking + 1]}
-                      reversed
+                      domain={[0, 10]}
                       stroke="#f97316"
                       style={{ fontSize: "12px" }}
                       label={{
-                        value: "Ranking",
+                        value: "Ranking Score (0-10)",
                         angle: 90,
                         position: "insideRight",
                         style: { fontSize: "12px", fill: "#f97316" },
@@ -528,7 +586,7 @@ export function CompetitorMetricsView({
                       yAxisId="right"
                       dataKey="avgRanking"
                       fill="#f97316"
-                      name="Avg Ranking"
+                      name="Ranking Score"
                       radius={[4, 4, 0, 0]}
                       hide={!showRanking}
                     />
@@ -547,7 +605,7 @@ export function CompetitorMetricsView({
               unit="%"
             />
             <StatisticsRow
-              title="Ranking Statistics"
+              title="Ranking Score Statistics"
               stats={rankingStats}
               color="text-orange-600"
             />

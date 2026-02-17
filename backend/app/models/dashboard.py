@@ -247,3 +247,157 @@ class CompetitorMetricsResponse(BaseModel):
     end_date: str = Field(..., description="End date of the query period")
 
     model_config = ConfigDict(from_attributes=True)
+
+
+class BrandSegmentsResponse(BaseModel):
+    """Response schema for listing segments of a brand."""
+    brand_id: str = Field(..., description="Brand identifier")
+    segments: list[str] = Field(default_factory=list, description="List of segment names")
+
+    model_config = ConfigDict(from_attributes=True)
+
+
+class BrandOverviewDataPoint(BaseModel):
+    """A single data point for brand overview time series."""
+    date: str = Field(..., description="Date of this data point (YYYY-MM-DD format)")
+    awareness_score: float = Field(..., description="Brand awareness score (0-100 scale)")
+    share_of_visibility: float = Field(0.0, description="Share of visibility (0-1)")
+    search_share_index: float = Field(0.0, description="Search share index (0-1)")
+    position_strength: float = Field(0.0, description="Position strength (0-1)")
+    search_momentum: float = Field(0.0, description="Search momentum (0-1)")
+
+    model_config = ConfigDict(from_attributes=True)
+
+
+class BrandOverviewMetricSummary(BaseModel):
+    """Summary for a single metric with current value and change."""
+    current_value: float = Field(..., description="Current metric value")
+    previous_value: Optional[float] = Field(None, description="Previous period value")
+    change: Optional[float] = Field(None, description="Change from previous period")
+    has_previous: bool = Field(False, description="Whether previous data exists")
+
+    model_config = ConfigDict(from_attributes=True)
+
+
+class BrandOverviewSummary(BaseModel):
+    """Summary of all 5 metrics with current values and changes."""
+    awareness_score: BrandOverviewMetricSummary = Field(..., description="Brand awareness score summary")
+    share_of_visibility: BrandOverviewMetricSummary = Field(..., description="Share of visibility summary")
+    search_share_index: BrandOverviewMetricSummary = Field(..., description="Search share index summary")
+    position_strength: BrandOverviewMetricSummary = Field(..., description="Position strength summary")
+    search_momentum: BrandOverviewMetricSummary = Field(..., description="Search momentum summary")
+
+    model_config = ConfigDict(from_attributes=True)
+
+
+class BrandOverviewResponse(BaseModel):
+    """Response schema for brand overview with metric summaries and time series."""
+    brand_id: str = Field(..., description="Brand identifier")
+    brand_name: str = Field(..., description="Brand display name")
+    summary: BrandOverviewSummary = Field(..., description="Metric summaries with current/previous values")
+    data_points: list[BrandOverviewDataPoint] = Field(default_factory=list, description="Time series data points")
+    start_date: str = Field(..., description="Start date of the query period")
+    end_date: str = Field(..., description="End date of the query period")
+
+    model_config = ConfigDict(from_attributes=True)
+
+
+class SegmentMetricsRow(BaseModel):
+    """A single segment's latest metrics."""
+    segment: str = Field(..., description="Segment name")
+    awareness_score: float = Field(0.0, description="Awareness score (0-100)")
+    share_of_visibility: float = Field(0.0, description="Share of visibility (0-1)")
+    search_share_index: float = Field(0.0, description="Search share index (0-1)")
+    position_strength: float = Field(0.0, description="Position strength (0-1)")
+    search_momentum: float = Field(0.0, description="Search momentum (0-1)")
+    consistency_index: float = Field(0.0, description="Consistency index (0-100)")
+
+    model_config = ConfigDict(from_attributes=True)
+
+
+class SegmentMetricsResponse(BaseModel):
+    """Response schema for per-segment metrics breakdown."""
+    brand_id: str = Field(..., description="Brand identifier")
+    brand_name: str = Field(..., description="Brand display name")
+    segments: list[SegmentMetricsRow] = Field(default_factory=list, description="Per-segment metric rows")
+
+    model_config = ConfigDict(from_attributes=True)
+
+
+class PerformanceDetailRow(BaseModel):
+    """A single row in the performance detail table with date."""
+    segment: str = Field(..., description="Segment name")
+    awareness_score: float = Field(0.0, description="Awareness score (0-100)")
+    share_of_visibility: float = Field(0.0, description="Share of visibility (0-1)")
+    search_share_index: float = Field(0.0, description="Search share index (0-1)")
+    position_strength: float = Field(0.0, description="Position strength (0-1)")
+    search_momentum: float = Field(0.0, description="Search momentum (0-1)")
+    date: str = Field(..., description="Search date (YYYY-MM-DD format)")
+
+    model_config = ConfigDict(from_attributes=True)
+
+
+class PerformanceDetailTableResponse(BaseModel):
+    """Response schema for performance detail table with all segment rows and dates."""
+    brand_id: str = Field(..., description="Brand identifier")
+    brand_name: str = Field(..., description="Brand display name")
+    rows: list[PerformanceDetailRow] = Field(default_factory=list, description="All segment metric rows with dates")
+
+    model_config = ConfigDict(from_attributes=True)
+
+
+class CompetitorAwarenessDataPoint(BaseModel):
+    """A single data point for competitor awareness time series."""
+    date: str = Field(..., description="Date of this data point (YYYY-MM-DD format)")
+    awareness_score: float = Field(0.0, description="Competitor awareness score (0-100)")
+    share_of_visibility: float = Field(0.0, description="Share of visibility (0-1)")
+    search_share_index: float = Field(0.0, description="Search share index (0-1)")
+    position_strength: float = Field(0.0, description="Position strength (0-1)")
+    search_momentum: float = Field(0.0, description="Search momentum (0-1)")
+
+    model_config = ConfigDict(from_attributes=True)
+
+
+class CompetitorAwarenessResponse(BaseModel):
+    """Response schema for competitor awareness time series."""
+    brand_id: str = Field(..., description="Target brand identifier")
+    competitor_brand_name: str = Field(..., description="Competitor brand name")
+    data_points: list[CompetitorAwarenessDataPoint] = Field(default_factory=list, description="Time series data points")
+    start_date: str = Field(..., description="Start date of the query period")
+    end_date: str = Field(..., description="End date of the query period")
+
+    model_config = ConfigDict(from_attributes=True)
+
+
+class CompetitorDetailRow(BaseModel):
+    """A single row in the competitor detail table with segment gap."""
+    segment: str = Field(..., description="Segment name")
+    awareness_score: float = Field(0.0, description="Competitor awareness score (0-100)")
+    share_of_visibility: float = Field(0.0, description="Share of visibility (0-1)")
+    search_share_index: float = Field(0.0, description="Search share index (0-1)")
+    position_strength: float = Field(0.0, description="Position strength (0-1)")
+    search_momentum: float = Field(0.0, description="Search momentum (0-1)")
+    date: str = Field(..., description="Search date (YYYY-MM-DD format)")
+    segment_gap: Optional[float] = Field(None, description="Brand awareness - competitor awareness gap")
+
+    model_config = ConfigDict(from_attributes=True)
+
+
+class CompetitorDetailTableResponse(BaseModel):
+    """Response schema for competitor detail table with segment gap."""
+    brand_id: str = Field(..., description="Target brand identifier")
+    brand_name: str = Field(..., description="Target brand display name")
+    competitor_brand_name: str = Field(..., description="Competitor brand name")
+    rows: list[CompetitorDetailRow] = Field(default_factory=list, description="All competitor metric rows with dates and gap")
+
+    model_config = ConfigDict(from_attributes=True)
+
+
+class TopCompetitorResponse(BaseModel):
+    """Response schema for top competitor by awareness score."""
+    brand_id: str = Field(..., description="Target brand identifier")
+    segment: str = Field(..., description="Segment name")
+    top_competitor_name: Optional[str] = Field(None, description="Top competitor brand name by avg awareness")
+    avg_awareness_score: Optional[float] = Field(None, description="Average awareness score of the top competitor")
+
+    model_config = ConfigDict(from_attributes=True)

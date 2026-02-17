@@ -65,6 +65,7 @@ const transformDataForChart = (
 
 interface BrandAwarenessScoreHistoricalViewProps {
   brandId?: string
+  segment?: string
   timeRange: TimeRange
   customStartDate?: string
   customEndDate?: string
@@ -72,6 +73,7 @@ interface BrandAwarenessScoreHistoricalViewProps {
 
 export function BrandAwarenessScoreHistoricalView({
   brandId,
+  segment = "All-Segment",
   timeRange,
   customStartDate,
   customEndDate,
@@ -110,6 +112,7 @@ export function BrandAwarenessScoreHistoricalView({
         const data = await dashboardAPI.getHistoricalTrends({
           timeRange,
           brandId,
+          segment,
           startDate: customStartDate,
           endDate: customEndDate,
         })
@@ -137,7 +140,7 @@ export function BrandAwarenessScoreHistoricalView({
     }
 
     fetchHistoricalTrends()
-  }, [timeRange, brandId, customStartDate, customEndDate])
+  }, [timeRange, brandId, segment, customStartDate, customEndDate])
 
   // ============================================================================
   // Custom Tooltip Component

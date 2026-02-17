@@ -39,6 +39,20 @@ from app.models.dashboard import (
     CompetitorListResponse,
     CompetitorMetricsDataPoint,
     CompetitorMetricsResponse,
+    BrandSegmentsResponse,
+    BrandOverviewDataPoint,
+    BrandOverviewMetricSummary,
+    BrandOverviewSummary,
+    BrandOverviewResponse,
+    SegmentMetricsRow,
+    SegmentMetricsResponse,
+    PerformanceDetailRow,
+    PerformanceDetailTableResponse,
+    CompetitorAwarenessDataPoint,
+    CompetitorAwarenessResponse,
+    CompetitorDetailRow,
+    CompetitorDetailTableResponse,
+    TopCompetitorResponse,
 )
 from kila_models.models import (
     UsersTable,
@@ -49,6 +63,7 @@ from kila_models.models import (
     ProjectsRecord,
     BrandPromptTable,
     BrandCompetitorsTable,
+    BrandCompetitorsAwarenessWeeklyPerformanceTable,
     BrandSearchCompetitorsVisibilityTable,
     BrandSearchCompetitorsRankingTable,
 )
@@ -199,9 +214,52 @@ async def get_user_brands(
         )
 
 
+@router.get("/brand-segments", response_model=BrandSegmentsResponse)
+async def get_brand_segments(
+    brand_id: str = Query(..., description="Brand ID to get segments for"),
+    db: AsyncSession = Depends(get_db),
+    current_user: UsersTable = Depends(get_current_user)
+):
+    """
+    Retrieve the list of segments for a brand.
+
+    Queries BrandAwarenessWeeklyPerformanceTable for distinct segment values,
+    excluding the "All-Segment" aggregate entry.
+
+    Args:
+        brand_id: Brand identifier
+        db: Database session
+        current_user: Authenticated user
+
+    Returns:
+        BrandSegmentsResponse with list of segment names
+    """
+    logger.info(f"Fetching segments for brand_id: {brand_id}")
+
+    query = (
+        select(distinct(BrandAwarenessWeeklyPerformanceTable.segment))
+        .where(
+            BrandAwarenessWeeklyPerformanceTable.brand_id == brand_id,
+            BrandAwarenessWeeklyPerformanceTable.segment != "All-Segment"
+        )
+        .order_by(asc(BrandAwarenessWeeklyPerformanceTable.segment))
+    )
+
+    result = await db.execute(query)
+    segments = [row[0] for row in result.all()]
+
+    logger.info(f"Found {len(segments)} segments for brand_id: {brand_id}")
+
+    return BrandSegmentsResponse(
+        brand_id=brand_id,
+        segments=segments,
+    )
+
+
 @router.get("/awareness-score", response_model=Optional[AwarenessScoreResponse])
 async def get_awareness_score(
     brand_id: Optional[str] = Query(None, description="Filter by specific brand ID"),
+    segment: str = Query("All-Segment", description="Segment name to filter by"),
     db: AsyncSession = Depends(get_db),
     current_user: UsersTable = Depends(get_current_user)
 ):
@@ -218,6 +276,7 @@ async def get_awareness_score(
     Args:
         brand_id: Optional brand ID to filter results. If not provided,
                   returns the first brand's data (for demo purposes).
+        segment: Segment name to filter by (default: "All-Segment")
         db: Database session (injected by FastAPI)
         current_user: Authenticated user (injected by FastAPI)
 
@@ -228,12 +287,13 @@ async def get_awareness_score(
     Raises:
         HTTPException 401: If user is not authenticated
     """
-    logger.info(f"Fetching awareness score for user: {current_user.user_id}, brand_id: {brand_id}")
+    logger.info(f"Fetching awareness score for user: {current_user.user_id}, brand_id: {brand_id}, segment: {segment}")
 
     # Build query to get the two most recent records for trend calculation
     # We order by created_date descending to get the latest first
     query = (
         select(BrandAwarenessWeeklyPerformanceTable)
+        .where(BrandAwarenessWeeklyPerformanceTable.segment == segment)
         .order_by(desc(BrandAwarenessWeeklyPerformanceTable.created_date))
         .limit(2)  # Get current and previous for trend
     )
@@ -284,6 +344,7 @@ async def get_awareness_score(
 @router.get("/consistency-index", response_model=Optional[ConsistencyIndexResponse])
 async def get_consistency_index(
     brand_id: Optional[str] = Query(None, description="Filter by specific brand ID"),
+    segment: str = Query("All-Segment", description="Segment name to filter by"),
     db: AsyncSession = Depends(get_db),
     current_user: UsersTable = Depends(get_current_user)
 ):
@@ -300,6 +361,7 @@ async def get_consistency_index(
     Args:
         brand_id: Optional brand ID to filter results. If not provided,
                   returns the first brand's data (for demo purposes).
+        segment: Segment name to filter by (default: "All-Segment")
         db: Database session (injected by FastAPI)
         current_user: Authenticated user (injected by FastAPI)
 
@@ -310,11 +372,12 @@ async def get_consistency_index(
     Raises:
         HTTPException 401: If user is not authenticated
     """
-    logger.info(f"Fetching consistency index for user: {current_user.user_id}, brand_id: {brand_id}")
+    logger.info(f"Fetching consistency index for user: {current_user.user_id}, brand_id: {brand_id}, segment: {segment}")
 
     # Build query to get the two most recent records for trend calculation
     query = (
         select(BrandAwarenessWeeklyPerformanceTable)
+        .where(BrandAwarenessWeeklyPerformanceTable.segment == segment)
         .order_by(desc(BrandAwarenessWeeklyPerformanceTable.created_date))
         .limit(2)
     )
@@ -365,6 +428,7 @@ async def get_consistency_index(
 @router.get("/metrics", response_model=DashboardMetricsResponse)
 async def get_dashboard_metrics(
     brand_id: Optional[str] = Query(None, description="Filter by specific brand ID"),
+    segment: str = Query("All-Segment", description="Segment name to filter by"),
     db: AsyncSession = Depends(get_db),
     current_user: UsersTable = Depends(get_current_user)
 ):
@@ -377,6 +441,7 @@ async def get_dashboard_metrics(
 
     Args:
         brand_id: Optional brand ID to filter results
+        segment: Segment name to filter by (default: "All-Segment")
         db: Database session (injected by FastAPI)
         current_user: Authenticated user (injected by FastAPI)
 
@@ -391,6 +456,7 @@ async def get_dashboard_metrics(
     # Build query to get the two most recent records
     query = (
         select(BrandAwarenessWeeklyPerformanceTable)
+        .where(BrandAwarenessWeeklyPerformanceTable.segment == segment)
         .order_by(desc(BrandAwarenessWeeklyPerformanceTable.created_date))
         .limit(2)
     )
@@ -528,6 +594,10 @@ async def get_historical_trends(
         None,
         description="Filter by specific brand ID"
     ),
+    segment: str = Query(
+        "All-Segment",
+        description="Segment name to filter by"
+    ),
     db: AsyncSession = Depends(get_db),
     current_user: UsersTable = Depends(get_current_user)
 ):
@@ -581,6 +651,7 @@ async def get_historical_trends(
         select(BrandAwarenessWeeklyPerformanceTable)
         .where(BrandAwarenessWeeklyPerformanceTable.created_date >= query_start_date)
         .where(BrandAwarenessWeeklyPerformanceTable.created_date <= query_end_date)
+        .where(BrandAwarenessWeeklyPerformanceTable.segment == segment)
         .order_by(asc(BrandAwarenessWeeklyPerformanceTable.created_date))
     )
 
@@ -665,6 +736,10 @@ async def get_detail_metrics(
         None,
         description="Custom end date (required if time_range is 'custom')"
     ),
+    segment: Optional[str] = Query(
+        None,
+        description="Segment name to filter by. If not provided, aggregates across all segments."
+    ),
     db: AsyncSession = Depends(get_db),
     current_user: UsersTable = Depends(get_current_user)
 ):
@@ -702,6 +777,8 @@ async def get_detail_metrics(
         )
         .order_by(asc(BrandSearchVisibilityTable.search_date))
     )
+    if segment:
+        vis_query = vis_query.where(BrandSearchVisibilityTable.segment == segment)
     vis_result = await db.execute(vis_query)
     vis_records = vis_result.scalars().all()
 
@@ -723,6 +800,8 @@ async def get_detail_metrics(
         )
         .order_by(asc(BrandSearchRankingTable.search_date))
     )
+    if segment:
+        rank_query = rank_query.where(BrandSearchRankingTable.segment == segment)
     rank_result = await db.execute(rank_query)
     rank_records = rank_result.scalars().all()
 
@@ -852,6 +931,10 @@ async def get_competitor_metrics(
         None,
         description="Custom end date (required if time_range is 'custom')"
     ),
+    segment: Optional[str] = Query(
+        None,
+        description="Segment name to filter by. If not provided, aggregates across all segments."
+    ),
     db: AsyncSession = Depends(get_db),
     current_user: UsersTable = Depends(get_current_user)
 ):
@@ -891,6 +974,8 @@ async def get_competitor_metrics(
         )
         .order_by(asc(BrandSearchCompetitorsVisibilityTable.search_date))
     )
+    if segment:
+        vis_query = vis_query.where(BrandSearchCompetitorsVisibilityTable.segment == segment)
     vis_result = await db.execute(vis_query)
     vis_records = vis_result.scalars().all()
 
@@ -911,6 +996,8 @@ async def get_competitor_metrics(
         )
         .order_by(asc(BrandSearchCompetitorsRankingTable.search_date))
     )
+    if segment:
+        rank_query = rank_query.where(BrandSearchCompetitorsRankingTable.segment == segment)
     rank_result = await db.execute(rank_query)
     rank_records = rank_result.scalars().all()
 
@@ -980,3 +1067,606 @@ async def get_competitor_metrics(
     )
 
     return response
+
+
+@router.get("/brand-overview", response_model=BrandOverviewResponse)
+async def get_brand_overview(
+    brand_id: str = Query(..., description="Brand ID to query"),
+    time_range: TimeRange = Query(
+        TimeRange.ONE_MONTH,
+        description="Predefined time range for the query"
+    ),
+    start_date: Optional[date] = Query(
+        None,
+        description="Custom start date (required if time_range is 'custom')"
+    ),
+    end_date: Optional[date] = Query(
+        None,
+        description="Custom end date (required if time_range is 'custom')"
+    ),
+    segment: str = Query(
+        "All-Segment",
+        description="Segment name to filter by"
+    ),
+    db: AsyncSession = Depends(get_db),
+    current_user: UsersTable = Depends(get_current_user)
+):
+    """
+    Retrieve brand overview data with metric summaries and time series.
+
+    Returns the 5 core metrics (awareness_score, share_of_visibility,
+    search_share_index, position_strength, search_momentum) as:
+    - Current/previous value summaries for metric cards
+    - Time series data points for the chart
+    """
+    logger.info(
+        f"Fetching brand overview for user: {current_user.user_id}, "
+        f"brand_id: {brand_id}, time_range: {time_range}, segment: {segment}"
+    )
+
+    # Determine date range
+    if time_range == TimeRange.CUSTOM:
+        if not start_date or not end_date:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="start_date and end_date are required for custom time range"
+            )
+        query_start_date = start_date
+        query_end_date = end_date
+    else:
+        query_start_date, query_end_date = get_date_range_for_time_range(time_range)
+
+    # Query weekly performance data within date range
+    query = (
+        select(BrandAwarenessWeeklyPerformanceTable)
+        .where(
+            BrandAwarenessWeeklyPerformanceTable.brand_id == brand_id,
+            BrandAwarenessWeeklyPerformanceTable.segment == segment,
+            BrandAwarenessWeeklyPerformanceTable.created_date >= query_start_date,
+            BrandAwarenessWeeklyPerformanceTable.created_date <= query_end_date,
+        )
+        .order_by(asc(BrandAwarenessWeeklyPerformanceTable.created_date))
+    )
+
+    result = await db.execute(query)
+    records = result.scalars().all()
+
+    # Build empty response if no data
+    if not records:
+        logger.warning(f"No brand overview data found for brand_id: {brand_id}")
+        empty_metric = BrandOverviewMetricSummary(current_value=0.0, has_previous=False)
+        return BrandOverviewResponse(
+            brand_id=brand_id,
+            brand_name="Unknown",
+            summary=BrandOverviewSummary(
+                awareness_score=empty_metric,
+                share_of_visibility=empty_metric,
+                search_share_index=empty_metric,
+                position_strength=empty_metric,
+                search_momentum=empty_metric,
+            ),
+            data_points=[],
+            start_date=query_start_date.isoformat(),
+            end_date=query_end_date.isoformat(),
+        )
+
+    # Build time series data points
+    data_points = []
+    for record in records:
+        data_points.append(BrandOverviewDataPoint(
+            date=record.created_date.isoformat(),
+            awareness_score=round(record.awareness_score or 0.0, 2),
+            share_of_visibility=round(record.share_of_visibility or 0.0, 4),
+            search_share_index=round(record.search_share_index or 0.0, 4),
+            position_strength=round(record.position_strength or 0.0, 4),
+            search_momentum=round(record.search_momentum or 0.0, 4),
+        ))
+
+    # Build metric summaries (current = last record, previous = second-to-last)
+    current = records[-1]
+    previous = records[-2] if len(records) > 1 else None
+
+    def make_summary(current_val: float | None, previous_val: float | None) -> BrandOverviewMetricSummary:
+        cv = round(current_val or 0.0, 4)
+        if previous_val is not None:
+            pv = round(previous_val, 4)
+            return BrandOverviewMetricSummary(
+                current_value=cv,
+                previous_value=pv,
+                change=round(cv - pv, 4),
+                has_previous=True,
+            )
+        return BrandOverviewMetricSummary(current_value=cv, has_previous=False)
+
+    summary = BrandOverviewSummary(
+        awareness_score=make_summary(current.awareness_score, previous.awareness_score if previous else None),
+        share_of_visibility=make_summary(current.share_of_visibility, previous.share_of_visibility if previous else None),
+        search_share_index=make_summary(current.search_share_index, previous.search_share_index if previous else None),
+        position_strength=make_summary(current.position_strength, previous.position_strength if previous else None),
+        search_momentum=make_summary(current.search_momentum, previous.search_momentum if previous else None),
+    )
+
+    brand_name = records[0].brand_name
+
+    logger.info(f"Returning {len(data_points)} brand overview data points for brand: {brand_name}")
+
+    return BrandOverviewResponse(
+        brand_id=brand_id,
+        brand_name=brand_name,
+        summary=summary,
+        data_points=data_points,
+        start_date=query_start_date.isoformat(),
+        end_date=query_end_date.isoformat(),
+    )
+
+
+@router.get("/segment-metrics", response_model=SegmentMetricsResponse)
+async def get_segment_metrics(
+    brand_id: str = Query(..., description="Brand ID to query"),
+    time_range: TimeRange = Query(
+        TimeRange.ONE_MONTH,
+        description="Predefined time range for the query"
+    ),
+    start_date: Optional[date] = Query(
+        None,
+        description="Custom start date (required if time_range is 'custom')"
+    ),
+    end_date: Optional[date] = Query(
+        None,
+        description="Custom end date (required if time_range is 'custom')"
+    ),
+    db: AsyncSession = Depends(get_db),
+    current_user: UsersTable = Depends(get_current_user)
+):
+    """
+    Retrieve per-segment metrics breakdown for a brand.
+
+    Returns the latest metric values for each segment (excluding "All-Segment"),
+    within the specified time range.
+    """
+    logger.info(
+        f"Fetching segment metrics for user: {current_user.user_id}, "
+        f"brand_id: {brand_id}, time_range: {time_range}"
+    )
+
+    # Determine date range
+    if time_range == TimeRange.CUSTOM:
+        if not start_date or not end_date:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="start_date and end_date are required for custom time range"
+            )
+        query_start_date = start_date
+        query_end_date = end_date
+    else:
+        query_start_date, query_end_date = get_date_range_for_time_range(time_range)
+
+    # Query all segment data within date range (excluding All-Segment)
+    query = (
+        select(BrandAwarenessWeeklyPerformanceTable)
+        .where(
+            BrandAwarenessWeeklyPerformanceTable.brand_id == brand_id,
+            BrandAwarenessWeeklyPerformanceTable.segment != "All-Segment",
+            BrandAwarenessWeeklyPerformanceTable.created_date >= query_start_date,
+            BrandAwarenessWeeklyPerformanceTable.created_date <= query_end_date,
+        )
+        .order_by(
+            asc(BrandAwarenessWeeklyPerformanceTable.segment),
+            desc(BrandAwarenessWeeklyPerformanceTable.created_date),
+        )
+    )
+
+    result = await db.execute(query)
+    records = result.scalars().all()
+
+    # Get the latest record per segment
+    brand_name = "Unknown"
+    seen_segments: set[str] = set()
+    segment_rows: list[SegmentMetricsRow] = []
+
+    for record in records:
+        brand_name = record.brand_name
+        if record.segment not in seen_segments:
+            seen_segments.add(record.segment)
+            segment_rows.append(SegmentMetricsRow(
+                segment=record.segment,
+                awareness_score=round(record.awareness_score or 0.0, 2),
+                share_of_visibility=round(record.share_of_visibility or 0.0, 4),
+                search_share_index=round(record.search_share_index or 0.0, 4),
+                position_strength=round(record.position_strength or 0.0, 4),
+                search_momentum=round(record.search_momentum or 0.0, 4),
+                consistency_index=round(record.consistency_index or 0.0, 2),
+            ))
+
+    logger.info(f"Returning {len(segment_rows)} segment metrics for brand_id: {brand_id}")
+
+    return SegmentMetricsResponse(
+        brand_id=brand_id,
+        brand_name=brand_name,
+        segments=segment_rows,
+    )
+
+
+@router.get("/performance-detail-table", response_model=PerformanceDetailTableResponse)
+async def get_performance_detail_table(
+    brand_id: str = Query(..., description="Brand ID to query"),
+    time_range: TimeRange = Query(
+        TimeRange.ONE_MONTH,
+        description="Predefined time range for the query"
+    ),
+    start_date: Optional[date] = Query(
+        None,
+        description="Custom start date (required if time_range is 'custom')"
+    ),
+    end_date: Optional[date] = Query(
+        None,
+        description="Custom end date (required if time_range is 'custom')"
+    ),
+    db: AsyncSession = Depends(get_db),
+    current_user: UsersTable = Depends(get_current_user)
+):
+    """
+    Retrieve all segment metric rows with dates for the performance detail table.
+
+    Returns all rows for all segments (excluding "All-Segment") within the
+    specified time range, including the created_date as the search date.
+    """
+    logger.info(
+        f"Fetching performance detail table for user: {current_user.user_id}, "
+        f"brand_id: {brand_id}, time_range: {time_range}"
+    )
+
+    # Determine date range
+    if time_range == TimeRange.CUSTOM:
+        if not start_date or not end_date:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="start_date and end_date are required for custom time range"
+            )
+        query_start_date = start_date
+        query_end_date = end_date
+    else:
+        query_start_date, query_end_date = get_date_range_for_time_range(time_range)
+
+    # Query all segment data within date range (excluding All-Segment)
+    query = (
+        select(BrandAwarenessWeeklyPerformanceTable)
+        .where(
+            BrandAwarenessWeeklyPerformanceTable.brand_id == brand_id,
+            BrandAwarenessWeeklyPerformanceTable.segment != "All-Segment",
+            BrandAwarenessWeeklyPerformanceTable.created_date >= query_start_date,
+            BrandAwarenessWeeklyPerformanceTable.created_date <= query_end_date,
+        )
+        .order_by(
+            asc(BrandAwarenessWeeklyPerformanceTable.segment),
+            desc(BrandAwarenessWeeklyPerformanceTable.created_date),
+        )
+    )
+
+    result = await db.execute(query)
+    records = result.scalars().all()
+
+    brand_name = "Unknown"
+    rows: list[PerformanceDetailRow] = []
+
+    for record in records:
+        brand_name = record.brand_name
+        rows.append(PerformanceDetailRow(
+            segment=record.segment,
+            awareness_score=round(record.awareness_score or 0.0, 2),
+            share_of_visibility=round(record.share_of_visibility or 0.0, 4),
+            search_share_index=round(record.search_share_index or 0.0, 4),
+            position_strength=round(record.position_strength or 0.0, 4),
+            search_momentum=round(record.search_momentum or 0.0, 4),
+            date=record.created_date.isoformat(),
+        ))
+
+    logger.info(f"Returning {len(rows)} performance detail rows for brand_id: {brand_id}")
+
+    return PerformanceDetailTableResponse(
+        brand_id=brand_id,
+        brand_name=brand_name,
+        rows=rows,
+    )
+
+
+@router.get("/competitor-awareness", response_model=CompetitorAwarenessResponse)
+async def get_competitor_awareness(
+    brand_id: str = Query(..., description="Target brand ID"),
+    competitor_brand_name: str = Query(..., description="Competitor brand name"),
+    time_range: TimeRange = Query(
+        TimeRange.ONE_MONTH,
+        description="Predefined time range for the query"
+    ),
+    start_date: Optional[date] = Query(
+        None,
+        description="Custom start date (required if time_range is 'custom')"
+    ),
+    end_date: Optional[date] = Query(
+        None,
+        description="Custom end date (required if time_range is 'custom')"
+    ),
+    segment: str = Query(..., description="Segment name to filter by"),
+    db: AsyncSession = Depends(get_db),
+    current_user: UsersTable = Depends(get_current_user)
+):
+    """
+    Retrieve competitor awareness metrics as a time series.
+
+    Returns the 5 core metrics (awareness_score, share_of_visibility,
+    search_share_index, position_strength, search_momentum) for a specific
+    competitor filtered by segment and time range.
+    """
+    logger.info(
+        f"Fetching competitor awareness for user: {current_user.user_id}, "
+        f"brand_id: {brand_id}, competitor: {competitor_brand_name}, "
+        f"segment: {segment}, time_range: {time_range}"
+    )
+
+    # Determine date range
+    if time_range == TimeRange.CUSTOM:
+        if not start_date or not end_date:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="start_date and end_date are required for custom time range"
+            )
+        query_start_date = start_date
+        query_end_date = end_date
+    else:
+        query_start_date, query_end_date = get_date_range_for_time_range(time_range)
+
+    # Query competitor awareness data
+    query = (
+        select(BrandCompetitorsAwarenessWeeklyPerformanceTable)
+        .where(
+            BrandCompetitorsAwarenessWeeklyPerformanceTable.search_target_brand_id == brand_id,
+            BrandCompetitorsAwarenessWeeklyPerformanceTable.competitor_brand_name == competitor_brand_name,
+            BrandCompetitorsAwarenessWeeklyPerformanceTable.segment == segment,
+            BrandCompetitorsAwarenessWeeklyPerformanceTable.created_date >= query_start_date,
+            BrandCompetitorsAwarenessWeeklyPerformanceTable.created_date <= query_end_date,
+        )
+        .order_by(asc(BrandCompetitorsAwarenessWeeklyPerformanceTable.created_date))
+    )
+
+    result = await db.execute(query)
+    records = result.scalars().all()
+
+    data_points = []
+    for record in records:
+        data_points.append(CompetitorAwarenessDataPoint(
+            date=record.created_date.isoformat(),
+            awareness_score=round(record.awareness_score or 0.0, 2),
+            share_of_visibility=round(record.share_of_visibility or 0.0, 4),
+            search_share_index=round(record.search_share_index or 0.0, 4),
+            position_strength=round(record.position_strength or 0.0, 4),
+            search_momentum=round(record.search_momentum or 0.0, 4),
+        ))
+
+    logger.info(f"Returning {len(data_points)} competitor awareness data points")
+
+    return CompetitorAwarenessResponse(
+        brand_id=brand_id,
+        competitor_brand_name=competitor_brand_name,
+        data_points=data_points,
+        start_date=query_start_date.isoformat(),
+        end_date=query_end_date.isoformat(),
+    )
+
+
+@router.get("/competitor-detail-table", response_model=CompetitorDetailTableResponse)
+async def get_competitor_detail_table(
+    brand_id: str = Query(..., description="Target brand ID"),
+    competitor_brand_name: str = Query(..., description="Competitor brand name"),
+    time_range: TimeRange = Query(
+        TimeRange.ONE_MONTH,
+        description="Predefined time range for the query"
+    ),
+    start_date: Optional[date] = Query(
+        None,
+        description="Custom start date (required if time_range is 'custom')"
+    ),
+    end_date: Optional[date] = Query(
+        None,
+        description="Custom end date (required if time_range is 'custom')"
+    ),
+    db: AsyncSession = Depends(get_db),
+    current_user: UsersTable = Depends(get_current_user)
+):
+    """
+    Retrieve competitor detail table with all segment rows, dates, and segment gap.
+
+    Returns all rows for a competitor across all segments (excluding "All-Segment"),
+    with the segment_gap calculated as: brand_awareness - competitor_awareness
+    for matching segment+date pairs.
+    """
+    logger.info(
+        f"Fetching competitor detail table for user: {current_user.user_id}, "
+        f"brand_id: {brand_id}, competitor: {competitor_brand_name}, "
+        f"time_range: {time_range}"
+    )
+
+    # Determine date range
+    if time_range == TimeRange.CUSTOM:
+        if not start_date or not end_date:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="start_date and end_date are required for custom time range"
+            )
+        query_start_date = start_date
+        query_end_date = end_date
+    else:
+        query_start_date, query_end_date = get_date_range_for_time_range(time_range)
+
+    # Query competitor data (all segments except All-Segment)
+    comp_query = (
+        select(BrandCompetitorsAwarenessWeeklyPerformanceTable)
+        .where(
+            BrandCompetitorsAwarenessWeeklyPerformanceTable.search_target_brand_id == brand_id,
+            BrandCompetitorsAwarenessWeeklyPerformanceTable.competitor_brand_name == competitor_brand_name,
+            BrandCompetitorsAwarenessWeeklyPerformanceTable.segment != "All-Segment",
+            BrandCompetitorsAwarenessWeeklyPerformanceTable.created_date >= query_start_date,
+            BrandCompetitorsAwarenessWeeklyPerformanceTable.created_date <= query_end_date,
+        )
+        .order_by(
+            asc(BrandCompetitorsAwarenessWeeklyPerformanceTable.segment),
+            desc(BrandCompetitorsAwarenessWeeklyPerformanceTable.created_date),
+        )
+    )
+
+    comp_result = await db.execute(comp_query)
+    comp_records = comp_result.scalars().all()
+
+    # Query brand's own awareness scores for gap calculation
+    brand_query = (
+        select(BrandAwarenessWeeklyPerformanceTable)
+        .where(
+            BrandAwarenessWeeklyPerformanceTable.brand_id == brand_id,
+            BrandAwarenessWeeklyPerformanceTable.segment != "All-Segment",
+            BrandAwarenessWeeklyPerformanceTable.created_date >= query_start_date,
+            BrandAwarenessWeeklyPerformanceTable.created_date <= query_end_date,
+        )
+    )
+
+    brand_result = await db.execute(brand_query)
+    brand_records = brand_result.scalars().all()
+
+    # Build lookup: (segment, date_str) -> brand_awareness_score
+    brand_awareness_map: dict[tuple[str, str], float] = {}
+    brand_name = "Unknown"
+    for record in brand_records:
+        brand_name = record.brand_name
+        key = (record.segment, record.created_date.isoformat())
+        brand_awareness_map[key] = record.awareness_score or 0.0
+
+    # Build rows with segment gap
+    rows: list[CompetitorDetailRow] = []
+    for record in comp_records:
+        if brand_name == "Unknown":
+            brand_name = record.search_target_brand_name or "Unknown"
+
+        comp_awareness = round(record.awareness_score or 0.0, 2)
+        date_str = record.created_date.isoformat()
+        key = (record.segment, date_str)
+
+        # Calculate segment gap
+        brand_awareness = brand_awareness_map.get(key)
+        if brand_awareness is not None:
+            segment_gap = round(brand_awareness - comp_awareness, 2)
+        else:
+            segment_gap = None
+
+        rows.append(CompetitorDetailRow(
+            segment=record.segment,
+            awareness_score=comp_awareness,
+            share_of_visibility=round(record.share_of_visibility or 0.0, 4),
+            search_share_index=round(record.search_share_index or 0.0, 4),
+            position_strength=round(record.position_strength or 0.0, 4),
+            search_momentum=round(record.search_momentum or 0.0, 4),
+            date=date_str,
+            segment_gap=segment_gap,
+        ))
+
+    logger.info(f"Returning {len(rows)} competitor detail rows for brand_id: {brand_id}")
+
+    return CompetitorDetailTableResponse(
+        brand_id=brand_id,
+        brand_name=brand_name,
+        competitor_brand_name=competitor_brand_name,
+        rows=rows,
+    )
+
+
+@router.get("/top-competitor", response_model=TopCompetitorResponse)
+async def get_top_competitor(
+    brand_id: str = Query(..., description="Target brand ID"),
+    segment: str = Query(..., description="Segment name to filter by"),
+    time_range: TimeRange = Query(
+        TimeRange.ONE_MONTH,
+        description="Predefined time range for the query"
+    ),
+    start_date: Optional[date] = Query(
+        None,
+        description="Custom start date (required if time_range is 'custom')"
+    ),
+    end_date: Optional[date] = Query(
+        None,
+        description="Custom end date (required if time_range is 'custom')"
+    ),
+    db: AsyncSession = Depends(get_db),
+    current_user: UsersTable = Depends(get_current_user)
+):
+    """
+    Find the top competitor by average awareness score for a given brand,
+    segment, and time range.
+
+    Queries BrandCompetitorsAwarenessWeeklyPerformanceTable grouped by
+    competitor_brand_name, calculates average awareness_score, and returns
+    the competitor with the highest average.
+    """
+    logger.info(
+        f"Fetching top competitor for user: {current_user.user_id}, "
+        f"brand_id: {brand_id}, segment: {segment}, time_range: {time_range}"
+    )
+
+    # Determine date range
+    if time_range == TimeRange.CUSTOM:
+        if not start_date or not end_date:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="start_date and end_date are required for custom time range"
+            )
+        query_start_date = start_date
+        query_end_date = end_date
+    else:
+        query_start_date, query_end_date = get_date_range_for_time_range(time_range)
+
+    # Query all competitor records for this brand + segment + date range
+    query = (
+        select(BrandCompetitorsAwarenessWeeklyPerformanceTable)
+        .where(
+            BrandCompetitorsAwarenessWeeklyPerformanceTable.search_target_brand_id == brand_id,
+            BrandCompetitorsAwarenessWeeklyPerformanceTable.segment == segment,
+            BrandCompetitorsAwarenessWeeklyPerformanceTable.created_date >= query_start_date,
+            BrandCompetitorsAwarenessWeeklyPerformanceTable.created_date <= query_end_date,
+        )
+    )
+
+    result = await db.execute(query)
+    records = result.scalars().all()
+
+    if not records:
+        logger.info(f"No competitor awareness data found for brand_id: {brand_id}, segment: {segment}")
+        return TopCompetitorResponse(
+            brand_id=brand_id,
+            segment=segment,
+            top_competitor_name=None,
+            avg_awareness_score=None,
+        )
+
+    # Group by competitor and calculate average awareness
+    competitor_scores: dict[str, list[float]] = {}
+    for record in records:
+        name = record.competitor_brand_name
+        score = record.awareness_score or 0.0
+        competitor_scores.setdefault(name, []).append(score)
+
+    # Find competitor with highest average awareness
+    best_competitor = None
+    best_avg = -1.0
+    for name, scores in competitor_scores.items():
+        avg = sum(scores) / len(scores)
+        if avg > best_avg:
+            best_avg = avg
+            best_competitor = name
+
+    logger.info(
+        f"Top competitor for brand_id: {brand_id}, segment: {segment}: "
+        f"{best_competitor} (avg awareness: {round(best_avg, 2)})"
+    )
+
+    return TopCompetitorResponse(
+        brand_id=brand_id,
+        segment=segment,
+        top_competitor_name=best_competitor,
+        avg_awareness_score=round(best_avg, 2),
+    )
