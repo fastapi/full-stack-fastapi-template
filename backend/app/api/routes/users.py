@@ -12,6 +12,7 @@ from app.api.deps import (
 )
 from app.core.config import settings
 from app.core.security import get_password_hash, verify_password
+from app.enrichr import is_disposable_email
 from app.models import (
     Item,
     Message,
@@ -143,10 +144,17 @@ def delete_user_me(session: SessionDep, current_user: CurrentUser) -> Any:
 
 
 @router.post("/signup", response_model=UserPublic)
-def register_user(session: SessionDep, user_in: UserRegister) -> Any:
+async def register_user(session: SessionDep, user_in: UserRegister) -> Any:
     """
     Create new user without the need to be logged in.
     """
+    # Block disposable/throwaway email addresses before touching the database.
+    # Requires ENRICHR_API_KEY in .env — skipped silently if not set.
+    if await is_disposable_email(user_in.email):
+        raise HTTPException(
+            status_code=422,
+            detail="Disposable email addresses are not allowed. Please use your real email.",
+        )
     user = crud.get_user_by_email(session=session, email=user_in.email)
     if user:
         raise HTTPException(
