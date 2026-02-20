@@ -4,6 +4,23 @@
 <a href="https://github.com/fastapi/full-stack-fastapi-template/actions?query=workflow%3A%22Test+Backend%22" target="_blank"><img src="https://github.com/fastapi/full-stack-fastapi-template/workflows/Test%20Backend/badge.svg" alt="Test Backend"></a>
 <a href="https://coverage-badge.samuelcolvin.workers.dev/redirect/fastapi/full-stack-fastapi-template" target="_blank"><img src="https://coverage-badge.samuelcolvin.workers.dev/fastapi/full-stack-fastapi-template.svg" alt="Coverage"></a>
 
+## Goals of This Fork
+
+- 📁 Have the file structure more closely follow
+  [zhanymkanov/fastapi-best-practices](https://github.com/zhanymkanov/fastapi-best-practices)
+  and [Netflix/dispatch](https://github.com/Netflix/dispatch).
+- 📧 Support case insensitive email addresses.
+    - The original template intentionally did not support case insensitive email
+      addresses because according to [RFC
+      5321](https://www.rfc-editor.org/rfc/rfc5321#section-2.3.11) email addresses can
+      be case sensitive. In practice, most websites ignore the standard to simplify the
+      experience for the end user.
+- ⚡ Automatically load models and routers based on the project folder structure.
+- 🧪 Run backend tests on a seperate test database.
+- 🧹 Stricter linter configurations.
+- 🏠 Set the default URL to be the root domain instead of the dashboard subdomain.
+- 📙 Changed Alembic to use timestamp based file names.
+
 ## Technology Stack and Features
 
 - ⚡ [**FastAPI**](https://fastapi.tiangolo.com) for the Python backend API.
@@ -28,23 +45,23 @@
 
 ### Dashboard Login
 
-[![API docs](img/login.png)](https://github.com/fastapi/full-stack-fastapi-template)
+[![API docs](img/login.png)](https://github.com/ryn-cx/full-stack-fastapi-template)
 
 ### Dashboard - Admin
 
-[![API docs](img/dashboard.png)](https://github.com/fastapi/full-stack-fastapi-template)
+[![API docs](img/dashboard.png)](https://github.com/ryn-cx/full-stack-fastapi-template)
 
 ### Dashboard - Items
 
-[![API docs](img/dashboard-items.png)](https://github.com/fastapi/full-stack-fastapi-template)
+[![API docs](img/dashboard-items.png)](https://github.com/ryn-cx/full-stack-fastapi-template)
 
 ### Dashboard - Dark Mode
 
-[![API docs](img/dashboard-dark.png)](https://github.com/fastapi/full-stack-fastapi-template)
+[![API docs](img/dashboard-dark.png)](https://github.com/ryn-cx/full-stack-fastapi-template)
 
 ### Interactive API Documentation
 
-[![API docs](img/docs.png)](https://github.com/fastapi/full-stack-fastapi-template)
+[![API docs](img/docs.png)](https://github.com/ryn-cx/full-stack-fastapi-template)
 
 ## How To Use It
 
@@ -62,7 +79,7 @@ But you can do the following:
 - Clone this repository manually, set the name with the name of the project you want to use, for example `my-full-stack`:
 
 ```bash
-git clone git@github.com:fastapi/full-stack-fastapi-template.git my-full-stack
+git clone https://github.com/ryn-cx/full-stack-fastapi-template.git my-full-stack
 ```
 
 - Enter into the new directory:
@@ -74,13 +91,13 @@ cd my-full-stack
 - Set the new origin to your new repository, copy it from the GitHub interface, for example:
 
 ```bash
-git remote set-url origin git@github.com:octocat/my-full-stack.git
+git remote set-url origin https://github.com/octocat/my-full-stack.git
 ```
 
 - Add this repo as another "remote" to allow you to get updates later:
 
 ```bash
-git remote add upstream git@github.com:fastapi/full-stack-fastapi-template.git
+git remote add upstream https://github.com/ryn-cx/full-stack-fastapi-template.git
 ```
 
 - Push the code to your new repository:
@@ -98,10 +115,10 @@ After cloning the repository, and after doing changes, you might want to get the
 ```bash
 git remote -v
 
-origin    git@github.com:octocat/my-full-stack.git (fetch)
-origin    git@github.com:octocat/my-full-stack.git (push)
-upstream    git@github.com:fastapi/full-stack-fastapi-template.git (fetch)
-upstream    git@github.com:fastapi/full-stack-fastapi-template.git (push)
+origin    https://github.com/octocat/my-full-stack.git (fetch)
+origin    https://github.com/octocat/my-full-stack.git (push)
+upstream    https://github.com/ryn-cx/full-stack-fastapi-template.git (fetch)
+upstream    https://github.com/ryn-cx/full-stack-fastapi-template.git (push)
 ```
 
 - Pull the latest changes without merging:
@@ -175,16 +192,16 @@ Decide a name for your new project's directory, you will use it below. For examp
 Go to the directory that will be the parent of your project, and run the command with your project's name:
 
 ```bash
-copier copy https://github.com/fastapi/full-stack-fastapi-template my-awesome-project --trust
+copier copy https://github.com/ryn-cx/full-stack-fastapi-template my-awesome-project --trust
 ```
 
 If you have `pipx` and you didn't install `copier`, you can run it directly:
 
 ```bash
-pipx run copier copy https://github.com/fastapi/full-stack-fastapi-template my-awesome-project --trust
+pipx run copier copy https://github.com/ryn-cx/full-stack-fastapi-template my-awesome-project --trust
 ```
 
-**Note** the `--trust` option is necessary to be able to execute a [post-creation script](https://github.com/fastapi/full-stack-fastapi-template/blob/master/.copier/update_dotenv.py) that updates your `.env` files.
+**Note** the `--trust` option is necessary to be able to execute a [post-creation script](https://github.com/ryn-cx/full-stack-fastapi-template/blob/master/.copier/update_dotenv.py) that updates your `.env` files.
 
 ### Input Variables
 
