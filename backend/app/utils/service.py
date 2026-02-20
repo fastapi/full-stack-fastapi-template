@@ -2,7 +2,7 @@ import logging
 from pathlib import Path
 from typing import Any
 
-import emails  # type: ignore
+import emails  # type: ignore[import-untyped]
 from jinja2 import Template
 
 from app.config import settings
@@ -16,8 +16,7 @@ def render_email_template(*, template_name: str, context: dict[str, Any]) -> str
     template_str = (
         Path(__file__).parent.parent / "email-templates" / "build" / template_name
     ).read_text()
-    html_content = Template(template_str).render(context)
-    return html_content
+    return Template(template_str).render(context)
 
 
 def send_email(
@@ -26,7 +25,10 @@ def send_email(
     subject: str = "",
     html_content: str = "",
 ) -> None:
-    assert settings.emails_enabled, "no provided configuration for email variables"
+    if not settings.emails_enabled:
+        msg = "no provided configuration for email variables"
+        raise ValueError(msg)
+
     message = emails.Message(
         subject=subject,
         html=html_content,
@@ -42,7 +44,7 @@ def send_email(
     if settings.SMTP_PASSWORD:
         smtp_options["password"] = settings.SMTP_PASSWORD
     response = message.send(to=email_to, smtp=smtp_options)
-    logger.info(f"send email result: {response}")
+    logger.info("send email result: %s", response)
 
 
 def generate_test_email(email_to: str) -> EmailData:
@@ -73,7 +75,9 @@ def generate_reset_password_email(email_to: str, email: str, token: str) -> Emai
 
 
 def generate_new_account_email(
-    email_to: str, username: str, password: str
+    email_to: str,
+    username: str,
+    password: str,
 ) -> EmailData:
     project_name = settings.PROJECT_NAME
     subject = f"{project_name} - New account for user {username}"

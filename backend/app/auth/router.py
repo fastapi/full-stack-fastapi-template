@@ -1,5 +1,5 @@
 from datetime import timedelta
-from typing import Annotated, Any
+from typing import Annotated
 
 from fastapi import APIRouter, Depends, HTTPException, status
 from fastapi.responses import HTMLResponse
@@ -20,31 +20,35 @@ router = APIRouter(tags=["login"])
 
 @router.post("/login/access-token")
 def login_access_token(
-    session: SessionDep, form_data: Annotated[OAuth2PasswordRequestForm, Depends()]
+    session: SessionDep,
+    form_data: Annotated[OAuth2PasswordRequestForm, Depends()],
 ) -> Token:
     """
     OAuth2 compatible token login, get an access token for future requests
     """
     user = auth_service.authenticate(
-        session=session, email=form_data.username, password=form_data.password
+        session=session,
+        email=form_data.username,
+        password=form_data.password,
     )
     if not user:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
             detail="Incorrect email or password",
         )
-    elif not user.is_active:
+    if not user.is_active:
         raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST, detail="Inactive user"
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Inactive user",
         )
     access_token_expires = timedelta(minutes=settings.ACCESS_TOKEN_EXPIRE_MINUTES)
     return Token(
-        access_token=create_access_token(user.id, expires_delta=access_token_expires)
+        access_token=create_access_token(user.id, expires_delta=access_token_expires),
     )
 
 
 @router.post("/login/test-token", response_model=UserPublic)
-def test_token(current_user: CurrentUser) -> Any:
+def test_token(current_user: CurrentUser) -> CurrentUser:
     """
     Test access token
     """
@@ -63,7 +67,9 @@ def recover_password(email: str, session: SessionDep) -> Message:
     if user:
         password_reset_token = auth_service.generate_password_reset_token(email=email)
         email_data = email_service.generate_reset_password_email(
-            email_to=user.email, email=email, token=password_reset_token
+            email_to=user.email,
+            email=email,
+            token=password_reset_token,
         )
         email_service.send_email(
             email_to=user.email,
@@ -71,7 +77,7 @@ def recover_password(email: str, session: SessionDep) -> Message:
             html_content=email_data.html_content,
         )
     return Message(
-        message="If that email is registered, we sent a password recovery link"
+        message="If that email is registered, we sent a password recovery link",
     )
 
 
@@ -83,17 +89,20 @@ def reset_password(session: SessionDep, body: NewPassword) -> Message:
     email = auth_service.verify_password_reset_token(token=body.token)
     if not email:
         raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST, detail="Invalid token"
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Invalid token",
         )
     user = user_service.get_user_by_email(session=session, email=email)
     if not user:
         # Don't reveal that the user doesn't exist - use same error as invalid token
         raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST, detail="Invalid token"
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Invalid token",
         )
-    elif not user.is_active:
+    if not user.is_active:
         raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST, detail="Inactive user"
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Inactive user",
         )
     user_in_update = UserUpdate(password=body.new_password)
     user_service.update_user(
@@ -109,7 +118,7 @@ def reset_password(session: SessionDep, body: NewPassword) -> Message:
     dependencies=[Depends(get_current_active_superuser)],
     response_class=HTMLResponse,
 )
-def recover_password_html_content(email: str, session: SessionDep) -> Any:
+def recover_password_html_content(email: str, session: SessionDep) -> HTMLResponse:
     """
     HTML Content for Password Recovery
     """
@@ -122,9 +131,12 @@ def recover_password_html_content(email: str, session: SessionDep) -> Any:
         )
     password_reset_token = auth_service.generate_password_reset_token(email=email)
     email_data = email_service.generate_reset_password_email(
-        email_to=user.email, email=email, token=password_reset_token
+        email_to=user.email,
+        email=email,
+        token=password_reset_token,
     )
 
     return HTMLResponse(
-        content=email_data.html_content, headers={"subject:": email_data.subject}
+        content=email_data.html_content,
+        headers={"subject:": email_data.subject},
     )

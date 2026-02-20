@@ -22,9 +22,11 @@ def init_db(session: Session) -> None:
     # Tables should be created with Alembic migrations
     # But if you don't want to use migrations, create
     # the tables un-commenting the next lines
+    # # ERA001 - Error from original template.
     # from sqlmodel import SQLModel # noqa: ERA001
 
     # This works because the models are already imported and registered from app.models
+    # # ERA001 - Error from original template.
     # SQLModel.metadata.create_all(engine) # noqa: ERA001
     user = session.exec(
         select(User).where(User.email == settings.FIRST_SUPERUSER),

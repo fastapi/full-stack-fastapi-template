@@ -1,5 +1,5 @@
 from datetime import datetime, timedelta, timezone
-from typing import Any
+from uuid import UUID
 
 import jwt
 from pwdlib import PasswordHash
@@ -13,19 +13,19 @@ password_hash = PasswordHash(
     (
         Argon2Hasher(),
         BcryptHasher(),
-    )
+    ),
 )
 
 
-def create_access_token(subject: str | Any, expires_delta: timedelta) -> str:
+def create_access_token(subject: str | UUID, expires_delta: timedelta) -> str:
     expire = datetime.now(timezone.utc) + expires_delta
     to_encode = {"exp": expire, "sub": str(subject)}
-    encoded_jwt = jwt.encode(to_encode, settings.SECRET_KEY, algorithm=ALGORITHM)
-    return encoded_jwt
+    return jwt.encode(to_encode, settings.SECRET_KEY, algorithm=ALGORITHM)
 
 
 def verify_password(
-    plain_password: str, hashed_password: str
+    plain_password: str,
+    hashed_password: str,
 ) -> tuple[bool, str | None]:
     return password_hash.verify_and_update(plain_password, hashed_password)
 

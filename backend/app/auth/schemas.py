@@ -4,7 +4,8 @@ from sqlmodel import Field, SQLModel
 # JSON payload containing access token
 class Token(SQLModel):
     access_token: str
-    token_type: str = "bearer"
+    # S105 - This is not a hardcoded password.
+    token_type: str = "bearer"  # noqa: S105
 
 
 # Contents of JWT token

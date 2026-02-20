@@ -23,7 +23,8 @@ def test_init_successful_connection() -> None:
         try:
             init(engine_mock)
             connection_successful = True
-        except Exception:
+        # BLE001 - Error from original template.
+        except Exception:  # noqa: BLE001
             connection_successful = False
 
         assert connection_successful, (

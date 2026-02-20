@@ -127,20 +127,20 @@ export type ItemsCreateItemData = {
 export type ItemsCreateItemResponse = (ItemPublic);
 
 export type ItemsReadItemData = {
-    id: string;
+    itemId: string;
 };
 
 export type ItemsReadItemResponse = (ItemPublic);
 
 export type ItemsUpdateItemData = {
-    id: string;
+    itemId: string;
     requestBody: ItemUpdate;
 };
 
 export type ItemsUpdateItemResponse = (ItemPublic);
 
 export type ItemsDeleteItemData = {
-    id: string;
+    itemId: string;
 };
 
 export type ItemsDeleteItemResponse = (Message);

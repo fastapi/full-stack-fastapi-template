@@ -31,7 +31,7 @@ const DeleteItem = ({ id, onSuccess }: DeleteItemProps) => {
   const { handleSubmit } = useForm()
 
   const deleteItem = async (id: string) => {
-    await ItemsService.deleteItem({ id: id })
+    await ItemsService.deleteItem({ itemId: id })
   }
 
   const mutation = useMutation({

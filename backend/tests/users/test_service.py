@@ -25,7 +25,9 @@ def test_authenticate_user(db: Session) -> None:
     user_in = UserCreate(email=email, password=password)
     user = user_service.create_user(session=db, user_create=user_in)
     authenticated_user = auth_service.authenticate(
-        session=db, email=email, password=password
+        session=db,
+        email=email,
+        password=password,
     )
     assert authenticated_user
     assert user.email == authenticated_user.email
@@ -128,7 +130,9 @@ def test_authenticate_user_with_bcrypt_upgrades_to_argon2(db: Session) -> None:
 
     # Authenticate - this should upgrade the hash to argon2
     authenticated_user = auth_service.authenticate(
-        session=db, email=email, password=password
+        session=db,
+        email=email,
+        password=password,
     )
     assert authenticated_user
     assert authenticated_user.email == email
@@ -139,7 +143,8 @@ def test_authenticate_user_with_bcrypt_upgrades_to_argon2(db: Session) -> None:
     assert authenticated_user.hashed_password.startswith("$argon2")
 
     verified, updated_hash = verify_password(
-        password, authenticated_user.hashed_password
+        password,
+        authenticated_user.hashed_password,
     )
     assert verified
     # Should not need another update since it's already argon2

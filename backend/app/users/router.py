@@ -1,5 +1,4 @@
 import uuid
-from typing import Any
 
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlmodel import col, delete, func, select
@@ -29,12 +28,8 @@ from app.utils import service as email_service
 router = APIRouter(prefix="/users", tags=["users"])
 
 
-@router.get(
-    "/",
-    dependencies=[Depends(get_current_active_superuser)],
-    response_model=UsersPublic,
-)
-def read_users(session: SessionDep, skip: int = 0, limit: int = 100) -> Any:
+@router.get("/", dependencies=[Depends(get_current_active_superuser)])
+def read_users(session: SessionDep, skip: int = 0, limit: int = 100) -> UsersPublic:
     """
     Retrieve users.
     """
@@ -47,13 +42,16 @@ def read_users(session: SessionDep, skip: int = 0, limit: int = 100) -> Any:
     )
     users = session.exec(statement).all()
 
-    return UsersPublic(data=users, count=count)
+    # reportArgumentType - Arguements are automatically converted.
+    return UsersPublic(data=users, count=count)  # pyright: ignore[reportArgumentType]
 
 
 @router.post(
-    "/", dependencies=[Depends(get_current_active_superuser)], response_model=UserPublic
+    "/",
+    dependencies=[Depends(get_current_active_superuser)],
+    response_model=UserPublic,
 )
-def create_user(*, session: SessionDep, user_in: UserCreate) -> Any:
+def create_user(*, session: SessionDep, user_in: UserCreate) -> User:
     """
     Create new user.
     """
@@ -67,7 +65,9 @@ def create_user(*, session: SessionDep, user_in: UserCreate) -> Any:
     user = user_service.create_user(session=session, user_create=user_in)
     if settings.emails_enabled and user_in.email:
         email_data = email_service.generate_new_account_email(
-            email_to=user_in.email, username=user_in.email, password=user_in.password
+            email_to=user_in.email,
+            username=user_in.email,
+            password=user_in.password,
         )
         email_service.send_email(
             email_to=user_in.email,
@@ -79,15 +79,19 @@ def create_user(*, session: SessionDep, user_in: UserCreate) -> Any:
 
 @router.patch("/me", response_model=UserPublic)
 def update_user_me(
-    *, session: SessionDep, user_in: UserUpdateMe, current_user: CurrentUser
-) -> Any:
+    *,
+    session: SessionDep,
+    user_in: UserUpdateMe,
+    current_user: CurrentUser,
+) -> User:
     """
     Update own user.
     """
 
     if user_in.email:
         existing_user = user_service.get_user_by_email(
-            session=session, email=user_in.email
+            session=session,
+            email=user_in.email,
         )
         if existing_user and existing_user.id != current_user.id:
             raise HTTPException(
@@ -102,17 +106,21 @@ def update_user_me(
     return current_user
 
 
-@router.patch("/me/password", response_model=Message)
+@router.patch("/me/password")
 def update_password_me(
-    *, session: SessionDep, body: UpdatePassword, current_user: CurrentUser
-) -> Any:
+    *,
+    session: SessionDep,
+    body: UpdatePassword,
+    current_user: CurrentUser,
+) -> Message:
     """
     Update own password.
     """
     verified, _ = verify_password(body.current_password, current_user.hashed_password)
     if not verified:
         raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST, detail="Incorrect password"
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Incorrect password",
         )
     if body.current_password == body.new_password:
         raise HTTPException(
@@ -127,15 +135,15 @@ def update_password_me(
 
 
 @router.get("/me", response_model=UserPublic)
-def read_user_me(current_user: CurrentUser) -> Any:
+def read_user_me(current_user: CurrentUser) -> CurrentUser:
     """
     Get current user.
     """
     return current_user
 
 
-@router.delete("/me", response_model=Message)
-def delete_user_me(session: SessionDep, current_user: CurrentUser) -> Any:
+@router.delete("/me")
+def delete_user_me(session: SessionDep, current_user: CurrentUser) -> Message:
     """
     Delete own user.
     """
@@ -150,7 +158,7 @@ def delete_user_me(session: SessionDep, current_user: CurrentUser) -> Any:
 
 
 @router.post("/signup", response_model=UserPublic)
-def register_user(session: SessionDep, user_in: UserRegister) -> Any:
+def register_user(session: SessionDep, user_in: UserRegister) -> User:
     """
     Create new user without the need to be logged in.
     """
@@ -161,14 +169,15 @@ def register_user(session: SessionDep, user_in: UserRegister) -> Any:
             detail="The user with this email already exists in the system",
         )
     user_create = UserCreate.model_validate(user_in)
-    user = user_service.create_user(session=session, user_create=user_create)
-    return user
+    return user_service.create_user(session=session, user_create=user_create)
 
 
 @router.get("/{user_id}", response_model=UserPublic)
 def read_user_by_id(
-    user_id: uuid.UUID, session: SessionDep, current_user: CurrentUser
-) -> Any:
+    user_id: uuid.UUID,
+    session: SessionDep,
+    current_user: CurrentUser,
+) -> User | None:
     """
     Get a specific user by id.
     """
@@ -182,7 +191,8 @@ def read_user_by_id(
         )
     if user is None:
         raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND, detail="User not found"
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="User not found",
         )
     return user
 
@@ -197,7 +207,7 @@ def update_user(
     session: SessionDep,
     user_id: uuid.UUID,
     user_in: UserUpdate,
-) -> Any:
+) -> User | None:
     """
     Update a user.
     """
@@ -210,7 +220,8 @@ def update_user(
         )
     if user_in.email:
         existing_user = user_service.get_user_by_email(
-            session=session, email=user_in.email
+            session=session,
+            email=user_in.email,
         )
         if existing_user and existing_user.id != user_id:
             raise HTTPException(
@@ -218,15 +229,18 @@ def update_user(
                 detail="User with this email already exists",
             )
 
-    db_user = user_service.update_user(
-        session=session, db_user=db_user, user_in=user_in
+    return user_service.update_user(
+        session=session,
+        db_user=db_user,
+        user_in=user_in,
     )
-    return db_user
 
 
 @router.delete("/{user_id}", dependencies=[Depends(get_current_active_superuser)])
 def delete_user(
-    session: SessionDep, current_user: CurrentUser, user_id: uuid.UUID
+    session: SessionDep,
+    current_user: CurrentUser,
+    user_id: uuid.UUID,
 ) -> Message:
     """
     Delete a user.
@@ -234,7 +248,8 @@ def delete_user(
     user = session.get(User, user_id)
     if not user:
         raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND, detail="User not found"
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="User not found",
         )
     if user == current_user:
         raise HTTPException(

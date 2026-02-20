@@ -28,6 +28,6 @@ class User(UserBase, table=True):
     hashed_password: str
     created_at: datetime | None = Field(
         default_factory=get_datetime_utc,
-        sa_type=DateTime(timezone=True),  # type: ignore
+        sa_type=DateTime(timezone=True),  # type: ignore[call-overload]
     )
     items: list["Item"] = Relationship(back_populates="owner", cascade_delete=True)

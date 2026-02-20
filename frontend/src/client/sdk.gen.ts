@@ -53,16 +53,16 @@ export class ItemsService {
      * Read Item
      * Get item by ID.
      * @param data The data for the request.
-     * @param data.id
+     * @param data.itemId
      * @returns ItemPublic Successful Response
      * @throws ApiError
      */
     public static readItem(data: ItemsReadItemData): CancelablePromise<ItemsReadItemResponse> {
         return __request(OpenAPI, {
             method: 'GET',
-            url: '/api/v1/items/{id}',
+            url: '/api/v1/items/{item_id}',
             path: {
-                id: data.id
+                item_id: data.itemId
             },
             errors: {
                 422: 'Validation Error'
@@ -74,7 +74,7 @@ export class ItemsService {
      * Update Item
      * Update an item.
      * @param data The data for the request.
-     * @param data.id
+     * @param data.itemId
      * @param data.requestBody
      * @returns ItemPublic Successful Response
      * @throws ApiError
@@ -82,9 +82,9 @@ export class ItemsService {
     public static updateItem(data: ItemsUpdateItemData): CancelablePromise<ItemsUpdateItemResponse> {
         return __request(OpenAPI, {
             method: 'PUT',
-            url: '/api/v1/items/{id}',
+            url: '/api/v1/items/{item_id}',
             path: {
-                id: data.id
+                item_id: data.itemId
             },
             body: data.requestBody,
             mediaType: 'application/json',
@@ -98,16 +98,16 @@ export class ItemsService {
      * Delete Item
      * Delete an item.
      * @param data The data for the request.
-     * @param data.id
+     * @param data.itemId
      * @returns Message Successful Response
      * @throws ApiError
      */
     public static deleteItem(data: ItemsDeleteItemData): CancelablePromise<ItemsDeleteItemResponse> {
         return __request(OpenAPI, {
             method: 'DELETE',
-            url: '/api/v1/items/{id}',
+            url: '/api/v1/items/{item_id}',
             path: {
-                id: data.id
+                item_id: data.itemId
             },
             errors: {
                 422: 'Validation Error'
