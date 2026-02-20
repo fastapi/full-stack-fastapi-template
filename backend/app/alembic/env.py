@@ -19,7 +19,12 @@ fileConfig(config.config_file_name)
 # target_metadata = mymodel.Base.metadata
 # target_metadata = None
 
-from app.models import SQLModel  # noqa
+from app.constants import APP_PATH
+from importlib import import_module
+from sqlmodel import SQLModel
+for model_file in APP_PATH.glob("*/models.py"):
+    import_module(f"app.{model_file.parent.name}.models")
+
 from app.config import settings # noqa
 
 target_metadata = SQLModel.metadata
