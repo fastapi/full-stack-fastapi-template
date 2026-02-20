@@ -6,7 +6,8 @@ from pwdlib import PasswordHash
 from pwdlib.hashers.argon2 import Argon2Hasher
 from pwdlib.hashers.bcrypt import BcryptHasher
 
-from app.core.config import settings
+from app.auth.constants import ALGORITHM
+from app.config import settings
 
 password_hash = PasswordHash(
     (
@@ -14,9 +15,6 @@ password_hash = PasswordHash(
         BcryptHasher(),
     )
 )
-
-
-ALGORITHM = "HS256"
 
 
 def create_access_token(subject: str | Any, expires_delta: timedelta) -> str:

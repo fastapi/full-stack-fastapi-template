@@ -3,7 +3,7 @@ import string
 
 from fastapi.testclient import TestClient
 
-from app.core.config import settings
+from app.config import settings
 
 
 def random_lower_string() -> str:

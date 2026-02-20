@@ -1,8 +1,9 @@
 from sqlmodel import Session, create_engine, select
 
-from app import crud
-from app.core.config import settings
-from app.models import User, UserCreate
+from app.config import settings
+from app.users import service as user_service
+from app.users.models import User
+from app.users.schemas import UserCreate
 
 engine = create_engine(str(settings.SQLALCHEMY_DATABASE_URI))
 
@@ -10,6 +11,7 @@ engine = create_engine(str(settings.SQLALCHEMY_DATABASE_URI))
 # make sure all SQLModel models are imported (app.models) before initializing DB
 # otherwise, SQLModel might fail to initialize relationships properly
 # for more details: https://github.com/fastapi/full-stack-fastapi-template/issues/28
+import app.models  # noqa: E402, F401 # pyright: ignore[reportUnusedImport]
 
 
 def init_db(session: Session) -> None:
@@ -30,4 +32,4 @@ def init_db(session: Session) -> None:
             password=settings.FIRST_SUPERUSER_PASSWORD,
             is_superuser=True,
         )
-        user = crud.create_user(session=session, user_create=user_in)
+        user = user_service.create_user(session=session, user_create=user_in)
