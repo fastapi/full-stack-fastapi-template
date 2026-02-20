@@ -4,66 +4,35 @@ version = "0.1.0"
 description = ""
 requires-python = ">=3.10,<4.0"
 dependencies = [
-    "fastapi[standard]<1.0.0,>=0.114.2",
-    "python-multipart<1.0.0,>=0.0.7",
-    "email-validator<3.0.0.0,>=2.1.0.post1",
-    "tenacity<9.0.0,>=8.2.3",
-    "pydantic>2.0",
-    "emails<1.0,>=0.6",
-    "jinja2<4.0.0,>=3.1.4",
-    "alembic<2.0.0,>=1.12.1",
-    "httpx<1.0.0,>=0.25.1",
-    "psycopg[binary]<4.0.0,>=3.1.13",
-    "sqlmodel<1.0.0,>=0.0.21",
-    "pydantic-settings<3.0.0,>=2.2.1",
-    "sentry-sdk[fastapi]>=2.0.0,<3.0.0",
-    "pyjwt<3.0.0,>=2.8.0",
-    "pwdlib[argon2,bcrypt]>=0.3.0",
+  "alembic<2.0.0,>=1.12.1",
+  "email-validator<3.0.0.0,>=2.1.0.post1",
+  "emails<1.0,>=0.6",
+  "fastapi[standard]<1.0.0,>=0.114.2",
+  "httpx<1.0.0,>=0.25.1",
+  "jinja2<4.0.0,>=3.1.4",
+  "psycopg[binary]<4.0.0,>=3.1.13",
+  "pwdlib[argon2,bcrypt]>=0.3.0",
+  "pydantic>2.0",
+  "pydantic-settings<3.0.0,>=2.2.1",
+  "pyjwt<3.0.0,>=2.8.0",
+  "python-multipart<1.0.0,>=0.0.7",
+  "sentry-sdk[fastapi]>=2.0.0,<3.0.0",
+  "sqlmodel<1.0.0,>=0.0.21",
+  "tenacity<9.0.0,>=8.2.3",
 ]
 
 [dependency-groups]
 dev = [
-    "pytest<8.0.0,>=7.4.3",
-    "mypy<2.0.0,>=1.8.0",
-    "ruff<1.0.0,>=0.2.2",
-    "prek>=0.2.24,<1.0.0",
-    "coverage<8.0.0,>=7.4.3",
+  "coverage<8.0.0,>=7.4.3",
+  "mypy<2.0.0,>=1.8.0",
+  "prek>=0.2.24,<1.0.0",
+  "pytest<8.0.0,>=7.4.3",
+  "ruff<1.0.0,>=0.2.2",
 ]
 
 [build-system]
 requires = ["hatchling"]
 build-backend = "hatchling.build"
-
-[tool.mypy]
-strict = true
-exclude = ["venv", ".venv", "alembic"]
-
-[tool.ruff]
-target-version = "py310"
-exclude = ["alembic"]
-
-[tool.ruff.lint]
-select = [
-    "E",  # pycodestyle errors
-    "W",  # pycodestyle warnings
-    "F",  # pyflakes
-    "I",  # isort
-    "B",  # flake8-bugbear
-    "C4",  # flake8-comprehensions
-    "UP",  # pyupgrade
-    "ARG001", # unused arguments in functions
-    "T201",   # print statements are not allowed
-]
-ignore = [
-    "E501",  # line too long, handled by black
-    "B008",  # do not perform function calls in argument defaults
-    "W191",  # indentation contains tabs
-    "B904",  # Allow raising exceptions without from e, for HTTPException
-]
-
-[tool.ruff.lint.pyupgrade]
-# Preserve types, even if a file imports `from __future__ import annotations`.
-keep-runtime-typing = true
 
 [tool.coverage.run]
 source = ["app"]
@@ -75,3 +44,34 @@ sort = "-Cover"
 
 [tool.coverage.html]
 show_contexts = true
+
+[tool.mypy]
+strict = true
+exclude = ["venv", ".venv", "alembic"]
+
+[tool.ruff]
+target-version = "py310"
+exclude = ["alembic"]
+
+[tool.ruff.lint]
+select = ["ALL"]  # Enable all linters.
+ignore = [
+  # Ignores from the original template
+  "E501",  # line too long, handled by black
+  "B008",  # do not perform function calls in argument defaults
+  "W191",  # indentation contains tabs
+  "B904",  # Allow raising exceptions without from e, for HTTPException
+  # Additional ignores.
+  "D",  # Existing code does not contain docstrings.
+  # Too many false positives.
+  "TC001",
+  "TC002",
+  "TC003",
+]
+
+[tool.ruff.lint.per-file-ignores]
+"tests/**/*.py" = ["S101"]  # Asserts should be allowed in tests.
+
+[tool.ruff.lint.pyupgrade]
+# Preserve types, even if a file imports `from __future__ import annotations`.
+keep-runtime-typing = true
