@@ -1,6 +1,6 @@
 from typing import Any
 
-from sqlmodel import Session, select
+from sqlmodel import Session, func, select
 
 from app.auth.security import get_password_hash
 from app.users.models import User
@@ -32,6 +32,6 @@ def update_user(*, session: Session, db_user: User, user_in: UserUpdate) -> Any:
 
 
 def get_user_by_email(*, session: Session, email: str) -> User | None:
-    statement = select(User).where(User.email == email)
+    statement = select(User).where(func.lower(User.email) == func.lower(email))
     session_user = session.exec(statement).first()
     return session_user

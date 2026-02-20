@@ -81,6 +81,16 @@ def test_get_user(db: Session) -> None:
     assert jsonable_encoder(user) == jsonable_encoder(user_2)
 
 
+def test_get_user_by_email_case_insensitive(db: Session) -> None:
+    email = random_email()
+    password = random_lower_string()
+    user_in = UserCreate(email=email, password=password)
+    user = user_service.create_user(session=db, user_create=user_in)
+    found_user = user_service.get_user_by_email(session=db, email=email.upper())
+    assert found_user
+    assert found_user.id == user.id
+
+
 def test_update_user(db: Session) -> None:
     password = random_lower_string()
     email = random_email()
