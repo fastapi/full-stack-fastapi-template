@@ -18,8 +18,18 @@ OpenAPI.TOKEN = async () => {
   return localStorage.getItem("access_token") || ""
 }
 
+const isAuthUserNotFound = (error: ApiError) => {
+  if (error.status !== 404) return false
+  if (!error.body || typeof error.body !== "object") return false
+  const detail = (error.body as { detail?: unknown }).detail
+  return detail === "User not found"
+}
+
 const handleApiError = (error: Error) => {
-  if (error instanceof ApiError && [401, 403].includes(error.status)) {
+  if (
+    error instanceof ApiError &&
+    ([401, 403].includes(error.status) || isAuthUserNotFound(error))
+  ) {
     localStorage.removeItem("access_token")
     window.location.href = "/login"
   }
