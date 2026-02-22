@@ -77,7 +77,9 @@ def read_templates(
 
         payload = template.model_dump()
         payload["versions_count"] = versions_count
-        payload["latest_version_number"] = latest_version.version if latest_version else None
+        payload["latest_version_number"] = (
+            latest_version.version if latest_version else None
+        )
         data.append(TemplateListPublic.model_validate(payload))
 
     return TemplatesPublic(data=data, count=count)

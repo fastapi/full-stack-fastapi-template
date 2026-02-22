@@ -3,7 +3,133 @@
 import type { CancelablePromise } from './core/CancelablePromise';
 import { OpenAPI } from './core/OpenAPI';
 import { request as __request } from './core/request';
-import type { ItemsReadItemsData, ItemsReadItemsResponse, ItemsCreateItemData, ItemsCreateItemResponse, ItemsReadItemData, ItemsReadItemResponse, ItemsUpdateItemData, ItemsUpdateItemResponse, ItemsDeleteItemData, ItemsDeleteItemResponse, LoginLoginAccessTokenData, LoginLoginAccessTokenResponse, LoginTestTokenResponse, LoginRecoverPasswordData, LoginRecoverPasswordResponse, LoginResetPasswordData, LoginResetPasswordResponse, LoginRecoverPasswordHtmlContentData, LoginRecoverPasswordHtmlContentResponse, PrivateCreateUserData, PrivateCreateUserResponse, UsersReadUsersData, UsersReadUsersResponse, UsersCreateUserData, UsersCreateUserResponse, UsersReadUserMeResponse, UsersDeleteUserMeResponse, UsersUpdateUserMeData, UsersUpdateUserMeResponse, UsersUpdatePasswordMeData, UsersUpdatePasswordMeResponse, UsersRegisterUserData, UsersRegisterUserResponse, UsersReadUserByIdData, UsersReadUserByIdResponse, UsersUpdateUserData, UsersUpdateUserResponse, UsersDeleteUserData, UsersDeleteUserResponse, UtilsTestEmailData, UtilsTestEmailResponse, UtilsHealthCheckResponse } from './types.gen';
+import type { GenerateExtractVariablesData, GenerateExtractVariablesResponse, GenerateRenderTemplateData, GenerateRenderTemplateResponse, GenerationsReadGenerationsData, GenerationsReadGenerationsResponse, GenerationsCreateGenerationData, GenerationsCreateGenerationResponse, GenerationsReadGenerationData, GenerationsReadGenerationResponse, GenerationsUpdateGenerationData, GenerationsUpdateGenerationResponse, ItemsReadItemsData, ItemsReadItemsResponse, ItemsCreateItemData, ItemsCreateItemResponse, ItemsReadItemData, ItemsReadItemResponse, ItemsUpdateItemData, ItemsUpdateItemResponse, ItemsDeleteItemData, ItemsDeleteItemResponse, LoginLoginAccessTokenData, LoginLoginAccessTokenResponse, LoginTestTokenResponse, LoginRecoverPasswordData, LoginRecoverPasswordResponse, LoginResetPasswordData, LoginResetPasswordResponse, LoginRecoverPasswordHtmlContentData, LoginRecoverPasswordHtmlContentResponse, PrivateCreateUserData, PrivateCreateUserResponse, TemplatesReadTemplatesData, TemplatesReadTemplatesResponse, TemplatesCreateTemplateData, TemplatesCreateTemplateResponse, TemplatesReadTemplateData, TemplatesReadTemplateResponse, TemplatesUpdateTemplateData, TemplatesUpdateTemplateResponse, TemplatesReadTemplateVersionsData, TemplatesReadTemplateVersionsResponse, TemplatesCreateTemplateVersionData, TemplatesCreateTemplateVersionResponse, UsersReadUsersData, UsersReadUsersResponse, UsersCreateUserData, UsersCreateUserResponse, UsersReadUserMeResponse, UsersDeleteUserMeResponse, UsersUpdateUserMeData, UsersUpdateUserMeResponse, UsersUpdatePasswordMeData, UsersUpdatePasswordMeResponse, UsersRegisterUserData, UsersRegisterUserResponse, UsersReadUserByIdData, UsersReadUserByIdResponse, UsersUpdateUserData, UsersUpdateUserResponse, UsersDeleteUserData, UsersDeleteUserResponse, UtilsTestEmailData, UtilsTestEmailResponse, UtilsHealthCheckResponse } from './types.gen';
+
+export class GenerateService {
+    /**
+     * Extract Variables
+     * @param data The data for the request.
+     * @param data.requestBody
+     * @returns ExtractVariablesResponse Successful Response
+     * @throws ApiError
+     */
+    public static extractVariables(data: GenerateExtractVariablesData): CancelablePromise<GenerateExtractVariablesResponse> {
+        return __request(OpenAPI, {
+            method: 'POST',
+            url: '/api/v1/generate/extract',
+            body: data.requestBody,
+            mediaType: 'application/json',
+            errors: {
+                422: 'Validation Error'
+            }
+        });
+    }
+    
+    /**
+     * Render Template
+     * @param data The data for the request.
+     * @param data.requestBody
+     * @returns RenderTemplateResponse Successful Response
+     * @throws ApiError
+     */
+    public static renderTemplate(data: GenerateRenderTemplateData): CancelablePromise<GenerateRenderTemplateResponse> {
+        return __request(OpenAPI, {
+            method: 'POST',
+            url: '/api/v1/generate/render',
+            body: data.requestBody,
+            mediaType: 'application/json',
+            errors: {
+                422: 'Validation Error'
+            }
+        });
+    }
+}
+
+export class GenerationsService {
+    /**
+     * Read Generations
+     * @param data The data for the request.
+     * @param data.skip
+     * @param data.limit
+     * @returns GenerationsPublic Successful Response
+     * @throws ApiError
+     */
+    public static readGenerations(data: GenerationsReadGenerationsData = {}): CancelablePromise<GenerationsReadGenerationsResponse> {
+        return __request(OpenAPI, {
+            method: 'GET',
+            url: '/api/v1/generations/',
+            query: {
+                skip: data.skip,
+                limit: data.limit
+            },
+            errors: {
+                422: 'Validation Error'
+            }
+        });
+    }
+    
+    /**
+     * Create Generation
+     * @param data The data for the request.
+     * @param data.requestBody
+     * @returns GenerationPublic Successful Response
+     * @throws ApiError
+     */
+    public static createGeneration(data: GenerationsCreateGenerationData): CancelablePromise<GenerationsCreateGenerationResponse> {
+        return __request(OpenAPI, {
+            method: 'POST',
+            url: '/api/v1/generations/',
+            body: data.requestBody,
+            mediaType: 'application/json',
+            errors: {
+                422: 'Validation Error'
+            }
+        });
+    }
+    
+    /**
+     * Read Generation
+     * @param data The data for the request.
+     * @param data.generationId
+     * @returns GenerationPublic Successful Response
+     * @throws ApiError
+     */
+    public static readGeneration(data: GenerationsReadGenerationData): CancelablePromise<GenerationsReadGenerationResponse> {
+        return __request(OpenAPI, {
+            method: 'GET',
+            url: '/api/v1/generations/{generation_id}',
+            path: {
+                generation_id: data.generationId
+            },
+            errors: {
+                422: 'Validation Error'
+            }
+        });
+    }
+    
+    /**
+     * Update Generation
+     * @param data The data for the request.
+     * @param data.generationId
+     * @param data.requestBody
+     * @returns GenerationPublic Successful Response
+     * @throws ApiError
+     */
+    public static updateGeneration(data: GenerationsUpdateGenerationData): CancelablePromise<GenerationsUpdateGenerationResponse> {
+        return __request(OpenAPI, {
+            method: 'PATCH',
+            url: '/api/v1/generations/{generation_id}',
+            path: {
+                generation_id: data.generationId
+            },
+            body: data.requestBody,
+            mediaType: 'application/json',
+            errors: {
+                422: 'Validation Error'
+            }
+        });
+    }
+}
 
 export class ItemsService {
     /**
@@ -226,6 +352,141 @@ export class PrivateService {
         return __request(OpenAPI, {
             method: 'POST',
             url: '/api/v1/private/users/',
+            body: data.requestBody,
+            mediaType: 'application/json',
+            errors: {
+                422: 'Validation Error'
+            }
+        });
+    }
+}
+
+export class TemplatesService {
+    /**
+     * Read Templates
+     * @param data The data for the request.
+     * @param data.skip
+     * @param data.limit
+     * @param data.category
+     * @param data.language
+     * @param data.search
+     * @returns TemplatesPublic Successful Response
+     * @throws ApiError
+     */
+    public static readTemplates(data: TemplatesReadTemplatesData = {}): CancelablePromise<TemplatesReadTemplatesResponse> {
+        return __request(OpenAPI, {
+            method: 'GET',
+            url: '/api/v1/templates/',
+            query: {
+                skip: data.skip,
+                limit: data.limit,
+                category: data.category,
+                language: data.language,
+                search: data.search
+            },
+            errors: {
+                422: 'Validation Error'
+            }
+        });
+    }
+    
+    /**
+     * Create Template
+     * @param data The data for the request.
+     * @param data.requestBody
+     * @returns TemplatePublic Successful Response
+     * @throws ApiError
+     */
+    public static createTemplate(data: TemplatesCreateTemplateData): CancelablePromise<TemplatesCreateTemplateResponse> {
+        return __request(OpenAPI, {
+            method: 'POST',
+            url: '/api/v1/templates/',
+            body: data.requestBody,
+            mediaType: 'application/json',
+            errors: {
+                422: 'Validation Error'
+            }
+        });
+    }
+    
+    /**
+     * Read Template
+     * @param data The data for the request.
+     * @param data.templateId
+     * @returns TemplatePublic Successful Response
+     * @throws ApiError
+     */
+    public static readTemplate(data: TemplatesReadTemplateData): CancelablePromise<TemplatesReadTemplateResponse> {
+        return __request(OpenAPI, {
+            method: 'GET',
+            url: '/api/v1/templates/{template_id}',
+            path: {
+                template_id: data.templateId
+            },
+            errors: {
+                422: 'Validation Error'
+            }
+        });
+    }
+    
+    /**
+     * Update Template
+     * @param data The data for the request.
+     * @param data.templateId
+     * @param data.requestBody
+     * @returns TemplatePublic Successful Response
+     * @throws ApiError
+     */
+    public static updateTemplate(data: TemplatesUpdateTemplateData): CancelablePromise<TemplatesUpdateTemplateResponse> {
+        return __request(OpenAPI, {
+            method: 'PATCH',
+            url: '/api/v1/templates/{template_id}',
+            path: {
+                template_id: data.templateId
+            },
+            body: data.requestBody,
+            mediaType: 'application/json',
+            errors: {
+                422: 'Validation Error'
+            }
+        });
+    }
+    
+    /**
+     * Read Template Versions
+     * @param data The data for the request.
+     * @param data.templateId
+     * @returns TemplateVersionsPublic Successful Response
+     * @throws ApiError
+     */
+    public static readTemplateVersions(data: TemplatesReadTemplateVersionsData): CancelablePromise<TemplatesReadTemplateVersionsResponse> {
+        return __request(OpenAPI, {
+            method: 'GET',
+            url: '/api/v1/templates/{template_id}/versions',
+            path: {
+                template_id: data.templateId
+            },
+            errors: {
+                422: 'Validation Error'
+            }
+        });
+    }
+    
+    /**
+     * Create Template Version
+     * @param data The data for the request.
+     * @param data.templateId
+     * @param data.requestBody
+     * @returns TemplateVersionPublic Successful Response
+     * @throws ApiError
+     */
+    public static createTemplateVersion(data: TemplatesCreateTemplateVersionData): CancelablePromise<TemplatesCreateTemplateVersionResponse> {
+        return __request(OpenAPI, {
+            method: 'POST',
+            url: '/api/v1/templates/{template_id}/versions',
+            path: {
+                template_id: data.templateId
+            },
             body: data.requestBody,
             mediaType: 'application/json',
             errors: {

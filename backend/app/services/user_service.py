@@ -19,7 +19,9 @@ from app.services.exceptions import (
 )
 
 
-def list_users(*, session: Session, skip: int = 0, limit: int = 100) -> tuple[list[User], int]:
+def list_users(
+    *, session: Session, skip: int = 0, limit: int = 100
+) -> tuple[list[User], int]:
     return user_repository.list_users(session=session, skip=skip, limit=limit)
 
 
@@ -64,7 +66,9 @@ def update_user(*, session: Session, db_user: User, user_in: UserUpdate) -> User
     return user_repository.save(session=session, user=db_user)
 
 
-def update_user_me(*, session: Session, current_user: User, user_in: UserUpdateMe) -> User:
+def update_user_me(
+    *, session: Session, current_user: User, user_in: UserUpdateMe
+) -> User:
     if user_in.email:
         existing_user = get_user_by_email(session=session, email=user_in.email)
         if existing_user and existing_user.id != current_user.id:
@@ -94,7 +98,9 @@ def delete_user_me(*, session: Session, current_user: User) -> None:
     user_repository.delete(session=session, user=current_user)
 
 
-def get_user_for_read(*, session: Session, user_id: uuid.UUID, current_user: User) -> User:
+def get_user_for_read(
+    *, session: Session, user_id: uuid.UUID, current_user: User
+) -> User:
     user = get_user_by_id(session=session, user_id=user_id)
     if user == current_user:
         return user

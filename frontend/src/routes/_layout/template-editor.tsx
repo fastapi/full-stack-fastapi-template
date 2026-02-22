@@ -143,7 +143,8 @@ function TemplateEditorPage() {
     setLanguage(template.language)
     setTagsInput(template.tags.join(", "))
 
-    const latestContent = template.latest_version?.content || DEFAULT_TEMPLATE_CONTENT
+    const latestContent =
+      template.latest_version?.content || DEFAULT_TEMPLATE_CONTENT
     const latestSchema = template.latest_version?.variables_schema || {}
 
     setContent(latestContent)

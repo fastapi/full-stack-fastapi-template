@@ -306,7 +306,9 @@ class Generation(GenerationBase, table=True):
 
     owner: User | None = Relationship(back_populates="generations")
     template: Template | None = Relationship(back_populates="generations")
-    template_version: TemplateVersion | None = Relationship(back_populates="generations")
+    template_version: TemplateVersion | None = Relationship(
+        back_populates="generations"
+    )
 
 
 class GenerationPublic(GenerationBase):

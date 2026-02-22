@@ -45,7 +45,9 @@ def list_templates(
         statement = statement.where(Template.name.ilike(keyword))
         count_statement = count_statement.where(Template.name.ilike(keyword))
 
-    statement = statement.order_by(col(Template.updated_at).desc()).offset(skip).limit(limit)
+    statement = (
+        statement.order_by(col(Template.updated_at).desc()).offset(skip).limit(limit)
+    )
 
     count = session.exec(count_statement).one()
     templates = list(session.exec(statement).all())
@@ -105,9 +107,8 @@ def count_template_versions(*, session: Session, template_id: uuid.UUID) -> int:
 
 
 def get_next_version_number(*, session: Session, template_id: uuid.UUID) -> int:
-    statement = (
-        select(func.max(TemplateVersion.version))
-        .where(TemplateVersion.template_id == template_id)
+    statement = select(func.max(TemplateVersion.version)).where(
+        TemplateVersion.template_id == template_id
     )
     current_max = session.exec(statement).one()
     if current_max is None:
@@ -115,7 +116,9 @@ def get_next_version_number(*, session: Session, template_id: uuid.UUID) -> int:
     return int(current_max) + 1
 
 
-def create_template_version(*, session: Session, template_version: TemplateVersion) -> TemplateVersion:
+def create_template_version(
+    *, session: Session, template_version: TemplateVersion
+) -> TemplateVersion:
     session.add(template_version)
     session.commit()
     session.refresh(template_version)

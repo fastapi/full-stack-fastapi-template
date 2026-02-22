@@ -9,6 +9,66 @@ export type Body_login_login_access_token = {
     client_secret?: (string | null);
 };
 
+export type ExtractVariablesRequest = {
+    template_version_id: string;
+    input_text: string;
+    profile_context?: {
+        [key: string]: unknown;
+    };
+};
+
+export type ExtractVariablesResponse = {
+    values: {
+        [key: string]: unknown;
+    };
+    missing_required: Array<(string)>;
+    confidence: {
+        [key: string]: (number);
+    };
+    notes?: {
+        [key: string]: (string);
+    };
+};
+
+export type GenerationCreate = {
+    title: string;
+    input_text: string;
+    extracted_values?: {
+        [key: string]: unknown;
+    };
+    output_text: string;
+    template_id: string;
+    template_version_id: string;
+};
+
+export type GenerationPublic = {
+    title: string;
+    input_text: string;
+    extracted_values?: {
+        [key: string]: unknown;
+    };
+    output_text: string;
+    id: string;
+    user_id: string;
+    template_id: string;
+    template_version_id: string;
+    created_at?: (string | null);
+    updated_at?: (string | null);
+};
+
+export type GenerationsPublic = {
+    data: Array<GenerationPublic>;
+    count: number;
+};
+
+export type GenerationUpdate = {
+    title?: (string | null);
+    extracted_values?: ({
+    [key: string]: unknown;
+} | null);
+    output_text?: (string | null);
+};
+
 export type HTTPValidationError = {
     detail?: Array<ValidationError>;
 };
@@ -50,6 +110,109 @@ export type PrivateUserCreate = {
     password: string;
     full_name: string;
     is_verified?: boolean;
+};
+
+export type RenderStyle = {
+    tone?: string;
+    length?: string;
+};
+
+export type RenderTemplateRequest = {
+    template_version_id: string;
+    values?: {
+        [key: string]: unknown;
+    };
+    style?: RenderStyle;
+};
+
+export type RenderTemplateResponse = {
+    output_text: string;
+};
+
+export type TemplateCategory = 'cover_letter' | 'email' | 'proposal' | 'other';
+
+export type TemplateCreate = {
+    name: string;
+    category?: TemplateCategory;
+    language?: TemplateLanguage;
+    tags?: Array<(string)>;
+};
+
+export type TemplateLanguage = 'fr' | 'en' | 'zh' | 'other';
+
+export type TemplateListPublic = {
+    name: string;
+    category?: TemplateCategory;
+    language?: TemplateLanguage;
+    tags?: Array<(string)>;
+    id: string;
+    user_id: string;
+    is_archived: boolean;
+    created_at?: (string | null);
+    updated_at?: (string | null);
+    versions_count?: number;
+    latest_version_number?: (number | null);
+};
+
+export type TemplatePublic = {
+    name: string;
+    category?: TemplateCategory;
+    language?: TemplateLanguage;
+    tags?: Array<(string)>;
+    id: string;
+    user_id: string;
+    is_archived: boolean;
+    created_at?: (string | null);
+    updated_at?: (string | null);
+    versions_count?: number;
+    latest_version?: (TemplateVersionPublic | null);
+};
+
+export type TemplatesPublic = {
+    data: Array<TemplateListPublic>;
+    count: number;
+};
+
+export type TemplateUpdate = {
+    name?: (string | null);
+    category?: (TemplateCategory | null);
+    language?: (TemplateLanguage | null);
+    tags?: (Array<(string)> | null);
+    is_archived?: (boolean | null);
+};
+
+export type TemplateVariableConfig = {
+    required?: boolean;
+    type?: TemplateVariableType;
+    description?: string;
+    example?: (unknown | null);
+    default?: (unknown | null);
+};
+
+export type TemplateVariableType = 'text' | 'list';
+
+export type TemplateVersionCreate = {
+    content: string;
+    variables_schema?: {
+        [key: string]: TemplateVariableConfig;
+    };
+};
+
+export type TemplateVersionPublic = {
+    content: string;
+    variables_schema?: {
+        [key: string]: TemplateVariableConfig;
+    };
+    id: string;
+    template_id: string;
+    version: number;
+    created_at?: (string | null);
+    created_by: string;
+};
+
+export type TemplateVersionsPublic = {
+    data: Array<TemplateVersionPublic>;
+    count: number;
 };
 
 export type Token = {
@@ -112,6 +275,44 @@ export type ValidationError = {
         [key: string]: unknown;
     };
 };
+
+export type GenerateExtractVariablesData = {
+    requestBody: ExtractVariablesRequest;
+};
+
+export type GenerateExtractVariablesResponse = (ExtractVariablesResponse);
+
+export type GenerateRenderTemplateData = {
+    requestBody: RenderTemplateRequest;
+};
+
+export type GenerateRenderTemplateResponse = (RenderTemplateResponse);
+
+export type GenerationsReadGenerationsData = {
+    limit?: number;
+    skip?: number;
+};
+
+export type GenerationsReadGenerationsResponse = (GenerationsPublic);
+
+export type GenerationsCreateGenerationData = {
+    requestBody: GenerationCreate;
+};
+
+export type GenerationsCreateGenerationResponse = (GenerationPublic);
+
+export type GenerationsReadGenerationData = {
+    generationId: string;
+};
+
+export type GenerationsReadGenerationResponse = (GenerationPublic);
+
+export type GenerationsUpdateGenerationData = {
+    generationId: string;
+    requestBody: GenerationUpdate;
+};
+
+export type GenerationsUpdateGenerationResponse = (GenerationPublic);
 
 export type ItemsReadItemsData = {
     limit?: number;
@@ -176,6 +377,48 @@ export type PrivateCreateUserData = {
 };
 
 export type PrivateCreateUserResponse = (UserPublic);
+
+export type TemplatesReadTemplatesData = {
+    category?: (TemplateCategory | null);
+    language?: (TemplateLanguage | null);
+    limit?: number;
+    search?: (string | null);
+    skip?: number;
+};
+
+export type TemplatesReadTemplatesResponse = (TemplatesPublic);
+
+export type TemplatesCreateTemplateData = {
+    requestBody: TemplateCreate;
+};
+
+export type TemplatesCreateTemplateResponse = (TemplatePublic);
+
+export type TemplatesReadTemplateData = {
+    templateId: string;
+};
+
+export type TemplatesReadTemplateResponse = (TemplatePublic);
+
+export type TemplatesUpdateTemplateData = {
+    requestBody: TemplateUpdate;
+    templateId: string;
+};
+
+export type TemplatesUpdateTemplateResponse = (TemplatePublic);
+
+export type TemplatesReadTemplateVersionsData = {
+    templateId: string;
+};
+
+export type TemplatesReadTemplateVersionsResponse = (TemplateVersionsPublic);
+
+export type TemplatesCreateTemplateVersionData = {
+    requestBody: TemplateVersionCreate;
+    templateId: string;
+};
+
+export type TemplatesCreateTemplateVersionResponse = (TemplateVersionPublic);
 
 export type UsersReadUsersData = {
     limit?: number;
