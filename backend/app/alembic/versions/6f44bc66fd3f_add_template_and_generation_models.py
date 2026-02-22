@@ -18,19 +18,21 @@ branch_labels = None
 depends_on = None
 
 
-template_category_enum = sa.Enum(
+template_category_enum = postgresql.ENUM(
     "cover_letter",
     "email",
     "proposal",
     "other",
     name="templatecategory",
+    create_type=False,
 )
-template_language_enum = sa.Enum(
+template_language_enum = postgresql.ENUM(
     "fr",
     "en",
     "zh",
     "other",
     name="templatelanguage",
+    create_type=False,
 )
 
 
