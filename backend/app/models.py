@@ -1,8 +1,10 @@
 import uuid
 from datetime import datetime, timezone
+from enum import Enum
+from typing import Any
 
 from pydantic import EmailStr
-from sqlalchemy import DateTime
+from sqlalchemy import JSON, Column, DateTime, UniqueConstraint
 from sqlmodel import Field, Relationship, SQLModel
 
 
@@ -54,6 +56,15 @@ class User(UserBase, table=True):
         sa_type=DateTime(timezone=True),  # type: ignore
     )
     items: list["Item"] = Relationship(back_populates="owner", cascade_delete=True)
+    templates: list["Template"] = Relationship(
+        back_populates="owner", cascade_delete=True
+    )
+    template_versions: list["TemplateVersion"] = Relationship(
+        back_populates="creator", cascade_delete=True
+    )
+    generations: list["Generation"] = Relationship(
+        back_populates="owner", cascade_delete=True
+    )
 
 
 # Properties to return via API, id is always required
@@ -106,6 +117,238 @@ class ItemPublic(ItemBase):
 class ItemsPublic(SQLModel):
     data: list[ItemPublic]
     count: int
+
+
+class TemplateCategory(str, Enum):
+    cover_letter = "cover_letter"
+    email = "email"
+    proposal = "proposal"
+    other = "other"
+
+
+class TemplateLanguage(str, Enum):
+    fr = "fr"
+    en = "en"
+    zh = "zh"
+    other = "other"
+
+
+class TemplateVariableType(str, Enum):
+    text = "text"
+    list = "list"
+
+
+class TemplateVariableConfig(SQLModel):
+    required: bool = False
+    type: TemplateVariableType = TemplateVariableType.text
+    description: str = ""
+    example: Any | None = None
+    default: Any | None = None
+
+
+class TemplateBase(SQLModel):
+    name: str = Field(min_length=1, max_length=255)
+    category: TemplateCategory = TemplateCategory.other
+    language: TemplateLanguage = TemplateLanguage.en
+    tags: list[str] = Field(default_factory=list)
+
+
+class TemplateCreate(TemplateBase):
+    pass
+
+
+class TemplateUpdate(SQLModel):
+    name: str | None = Field(default=None, min_length=1, max_length=255)
+    category: TemplateCategory | None = None
+    language: TemplateLanguage | None = None
+    tags: list[str] | None = None
+    is_archived: bool | None = None
+
+
+class TemplateVersionBase(SQLModel):
+    content: str = Field(min_length=1)
+    variables_schema: dict[str, TemplateVariableConfig] = Field(default_factory=dict)
+
+
+class TemplateVersionCreate(TemplateVersionBase):
+    pass
+
+
+class Template(TemplateBase, table=True):
+    id: uuid.UUID = Field(default_factory=uuid.uuid4, primary_key=True)
+    user_id: uuid.UUID = Field(
+        foreign_key="user.id", nullable=False, ondelete="CASCADE"
+    )
+    tags: list[str] = Field(
+        default_factory=list, sa_column=Column(JSON, nullable=False)
+    )
+    is_archived: bool = False
+    created_at: datetime | None = Field(
+        default_factory=get_datetime_utc,
+        sa_type=DateTime(timezone=True),  # type: ignore
+    )
+    updated_at: datetime | None = Field(
+        default_factory=get_datetime_utc,
+        sa_type=DateTime(timezone=True),  # type: ignore
+    )
+
+    owner: User | None = Relationship(back_populates="templates")
+    versions: list["TemplateVersion"] = Relationship(
+        back_populates="template", cascade_delete=True
+    )
+    generations: list["Generation"] = Relationship(
+        back_populates="template", cascade_delete=True
+    )
+
+
+class TemplateVersion(TemplateVersionBase, table=True):
+    __table_args__ = (UniqueConstraint("template_id", "version"),)
+
+    id: uuid.UUID = Field(default_factory=uuid.uuid4, primary_key=True)
+    template_id: uuid.UUID = Field(
+        foreign_key="template.id", nullable=False, ondelete="CASCADE"
+    )
+    version: int = Field(default=1, ge=1)
+    variables_schema: dict[str, Any] = Field(
+        default_factory=dict, sa_column=Column(JSON, nullable=False)
+    )
+    created_at: datetime | None = Field(
+        default_factory=get_datetime_utc,
+        sa_type=DateTime(timezone=True),  # type: ignore
+    )
+    created_by: uuid.UUID = Field(
+        foreign_key="user.id", nullable=False, ondelete="CASCADE"
+    )
+
+    template: Template | None = Relationship(back_populates="versions")
+    creator: User | None = Relationship(back_populates="template_versions")
+    generations: list["Generation"] = Relationship(back_populates="template_version")
+
+
+class TemplateVersionPublic(TemplateVersionBase):
+    id: uuid.UUID
+    template_id: uuid.UUID
+    version: int
+    created_at: datetime | None = None
+    created_by: uuid.UUID
+
+
+class TemplatePublic(TemplateBase):
+    id: uuid.UUID
+    user_id: uuid.UUID
+    is_archived: bool
+    created_at: datetime | None = None
+    updated_at: datetime | None = None
+    versions_count: int = 0
+    latest_version: TemplateVersionPublic | None = None
+
+
+class TemplateListPublic(TemplateBase):
+    id: uuid.UUID
+    user_id: uuid.UUID
+    is_archived: bool
+    created_at: datetime | None = None
+    updated_at: datetime | None = None
+    versions_count: int = 0
+    latest_version_number: int | None = None
+
+
+class TemplatesPublic(SQLModel):
+    data: list[TemplateListPublic]
+    count: int
+
+
+class TemplateVersionsPublic(SQLModel):
+    data: list[TemplateVersionPublic]
+    count: int
+
+
+class GenerationBase(SQLModel):
+    title: str = Field(min_length=1, max_length=255)
+    input_text: str = Field(min_length=1)
+    extracted_values: dict[str, Any] = Field(default_factory=dict)
+    output_text: str = Field(min_length=1)
+
+
+class GenerationCreate(GenerationBase):
+    template_id: uuid.UUID
+    template_version_id: uuid.UUID
+
+
+class GenerationUpdate(SQLModel):
+    title: str | None = Field(default=None, min_length=1, max_length=255)
+    extracted_values: dict[str, Any] | None = None
+    output_text: str | None = Field(default=None, min_length=1)
+
+
+class Generation(GenerationBase, table=True):
+    id: uuid.UUID = Field(default_factory=uuid.uuid4, primary_key=True)
+    user_id: uuid.UUID = Field(
+        foreign_key="user.id", nullable=False, ondelete="CASCADE"
+    )
+    template_id: uuid.UUID = Field(
+        foreign_key="template.id", nullable=False, ondelete="CASCADE"
+    )
+    template_version_id: uuid.UUID = Field(
+        foreign_key="templateversion.id", nullable=False, ondelete="CASCADE"
+    )
+    extracted_values: dict[str, Any] = Field(
+        default_factory=dict, sa_column=Column(JSON, nullable=False)
+    )
+    created_at: datetime | None = Field(
+        default_factory=get_datetime_utc,
+        sa_type=DateTime(timezone=True),  # type: ignore
+    )
+    updated_at: datetime | None = Field(
+        default_factory=get_datetime_utc,
+        sa_type=DateTime(timezone=True),  # type: ignore
+    )
+
+    owner: User | None = Relationship(back_populates="generations")
+    template: Template | None = Relationship(back_populates="generations")
+    template_version: TemplateVersion | None = Relationship(back_populates="generations")
+
+
+class GenerationPublic(GenerationBase):
+    id: uuid.UUID
+    user_id: uuid.UUID
+    template_id: uuid.UUID
+    template_version_id: uuid.UUID
+    created_at: datetime | None = None
+    updated_at: datetime | None = None
+
+
+class GenerationsPublic(SQLModel):
+    data: list[GenerationPublic]
+    count: int
+
+
+class ExtractVariablesRequest(SQLModel):
+    template_version_id: uuid.UUID
+    input_text: str = Field(min_length=1)
+    profile_context: dict[str, Any] = Field(default_factory=dict)
+
+
+class ExtractVariablesResponse(SQLModel):
+    values: dict[str, Any]
+    missing_required: list[str]
+    confidence: dict[str, float]
+    notes: dict[str, str] = Field(default_factory=dict)
+
+
+class RenderStyle(SQLModel):
+    tone: str = "professional"
+    length: str = "medium"
+
+
+class RenderTemplateRequest(SQLModel):
+    template_version_id: uuid.UUID
+    values: dict[str, Any] = Field(default_factory=dict)
+    style: RenderStyle = Field(default_factory=RenderStyle)
+
+
+class RenderTemplateResponse(SQLModel):
+    output_text: str
 
 
 # Generic message
