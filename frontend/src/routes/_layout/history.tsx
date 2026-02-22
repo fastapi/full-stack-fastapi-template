@@ -1,4 +1,4 @@
-﻿import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
 import { createFileRoute } from "@tanstack/react-router"
 import { useEffect, useState } from "react"
 
@@ -24,7 +24,7 @@ export const Route = createFileRoute("/_layout/history")({
   head: () => ({
     meta: [
       {
-        title: "Generations History - FastAPI Template",
+        title: "Generations History - TemplateForge AI",
       },
     ],
   }),

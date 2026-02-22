@@ -1,4 +1,4 @@
-﻿import { useQuery } from "@tanstack/react-query"
+import { useQuery } from "@tanstack/react-query"
 import { createFileRoute, Link } from "@tanstack/react-router"
 import { useMemo, useState } from "react"
 
@@ -41,7 +41,7 @@ export const Route = createFileRoute("/_layout/templates")({
   head: () => ({
     meta: [
       {
-        title: "Templates - FastAPI Template",
+        title: "Templates - TemplateForge AI",
       },
     ],
   }),

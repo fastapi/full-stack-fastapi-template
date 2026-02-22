@@ -358,6 +358,10 @@ class Message(SQLModel):
     message: str
 
 
+class GoogleLoginRequest(SQLModel):
+    id_token: str = Field(min_length=1)
+
+
 # JSON payload containing access token
 class Token(SQLModel):
     access_token: str

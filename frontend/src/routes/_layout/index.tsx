@@ -7,7 +7,7 @@ export const Route = createFileRoute("/_layout/")({
   head: () => ({
     meta: [
       {
-        title: "Dashboard - FastAPI Template",
+        title: "Dashboard - TemplateForge AI",
       },
     ],
   }),
@@ -20,7 +20,7 @@ function Dashboard() {
     <div>
       <div>
         <h1 className="text-2xl truncate max-w-sm">
-          Hi, {currentUser?.full_name || currentUser?.email} 👋
+          Hi, {currentUser?.full_name || currentUser?.email}
         </h1>
         <p className="text-muted-foreground">
           Welcome back, nice to see you again!!!

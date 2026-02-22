@@ -4,11 +4,13 @@ import {
   Link as RouterLink,
   redirect,
 } from "@tanstack/react-router"
+import { useEffect, useRef, useState } from "react"
 import { useForm } from "react-hook-form"
 import { z } from "zod"
 
 import type { Body_login_login_access_token as AccessToken } from "@/client"
 import { AuthLayout } from "@/components/Common/AuthLayout"
+import { Separator } from "@/components/ui/separator"
 import {
   Form,
   FormControl,
@@ -21,6 +23,7 @@ import { Input } from "@/components/ui/input"
 import { LoadingButton } from "@/components/ui/loading-button"
 import { PasswordInput } from "@/components/ui/password-input"
 import useAuth, { isLoggedIn } from "@/hooks/useAuth"
+import { renderGoogleSignInButton } from "@/lib/googleIdentity"
 
 const formSchema = z.object({
   username: z.email(),
@@ -44,14 +47,17 @@ export const Route = createFileRoute("/login")({
   head: () => ({
     meta: [
       {
-        title: "Log In - FastAPI Template",
+        title: "Log In - TemplateForge AI",
       },
     ],
   }),
 })
 
 function Login() {
-  const { loginMutation } = useAuth()
+  const { loginMutation, googleLoginMutation } = useAuth()
+  const googleButtonRef = useRef<HTMLDivElement>(null)
+  const [googleInitError, setGoogleInitError] = useState<string | null>(null)
+  const googleClientId = (import.meta.env.VITE_GOOGLE_CLIENT_ID || "").trim()
   const form = useForm<FormData>({
     resolver: zodResolver(formSchema),
     mode: "onBlur",
@@ -66,6 +72,31 @@ function Login() {
     if (loginMutation.isPending) return
     loginMutation.mutate(data)
   }
+
+  useEffect(() => {
+    if (!googleClientId || !googleButtonRef.current) return
+
+    let cancelled = false
+    setGoogleInitError(null)
+
+    renderGoogleSignInButton({
+      container: googleButtonRef.current,
+      clientId: googleClientId,
+      onCredential: (idToken) => {
+        if (googleLoginMutation.isPending) return
+        googleLoginMutation.mutate(idToken)
+      },
+    }).catch((error) => {
+      if (cancelled) return
+      setGoogleInitError(
+        error instanceof Error ? error.message : "Failed to initialize Google login",
+      )
+    })
+
+    return () => {
+      cancelled = true
+    }
+  }, [googleClientId, googleLoginMutation])
 
   return (
     <AuthLayout>
@@ -127,6 +158,38 @@ function Login() {
             <LoadingButton type="submit" loading={loginMutation.isPending}>
               Log In
             </LoadingButton>
+
+            {googleClientId ? (
+              <>
+                <div className="relative my-1">
+                  <div className="absolute inset-0 flex items-center">
+                    <Separator />
+                  </div>
+                  <div className="relative flex justify-center text-xs uppercase">
+                    <span className="bg-background px-2 text-muted-foreground">
+                      or continue with
+                    </span>
+                  </div>
+                </div>
+
+                <div className="grid gap-2">
+                  <div
+                    ref={googleButtonRef}
+                    className={googleLoginMutation.isPending ? "opacity-70" : ""}
+                  />
+                  {googleLoginMutation.isPending ? (
+                    <p className="text-center text-xs text-muted-foreground">
+                      Signing in with Google...
+                    </p>
+                  ) : null}
+                  {googleInitError ? (
+                    <p className="text-center text-xs text-destructive">
+                      {googleInitError}
+                    </p>
+                  ) : null}
+                </div>
+              </>
+            ) : null}
           </div>
 
           <div className="text-center text-sm">

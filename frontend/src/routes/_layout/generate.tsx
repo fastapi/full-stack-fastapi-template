@@ -1,4 +1,4 @@
-﻿import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
 import { createFileRoute } from "@tanstack/react-router"
 import { useEffect, useMemo, useState } from "react"
 
@@ -94,7 +94,7 @@ export const Route = createFileRoute("/_layout/generate")({
   head: () => ({
     meta: [
       {
-        title: "Generate - FastAPI Template",
+        title: "Generate - TemplateForge AI",
       },
     ],
   }),

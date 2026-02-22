@@ -1,3 +1,4 @@
+import logging
 from typing import Any, NoReturn
 
 from fastapi import APIRouter, HTTPException
@@ -13,6 +14,7 @@ from app.services import generation_service
 from app.services.exceptions import ServiceError
 
 router = APIRouter(prefix="/generate", tags=["generate"])
+logger = logging.getLogger(__name__)
 
 
 def _raise_http_from_service_error(exc: ServiceError) -> NoReturn:
@@ -33,6 +35,11 @@ def extract_variables(
             extract_in=extract_in,
         )
     except ServiceError as exc:
+        logger.warning(
+            "Generate extract failed (status=%s): %s",
+            exc.status_code,
+            exc.detail,
+        )
         _raise_http_from_service_error(exc)
 
 
@@ -50,4 +57,9 @@ def render_template(
             render_in=render_in,
         )
     except ServiceError as exc:
+        logger.warning(
+            "Generate render failed (status=%s): %s",
+            exc.status_code,
+            exc.detail,
+        )
         _raise_http_from_service_error(exc)

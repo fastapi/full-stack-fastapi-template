@@ -1,4 +1,4 @@
-﻿import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
 import { createFileRoute, useNavigate } from "@tanstack/react-router"
 import { useEffect, useMemo, useState } from "react"
 
@@ -79,7 +79,7 @@ export const Route = createFileRoute("/_layout/template-editor")({
   head: () => ({
     meta: [
       {
-        title: "Template Editor - FastAPI Template",
+        title: "Template Editor - TemplateForge AI",
       },
     ],
   }),

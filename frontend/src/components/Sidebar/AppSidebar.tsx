@@ -25,7 +25,6 @@ const baseItems: Item[] = [
   { icon: Briefcase, title: "Editor", path: "/template-editor" },
   { icon: Sparkles, title: "Generate", path: "/generate" },
   { icon: History, title: "History", path: "/history" },
-  { icon: Briefcase, title: "Items", path: "/items" },
 ]
 
 export function AppSidebar() {

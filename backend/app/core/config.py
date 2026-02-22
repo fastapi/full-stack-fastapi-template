@@ -50,6 +50,13 @@ class Settings(BaseSettings):
 
     PROJECT_NAME: str
     SENTRY_DSN: HttpUrl | None = None
+    LOG_LEVEL: str = "INFO"
+    LOG_REQUESTS: bool = True
+    GOOGLE_OAUTH_CLIENT_ID: str | None = None
+    GOOGLE_AUTH_TIMEOUT_SECONDS: float = 10.0
+    GEMINI_API_KEY: str | None = None
+    GEMINI_MODEL: str = "gemini-2.5-flash-lite"
+    GEMINI_TIMEOUT_SECONDS: float = 30.0
     POSTGRES_SERVER: str
     POSTGRES_PORT: int = 5432
     POSTGRES_USER: str
