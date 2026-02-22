@@ -84,15 +84,15 @@ def _extract_text_from_gemini_response(payload: dict[str, Any]) -> str:
     return text
 
 
-def _gemini_generate_json(*, system_prompt: str, user_payload: dict[str, Any]) -> dict[str, Any]:
+def _gemini_generate_json(
+    *, system_prompt: str, user_payload: dict[str, Any]
+) -> dict[str, Any]:
     api_key = settings.GEMINI_API_KEY
     if not api_key:
         raise GeminiResponseError("GEMINI_API_KEY is not configured")
 
     model = settings.GEMINI_MODEL.strip() or "gemini-2.5-flash-lite"
-    url = (
-        f"https://generativelanguage.googleapis.com/v1beta/models/{model}:generateContent"
-    )
+    url = f"https://generativelanguage.googleapis.com/v1beta/models/{model}:generateContent"
 
     request_body = {
         "systemInstruction": {"parts": [{"text": system_prompt}]},
@@ -266,7 +266,9 @@ def _normalize_extract_output(
         if isinstance(raw_conf_value, (int, float)):
             confidence[variable] = max(0.0, min(1.0, float(raw_conf_value)))
         else:
-            confidence[variable] = 0.0 if is_missing_value(coerced, config.type) else 0.5
+            confidence[variable] = (
+                0.0 if is_missing_value(coerced, config.type) else 0.5
+            )
 
         raw_note = raw_notes.get(variable)
         if isinstance(raw_note, str) and raw_note.strip():
@@ -364,7 +366,9 @@ def extract_variables(
         raw = _gemini_generate_json(
             system_prompt=EXTRACT_SYSTEM_PROMPT, user_payload=payload
         )
-        normalized = _normalize_extract_output(raw=raw, variables_schema=variables_schema)
+        normalized = _normalize_extract_output(
+            raw=raw, variables_schema=variables_schema
+        )
         logger.info(
             "AI extract provider=gemini model=%s variables=%s missing_required=%s",
             settings.GEMINI_MODEL,
@@ -393,7 +397,9 @@ def _render_with_gemini(
         "values": values,
         "style": style or {},
     }
-    raw = _gemini_generate_json(system_prompt=RENDER_SYSTEM_PROMPT, user_payload=payload)
+    raw = _gemini_generate_json(
+        system_prompt=RENDER_SYSTEM_PROMPT, user_payload=payload
+    )
     output_text = raw.get("output_text")
     if not isinstance(output_text, str) or not output_text.strip():
         raise GeminiResponseError("Gemini render response missing output_text")

@@ -3,7 +3,7 @@
 import type { CancelablePromise } from './core/CancelablePromise';
 import { OpenAPI } from './core/OpenAPI';
 import { request as __request } from './core/request';
-import type { GenerateExtractVariablesData, GenerateExtractVariablesResponse, GenerateRenderTemplateData, GenerateRenderTemplateResponse, GenerationsReadGenerationsData, GenerationsReadGenerationsResponse, GenerationsCreateGenerationData, GenerationsCreateGenerationResponse, GenerationsReadGenerationData, GenerationsReadGenerationResponse, GenerationsUpdateGenerationData, GenerationsUpdateGenerationResponse, ItemsReadItemsData, ItemsReadItemsResponse, ItemsCreateItemData, ItemsCreateItemResponse, ItemsReadItemData, ItemsReadItemResponse, ItemsUpdateItemData, ItemsUpdateItemResponse, ItemsDeleteItemData, ItemsDeleteItemResponse, LoginLoginAccessTokenData, LoginLoginAccessTokenResponse, LoginTestTokenResponse, LoginRecoverPasswordData, LoginRecoverPasswordResponse, LoginResetPasswordData, LoginResetPasswordResponse, LoginRecoverPasswordHtmlContentData, LoginRecoverPasswordHtmlContentResponse, PrivateCreateUserData, PrivateCreateUserResponse, TemplatesReadTemplatesData, TemplatesReadTemplatesResponse, TemplatesCreateTemplateData, TemplatesCreateTemplateResponse, TemplatesReadTemplateData, TemplatesReadTemplateResponse, TemplatesUpdateTemplateData, TemplatesUpdateTemplateResponse, TemplatesReadTemplateVersionsData, TemplatesReadTemplateVersionsResponse, TemplatesCreateTemplateVersionData, TemplatesCreateTemplateVersionResponse, UsersReadUsersData, UsersReadUsersResponse, UsersCreateUserData, UsersCreateUserResponse, UsersReadUserMeResponse, UsersDeleteUserMeResponse, UsersUpdateUserMeData, UsersUpdateUserMeResponse, UsersUpdatePasswordMeData, UsersUpdatePasswordMeResponse, UsersRegisterUserData, UsersRegisterUserResponse, UsersReadUserByIdData, UsersReadUserByIdResponse, UsersUpdateUserData, UsersUpdateUserResponse, UsersDeleteUserData, UsersDeleteUserResponse, UtilsTestEmailData, UtilsTestEmailResponse, UtilsHealthCheckResponse } from './types.gen';
+import type { GenerateExtractVariablesData, GenerateExtractVariablesResponse, GenerateRenderTemplateData, GenerateRenderTemplateResponse, GenerationsReadGenerationsData, GenerationsReadGenerationsResponse, GenerationsCreateGenerationData, GenerationsCreateGenerationResponse, GenerationsReadGenerationData, GenerationsReadGenerationResponse, GenerationsUpdateGenerationData, GenerationsUpdateGenerationResponse, ItemsReadItemsData, ItemsReadItemsResponse, ItemsCreateItemData, ItemsCreateItemResponse, ItemsReadItemData, ItemsReadItemResponse, ItemsUpdateItemData, ItemsUpdateItemResponse, ItemsDeleteItemData, ItemsDeleteItemResponse, LoginLoginAccessTokenData, LoginLoginAccessTokenResponse, LoginLoginGoogleData, LoginLoginGoogleResponse, LoginTestTokenResponse, LoginRecoverPasswordData, LoginRecoverPasswordResponse, LoginResetPasswordData, LoginResetPasswordResponse, LoginRecoverPasswordHtmlContentData, LoginRecoverPasswordHtmlContentResponse, PrivateCreateUserData, PrivateCreateUserResponse, TemplatesReadTemplatesData, TemplatesReadTemplatesResponse, TemplatesCreateTemplateData, TemplatesCreateTemplateResponse, TemplatesReadTemplateData, TemplatesReadTemplateResponse, TemplatesUpdateTemplateData, TemplatesUpdateTemplateResponse, TemplatesReadTemplateVersionsData, TemplatesReadTemplateVersionsResponse, TemplatesCreateTemplateVersionData, TemplatesCreateTemplateVersionResponse, UsersReadUsersData, UsersReadUsersResponse, UsersCreateUserData, UsersCreateUserResponse, UsersReadUserMeResponse, UsersDeleteUserMeResponse, UsersUpdateUserMeData, UsersUpdateUserMeResponse, UsersUpdatePasswordMeData, UsersUpdatePasswordMeResponse, UsersRegisterUserData, UsersRegisterUserResponse, UsersReadUserByIdData, UsersReadUserByIdResponse, UsersUpdateUserData, UsersUpdateUserResponse, UsersDeleteUserData, UsersDeleteUserResponse, UtilsTestEmailData, UtilsTestEmailResponse, UtilsHealthCheckResponse } from './types.gen';
 
 export class GenerateService {
     /**
@@ -257,6 +257,26 @@ export class LoginService {
             url: '/api/v1/login/access-token',
             formData: data.formData,
             mediaType: 'application/x-www-form-urlencoded',
+            errors: {
+                422: 'Validation Error'
+            }
+        });
+    }
+    
+    /**
+     * Login Google
+     * Google ID token login. Validates token with Google and returns local JWT.
+     * @param data The data for the request.
+     * @param data.requestBody
+     * @returns Token Successful Response
+     * @throws ApiError
+     */
+    public static loginGoogle(data: LoginLoginGoogleData): CancelablePromise<LoginLoginGoogleResponse> {
+        return __request(OpenAPI, {
+            method: 'POST',
+            url: '/api/v1/login/google',
+            body: data.requestBody,
+            mediaType: 'application/json',
             errors: {
                 422: 'Validation Error'
             }
