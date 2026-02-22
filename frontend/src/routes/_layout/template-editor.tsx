@@ -44,6 +44,8 @@ const LANGUAGE_OPTIONS: Array<{ label: string; value: TemplateLanguage }> = [
   { label: "Other", value: "other" },
 ]
 
+const DEFAULT_TEMPLATE_CONTENT = "Dear {{company}},\n\n{{body}}"
+
 const defaultTemplateSchema = (): TemplateVariableConfig => ({
   required: false,
   type: "text",
@@ -93,26 +95,45 @@ function TemplateEditorPage() {
   const [category, setCategory] = useState<TemplateCategory>("cover_letter")
   const [language, setLanguage] = useState<TemplateLanguage>("en")
   const [tagsInput, setTagsInput] = useState("")
-  const [content, setContent] = useState("Dear {{company}},\n\n{{body}}")
+  const [content, setContent] = useState(DEFAULT_TEMPLATE_CONTENT)
   const [variablesSchema, setVariablesSchema] = useState<
     Record<string, TemplateVariableConfig>
   >({})
   const [preview, setPreview] = useState("")
+  const [hydratedTemplateId, setHydratedTemplateId] = useState<string | null>(
+    null,
+  )
 
   const templateQuery = useQuery({
     queryKey: ["template", templateId],
     queryFn: () => getTemplate(templateId!),
     enabled: Boolean(templateId),
+    refetchOnWindowFocus: false,
   })
 
   const versionsQuery = useQuery({
     queryKey: ["templateVersions", templateId],
     queryFn: () => listTemplateVersions(templateId!),
     enabled: Boolean(templateId),
+    refetchOnWindowFocus: false,
   })
 
   useEffect(() => {
+    if (!templateId) {
+      setHydratedTemplateId(null)
+      return
+    }
+    if (hydratedTemplateId !== null && hydratedTemplateId !== templateId) {
+      setHydratedTemplateId(null)
+    }
+  }, [templateId, hydratedTemplateId])
+
+  useEffect(() => {
     if (!templateQuery.data) {
+      return
+    }
+
+    if (hydratedTemplateId === templateQuery.data.id) {
       return
     }
 
@@ -122,12 +143,13 @@ function TemplateEditorPage() {
     setLanguage(template.language)
     setTagsInput(template.tags.join(", "))
 
-    const latestContent = template.latest_version?.content || content
+    const latestContent = template.latest_version?.content || DEFAULT_TEMPLATE_CONTENT
     const latestSchema = template.latest_version?.variables_schema || {}
 
     setContent(latestContent)
     setVariablesSchema(syncSchemaWithContent(latestContent, latestSchema))
-  }, [templateQuery.data, content])
+    setHydratedTemplateId(template.id)
+  }, [templateQuery.data, hydratedTemplateId])
 
   useEffect(() => {
     setVariablesSchema((current) => {

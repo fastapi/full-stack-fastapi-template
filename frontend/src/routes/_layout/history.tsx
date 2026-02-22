@@ -11,6 +11,7 @@ import {
   CardTitle,
 } from "@/components/ui/card"
 import useCustomToast from "@/hooks/useCustomToast"
+import { downloadTextAsPdf } from "@/lib/pdf"
 import {
   getGeneration,
   listGenerations,
@@ -72,15 +73,26 @@ function HistoryPage() {
     }
 
     try {
-      await updateMutation.mutateAsync({
+      const updatedGeneration = await updateMutation.mutateAsync({
         id: selectedGenerationId,
         output_text: editableOutput,
       })
-      showSuccessToast("Generation updated")
       await queryClient.invalidateQueries({
         queryKey: ["generation", selectedGenerationId],
       })
       await queryClient.invalidateQueries({ queryKey: ["generations"] })
+
+      try {
+        await downloadTextAsPdf({
+          title: updatedGeneration.title,
+          body: updatedGeneration.output_text,
+          subtitle: `Saved at ${new Date().toLocaleString()}`,
+        })
+        showSuccessToast("Generation updated and PDF downloaded")
+      } catch {
+        showSuccessToast("Generation updated")
+        showErrorToast("PDF download failed")
+      }
     } catch (error) {
       showErrorToast(errorToMessage(error))
     }
@@ -191,7 +203,7 @@ function HistoryPage() {
                     onClick={handleSaveEditedOutput}
                     disabled={updateMutation.isPending}
                   >
-                    Save Edited Output
+                    Save Edited Output & Download PDF
                   </Button>
                 </div>
               </>
