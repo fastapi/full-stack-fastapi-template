@@ -72,7 +72,9 @@ def render_for_user(
     missing_required: list[str] = []
     for variable, raw_config in normalized_schema.items():
         config = TemplateVariableConfig.model_validate(raw_config)
-        if config.required and is_missing_value(render_in.values.get(variable), config.type):
+        if config.required and is_missing_value(
+            render_in.values.get(variable), config.type
+        ):
             missing_required.append(variable)
 
     if missing_required:
@@ -137,7 +139,9 @@ def create_generation_for_user(
             "updated_at": get_datetime_utc(),
         },
     )
-    return generation_repository.create_generation(session=session, generation=generation)
+    return generation_repository.create_generation(
+        session=session, generation=generation
+    )
 
 
 def update_generation_for_user(

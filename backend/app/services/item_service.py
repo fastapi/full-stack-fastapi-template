@@ -17,7 +17,9 @@ def list_items_for_user(
     )
 
 
-def get_item_for_user(*, session: Session, current_user: User, item_id: uuid.UUID) -> Item:
+def get_item_for_user(
+    *, session: Session, current_user: User, item_id: uuid.UUID
+) -> Item:
     item = item_repository.get_by_id(session=session, item_id=item_id)
     if item is None:
         raise NotFoundError("Item not found")
@@ -36,7 +38,9 @@ def create_item_for_owner(
 def create_item_for_user(
     *, session: Session, current_user: User, item_in: ItemCreate
 ) -> Item:
-    return create_item_for_owner(session=session, item_in=item_in, owner_id=current_user.id)
+    return create_item_for_owner(
+        session=session, item_in=item_in, owner_id=current_user.id
+    )
 
 
 def update_item_for_user(
@@ -46,7 +50,9 @@ def update_item_for_user(
     item_id: uuid.UUID,
     item_in: ItemUpdate,
 ) -> Item:
-    item = get_item_for_user(session=session, current_user=current_user, item_id=item_id)
+    item = get_item_for_user(
+        session=session, current_user=current_user, item_id=item_id
+    )
     update_dict = item_in.model_dump(exclude_unset=True)
     item.sqlmodel_update(update_dict)
     return item_repository.save(session=session, item=item)
@@ -55,5 +61,7 @@ def update_item_for_user(
 def delete_item_for_user(
     *, session: Session, current_user: User, item_id: uuid.UUID
 ) -> None:
-    item = get_item_for_user(session=session, current_user=current_user, item_id=item_id)
+    item = get_item_for_user(
+        session=session, current_user=current_user, item_id=item_id
+    )
     item_repository.delete_one(session=session, item=item)

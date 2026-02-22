@@ -1,4 +1,4 @@
-﻿import re
+import re
 from typing import Any
 
 from app.models import TemplateVariableConfig, TemplateVariableType
@@ -55,7 +55,9 @@ def _split_list_values(raw: str) -> list[str]:
     return values
 
 
-def _extract_labeled_value(input_text: str, aliases: list[str]) -> tuple[str | None, str | None]:
+def _extract_labeled_value(
+    input_text: str, aliases: list[str]
+) -> tuple[str | None, str | None]:
     for alias in aliases:
         pattern = re.compile(rf"(?im)^\s*{re.escape(alias)}\s*[:：\-]\s*(.+)$")
         match = pattern.search(input_text)
@@ -64,7 +66,9 @@ def _extract_labeled_value(input_text: str, aliases: list[str]) -> tuple[str | N
     return None, None
 
 
-def _extract_heuristic_value(variable: str, input_text: str) -> tuple[str | None, str | None]:
+def _extract_heuristic_value(
+    variable: str, input_text: str
+) -> tuple[str | None, str | None]:
     lowered = variable.lower()
 
     if "company" in lowered:
@@ -145,7 +149,9 @@ def extract_variables(
             if label_note:
                 notes[variable] = label_note
         else:
-            heuristic_value, heuristic_note = _extract_heuristic_value(variable, input_text)
+            heuristic_value, heuristic_note = _extract_heuristic_value(
+                variable, input_text
+            )
             if heuristic_value is not None:
                 coerced = _coerce_value_for_type(heuristic_value, config.type)
                 values[variable] = coerced

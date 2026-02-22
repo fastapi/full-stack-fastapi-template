@@ -1,4 +1,11 @@
-import { Briefcase, FileText, History, Home, Sparkles, Users } from "lucide-react"
+import {
+  Briefcase,
+  FileText,
+  History,
+  Home,
+  Sparkles,
+  Users,
+} from "lucide-react"
 
 import { SidebarAppearance } from "@/components/Common/Appearance"
 import { Logo } from "@/components/Common/Logo"

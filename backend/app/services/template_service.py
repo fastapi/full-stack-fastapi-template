@@ -58,7 +58,8 @@ def create_template_for_user(
     *, session: Session, current_user: User, template_in: TemplateCreate
 ) -> Template:
     template = Template.model_validate(
-        template_in, update={"user_id": current_user.id, "updated_at": get_datetime_utc()}
+        template_in,
+        update={"user_id": current_user.id, "updated_at": get_datetime_utc()},
     )
     return template_repository.create_template(session=session, template=template)
 
@@ -82,7 +83,9 @@ def update_template_for_user(
 def list_template_versions_for_user(
     *, session: Session, current_user: User, template_id: uuid.UUID
 ) -> list[TemplateVersion]:
-    get_template_for_user(session=session, current_user=current_user, template_id=template_id)
+    get_template_for_user(
+        session=session, current_user=current_user, template_id=template_id
+    )
     return template_repository.list_template_versions(
         session=session, template_id=template_id
     )
@@ -159,4 +162,6 @@ def get_template_latest_version(
 
 
 def count_template_versions(*, session: Session, template_id: uuid.UUID) -> int:
-    return template_repository.count_template_versions(session=session, template_id=template_id)
+    return template_repository.count_template_versions(
+        session=session, template_id=template_id
+    )

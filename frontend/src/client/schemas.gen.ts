@@ -57,6 +57,238 @@ export const Body_login_login_access_tokenSchema = {
     title: 'Body_login-login_access_token'
 } as const;
 
+export const ExtractVariablesRequestSchema = {
+    properties: {
+        template_version_id: {
+            type: 'string',
+            format: 'uuid',
+            title: 'Template Version Id'
+        },
+        input_text: {
+            type: 'string',
+            minLength: 1,
+            title: 'Input Text'
+        },
+        profile_context: {
+            additionalProperties: true,
+            type: 'object',
+            title: 'Profile Context'
+        }
+    },
+    type: 'object',
+    required: ['template_version_id', 'input_text'],
+    title: 'ExtractVariablesRequest'
+} as const;
+
+export const ExtractVariablesResponseSchema = {
+    properties: {
+        values: {
+            additionalProperties: true,
+            type: 'object',
+            title: 'Values'
+        },
+        missing_required: {
+            items: {
+                type: 'string'
+            },
+            type: 'array',
+            title: 'Missing Required'
+        },
+        confidence: {
+            additionalProperties: {
+                type: 'number'
+            },
+            type: 'object',
+            title: 'Confidence'
+        },
+        notes: {
+            additionalProperties: {
+                type: 'string'
+            },
+            type: 'object',
+            title: 'Notes'
+        }
+    },
+    type: 'object',
+    required: ['values', 'missing_required', 'confidence'],
+    title: 'ExtractVariablesResponse'
+} as const;
+
+export const GenerationCreateSchema = {
+    properties: {
+        title: {
+            type: 'string',
+            maxLength: 255,
+            minLength: 1,
+            title: 'Title'
+        },
+        input_text: {
+            type: 'string',
+            minLength: 1,
+            title: 'Input Text'
+        },
+        extracted_values: {
+            additionalProperties: true,
+            type: 'object',
+            title: 'Extracted Values'
+        },
+        output_text: {
+            type: 'string',
+            minLength: 1,
+            title: 'Output Text'
+        },
+        template_id: {
+            type: 'string',
+            format: 'uuid',
+            title: 'Template Id'
+        },
+        template_version_id: {
+            type: 'string',
+            format: 'uuid',
+            title: 'Template Version Id'
+        }
+    },
+    type: 'object',
+    required: ['title', 'input_text', 'output_text', 'template_id', 'template_version_id'],
+    title: 'GenerationCreate'
+} as const;
+
+export const GenerationPublicSchema = {
+    properties: {
+        title: {
+            type: 'string',
+            maxLength: 255,
+            minLength: 1,
+            title: 'Title'
+        },
+        input_text: {
+            type: 'string',
+            minLength: 1,
+            title: 'Input Text'
+        },
+        extracted_values: {
+            additionalProperties: true,
+            type: 'object',
+            title: 'Extracted Values'
+        },
+        output_text: {
+            type: 'string',
+            minLength: 1,
+            title: 'Output Text'
+        },
+        id: {
+            type: 'string',
+            format: 'uuid',
+            title: 'Id'
+        },
+        user_id: {
+            type: 'string',
+            format: 'uuid',
+            title: 'User Id'
+        },
+        template_id: {
+            type: 'string',
+            format: 'uuid',
+            title: 'Template Id'
+        },
+        template_version_id: {
+            type: 'string',
+            format: 'uuid',
+            title: 'Template Version Id'
+        },
+        created_at: {
+            anyOf: [
+                {
+                    type: 'string',
+                    format: 'date-time'
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Created At'
+        },
+        updated_at: {
+            anyOf: [
+                {
+                    type: 'string',
+                    format: 'date-time'
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Updated At'
+        }
+    },
+    type: 'object',
+    required: ['title', 'input_text', 'output_text', 'id', 'user_id', 'template_id', 'template_version_id'],
+    title: 'GenerationPublic'
+} as const;
+
+export const GenerationUpdateSchema = {
+    properties: {
+        title: {
+            anyOf: [
+                {
+                    type: 'string',
+                    maxLength: 255,
+                    minLength: 1
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Title'
+        },
+        extracted_values: {
+            anyOf: [
+                {
+                    additionalProperties: true,
+                    type: 'object'
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Extracted Values'
+        },
+        output_text: {
+            anyOf: [
+                {
+                    type: 'string',
+                    minLength: 1
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Output Text'
+        }
+    },
+    type: 'object',
+    title: 'GenerationUpdate'
+} as const;
+
+export const GenerationsPublicSchema = {
+    properties: {
+        data: {
+            items: {
+                '$ref': '#/components/schemas/GenerationPublic'
+            },
+            type: 'array',
+            title: 'Data'
+        },
+        count: {
+            type: 'integer',
+            title: 'Count'
+        }
+    },
+    type: 'object',
+    required: ['data', 'count'],
+    title: 'GenerationsPublic'
+} as const;
+
 export const HTTPValidationErrorSchema = {
     properties: {
         detail: {
@@ -249,6 +481,481 @@ export const PrivateUserCreateSchema = {
     type: 'object',
     required: ['email', 'password', 'full_name'],
     title: 'PrivateUserCreate'
+} as const;
+
+export const RenderStyleSchema = {
+    properties: {
+        tone: {
+            type: 'string',
+            title: 'Tone',
+            default: 'professional'
+        },
+        length: {
+            type: 'string',
+            title: 'Length',
+            default: 'medium'
+        }
+    },
+    type: 'object',
+    title: 'RenderStyle'
+} as const;
+
+export const RenderTemplateRequestSchema = {
+    properties: {
+        template_version_id: {
+            type: 'string',
+            format: 'uuid',
+            title: 'Template Version Id'
+        },
+        values: {
+            additionalProperties: true,
+            type: 'object',
+            title: 'Values'
+        },
+        style: {
+            '$ref': '#/components/schemas/RenderStyle'
+        }
+    },
+    type: 'object',
+    required: ['template_version_id'],
+    title: 'RenderTemplateRequest'
+} as const;
+
+export const RenderTemplateResponseSchema = {
+    properties: {
+        output_text: {
+            type: 'string',
+            title: 'Output Text'
+        }
+    },
+    type: 'object',
+    required: ['output_text'],
+    title: 'RenderTemplateResponse'
+} as const;
+
+export const TemplateCategorySchema = {
+    type: 'string',
+    enum: ['cover_letter', 'email', 'proposal', 'other'],
+    title: 'TemplateCategory'
+} as const;
+
+export const TemplateCreateSchema = {
+    properties: {
+        name: {
+            type: 'string',
+            maxLength: 255,
+            minLength: 1,
+            title: 'Name'
+        },
+        category: {
+            '$ref': '#/components/schemas/TemplateCategory',
+            default: 'other'
+        },
+        language: {
+            '$ref': '#/components/schemas/TemplateLanguage',
+            default: 'en'
+        },
+        tags: {
+            items: {
+                type: 'string'
+            },
+            type: 'array',
+            title: 'Tags'
+        }
+    },
+    type: 'object',
+    required: ['name'],
+    title: 'TemplateCreate'
+} as const;
+
+export const TemplateLanguageSchema = {
+    type: 'string',
+    enum: ['fr', 'en', 'zh', 'other'],
+    title: 'TemplateLanguage'
+} as const;
+
+export const TemplateListPublicSchema = {
+    properties: {
+        name: {
+            type: 'string',
+            maxLength: 255,
+            minLength: 1,
+            title: 'Name'
+        },
+        category: {
+            '$ref': '#/components/schemas/TemplateCategory',
+            default: 'other'
+        },
+        language: {
+            '$ref': '#/components/schemas/TemplateLanguage',
+            default: 'en'
+        },
+        tags: {
+            items: {
+                type: 'string'
+            },
+            type: 'array',
+            title: 'Tags'
+        },
+        id: {
+            type: 'string',
+            format: 'uuid',
+            title: 'Id'
+        },
+        user_id: {
+            type: 'string',
+            format: 'uuid',
+            title: 'User Id'
+        },
+        is_archived: {
+            type: 'boolean',
+            title: 'Is Archived'
+        },
+        created_at: {
+            anyOf: [
+                {
+                    type: 'string',
+                    format: 'date-time'
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Created At'
+        },
+        updated_at: {
+            anyOf: [
+                {
+                    type: 'string',
+                    format: 'date-time'
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Updated At'
+        },
+        versions_count: {
+            type: 'integer',
+            title: 'Versions Count',
+            default: 0
+        },
+        latest_version_number: {
+            anyOf: [
+                {
+                    type: 'integer'
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Latest Version Number'
+        }
+    },
+    type: 'object',
+    required: ['name', 'id', 'user_id', 'is_archived'],
+    title: 'TemplateListPublic'
+} as const;
+
+export const TemplatePublicSchema = {
+    properties: {
+        name: {
+            type: 'string',
+            maxLength: 255,
+            minLength: 1,
+            title: 'Name'
+        },
+        category: {
+            '$ref': '#/components/schemas/TemplateCategory',
+            default: 'other'
+        },
+        language: {
+            '$ref': '#/components/schemas/TemplateLanguage',
+            default: 'en'
+        },
+        tags: {
+            items: {
+                type: 'string'
+            },
+            type: 'array',
+            title: 'Tags'
+        },
+        id: {
+            type: 'string',
+            format: 'uuid',
+            title: 'Id'
+        },
+        user_id: {
+            type: 'string',
+            format: 'uuid',
+            title: 'User Id'
+        },
+        is_archived: {
+            type: 'boolean',
+            title: 'Is Archived'
+        },
+        created_at: {
+            anyOf: [
+                {
+                    type: 'string',
+                    format: 'date-time'
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Created At'
+        },
+        updated_at: {
+            anyOf: [
+                {
+                    type: 'string',
+                    format: 'date-time'
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Updated At'
+        },
+        versions_count: {
+            type: 'integer',
+            title: 'Versions Count',
+            default: 0
+        },
+        latest_version: {
+            anyOf: [
+                {
+                    '$ref': '#/components/schemas/TemplateVersionPublic'
+                },
+                {
+                    type: 'null'
+                }
+            ]
+        }
+    },
+    type: 'object',
+    required: ['name', 'id', 'user_id', 'is_archived'],
+    title: 'TemplatePublic'
+} as const;
+
+export const TemplateUpdateSchema = {
+    properties: {
+        name: {
+            anyOf: [
+                {
+                    type: 'string',
+                    maxLength: 255,
+                    minLength: 1
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Name'
+        },
+        category: {
+            anyOf: [
+                {
+                    '$ref': '#/components/schemas/TemplateCategory'
+                },
+                {
+                    type: 'null'
+                }
+            ]
+        },
+        language: {
+            anyOf: [
+                {
+                    '$ref': '#/components/schemas/TemplateLanguage'
+                },
+                {
+                    type: 'null'
+                }
+            ]
+        },
+        tags: {
+            anyOf: [
+                {
+                    items: {
+                        type: 'string'
+                    },
+                    type: 'array'
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Tags'
+        },
+        is_archived: {
+            anyOf: [
+                {
+                    type: 'boolean'
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Is Archived'
+        }
+    },
+    type: 'object',
+    title: 'TemplateUpdate'
+} as const;
+
+export const TemplateVariableConfigSchema = {
+    properties: {
+        required: {
+            type: 'boolean',
+            title: 'Required',
+            default: false
+        },
+        type: {
+            '$ref': '#/components/schemas/TemplateVariableType',
+            default: 'text'
+        },
+        description: {
+            type: 'string',
+            title: 'Description',
+            default: ''
+        },
+        example: {
+            anyOf: [
+                {},
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Example'
+        },
+        default: {
+            anyOf: [
+                {},
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Default'
+        }
+    },
+    type: 'object',
+    title: 'TemplateVariableConfig'
+} as const;
+
+export const TemplateVariableTypeSchema = {
+    type: 'string',
+    enum: ['text', 'list'],
+    title: 'TemplateVariableType'
+} as const;
+
+export const TemplateVersionCreateSchema = {
+    properties: {
+        content: {
+            type: 'string',
+            minLength: 1,
+            title: 'Content'
+        },
+        variables_schema: {
+            additionalProperties: {
+                '$ref': '#/components/schemas/TemplateVariableConfig'
+            },
+            type: 'object',
+            title: 'Variables Schema'
+        }
+    },
+    type: 'object',
+    required: ['content'],
+    title: 'TemplateVersionCreate'
+} as const;
+
+export const TemplateVersionPublicSchema = {
+    properties: {
+        content: {
+            type: 'string',
+            minLength: 1,
+            title: 'Content'
+        },
+        variables_schema: {
+            additionalProperties: {
+                '$ref': '#/components/schemas/TemplateVariableConfig'
+            },
+            type: 'object',
+            title: 'Variables Schema'
+        },
+        id: {
+            type: 'string',
+            format: 'uuid',
+            title: 'Id'
+        },
+        template_id: {
+            type: 'string',
+            format: 'uuid',
+            title: 'Template Id'
+        },
+        version: {
+            type: 'integer',
+            title: 'Version'
+        },
+        created_at: {
+            anyOf: [
+                {
+                    type: 'string',
+                    format: 'date-time'
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Created At'
+        },
+        created_by: {
+            type: 'string',
+            format: 'uuid',
+            title: 'Created By'
+        }
+    },
+    type: 'object',
+    required: ['content', 'id', 'template_id', 'version', 'created_by'],
+    title: 'TemplateVersionPublic'
+} as const;
+
+export const TemplateVersionsPublicSchema = {
+    properties: {
+        data: {
+            items: {
+                '$ref': '#/components/schemas/TemplateVersionPublic'
+            },
+            type: 'array',
+            title: 'Data'
+        },
+        count: {
+            type: 'integer',
+            title: 'Count'
+        }
+    },
+    type: 'object',
+    required: ['data', 'count'],
+    title: 'TemplateVersionsPublic'
+} as const;
+
+export const TemplatesPublicSchema = {
+    properties: {
+        data: {
+            items: {
+                '$ref': '#/components/schemas/TemplateListPublic'
+            },
+            type: 'array',
+            title: 'Data'
+        },
+        count: {
+            type: 'integer',
+            title: 'Count'
+        }
+    },
+    type: 'object',
+    required: ['data', 'count'],
+    title: 'TemplatesPublic'
 } as const;
 
 export const TokenSchema = {
