@@ -289,6 +289,19 @@ export const GenerationsPublicSchema = {
     title: 'GenerationsPublic'
 } as const;
 
+export const GoogleLoginRequestSchema = {
+    properties: {
+        id_token: {
+            type: 'string',
+            minLength: 1,
+            title: 'Id Token'
+        }
+    },
+    type: 'object',
+    required: ['id_token'],
+    title: 'GoogleLoginRequest'
+} as const;
+
 export const HTTPValidationErrorSchema = {
     properties: {
         detail: {

@@ -69,6 +69,10 @@ export type GenerationUpdate = {
     output_text?: (string | null);
 };
 
+export type GoogleLoginRequest = {
+    id_token: string;
+};
+
 export type HTTPValidationError = {
     detail?: Array<ValidationError>;
 };
@@ -351,6 +355,12 @@ export type LoginLoginAccessTokenData = {
 };
 
 export type LoginLoginAccessTokenResponse = (Token);
+
+export type LoginLoginGoogleData = {
+    requestBody: GoogleLoginRequest;
+};
+
+export type LoginLoginGoogleResponse = (Token);
 
 export type LoginTestTokenResponse = (UserPublic);
 

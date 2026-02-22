@@ -25,7 +25,9 @@ let googleScriptPromise: Promise<void> | null = null
 
 export const loadGoogleIdentityScript = () => {
   if (typeof window === "undefined") {
-    return Promise.reject(new Error("Google Identity is only available in browser"))
+    return Promise.reject(
+      new Error("Google Identity is only available in browser"),
+    )
   }
 
   const existing = (window as GoogleWindow).google?.accounts?.id
@@ -94,4 +96,3 @@ export const renderGoogleSignInButton = async ({
     width: Math.max(container.clientWidth || 320, 240),
   })
 }
-

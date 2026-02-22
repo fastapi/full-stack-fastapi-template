@@ -10,7 +10,6 @@ import { z } from "zod"
 
 import type { Body_login_login_access_token as AccessToken } from "@/client"
 import { AuthLayout } from "@/components/Common/AuthLayout"
-import { Separator } from "@/components/ui/separator"
 import {
   Form,
   FormControl,
@@ -22,6 +21,7 @@ import {
 import { Input } from "@/components/ui/input"
 import { LoadingButton } from "@/components/ui/loading-button"
 import { PasswordInput } from "@/components/ui/password-input"
+import { Separator } from "@/components/ui/separator"
 import useAuth, { isLoggedIn } from "@/hooks/useAuth"
 import { renderGoogleSignInButton } from "@/lib/googleIdentity"
 
@@ -89,14 +89,16 @@ function Login() {
     }).catch((error) => {
       if (cancelled) return
       setGoogleInitError(
-        error instanceof Error ? error.message : "Failed to initialize Google login",
+        error instanceof Error
+          ? error.message
+          : "Failed to initialize Google login",
       )
     })
 
     return () => {
       cancelled = true
     }
-  }, [googleClientId, googleLoginMutation])
+  }, [googleLoginMutation])
 
   return (
     <AuthLayout>
@@ -175,7 +177,9 @@ function Login() {
                 <div className="grid gap-2">
                   <div
                     ref={googleButtonRef}
-                    className={googleLoginMutation.isPending ? "opacity-70" : ""}
+                    className={
+                      googleLoginMutation.isPending ? "opacity-70" : ""
+                    }
                   />
                   {googleLoginMutation.isPending ? (
                     <p className="text-center text-xs text-muted-foreground">
