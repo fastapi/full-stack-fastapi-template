@@ -20,7 +20,7 @@ logger = logging.getLogger(__name__)
 async def lifespan(app: FastAPI):
     """Initialize database on startup"""
     logger.info(f"🚀 Starting application in {settings.environment.upper()} mode")
-    logger.info(f"Database: {settings.mysql_host}/{settings.mysql_database}")
+    logger.info(f"Database: {settings.pg_host}/{settings.pg_database}")
     logger.info(f"Debug mode: {settings.debug}")
     logger.info("Starting up - initializing database...")
 
@@ -93,9 +93,9 @@ async def show_config():
         "environment": settings.environment,
         "debug": settings.debug,
         "database": {
-            "host": settings.mysql_host,
-            "database": settings.mysql_database,
-            "pool_size": settings.mysql_pool_size
+            "host": settings.pg_host,
+            "database": settings.pg_database,
+            "pool_size": settings.pg_pool_size
         },
         "ai_model": settings.ai_model,
         "log_level": settings.log_level,

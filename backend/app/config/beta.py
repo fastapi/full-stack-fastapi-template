@@ -9,8 +9,8 @@ class BetaConfig(BaseConfig):
     debug: bool = True  # Still debug but less verbose
 
     # Database
-    mysql_database: str = "ai_prompts_beta"
-    mysql_pool_size: int = 10
+    pg_database: str = "ai_prompts_beta"
+    pg_pool_size: int = 10
 
     # Logging
     log_level: str = "INFO"

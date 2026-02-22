@@ -1,12 +1,9 @@
+import { SignInButton, SignUpButton } from "@clerk/clerk-react"
 import { ChevronDown, Menu, X } from "lucide-react"
 import { useState } from "react"
 import { Button } from "@/components/ui/button"
 
-interface HeaderProps {
-  onOpenAuth: (mode: "signin" | "signup") => void
-}
-
-export default function Header({ onOpenAuth }: HeaderProps) {
+export default function Header() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
   const [productDropdownOpen, setProductDropdownOpen] = useState(false)
 
@@ -81,16 +78,14 @@ export default function Header({ onOpenAuth }: HeaderProps) {
 
           {/* Right Side - Auth Buttons */}
           <div className="hidden md:flex items-center space-x-4">
-            <Button
-              onClick={() => onOpenAuth("signin")}
-              variant={"ghost"}
-              size={"sm"}
-            >
-              Sign In
-            </Button>
-            <Button onClick={() => onOpenAuth("signup")} size={"sm"}>
-              Sign Up Free
-            </Button>
+            <SignInButton mode="modal" forceRedirectUrl="/app/projects">
+              <Button variant={"ghost"} size={"sm"}>
+                Sign In
+              </Button>
+            </SignInButton>
+            <SignUpButton mode="modal" forceRedirectUrl="/app/projects">
+              <Button size={"sm"}>Sign Up Free</Button>
+            </SignUpButton>
           </div>
 
           {/* Mobile menu button */}
@@ -132,10 +127,12 @@ export default function Header({ onOpenAuth }: HeaderProps) {
               >
                 Pricing
               </a>
-              <Button variant={"ghost"} onClick={() => onOpenAuth("signin")}>
-                Sign In
-              </Button>
-              <Button onClick={() => onOpenAuth("signup")}>Sign Up Free</Button>
+              <SignInButton mode="modal" forceRedirectUrl="/app/projects">
+                <Button variant={"ghost"}>Sign In</Button>
+              </SignInButton>
+              <SignUpButton mode="modal" forceRedirectUrl="/app/projects">
+                <Button>Sign Up Free</Button>
+              </SignUpButton>
             </nav>
           </div>
         )}

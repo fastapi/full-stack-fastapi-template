@@ -401,3 +401,44 @@ class TopCompetitorResponse(BaseModel):
     avg_awareness_score: Optional[float] = Field(None, description="Average awareness score of the top competitor")
 
     model_config = ConfigDict(from_attributes=True)
+
+
+class InsightSignalSeverity(BaseModel):
+    """A single signal's latest severity for the risk overview cards."""
+    signal_type: str = Field(..., description="Signal type identifier")
+    signal_name: str = Field(..., description="Human-readable signal display name")
+    severity: str = Field(..., description="Severity level: Low, Medium, or High")
+    signal_score: float = Field(..., description="Numeric signal score")
+    business_meaning: str = Field(..., description="Human-readable business meaning")
+
+    model_config = ConfigDict(from_attributes=True)
+
+
+class BrandRiskOverviewResponse(BaseModel):
+    """Response schema for brand risk overview with 5 signal severities."""
+    brand_id: str = Field(..., description="Brand identifier")
+    segment: str = Field(..., description="Segment name")
+    signals: list[InsightSignalSeverity] = Field(default_factory=list, description="List of signal severities")
+
+    model_config = ConfigDict(from_attributes=True)
+
+
+class RiskHistoryDataPoint(BaseModel):
+    """A single date row for risk history chart with severity values mapped to integers."""
+    date: str = Field(..., description="Date of this data point (YYYY-MM-DD format)")
+    competitive_dominance: Optional[int] = Field(None, description="Severity: Low=1, Medium=2, High=4")
+    competitive_erosion: Optional[int] = Field(None, description="Severity: Low=1, Medium=2, High=4")
+    competitor_breakthrough: Optional[int] = Field(None, description="Severity: Low=1, Medium=2, High=4")
+    growth_deceleration: Optional[int] = Field(None, description="Severity: Low=1, Medium=2, High=4")
+    position_weakness: Optional[int] = Field(None, description="Severity: Low=1, Medium=2, High=4")
+
+    model_config = ConfigDict(from_attributes=True)
+
+
+class RiskHistoryResponse(BaseModel):
+    """Response schema for risk history time series chart."""
+    brand_id: str = Field(..., description="Brand identifier")
+    segment: str = Field(..., description="Segment name")
+    data_points: list[RiskHistoryDataPoint] = Field(default_factory=list, description="Time series data points")
+
+    model_config = ConfigDict(from_attributes=True)

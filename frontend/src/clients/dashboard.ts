@@ -12,6 +12,8 @@
  * - Automatic cache invalidation on expiry
  */
 
+import { getAuthToken } from "./auth-helper"
+
 // API configuration - uses environment variable or falls back to localhost
 const API_BASE_URL = import.meta.env.VITE_API_URL || "http://localhost:8000"
 const API_PREFIX: string = "/api/v1"
@@ -443,6 +445,66 @@ export interface TopCompetitorParams {
 }
 
 /**
+ * A single signal's latest severity for the risk overview
+ */
+export interface InsightSignalSeverity {
+  signal_type: string
+  signal_name: string
+  severity: string
+  signal_score: number
+  business_meaning: string
+}
+
+/**
+ * Response for risk overview endpoint (5 severity cards)
+ */
+export interface BrandRiskOverviewResponse {
+  brand_id: string
+  segment: string
+  signals: InsightSignalSeverity[]
+}
+
+/**
+ * Parameters for risk overview query
+ */
+export interface RiskOverviewParams {
+  brandId: string
+  segment: string
+}
+
+/**
+ * A single data point for risk history chart
+ */
+export interface RiskHistoryDataPoint {
+  date: string
+  competitive_dominance: number | null
+  competitive_erosion: number | null
+  competitor_breakthrough: number | null
+  growth_deceleration: number | null
+  position_weakness: number | null
+}
+
+/**
+ * Response for risk history endpoint
+ */
+export interface RiskHistoryResponse {
+  brand_id: string
+  segment: string
+  data_points: RiskHistoryDataPoint[]
+}
+
+/**
+ * Parameters for risk history query
+ */
+export interface RiskHistoryParams {
+  brandId: string
+  segment: string
+  timeRange: TimeRange
+  startDate?: string
+  endDate?: string
+}
+
+/**
  * Standard API error response interface
  */
 export interface ApiError {
@@ -471,8 +533,8 @@ class DashboardAPI {
    *
    * @returns Headers object with Content-Type and Authorization
    */
-  private getAuthHeaders(): HeadersInit {
-    const token = localStorage.getItem("access_token")
+  private async getAuthHeaders(): Promise<HeadersInit> {
+    const token = await getAuthToken()
     return {
       "Content-Type": "application/json",
       ...(token ? { Authorization: `Bearer ${token}` } : {}),
@@ -605,7 +667,7 @@ class DashboardAPI {
     // Make API request
     const response = await fetch(url, {
       method: "GET",
-      headers: this.getAuthHeaders(),
+      headers: await this.getAuthHeaders(),
     })
 
     // Handle authentication errors
@@ -669,7 +731,7 @@ class DashboardAPI {
     // Make API request
     const response = await fetch(url, {
       method: "GET",
-      headers: this.getAuthHeaders(),
+      headers: await this.getAuthHeaders(),
     })
 
     // Handle authentication errors
@@ -727,7 +789,7 @@ class DashboardAPI {
     // Make API request
     const response = await fetch(url, {
       method: "GET",
-      headers: this.getAuthHeaders(),
+      headers: await this.getAuthHeaders(),
     })
 
     // Handle authentication errors
@@ -814,7 +876,7 @@ class DashboardAPI {
     // Make API request
     const response = await fetch(url, {
       method: "GET",
-      headers: this.getAuthHeaders(),
+      headers: await this.getAuthHeaders(),
     })
 
     // Handle authentication errors
@@ -878,7 +940,7 @@ class DashboardAPI {
     // Make API request
     const response = await fetch(url, {
       method: "GET",
-      headers: this.getAuthHeaders(),
+      headers: await this.getAuthHeaders(),
     })
 
     // Handle authentication errors
@@ -941,7 +1003,7 @@ class DashboardAPI {
 
     const response = await fetch(url, {
       method: "GET",
-      headers: this.getAuthHeaders(),
+      headers: await this.getAuthHeaders(),
     })
 
     if (response.status === 401) {
@@ -1016,7 +1078,7 @@ class DashboardAPI {
 
     const response = await fetch(url, {
       method: "GET",
-      headers: this.getAuthHeaders(),
+      headers: await this.getAuthHeaders(),
     })
 
     if (response.status === 401) {
@@ -1081,7 +1143,7 @@ class DashboardAPI {
 
     const response = await fetch(url, {
       method: "GET",
-      headers: this.getAuthHeaders(),
+      headers: await this.getAuthHeaders(),
     })
 
     if (response.status === 401) {
@@ -1157,7 +1219,7 @@ class DashboardAPI {
 
     const response = await fetch(url, {
       method: "GET",
-      headers: this.getAuthHeaders(),
+      headers: await this.getAuthHeaders(),
     })
 
     if (response.status === 401) {
@@ -1239,7 +1301,7 @@ class DashboardAPI {
 
     const response = await fetch(url, {
       method: "GET",
-      headers: this.getAuthHeaders(),
+      headers: await this.getAuthHeaders(),
     })
 
     if (response.status === 401) {
@@ -1307,7 +1369,7 @@ class DashboardAPI {
 
     const response = await fetch(url, {
       method: "GET",
-      headers: this.getAuthHeaders(),
+      headers: await this.getAuthHeaders(),
     })
 
     if (response.status === 401) {
@@ -1374,7 +1436,7 @@ class DashboardAPI {
 
     const response = await fetch(url, {
       method: "GET",
-      headers: this.getAuthHeaders(),
+      headers: await this.getAuthHeaders(),
     })
 
     if (response.status === 401) {
@@ -1443,7 +1505,7 @@ class DashboardAPI {
 
     const response = await fetch(url, {
       method: "GET",
-      headers: this.getAuthHeaders(),
+      headers: await this.getAuthHeaders(),
     })
 
     if (response.status === 401) {
@@ -1511,7 +1573,7 @@ class DashboardAPI {
 
     const response = await fetch(url, {
       method: "GET",
-      headers: this.getAuthHeaders(),
+      headers: await this.getAuthHeaders(),
     })
 
     if (response.status === 401) {
@@ -1579,7 +1641,7 @@ class DashboardAPI {
 
     const response = await fetch(url, {
       method: "GET",
-      headers: this.getAuthHeaders(),
+      headers: await this.getAuthHeaders(),
     })
 
     if (response.status === 401) {
@@ -1597,6 +1659,111 @@ class DashboardAPI {
     console.log("[DashboardAPI] Top competitor fetched successfully", {
       topCompetitor: data.top_competitor_name,
     })
+
+    return data
+  }
+
+  // ── Risk Overview (Insight page) ──────────────────────────────
+
+  private getRiskOverviewCacheKey(params: RiskOverviewParams): string {
+    return `dashboard_risk_overview_${params.brandId}_${params.segment}`
+  }
+
+  async getRiskOverview(
+    params: RiskOverviewParams,
+    forceRefresh = false,
+  ): Promise<BrandRiskOverviewResponse> {
+    const cacheKey = this.getRiskOverviewCacheKey(params)
+
+    if (!forceRefresh) {
+      const cached = this.getCachedData<BrandRiskOverviewResponse>(cacheKey)
+      if (cached) {
+        console.log("[DashboardAPI] Returning cached risk overview")
+        return cached
+      }
+    }
+
+    console.log("[DashboardAPI] Fetching risk overview from API...", params)
+
+    const queryParams = new URLSearchParams()
+    queryParams.append("brand_id", params.brandId)
+    queryParams.append("segment", params.segment)
+
+    const url = `${this.baseUrl}${this.apiPrefix}/dashboard/risk-overview?${queryParams.toString()}`
+
+    const response = await fetch(url, {
+      method: "GET",
+      headers: await this.getAuthHeaders(),
+    })
+
+    if (response.status === 401) {
+      throw new Error("Unauthorized - Please log in again")
+    }
+
+    if (!response.ok) {
+      const error: ApiError = await response.json()
+      throw new Error(error.detail || "Failed to fetch risk overview")
+    }
+
+    const data: BrandRiskOverviewResponse = await response.json()
+    this.setCachedData(cacheKey, data)
+
+    return data
+  }
+
+  // ── Risk History (Insight page chart) ─────────────────────────
+
+  private getRiskHistoryCacheKey(params: RiskHistoryParams): string {
+    return `dashboard_risk_history_${params.brandId}_${params.segment}_${params.timeRange}_${params.startDate || ""}_${params.endDate || ""}`
+  }
+
+  async getRiskHistory(
+    params: RiskHistoryParams,
+    forceRefresh = false,
+  ): Promise<RiskHistoryResponse> {
+    const cacheKey = this.getRiskHistoryCacheKey(params)
+
+    if (!forceRefresh) {
+      const cached = this.getCachedData<RiskHistoryResponse>(cacheKey)
+      if (cached) {
+        console.log("[DashboardAPI] Returning cached risk history")
+        return cached
+      }
+    }
+
+    console.log("[DashboardAPI] Fetching risk history from API...", params)
+
+    const queryParams = new URLSearchParams()
+    queryParams.append("brand_id", params.brandId)
+    queryParams.append("segment", params.segment)
+    queryParams.append("time_range", params.timeRange)
+
+    if (params.timeRange === "custom") {
+      if (!params.startDate || !params.endDate) {
+        throw new Error("Start date and end date are required for custom time range")
+      }
+      queryParams.append("start_date", params.startDate)
+      queryParams.append("end_date", params.endDate)
+    }
+
+    const url = `${this.baseUrl}${this.apiPrefix}/dashboard/risk-history?${queryParams.toString()}`
+
+    const response = await fetch(url, {
+      method: "GET",
+      headers: await this.getAuthHeaders(),
+    })
+
+    if (response.status === 401) {
+      throw new Error("Unauthorized - Please log in again")
+    }
+
+    if (!response.ok) {
+      const error: ApiError = await response.json()
+      throw new Error(error.detail || "Failed to fetch risk history")
+    }
+
+    const data: RiskHistoryResponse = await response.json()
+    this.setCachedData(cacheKey, data)
 
     return data
   }

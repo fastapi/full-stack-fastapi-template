@@ -1,6 +1,7 @@
 // src/components/app/AppLayout.tsx
 
-import { Link, useLocation, useNavigate } from "@tanstack/react-router"
+import { useClerk, useUser } from "@clerk/clerk-react"
+import { Link, useLocation } from "@tanstack/react-router"
 import {
   ChevronDown,
   ChevronRight,
@@ -27,24 +28,10 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
   const [sidebarOpen, setSidebarOpen] = useState(true)
   const [expandedMenus, setExpandedMenus] = useState<Set<string>>(new Set(["Dashboard"]))
   const location = useLocation()
-  const navigate = useNavigate()
 
-  // Get user's first name from stored user object
-  const getUserFirstName = (): string => {
-    try {
-      const userStr = localStorage.getItem("user")
-      if (userStr) {
-        const user = JSON.parse(userStr)
-        if (user.first_name) return user.first_name
-        if (user.full_name) return user.full_name.split(" ")[0]
-        if (user.user_name) return user.user_name.split(" ")[0]
-      }
-    } catch {
-      // Ignore parse errors
-    }
-    return "User"
-  }
-  const userFirstName = getUserFirstName()
+  const { signOut } = useClerk()
+  const { user: clerkUser } = useUser()
+  const userFirstName = clerkUser?.firstName || clerkUser?.username || "User"
 
   const menuItems: MenuItem[] = [
     { name: "Projects", icon: FolderKanban, path: "/app/projects" },
@@ -57,7 +44,16 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
         { name: "Competitive Analysis", path: "/app/dashboard/competitors" },
       ],
     },
-    { name: "Insight", icon: Lightbulb, path: "/app/insight" },
+    {
+      name: "Insight",
+      icon: Lightbulb,
+      children: [
+        { name: "Brand Risk Overview", path: "/app/insight/brand-risk" },
+        { name: "Competitive Risk", path: "/app/insight/competitive-risk" },
+        { name: "Growth Risk", path: "/app/insight/growth-risk" },
+        { name: "Ranking Position Risk", path: "/app/insight/ranking-risk" },
+      ],
+    },
     { name: "My Profile", icon: User, path: "/app/users" },
   ]
 
@@ -73,11 +69,15 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
     })
   }
 
-  const handleLogout = () => {
-    localStorage.removeItem("isAuthenticated")
-    localStorage.removeItem("userName")
-    toast.success("Logged out successfully")
-    navigate({ to: "/" })
+  const handleLogout = async () => {
+    try {
+      await signOut()
+      toast.success("Logged out successfully")
+      window.location.href = "/"
+    } catch (error) {
+      console.error("Logout failed:", error)
+      toast.error("Logout failed")
+    }
   }
 
   return (

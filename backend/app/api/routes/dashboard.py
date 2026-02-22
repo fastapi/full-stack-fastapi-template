@@ -53,6 +53,10 @@ from app.models.dashboard import (
     CompetitorDetailRow,
     CompetitorDetailTableResponse,
     TopCompetitorResponse,
+    InsightSignalSeverity,
+    BrandRiskOverviewResponse,
+    RiskHistoryDataPoint,
+    RiskHistoryResponse,
 )
 from kila_models.models import (
     UsersTable,
@@ -66,6 +70,7 @@ from kila_models.models import (
     BrandCompetitorsAwarenessWeeklyPerformanceTable,
     BrandSearchCompetitorsVisibilityTable,
     BrandSearchCompetitorsRankingTable,
+    BrandPerformanceInsightTable,
 )
 
 
@@ -1669,4 +1674,154 @@ async def get_top_competitor(
         segment=segment,
         top_competitor_name=best_competitor,
         avg_awareness_score=round(best_avg, 2),
+    )
+
+
+# ── Signal type constants and mappings for insight endpoints ──────
+
+INSIGHT_SIGNAL_TYPES = [
+    "competitive_dominance_signal",
+    "competitive_erosion_signal",
+    "competitive_breakthrough_signal",
+    "deceleration_warning_signal",
+    "weak_structural_position_signal",
+]
+
+SIGNAL_DISPLAY_NAMES = {
+    "competitive_dominance_signal": "Competitive Dominance Risk",
+    "competitive_erosion_signal": "Competitive Erosion Risk",
+    "competitive_breakthrough_signal": "Competitor Breakthrough Risk",
+    "deceleration_warning_signal": "Growth Deceleration Risk",
+    "weak_structural_position_signal": "Position Structure Weakness Risk",
+}
+
+SEVERITY_TO_INT = {"Low": 1, "Medium": 2, "High": 4}
+
+SIGNAL_TYPE_TO_HISTORY_KEY = {
+    "competitive_dominance_signal": "competitive_dominance",
+    "competitive_erosion_signal": "competitive_erosion",
+    "competitive_breakthrough_signal": "competitor_breakthrough",
+    "deceleration_warning_signal": "growth_deceleration",
+    "weak_structural_position_signal": "position_weakness",
+}
+
+
+@router.get("/risk-overview", response_model=BrandRiskOverviewResponse)
+async def get_risk_overview(
+    brand_id: str = Query(..., description="Brand ID to get risk overview for"),
+    segment: str = Query("All-Segment", description="Segment to filter by"),
+    db: AsyncSession = Depends(get_db),
+    current_user: UsersTable = Depends(get_current_user),
+):
+    """Get the latest severity for each of the 5 insight signal types."""
+    logger.info(f"Getting risk overview for brand_id: {brand_id}, segment: {segment}")
+
+    signals: list[InsightSignalSeverity] = []
+
+    for signal_type in INSIGHT_SIGNAL_TYPES:
+        query = (
+            select(BrandPerformanceInsightTable)
+            .where(
+                BrandPerformanceInsightTable.search_target_brand_id == brand_id,
+                BrandPerformanceInsightTable.segment == segment,
+                BrandPerformanceInsightTable.signal_type == signal_type,
+            )
+            .order_by(desc(BrandPerformanceInsightTable.created_date))
+            .limit(1)
+        )
+        result = await db.execute(query)
+        record = result.scalar_one_or_none()
+
+        if record:
+            signals.append(InsightSignalSeverity(
+                signal_type=signal_type,
+                signal_name=SIGNAL_DISPLAY_NAMES[signal_type],
+                severity=record.severity,
+                signal_score=record.signal_score,
+                business_meaning=record.business_meaning,
+            ))
+        else:
+            signals.append(InsightSignalSeverity(
+                signal_type=signal_type,
+                signal_name=SIGNAL_DISPLAY_NAMES[signal_type],
+                severity="Low",
+                signal_score=0.0,
+                business_meaning="No data available",
+            ))
+
+    return BrandRiskOverviewResponse(
+        brand_id=brand_id,
+        segment=segment,
+        signals=signals,
+    )
+
+
+@router.get("/risk-history", response_model=RiskHistoryResponse)
+async def get_risk_history(
+    brand_id: str = Query(..., description="Brand ID to get risk history for"),
+    segment: str = Query("All-Segment", description="Segment to filter by"),
+    time_range: TimeRange = Query(TimeRange.ONE_MONTH, description="Time range"),
+    start_date: Optional[date] = Query(None, description="Custom start date"),
+    end_date: Optional[date] = Query(None, description="Custom end date"),
+    db: AsyncSession = Depends(get_db),
+    current_user: UsersTable = Depends(get_current_user),
+):
+    """Get risk history time series with severity mapped to integers for charting."""
+    logger.info(
+        f"Getting risk history for brand_id: {brand_id}, segment: {segment}, "
+        f"time_range: {time_range}"
+    )
+
+    if time_range == TimeRange.CUSTOM:
+        if not start_date or not end_date:
+            raise HTTPException(
+                status_code=400,
+                detail="start_date and end_date are required for custom time range",
+            )
+        query_start_date = start_date
+        query_end_date = end_date
+    else:
+        query_start_date, query_end_date = get_date_range_for_time_range(time_range)
+
+    query = (
+        select(BrandPerformanceInsightTable)
+        .where(
+            BrandPerformanceInsightTable.search_target_brand_id == brand_id,
+            BrandPerformanceInsightTable.segment == segment,
+            BrandPerformanceInsightTable.signal_type.in_(INSIGHT_SIGNAL_TYPES),
+            BrandPerformanceInsightTable.created_date >= query_start_date,
+            BrandPerformanceInsightTable.created_date <= query_end_date,
+        )
+        .order_by(asc(BrandPerformanceInsightTable.created_date))
+    )
+
+    result = await db.execute(query)
+    records = result.scalars().all()
+
+    # Group by date, pivot signal types into columns
+    date_map: dict[str, dict[str, int]] = {}
+    for record in records:
+        date_str = record.created_date.isoformat()
+        if date_str not in date_map:
+            date_map[date_str] = {}
+        history_key = SIGNAL_TYPE_TO_HISTORY_KEY.get(record.signal_type)
+        if history_key:
+            date_map[date_str][history_key] = SEVERITY_TO_INT.get(record.severity, 1)
+
+    data_points = [
+        RiskHistoryDataPoint(
+            date=dt,
+            competitive_dominance=cols.get("competitive_dominance"),
+            competitive_erosion=cols.get("competitive_erosion"),
+            competitor_breakthrough=cols.get("competitor_breakthrough"),
+            growth_deceleration=cols.get("growth_deceleration"),
+            position_weakness=cols.get("position_weakness"),
+        )
+        for dt, cols in sorted(date_map.items())
+    ]
+
+    return RiskHistoryResponse(
+        brand_id=brand_id,
+        segment=segment,
+        data_points=data_points,
     )

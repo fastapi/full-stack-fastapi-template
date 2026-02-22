@@ -1,3 +1,4 @@
+from typing import Optional
 from pydantic import BaseModel, EmailStr, Field, field_validator, ConfigDict
 from datetime import datetime
 
@@ -40,3 +41,13 @@ class TokenResponse(BaseModel):
     refresh_token: str
     token_type: str = "bearer"
     user: UserResponse
+
+
+class ClerkSyncResponse(BaseModel):
+    user_id: str
+    email: str
+    user_name: Optional[str] = None
+    is_active: bool
+    profile_complete: bool
+
+    model_config = ConfigDict(from_attributes=True)

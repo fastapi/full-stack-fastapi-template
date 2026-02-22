@@ -1,47 +1,110 @@
-import { createFileRoute, Outlet, redirect } from "@tanstack/react-router"
+import { useAuth } from "@clerk/clerk-react"
+import { createFileRoute, Outlet, useNavigate } from "@tanstack/react-router"
+import { useEffect, useState } from "react"
 import AppLayout from "@/components/app/AppLayout"
 
 export const Route = createFileRoute("/app")({
-  beforeLoad: ({ location }) => {
-    // Check if user is authenticated
-    const isAuthenticated = localStorage.getItem("isAuthenticated") === "true"
+  component: AppGuard,
+})
 
-    if (!isAuthenticated) {
-      throw redirect({
-        to: "/",
-        search: {
-          redirect: location.href,
-        },
-      })
+function AppGuard() {
+  const { isLoaded, isSignedIn, getToken } = useAuth()
+  const navigate = useNavigate()
+  const [syncState, setSyncState] = useState<
+    "loading" | "synced" | "error"
+  >("loading")
+  const [profileComplete, setProfileComplete] = useState(false)
+
+  useEffect(() => {
+    if (!isLoaded) return
+
+    if (!isSignedIn) {
+      navigate({ to: "/" })
+      return
     }
 
-    // Check if profile is complete (skip check if already on profile-setup page)
-    if (!location.pathname.includes("/profile-setup")) {
-      const profileComplete =
-        localStorage.getItem("profile_complete") === "true"
-
-      // Also check user object for profile_complete flag
-      const userStr = localStorage.getItem("user")
-      let userProfileComplete = false
-      if (userStr) {
-        try {
-          const user = JSON.parse(userStr)
-          userProfileComplete = user.profile_complete === true
-        } catch {
-          // Ignore parse errors
+    // Sync with backend to check profile status
+    const syncUser = async () => {
+      try {
+        const token = await getToken()
+        if (!token) {
+          console.error("No Clerk token available")
+          setSyncState("error")
+          return
         }
-      }
 
-      if (!profileComplete && !userProfileComplete) {
-        throw redirect({
-          to: "/app/profile-setup",
+        const apiUrl = import.meta.env.VITE_API_URL || "http://localhost:8000"
+        const response = await fetch(`${apiUrl}/api/v1/auth/clerk-sync`, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+          },
         })
+
+        if (response.ok) {
+          const data = await response.json()
+          setProfileComplete(data.profile_complete)
+          setSyncState("synced")
+        } else {
+          console.error("clerk-sync failed:", response.status)
+          setSyncState("error")
+        }
+      } catch (error) {
+        console.error("Failed to sync user:", error)
+        setSyncState("error")
       }
     }
-  },
-  component: () => (
+
+    syncUser()
+  }, [isLoaded, isSignedIn, getToken, navigate])
+
+  // Redirect to profile setup if not complete (moved to useEffect to avoid setState-in-render)
+  useEffect(() => {
+    if (
+      syncState === "synced" &&
+      !profileComplete &&
+      !window.location.pathname.includes("/profile-setup")
+    ) {
+      navigate({ to: "/app/profile-setup" })
+    }
+  }, [syncState, profileComplete, navigate])
+
+  // Still loading Clerk or syncing with backend
+  if (!isLoaded || syncState === "loading") {
+    return (
+      <div className="h-screen flex items-center justify-center bg-gray-50 dark:bg-gray-900">
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600" />
+      </div>
+    )
+  }
+
+  if (!isSignedIn) {
+    return null
+  }
+
+  // Backend sync failed — show error with retry
+  if (syncState === "error") {
+    return (
+      <div className="h-screen flex flex-col items-center justify-center bg-gray-50 dark:bg-gray-900 gap-4">
+        <p className="text-gray-600 dark:text-gray-400">
+          Failed to connect to server. Please try again.
+        </p>
+        <button
+          onClick={() => {
+            setSyncState("loading")
+          }}
+          className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition"
+        >
+          Retry
+        </button>
+      </div>
+    )
+  }
+
+  return (
     <AppLayout>
       <Outlet />
     </AppLayout>
-  ),
-})
+  )
+}

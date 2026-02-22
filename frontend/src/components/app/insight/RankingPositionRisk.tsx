@@ -1,4 +1,10 @@
-import { Calendar, ChartColumnBig, ChartLine, Lightbulb, Loader2 } from "lucide-react"
+import {
+  Calendar,
+  ChartColumnBig,
+  ChartLine,
+  Loader2,
+  MapPin,
+} from "lucide-react"
 import { useCallback, useEffect, useState } from "react"
 import { toast } from "sonner"
 import {
@@ -14,10 +20,9 @@ import {
   YAxis,
 } from "recharts"
 import {
+  type BrandOverviewResponse,
   type BrandRiskOverviewResponse,
   type InsightSignalSeverity,
-  type RiskHistoryDataPoint,
-  type RiskHistoryResponse,
   type TimeRange,
   type UserBrand,
   type UserBrandsResponse,
@@ -39,27 +44,14 @@ import {
 } from "@/components/ui/select"
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs"
 
-// ── Signal display config ──────────────────────────────────────
+// ── Chart config ─────────────────────────────────────────────
 
-const SIGNAL_COLORS: Record<string, string> = {
-  "Competitive Dominance Risk": "#3b82f6",
-  "Competitive Erosion Risk": "#8b5cf6",
-  "Competitor Breakthrough Risk": "#f97316",
-  "Growth Deceleration Risk": "#ec4899",
-  "Position Structure Weakness Risk": "#22c55e",
-}
-
-const CHART_KEYS = [
-  { dataKey: "competitive_dominance", name: "Competitive Dominance Risk" },
-  { dataKey: "competitive_erosion", name: "Competitive Erosion Risk" },
-  { dataKey: "competitor_breakthrough", name: "Competitor Breakthrough Risk" },
-  { dataKey: "growth_deceleration", name: "Growth Deceleration Risk" },
-  { dataKey: "position_weakness", name: "Position Structure Weakness Risk" },
+const CHART_SERIES = [
+  { dataKey: "Position Strength", color: "#3b82f6" },
+  { dataKey: "Position Delta (WoW)", color: "#f97316" },
 ]
 
-const SEVERITY_LABEL: Record<number, string> = { 1: "Low", 2: "Medium", 4: "High" }
-
-// ── Severity badge component ───────────────────────────────────
+// ── Severity badge ───────────────────────────────────────────
 
 function SeverityBadge({ severity }: { severity: string }) {
   const lower = severity.toLowerCase()
@@ -74,7 +66,19 @@ function SeverityBadge({ severity }: { severity: string }) {
   return <span className={classes}>{severity}</span>
 }
 
-// ── Chart helpers ──────────────────────────────────────────────
+// ── Delta value display ──────────────────────────────────────
+
+function DeltaValue({ value, suffix = "%" }: { value: number; suffix?: string }) {
+  const color = value > 0 ? "text-green-600" : value < 0 ? "text-red-600" : "text-slate-600"
+  const sign = value > 0 ? "+" : ""
+  return (
+    <span className={`font-semibold ${color}`}>
+      {sign}{value.toFixed(1)}{suffix}
+    </span>
+  )
+}
+
+// ── Chart helpers ────────────────────────────────────────────
 
 const formatDateForDisplay = (isoDate: string): string => {
   const d = new Date(isoDate)
@@ -84,23 +88,29 @@ const formatDateForDisplay = (isoDate: string): string => {
 interface ChartDataPoint {
   date: string
   displayDate: string
-  "Competitive Dominance Risk": number | null
-  "Competitive Erosion Risk": number | null
-  "Competitor Breakthrough Risk": number | null
-  "Growth Deceleration Risk": number | null
-  "Position Structure Weakness Risk": number | null
+  "Position Strength": number | null
+  "Position Delta (WoW)": number | null
 }
 
-function transformHistoryData(dataPoints: RiskHistoryDataPoint[]): ChartDataPoint[] {
-  return dataPoints.map((p) => ({
-    date: p.date,
-    displayDate: formatDateForDisplay(p.date),
-    "Competitive Dominance Risk": p.competitive_dominance,
-    "Competitive Erosion Risk": p.competitive_erosion,
-    "Competitor Breakthrough Risk": p.competitor_breakthrough,
-    "Growth Deceleration Risk": p.growth_deceleration,
-    "Position Structure Weakness Risk": p.position_weakness,
-  }))
+function transformBrandData(brandData: BrandOverviewResponse | null): ChartDataPoint[] {
+  if (!brandData || brandData.data_points.length === 0) return []
+
+  const sorted = [...brandData.data_points].sort(
+    (a, b) => new Date(a.date).getTime() - new Date(b.date).getTime(),
+  )
+
+  return sorted.map((p, i) => {
+    const strength = p.position_strength * 100
+    const prevStrength = i > 0 ? sorted[i - 1].position_strength * 100 : null
+    const delta = prevStrength !== null ? strength - prevStrength : null
+
+    return {
+      date: p.date,
+      displayDate: formatDateForDisplay(p.date),
+      "Position Strength": strength,
+      "Position Delta (WoW)": delta,
+    }
+  })
 }
 
 const CustomTooltip = ({ active, payload, label }: any) => {
@@ -108,19 +118,18 @@ const CustomTooltip = ({ active, payload, label }: any) => {
   return (
     <div className="bg-white border border-gray-200 rounded-lg shadow-lg p-3">
       <p className="text-sm font-medium text-gray-700 mb-2">{label}</p>
-      {payload.map((entry: any) => {
-        const severityText = SEVERITY_LABEL[entry.value] || "N/A"
-        return (
-          <div key={entry.name} className="flex items-center gap-2 text-sm">
-            <span
-              className="w-3 h-3 rounded-full"
-              style={{ backgroundColor: entry.color }}
-            />
-            <span className="text-gray-600">{entry.name}:</span>
-            <span className="font-medium">{severityText}</span>
-          </div>
-        )
-      })}
+      {payload.map((entry: any) => (
+        <div key={entry.name} className="flex items-center gap-2 text-sm">
+          <span
+            className="w-3 h-3 rounded-full"
+            style={{ backgroundColor: entry.color }}
+          />
+          <span className="text-gray-600">{entry.name}:</span>
+          <span className="font-medium">
+            {entry.value !== null ? `${entry.value.toFixed(1)}%` : "N/A"}
+          </span>
+        </div>
+      ))}
     </div>
   )
 }
@@ -158,19 +167,9 @@ const CustomLegend = ({ payload, hiddenSeries, onToggle }: CustomLegendProps) =>
   )
 }
 
-const CustomYAxisTick = ({ x, y, payload }: any) => {
-  const label = SEVERITY_LABEL[payload.value]
-  if (!label) return null
-  return (
-    <text x={x} y={y} dy={4} textAnchor="end" fontSize={12} fill="#64748b">
-      {label}
-    </text>
-  )
-}
+// ── Main component ───────────────────────────────────────────
 
-// ── Main component ─────────────────────────────────────────────
-
-export default function Insight() {
+export default function RankingPositionRisk() {
   // Brand selection
   const [brands, setBrands] = useState<UserBrand[]>([])
   const [selectedBrandId, setSelectedBrandId] = useState<string | null>(null)
@@ -181,11 +180,16 @@ export default function Insight() {
   const [segments, setSegments] = useState<string[]>([])
   const [selectedSegment, setSelectedSegment] = useState<string>("All-Segment")
 
-  // Risk overview (5 cards)
+  // Brand overview (for Card 1 metrics)
+  const [brandOverview, setBrandOverview] = useState<BrandOverviewResponse | null>(null)
+
+  // Risk overview (for severity badge)
   const [riskOverview, setRiskOverview] = useState<BrandRiskOverviewResponse | null>(null)
+
+  // Loading states for Card 1
   const [isLoadingOverview, setIsLoadingOverview] = useState(false)
 
-  // Time range
+  // Time range (for chart)
   const [timeRange, setTimeRange] = useState<TimeRange>("1month")
   const [showCustomDate, setShowCustomDate] = useState(false)
   const [customDateRange, setCustomDateRange] = useState({ start: "", end: "" })
@@ -242,49 +246,60 @@ export default function Insight() {
     fetchSegments()
   }, [selectedBrandId])
 
-  // ── Fetch risk overview on brand+segment change ──
+  // ── Fetch Card 1 data on brand+segment change ──
   useEffect(() => {
     if (!selectedBrandId || !selectedSegment) return
-    const fetchOverview = async () => {
+
+    const fetchOverviewData = async () => {
+      setIsLoadingOverview(true)
       try {
-        setIsLoadingOverview(true)
-        const data = await dashboardAPI.getRiskOverview({
-          brandId: selectedBrandId,
-          segment: selectedSegment,
-        })
-        setRiskOverview(data)
+        const [brandRes, riskRes] = await Promise.all([
+          dashboardAPI.getBrandOverview({
+            brandId: selectedBrandId,
+            timeRange: "1month",
+            segment: selectedSegment,
+          }),
+          dashboardAPI.getRiskOverview({
+            brandId: selectedBrandId,
+            segment: selectedSegment,
+          }),
+        ])
+        setBrandOverview(brandRes)
+        setRiskOverview(riskRes)
       } catch {
+        setBrandOverview(null)
         setRiskOverview(null)
       } finally {
         setIsLoadingOverview(false)
       }
     }
-    fetchOverview()
+    fetchOverviewData()
   }, [selectedBrandId, selectedSegment])
 
-  // ── Fetch risk history on brand+segment+timeRange change ──
+  // ── Fetch chart data on brand+segment+timeRange change ──
   useEffect(() => {
     if (!selectedBrandId || !selectedSegment) return
-    if (timeRange === "custom" && (!customDateApplied?.start || !customDateApplied?.end)) return
+    if (timeRange === "custom" && (!customDateApplied?.start || !customDateApplied?.end))
+      return
 
-    const fetchHistory = async () => {
+    const fetchChartData = async () => {
+      setIsLoadingChart(true)
       try {
-        setIsLoadingChart(true)
-        const data: RiskHistoryResponse = await dashboardAPI.getRiskHistory({
+        const brandRes = await dashboardAPI.getBrandOverview({
           brandId: selectedBrandId,
-          segment: selectedSegment,
           timeRange,
+          segment: selectedSegment,
           startDate: customDateApplied?.start,
           endDate: customDateApplied?.end,
         })
-        setChartData(transformHistoryData(data.data_points))
+        setChartData(transformBrandData(brandRes))
       } catch {
         setChartData([])
       } finally {
         setIsLoadingChart(false)
       }
     }
-    fetchHistory()
+    fetchChartData()
   }, [selectedBrandId, selectedSegment, timeRange, customDateApplied])
 
   const toggleSeries = (name: string) => {
@@ -313,6 +328,22 @@ export default function Insight() {
     }
   }
 
+  // ── Computed values for Card 1 ──
+  const getSeverity = (signalType: string): InsightSignalSeverity | undefined =>
+    riskOverview?.signals.find((s) => s.signal_type === signalType)
+
+  const currentStrength = brandOverview
+    ? brandOverview.summary.position_strength.current_value * 100
+    : null
+  const previousStrength =
+    brandOverview && brandOverview.summary.position_strength.previous_value !== null
+      ? brandOverview.summary.position_strength.previous_value * 100
+      : null
+  const strengthDelta =
+    currentStrength !== null && previousStrength !== null
+      ? currentStrength - previousStrength
+      : null
+
   // ── Render ──
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100 p-8">
@@ -320,9 +351,12 @@ export default function Insight() {
         {/* Header */}
         <div className="flex items-center justify-between">
           <div>
-            <h1 className="text-4xl font-bold text-slate-900">Insight</h1>
+            <h1 className="text-4xl font-bold text-slate-900">
+              Ranking Position Risk
+            </h1>
             <p className="text-slate-600 mt-2">
-              AI-powered risk signals and performance insights for your brand
+              Position strength risk analysis and structural weakness tracking for your
+              brand
             </p>
           </div>
           <Button variant="outline" onClick={handleRefresh}>
@@ -394,14 +428,14 @@ export default function Insight() {
           </CardContent>
         </Card>
 
-        {/* Risk Overview Card */}
+        {/* Card 1: Ranking Position Risk Overview */}
         {selectedBrandId && (
           <Card className="shadow-lg">
             <CardHeader className="pb-4">
               <div className="flex items-center gap-2">
-                <Lightbulb className="h-5 w-5 text-amber-500" />
+                <MapPin className="h-5 w-5 text-violet-500" />
                 <CardTitle className="text-xl font-bold">
-                  Your Brand Risk Overview
+                  Your Brand Ranking Position Risk Overview
                 </CardTitle>
               </div>
             </CardHeader>
@@ -423,40 +457,67 @@ export default function Insight() {
                 </Select>
               </div>
 
-              {/* 5 Severity Cards */}
               {isLoadingOverview ? (
                 <div className="flex items-center justify-center py-8">
                   <Loader2 className="h-6 w-6 animate-spin text-slate-400" />
                 </div>
-              ) : riskOverview ? (
-                <div className="grid grid-cols-5 gap-4">
-                  {riskOverview.signals.map((signal: InsightSignalSeverity) => (
-                    <div
-                      key={signal.signal_type}
-                      className="border rounded-lg p-4 bg-white shadow-sm flex flex-col items-center gap-3"
-                    >
-                      <span className="text-xs font-semibold text-slate-600 text-center leading-tight">
-                        {signal.signal_name}
-                      </span>
-                      <SeverityBadge severity={signal.severity} />
-                    </div>
-                  ))}
-                </div>
               ) : (
-                <p className="text-sm text-slate-400 text-center py-4">
-                  No risk data available
-                </p>
+                <div className="grid grid-cols-1 max-w-md">
+                  {/* Weak Position Risk card */}
+                  <div className="border rounded-lg p-5 bg-white shadow-sm space-y-3">
+                    <div className="flex items-center justify-between">
+                      <span className="text-sm font-semibold text-slate-700">
+                        Weak Position Risk
+                      </span>
+                      {getSeverity("weak_structural_position_signal") && (
+                        <SeverityBadge
+                          severity={
+                            getSeverity("weak_structural_position_signal")!.severity
+                          }
+                        />
+                      )}
+                    </div>
+                    <div className="space-y-2 text-sm">
+                      <div className="flex justify-between">
+                        <span className="text-slate-500">
+                          Current Position Strength
+                        </span>
+                        <span className="font-semibold text-slate-800">
+                          {currentStrength !== null
+                            ? `${currentStrength.toFixed(1)}%`
+                            : "N/A"}
+                        </span>
+                      </div>
+                      <div className="flex justify-between">
+                        <span className="text-slate-500">
+                          Position Change (vs Previous Week)
+                        </span>
+                        {strengthDelta !== null ? (
+                          <DeltaValue value={strengthDelta} />
+                        ) : (
+                          <span className="text-slate-400">N/A</span>
+                        )}
+                      </div>
+                    </div>
+                  </div>
+                </div>
               )}
+            </CardContent>
+          </Card>
+        )}
 
-              {/* Divider */}
-              <hr className="border-slate-200" />
-
-              {/* Risk Historical Status header row */}
+        {/* Card 2: Historical Chart */}
+        {selectedBrandId && (
+          <Card className="shadow-lg">
+            <CardHeader className="pb-4">
+              <CardTitle className="text-xl font-bold">
+                Position Strength Historical Trends
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-6">
+              {/* Time range + chart toggle row */}
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-4">
-                  <span className="text-lg font-semibold text-slate-800">
-                    Risk Historical Status
-                  </span>
                   <Tabs
                     value={showCustomDate ? "custom" : timeRange}
                     onValueChange={(value) => {
@@ -574,9 +635,13 @@ export default function Insight() {
                           tick={{ fontSize: 12, fill: "#64748b" }}
                         />
                         <YAxis
-                          domain={[0, 5]}
-                          ticks={[1, 2, 4]}
-                          tick={<CustomYAxisTick />}
+                          tick={{ fontSize: 12, fill: "#64748b" }}
+                          label={{
+                            value: "Score (%)",
+                            angle: -90,
+                            position: "insideLeft",
+                            style: { fontSize: 12, fill: "#64748b" },
+                          }}
                         />
                         <Tooltip content={<CustomTooltip />} />
                         <Legend
@@ -587,16 +652,16 @@ export default function Insight() {
                             />
                           }
                         />
-                        {CHART_KEYS.map(({ dataKey, name }) => (
+                        {CHART_SERIES.map(({ dataKey, color }) => (
                           <Line
                             key={dataKey}
                             type="monotone"
-                            dataKey={name}
-                            stroke={SIGNAL_COLORS[name]}
+                            dataKey={dataKey}
+                            stroke={color}
                             strokeWidth={2}
                             dot={{ r: 3 }}
                             activeDot={{ r: 5 }}
-                            hide={hiddenSeries.has(name)}
+                            hide={hiddenSeries.has(dataKey)}
                             connectNulls
                           />
                         ))}
@@ -609,9 +674,13 @@ export default function Insight() {
                           tick={{ fontSize: 12, fill: "#64748b" }}
                         />
                         <YAxis
-                          domain={[0, 5]}
-                          ticks={[1, 2, 4]}
-                          tick={<CustomYAxisTick />}
+                          tick={{ fontSize: 12, fill: "#64748b" }}
+                          label={{
+                            value: "Score (%)",
+                            angle: -90,
+                            position: "insideLeft",
+                            style: { fontSize: 12, fill: "#64748b" },
+                          }}
                         />
                         <Tooltip content={<CustomTooltip />} />
                         <Legend
@@ -622,12 +691,12 @@ export default function Insight() {
                             />
                           }
                         />
-                        {CHART_KEYS.map(({ dataKey, name }) => (
+                        {CHART_SERIES.map(({ dataKey, color }) => (
                           <Bar
                             key={dataKey}
-                            dataKey={name}
-                            fill={SIGNAL_COLORS[name]}
-                            hide={hiddenSeries.has(name)}
+                            dataKey={dataKey}
+                            fill={color}
+                            hide={hiddenSeries.has(dataKey)}
                           />
                         ))}
                       </BarChart>

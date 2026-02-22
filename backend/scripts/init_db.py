@@ -28,28 +28,29 @@ logger = logging.getLogger(__name__)
 
 async def create_database_if_not_exists():
     """Create the database if it doesn't exist"""
-    # Connect without database specified
-    base_url = f"mysql+aiomysql://{settings.mysql_user}:{settings.mysql_password}@{settings.mysql_host}:{settings.mysql_port}"
+    # Connect to the default 'postgres' database to check/create our target DB
+    password_part = f":{settings.pg_password}" if settings.pg_password else ""
+    base_url = f"postgresql+asyncpg://{settings.pg_user}{password_part}@{settings.pg_host}:{settings.pg_port}/postgres"
 
-    engine = create_async_engine(base_url, echo=False)
+    engine = create_async_engine(base_url, echo=False, isolation_level="AUTOCOMMIT")
 
     try:
         async with engine.connect() as conn:
             # Check if database exists
             result = await conn.execute(
-                text(f"SHOW DATABASES LIKE '{settings.mysql_database}'")
+                text("SELECT 1 FROM pg_database WHERE datname = :dbname"),
+                {"dbname": settings.pg_database}
             )
             db_exists = result.fetchone()
 
             if not db_exists:
-                logger.info(f"Database '{settings.mysql_database}' does not exist. Creating...")
+                logger.info(f"Database '{settings.pg_database}' does not exist. Creating...")
                 await conn.execute(
-                    text(f"CREATE DATABASE {settings.mysql_database} CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci")
+                    text(f'CREATE DATABASE "{settings.pg_database}"')
                 )
-                await conn.commit()
-                logger.info(f"Database '{settings.mysql_database}' created successfully")
+                logger.info(f"Database '{settings.pg_database}' created successfully")
             else:
-                logger.info(f"Database '{settings.mysql_database}' already exists")
+                logger.info(f"Database '{settings.pg_database}' already exists")
 
     except Exception as e:
         logger.error(f"Error creating database: {str(e)}")
@@ -72,7 +73,9 @@ async def create_tables():
             logger.info("Tables created successfully")
 
             # Verify tables were created
-            result = await conn.execute(text("SHOW TABLES"))
+            result = await conn.execute(
+                text("SELECT tablename FROM pg_tables WHERE schemaname = 'public'")
+            )
             tables = result.fetchall()
             logger.info(f"Existing tables: {[table[0] for table in tables]}")
 
@@ -90,20 +93,29 @@ async def verify_schema():
     try:
         async with engine.connect() as conn:
             # Check prompts table structure
-            result = await conn.execute(text("DESCRIBE prompts"))
+            result = await conn.execute(
+                text("""
+                    SELECT column_name, data_type, is_nullable, column_default
+                    FROM information_schema.columns
+                    WHERE table_name = 'prompts' AND table_schema = 'public'
+                    ORDER BY ordinal_position
+                """)
+            )
             columns = result.fetchall()
 
             logger.info("Prompts table structure:")
             for col in columns:
-                logger.info(f"  {col[0]} - {col[1]} - Null: {col[2]} - Key: {col[3]}")
+                logger.info(f"  {col[0]} - {col[1]} - Nullable: {col[2]} - Default: {col[3]}")
 
             # Check indexes
-            result = await conn.execute(text("SHOW INDEX FROM prompts"))
+            result = await conn.execute(
+                text("SELECT indexname, indexdef FROM pg_indexes WHERE tablename = 'prompts'")
+            )
             indexes = result.fetchall()
 
             logger.info("Prompts table indexes:")
             for idx in indexes:
-                logger.info(f"  {idx[2]} on column {idx[4]}")
+                logger.info(f"  {idx[0]}: {idx[1]}")
 
     except Exception as e:
         logger.error(f"Error verifying schema: {str(e)}")
@@ -119,8 +131,8 @@ async def main():
         logger.info("Starting database initialization...")
         logger.info("=" * 60)
 
-        logger.info(f"Target database: {settings.mysql_database}")
-        logger.info(f"Host: {settings.mysql_host}:{settings.mysql_port}")
+        logger.info(f"Target database: {settings.pg_database}")
+        logger.info(f"Host: {settings.pg_host}:{settings.pg_port}")
 
         # Step 1: Create database if needed
         await create_database_if_not_exists()

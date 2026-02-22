@@ -5,8 +5,9 @@ from datetime import datetime, timezone
 from nanoid import generate
 from app.core.db import get_db
 from kila_models.models import UsersTable, UsersProfileTable
-from app.models.user_auth import UserSignupRequest, UserLoginRequest, UserResponse, TokenResponse
+from app.models.user_auth import UserSignupRequest, UserLoginRequest, UserResponse, TokenResponse, ClerkSyncResponse
 from app.utils.auth import hash_password, verify_password, create_access_token, create_refresh_token
+from app.api.deps import get_current_user
 import logging
 
 logger = logging.getLogger(__name__)
@@ -172,4 +173,29 @@ async def login(
         access_token=access_token,
         refresh_token=refresh_token,
         user=user_response
+    )
+
+
+@router.post("/clerk-sync", response_model=ClerkSyncResponse)
+async def clerk_sync(
+    current_user: UsersTable = Depends(get_current_user),
+    db: AsyncSession = Depends(get_db)
+):
+    """
+    Post-login sync endpoint for Clerk authentication.
+    Called by the frontend after Clerk sign-in to confirm user exists in DB
+    and check profile completion status.
+    The get_current_user dependency handles auto-creation if needed.
+    """
+    # Check if user has a profile
+    profile_stmt = select(exists().where(UsersProfileTable.user_id == current_user.user_id))
+    profile_result = await db.execute(profile_stmt)
+    has_profile = profile_result.scalar()
+
+    return ClerkSyncResponse(
+        user_id=current_user.user_id,
+        email=current_user.email,
+        user_name=current_user.user_name,
+        is_active=current_user.is_active,
+        profile_complete=has_profile,
     )

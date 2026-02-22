@@ -5,6 +5,8 @@
  * Includes built-in caching functionality to minimize API calls.
  */
 
+import { getAuthToken } from "./auth-helper"
+
 // API configuration
 const API_BASE_URL = import.meta.env.VITE_API_URL || "http://localhost:8000"
 const API_PREFIX = "/api/v1"
@@ -170,8 +172,8 @@ class ProjectsAPI {
   /**
    * Get authorization headers
    */
-  private getAuthHeaders(): HeadersInit {
-    const token = localStorage.getItem("access_token")
+  private async getAuthHeaders(): Promise<HeadersInit> {
+    const token = await getAuthToken()
     return {
       "Content-Type": "application/json",
       ...(token ? { Authorization: `Bearer ${token}` } : {}),
@@ -254,11 +256,15 @@ class ProjectsAPI {
 
     const response = await fetch(url, {
       method: "GET",
-      headers: this.getAuthHeaders(),
+      headers: await this.getAuthHeaders(),
     })
 
     if (response.status === 401) {
-      throw new Error("Unauthorized - Please log in again")
+      // In case the token was invalidated
+      console.error("[ProjectsAPI] Authentication failed, clearing cache and trying again...")
+      this.clearCache()
+      // Retry once with fresh headers and force refresh
+      return await this.getProjects(true)
     }
 
     if (!response.ok) {
@@ -290,7 +296,7 @@ class ProjectsAPI {
 
     const response = await fetch(url, {
       method: "POST",
-      headers: this.getAuthHeaders(),
+      headers: await this.getAuthHeaders(),
       body: JSON.stringify(projectData),
     })
 
@@ -332,7 +338,7 @@ class ProjectsAPI {
 
     const response = await fetch(url, {
       method: "POST",
-      headers: this.getAuthHeaders(),
+      headers: await this.getAuthHeaders(),
       body: JSON.stringify(setupData),
     })
 
@@ -380,7 +386,7 @@ class ProjectsAPI {
 
     const response = await fetch(url, {
       method: "PATCH",
-      headers: this.getAuthHeaders(),
+      headers: await this.getAuthHeaders(),
       body: JSON.stringify(updateData),
     })
 
@@ -419,7 +425,7 @@ class ProjectsAPI {
 
     const response = await fetch(url, {
       method: "GET",
-      headers: this.getAuthHeaders(),
+      headers: await this.getAuthHeaders(),
     })
 
     if (response.status === 401) {
@@ -460,7 +466,7 @@ class ProjectsAPI {
 
     const response = await fetch(url, {
       method: "PUT",
-      headers: this.getAuthHeaders(),
+      headers: await this.getAuthHeaders(),
       body: JSON.stringify(updateData),
     })
 
@@ -501,7 +507,7 @@ class ProjectsAPI {
 
     const response = await fetch(url, {
       method: "DELETE",
-      headers: this.getAuthHeaders(),
+      headers: await this.getAuthHeaders(),
     })
 
     if (response.status === 401) {

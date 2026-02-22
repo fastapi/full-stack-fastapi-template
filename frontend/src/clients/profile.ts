@@ -1,3 +1,5 @@
+import { getAuthToken } from "./auth-helper"
+
 const API_BASE_URL = import.meta.env.VITE_API_URL || "http://localhost:8000"
 const API_PREFIX: string = "/api/v1"
 
@@ -47,8 +49,8 @@ class ProfileAPI {
     this.apiPrefix = apiPrefix
   }
 
-  private getAuthHeaders(): HeadersInit {
-    const token = localStorage.getItem("access_token")
+  private async getAuthHeaders(): Promise<HeadersInit> {
+    const token = await getAuthToken()
     return {
       "Content-Type": "application/json",
       ...(token ? { Authorization: `Bearer ${token}` } : {}),
@@ -60,7 +62,7 @@ class ProfileAPI {
       `${this.baseUrl}${this.apiPrefix}/profile/me`,
       {
         method: "GET",
-        headers: this.getAuthHeaders(),
+        headers: await this.getAuthHeaders(),
       },
     )
 
@@ -82,7 +84,7 @@ class ProfileAPI {
       `${this.baseUrl}${this.apiPrefix}/profile/setup`,
       {
         method: "POST",
-        headers: this.getAuthHeaders(),
+        headers: await this.getAuthHeaders(),
         body: JSON.stringify(data),
       },
     )
@@ -112,7 +114,7 @@ class ProfileAPI {
       `${this.baseUrl}${this.apiPrefix}/profile/companies/search?${params}`,
       {
         method: "GET",
-        headers: this.getAuthHeaders(),
+        headers: await this.getAuthHeaders(),
       },
     )
 

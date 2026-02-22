@@ -9,9 +9,9 @@ class ProductionConfig(BaseConfig):
     debug: bool = False
 
     # Database
-    mysql_database: str = "ai_prompts"
-    mysql_pool_size: int = 20
-    mysql_max_overflow: int = 40
+    pg_database: str = "ai_prompts"
+    pg_pool_size: int = 20
+    pg_max_overflow: int = 40
 
     # Logging - Only important stuff
     log_level: str = "WARNING"

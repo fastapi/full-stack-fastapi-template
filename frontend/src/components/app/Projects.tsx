@@ -86,7 +86,15 @@ export default function Projects() {
     } catch (err) {
       const errorMessage =
         err instanceof Error ? err.message : "Failed to load projects"
-      setError(errorMessage)
+      
+      // Check if it's an authentication error specifically
+      if (errorMessage.includes("Unauthorized") || errorMessage.includes("401")) {
+        console.error("[Projects] Authentication issue detected - please log in again")
+        // Show a specific message that indicates they might need to re-login
+        setError("Authentication failed. Please log in again to view your projects.")
+      } else {
+        setError(errorMessage)
+      }
       console.error("[Projects] Error:", err)
     } finally {
       setIsLoading(false)

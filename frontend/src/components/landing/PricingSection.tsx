@@ -1,9 +1,7 @@
 // src/components/landing/PricingSection.tsx
-interface PricingSectionProps {
-  onOpenAuth: (mode: "signin" | "signup") => void
-}
+import { SignUpButton } from "@clerk/clerk-react"
 
-export default function PricingSection({ onOpenAuth }: PricingSectionProps) {
+export default function PricingSection() {
   const plans = [
     {
       name: "Starter",
@@ -85,16 +83,17 @@ export default function PricingSection({ onOpenAuth }: PricingSectionProps) {
                   </li>
                 ))}
               </ul>
-              <button
-                onClick={() => onOpenAuth("signup")}
-                className={`w-full py-3 rounded-lg font-semibold transition ${
-                  plan.popular
-                    ? "bg-blue-600 text-white hover:bg-blue-700"
-                    : "border-2 border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800"
-                }`}
-              >
-                Get Started
-              </button>
+              <SignUpButton mode="modal" forceRedirectUrl="/app/projects">
+                <button
+                  className={`w-full py-3 rounded-lg font-semibold transition ${
+                    plan.popular
+                      ? "bg-blue-600 text-white hover:bg-blue-700"
+                      : "border-2 border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800"
+                  }`}
+                >
+                  Get Started
+                </button>
+              </SignUpButton>
             </div>
           ))}
         </div>

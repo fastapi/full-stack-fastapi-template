@@ -17,14 +17,14 @@ class BaseConfig(BaseSettings):
     api_prefix: str = "/api/v1"
     allowed_origins: list[str] = ["*"]
 
-    # Database Settings (common structure)
-    mysql_host: str = "localhost"
-    mysql_port: int = 3306
-    mysql_user: str = "root"
-    mysql_password: str = ""
-    mysql_database: str = "kila_intelligence"
-    mysql_pool_size: int = 10
-    mysql_max_overflow: int = 20
+    # Database Settings (PostgreSQL)
+    pg_host: str = "localhost"
+    pg_port: int = 5432
+    pg_user: str = "yongzhang"
+    pg_password: str = ""
+    pg_database: str = "kila_intelligence"
+    pg_pool_size: int = 10
+    pg_max_overflow: int = 20
 
     # JWT settings
     secret_key: str = ""
@@ -53,6 +53,10 @@ class BaseConfig(BaseSettings):
     secret_key: str = "your-secret-key-change-in-production"
     api_key_header: str = "X-API-Key"
 
+    # Clerk
+    clerk_secret_key: str = ""
+    clerk_publishable_key: str = ""
+
     # Rate Limiting
     rate_limit_enabled: bool = False
     rate_limit_requests: int = 100
@@ -61,7 +65,8 @@ class BaseConfig(BaseSettings):
     # Computed Properties
     @property
     def database_url(self) -> str:
-        return f"mysql+aiomysql://{self.mysql_user}:{self.mysql_password}@{self.mysql_host}:{self.mysql_port}/{self.mysql_database}"
+        password_part = f":{self.pg_password}" if self.pg_password else ""
+        return f"postgresql+asyncpg://{self.pg_user}{password_part}@{self.pg_host}:{self.pg_port}/{self.pg_database}"
 
     @property
     def is_production(self) -> bool:

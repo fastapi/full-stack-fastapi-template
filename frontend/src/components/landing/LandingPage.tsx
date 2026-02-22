@@ -1,5 +1,3 @@
-import { useState } from "react"
-import AuthDialog from "./AuthDialog"
 import Footer from "./Footer"
 import Header from "./Header"
 import Hero from "./Hero"
@@ -8,33 +6,18 @@ import ProductSection from "./ProductSection"
 import TestimonialSection from "./TestimonialSection"
 
 export default function LandingPage() {
-  const [authDialogOpen, setAuthDialogOpen] = useState(false)
-  const [authMode, setAuthMode] = useState<"signin" | "signup">("signin")
-
-  const openAuthDialog = (mode: "signin" | "signup") => {
-    setAuthMode(mode)
-    setAuthDialogOpen(true)
-  }
-
   return (
     <div className="min-h-screen bg-white dark:bg-gray-900">
-      <Header onOpenAuth={openAuthDialog} />
+      <Header />
 
       <main>
-        <Hero onOpenAuth={openAuthDialog} />
+        <Hero />
         <ProductSection />
         <TestimonialSection />
-        <PricingSection onOpenAuth={openAuthDialog} />
+        <PricingSection />
       </main>
 
       <Footer />
-
-      <AuthDialog
-        open={authDialogOpen}
-        onOpenChange={setAuthDialogOpen}
-        mode={authMode}
-        onModeChange={setAuthMode}
-      />
     </div>
   )
 }

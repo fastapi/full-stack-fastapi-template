@@ -1,3 +1,4 @@
+import { useUser } from "@clerk/clerk-react"
 import { createFileRoute, useNavigate } from "@tanstack/react-router"
 import { Briefcase, Building2, Mail, Phone, User } from "lucide-react"
 import { useCallback, useEffect, useState } from "react"
@@ -25,6 +26,7 @@ interface CompanyOption {
 
 function ProfileSetup() {
   const navigate = useNavigate()
+  const { user: clerkUser } = useUser()
   const [loading, setLoading] = useState(false)
 
   // Form state
@@ -50,30 +52,20 @@ function ProfileSetup() {
     general?: string
   }>({})
 
-  // Pre-fill email from user data
+  // Pre-fill from Clerk user data
   useEffect(() => {
-    const userStr = localStorage.getItem("user")
-    if (userStr) {
-      try {
-        const user = JSON.parse(userStr)
-        if (user.email) {
-          setEmail(user.email)
-        }
-        // Try to pre-fill name if available
-        if (user.user_name) {
-          const nameParts = user.user_name.split(" ")
-          if (nameParts.length >= 1) {
-            setFirstName(nameParts[0])
-          }
-          if (nameParts.length >= 2) {
-            setLastName(nameParts.slice(1).join(" "))
-          }
-        }
-      } catch {
-        // Ignore parse errors
+    if (clerkUser) {
+      if (clerkUser.primaryEmailAddress?.emailAddress) {
+        setEmail(clerkUser.primaryEmailAddress.emailAddress)
+      }
+      if (clerkUser.firstName) {
+        setFirstName(clerkUser.firstName)
+      }
+      if (clerkUser.lastName) {
+        setLastName(clerkUser.lastName)
       }
     }
-  }, [])
+  }, [clerkUser])
 
   // Debounced company search
   const searchCompanies = useCallback(async (query: string) => {

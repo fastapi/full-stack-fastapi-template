@@ -9,8 +9,8 @@ class DevelopmentConfig(BaseConfig):
     debug: bool = True
 
     # Database
-    mysql_database: str = "kila_intelligence"
-    mysql_pool_size: int = 5
+    pg_database: str = "kila_intelligence"
+    pg_pool_size: int = 5
 
     # Logging - More verbose in dev
     log_level: str = "DEBUG"
