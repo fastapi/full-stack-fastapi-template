@@ -15,7 +15,7 @@ jobs:
         with:
           host: 89.167.87.10
           username: deployer
-          key: ${{ secrets.SERVER_SSH_KEY }}
+          key: ${{ secrets.SSH_PRIVATE_KEY }}
           envs: GH_PAT
           script: |
             cd /opt/geo/kila
