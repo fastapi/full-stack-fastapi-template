@@ -14,6 +14,7 @@ function AppGuard() {
     "loading" | "synced" | "error"
   >("loading")
   const [profileComplete, setProfileComplete] = useState(false)
+  const [retryCount, setRetryCount] = useState(0)
 
   useEffect(() => {
     if (!isLoaded) return
@@ -57,7 +58,7 @@ function AppGuard() {
     }
 
     syncUser()
-  }, [isLoaded, isSignedIn, getToken, navigate])
+  }, [isLoaded, isSignedIn, getToken, navigate, retryCount])
 
   // Redirect to profile setup if not complete (moved to useEffect to avoid setState-in-render)
   useEffect(() => {
@@ -93,6 +94,7 @@ function AppGuard() {
         <button
           onClick={() => {
             setSyncState("loading")
+            setRetryCount((c) => c + 1)
           }}
           className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition"
         >

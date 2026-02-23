@@ -1,0 +1,59 @@
+services:
+  nginx:
+    image: nginx:1.27
+    ports:
+      - "80:80"
+    volumes:
+      - ./nginx.prod.conf:/etc/nginx/conf.d/default.conf:ro
+    depends_on:
+      - frontend
+      - backend
+    restart: unless-stopped
+
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+      args:
+        VITE_API_URL: http://www.spekila.com
+        VITE_CLERK_PUBLISHABLE_KEY: pk_test_Y3VkZGx5LXJlaW5kZWVyLTU3LmNsZXJrLmFjY291bnRzLmRldiQ
+    restart: unless-stopped
+
+  backend:
+    build:
+      context: ..
+      dockerfile: kila/backend/Dockerfile
+    environment:
+      - ENVIRONMENT=production
+    env_file:
+      - ./backend/.env.prod
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    restart: unless-stopped
+
+  scraper:
+    build:
+      context: ..
+      dockerfile: kila-scraper/Dockerfile
+    environment:
+      - ENVIRONMENT=production
+    env_file:
+      - ../kila-scraper/.env.prod
+    volumes:
+      - ../data:/data
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    labels:
+      ofelia.enabled: "true"
+      ofelia.job-exec.brand-search-daily.schedule: "0 22 * * *"
+      ofelia.job-exec.brand-search-daily.command: "python -m app.jobs.brand_search_jobs.brand_search_response_job --mode daily"
+    restart: unless-stopped
+
+  ofelia:
+    image: mcuadros/ofelia:latest
+    depends_on:
+      - scraper
+    command: daemon --docker
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+    restart: unless-stopped

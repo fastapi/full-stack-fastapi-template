@@ -1,0 +1,27 @@
+name: Deploy to Production
+
+on:
+  push:
+    branches: [main, master]
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Deploy frontend and backend to production
+        uses: appleboy/ssh-action@v1.2.0
+        env:
+          GH_PAT: ${{ secrets.GH_PAT }}
+        with:
+          host: 89.167.87.10
+          username: root
+          key: ${{ secrets.SERVER_SSH_KEY }}
+          envs: GH_PAT
+          script: |
+            cd /opt/geo/kila
+            BRANCH=$(git rev-parse --abbrev-ref HEAD)
+            git remote set-url origin https://x-access-token:${GH_PAT}@github.com/brucezy/kila.git
+            git pull origin $BRANCH
+
+            cd /opt/geo
+            docker compose -f kila/docker-compose.prod.yml up --build -d frontend backend nginx

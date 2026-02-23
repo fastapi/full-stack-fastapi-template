@@ -9,7 +9,7 @@ class ProductionConfig(BaseConfig):
     debug: bool = False
 
     # Database
-    pg_database: str = "ai_prompts"
+    pg_database: str = "kila_intelligence"
     pg_pool_size: int = 20
     pg_max_overflow: int = 40
 
@@ -18,9 +18,10 @@ class ProductionConfig(BaseConfig):
 
     # CORS - Strict domain whitelist
     allowed_origins: list[str] = [
-        "https://yourapp.com",
-        "https://www.yourapp.com",
-        "https://api.yourapp.com"
+        "http://www.spekila.com",
+        "https://www.spekila.com",
+        "http://spekila.com",
+        "https://spekila.com",
     ]
 
     # Rate limiting - Strict limits
@@ -34,7 +35,7 @@ class ProductionConfig(BaseConfig):
 
     # Security - Must be set in environment
     # These will raise validation errors if not provided
-    secret_key: str  # No default - must be in .env.production
+    secret_key: str  # No default - must be in .env.prod
 
     model_config = SettingsConfigDict(
         env_file=".env.prod",

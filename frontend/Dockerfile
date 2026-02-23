@@ -1,20 +1,24 @@
-# Stage 0, "build-stage", based on Node.js, to build and compile the frontend
-FROM node:24 AS build-stage
+# Stage 0: build React app
+FROM node:24-slim AS build-stage
+
+ENV PNPM_HOME="/pnpm"
+ENV PATH="$PNPM_HOME:$PATH"
+RUN corepack enable
 
 WORKDIR /app
 
-COPY package*.json /app/
+COPY package.json pnpm-lock.yaml ./
+RUN pnpm install --frozen-lockfile
 
-RUN npm install
+COPY ./ ./
 
-COPY ./ /app/
+ARG VITE_API_URL
+ARG VITE_CLERK_PUBLISHABLE_KEY
 
-ARG VITE_API_URL=${VITE_API_URL}
-
-RUN npm run build
+RUN pnpm build
 
 
-# Stage 1, based on Nginx, to have only the compiled app, ready for production with Nginx
+# Stage 1: serve with nginx
 FROM nginx:1
 
 COPY --from=build-stage /app/dist/ /usr/share/nginx/html
