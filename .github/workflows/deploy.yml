@@ -14,7 +14,7 @@ jobs:
           GH_PAT: ${{ secrets.GH_PAT }}
         with:
           host: 89.167.87.10
-          username: root
+          username: deployer
           key: ${{ secrets.SERVER_SSH_KEY }}
           envs: GH_PAT
           script: |
