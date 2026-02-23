@@ -315,17 +315,17 @@ export default function Insight() {
 
   // ── Render ──
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100 p-8">
-      <div className="max-w-7xl mx-auto space-y-8">
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100 p-4 sm:p-6 lg:p-8">
+      <div className="max-w-7xl mx-auto space-y-6 sm:space-y-8">
         {/* Header */}
-        <div className="flex items-center justify-between">
+        <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
           <div>
-            <h1 className="text-4xl font-bold text-slate-900">Insight</h1>
-            <p className="text-slate-600 mt-2">
+            <h1 className="text-2xl sm:text-4xl font-bold text-slate-900">Insight</h1>
+            <p className="text-slate-600 mt-1 text-sm sm:text-base">
               AI-powered risk signals and performance insights for your brand
             </p>
           </div>
-          <Button variant="outline" onClick={handleRefresh}>
+          <Button variant="outline" onClick={handleRefresh} size="sm">
             Refresh Data
           </Button>
         </div>
@@ -359,12 +359,12 @@ export default function Insight() {
                 No brands found. Create a project with brand settings to get started.
               </p>
             ) : (
-              <div className="flex items-center gap-4">
+              <div className="flex flex-col sm:flex-row sm:items-center gap-4">
                 <Select
                   value={selectedBrandId || undefined}
                   onValueChange={setSelectedBrandId}
                 >
-                  <SelectTrigger className="w-[350px]">
+                  <SelectTrigger className="w-full sm:w-[350px]">
                     <SelectValue placeholder="Select a brand" />
                   </SelectTrigger>
                   <SelectContent>
@@ -407,10 +407,10 @@ export default function Insight() {
             </CardHeader>
             <CardContent className="space-y-6">
               {/* Segment selector */}
-              <div className="flex items-center gap-3">
+              <div className="flex flex-col sm:flex-row sm:items-center gap-3">
                 <span className="text-sm font-medium text-slate-700">Segment:</span>
                 <Select value={selectedSegment} onValueChange={setSelectedSegment}>
-                  <SelectTrigger className="w-[220px]">
+                  <SelectTrigger className="w-full sm:w-[220px]">
                     <SelectValue placeholder="Select segment" />
                   </SelectTrigger>
                   <SelectContent>
@@ -429,7 +429,7 @@ export default function Insight() {
                   <Loader2 className="h-6 w-6 animate-spin text-slate-400" />
                 </div>
               ) : riskOverview ? (
-                <div className="grid grid-cols-5 gap-4">
+                <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3">
                   {riskOverview.signals.map((signal: InsightSignalSeverity) => (
                     <div
                       key={signal.signal_type}
@@ -452,8 +452,8 @@ export default function Insight() {
               <hr className="border-slate-200" />
 
               {/* Risk Historical Status header row */}
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-4">
+              <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+                <div className="flex flex-wrap items-center gap-3">
                   <span className="text-lg font-semibold text-slate-800">
                     Risk Historical Status
                   </span>
@@ -519,7 +519,7 @@ export default function Insight() {
 
               {/* Custom date inputs */}
               {showCustomDate && (
-                <div className="flex gap-3 items-center p-4 bg-gray-50 rounded-lg">
+                <div className="flex flex-col sm:flex-row gap-3 sm:items-end p-4 bg-gray-50 rounded-lg">
                   <div className="flex-1">
                     <label className="text-sm font-medium text-gray-700 block mb-1">
                       Start Date
@@ -554,17 +554,17 @@ export default function Insight() {
 
               {/* Chart */}
               {isLoadingChart ? (
-                <div className="flex items-center justify-center h-96">
+                <div className="flex items-center justify-center h-64 sm:h-80 lg:h-96">
                   <Loader2 className="h-8 w-8 animate-spin text-slate-400" />
                 </div>
               ) : chartData.length === 0 ? (
-                <div className="w-full h-96 bg-gray-50 rounded-lg flex items-center justify-center">
+                <div className="w-full h-64 sm:h-80 lg:h-96 bg-gray-50 rounded-lg flex items-center justify-center">
                   <p className="text-slate-500">
                     No data available for the selected time range
                   </p>
                 </div>
               ) : (
-                <div className="w-full h-96 bg-gray-50 rounded-lg p-4">
+                <div className="w-full h-64 sm:h-80 lg:h-96 bg-gray-50 rounded-lg p-4">
                   <ResponsiveContainer width="100%" height="100%">
                     {chartType === "line" ? (
                       <LineChart data={chartData}>

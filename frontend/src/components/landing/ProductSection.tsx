@@ -38,7 +38,7 @@ export default function ProductSection() {
           </p>
         </div>
 
-        <div className="grid md:grid-cols-3 gap-8">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 md:gap-8">
           {products.map((product, idx) => (
             <div
               key={idx}
@@ -55,11 +55,11 @@ export default function ProductSection() {
           ))}
         </div>
 
-        <div className="mt-20 bg-gradient-to-r from-blue-600 to-purple-600 rounded-2xl p-12 text-white">
-          <h3 className="text-3xl font-bold mb-8 text-center">
+        <div className="mt-12 sm:mt-20 bg-gradient-to-r from-blue-600 to-purple-600 rounded-2xl p-6 sm:p-10 lg:p-12 text-white">
+          <h3 className="text-2xl sm:text-3xl font-bold mb-6 sm:mb-8 text-center">
             Why Customers Choose Us
           </h3>
-          <div className="grid md:grid-cols-3 gap-8">
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-6 sm:gap-8">
             <div className="text-center">
               <div className="text-4xl font-bold mb-2">10x</div>
               <div className="text-blue-100">Faster Workflows</div>

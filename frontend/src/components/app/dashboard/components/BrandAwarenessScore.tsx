@@ -65,14 +65,14 @@ export function BrandAwarenessScore({
       {/* Section 1: All-Segment Overview */}
       <div>
         <h3 className="text-lg font-semibold text-slate-700 mb-4">Overall Awareness (All Segments)</h3>
-        <div className="grid grid-cols-12 gap-8 items-stretch">
-          <div className="col-span-6 flex">
+        <div className="grid grid-cols-1 md:grid-cols-12 gap-4 md:gap-8 items-stretch">
+          <div className="md:col-span-6 flex">
             <BrandAwarenessScoreCurrentScore brandId={brandId} segment="All-Segment" />
           </div>
-          <div className="col-span-6 flex">
+          <div className="md:col-span-6 flex">
             <BrandAwarenessScoreGaugeView brandId={brandId} segment="All-Segment" />
           </div>
-          <div className="col-span-12">
+          <div className="md:col-span-12">
             <BrandAwarenessScoreHistoricalView
               brandId={brandId}
               segment="All-Segment"
@@ -89,7 +89,7 @@ export function BrandAwarenessScore({
 
       {/* Section 2: Per-Segment Detail */}
       <div>
-        <div className="flex items-center gap-4 mb-4">
+        <div className="flex flex-col sm:flex-row sm:items-center gap-3 mb-4">
           <h3 className="text-lg font-semibold text-slate-700">Segment Detail</h3>
           {isLoadingSegments ? (
             <div className="flex items-center gap-2 text-slate-500">
@@ -101,7 +101,7 @@ export function BrandAwarenessScore({
               value={selectedSegment || undefined}
               onValueChange={setSelectedSegment}
             >
-              <SelectTrigger className="w-[300px]">
+              <SelectTrigger className="w-full sm:w-[300px]">
                 <SelectValue placeholder="Select a segment" />
               </SelectTrigger>
               <SelectContent>
@@ -118,14 +118,14 @@ export function BrandAwarenessScore({
         </div>
 
         {selectedSegment && (
-          <div className="grid grid-cols-12 gap-8 items-stretch">
-            <div className="col-span-6 flex">
+          <div className="grid grid-cols-1 md:grid-cols-12 gap-4 md:gap-8 items-stretch">
+            <div className="md:col-span-6 flex">
               <BrandAwarenessScoreCurrentScore brandId={brandId} segment={selectedSegment} />
             </div>
-            <div className="col-span-6 flex">
+            <div className="md:col-span-6 flex">
               <BrandAwarenessScoreGaugeView brandId={brandId} segment={selectedSegment} />
             </div>
-            <div className="col-span-12">
+            <div className="md:col-span-12">
               <BrandAwarenessScoreHistoricalView
                 brandId={brandId}
                 segment={selectedSegment}

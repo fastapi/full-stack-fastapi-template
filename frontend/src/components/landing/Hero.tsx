@@ -6,7 +6,7 @@ export default function Hero() {
   return (
     <section className="bg-gradient-to-br from-blue-50 via-white to-purple-50 dark:from-gray-900 dark:via-gray-900 dark:to-gray-800 py-20">
       <div className="font-display max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-        <h1 className="text-5xl md:text-6xl font-bold text-gray-900 dark:text-white mb-6">
+        <h1 className="text-3xl sm:text-5xl md:text-6xl font-bold text-gray-900 dark:text-white mb-6">
           Transform Your Business with{" "}
           <span className="text-blue-600">Kila</span>
         </h1>

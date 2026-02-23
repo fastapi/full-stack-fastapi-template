@@ -111,23 +111,23 @@ export default function Dashboard() {
   // ============================================================================
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100 p-8">
-      <div className="max-w-7xl mx-auto space-y-8">
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100 p-4 sm:p-6 lg:p-8">
+      <div className="max-w-7xl mx-auto space-y-6 sm:space-y-8">
         {/* Header */}
-        <div className="flex items-center justify-between">
+        <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
           <div>
-            <h1 className="text-4xl font-bold text-slate-900">
+            <h1 className="text-2xl sm:text-4xl font-bold text-slate-900">
               Brand Performance Dashboard
             </h1>
-            <p className="text-slate-600 mt-2">
+            <p className="text-slate-600 mt-1 text-sm sm:text-base">
               Welcome back! Here's what's happening today.
             </p>
           </div>
-          <div className="flex gap-3">
-            <Button variant="outline" onClick={handleRefresh}>
+          <div className="flex gap-3 flex-wrap">
+            <Button variant="outline" onClick={handleRefresh} size="sm">
               Refresh Data
             </Button>
-            <Button>
+            <Button size="sm">
               <Activity className="mr-2 h-4 w-4" />
               View Analytics
             </Button>
@@ -166,12 +166,12 @@ export default function Dashboard() {
                 <p>No brands found. Create a project with brand settings to get started.</p>
               </div>
             ) : (
-              <div className="flex items-center gap-4">
+              <div className="flex flex-col sm:flex-row sm:items-center gap-4">
                 <Select
                   value={selectedBrandId || undefined}
                   onValueChange={handleBrandChange}
                 >
-                  <SelectTrigger className="w-[350px]">
+                  <SelectTrigger className="w-full sm:w-[350px]">
                     <SelectValue placeholder="Select a brand" />
                   </SelectTrigger>
                   <SelectContent>
@@ -205,15 +205,15 @@ export default function Dashboard() {
         {selectedBrandId && (
           <div className="w-full mx-auto">
             <Tabs defaultValue="awareness">
-              <div className="flex items-center justify-between mb-4">
-                <TabsList>
-                  <TabsTrigger value="awareness">Awareness</TabsTrigger>
-                  <TabsTrigger value="detail-metrics">Detail Metrics</TabsTrigger>
-                  <TabsTrigger value="competitors">Competitors</TabsTrigger>
+              <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between mb-4">
+                <TabsList className="w-full sm:w-auto">
+                  <TabsTrigger value="awareness" className="flex-1 sm:flex-none">Awareness</TabsTrigger>
+                  <TabsTrigger value="detail-metrics" className="flex-1 sm:flex-none">Detail Metrics</TabsTrigger>
+                  <TabsTrigger value="competitors" className="flex-1 sm:flex-none">Competitors</TabsTrigger>
                 </TabsList>
 
                 {/* Global Time Range Selection */}
-                <div className="flex items-center gap-3">
+                <div className="flex items-center gap-2 overflow-x-auto">
                   <Tabs
                     value={showCustomDate ? "custom" : timeRange}
                     onValueChange={(value) => {
@@ -276,7 +276,7 @@ export default function Dashboard() {
 
               {/* Custom Date Range Inputs */}
               {showCustomDate && (
-                <div className="flex gap-3 items-center p-4 bg-gray-50 rounded-lg mb-4">
+                <div className="flex flex-col sm:flex-row gap-3 sm:items-end p-4 bg-gray-50 rounded-lg mb-4">
                   <div className="flex-1">
                     <label className="text-sm font-medium text-gray-700 block mb-1">
                       Start Date
