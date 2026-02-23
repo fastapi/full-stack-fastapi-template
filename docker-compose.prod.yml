@@ -46,7 +46,7 @@ services:
     labels:
       ofelia.enabled: "true"
       ofelia.job-exec.brand-search-daily.schedule: "0 0 22 * * *"
-      ofelia.job-exec.brand-search-daily.command: "python -m app.jobs.brand_search_jobs.brand_search_response_job --mode daily"
+      ofelia.job-exec.brand-search-daily.command: "python -m app.jobs.brand_search_jobs.brand_search_response_job --mode daily --full-run"
     restart: unless-stopped
 
   ofelia:
