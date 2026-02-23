@@ -83,7 +83,7 @@ export function PerformanceDetailTable({
 
   // Calculate min/max for each metric column across all rows
   const columnExtremes = useMemo(() => {
-    if (rows.length === 0) return {}
+    if (rows.length === 0) return {} as Record<NumericKey, { min: number; max: number }>
 
     const extremes: Record<NumericKey, { min: number; max: number }> = {} as any
 
