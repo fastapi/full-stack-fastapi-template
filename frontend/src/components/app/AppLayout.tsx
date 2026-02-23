@@ -244,7 +244,7 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
       {/* Main Content */}
       <div className="flex-1 flex flex-col overflow-hidden min-w-0">
         {/* Top Bar */}
-        <header className="h-16 bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 flex items-center px-4 gap-3 flex-shrink-0">
+        <header className="h-16 bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 flex items-center px-4 flex-shrink-0">
           {/* Mobile hamburger */}
           <button
             onClick={() => setMobileSidebarOpen(true)}
@@ -253,23 +253,22 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
             <Menu size={22} />
           </button>
 
-          {/* Search Bar */}
-          <div className="flex-1 min-w-0 max-w-2xl">
-            <input
-              type="text"
-              placeholder="Search..."
-              className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent dark:bg-gray-700 dark:text-white text-sm"
-            />
-          </div>
-
-          {/* User Profile */}
-          <div className="flex items-center gap-3 flex-shrink-0">
+          {/* User Profile — pushed to the far right */}
+          <div className="ml-auto flex items-center gap-3 flex-shrink-0">
             <span className="text-sm font-medium text-gray-900 dark:text-white hidden sm:block">
               {userFirstName}
             </span>
-            <div className="w-9 h-9 bg-gradient-to-br from-blue-500 to-purple-500 rounded-full flex items-center justify-center text-white font-bold flex-shrink-0">
-              <User size={18} />
-            </div>
+            {clerkUser?.imageUrl ? (
+              <img
+                src={clerkUser.imageUrl}
+                alt={userFirstName}
+                className="w-9 h-9 rounded-full object-cover flex-shrink-0"
+              />
+            ) : (
+              <div className="w-9 h-9 bg-gradient-to-br from-blue-500 to-purple-500 rounded-full flex items-center justify-center text-white font-bold flex-shrink-0">
+                <User size={18} />
+              </div>
+            )}
           </div>
         </header>
 
