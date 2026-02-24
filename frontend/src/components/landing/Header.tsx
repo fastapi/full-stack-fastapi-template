@@ -1,11 +1,10 @@
 import { SignInButton, SignUpButton } from "@clerk/clerk-react"
-import { ChevronDown, Menu, X } from "lucide-react"
+import { Menu, X } from "lucide-react"
 import { useState } from "react"
 import { Button } from "@/components/ui/button"
 
 export default function Header() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
-  const [productDropdownOpen, setProductDropdownOpen] = useState(false)
 
   const products = [
     { name: "Analytics Dashboard", href: "#analytics" },
