@@ -32,7 +32,7 @@
     "@tanstack/react-router": "^1.157.3",
     "@tanstack/react-router-devtools": "^1.159.10",
     "@tanstack/react-table": "^8.21.3",
-    "axios": "1.13.4",
+    "axios": "1.13.5",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
     "form-data": "4.0.5",
@@ -45,7 +45,7 @@
     "react-icons": "^5.5.0",
     "sonner": "^2.0.7",
     "tailwind-merge": "^3.4.0",
-    "tailwindcss": "^4.1.17",
+    "tailwindcss": "^4.2.0",
     "zod": "^4.3.6"
   },
   "devDependencies": {
@@ -57,7 +57,7 @@
     "@types/node": "^25.1.0",
     "@types/react": "^19.2.7",
     "@types/react-dom": "^19.2.3",
-    "@vitejs/plugin-react-swc": "^4.2.2",
+    "@vitejs/plugin-react-swc": "^4.2.3",
     "dotenv": "^17.3.1",
     "tw-animate-css": "^1.4.0",
     "typescript": "^5.9.3",

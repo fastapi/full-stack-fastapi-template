@@ -16,6 +16,9 @@
 
 ### Internal
 
+* ⬆ Bump tailwindcss from 4.1.18 to 4.2.0. PR [#2198](https://github.com/fastapi/full-stack-fastapi-template/pull/2198) by [@dependabot[bot]](https://github.com/apps/dependabot).
+* ⬆ Bump axios from 1.13.4 to 1.13.5. PR [#2199](https://github.com/fastapi/full-stack-fastapi-template/pull/2199) by [@dependabot[bot]](https://github.com/apps/dependabot).
+* ⬆ Bump @vitejs/plugin-react-swc from 4.2.2 to 4.2.3. PR [#2200](https://github.com/fastapi/full-stack-fastapi-template/pull/2200) by [@dependabot[bot]](https://github.com/apps/dependabot).
 * ⬆ Bump dotenv from 17.2.3 to 17.3.1. PR [#2185](https://github.com/fastapi/full-stack-fastapi-template/pull/2185) by [@dependabot[bot]](https://github.com/apps/dependabot).
 * ⬆ Bump @tanstack/router-devtools from 1.157.17 to 1.159.10. PR [#2186](https://github.com/fastapi/full-stack-fastapi-template/pull/2186) by [@dependabot[bot]](https://github.com/apps/dependabot).
 * ⬆ Bump @tanstack/react-router-devtools from 1.157.17 to 1.159.10. PR [#2188](https://github.com/fastapi/full-stack-fastapi-template/pull/2188) by [@dependabot[bot]](https://github.com/apps/dependabot).
