@@ -6,7 +6,7 @@ export default function Footer() {
     <footer className="bg-gray-900 text-white py-12">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex flex-col md:flex-row justify-between items-center space-y-4 md:space-y-0">
-          <div className="flex flex-col md:flex-row items-center space-y-2 md:space-y-0 md:space-x-6 text-sm text-gray-400">
+          <div className="flex flex-col md:flex-row items-center space-y-2 md:space-y-0 md:space-x-6 font-funnel-sans text-[11px] tracking-[0.2em] uppercase text-gray-400">
             <span>© 2026 Kila, Inc. All Rights Reserved</span>
             <a href="#privacy" className="hover:text-white transition">
               Privacy Policy

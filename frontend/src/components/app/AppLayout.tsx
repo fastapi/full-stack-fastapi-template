@@ -111,20 +111,11 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
       >
         {/* Logo */}
         <div className="h-16 flex items-center justify-between px-4 border-b border-gray-200 dark:border-gray-700 flex-shrink-0">
-          {showFullContent ? (
-            <div className="flex items-center space-x-2">
-              <div className="w-8 h-8 bg-gradient-to-br from-blue-600 to-purple-600 rounded-lg flex items-center justify-center flex-shrink-0">
-                <span className="text-white font-bold text-lg">K</span>
-              </div>
-              <span className="text-xl font-bold text-gray-900 dark:text-white">
-                Kila
-              </span>
-            </div>
-          ) : (
-            <div className="w-8 h-8 bg-gradient-to-br from-blue-600 to-purple-600 rounded-lg flex items-center justify-center">
-              <span className="text-white font-bold text-lg">K</span>
-            </div>
-          )}
+          <img
+            src="/assets/images/Kila_logo.svg"
+            alt="Kila"
+            className={showFullContent ? "h-8 w-auto" : "h-8 w-8"}
+          />
           {/* Desktop toggle button */}
           <button
             onClick={() => setSidebarOpen(!sidebarOpen)}

@@ -41,13 +41,13 @@ export default function TestimonialSection() {
   return (
     <section className="py-20 bg-gray-50 dark:bg-gray-800">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <h2 className="text-4xl font-bold text-gray-900 dark:text-white mb-12 text-center">
+        <h2 className="font-funnel-sans font-bold text-4xl tracking-[-0.02em] text-gray-900 dark:text-white mb-12 text-center">
           What Our Customers Say
         </h2>
 
         <div className="bg-white dark:bg-gray-900 p-8 rounded-lg shadow-md mb-12 min-h-[200px]">
           <div className="text-3xl text-blue-600 mb-4">"</div>
-          <p className="text-lg text-gray-700 dark:text-gray-300 mb-6 italic">
+          <p className="font-funnel-sans font-normal text-base leading-[1.7] opacity-75 text-gray-700 dark:text-gray-300 mb-6 italic">
             {testimonials[current].quote}
           </p>
           <div className="flex items-center">
@@ -55,10 +55,10 @@ export default function TestimonialSection() {
               {testimonials[current].author.charAt(0)}
             </div>
             <div>
-              <div className="font-bold text-gray-900 dark:text-white">
+              <div className="font-funnel-sans font-semibold text-base tracking-[-0.01em] text-gray-900 dark:text-white">
                 {testimonials[current].author}
               </div>
-              <div className="text-gray-600 dark:text-gray-400 text-sm">
+              <div className="font-funnel-sans text-[11px] tracking-[0.2em] uppercase text-gray-600 dark:text-gray-400">
                 {testimonials[current].role}
               </div>
             </div>
@@ -66,7 +66,7 @@ export default function TestimonialSection() {
         </div>
 
         <div>
-          <h3 className="text-center text-gray-600 dark:text-gray-400 mb-6 font-semibold">
+          <h3 className="font-funnel-sans font-medium text-[11px] tracking-[0.2em] uppercase text-center text-gray-600 dark:text-gray-400 mb-6">
             Trusted by leading companies
           </h3>
           <div className="flex flex-wrap justify-center gap-8">
@@ -75,7 +75,7 @@ export default function TestimonialSection() {
                 key={idx}
                 className="bg-white dark:bg-gray-900 px-6 py-4 rounded-lg border border-gray-200 dark:border-gray-700"
               >
-                <span className="font-bold text-gray-700 dark:text-gray-300">
+                <span className="font-funnel-sans font-medium text-sm tracking-[0.04em] text-gray-700 dark:text-gray-300">
                   {logo}
                 </span>
               </div>
