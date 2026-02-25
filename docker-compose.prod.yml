@@ -3,8 +3,10 @@ services:
     image: nginx:1.27
     ports:
       - "80:80"
+      - "443:443"
     volumes:
       - ./nginx.prod.conf:/etc/nginx/conf.d/default.conf:ro
+      - ./certs:/etc/nginx/certs:ro
     depends_on:
       - frontend
       - backend
@@ -15,7 +17,7 @@ services:
       context: ./frontend
       dockerfile: Dockerfile
       args:
-        VITE_API_URL: http://www.spekila.com
+        VITE_API_URL: https://www.spekila.com
         VITE_CLERK_PUBLISHABLE_KEY: pk_test_Y3VkZGx5LXJlaW5kZWVyLTU3LmNsZXJrLmFjY291bnRzLmRldiQ
     restart: unless-stopped
 
