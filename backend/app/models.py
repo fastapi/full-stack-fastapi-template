@@ -325,6 +325,20 @@ class GenerationsPublic(SQLModel):
     count: int
 
 
+class RecentTemplatePublic(SQLModel):
+    template_id: uuid.UUID
+    template_name: str
+    category: TemplateCategory
+    language: TemplateLanguage
+    last_used_at: datetime
+    usage_count: int
+
+
+class RecentTemplatesPublic(SQLModel):
+    data: list[RecentTemplatePublic]
+    count: int
+
+
 class ExtractVariablesRequest(SQLModel):
     template_version_id: uuid.UUID
     input_text: str = Field(min_length=1)

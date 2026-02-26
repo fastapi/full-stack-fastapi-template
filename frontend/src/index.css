@@ -43,6 +43,20 @@
 
 :root {
   --radius: 0.625rem;
+  --radius-control: 0.85rem;
+  --radius-panel: 1.05rem;
+  --radius-overlay: 1.1rem;
+  --space-card-x: 1.1rem;
+  --space-card-y: 1rem;
+  --control-height: 2.5rem;
+  --control-height-sm: 2.125rem;
+  --control-height-lg: 2.875rem;
+  --shadow-elev-1:
+    0 1px 2px rgb(15 23 42 / 0.05), 0 8px 18px rgb(15 23 42 / 0.05);
+  --shadow-elev-2:
+    0 3px 10px rgb(15 23 42 / 0.08), 0 20px 38px rgb(15 23 42 / 0.09);
+  --surface-input: oklch(0.995 0 0);
+  --surface-card-muted: oklch(0.985 0.003 200);
   --background: oklch(1 0 0);
   --foreground: oklch(0.145 0 0);
   --card: oklch(1 0 0);
@@ -77,6 +91,10 @@
 }
 
 .dark {
+  --surface-input: oklch(0.23 0 0);
+  --surface-card-muted: oklch(0.24 0.004 200);
+  --shadow-elev-1: 0 1px 2px rgb(0 0 0 / 0.22), 0 10px 28px rgb(0 0 0 / 0.22);
+  --shadow-elev-2: 0 6px 14px rgb(0 0 0 / 0.28), 0 24px 48px rgb(0 0 0 / 0.32);
   --background: oklch(0.145 0 0);
   --foreground: oklch(0.985 0 0);
   --card: oklch(0.205 0 0);
@@ -115,7 +133,19 @@
     @apply border-border outline-ring/50;
   }
   body {
-    @apply bg-background text-foreground;
+    @apply bg-background text-foreground antialiased;
+    background-image:
+      radial-gradient(
+        1200px 420px at 12% -8%,
+        color-mix(in oklab, var(--primary) 10%, transparent),
+        transparent 58%
+      ),
+      radial-gradient(
+        900px 380px at 100% 0%,
+        color-mix(in oklab, var(--foreground) 3%, transparent),
+        transparent 62%
+      );
+    background-attachment: fixed;
   }
   button,
   [role="button"] {

@@ -1,6 +1,7 @@
 from fastapi import APIRouter
 
 from app.api.routes import (
+    dashboard,
     generate,
     generations,
     items,
@@ -20,6 +21,7 @@ api_router.include_router(items.router)
 api_router.include_router(templates.router)
 api_router.include_router(generate.router)
 api_router.include_router(generations.router)
+api_router.include_router(dashboard.router)
 
 
 if settings.ENVIRONMENT == "local":

@@ -2,7 +2,7 @@ import uuid
 
 from sqlmodel import Session, col, func, select
 
-from app.models import Generation
+from app.models import Generation, Template
 
 
 def get_generation_by_id(
@@ -47,3 +47,30 @@ def save_generation(*, session: Session, generation: Generation) -> Generation:
     session.commit()
     session.refresh(generation)
     return generation
+
+
+def list_recent_templates_for_user(
+    *, session: Session, user_id: uuid.UUID, limit: int = 5
+):
+    last_used_at_expr = func.max(Generation.created_at).label("last_used_at")
+    usage_count_expr = func.count(Generation.id).label("usage_count")
+
+    statement = (
+        select(
+            Generation.template_id,
+            Template.name,
+            Template.category,
+            Template.language,
+            last_used_at_expr,
+            usage_count_expr,
+        )
+        .join(Template, Template.id == Generation.template_id)
+        .where(Generation.user_id == user_id)
+        .group_by(
+            Generation.template_id, Template.name, Template.category, Template.language
+        )
+        .order_by(last_used_at_expr.desc())
+        .limit(limit)
+    )
+
+    return list(session.exec(statement).all())

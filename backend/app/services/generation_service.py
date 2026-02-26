@@ -8,6 +8,8 @@ from app.models import (
     Generation,
     GenerationCreate,
     GenerationUpdate,
+    RecentTemplatePublic,
+    RecentTemplatesPublic,
     RenderTemplateRequest,
     RenderTemplateResponse,
     TemplateVariableConfig,
@@ -100,6 +102,41 @@ def list_generations_for_user(
         skip=skip,
         limit=limit,
     )
+
+
+def get_recent_templates_for_dashboard(
+    *,
+    session: Session,
+    current_user: User,
+    limit: int = 5,
+) -> RecentTemplatesPublic:
+    safe_limit = max(1, min(limit, 20))
+    rows = generation_repository.list_recent_templates_for_user(
+        session=session,
+        user_id=current_user.id,
+        limit=safe_limit,
+    )
+
+    data = [
+        RecentTemplatePublic(
+            template_id=template_id,
+            template_name=template_name,
+            category=category,
+            language=language,
+            last_used_at=last_used_at,
+            usage_count=usage_count,
+        )
+        for (
+            template_id,
+            template_name,
+            category,
+            language,
+            last_used_at,
+            usage_count,
+        ) in rows
+    ]
+
+    return RecentTemplatesPublic(data=data, count=len(data))
 
 
 def get_generation_for_user(

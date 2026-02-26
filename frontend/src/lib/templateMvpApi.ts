@@ -83,6 +83,20 @@ export interface GenerationsResponse {
   count: number
 }
 
+export interface RecentTemplate {
+  template_id: string
+  template_name: string
+  category: TemplateCategory
+  language: TemplateLanguage
+  last_used_at: string
+  usage_count: number
+}
+
+export interface RecentTemplatesResponse {
+  data: RecentTemplate[]
+  count: number
+}
+
 export interface CreateTemplatePayload {
   name: string
   category: TemplateCategory
@@ -273,6 +287,16 @@ export async function createGeneration(
 
 export async function listGenerations(): Promise<GenerationsResponse> {
   return apiRequest<GenerationsResponse>("/generations/")
+}
+
+export async function listRecentTemplates(
+  limit = 5,
+): Promise<RecentTemplatesResponse> {
+  const query = new URLSearchParams()
+  query.set("limit", String(limit))
+  return apiRequest<RecentTemplatesResponse>(
+    `/dashboard/recent-templates?${query.toString()}`,
+  )
 }
 
 export async function getGeneration(generationId: string): Promise<Generation> {
