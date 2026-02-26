@@ -1,5 +1,6 @@
 {
     "recommendations": [
+        "FastAPILabs.fastapi-vscode",
         "astral-sh.ty",
         "biomejs.biome",
         "bradlc.vscode-tailwindcss",
