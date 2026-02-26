@@ -15,6 +15,12 @@ import {
 } from "lucide-react"
 import { useState } from "react"
 import { toast } from "sonner"
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu"
 
 interface MenuItem {
   name: string
@@ -43,6 +49,7 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
       icon: LayoutDashboard,
       children: [
         { name: "Brand Overview", path: "/app/dashboard/overview" },
+        { name: "Brand Impression", path: "/app/dashboard/brand-impression" },
         { name: "Performance Detail", path: "/app/dashboard/performance" },
         { name: "Competitive Analysis", path: "/app/dashboard/competitors" },
       ],
@@ -102,33 +109,36 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
           "bg-white dark:bg-gray-800 border-r border-gray-200 dark:border-gray-700",
           "flex flex-col transition-all duration-300 flex-shrink-0",
           // Mobile: fixed overlay, slides in/out
-          "fixed inset-y-0 left-0 z-50 w-64",
+          "fixed inset-y-0 left-0 z-50 w-fit",
           mobileSidebarOpen ? "translate-x-0" : "-translate-x-full",
           // Desktop: normal flow, toggle width
           "md:relative md:translate-x-0",
-          sidebarOpen ? "md:w-64" : "md:w-20",
+          sidebarOpen ? "md:w-fit" : "md:w-12",
         ].join(" ")}
       >
-        {/* Logo */}
-        <div className="h-16 flex items-center justify-between px-4 border-b border-gray-200 dark:border-gray-700 flex-shrink-0">
-          <img
-            src="/assets/images/Kila_logo.svg"
-            alt="Kila"
-            className={showFullContent ? "h-8 w-auto" : "h-8 w-8"}
-          />
+        {/* Workspace / User Header */}
+        <div className="flex items-center justify-between px-3 py-3 border-b border-gray-200 dark:border-gray-700 flex-shrink-0">
+          {showFullContent && (
+            <div className="flex items-center gap-1.5 min-w-0">
+              <span className="text-[11px] font-semibold text-gray-900 dark:text-white whitespace-nowrap">
+                {userFirstName}
+              </span>
+              <span className="text-[11px] font-semibold text-gray-900 dark:text-white whitespace-nowrap">Workspace</span>
+            </div>
+          )}
           {/* Desktop toggle button */}
           <button
             onClick={() => setSidebarOpen(!sidebarOpen)}
-            className="hidden md:block text-gray-500 hover:text-gray-700 dark:hover:text-gray-300"
+            className="hidden md:block text-gray-500 hover:text-gray-700 dark:hover:text-gray-300 flex-shrink-0"
           >
-            {sidebarOpen ? <X size={20} /> : <Menu size={20} />}
+            {sidebarOpen ? <X size={16} /> : <Menu size={16} />}
           </button>
           {/* Mobile close button */}
           <button
             onClick={closeMobileSidebar}
-            className="md:hidden text-gray-500 hover:text-gray-700 dark:hover:text-gray-300"
+            className="md:hidden text-gray-500 hover:text-gray-700 dark:hover:text-gray-300 flex-shrink-0"
           >
-            <X size={20} />
+            <X size={16} />
           </button>
         </div>
 
@@ -154,20 +164,20 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
                         setExpandedMenus((prev) => new Set(prev).add(item.name))
                       }
                     }}
-                    className={`flex items-center w-full px-3 py-2 rounded-lg transition ${
+                    className={`flex items-center w-full px-3 py-1.5 rounded-lg transition ${
                       isParentActive
                         ? "bg-blue-50 dark:bg-blue-900/20 text-blue-600 dark:text-blue-400"
                         : "text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700"
                     }`}
                   >
-                    <Icon size={20} />
+                    <Icon size={showFullContent ? 16 : 20} />
                     {showFullContent && (
                       <>
-                        <span className="ml-3 font-medium flex-1 text-left">{item.name}</span>
+                        <span className="ml-3 text-xs font-medium flex-1 text-left whitespace-nowrap">{item.name}</span>
                         {isExpanded ? (
-                          <ChevronDown size={16} className="ml-auto" />
+                          <ChevronDown size={12} className="ml-auto" />
                         ) : (
-                          <ChevronRight size={16} className="ml-auto" />
+                          <ChevronRight size={12} className="ml-auto" />
                         )}
                       </>
                     )}
@@ -182,14 +192,14 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
                             key={child.path}
                             to={child.path}
                             onClick={closeMobileSidebar}
-                            className={`flex items-center pl-6 pr-3 py-1.5 rounded-lg transition text-sm ${
+                            className={`flex items-center pl-6 pr-3 py-1 rounded-lg transition text-xs ${
                               isChildActive
                                 ? "bg-blue-50 dark:bg-blue-900/20 text-blue-600 dark:text-blue-400 font-medium"
                                 : "text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700"
                             }`}
                           >
                             <span
-                              className="w-1.5 h-1.5 rounded-full mr-3 flex-shrink-0"
+                              className="w-1 h-1 rounded-full mr-3 flex-shrink-0"
                               style={{ backgroundColor: isChildActive ? "#3b82f6" : "#9ca3af" }}
                             />
                             {child.name}
@@ -207,59 +217,72 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
                 key={item.path}
                 to={item.path!}
                 onClick={closeMobileSidebar}
-                className={`flex items-center px-3 py-2 rounded-lg transition ${
+                className={`flex items-center px-3 py-1.5 rounded-lg transition ${
                   isParentActive
                     ? "bg-blue-50 dark:bg-blue-900/20 text-blue-600 dark:text-blue-400"
                     : "text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700"
                 }`}
               >
-                <Icon size={20} />
-                {showFullContent && <span className="ml-3 font-medium">{item.name}</span>}
+                <Icon size={showFullContent ? 16 : 20} />
+                {showFullContent && <span className="ml-3 text-xs font-medium whitespace-nowrap">{item.name}</span>}
               </Link>
             )
           })}
         </nav>
 
-        {/* User Section */}
-        <div className="border-t border-gray-200 dark:border-gray-700 p-4 flex-shrink-0">
-          <button
-            onClick={handleLogout}
-            className="flex items-center w-full px-3 py-2 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition"
-          >
-            <LogOut size={20} />
-            {showFullContent && <span className="ml-3">Logout</span>}
-          </button>
+        {/* Sidebar Footer — Kila brand */}
+        <div className="border-t border-gray-200 dark:border-gray-700 px-3 py-2.5 flex items-center gap-2 flex-shrink-0">
+          <img
+            src="/assets/images/Kila_logo.svg"
+            alt="Kila"
+            className="h-5 w-5 flex-shrink-0"
+          />
+          {showFullContent && (
+            <span className="text-[10px] text-gray-400 whitespace-nowrap">Kila Inc.</span>
+          )}
         </div>
       </aside>
 
       {/* Main Content */}
       <div className="flex-1 flex flex-col overflow-hidden min-w-0">
         {/* Top Bar */}
-        <header className="h-16 bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 flex items-center px-4 flex-shrink-0">
+        <header className="h-12 bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 flex items-center px-4 flex-shrink-0">
           {/* Mobile hamburger */}
           <button
             onClick={() => setMobileSidebarOpen(true)}
             className="md:hidden text-gray-500 hover:text-gray-700 dark:hover:text-gray-300 flex-shrink-0"
           >
-            <Menu size={22} />
+            <Menu size={18} />
           </button>
 
-          {/* User Profile — pushed to the far right */}
-          <div className="ml-auto flex items-center gap-3 flex-shrink-0">
-            <span className="text-sm font-medium text-gray-900 dark:text-white hidden sm:block">
-              {userFirstName}
-            </span>
-            {clerkUser?.imageUrl ? (
-              <img
-                src={clerkUser.imageUrl}
-                alt={userFirstName}
-                className="w-9 h-9 rounded-full object-cover flex-shrink-0"
-              />
-            ) : (
-              <div className="w-9 h-9 bg-gradient-to-br from-blue-500 to-purple-500 rounded-full flex items-center justify-center text-white font-bold flex-shrink-0">
-                <User size={18} />
-              </div>
-            )}
+          {/* Avatar with logout dropdown — pushed to the far right */}
+          <div className="ml-auto flex-shrink-0">
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <button className="rounded-full focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500">
+                  {clerkUser?.imageUrl ? (
+                    <img
+                      src={clerkUser.imageUrl}
+                      alt={userFirstName}
+                      className="w-7 h-7 rounded-full object-cover"
+                    />
+                  ) : (
+                    <div className="w-7 h-7 bg-gradient-to-br from-blue-500 to-purple-500 rounded-full flex items-center justify-center text-white">
+                      <User size={14} />
+                    </div>
+                  )}
+                </button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end" className="w-24 min-w-0">
+                <DropdownMenuItem
+                  onClick={handleLogout}
+                  className="text-xs cursor-pointer text-red-600 focus:text-red-600"
+                >
+                  <LogOut size={13} className="mr-2" />
+                  Logout
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
           </div>
         </header>
 

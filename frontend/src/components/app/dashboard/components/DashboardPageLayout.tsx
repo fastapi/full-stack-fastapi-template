@@ -1,13 +1,19 @@
-import { Calendar, Loader2 } from "lucide-react"
+import { Calendar, Loader2, RefreshCw } from "lucide-react"
 import { useCallback, useEffect, useState } from "react"
 import { toast } from "sonner"
 import {
+  type BrandSegmentsResponse,
   type TimeRange,
   type UserBrand,
   type UserBrandsResponse,
   dashboardAPI,
 } from "@/clients/dashboard"
 import { Button } from "@/components/ui/button"
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from "@/components/ui/tooltip"
 import {
   Card,
   CardContent,
@@ -27,24 +33,45 @@ import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs"
 interface DashboardPageLayoutProps {
   title: string
   description: string
+  /** Override the brand card title. Default: "Select Brand to Monitor" */
+  brandCardTitle?: string
+  /** Description shown below the card title. Pass empty string to hide. */
+  brandCardDescription?: string
+  /** Whether to show Project and Role fields. Default: true */
+  showProjectRole?: boolean
+  /** Width class for the brand dropdown. Default: "w-[350px]" */
+  brandDropdownWidth?: string
+  /** Extra content rendered inside the brand card after the dropdown row */
+  brandCardExtras?: (selectedBrand: UserBrand | undefined) => React.ReactNode
   children: (props: {
     selectedBrandId: string
     selectedBrand: UserBrand
+    selectedSegment: string
     timeRange: TimeRange
     customStartDate?: string
     customEndDate?: string
+    timeRangeControls: React.ReactNode
+    customDateInputs: React.ReactNode
   }) => React.ReactNode
 }
 
 export function DashboardPageLayout({
   title,
   description,
+  brandCardTitle = "Select Brand to Monitor",
+  brandCardDescription = "Choose a brand from your projects to view its performance metrics",
+  showProjectRole = true,
+  brandDropdownWidth = "w-[350px]",
+  brandCardExtras,
   children,
 }: DashboardPageLayoutProps) {
   const [brands, setBrands] = useState<UserBrand[]>([])
   const [selectedBrandId, setSelectedBrandId] = useState<string | null>(null)
   const [isLoadingBrands, setIsLoadingBrands] = useState(true)
   const [brandsError, setBrandsError] = useState<string | null>(null)
+  const [segments, setSegments] = useState<string[]>([])
+  const [selectedSegment, setSelectedSegment] = useState<string>("")
+  const [isLoadingSegments, setIsLoadingSegments] = useState(false)
   const [timeRange, setTimeRange] = useState<TimeRange>("1month")
   const [showCustomDate, setShowCustomDate] = useState(false)
   const [customDateRange, setCustomDateRange] = useState({ start: "", end: "" })
@@ -75,6 +102,21 @@ export function DashboardPageLayout({
     fetchUserBrands()
   }, [fetchUserBrands])
 
+  useEffect(() => {
+    if (!selectedBrandId) return
+    setIsLoadingSegments(true)
+    setSegments([])
+    setSelectedSegment("")
+    dashboardAPI
+      .getBrandSegments(selectedBrandId)
+      .then((data: BrandSegmentsResponse) => {
+        setSegments(data.segments)
+        setSelectedSegment(data.segments[0] ?? "")
+      })
+      .catch(() => setSegments([]))
+      .finally(() => setIsLoadingSegments(false))
+  }, [selectedBrandId])
+
   const handleBrandChange = (brandId: string) => {
     setSelectedBrandId(brandId)
   }
@@ -102,30 +144,38 @@ export function DashboardPageLayout({
   const selectedBrand = brands.find((b) => b.brand_id === selectedBrandId)
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100 p-8">
-      <div className="max-w-7xl mx-auto space-y-8">
+    <div className="min-h-screen bg-slate-50 px-4 py-4">
+      <div className="space-y-4">
         {/* Header */}
-        <div className="flex items-center justify-between">
-          <div>
-            <h1 className="text-4xl font-bold text-slate-900">{title}</h1>
-            <p className="text-slate-600 mt-2">{description}</p>
-          </div>
-          <div className="flex gap-3">
-            <Button variant="outline" onClick={handleRefresh}>
-              Refresh Data
-            </Button>
-          </div>
+        <div>
+          <h1 className="text-lg font-bold text-slate-900">{title}</h1>
+          <p className="text-xs text-slate-600 mt-1">{description}</p>
         </div>
 
         {/* Brand Selector */}
-        <Card className="shadow-md">
+        <Card className="rounded-xl ring-1 ring-slate-900/5 shadow-sm">
           <CardHeader className="pb-4">
-            <CardTitle className="text-lg font-semibold">
-              Select Brand to Monitor
-            </CardTitle>
-            <CardDescription>
-              Choose a brand from your projects to view its performance metrics
-            </CardDescription>
+            <div className="flex items-center justify-between">
+              <div>
+                <CardTitle>
+                  <span className="text-base font-semibold text-slate-900 bg-indigo-50 px-3 py-1 rounded-full">{brandCardTitle}</span>
+                </CardTitle>
+                {brandCardDescription && (
+                  <CardDescription>{brandCardDescription}</CardDescription>
+                )}
+              </div>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <button
+                    onClick={handleRefresh}
+                    className="text-slate-400 hover:text-indigo-500 hover:bg-indigo-50 rounded-md p-1.5 transition-colors"
+                  >
+                    <RefreshCw className="h-5 w-5" strokeWidth={2.5} />
+                  </button>
+                </TooltipTrigger>
+                <TooltipContent>Refresh Data</TooltipContent>
+              </Tooltip>
+            </div>
           </CardHeader>
           <CardContent>
             {isLoadingBrands ? (
@@ -152,38 +202,63 @@ export function DashboardPageLayout({
                 </p>
               </div>
             ) : (
-              <div className="flex items-center gap-4">
-                <Select
-                  value={selectedBrandId || undefined}
-                  onValueChange={handleBrandChange}
-                >
-                  <SelectTrigger className="w-[350px]">
-                    <SelectValue placeholder="Select a brand" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {brands.map((brand) => (
-                      <SelectItem key={brand.brand_id} value={brand.brand_id}>
-                        <div className="flex items-center gap-2">
-                          <span className="font-medium">
-                            {brand.brand_name}
-                          </span>
-                          <span className="text-xs text-slate-400">
-                            ({brand.project_name})
-                          </span>
-                        </div>
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-                {selectedBrand && (
-                  <div className="text-sm text-slate-500">
+              <div className="flex items-center gap-4 flex-wrap">
+                {/* Brand dropdown */}
+                <div className="flex items-center gap-1.5">
+                  <span className="text-[10px] text-slate-500 font-medium whitespace-nowrap">Brand</span>
+                  <Select
+                    value={selectedBrandId || undefined}
+                    onValueChange={handleBrandChange}
+                  >
+                    <SelectTrigger className="w-[140px] !h-6 !py-0 px-2 text-[10px] [&_svg:last-child]:size-3">
+                      <SelectValue placeholder="Select a brand" />
+                    </SelectTrigger>
+                    <SelectContent className="max-h-40">
+                      {brands.map((brand) => (
+                        <SelectItem key={brand.brand_id} value={brand.brand_id} className="text-[10px] !py-0.5 px-2">
+                          <div className="flex items-center gap-1">
+                            <span className="font-medium">{brand.brand_name}</span>
+                            <span className="text-slate-400">({brand.project_name})</span>
+                          </div>
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+
+                {/* Segment dropdown */}
+                <div className="flex items-center gap-1.5">
+                  <span className="text-[10px] text-slate-500 font-medium whitespace-nowrap">Segment</span>
+                  <Select
+                    value={selectedSegment || undefined}
+                    onValueChange={setSelectedSegment}
+                    disabled={isLoadingSegments || segments.length === 0}
+                  >
+                    <SelectTrigger className="w-[140px] !h-6 !py-0 px-2 text-[10px] [&_svg:last-child]:size-3">
+                      <SelectValue placeholder={isLoadingSegments ? "Loading…" : "Select segment"} />
+                    </SelectTrigger>
+                    <SelectContent className="max-h-40">
+                      {segments.map((seg) => (
+                        <SelectItem key={seg} value={seg} className="text-[10px] !py-0.5 px-2">
+                          {seg}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+
+                {showProjectRole && selectedBrand && (
+                  <div className="text-[10px] text-slate-500">
                     <span className="font-medium">Project:</span>{" "}
                     {selectedBrand.project_name}
                     <span className="mx-2">|</span>
                     <span className="font-medium">Role:</span>{" "}
-                    <span className="capitalize">
-                      {selectedBrand.user_role}
-                    </span>
+                    <span className="capitalize">{selectedBrand.user_role}</span>
+                  </div>
+                )}
+                {brandCardExtras && (
+                  <div className="ml-auto flex items-center gap-2">
+                    {brandCardExtras(selectedBrand)}
                   </div>
                 )}
               </div>
@@ -191,123 +266,120 @@ export function DashboardPageLayout({
           </CardContent>
         </Card>
 
-        {/* Time Range Selection */}
-        {selectedBrandId && (
-          <div className="flex items-center justify-end gap-3">
-            <Tabs
-              value={showCustomDate ? "custom" : timeRange}
-              onValueChange={(value) => {
-                if (value === "custom") {
-                  setShowCustomDate(true)
-                } else {
-                  setTimeRange(value as TimeRange)
-                  setShowCustomDate(false)
-                  setCustomDateApplied(null)
-                }
-              }}
-            >
-              <TabsList className="bg-transparent rounded-none border-b h-auto p-0">
-                <TabsTrigger
-                  value="1month"
-                  className="bg-transparent rounded-none shadow-none px-4 py-2
-                    data-[state=active]:bg-transparent data-[state=active]:shadow-none
-                    border-b-2 border-transparent data-[state=active]:border-primary"
-                >
-                  1M
-                </TabsTrigger>
-                <TabsTrigger
-                  value="1quarter"
-                  className="bg-transparent rounded-none shadow-none px-4 py-2
-                    data-[state=active]:bg-transparent data-[state=active]:shadow-none
-                    border-b-2 border-transparent data-[state=active]:border-primary"
-                >
-                  1Q
-                </TabsTrigger>
-                <TabsTrigger
-                  value="1year"
-                  className="bg-transparent rounded-none shadow-none px-4 py-2
-                    data-[state=active]:bg-transparent data-[state=active]:shadow-none
-                    border-b-2 border-transparent data-[state=active]:border-primary"
-                >
-                  1Y
-                </TabsTrigger>
-                <TabsTrigger
-                  value="ytd"
-                  className="bg-transparent rounded-none shadow-none px-4 py-2
-                    data-[state=active]:bg-transparent data-[state=active]:shadow-none
-                    border-b-2 border-transparent data-[state=active]:border-primary"
-                >
-                  YTD
-                </TabsTrigger>
-              </TabsList>
-            </Tabs>
-
-            <Button
-              variant={showCustomDate ? "default" : "outline"}
-              onClick={() => setShowCustomDate(!showCustomDate)}
-              size="sm"
-              type="button"
-            >
-              <Calendar className="h-4 w-4 mr-2" />
-              Custom Range
-            </Button>
-          </div>
-        )}
-
-        {/* Custom Date Range Inputs */}
-        {showCustomDate && (
-          <div className="flex gap-3 items-center p-4 bg-gray-50 rounded-lg">
-            <div className="flex-1">
-              <label className="text-sm font-medium text-gray-700 block mb-1">
-                Start Date
-              </label>
-              <input
-                type="date"
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                value={customDateRange.start}
-                onChange={(e) =>
-                  setCustomDateRange({
-                    ...customDateRange,
-                    start: e.target.value,
-                  })
-                }
-              />
-            </div>
-            <div className="flex-1">
-              <label className="text-sm font-medium text-gray-700 block mb-1">
-                End Date
-              </label>
-              <input
-                type="date"
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                value={customDateRange.end}
-                onChange={(e) =>
-                  setCustomDateRange({
-                    ...customDateRange,
-                    end: e.target.value,
-                  })
-                }
-              />
-            </div>
-            <Button
-              className="self-end"
-              onClick={handleCustomDateApply}
-              type="button"
-            >
-              Apply
-            </Button>
-          </div>
-        )}
-
         {/* Page Content */}
         {selectedBrandId && selectedBrand && (
           <div className="w-full">
             {children({
               selectedBrandId,
               selectedBrand,
+              selectedSegment,
               timeRange,
               customStartDate: customDateApplied?.start,
               customEndDate: customDateApplied?.end,
+              timeRangeControls: (
+                <div className="flex items-center gap-2">
+                  <Tabs
+                    value={showCustomDate ? "custom" : timeRange}
+                    onValueChange={(value) => {
+                      if (value === "custom") {
+                        setShowCustomDate(true)
+                      } else {
+                        setTimeRange(value as TimeRange)
+                        setShowCustomDate(false)
+                        setCustomDateApplied(null)
+                      }
+                    }}
+                  >
+                    <TabsList className="bg-transparent rounded-none border-b h-auto p-0">
+                      <TabsTrigger
+                        value="1month"
+                        className="bg-transparent rounded-none shadow-none px-3 py-1 text-xs
+                          data-[state=active]:bg-transparent data-[state=active]:shadow-none
+                          border-b-2 border-transparent data-[state=active]:border-primary"
+                      >
+                        1M
+                      </TabsTrigger>
+                      <TabsTrigger
+                        value="1quarter"
+                        className="bg-transparent rounded-none shadow-none px-3 py-1 text-xs
+                          data-[state=active]:bg-transparent data-[state=active]:shadow-none
+                          border-b-2 border-transparent data-[state=active]:border-primary"
+                      >
+                        1Q
+                      </TabsTrigger>
+                      <TabsTrigger
+                        value="1year"
+                        className="bg-transparent rounded-none shadow-none px-3 py-1 text-xs
+                          data-[state=active]:bg-transparent data-[state=active]:shadow-none
+                          border-b-2 border-transparent data-[state=active]:border-primary"
+                      >
+                        1Y
+                      </TabsTrigger>
+                      <TabsTrigger
+                        value="ytd"
+                        className="bg-transparent rounded-none shadow-none px-3 py-1 text-xs
+                          data-[state=active]:bg-transparent data-[state=active]:shadow-none
+                          border-b-2 border-transparent data-[state=active]:border-primary"
+                      >
+                        YTD
+                      </TabsTrigger>
+                    </TabsList>
+                  </Tabs>
+                  <Button
+                    variant={showCustomDate ? "default" : "outline"}
+                    onClick={() => setShowCustomDate(!showCustomDate)}
+                    size="sm"
+                    type="button"
+                    className="h-7 text-xs px-2"
+                  >
+                    <Calendar className="h-3 w-3 mr-1" />
+                    Custom
+                  </Button>
+                </div>
+              ),
+              customDateInputs: showCustomDate ? (
+                <div className="flex gap-3 items-center p-3 bg-gray-50 rounded-lg">
+                  <div className="flex-1">
+                    <label className="text-xs font-medium text-gray-700 block mb-1">
+                      Start Date
+                    </label>
+                    <input
+                      type="date"
+                      className="w-full px-2 py-1.5 text-xs border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      value={customDateRange.start}
+                      onChange={(e) =>
+                        setCustomDateRange({
+                          ...customDateRange,
+                          start: e.target.value,
+                        })
+                      }
+                    />
+                  </div>
+                  <div className="flex-1">
+                    <label className="text-xs font-medium text-gray-700 block mb-1">
+                      End Date
+                    </label>
+                    <input
+                      type="date"
+                      className="w-full px-2 py-1.5 text-xs border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      value={customDateRange.end}
+                      onChange={(e) =>
+                        setCustomDateRange({
+                          ...customDateRange,
+                          end: e.target.value,
+                        })
+                      }
+                    />
+                  </div>
+                  <Button
+                    className="self-end h-7 text-xs px-3"
+                    onClick={handleCustomDateApply}
+                    type="button"
+                  >
+                    Apply
+                  </Button>
+                </div>
+              ) : null,
             })}
           </div>
         )}
@@ -317,7 +389,7 @@ export function DashboardPageLayout({
           !brandsError &&
           brands.length > 0 &&
           !selectedBrandId && (
-            <Card className="shadow-lg">
+            <Card className="rounded-xl ring-1 ring-slate-900/5 shadow-sm">
               <CardContent className="flex flex-col items-center justify-center h-64">
                 <p className="text-slate-500">
                   Select a brand above to view its performance metrics

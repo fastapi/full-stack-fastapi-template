@@ -22,6 +22,7 @@ import { Route as AppDashboardPerformanceRouteImport } from './routes/app.dashbo
 import { Route as AppDashboardOverviewRouteImport } from './routes/app.dashboard.overview'
 import { Route as AppDashboardDashboardRouteImport } from './routes/app.dashboard.dashboard'
 import { Route as AppDashboardCompetitorsRouteImport } from './routes/app.dashboard.competitors'
+import { Route as AppDashboardBrandImpressionRouteImport } from './routes/app.dashboard.brand-impression'
 
 const AppRoute = AppRouteImport.update({
   id: '/app',
@@ -89,6 +90,12 @@ const AppDashboardCompetitorsRoute = AppDashboardCompetitorsRouteImport.update({
   path: '/dashboard/competitors',
   getParentRoute: () => AppRoute,
 } as any)
+const AppDashboardBrandImpressionRoute =
+  AppDashboardBrandImpressionRouteImport.update({
+    id: '/dashboard/brand-impression',
+    path: '/dashboard/brand-impression',
+    getParentRoute: () => AppRoute,
+  } as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -96,6 +103,7 @@ export interface FileRoutesByFullPath {
   '/app/profile-setup': typeof AppProfileSetupRoute
   '/app/projects': typeof AppProjectsRoute
   '/app/users': typeof AppUsersRoute
+  '/app/dashboard/brand-impression': typeof AppDashboardBrandImpressionRoute
   '/app/dashboard/competitors': typeof AppDashboardCompetitorsRoute
   '/app/dashboard/dashboard': typeof AppDashboardDashboardRoute
   '/app/dashboard/overview': typeof AppDashboardOverviewRoute
@@ -111,6 +119,7 @@ export interface FileRoutesByTo {
   '/app/profile-setup': typeof AppProfileSetupRoute
   '/app/projects': typeof AppProjectsRoute
   '/app/users': typeof AppUsersRoute
+  '/app/dashboard/brand-impression': typeof AppDashboardBrandImpressionRoute
   '/app/dashboard/competitors': typeof AppDashboardCompetitorsRoute
   '/app/dashboard/dashboard': typeof AppDashboardDashboardRoute
   '/app/dashboard/overview': typeof AppDashboardOverviewRoute
@@ -127,6 +136,7 @@ export interface FileRoutesById {
   '/app/profile-setup': typeof AppProfileSetupRoute
   '/app/projects': typeof AppProjectsRoute
   '/app/users': typeof AppUsersRoute
+  '/app/dashboard/brand-impression': typeof AppDashboardBrandImpressionRoute
   '/app/dashboard/competitors': typeof AppDashboardCompetitorsRoute
   '/app/dashboard/dashboard': typeof AppDashboardDashboardRoute
   '/app/dashboard/overview': typeof AppDashboardOverviewRoute
@@ -144,6 +154,7 @@ export interface FileRouteTypes {
     | '/app/profile-setup'
     | '/app/projects'
     | '/app/users'
+    | '/app/dashboard/brand-impression'
     | '/app/dashboard/competitors'
     | '/app/dashboard/dashboard'
     | '/app/dashboard/overview'
@@ -159,6 +170,7 @@ export interface FileRouteTypes {
     | '/app/profile-setup'
     | '/app/projects'
     | '/app/users'
+    | '/app/dashboard/brand-impression'
     | '/app/dashboard/competitors'
     | '/app/dashboard/dashboard'
     | '/app/dashboard/overview'
@@ -174,6 +186,7 @@ export interface FileRouteTypes {
     | '/app/profile-setup'
     | '/app/projects'
     | '/app/users'
+    | '/app/dashboard/brand-impression'
     | '/app/dashboard/competitors'
     | '/app/dashboard/dashboard'
     | '/app/dashboard/overview'
@@ -282,6 +295,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AppDashboardCompetitorsRouteImport
       parentRoute: typeof AppRoute
     }
+    '/app/dashboard/brand-impression': {
+      id: '/app/dashboard/brand-impression'
+      path: '/dashboard/brand-impression'
+      fullPath: '/app/dashboard/brand-impression'
+      preLoaderRoute: typeof AppDashboardBrandImpressionRouteImport
+      parentRoute: typeof AppRoute
+    }
   }
 }
 
@@ -289,6 +309,7 @@ interface AppRouteChildren {
   AppProfileSetupRoute: typeof AppProfileSetupRoute
   AppProjectsRoute: typeof AppProjectsRoute
   AppUsersRoute: typeof AppUsersRoute
+  AppDashboardBrandImpressionRoute: typeof AppDashboardBrandImpressionRoute
   AppDashboardCompetitorsRoute: typeof AppDashboardCompetitorsRoute
   AppDashboardDashboardRoute: typeof AppDashboardDashboardRoute
   AppDashboardOverviewRoute: typeof AppDashboardOverviewRoute
@@ -303,6 +324,7 @@ const AppRouteChildren: AppRouteChildren = {
   AppProfileSetupRoute: AppProfileSetupRoute,
   AppProjectsRoute: AppProjectsRoute,
   AppUsersRoute: AppUsersRoute,
+  AppDashboardBrandImpressionRoute: AppDashboardBrandImpressionRoute,
   AppDashboardCompetitorsRoute: AppDashboardCompetitorsRoute,
   AppDashboardDashboardRoute: AppDashboardDashboardRoute,
   AppDashboardOverviewRoute: AppDashboardOverviewRoute,

@@ -7,7 +7,7 @@ import TestimonialSection from "./TestimonialSection"
 
 export default function LandingPage() {
   return (
-    <div className="min-h-screen bg-white dark:bg-gray-900">
+    <div className="min-h-screen bg-white dark:bg-gray-900 font-sora">
       <Header />
 
       <main>

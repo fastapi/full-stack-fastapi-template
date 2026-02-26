@@ -10,8 +10,8 @@ import {
 import { ArrowDown, ArrowUp, ArrowUpDown, ChevronLeft, ChevronRight, Loader2 } from "lucide-react"
 import { useEffect, useMemo, useState } from "react"
 import {
-  type SegmentMetricsResponse,
-  type SegmentMetricsRow,
+  type ReferenceSourceItem,
+  type ReferenceSourcesResponse,
   type TimeRange,
   dashboardAPI,
 } from "@/clients/dashboard"
@@ -25,8 +25,9 @@ import {
   TableRow,
 } from "@/components/ui/table"
 
-interface SegmentMetricsTableProps {
+interface AIReferenceSourceTableProps {
   brandId: string
+  segment?: string
   timeRange: TimeRange
   customStartDate?: string
   customEndDate?: string
@@ -40,13 +41,14 @@ function SortIcon({ sorted }: { sorted: false | "asc" | "desc" }) {
 
 const PAGE_SIZE = 8
 
-export function SegmentMetricsTable({
+export function AIReferenceSourceTable({
   brandId,
+  segment,
   timeRange,
   customStartDate,
   customEndDate,
-}: SegmentMetricsTableProps) {
-  const [segments, setSegments] = useState<SegmentMetricsRow[]>([])
+}: AIReferenceSourceTableProps) {
+  const [sources, setSources] = useState<ReferenceSourceItem[]>([])
   const [isLoading, setIsLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
   const [sorting, setSorting] = useState<SortingState>([])
@@ -56,63 +58,34 @@ export function SegmentMetricsTable({
       try {
         setIsLoading(true)
         setError(null)
-        const data: SegmentMetricsResponse = await dashboardAPI.getSegmentMetrics({
+        const data: ReferenceSourcesResponse = await dashboardAPI.getBrandReferenceSources({
           brandId,
+          segment,
           timeRange,
           startDate: customStartDate,
           endDate: customEndDate,
         })
-        setSegments(data.segments)
+        setSources(data.sources)
       } catch (err) {
-        setError(err instanceof Error ? err.message : "Failed to load segment metrics")
+        setError(err instanceof Error ? err.message : "Failed to load reference sources")
       } finally {
         setIsLoading(false)
       }
     }
     fetchData()
-  }, [brandId, timeRange, customStartDate, customEndDate])
+  }, [brandId, segment, timeRange, customStartDate, customEndDate])
 
-  const columns = useMemo<ColumnDef<SegmentMetricsRow>[]>(
+  const columns = useMemo<ColumnDef<ReferenceSourceItem>[]>(
     () => [
       {
-        accessorKey: "segment",
-        header: "Segment",
-        enableSorting: true,
+        accessorKey: "seq",
+        header: "#",
+        enableSorting: false,
+        size: 40,
       },
       {
-        accessorKey: "awareness_score",
-        header: "Awareness",
-        cell: ({ getValue }) => (getValue() as number).toFixed(1),
-        enableSorting: true,
-      },
-      {
-        accessorKey: "share_of_visibility",
-        header: "Visibility",
-        cell: ({ getValue }) => `${((getValue() as number) * 100).toFixed(1)}%`,
-        enableSorting: true,
-      },
-      {
-        accessorKey: "search_share_index",
-        header: "Share Index",
-        cell: ({ getValue }) => `${((getValue() as number) * 100).toFixed(1)}%`,
-        enableSorting: true,
-      },
-      {
-        accessorKey: "position_strength",
-        header: "Position",
-        cell: ({ getValue }) => `${((getValue() as number) * 100).toFixed(1)}%`,
-        enableSorting: true,
-      },
-      {
-        accessorKey: "search_momentum",
-        header: "Momentum",
-        cell: ({ getValue }) => `${((getValue() as number) * 100).toFixed(1)}%`,
-        enableSorting: true,
-      },
-      {
-        accessorKey: "consistency_index",
-        header: "Consistency",
-        cell: ({ getValue }) => (getValue() as number).toFixed(1),
+        accessorKey: "source",
+        header: "Source",
         enableSorting: true,
       },
     ],
@@ -120,7 +93,7 @@ export function SegmentMetricsTable({
   )
 
   const table = useReactTable({
-    data: segments,
+    data: sources,
     columns,
     state: { sorting },
     onSortingChange: setSorting,
@@ -133,47 +106,44 @@ export function SegmentMetricsTable({
   if (isLoading) {
     return (
       <div className="flex items-center justify-center py-10">
-        <Loader2 className="h-5 w-5 animate-spin text-slate-400" />
+        <Loader2 className="h-4 w-4 animate-spin text-slate-400" />
         <span className="ml-2 text-xs text-slate-500">Loading...</span>
       </div>
     )
   }
 
   if (error) {
-    return <div className="text-center py-8 text-xs text-red-500">{error}</div>
+    return <div className="text-center py-6 text-xs text-red-500">{error}</div>
   }
 
-  if (segments.length === 0) {
+  if (sources.length === 0) {
     return (
-      <div className="text-center py-8 text-xs text-slate-400">
-        No segment data available for the selected time range
+      <div className="text-center py-6 text-xs text-slate-400">
+        No reference sources found for the selected period
       </div>
     )
   }
 
   return (
     <div className="flex flex-col gap-2">
-      {/* Scrollable table */}
       <div className="w-full overflow-auto rounded-lg border border-slate-100">
-        <Table className="min-w-max text-xs">
+        <Table className="text-xs">
           <TableHeader className="sticky top-0 z-30 bg-indigo-50">
             {table.getHeaderGroups().map((headerGroup) => (
               <TableRow key={headerGroup.id} className="border-b border-indigo-100 hover:bg-transparent">
-                {headerGroup.headers.map((header, idx) => (
+                {headerGroup.headers.map((header) => (
                   <TableHead
                     key={header.id}
                     className={[
                       "text-[10px] font-semibold text-indigo-700 py-2 whitespace-nowrap select-none",
-                      idx === 0
-                        ? "sticky left-0 z-20 bg-indigo-50 pl-3"
-                        : "text-right pr-3",
+                      header.column.id === "seq" ? "w-10 pl-3" : "pr-3",
                       header.column.getCanSort() ? "cursor-pointer" : "",
                     ].join(" ")}
                     onClick={header.column.getToggleSortingHandler()}
                   >
-                    <div className={`flex items-center gap-1 ${idx > 0 ? "justify-end" : ""}`}>
+                    <div className="flex items-center gap-1">
                       {flexRender(header.column.columnDef.header, header.getContext())}
-                      <SortIcon sorted={header.column.getIsSorted()} />
+                      {header.column.getCanSort() && <SortIcon sorted={header.column.getIsSorted()} />}
                     </div>
                   </TableHead>
                 ))}
@@ -186,17 +156,12 @@ export function SegmentMetricsTable({
                 key={row.id}
                 className={rowIdx % 2 === 0 ? "bg-white hover:bg-slate-50" : "bg-slate-50/50 hover:bg-slate-100/60"}
               >
-                {row.getVisibleCells().map((cell, idx) => (
+                {row.getVisibleCells().map((cell) => (
                   <TableCell
                     key={cell.id}
                     className={[
                       "text-xs py-1.5",
-                      idx === 0
-                        ? "sticky left-0 z-10 font-medium whitespace-nowrap pl-3"
-                        : "text-right pr-3",
-                      idx === 0
-                        ? rowIdx % 2 === 0 ? "bg-white" : "bg-slate-50/50"
-                        : "",
+                      cell.column.id === "seq" ? "w-10 pl-3 text-slate-400" : "pr-3 break-all",
                     ].join(" ")}
                   >
                     {flexRender(cell.column.columnDef.cell, cell.getContext())}
@@ -208,30 +173,19 @@ export function SegmentMetricsTable({
         </Table>
       </div>
 
-      {/* Pagination */}
       {table.getPageCount() > 1 && (
         <div className="flex items-center justify-between px-1">
           <span className="text-[10px] text-slate-400">
             Page {table.getState().pagination.pageIndex + 1} of {table.getPageCount()}
-            <span className="ml-2 text-slate-300">({segments.length} rows)</span>
+            <span className="ml-2 text-slate-300">({sources.length} rows)</span>
           </span>
           <div className="flex items-center gap-1">
-            <Button
-              variant="outline"
-              size="sm"
-              className="h-6 w-6 p-0"
-              onClick={() => table.previousPage()}
-              disabled={!table.getCanPreviousPage()}
-            >
+            <Button variant="outline" size="sm" className="h-6 w-6 p-0"
+              onClick={() => table.previousPage()} disabled={!table.getCanPreviousPage()}>
               <ChevronLeft className="h-3 w-3" />
             </Button>
-            <Button
-              variant="outline"
-              size="sm"
-              className="h-6 w-6 p-0"
-              onClick={() => table.nextPage()}
-              disabled={!table.getCanNextPage()}
-            >
+            <Button variant="outline" size="sm" className="h-6 w-6 p-0"
+              onClick={() => table.nextPage()} disabled={!table.getCanNextPage()}>
               <ChevronRight className="h-3 w-3" />
             </Button>
           </div>

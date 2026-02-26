@@ -315,8 +315,8 @@ export default function Insight() {
 
   // ── Render ──
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100 p-4 sm:p-6 lg:p-8">
-      <div className="max-w-7xl mx-auto space-y-6 sm:space-y-8">
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100 px-4 py-4">
+      <div className="space-y-4">
         {/* Header */}
         <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
           <div>

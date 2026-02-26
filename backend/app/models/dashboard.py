@@ -442,3 +442,59 @@ class RiskHistoryResponse(BaseModel):
     data_points: list[RiskHistoryDataPoint] = Field(default_factory=list, description="Time series data points")
 
     model_config = ConfigDict(from_attributes=True)
+
+
+class BrandImpressionMetric(BaseModel):
+    """A single metric for the brand impression summary card."""
+    current_value: Optional[float] = Field(None, description="Current metric value")
+    previous_value: Optional[float] = Field(None, description="Previous metric value (7 days prior)")
+    change: Optional[float] = Field(None, description="Absolute change: current - previous")
+    trend: str = Field("no_data", description="Trend direction: up, down, flat, or no_data")
+
+    model_config = ConfigDict(from_attributes=True)
+
+
+class BrandImpressionSummaryResponse(BaseModel):
+    """Response schema for the brand impression summary card (3 quick metrics)."""
+    brand_id: str = Field(..., description="Brand identifier")
+    brand_name: str = Field(..., description="Brand display name")
+    visibility: BrandImpressionMetric = Field(..., description="Visibility rate (search_visibility_count / total_search_count * 100)")
+    position: BrandImpressionMetric = Field(..., description="Median ranking position (lower = better)")
+    sentiment: BrandImpressionMetric = Field(..., description="Final sentiment score (0-100, NULL = no reviews)")
+    current_period_end: Optional[str] = Field(None, description="End date of the current 7-day window")
+    previous_period_end: Optional[str] = Field(None, description="End date of the previous 7-day window")
+
+    model_config = ConfigDict(from_attributes=True)
+
+
+class ReferenceSourceItem(BaseModel):
+    """A single AI reference source entry."""
+    seq: int = Field(..., description="Sequence number")
+    source: str = Field(..., description="Reference source URL or name")
+
+    model_config = ConfigDict(from_attributes=True)
+
+
+class ReferenceSourcesResponse(BaseModel):
+    """Response schema for AI reference sources table."""
+    brand_id: str = Field(..., description="Brand identifier")
+    sources: list[ReferenceSourceItem] = Field(default_factory=list, description="Deduplicated reference sources")
+
+    model_config = ConfigDict(from_attributes=True)
+
+
+class CustomerReviewItem(BaseModel):
+    """A single customer review with sentiment label."""
+    seq: int = Field(..., description="Sequence number")
+    review: str = Field(..., description="Customer review text")
+    sentiment: str = Field(..., description="Sentiment label: Positive, Neutral, or Negative")
+
+    model_config = ConfigDict(from_attributes=True)
+
+
+class CustomerReviewsResponse(BaseModel):
+    """Response schema for customer reviews with sentiment table."""
+    brand_id: str = Field(..., description="Brand identifier")
+    reviews: list[CustomerReviewItem] = Field(default_factory=list, description="Customer reviews with sentiment")
+
+    model_config = ConfigDict(from_attributes=True)

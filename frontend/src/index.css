@@ -1,4 +1,4 @@
-@import url("https://fonts.googleapis.com/css2?family=Funnel+Sans:wght@300;400;500;600;700;800&display=swap");
+@import url("https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Sora:wght@400;500;600;700;800&display=swap");
 @import "tailwindcss";
 @import "tw-animate-css"; /* noinspection CssUnknownAtRule */
 
@@ -11,7 +11,8 @@
 
 /*noinspection CssInvalidAtRule*/
 @theme {
-  --font-funnel-sans: "Funnel Sans", sans-serif;
+  --font-inter: "Inter", sans-serif;
+  --font-sora: "Sora", sans-serif;
   --color-brand-primary: #3b82f6; /* Creates 'bg-brand-primary' and 'text-brand-primary' */
   --spacing-128: 32rem;
   --radius: 0.1rem;
@@ -74,7 +75,7 @@
   body {
     background: hsl(var(--background));
     color: hsl(var(--foreground));
-    font-family: var(--font-funnel-sans);
+    font-family: var(--font-inter);
   }
 }
 

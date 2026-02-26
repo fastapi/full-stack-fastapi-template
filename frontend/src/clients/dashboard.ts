@@ -505,6 +505,58 @@ export interface RiskHistoryParams {
 }
 
 /**
+ * Response for brand segments endpoint
+ */
+export interface BrandSegmentsResponse {
+  brand_id: string
+  segments: string[]
+}
+
+/**
+ * A single metric in the brand impression summary card
+ */
+export interface BrandImpressionMetric {
+  current_value: number | null
+  previous_value: number | null
+  change: number | null
+  trend: "up" | "down" | "flat" | "no_data"
+}
+
+/**
+ * Response for the brand impression summary card (3 quick metrics)
+ */
+export interface BrandImpressionSummaryResponse {
+  brand_id: string
+  brand_name: string
+  visibility: BrandImpressionMetric
+  position: BrandImpressionMetric
+  sentiment: BrandImpressionMetric
+  current_period_end: string | null
+  previous_period_end: string | null
+}
+
+export interface ReferenceSourceItem {
+  seq: number
+  source: string
+}
+
+export interface ReferenceSourcesResponse {
+  brand_id: string
+  sources: ReferenceSourceItem[]
+}
+
+export interface CustomerReviewItem {
+  seq: number
+  review: string
+  sentiment: "Positive" | "Neutral" | "Negative"
+}
+
+export interface CustomerReviewsResponse {
+  brand_id: string
+  reviews: CustomerReviewItem[]
+}
+
+/**
  * Standard API error response interface
  */
 export interface ApiError {
@@ -1766,6 +1818,137 @@ class DashboardAPI {
     this.setCachedData(cacheKey, data)
 
     return data
+  }
+
+  // ── Brand Segments ────────────────────────────────────────────
+
+  async getBrandSegments(brandId: string): Promise<BrandSegmentsResponse> {
+    const cacheKey = `dashboard_brand_segments_${brandId}`
+    const cached = this.getCachedData<BrandSegmentsResponse>(cacheKey)
+    if (cached) return cached
+
+    const url = `${this.baseUrl}${this.apiPrefix}/dashboard/brand-segments?brand_id=${encodeURIComponent(brandId)}`
+
+    const response = await fetch(url, {
+      method: "GET",
+      headers: await this.getAuthHeaders(),
+    })
+
+    if (response.status === 401) throw new Error("Unauthorized - Please log in again")
+    if (!response.ok) {
+      const error: ApiError = await response.json()
+      throw new Error(error.detail || "Failed to fetch brand segments")
+    }
+
+    const data: BrandSegmentsResponse = await response.json()
+    this.setCachedData(cacheKey, data)
+    return data
+  }
+
+  // ── Brand Impression Summary ───────────────────────────────────
+
+  private getBrandImpressionSummaryCacheKey(brandId: string): string {
+    return `dashboard_brand_impression_summary_${brandId}`
+  }
+
+  async getBrandImpressionSummary(
+    brandId: string,
+    forceRefresh = false,
+  ): Promise<BrandImpressionSummaryResponse> {
+    const cacheKey = this.getBrandImpressionSummaryCacheKey(brandId)
+
+    if (!forceRefresh) {
+      const cached = this.getCachedData<BrandImpressionSummaryResponse>(cacheKey)
+      if (cached) {
+        return cached
+      }
+    }
+
+    console.log("[DashboardAPI] Fetching brand impression summary from API...", { brandId })
+
+    const queryParams = new URLSearchParams()
+    queryParams.append("brand_id", brandId)
+
+    const url = `${this.baseUrl}${this.apiPrefix}/dashboard/brand-impression-summary?${queryParams.toString()}`
+
+    const response = await fetch(url, {
+      method: "GET",
+      headers: await this.getAuthHeaders(),
+    })
+
+    if (response.status === 401) {
+      throw new Error("Unauthorized - Please log in again")
+    }
+
+    if (!response.ok) {
+      const error: ApiError = await response.json()
+      throw new Error(error.detail || "Failed to fetch brand impression summary")
+    }
+
+    const data: BrandImpressionSummaryResponse = await response.json()
+    this.setCachedData(cacheKey, data)
+
+    return data
+  }
+
+  async getBrandReferenceSources({
+    brandId,
+    segment,
+    timeRange,
+    startDate,
+    endDate,
+  }: {
+    brandId: string
+    segment?: string
+    timeRange: TimeRange
+    startDate?: string
+    endDate?: string
+  }): Promise<ReferenceSourcesResponse> {
+    const params = new URLSearchParams({ brand_id: brandId, time_range: timeRange })
+    if (segment) params.append("segment", segment)
+    if (startDate) params.append("start_date", startDate)
+    if (endDate) params.append("end_date", endDate)
+
+    const response = await fetch(
+      `${API_BASE_URL}${API_PREFIX}/dashboard/brand-reference-sources?${params}`,
+      { headers: await this.getAuthHeaders() },
+    )
+    if (response.status === 401) throw new Error("Unauthorized - Please log in again")
+    if (!response.ok) {
+      const error: ApiError = await response.json()
+      throw new Error(error.detail || "Failed to fetch reference sources")
+    }
+    return response.json()
+  }
+
+  async getBrandCustomerReviews({
+    brandId,
+    segment,
+    timeRange,
+    startDate,
+    endDate,
+  }: {
+    brandId: string
+    segment?: string
+    timeRange: TimeRange
+    startDate?: string
+    endDate?: string
+  }): Promise<CustomerReviewsResponse> {
+    const params = new URLSearchParams({ brand_id: brandId, time_range: timeRange })
+    if (segment) params.append("segment", segment)
+    if (startDate) params.append("start_date", startDate)
+    if (endDate) params.append("end_date", endDate)
+
+    const response = await fetch(
+      `${API_BASE_URL}${API_PREFIX}/dashboard/brand-customer-reviews?${params}`,
+      { headers: await this.getAuthHeaders() },
+    )
+    if (response.status === 401) throw new Error("Unauthorized - Please log in again")
+    if (!response.ok) {
+      const error: ApiError = await response.json()
+      throw new Error(error.detail || "Failed to fetch customer reviews")
+    }
+    return response.json()
   }
 }
 
