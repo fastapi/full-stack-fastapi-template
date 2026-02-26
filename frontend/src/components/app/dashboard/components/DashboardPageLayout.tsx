@@ -39,8 +39,6 @@ interface DashboardPageLayoutProps {
   brandCardDescription?: string
   /** Whether to show Project and Role fields. Default: true */
   showProjectRole?: boolean
-  /** Width class for the brand dropdown. Default: "w-[350px]" */
-  brandDropdownWidth?: string
   /** Extra content rendered inside the brand card after the dropdown row */
   brandCardExtras?: (selectedBrand: UserBrand | undefined) => React.ReactNode
   children: (props: {
@@ -61,7 +59,6 @@ export function DashboardPageLayout({
   brandCardTitle = "Select Brand to Monitor",
   brandCardDescription = "Choose a brand from your projects to view its performance metrics",
   showProjectRole = true,
-  brandDropdownWidth = "w-[350px]",
   brandCardExtras,
   children,
 }: DashboardPageLayoutProps) {

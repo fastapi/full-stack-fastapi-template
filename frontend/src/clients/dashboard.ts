@@ -1820,31 +1820,6 @@ class DashboardAPI {
     return data
   }
 
-  // ── Brand Segments ────────────────────────────────────────────
-
-  async getBrandSegments(brandId: string): Promise<BrandSegmentsResponse> {
-    const cacheKey = `dashboard_brand_segments_${brandId}`
-    const cached = this.getCachedData<BrandSegmentsResponse>(cacheKey)
-    if (cached) return cached
-
-    const url = `${this.baseUrl}${this.apiPrefix}/dashboard/brand-segments?brand_id=${encodeURIComponent(brandId)}`
-
-    const response = await fetch(url, {
-      method: "GET",
-      headers: await this.getAuthHeaders(),
-    })
-
-    if (response.status === 401) throw new Error("Unauthorized - Please log in again")
-    if (!response.ok) {
-      const error: ApiError = await response.json()
-      throw new Error(error.detail || "Failed to fetch brand segments")
-    }
-
-    const data: BrandSegmentsResponse = await response.json()
-    this.setCachedData(cacheKey, data)
-    return data
-  }
-
   // ── Brand Impression Summary ───────────────────────────────────
 
   private getBrandImpressionSummaryCacheKey(brandId: string): string {
