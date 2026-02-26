@@ -23,5 +23,9 @@ jobs:
             git remote set-url origin https://x-access-token:${GH_PAT}@github.com/brucezy/kila.git
             git pull origin $BRANCH
 
+            cd /opt/geo/kila-models
+            git remote set-url origin https://x-access-token:${GH_PAT}@github.com/brucezy/kila-models.git
+            git pull origin main
+
             cd /opt/geo
             docker compose -f kila/docker-compose.prod.yml up --build -d frontend backend nginx
