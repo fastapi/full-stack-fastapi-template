@@ -35,4 +35,4 @@ jobs:
             fi
 
             cd /opt/geo
-            docker compose -f kila/docker-compose.prod.yml up --build -d frontend backend nginx
+            docker compose -f kila/docker-compose.prod.yml up --build -d
