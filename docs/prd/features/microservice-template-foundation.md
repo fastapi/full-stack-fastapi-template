@@ -1,6 +1,6 @@
 # PRD: Microservice Template Foundation
 
-**Version**: 1.0
+**Version**: 1.1
 **Component**: Full-stack (Backend-primary)
 **Status**: Draft
 **Last Updated**: 2026-02-27
@@ -27,14 +27,17 @@ Aygentic engineers waste hours re-implementing auth, error handling, logging, co
   - All tests updated for new stack (Supabase, Clerk, Entity)
   - Docker Compose adjusted for WITH_UI flag
   - GitHub Actions CI adjusted for WITH_UI flag
+  - **Gateway-ready conventions** — standardised path prefixes, health endpoints, service metadata, and correlation ID propagation that make services routable through any API gateway. Includes reference Traefik configuration.
+  - **Platform-agnostic deployment guidance** — containerised deployment conventions with GHCR, GitHub Actions CI/CD, and environment promotion (staging → production). No platform lock-in; works with any container host (Alibaba Cloud, Railway, Cloud Run, Fly.io, self-hosted).
 
 - **Out of scope**:
   - User management service (separate repo)
   - Multi-tenancy / workspace isolation
   - Service mesh, Kubernetes, Terraform
   - Shared NPM/PyPI packages
-  - API gateway configuration
-  - Deployment to specific cloud providers
+  - Full API gateway implementation (template is gateway-ready, not gateway-inclusive)
+  - Platform-specific deployment automation (template provides generic container workflows)
+  - Multi-region / disaster recovery
 
 ### Living Document
 
@@ -52,6 +55,8 @@ This PRD is a living document that will evolve during development:
 - **Developer Experience**: Clone-to-running in <10 minutes with 3 env vars (SUPABASE_URL, SUPABASE_SERVICE_KEY, CLERK_SECRET_KEY)
 - **Observability**: Structured JSON logs with request ID correlation on every request
 - **Test Coverage**: 90% line coverage on backend (pytest); frontend coverage when WITH_UI=true
+- **Deployment**: Containerised with platform-agnostic GitHub Actions. Staging auto-deploys on merge to main; production deploys on release publish. Zero-downtime deployments.
+- **Time to Production**: From cloned template to live deployment in <30 minutes on any container platform (including Supabase project creation, Clerk application setup, and container host configuration)
 
 ---
 
@@ -86,6 +91,16 @@ This PRD is a living document that will evolve during development:
 **As an** Aygentic engineer debugging a production issue
 **I want** structured JSON logs with request IDs, correlation fields, and standard error shapes
 **So that** I can trace requests across services and aggregate logs in a centralised platform.
+
+### US-7: Deploy to Production
+**As an** Aygentic engineer
+**I want** to merge to main for staging and publish a release for production
+**So that** my service deploys with zero downtime via any container platform, with the exact same image promoted from staging to production.
+
+### US-8: Multi-Service Communication
+**As an** Aygentic engineer running multiple services from this template
+**I want** services to communicate via HTTP with automatic correlation ID propagation
+**So that** I can trace requests across services and debug distributed issues using a single correlation ID.
 
 ---
 
@@ -178,6 +193,55 @@ When the workflow executes
 Then backend lint, type-check, and pytest steps run
 And frontend lint, type-check, build, and Playwright E2E steps run
 And the pipeline passes
+```
+
+### Scenario: Deploy to staging on merge to main
+```gherkin
+Given the CI pipeline passes on the main branch
+When a commit is pushed to main
+Then the GitHub Actions workflow builds the Docker image
+And pushes it to GitHub Container Registry (GHCR) tagged with the commit SHA
+And the pluggable deploy step deploys the image to the staging environment
+And GET /healthz on staging returns 200
+And GET /version on staging returns the correct commit SHA
+```
+
+### Scenario: Promote staging to production via release
+```gherkin
+Given a Docker image is deployed and validated on staging
+When a GitHub release is published with tag v1.x.x
+Then the existing staging image (tagged with commit SHA) is re-tagged as v1.x.x
+And the pluggable deploy step deploys the v1.x.x image to the production environment
+And the production image is identical to the staging image (no rebuild)
+And GET /version on production returns the release version
+```
+
+### Scenario: Rollback production to previous version
+```gherkin
+Given production is running image v1.2.0 and an issue is detected
+When the deploy workflow is triggered with the previous tag v1.1.0
+Then the v1.1.0 image (still stored in GHCR) is deployed to production
+And GET /version on production returns v1.1.0
+And the rollback completes within 5 minutes
+```
+
+### Scenario: Service-to-service communication with correlation
+```gherkin
+Given Service A receives a request with X-Correlation-ID "trace-123"
+When Service A calls Service B using the shared HTTP client
+Then the request to Service B includes X-Correlation-ID "trace-123"
+And both services log entries include correlation_id "trace-123"
+And Service B's response is logged by Service A with duration and status
+```
+
+### Scenario: Gateway-ready service metadata
+```gherkin
+Given a service is deployed to any container platform
+When I call GET /version without authentication
+Then the response includes "service_name", "version", "commit", "build_time", "environment"
+And the service exposes GET /healthz (liveness) and GET /readyz (readiness) without auth
+And all API routes are prefixed with /api/v1
+And the service can be placed behind any API gateway without modification
 ```
 
 ---
@@ -477,11 +541,13 @@ CORS configured from `BACKEND_CORS_ORIGINS` env var. No wildcard in production.
 #### 4.1.14 Docker Conventions
 
 **Dockerfile (backend)**:
+- Multi-stage build: builder stage (install deps with `uv`) + runtime stage (copy installed packages)
 - Base: `python:3.10-slim`
 - Non-root user (`appuser`)
-- Health check: `CMD curl -f http://localhost:8000/healthz || exit 1`
+- Health check: Python-based (no `curl` in final image) — `CMD ["python", "-c", "import httpx; httpx.get('http://localhost:8000/healthz').raise_for_status()"]`
 - Build args: `GIT_COMMIT`, `BUILD_TIME`
 - Uses `uv` for dependency management
+- OCI labels for GHCR metadata: `org.opencontainers.image.source`, `org.opencontainers.image.version`, `org.opencontainers.image.revision`
 
 **Dockerfile (frontend)** — only when WITH_UI=true:
 - Multi-stage: Bun build + Nginx runtime
@@ -504,7 +570,9 @@ When `WITH_UI=true`, the startup script (or developer) uses `docker compose --pr
 
 #### 4.1.15 CI/CD Conventions
 
-**Pipeline stages**: Lint → Type-check → Test → Build
+**Pipeline stages**: Lint → Type-check → Test → Build → Push → Deploy
+
+**CI (on every PR and push to main)**:
 
 **Backend** (always runs):
 1. `ruff check` + `ruff format --check` (lint)
@@ -518,7 +586,17 @@ When `WITH_UI=true`, the startup script (or developer) uses `docker compose --pr
 3. `bun run build` (build)
 4. `playwright test` (E2E)
 
+**CD (deployment)** — see Section 4.1.19 for full details:
+
+| Trigger | Pipeline | Target |
+|---------|----------|--------|
+| Push to `main` | CI → Build image → Push to GHCR → Deploy (pluggable) | Staging |
+| Release published | Re-tag staging image → Deploy (pluggable) | Production |
+| PR opened | CI only (platform PR preview optional) | PR preview |
+
 **Gating logic**: CI workflow checks for existence of `frontend/` directory OR reads `WITH_UI` from `.env` / repository variable to decide whether to run frontend steps.
+
+**Unified workflow**: A single `ci.yml` handles CI. Separate `deploy-staging.yml` and `deploy-production.yml` handle deployments with pluggable platform-specific deploy steps.
 
 #### 4.1.16 Project Structure Convention
 
@@ -579,7 +657,8 @@ When `WITH_UI=true`, the startup script (or developer) uses `docker compose --pr
 ├── .github/
 │   └── workflows/
 │       ├── ci.yml                   # Unified CI: backend always, frontend gated
-│       └── deploy.yml
+│       ├── deploy-staging.yml       # GHCR build/push + pluggable staging deploy
+│       └── deploy-production.yml    # Re-tag image + pluggable production deploy
 ├── copier.yml                       # Template configuration
 ├── pyproject.toml                   # Root project metadata
 ├── CLAUDE.md
@@ -635,6 +714,317 @@ class EntitiesPublic(BaseModel):
     data: list[EntityPublic]
     count: int
 ```
+
+#### 4.1.19 Deployment Conventions
+
+**Approach**: Platform-agnostic containerised deployment. The template provides a production-ready Dockerfile, GHCR integration, and GitHub Actions workflows with a **pluggable deploy step**. Teams customise the deploy step for their chosen platform (Alibaba Cloud ECS/ACR, Railway, Cloud Run, Fly.io, self-hosted Docker Compose, etc.).
+
+**Why platform-agnostic**: Since the template uses managed services (Supabase for database, Clerk for auth), the backend is a **stateless Docker container** with no local state to manage. Any platform that runs containers works. Locking to a specific platform would limit reusability across teams deploying to different cloud providers.
+
+**Environment model**:
+
+| Environment | Trigger | Purpose |
+|-------------|---------|---------|
+| Local | `docker compose up` | Development with hot-reload |
+| Staging | Push to `main` branch | Pre-production validation |
+| Production | GitHub release published | Live traffic |
+| PR Preview | Pull request opened (optional) | Per-PR isolated environment |
+
+**Container registry**: GitHub Container Registry (GHCR) as default.
+
+| Step | Action |
+|------|--------|
+| Build | `docker build` in GitHub Actions |
+| Tag (staging) | `ghcr.io/{org}/{service}:{sha}` |
+| Tag (production) | Re-tag staging image as `ghcr.io/{org}/{service}:v{semver}` |
+| Tag (latest) | `ghcr.io/{org}/{service}:latest` updated on production deploy |
+
+**Required environment secrets** (set per environment on the container platform):
+
+| Secret | Description | Per-Environment |
+|--------|-------------|-----------------|
+| `SUPABASE_URL` | Supabase project URL | Yes — separate Supabase project per env |
+| `SUPABASE_SERVICE_KEY` | Supabase service role key | Yes |
+| `CLERK_SECRET_KEY` | Clerk secret key | Yes — separate Clerk application per env |
+| `ENVIRONMENT` | `staging` or `production` | Yes |
+| `SERVICE_NAME` | Service identifier for logs/traces | No — same across envs |
+| `BACKEND_CORS_ORIGINS` | Allowed CORS origins | Yes — env-specific frontend URLs |
+| `SENTRY_DSN` | Sentry DSN (optional) | Yes — separate Sentry project per env |
+
+**Required GitHub Actions secrets**:
+
+| Secret | Description |
+|--------|-------------|
+| `GHCR_TOKEN` | GitHub token with `write:packages` scope (or use `GITHUB_TOKEN`) |
+| Platform-specific deploy token | e.g., `RAILWAY_TOKEN`, `ALIBABA_ACCESS_KEY`, `GCP_SA_KEY` |
+| Platform-specific service ID | e.g., `RAILWAY_SERVICE_ID_STAGING`, `ALIBABA_ECS_CLUSTER` |
+
+##### Staging-to-Production Promotion Strategy
+
+**Promotion model**: Image-based promotion. The exact same Docker image that passes staging validation is deployed to production — no rebuild. This guarantees production runs identical code to what was tested.
+
+**Promotion flow**:
+
+```
+Push to main
+    → CI passes (lint, types, tests, coverage)
+    → Build Docker image: ghcr.io/{org}/{svc}:{commit-sha}
+    → Push to GHCR
+    → Deploy to Staging (pluggable deploy step)
+    → Manual validation on staging (smoke tests, QA)
+
+Create GitHub Release (tag: v1.x.x)
+    → Re-tag existing image: ghcr.io/{org}/{svc}:v1.x.x
+    → Deploy to Production (pluggable deploy step)
+    → Post-deploy health check verification
+```
+
+**Environment isolation**: Each environment (staging, production) uses **separate Supabase projects** and **separate Clerk applications**. Environment variables differ per environment; the container image is identical.
+
+| Config | Staging | Production |
+|--------|---------|------------|
+| `SUPABASE_URL` | Staging Supabase project | Production Supabase project |
+| `SUPABASE_SERVICE_KEY` | Staging service key | Production service key |
+| `CLERK_SECRET_KEY` | Staging Clerk app | Production Clerk app |
+| `ENVIRONMENT` | `staging` | `production` |
+| `LOG_LEVEL` | `DEBUG` | `INFO` |
+| `BACKEND_CORS_ORIGINS` | Staging frontend URL | Production frontend URL |
+| `SENTRY_DSN` | Staging Sentry project | Production Sentry project |
+
+**Rollback strategy**: Deploy the previous image tag. GHCR retains all tagged images. Rollback = trigger deploy workflow with the prior `v1.x.x` tag.
+
+**Supabase migration coordination**: Database migrations run via `supabase db push` against the target environment's Supabase project **BEFORE** deploying the new container image. The order is critical: migrate first, then deploy. This ensures the database schema is ready for the new application code.
+
+**Pre-production checklist**:
+
+1. All CI checks pass (lint, types, tests, 90% coverage)
+2. Docker image built and pushed to GHCR
+3. Image deployed and running on staging
+4. Staging health checks pass (`GET /healthz` → 200, `GET /readyz` → 200)
+5. Staging `GET /version` shows correct commit SHA and build time
+6. Manual or automated smoke tests pass on staging
+7. Supabase migrations applied to production (`supabase db push`)
+8. GitHub release created with changelog
+9. Production deploy triggered by release publish
+10. Production health checks verified post-deploy (`GET /healthz`, `GET /readyz`)
+
+**Reference deploy-staging.yml**:
+
+```yaml
+name: Deploy to Staging
+
+on:
+  push:
+    branches: [main]
+
+jobs:
+  ci:
+    # ... CI steps (lint, type-check, test) — see ci.yml
+
+  deploy:
+    runs-on: ubuntu-latest
+    needs: [ci]
+    permissions:
+      packages: write
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Log in to GHCR
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Build and push Docker image
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          file: backend/Dockerfile
+          push: true
+          tags: |
+            ghcr.io/${{ github.repository }}/backend:${{ github.sha }}
+            ghcr.io/${{ github.repository }}/backend:staging
+          build-args: |
+            GIT_COMMIT=${{ github.sha }}
+            BUILD_TIME=${{ github.event.head_commit.timestamp }}
+
+      # --- PLUGGABLE DEPLOY STEP ---
+      # Uncomment ONE of the following blocks for your platform:
+
+      # --- Railway ---
+      # - name: Deploy to Railway
+      #   run: railway up --service ${{ secrets.RAILWAY_SERVICE_ID_STAGING }}
+      #   env:
+      #     RAILWAY_TOKEN: ${{ secrets.RAILWAY_TOKEN }}
+
+      # --- Alibaba Cloud (ACR + ECS) ---
+      # - name: Push to Alibaba Cloud ACR
+      #   run: |
+      #     docker tag ghcr.io/${{ github.repository }}/backend:${{ github.sha }} \
+      #       registry.{region}.aliyuncs.com/{namespace}/{service}:${{ github.sha }}
+      #     docker push registry.{region}.aliyuncs.com/{namespace}/{service}:${{ github.sha }}
+      # - name: Deploy to ECS
+      #   run: aliyun ecs ... # Update ECS service with new image
+
+      # --- Google Cloud Run ---
+      # - name: Deploy to Cloud Run
+      #   uses: google-github-actions/deploy-cloudrun@v2
+      #   with:
+      #     service: ${{ secrets.GCP_SERVICE_NAME }}
+      #     image: ghcr.io/${{ github.repository }}/backend:${{ github.sha }}
+
+      # --- Fly.io ---
+      # - name: Deploy to Fly.io
+      #   uses: superfly/flyctl-actions/setup-flyctl@main
+      # - run: flyctl deploy --image ghcr.io/${{ github.repository }}/backend:${{ github.sha }}
+
+      # --- Self-hosted (Docker Compose via SSH) ---
+      # - name: Deploy via SSH
+      #   run: |
+      #     ssh ${{ secrets.DEPLOY_HOST }} "docker pull ghcr.io/${{ github.repository }}/backend:${{ github.sha }} && docker compose up -d"
+```
+
+**Reference deploy-production.yml**:
+
+```yaml
+name: Deploy to Production
+
+on:
+  release:
+    types: [published]
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    permissions:
+      packages: write
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Log in to GHCR
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Tag release image (promote staging image)
+        run: |
+          docker pull ghcr.io/${{ github.repository }}/backend:${{ github.sha }}
+          docker tag ghcr.io/${{ github.repository }}/backend:${{ github.sha }} \
+            ghcr.io/${{ github.repository }}/backend:${{ github.event.release.tag_name }}
+          docker tag ghcr.io/${{ github.repository }}/backend:${{ github.sha }} \
+            ghcr.io/${{ github.repository }}/backend:latest
+          docker push ghcr.io/${{ github.repository }}/backend:${{ github.event.release.tag_name }}
+          docker push ghcr.io/${{ github.repository }}/backend:latest
+
+      # --- PLUGGABLE DEPLOY STEP ---
+      # Same pattern as staging — uncomment your platform block
+      # Use ${{ github.event.release.tag_name }} as the image tag
+```
+
+**Docker Compose retained for local development**: The template keeps `compose.yml` and `compose.override.yml` for local development. GHCR + GitHub Actions is for staging/production only. Developers run `docker compose up` locally, push to GitHub for deployment.
+
+#### 4.1.20 Gateway-Ready Conventions
+
+The template does **NOT** include a gateway. Instead, every service follows conventions that make it routable through any API gateway (Traefik, Kong, AWS ALB, Alibaba Cloud API Gateway, etc.).
+
+**Service discoverability**:
+- Every service exposes `GET /version` with `service_name`, `version`, `environment`
+- Every service exposes `GET /healthz` (liveness) and `GET /readyz` (readiness)
+- These endpoints require no authentication
+- Gateways use these endpoints for health checking and service registration
+
+**Routing conventions**:
+- All API routes are prefixed with `/api/v1` (configurable via `API_V1_STR`)
+- Service name is part of the deployment URL, not the API path
+  - Correct: `https://user-service.example.com/api/v1/users`
+  - Incorrect: `https://gateway.example.com/user-service/api/v1/users`
+- Path-based gateway routing is possible but not the default convention
+
+**Cross-cutting concerns** — template responsibility vs gateway responsibility:
+
+| Concern | Template Responsibility | Gateway Responsibility |
+|---------|----------------------|----------------------|
+| Authentication | Clerk JWT verification per-service | Optional JWT pre-validation |
+| Rate limiting | None (defer to gateway) | Per-client rate limits |
+| API key management | None (Clerk handles user auth) | Machine-to-machine API keys |
+| CORS | Per-service `BACKEND_CORS_ORIGINS` | Aggregate CORS if fronting multiple services |
+| TLS termination | None (platform provides) | Certificate management |
+| Request routing | Responds to all requests on its port | Routes by domain/path to services |
+| Load balancing | None (platform provides) | Distributes across service instances |
+
+**Service-to-service communication**:
+- Services discover each other via environment variables (see Section 4.1.21)
+- All inter-service calls use the shared HTTP client (Section 4.1.6), which automatically:
+  - Propagates `X-Correlation-ID` and `X-Request-ID`
+  - Applies timeout, retry, and circuit breaker policies
+  - Logs outgoing requests with target service name and duration
+
+**Reference: Traefik gateway configuration** (for teams wanting a self-hosted gateway):
+
+```yaml
+# compose.gateway.yml — Reference only, NOT part of the template
+# Teams deploying to managed platforms typically use the platform's built-in routing.
+services:
+  traefik:
+    image: traefik:3.6
+    command:
+      - --providers.docker
+      - --providers.docker.exposedbydefault=false
+      - --entrypoints.http.address=:80
+      - --entrypoints.https.address=:443
+      - --certificatesresolvers.le.acme.tlschallenge=true
+      - --certificatesresolvers.le.acme.email=${ACME_EMAIL}
+      - --certificatesresolvers.le.acme.storage=/certificates/acme.json
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+      - traefik-certificates:/certificates
+
+# Rate limiting middleware (apply via labels on services):
+# traefik.http.middlewares.rate-limit.ratelimit.average=100
+# traefik.http.middlewares.rate-limit.ratelimit.burst=50
+# traefik.http.middlewares.rate-limit.ratelimit.period=1m
+```
+
+#### 4.1.21 Service URL Configuration
+
+When a service needs to call another service, the target URL is configured via environment variable following the pattern: `{SERVICE_NAME}_URL`.
+
+**Config additions** to `app/core/config.py`:
+
+| Variable | Type | Default | Description |
+|----------|------|---------|-------------|
+| `{SERVICE_NAME}_URL` | `AnyHttpUrl` | None | Base URL for the target service. One env var per dependency. |
+
+**Example `.env`**:
+```env
+USER_SERVICE_URL=https://user-service.railway.internal
+BILLING_SERVICE_URL=https://billing-service.railway.internal
+```
+
+**Usage in code**:
+```python
+from app.core.config import settings
+
+async def get_user(http: HttpClientDep, user_id: str):
+    url = settings.USER_SERVICE_URL
+    if not url:
+        raise ServiceError(
+            status_code=503,
+            error="SERVICE_UNAVAILABLE",
+            message="User service not configured",
+            code="SERVICE_NOT_CONFIGURED",
+        )
+    response = await http.get(f"{url}/api/v1/users/{user_id}")
+    return response.json()
+```
+
+This is intentionally simple — no service registry, no DNS-based discovery, no service mesh. Just environment variables pointing to URLs. This works because container platforms provide stable internal URLs for services within the same project/cluster.
 
 ### 4.2 WITH_UI Flag
 
@@ -719,6 +1109,40 @@ supabase migration new create_entities   # Creates timestamped .sql file
 supabase db reset                         # Apply locally (drops + recreates)
 supabase db push                          # Apply to remote project
 ```
+
+### Architecture Decision: Platform-Agnostic Deployment over Platform-Specific
+
+**Decision**: Use **platform-agnostic container deployment** (GHCR + pluggable GitHub Actions deploy step) instead of locking to a specific cloud provider.
+
+**Rationale**:
+
+| Factor | Platform-specific (e.g., Railway, Cloud Run) | Platform-agnostic (GHCR + pluggable deploy) | Winner |
+|--------|----------------------------------------------|---------------------------------------------|--------|
+| Portability | Locked to one vendor's CLI/API | Works with any container platform | **Platform-agnostic** |
+| Team flexibility | All teams must use same platform | Teams choose per-project (Alibaba Cloud, Railway, etc.) | **Platform-agnostic** |
+| Template maintenance | Must maintain platform-specific workflows | One CI workflow + commented deploy examples | **Platform-agnostic** |
+| Developer experience | Optimised for one platform | Slightly more initial setup | Platform-specific |
+| Vendor lock-in | High (platform CLI, config files) | Low (standard Docker + GHCR) | **Platform-agnostic** |
+
+Since the template uses managed services (Supabase for database, Clerk for auth), the backend is a stateless container. Any platform that runs Docker containers works. The template provides a production-ready Dockerfile, GHCR integration, and reference deploy steps for multiple platforms. Teams uncomment the deploy step for their chosen platform.
+
+**Escape hatch**: The template retains Docker Compose for local development. The Dockerfile is standard and works with any container runtime.
+
+### Architecture Decision: Gateway-Ready over Gateway-Inclusive
+
+**Decision**: Make services **gateway-ready** (follow conventions) rather than including a gateway implementation in the template.
+
+**Rationale**:
+
+| Factor | Gateway-inclusive | Gateway-ready | Winner |
+|--------|------------------|---------------|--------|
+| Template simplicity | Adds gateway service, routing config, extra container | No additional components | **Gateway-ready** |
+| Deployment flexibility | Couples template to specific gateway (Traefik/Kong) | Works with any gateway or direct access | **Gateway-ready** |
+| Platform compatibility | May conflict with platform's built-in routing | Complements any platform's routing | **Gateway-ready** |
+| Single-service use case | Unnecessary overhead | Service works standalone | **Gateway-ready** |
+| Multi-service use case | Gateway is an operational concern, not per-service | Services bring conventions, team adds gateway | **Gateway-ready** |
+
+A gateway is a deployment-level concern that varies by team and scale. Including one in the template would either (a) couple all services to one deployment model, or (b) require maintaining multiple gateway configurations. Instead, the template ensures every service follows conventions (versioned APIs, health endpoints, correlation IDs, CORS configuration) that make it routable through any gateway a team chooses to adopt.
 
 ### API Endpoints
 
@@ -914,6 +1338,8 @@ CREATE POLICY "Users can delete own entities"
 - **External**:
   - **Supabase**: Database (PostgreSQL), REST API via supabase-py
   - **Clerk**: JWT verification, user identity provider
+  - **GitHub Container Registry (GHCR)**: Docker image storage and versioning
+  - **Container host (team choice)**: Alibaba Cloud ECS/ACR, Railway, Google Cloud Run, Fly.io, or self-hosted — any platform that runs Docker containers
   - **Sentry** (optional): Error tracking and performance monitoring
 - **New Python libraries** (replacing existing):
   - `supabase` >=2.0 — Supabase Python client
@@ -1003,6 +1429,18 @@ Not applicable for the backend-only template. When WITH_UI=true, the existing Re
 **Phase 8 — Copier Template** (optional, can be separate story):
 27. Add copier.yml with template variables
 28. Add Jinja conditionals for WITH_UI file inclusion
+
+**Phase 9 — Deployment**:
+29. Update backend Dockerfile (multi-stage build, OCI labels, non-root user, build args)
+30. Create `deploy-staging.yml` GitHub Action (GHCR build/push + pluggable deploy step)
+31. Create `deploy-production.yml` GitHub Action (re-tag image + pluggable deploy step)
+32. Create `.env.example` with all required env vars documented
+33. Update README.md with deployment setup instructions (GHCR, environment promotion, platform examples)
+
+**Phase 10 — Gateway Documentation**:
+34. Document gateway-ready conventions in README
+35. Add reference `compose.gateway.yml` for self-hosted Traefik gateway (documentation only, not shipped)
+36. Document service-to-service communication pattern with env var URLs
 
 ### Code Pattern Examples
 
@@ -1123,6 +1561,11 @@ Map to acceptance criteria:
 - [ ] **AC: Entity CRUD**: POST → GET → PATCH → DELETE lifecycle
 - [ ] **AC: Operational endpoints**: curl `/healthz`, `/readyz`, `/version` without auth → 200
 - [ ] **AC: CI**: Push to branch, verify backend-only CI passes; toggle WITH_UI=true, verify full CI passes
+- [ ] **AC: Deploy staging**: Push to main, verify Docker image built and pushed to GHCR, verify deploy step triggers
+- [ ] **AC: Promote to production**: Create GitHub release, verify staging image re-tagged with version, verify production deploy triggers
+- [ ] **AC: Rollback**: Deploy previous image tag, verify production restored to prior version
+- [ ] **AC: Service metadata**: GET /version returns service_name, version, commit, build_time, environment
+- [ ] **AC: Correlation propagation**: Service-to-service call propagates X-Correlation-ID header
 
 ---
 
@@ -1137,6 +1580,11 @@ Map to acceptance criteria:
 | RLS policies defined but bypassed by service key — false sense of security | Medium | Medium | Document clearly that service-layer ownership checks are the primary enforcement. RLS is defense-in-depth for direct DB access. |
 | Breaking change if existing services depend on current template structure | High | Low | This is a new template, not a migration of existing services. Document migration path separately. |
 | `structlog` learning curve for team | Low | Low | Provide clear examples in template code. structlog API is stdlib-compatible. |
+| GHCR rate limiting on image pulls in CI | Low | Low | Use GitHub Actions Docker layer cache. Container platforms cache pulled images. |
+| Platform-specific deploy step maintenance across multiple platforms | Medium | Medium | Keep deploy steps minimal (2-3 lines each). Document alternatives as commented YAML blocks. Teams only uncomment one. |
+| Service-to-service latency when using public URLs instead of internal networking | Medium | Low | Document platform-specific internal networking (e.g., Railway `.railway.internal`, Alibaba Cloud VPC endpoints). Fall back to public URLs if internal networking is unavailable. |
+| Team unfamiliarity with container deployment and GHCR | Low | Medium | Provide step-by-step README per platform. GHCR uses standard Docker push/pull. Deployment is one workflow file to uncomment. |
+| Gateway-ready conventions insufficient for complex routing requirements | Medium | Low | Document upgrade path: when direct service URLs are outgrown, add a Traefik or cloud-native API gateway. Conventions are gateway-agnostic by design. |
 
 ---
 
@@ -1165,23 +1613,40 @@ Map to acceptance criteria:
 - Test fixtures: `backend/tests/conftest.py` — Session-scoped DB, module-scoped client, pre-authenticated header fixtures
 - Docker: `compose.yml` — Multi-service with health checks, Traefik routing, env vars from `.env`
 - CI: `.github/workflows/test-backend.yml` — Python setup, docker compose, migration, pytest with coverage
+- Deploy: `.github/workflows/deploy-staging.yml` — Self-hosted runner staging deployment (to be replaced)
+- Deploy: `.github/workflows/deploy-production.yml` — Self-hosted runner production deployment (to be replaced)
+
+### Deployment References
+
+- [GitHub Container Registry (GHCR) documentation](https://docs.github.com/en/packages/working-with-a-github-packages-registry/working-with-the-container-registry) — Docker image storage with GitHub Actions integration
+- [Docker multi-stage build best practices](https://docs.docker.com/build/building/best-practices/) — Optimising Dockerfile for production containers
+- [OCI image specification](https://github.com/opencontainers/image-spec/blob/main/annotations.md) — Standard labels for container images
+- [Traefik API Gateway](https://doc.traefik.io/traefik/) — Reference gateway for self-hosted deployments
+- [Alibaba Cloud Container Registry (ACR)](https://www.alibabacloud.com/product/container-registry) — Container registry for Alibaba Cloud deployments
+- [Alibaba Cloud Elastic Container Service (ECS)](https://www.alibabacloud.com/product/ecs) — Container hosting on Alibaba Cloud
 
 ---
 
 ## Quality Checklist
 
 - [x] Self-contained with full context
-- [x] INVEST user stories (6 stories)
-- [x] Complete Gherkin ACs (happy + edge + errors — 9 scenarios)
+- [x] INVEST user stories (8 stories)
+- [x] Complete Gherkin ACs (happy + edge + errors + deployment — 14 scenarios)
 - [x] API contracts with schemas (all 8 endpoints defined)
 - [x] Error handling defined (unified shape, status mapping, validation details)
 - [x] Data models documented (Entity schema + Pydantic models)
 - [x] Security addressed (Clerk JWT, Supabase service key, CORS, headers, secrets)
 - [x] Performance specified (<50ms health, <200ms CRUD, <5s cold start)
 - [x] Testing strategy outlined (unit + integration + E2E, fixtures, coverage)
-- [x] Out-of-scope listed (user service, multi-tenancy, K8s, shared packages)
-- [x] References populated (Context7, web research, codebase)
+- [x] Out-of-scope listed (updated: gateway-inclusive, platform-specific, K8s, shared packages)
+- [x] References populated (Context7, web research, codebase, deployment)
 - [x] Matches project conventions (naming, structure, patterns from existing template)
 - [x] Quantifiable requirements (no vague terms)
-- [x] Architecture decision documented (Supabase CLI migrations over Alembic)
-- [x] Full canonical conventions list (18 convention categories)
+- [x] Architecture decisions documented (Supabase CLI migrations, platform-agnostic deployment, gateway-ready)
+- [x] Full canonical conventions list (21 convention categories)
+- [x] Deployment strategy specified (platform-agnostic containerised deployment)
+- [x] CI/CD pipeline covers build, push, deploy (GHCR + pluggable deploy step)
+- [x] Environment promotion documented (staging → production with image-based promotion)
+- [x] Rollback strategy documented (deploy previous image tag)
+- [x] Gateway-ready conventions defined (service discoverability, routing, cross-cutting concerns)
+- [x] Service-to-service communication pattern documented (env var URLs + HTTP client)

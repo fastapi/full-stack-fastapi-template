@@ -86,7 +86,7 @@ git remote add upstream git@github.com:fastapi/full-stack-fastapi-template.git
 - Push the code to your new repository:
 
 ```bash
-git push -u origin master
+git push -u origin main
 ```
 
 ### Update From the Original Template
@@ -107,7 +107,7 @@ upstream    git@github.com:fastapi/full-stack-fastapi-template.git (push)
 - Pull the latest changes without merging:
 
 ```bash
-git pull --no-commit upstream master
+git pull --no-commit upstream main
 ```
 
 This will download the latest changes from this template without committing them, that way you can check everything is right before committing.
@@ -184,7 +184,7 @@ If you have `pipx` and you didn't install `copier`, you can run it directly:
 pipx run copier copy https://github.com/fastapi/full-stack-fastapi-template my-awesome-project --trust
 ```
 
-**Note** the `--trust` option is necessary to be able to execute a [post-creation script](https://github.com/fastapi/full-stack-fastapi-template/blob/master/.copier/update_dotenv.py) that updates your `.env` files.
+**Note** the `--trust` option is necessary to be able to execute a [post-creation script](https://github.com/fastapi/full-stack-fastapi-template/blob/main/.copier/update_dotenv.py) that updates your `.env` files.
 
 ### Input Variables
 
