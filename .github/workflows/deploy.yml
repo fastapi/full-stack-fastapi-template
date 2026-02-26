@@ -18,14 +18,21 @@ jobs:
           key: ${{ secrets.SSH_PRIVATE_KEY }}
           envs: GH_PAT
           script: |
+            set -e
+
             cd /opt/geo/kila
             BRANCH=$(git rev-parse --abbrev-ref HEAD)
             git remote set-url origin https://x-access-token:${GH_PAT}@github.com/brucezy/kila.git
             git pull origin $BRANCH
 
-            cd /opt/geo/kila-models
-            git remote set-url origin https://x-access-token:${GH_PAT}@github.com/brucezy/kila-models.git
-            git pull origin main
+            if [ -d /opt/geo/kila-models ]; then
+              cd /opt/geo/kila-models
+              git remote set-url origin https://x-access-token:${GH_PAT}@github.com/brucezy/kila-models.git
+              git pull origin main
+            else
+              cd /opt/geo
+              git clone https://x-access-token:${GH_PAT}@github.com/brucezy/kila-models.git kila-models
+            fi
 
             cd /opt/geo
             docker compose -f kila/docker-compose.prod.yml up --build -d frontend backend nginx
