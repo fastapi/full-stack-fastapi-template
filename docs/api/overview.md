@@ -2,10 +2,10 @@
 title: "API Overview"
 doc-type: reference
 status: draft
-version: "1.1.0"
+version: "1.2.0"
 base-url: "/api/v1"
-last-updated: 2026-02-27
-updated-by: "api-docs-writer (AYG-65)"
+last-updated: 2026-02-28
+updated-by: "api-docs-writer (AYG-68)"
 related-code:
   - backend/app/main.py
   - backend/app/api/main.py
@@ -14,6 +14,7 @@ related-code:
   - backend/app/api/routes/users.py
   - backend/app/api/routes/items.py
   - backend/app/api/routes/utils.py
+  - backend/app/api/routes/health.py
   - backend/app/api/routes/private.py
   - backend/app/models.py
   - backend/app/core/config.py
@@ -77,7 +78,19 @@ Token expiry is controlled by Clerk session settings. Clients should treat token
 
 ## Endpoint Summary
 
-Endpoints are grouped by resource. All paths are relative to the base URL `/api/v1`.
+Endpoints are grouped by resource. **Operational endpoints** (`/healthz`, `/readyz`, `/version`) are mounted at the **root level** — they are not under `/api/v1`. All other paths are relative to the base URL `/api/v1`.
+
+### Operational Endpoints (Root Level)
+
+These endpoints are public (no authentication required) and mounted directly on the application root for compatibility with container orchestrators and API gateways. They do not appear in the `/api/v1/openapi.json` spec.
+
+| Method | Path | Description | Auth Required |
+|--------|------|-------------|:-------------:|
+| `GET` | `/healthz` | Liveness probe — returns `{"status": "ok"}` immediately | No |
+| `GET` | `/readyz` | Readiness probe — checks Supabase connectivity | No |
+| `GET` | `/version` | Build metadata for API gateway service discovery | No |
+
+> **Note:** `/readyz` returns `200` when all checks pass and `503` when any dependency is unreachable. Container orchestrators (Kubernetes, ECS) use these distinct status codes to gate traffic routing. `/healthz` always returns `200` regardless of dependency state.
 
 ### Auth / Login
 
@@ -124,7 +137,7 @@ Non-superusers can only access items they own. Accessing another user's item ret
 
 | Method | Path | Description | Auth Required | Superuser |
 |--------|------|-------------|:-------------:|:---------:|
-| `GET` | `/utils/health-check/` | Liveness probe — returns `true` | No | No |
+| `GET` | `/utils/health-check/` | Legacy liveness probe — returns `true` (superseded by `/healthz`) | No | No |
 | `POST` | `/utils/test-email/` | Send a test email to a given address | Yes | Yes |
 
 ### Private (local environment only)
@@ -371,6 +384,7 @@ CORS allowed origins are controlled by two configuration values:
 
 ## Endpoint Reference
 
+- [Operational Endpoints — Health, Readiness, Version](endpoints/health.md)
 - [Login & Authentication](endpoints/login.md)
 - [Users](endpoints/users.md)
 - [Items](endpoints/items.md)
@@ -380,5 +394,6 @@ CORS allowed origins are controlled by two configuration values:
 
 | Version | Date | Change |
 |---------|------|--------|
+| 1.2.0 | 2026-02-28 | AYG-68: Operational endpoints (`/healthz`, `/readyz`, `/version`) added at root level; Utils `/health-check/` marked as legacy |
 | 1.1.0 | 2026-02-27 | AYG-65: Auth updated to Clerk JWT; unified error response shape documented; `PaginatedResponse[T]` and `offset`/`limit` pagination params documented |
 | 1.0.0 | 2026-02-26 | Initial release |

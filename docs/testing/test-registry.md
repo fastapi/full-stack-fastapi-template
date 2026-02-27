@@ -2,8 +2,8 @@
 title: "Test Registry"
 doc-type: reference
 status: draft
-last-updated: 2026-02-27
-updated-by: "data-model-docs-writer"
+last-updated: 2026-02-28
+updated-by: "api-docs-writer"
 related-code:
   - "backend/tests/**/*.py"
   - "frontend/tests/**/*.spec.ts"
@@ -18,7 +18,7 @@ tags: [testing, quality, registry]
 
 | Module | Unit | Integration | E2E | Total |
 |--------|------|-------------|-----|-------|
-| backend/api/routes | 0 | 47 | 0 | 47 |
+| backend/api/routes | 0 | 64 | 0 | 64 |
 | backend/core/config | 13 | 0 | 0 | 13 |
 | backend/core/errors | 20 | 0 | 0 | 20 |
 | backend/core/logging | 6 | 0 | 0 | 6 |
@@ -33,7 +33,7 @@ tags: [testing, quality, registry]
 | frontend/user-settings | 0 | 0 | 14 | 14 |
 | frontend/sign-up | 0 | 0 | 11 | 11 |
 | frontend/reset-password | 0 | 0 | 6 | 6 |
-| **Total** | **80** | **47** | **61** | **188** |
+| **Total** | **80** | **64** | **61** | **205** |
 
 > Unit tests in `backend/tests/unit/` can run without database env vars. The conftest guard pattern in that directory skips DB-dependent fixtures automatically.
 
@@ -106,6 +106,28 @@ tags: [testing, quality, registry]
 | Test Name | Description | Type | Status |
 |-----------|-------------|------|--------|
 | test_create_user | Creates user via private API without auth | integration | passing |
+
+### Backend — Integration: Health (`backend/tests/integration/test_health.py`)
+
+| Test Name | Description | Type | Status |
+|-----------|-------------|------|--------|
+| test_returns_200_ok | Returns 200 with {"status": "ok"} for liveness check | integration | passing |
+| test_no_auth_required (healthz) | Succeeds without Authorization header | integration | passing |
+| test_response_schema_exact (healthz) | Response contains only the status field | integration | passing |
+| test_never_checks_dependencies | Does not access Supabase client in liveness probe | integration | passing |
+| test_healthy_supabase_returns_200 | Returns 200 when Supabase is reachable | integration | passing |
+| test_unreachable_supabase_returns_503 | Returns 503 when Supabase connection fails | integration | passing |
+| test_api_error_still_reports_ok | Treats PostgREST APIError as server reachable | integration | passing |
+| test_missing_supabase_client_returns_503 | Returns 503 when app.state.supabase unset | integration | passing |
+| test_exception_does_not_crash | Returns valid JSON 503, not a 500 crash | integration | passing |
+| test_no_auth_required (readyz) | Succeeds without Authorization header | integration | passing |
+| test_response_schema_exact (readyz) | Response has only status and checks fields | integration | passing |
+| test_returns_200_with_metadata | Returns 200 with all five metadata fields | integration | passing |
+| test_includes_service_name | Includes service_name for gateway discoverability | integration | passing |
+| test_default_values_for_unset_env_vars | GIT_COMMIT and BUILD_TIME default to unknown | integration | passing |
+| test_custom_settings_values | Reflects custom settings in response body | integration | passing |
+| test_response_schema_exact (version) | Response has exactly five expected fields | integration | passing |
+| test_no_auth_required (version) | Succeeds without Authorization header | integration | passing |
 
 ### Backend — Unit: Config (`backend/tests/unit/test_config.py`)
 
