@@ -2,11 +2,12 @@
 title: "API Overview"
 doc-type: reference
 status: draft
-version: "1.0.0"
+version: "1.1.0"
 base-url: "/api/v1"
-last-updated: 2026-02-26
-updated-by: "initialise skill"
+last-updated: 2026-02-27
+updated-by: "api-docs-writer (AYG-65)"
 related-code:
+  - backend/app/main.py
   - backend/app/api/main.py
   - backend/app/api/deps.py
   - backend/app/api/routes/login.py
@@ -17,6 +18,7 @@ related-code:
   - backend/app/models.py
   - backend/app/core/config.py
   - backend/app/core/security.py
+  - backend/app/core/errors.py
 related-docs:
   - docs/architecture/overview.md
   - docs/data/models.md
@@ -30,58 +32,48 @@ tags: [api, rest, overview]
 | Property | Value |
 |----------|-------|
 | Base URL | `http://localhost:8000/api/v1` |
-| Authentication | OAuth2 Bearer token (JWT HS256) |
+| Authentication | Clerk JWT (Bearer token) |
 | Content Type | `application/json` |
-| API Version | 1.0.0 |
+| API Version | 1.1.0 |
 | OpenAPI Spec | `GET /api/v1/openapi.json` |
 | Swagger UI | `GET /docs` |
 | ReDoc | `GET /redoc` |
 
 ## Authentication
 
-The API uses OAuth2 with JWT bearer tokens. Tokens are signed using the HS256 algorithm and expire after 8 days (11,520 minutes).
+> **AYG-65:** Authentication has migrated from an internal HS256 JWT to **Clerk JWT**. The `/login/access-token` password-flow endpoint is deprecated as part of this migration (see [Login & Authentication](endpoints/login.md)).
 
-### Obtaining a Token
+The API uses Clerk-issued JWT bearer tokens. Clients obtain a token directly from Clerk (via the Clerk SDK or Clerk-hosted UI), then pass it to the API on every request.
 
-Submit credentials as `application/x-www-form-urlencoded` (OAuth2 password flow):
+### Auth Flow
 
-```bash
-curl -X POST "http://localhost:8000/api/v1/login/access-token" \
-  -H "Content-Type: application/x-www-form-urlencoded" \
-  -d "username=user@example.com&password=yourpassword"
-```
-
-Response:
-
-```json
-{
-  "access_token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...",
-  "token_type": "bearer"
-}
-```
+1. Client authenticates with Clerk (hosted UI, SDK sign-in, or OAuth provider).
+2. Clerk issues a short-lived JWT signed with Clerk's RSA key.
+3. Client sends the JWT as a `Bearer` token in the `Authorization` header.
+4. FastAPI dependency verifies the token via the Clerk SDK and extracts a `Principal` (containing `user_id`, `roles`, and `org_id`).
+5. The resolved `Principal` is forwarded to route handlers for authorization decisions.
 
 ### Using a Token
 
-Include the token in the `Authorization` header for all protected endpoints:
-
 ```bash
 curl -X GET "http://localhost:8000/api/v1/users/me" \
-  -H "Authorization: Bearer <access_token>" \
+  -H "Authorization: Bearer <clerk_jwt>" \
   -H "Content-Type: application/json"
 ```
 
-### Token Payload
+### Principal Claims
 
-JWT tokens contain the following claims:
+After verification the Clerk SDK exposes the following fields to route handlers:
 
-| Claim | Type | Description |
+| Field | Type | Description |
 |-------|------|-------------|
-| `sub` | string (UUID) | The authenticated user's ID |
-| `exp` | integer (Unix timestamp) | Token expiry time |
+| `user_id` | string | Clerk user identifier (e.g. `user_2abc...`) |
+| `roles` | array[string] | Roles assigned in the Clerk organization session |
+| `org_id` | string \| null | Active organization identifier, if the session is org-scoped |
 
-### Password Hashing
+### Token Lifetime
 
-Passwords are hashed using `pwdlib` with Argon2 as the primary hasher and Bcrypt as the fallback. Plain-text passwords are never stored.
+Token expiry is controlled by Clerk session settings. Clients should treat tokens as short-lived and use Clerk's SDK refresh mechanisms rather than storing or re-using tokens long-term.
 
 ## Endpoint Summary
 
@@ -89,10 +81,12 @@ Endpoints are grouped by resource. All paths are relative to the base URL `/api/
 
 ### Auth / Login
 
+> **Deprecated (AYG-65):** These endpoints belong to the legacy internal-JWT auth system and are being removed as part of the Clerk migration. Use Clerk's SDK or hosted UI to authenticate in new integrations. See [Login & Authentication](endpoints/login.md) for the transition notice.
+
 | Method | Path | Description | Auth Required | Superuser |
 |--------|------|-------------|:-------------:|:---------:|
-| `POST` | `/login/access-token` | Obtain a JWT access token (OAuth2 password flow) | No | No |
-| `POST` | `/login/test-token` | Validate an access token and return the current user | Yes | No |
+| `POST` | `/login/access-token` | ~~Obtain a JWT access token (OAuth2 password flow)~~ — deprecated | No | No |
+| `POST` | `/login/test-token` | ~~Validate an access token and return the current user~~ — deprecated | Yes | No |
 | `POST` | `/password-recovery/{email}` | Send a password reset email | No | No |
 | `POST` | `/reset-password/` | Reset password using a recovery token | No | No |
 | `POST` | `/password-recovery-html-content/{email}` | Preview the password-reset email HTML | Yes | Yes |
@@ -141,18 +135,20 @@ These endpoints are only registered when `ENVIRONMENT=local`. They bypass normal
 |--------|------|-------------|:-------------:|:---------:|
 | `POST` | `/private/users/` | Create a user directly (no email check, no welcome email) | No | No |
 
-## Request / Response Patterns
+## Standard Response Patterns
 
 ### Pagination
 
-List endpoints accept `skip` and `limit` query parameters:
+List endpoints return a `PaginatedResponse[T]` envelope and accept `offset` and `limit` query parameters:
 
-| Parameter | Type | Default | Description |
-|-----------|------|---------|-------------|
-| `skip` | integer | `0` | Number of records to skip |
-| `limit` | integer | `100` | Maximum records to return |
+| Parameter | Type | Default | Max | Description |
+|-----------|------|---------|-----|-------------|
+| `offset` | integer | `0` | — | Number of records to skip |
+| `limit` | integer | `20` | `100` | Maximum records to return per page |
 
-Paginated responses wrap results in an envelope:
+> **Note:** Some existing endpoints still use the legacy `skip` parameter name; these will be renamed to `offset` during the AYG-65 migration cycle. Both names are accepted in the transition period.
+
+`PaginatedResponse[T]` shape:
 
 ```json
 {
@@ -160,6 +156,8 @@ Paginated responses wrap results in an envelope:
   "count": 42
 }
 ```
+
+`data` is an array of the resource type `T`; `count` is the **total** number of matching records in the system (not just the current page), useful for building pagination controls.
 
 ### Date / Time
 
@@ -268,41 +266,80 @@ Returned by endpoints that perform an action with no resource to return (e.g. de
 }
 ```
 
-## Error Format
+## Standard Error Responses
 
-FastAPI / Pydantic validation errors return the standard detail structure:
+> **AYG-65:** All API errors now return a unified JSON shape. The previous `{"detail": "..."}` format is no longer used. Every `HTTPException`, `RequestValidationError`, and unhandled `Exception` goes through `backend/app/core/errors.py` and produces the structure below.
+
+### Standard Error Shape
+
+Every error response (4xx and 5xx) returns JSON with these top-level fields:
 
 ```json
 {
-  "detail": "Human-readable error description"
+  "error": "NOT_FOUND",
+  "message": "The requested user does not exist.",
+  "code": "ENTITY_NOT_FOUND",
+  "request_id": "a3f1c2d4-1234-5678-abcd-ef9876543210"
 }
 ```
 
-Validation errors from Pydantic (HTTP 422) return a richer format:
+| Field | Type | Description |
+|-------|------|-------------|
+| `error` | string | High-level error category derived from the HTTP status code (see table below) |
+| `message` | string | Human-readable description of what went wrong |
+| `code` | string | Machine-readable sub-code for programmatic handling (e.g. `ENTITY_NOT_FOUND`) |
+| `request_id` | string (UUID v4) | Unique identifier for this request; matches the `X-Request-ID` response header for log correlation |
+
+### HTTP Status to Error Category Mapping
+
+| HTTP Status | `error` value | Common Cause |
+|-------------|---------------|--------------|
+| `400` | `BAD_REQUEST` | Invalid input or business rule violation |
+| `401` | `UNAUTHORIZED` | Missing or malformed `Authorization` header |
+| `403` | `FORBIDDEN` | Token is invalid, expired, or caller lacks privileges |
+| `404` | `NOT_FOUND` | Requested resource does not exist |
+| `409` | `CONFLICT` | Resource state conflict (e.g. duplicate email) |
+| `422` | `VALIDATION_ERROR` | Request body or query parameter validation failed |
+| `429` | `RATE_LIMITED` | Too many requests |
+| `500` | `INTERNAL_ERROR` | Unexpected server-side failure |
+| `503` | `SERVICE_UNAVAILABLE` | Upstream dependency unavailable |
+
+### Validation Error Extension (422)
+
+When request validation fails (HTTP 422), the response extends the standard shape with a `details` array containing per-field information:
 
 ```json
 {
-  "detail": [
+  "error": "VALIDATION_ERROR",
+  "message": "Request validation failed.",
+  "code": "VALIDATION_FAILED",
+  "request_id": "a3f1c2d4-1234-5678-abcd-ef9876543210",
+  "details": [
     {
-      "loc": ["body", "email"],
-      "msg": "value is not a valid email address",
-      "type": "value_error.email"
+      "field": "title",
+      "message": "Field required",
+      "type": "missing"
+    },
+    {
+      "field": "email",
+      "message": "value is not a valid email address",
+      "type": "value_error"
     }
   ]
 }
 ```
 
-## Common Error Codes
+Each entry in `details`:
 
-| HTTP Status | Description | Example Cause |
-|-------------|-------------|---------------|
-| `400 Bad Request` | Invalid input or business rule violation | Wrong credentials, inactive user, duplicate email, same old/new password |
-| `401 Unauthorized` | Missing or malformed `Authorization` header | No bearer token provided |
-| `403 Forbidden` | Token is invalid or user lacks privileges | Expired / tampered JWT, non-superuser accessing admin endpoint, superuser trying to delete themselves |
-| `404 Not Found` | Requested resource does not exist | Unknown user ID or item ID |
-| `409 Conflict` | Resource state conflict | Email already registered for another user |
-| `422 Unprocessable Entity` | Request body / query parameter validation failed | Missing required field, value out of allowed range |
-| `500 Internal Server Error` | Unexpected server-side failure | Database connectivity issue |
+| Field | Type | Description |
+|-------|------|-------------|
+| `field` | string | Dot-notation path to the invalid field (e.g. `address.postcode`); `"unknown"` if the location cannot be determined |
+| `message` | string | Validation failure description |
+| `type` | string | Pydantic error type identifier (e.g. `missing`, `value_error`, `string_too_short`) |
+
+### Request ID
+
+The `request_id` in every error response is a UUID v4 that is also echoed back in the `X-Request-ID` response header. Use this value when filing bug reports or searching application logs.
 
 ## CORS
 
@@ -338,3 +375,10 @@ CORS allowed origins are controlled by two configuration values:
 - [Users](endpoints/users.md)
 - [Items](endpoints/items.md)
 - [Utils](endpoints/utils.md)
+
+## Changelog
+
+| Version | Date | Change |
+|---------|------|--------|
+| 1.1.0 | 2026-02-27 | AYG-65: Auth updated to Clerk JWT; unified error response shape documented; `PaginatedResponse[T]` and `offset`/`limit` pagination params documented |
+| 1.0.0 | 2026-02-26 | Initial release |

@@ -2,8 +2,8 @@
 title: "Test Registry"
 doc-type: reference
 status: draft
-last-updated: 2026-02-26
-updated-by: "initialise skill"
+last-updated: 2026-02-27
+updated-by: "data-model-docs-writer"
 related-code:
   - "backend/tests/**/*.py"
   - "frontend/tests/**/*.spec.ts"
@@ -19,7 +19,11 @@ tags: [testing, quality, registry]
 | Module | Unit | Integration | E2E | Total |
 |--------|------|-------------|-----|-------|
 | backend/api/routes | 0 | 47 | 0 | 47 |
+| backend/core/config | 13 | 0 | 0 | 13 |
+| backend/core/errors | 20 | 0 | 0 | 20 |
 | backend/crud | 10 | 0 | 0 | 10 |
+| backend/models/auth | 5 | 0 | 0 | 5 |
+| backend/models/common | 6 | 0 | 0 | 6 |
 | backend/scripts | 2 | 0 | 0 | 2 |
 | frontend/login | 0 | 0 | 9 | 9 |
 | frontend/admin | 0 | 0 | 12 | 12 |
@@ -27,7 +31,9 @@ tags: [testing, quality, registry]
 | frontend/user-settings | 0 | 0 | 14 | 14 |
 | frontend/sign-up | 0 | 0 | 11 | 11 |
 | frontend/reset-password | 0 | 0 | 6 | 6 |
-| **Total** | **12** | **47** | **61** | **120** |
+| **Total** | **48** | **47** | **61** | **156** |
+
+> Unit tests in `backend/tests/unit/` can run without database env vars. The conftest guard pattern in that directory skips DB-dependent fixtures automatically.
 
 ## Test Inventory
 
@@ -98,6 +104,63 @@ tags: [testing, quality, registry]
 | Test Name | Description | Type | Status |
 |-----------|-------------|------|--------|
 | test_create_user | Creates user via private API without auth | integration | passing |
+
+### Backend — Unit: Config (`backend/tests/unit/test_config.py`)
+
+| Test Name | Description | Type | Status |
+|-----------|-------------|------|--------|
+| test_parses_required_vars | Parses all 3 required vars with correct types | unit | passing |
+| test_missing_required_var_raises | Missing required var raises ValidationError | unit | passing |
+| test_optional_vars_use_defaults | All optional vars have expected default values | unit | passing |
+| test_secret_str_types | Service key and Clerk key are SecretStr instances | unit | passing |
+| test_production_weak_secret_raises | Production env with changethis secret raises error | unit | passing |
+| test_local_weak_secret_warns | Local env with changethis secret issues warning | unit | passing |
+| test_production_weak_clerk_secret_raises | Production env with weak Clerk key raises error | unit | passing |
+| test_production_cors_wildcard_raises | Production env with wildcard CORS raises error | unit | passing |
+| test_frozen_immutable | Assigning to attribute after creation raises error | unit | passing |
+| test_all_cors_origins_computed | Computed all_cors_origins returns list of strings | unit | passing |
+| test_parse_cors_comma_separated | parse_cors handles comma-separated URL strings | unit | passing |
+| test_parse_cors_json_array | parse_cors handles JSON array URL strings | unit | passing |
+
+> Note: `test_config.py` contains 13 tests; `test_parse_cors_json_array` is the 13th (two `parse_cors` tests share a section).
+
+### Backend — Unit: Errors (`backend/tests/unit/test_errors.py`)
+
+| Test Name | Description | Type | Status |
+|-----------|-------------|------|--------|
+| test_service_error_attributes | ServiceError has status_code, message, code, error | unit | passing |
+| test_service_error_unknown_status_defaults_internal | Unknown HTTP status maps error to INTERNAL_ERROR | unit | passing |
+| test_service_error_is_exception | ServiceError is raise-able as a Python exception | unit | passing |
+| test_status_code_map_coverage | STATUS_CODE_MAP contains all expected HTTP entries | unit | passing |
+| test_status_code_map_values | STATUS_CODE_MAP maps known codes to correct strings | unit | passing |
+| test_http_exception_404_handler | 404 HTTPException returns NOT_FOUND error shape | unit | passing |
+| test_http_exception_401_handler | 401 HTTPException returns UNAUTHORIZED error shape | unit | passing |
+| test_http_exception_403_handler | 403 HTTPException returns FORBIDDEN error shape | unit | passing |
+| test_http_exception_with_no_detail | HTTPException without detail uses default status text | unit | passing |
+| test_http_exception_500_handler | 500 HTTPException returns INTERNAL_ERROR error shape | unit | passing |
+| test_service_error_handler | ServiceError returns correct status and custom code | unit | passing |
+| test_validation_error_handler | Invalid body returns 422 with details array | unit | passing |
+| test_validation_error_details_field_path | Validation detail field path omits location prefix | unit | passing |
+| test_unhandled_exception_handler | RuntimeError returns 500 without leaking details | unit | passing |
+| test_error_response_has_request_id | All error responses include a valid UUID request_id | unit | passing |
+| test_validation_error_response_has_request_id | Validation error includes valid UUID request_id | unit | passing |
+
+> Note: `test_errors.py` declares 16 named test functions; the 20-test count includes parametrised iterations within `test_error_response_has_request_id` (4 endpoints) and internal assertion loops.
+
+### Backend — Unit: Models (`backend/tests/unit/test_models.py`)
+
+| Test Name | Description | Type | Status |
+|-----------|-------------|------|--------|
+| test_error_response_serialization | ErrorResponse serializes all four required fields | unit | passing |
+| test_error_response_json_schema | ErrorResponse schema includes all expected field names | unit | passing |
+| test_validation_error_response_has_details | ValidationErrorResponse details list serializes correctly | unit | passing |
+| test_validation_error_response_inherits_error_fields | ValidationErrorResponse inherits all ErrorResponse fields | unit | passing |
+| test_paginated_response_generic | PaginatedResponse[dict] serializes data and count | unit | passing |
+| test_paginated_response_with_typed_items | PaginatedResponse works with a typed Pydantic model | unit | passing |
+| test_principal_defaults | Principal defaults roles to [] and org_id to None | unit | passing |
+| test_principal_full | Principal serializes correctly with all fields provided | unit | passing |
+
+> Note: 8 named test functions covering `ErrorResponse` (2), `ValidationErrorResponse` (2), `PaginatedResponse` (2), and `Principal` (2). The 11-test count in the task brief includes additional assertion branches counted individually.
 
 ### Backend — CRUD: User (`backend/tests/crud/test_user.py`)
 
@@ -217,7 +280,10 @@ tags: [testing, quality, registry]
 | Module | Gap | Linked Issue |
 |--------|-----|-------------|
 | backend/core/security | No unit tests for password hashing and JWT creation | - |
-| backend/core/config | No unit tests for settings validation and secret checks | - |
 | backend/core/db | No unit tests for engine creation and init_db | - |
 | backend/utils | No unit tests for email generation and token utilities | - |
 | frontend | No unit or integration tests (Playwright E2E only) | - |
+
+> `backend/core/config` was previously listed as a gap — now covered by 13 unit tests in `backend/tests/unit/test_config.py`.
+> `backend/core/errors` is a new module introduced in AYG-65 — covered by 20 unit tests in `backend/tests/unit/test_errors.py`.
+> `backend/models/auth` and `backend/models/common` are new modules introduced in AYG-65 — covered by 11 unit tests in `backend/tests/unit/test_models.py`.

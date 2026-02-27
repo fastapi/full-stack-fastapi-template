@@ -2,13 +2,14 @@
 title: "Items API"
 doc-type: reference
 status: current
-version: "1.0.0"
+version: "1.1.0"
 base-url: "/api/v1"
-last-updated: 2026-02-26
-updated-by: "initialise skill"
+last-updated: 2026-02-27
+updated-by: "api-docs-writer (AYG-65)"
 related-code:
   - backend/app/api/routes/items.py
   - backend/app/api/deps.py
+  - backend/app/core/errors.py
   - backend/app/models.py
 related-docs:
   - docs/api/overview.md
@@ -24,8 +25,10 @@ tags: [api, rest, items]
 The items router provides CRUD operations for the `Item` resource. Each item belongs to an owner (the user who created it). Regular users can only read, update, and delete their own items; superusers can access all items regardless of ownership. All paths are prefixed with `/api/v1/items`.
 
 **Base URL:** `/api/v1/items`
-**Authentication:** Bearer token (JWT HS256) — required for all endpoints
+**Authentication:** Clerk JWT Bearer token — required for all endpoints
 **Tag:** `items`
+
+> **AYG-65:** Auth dependency updated from internal HS256 JWT to Clerk JWT. The client must supply a Clerk-issued token as `Authorization: Bearer <clerk_jwt>`. See [API Overview — Authentication](../overview.md#authentication) for the full flow. All error responses now use the [unified error shape](../overview.md#standard-error-responses).
 
 ## Quick Start
 
@@ -86,11 +89,14 @@ curl -X GET "http://localhost:8000/api/v1/items/?skip=0&limit=20" \
 
 **Error Responses:**
 
-| Status | Detail | When |
-|--------|--------|------|
-| `403 Forbidden` | `"Could not validate credentials"` | Token is invalid or missing |
-| `400 Bad Request` | `"Inactive user"` | Account has been deactivated |
-| `422 Unprocessable Entity` | Pydantic validation error | `skip` or `limit` are not valid integers |
+All errors use the [standard error shape](../overview.md#standard-error-responses).
+
+| Status | `error` | `code` | When |
+|--------|---------|--------|------|
+| `400 Bad Request` | `BAD_REQUEST` | `BAD_REQUEST` | Account has been deactivated |
+| `401 Unauthorized` | `UNAUTHORIZED` | `UNAUTHORIZED` | No `Authorization` header supplied |
+| `403 Forbidden` | `FORBIDDEN` | `FORBIDDEN` | Clerk token is invalid, expired, or cannot be verified |
+| `422 Unprocessable Entity` | `VALIDATION_ERROR` | `VALIDATION_FAILED` | `skip` or `limit` are not valid integers (includes `details` array) |
 
 ---
 
@@ -138,11 +144,14 @@ curl -X GET "http://localhost:8000/api/v1/items/a1b2c3d4-e5f6-7890-abcd-ef123456
 
 **Error Responses:**
 
-| Status | Detail | When |
-|--------|--------|------|
-| `403 Forbidden` | `"Not enough permissions"` | Caller is not the item owner and not a superuser |
-| `403 Forbidden` | `"Could not validate credentials"` | Token is invalid or missing |
-| `404 Not Found` | `"Item not found"` | No item exists with the given `id` |
+All errors use the [standard error shape](../overview.md#standard-error-responses).
+
+| Status | `error` | `code` | When |
+|--------|---------|--------|------|
+| `401 Unauthorized` | `UNAUTHORIZED` | `UNAUTHORIZED` | No `Authorization` header supplied |
+| `403 Forbidden` | `FORBIDDEN` | `FORBIDDEN` | Caller is not the item owner and not a superuser |
+| `403 Forbidden` | `FORBIDDEN` | `FORBIDDEN` | Clerk token is invalid, expired, or cannot be verified |
+| `404 Not Found` | `NOT_FOUND` | `NOT_FOUND` | No item exists with the given `id` |
 
 ---
 
@@ -205,10 +214,13 @@ curl -X POST "http://localhost:8000/api/v1/items/" \
 
 **Error Responses:**
 
-| Status | Detail | When |
-|--------|--------|------|
-| `403 Forbidden` | `"Could not validate credentials"` | Token is invalid or missing |
-| `422 Unprocessable Entity` | Pydantic validation error | `title` is missing, empty, or exceeds 255 characters; `description` exceeds 255 characters |
+All errors use the [standard error shape](../overview.md#standard-error-responses).
+
+| Status | `error` | `code` | When |
+|--------|---------|--------|------|
+| `401 Unauthorized` | `UNAUTHORIZED` | `UNAUTHORIZED` | No `Authorization` header supplied |
+| `403 Forbidden` | `FORBIDDEN` | `FORBIDDEN` | Clerk token is invalid, expired, or cannot be verified |
+| `422 Unprocessable Entity` | `VALIDATION_ERROR` | `VALIDATION_FAILED` | `title` is missing, empty, or exceeds 255 characters; `description` exceeds 255 characters (includes `details` array) |
 
 ---
 
@@ -271,12 +283,15 @@ curl -X PUT "http://localhost:8000/api/v1/items/a1b2c3d4-e5f6-7890-abcd-ef123456
 
 **Error Responses:**
 
-| Status | Detail | When |
-|--------|--------|------|
-| `403 Forbidden` | `"Not enough permissions"` | Caller is not the item owner and not a superuser |
-| `403 Forbidden` | `"Could not validate credentials"` | Token is invalid or missing |
-| `404 Not Found` | `"Item not found"` | No item exists with the given `id` |
-| `422 Unprocessable Entity` | Pydantic validation error | `title` is empty string or fields exceed max length |
+All errors use the [standard error shape](../overview.md#standard-error-responses).
+
+| Status | `error` | `code` | When |
+|--------|---------|--------|------|
+| `401 Unauthorized` | `UNAUTHORIZED` | `UNAUTHORIZED` | No `Authorization` header supplied |
+| `403 Forbidden` | `FORBIDDEN` | `FORBIDDEN` | Caller is not the item owner and not a superuser |
+| `403 Forbidden` | `FORBIDDEN` | `FORBIDDEN` | Clerk token is invalid, expired, or cannot be verified |
+| `404 Not Found` | `NOT_FOUND` | `NOT_FOUND` | No item exists with the given `id` |
+| `422 Unprocessable Entity` | `VALIDATION_ERROR` | `VALIDATION_FAILED` | `title` is empty string or fields exceed max length (includes `details` array) |
 
 ---
 
@@ -316,11 +331,14 @@ curl -X DELETE "http://localhost:8000/api/v1/items/a1b2c3d4-e5f6-7890-abcd-ef123
 
 **Error Responses:**
 
-| Status | Detail | When |
-|--------|--------|------|
-| `403 Forbidden` | `"Not enough permissions"` | Caller is not the item owner and not a superuser |
-| `403 Forbidden` | `"Could not validate credentials"` | Token is invalid or missing |
-| `404 Not Found` | `"Item not found"` | No item exists with the given `id` |
+All errors use the [standard error shape](../overview.md#standard-error-responses).
+
+| Status | `error` | `code` | When |
+|--------|---------|--------|------|
+| `401 Unauthorized` | `UNAUTHORIZED` | `UNAUTHORIZED` | No `Authorization` header supplied |
+| `403 Forbidden` | `FORBIDDEN` | `FORBIDDEN` | Caller is not the item owner and not a superuser |
+| `403 Forbidden` | `FORBIDDEN` | `FORBIDDEN` | Clerk token is invalid, expired, or cannot be verified |
+| `404 Not Found` | `NOT_FOUND` | `NOT_FOUND` | No item exists with the given `id` |
 
 ---
 
@@ -328,4 +346,5 @@ curl -X DELETE "http://localhost:8000/api/v1/items/a1b2c3d4-e5f6-7890-abcd-ef123
 
 | Version | Date | Change |
 |---------|------|--------|
-| 1.0.0 | 2026-02-25 | Initial release |
+| 1.1.0 | 2026-02-27 | AYG-65: Auth updated to Clerk JWT; all error tables updated to unified error shape |
+| 1.0.0 | 2026-02-26 | Initial release |

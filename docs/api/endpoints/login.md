@@ -1,37 +1,47 @@
 ---
 title: "Login & Authentication API"
 doc-type: reference
-status: current
-version: "1.0.0"
+status: deprecated
+version: "1.1.0"
 base-url: "/api/v1"
-last-updated: 2026-02-26
-updated-by: "initialise skill"
+last-updated: 2026-02-27
+updated-by: "api-docs-writer (AYG-65)"
 related-code:
   - backend/app/api/routes/login.py
   - backend/app/api/deps.py
   - backend/app/core/security.py
+  - backend/app/core/errors.py
   - backend/app/models.py
 related-docs:
   - docs/api/overview.md
   - docs/architecture/overview.md
   - docs/data/models.md
-tags: [api, rest, login, auth, jwt]
+tags: [api, rest, login, auth, jwt, deprecated]
 ---
 
 # Login & Authentication API
 
+> **DEPRECATED — AYG-65**
+>
+> This router covers the internal OAuth2 password-flow login that issued HS256-signed JWTs. As part of the Supabase + Clerk migration (AYG-65 through AYG-74), **authentication is moving to Clerk**. Clients will obtain tokens directly from Clerk's hosted UI or SDK; the `/login/access-token` endpoint is no longer the correct way to authenticate.
+>
+> - All endpoints in this file remain available during the migration transition period.
+> - Once migration is complete, this router will be removed and this document will be archived.
+> - See [API Overview — Authentication](../overview.md#authentication) for the new Clerk JWT auth flow.
+
 ## Overview
 
-The login router handles all authentication flows: obtaining JWT access tokens via the OAuth2 password grant, validating existing tokens, and the full password-recovery cycle (request reset email, reset with token, and preview the email HTML). All paths are unprefixed and sit directly under `/api/v1`.
+The login router handles all authentication flows for the legacy internal-JWT system: obtaining JWT access tokens via the OAuth2 password grant, validating existing tokens, and the full password-recovery cycle (request reset email, reset with token, and preview the email HTML). All paths are unprefixed and sit directly under `/api/v1`.
 
 **Base URL:** `/api/v1`
 **Authentication:** None required for most endpoints (see individual endpoint notes)
 **Tag:** `login`
+**Status:** Deprecated — being replaced by Clerk auth (AYG-65 through AYG-74)
 
 ## Quick Start
 
 ```bash
-# Obtain a token
+# Obtain a token (legacy — use Clerk SDK in new integrations)
 curl -X POST "http://localhost:8000/api/v1/login/access-token" \
   -H "Content-Type: application/x-www-form-urlencoded" \
   -d "username=user@example.com&password=yourpassword"
@@ -82,11 +92,13 @@ curl -X POST "http://localhost:8000/api/v1/login/access-token" \
 
 **Error Responses:**
 
-| Status | Detail | When |
-|--------|--------|------|
-| `400 Bad Request` | `"Incorrect email or password"` | Credentials do not match any active user |
-| `400 Bad Request` | `"Inactive user"` | User account exists but `is_active` is `false` |
-| `422 Unprocessable Entity` | Pydantic validation error | Missing or malformed form fields |
+All errors use the [standard error shape](../overview.md#standard-error-responses).
+
+| Status | `error` | `code` | When |
+|--------|---------|--------|------|
+| `400 Bad Request` | `BAD_REQUEST` | `BAD_REQUEST` | Credentials do not match any active user (`"Incorrect email or password"`) |
+| `400 Bad Request` | `BAD_REQUEST` | `BAD_REQUEST` | User account exists but `is_active` is `false` (`"Inactive user"`) |
+| `422 Unprocessable Entity` | `VALIDATION_ERROR` | `VALIDATION_FAILED` | Missing or malformed form fields (includes `details` array) |
 
 ---
 
@@ -130,11 +142,13 @@ curl -X POST "http://localhost:8000/api/v1/login/test-token" \
 
 **Error Responses:**
 
-| Status | Detail | When |
-|--------|--------|------|
-| `403 Forbidden` | `"Could not validate credentials"` | Token is missing, malformed, or has an invalid signature |
-| `400 Bad Request` | `"Inactive user"` | Token belongs to a deactivated account |
-| `404 Not Found` | `"User not found"` | Token `sub` references a deleted user |
+All errors use the [standard error shape](../overview.md#standard-error-responses).
+
+| Status | `error` | `code` | When |
+|--------|---------|--------|------|
+| `403 Forbidden` | `FORBIDDEN` | `FORBIDDEN` | Token is missing, malformed, or has an invalid signature |
+| `400 Bad Request` | `BAD_REQUEST` | `BAD_REQUEST` | Token belongs to a deactivated account (`"Inactive user"`) |
+| `404 Not Found` | `NOT_FOUND` | `NOT_FOUND` | Token `sub` references a deleted user |
 
 ---
 
@@ -173,9 +187,11 @@ curl -X POST "http://localhost:8000/api/v1/password-recovery/user@example.com"
 
 **Error Responses:**
 
-| Status | Detail | When |
-|--------|--------|------|
-| `422 Unprocessable Entity` | Pydantic validation error | `email` path segment is not a valid email format |
+All errors use the [standard error shape](../overview.md#standard-error-responses).
+
+| Status | `error` | `code` | When |
+|--------|---------|--------|------|
+| `422 Unprocessable Entity` | `VALIDATION_ERROR` | `VALIDATION_FAILED` | `email` path segment is not a valid email format (includes `details` array) |
 
 > Note: If the email is not registered, no email is sent but the response is identical to the success case. This is by design.
 
@@ -229,11 +245,13 @@ curl -X POST "http://localhost:8000/api/v1/reset-password/" \
 
 **Error Responses:**
 
-| Status | Detail | When |
-|--------|--------|------|
-| `400 Bad Request` | `"Invalid token"` | Recovery token is expired, malformed, or does not match a registered user |
-| `400 Bad Request` | `"Inactive user"` | The account associated with the token has been deactivated |
-| `422 Unprocessable Entity` | Pydantic validation error | `new_password` is shorter than 8 characters or body is malformed |
+All errors use the [standard error shape](../overview.md#standard-error-responses).
+
+| Status | `error` | `code` | When |
+|--------|---------|--------|------|
+| `400 Bad Request` | `BAD_REQUEST` | `BAD_REQUEST` | Recovery token is expired, malformed, or does not match a registered user (`"Invalid token"`) |
+| `400 Bad Request` | `BAD_REQUEST` | `BAD_REQUEST` | The account associated with the token has been deactivated (`"Inactive user"`) |
+| `422 Unprocessable Entity` | `VALIDATION_ERROR` | `VALIDATION_FAILED` | `new_password` is shorter than 8 characters or body is malformed (includes `details` array) |
 
 ---
 
@@ -265,11 +283,13 @@ curl -X POST "http://localhost:8000/api/v1/password-recovery-html-content/user@e
 
 **Error Responses:**
 
-| Status | Detail | When |
-|--------|--------|------|
-| `403 Forbidden` | `"The user doesn't have enough privileges"` | Caller is not a superuser |
-| `403 Forbidden` | `"Could not validate credentials"` | Token is invalid or missing |
-| `404 Not Found` | `"The user with this username does not exist in the system."` | No registered user with that email |
+All errors use the [standard error shape](../overview.md#standard-error-responses).
+
+| Status | `error` | `code` | When |
+|--------|---------|--------|------|
+| `403 Forbidden` | `FORBIDDEN` | `FORBIDDEN` | Caller is not a superuser |
+| `403 Forbidden` | `FORBIDDEN` | `FORBIDDEN` | Token is invalid or missing |
+| `404 Not Found` | `NOT_FOUND` | `NOT_FOUND` | No registered user with that email |
 
 ---
 
@@ -277,4 +297,5 @@ curl -X POST "http://localhost:8000/api/v1/password-recovery-html-content/user@e
 
 | Version | Date | Change |
 |---------|------|--------|
-| 1.0.0 | 2026-02-25 | Initial release |
+| 1.1.0 | 2026-02-27 | AYG-65: Marked deprecated — auth migrating to Clerk JWT; all error tables updated to unified error shape |
+| 1.0.0 | 2026-02-26 | Initial release |

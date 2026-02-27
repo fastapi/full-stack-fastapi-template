@@ -2,14 +2,14 @@
 title: "Deployment Environments"
 doc-type: reference
 status: published
-last-updated: 2026-02-26
-updated-by: "initialise skill"
+last-updated: 2026-02-27
+updated-by: "infra docs writer"
 related-code:
+  - backend/app/core/config.py
   - compose.yml
   - compose.override.yml
   - backend/Dockerfile
   - frontend/Dockerfile
-  - .env
   - .github/workflows/**
 related-docs:
   - docs/getting-started/setup.md
@@ -35,8 +35,15 @@ This project uses three deployment environments with progressively stricter conf
 All environments use:
 - **Frontend**: React 19 + TypeScript, served by Nginx, managed by Traefik
 - **Backend**: FastAPI + Python 3.10, run by uvicorn, managed by Traefik
-- **Database**: PostgreSQL 18 (local) or managed service (staging/production)
+- **Database**: PostgreSQL 18 (local) or Supabase managed service (staging/production)
+- **Authentication**: Clerk for user authentication and JWT verification
 - **Proxy**: Traefik 3.6 for routing and HTTPS/TLS certificates via Let's Encrypt
+
+Configuration is managed via environment variables with the following characteristics:
+- **Settings are frozen**: All configuration is immutable after application initialization
+- **Secrets are protected**: Uses Pydantic `SecretStr` type to prevent accidental logging
+- **Production validation**: Enforces security rules (no default secrets, no wildcard CORS)
+- **Local development**: Same validation with relaxed error handling for convenience
 
 Domains are managed by:
 - **Local**: localhost with optional localhost.tiangolo.com
@@ -65,28 +72,29 @@ Domains are managed by:
 
 | Variable | Value | Notes |
 |----------|-------|-------|
-| `ENVIRONMENT` | local | Development mode |
-| `DOMAIN` | localhost | Base domain for Traefik |
-| `FRONTEND_HOST` | http://localhost:5173 | Frontend URL for email links |
+| `ENVIRONMENT` | local | Development mode (relaxed validation) |
+| `SUPABASE_URL` | [Vault/Config/Secret manager] | Supabase project URL |
+| `SUPABASE_SERVICE_KEY` | [Vault/Config/Secret manager] | Service role key (secret value) |
+| `CLERK_SECRET_KEY` | [Vault/Config/Secret manager] | Clerk authentication secret |
+| `LOG_LEVEL` | INFO | Standard information logging |
+| `LOG_FORMAT` | json | Structured JSON logging |
 | `BACKEND_CORS_ORIGINS` | http://localhost,http://localhost:5173 | Allow frontend origin |
-| `SECRET_KEY` | changethis | **Change for security** |
-| `POSTGRES_SERVER` | db | Docker service name |
-| `POSTGRES_PASSWORD` | changethis | **Change for security** |
-| `FIRST_SUPERUSER` | admin@example.com | Admin email |
-| `FIRST_SUPERUSER_PASSWORD` | changethis | **Change for security** |
-| `SMTP_HOST` | mailcatcher | Automatic email testing |
+| `WITH_UI` | false | UI endpoints disabled |
+| `HTTP_CLIENT_TIMEOUT` | 30 | Request timeout in seconds |
 | `SENTRY_DSN` | (empty) | No error tracking locally |
 
 ### Services
 
 | Service | Type | Notes |
 |---------|------|-------|
-| PostgreSQL | Database | postgres:18 container |
+| PostgreSQL 18 | Database | Local postgres:18 container |
 | FastAPI | Backend | Python 3.10 with uvicorn |
 | React | Frontend | Node 18 with Vite dev server |
 | Traefik | Reverse Proxy | Routes traffic by domain |
 | Mailcatcher | Email | Captures emails, UI at :1080 |
 | Adminer | Database | Web UI for database management |
+| Clerk | Authentication | External managed service |
+| Supabase | Storage | External managed service |
 
 ### Running Locally
 
@@ -133,26 +141,29 @@ See [Setup Guide](../getting-started/setup.md) for detailed instructions.
 | Variable | Source | Example |
 |----------|--------|---------|
 | `ENVIRONMENT` | Hardcoded | staging |
-| `DOMAIN` | GitHub Secret | staging.example.com |
-| `STACK_NAME` | GitHub Secret | staging-example-com |
-| `FRONTEND_HOST` | GitHub Secret | https://dashboard.staging.example.com |
+| `SERVICE_NAME` | GitHub Secret | my-service |
+| `SUPABASE_URL` | GitHub Secret | https://your-project.supabase.co |
+| `SUPABASE_SERVICE_KEY` | GitHub Secret | [Secret manager] |
+| `CLERK_SECRET_KEY` | GitHub Secret | [Secret manager] |
+| `LOG_LEVEL` | GitHub Secret | INFO |
+| `LOG_FORMAT` | GitHub Secret | json |
 | `BACKEND_CORS_ORIGINS` | GitHub Secret | https://dashboard.staging.example.com |
-| `SECRET_KEY` | GitHub Secret | [Secret manager] |
-| `POSTGRES_SERVER` | GitHub Secret | db (internal) or managed-db.example.com |
-| `POSTGRES_PASSWORD` | GitHub Secret | [Secret manager] |
-| `FIRST_SUPERUSER` | GitHub Secret | admin@staging.example.com |
-| `FIRST_SUPERUSER_PASSWORD` | GitHub Secret | [Secret manager] |
-| `SMTP_HOST` | GitHub Secret | [Email service] |
+| `GIT_COMMIT` | GitHub Actions | SHA from commit |
+| `BUILD_TIME` | GitHub Actions | Timestamp from build |
 | `SENTRY_DSN` | GitHub Secret | https://xxxx@sentry.io/yyyy |
+| `HTTP_CLIENT_TIMEOUT` | Default | 30 |
+| `HTTP_CLIENT_MAX_RETRIES` | Default | 3 |
 
 ### Services
 
 | Service | Type | Config | Notes |
 |---------|------|--------|-------|
-| PostgreSQL 18 | Database | Managed or self-hosted | Backed up daily |
+| Supabase PostgreSQL | Database | Managed service | Daily backups, auto-scaling |
 | FastAPI | Backend | 2-4 workers | Auto-restarts on failure |
-| React | Frontend | Production build | Served by Nginx |
-| Traefik | Reverse Proxy | Let's Encrypt SSL | Auto-renews certs |
+| React | Frontend | Production build | Served by Nginx, cached |
+| Traefik | Reverse Proxy | Let's Encrypt SSL | Auto-renews certs, rate limiting |
+| Clerk | Authentication | Managed service | JWT verification, user management |
+| Sentry | Error Tracking | Enabled | Real-time alerts |
 
 ### Deployment Process
 
@@ -210,27 +221,29 @@ git push  # Triggers redeploy
 | Variable | Source | Example |
 |----------|--------|---------|
 | `ENVIRONMENT` | Hardcoded | production |
-| `DOMAIN` | GitHub Secret | example.com |
-| `STACK_NAME` | GitHub Secret | example-com |
-| `FRONTEND_HOST` | GitHub Secret | https://dashboard.example.com |
+| `SERVICE_NAME` | GitHub Secret | my-service |
+| `SUPABASE_URL` | GitHub Secret | https://your-project.supabase.co |
+| `SUPABASE_SERVICE_KEY` | GitHub Secret | [Secret manager] |
+| `CLERK_SECRET_KEY` | GitHub Secret | [Secret manager] |
+| `LOG_LEVEL` | GitHub Secret | WARNING |
+| `LOG_FORMAT` | GitHub Secret | json |
 | `BACKEND_CORS_ORIGINS` | GitHub Secret | https://dashboard.example.com |
-| `SECRET_KEY` | GitHub Secret | [Secret manager] |
-| `POSTGRES_SERVER` | GitHub Secret | db (internal) or managed-db.example.com |
-| `POSTGRES_PASSWORD` | GitHub Secret | [Secret manager] |
-| `FIRST_SUPERUSER` | GitHub Secret | admin@example.com |
-| `FIRST_SUPERUSER_PASSWORD` | GitHub Secret | [Secret manager] |
-| `SMTP_HOST` | GitHub Secret | [Email service] |
+| `GIT_COMMIT` | GitHub Actions | SHA from release tag |
+| `BUILD_TIME` | GitHub Actions | Timestamp from build |
 | `SENTRY_DSN` | GitHub Secret | https://xxxx@sentry.io/yyyy |
+| `HTTP_CLIENT_TIMEOUT` | Default | 30 |
+| `HTTP_CLIENT_MAX_RETRIES` | Default | 3 |
 
 ### Services
 
 | Service | Type | Config | Notes |
 |---------|------|--------|-------|
-| PostgreSQL 18 | Database | Managed or self-hosted | Daily backups, replication |
+| Supabase PostgreSQL | Database | Managed service | Daily backups, point-in-time recovery, replication |
 | FastAPI | Backend | 4+ workers | Auto-restart, health checks |
-| React | Frontend | Production build | Cached, minified |
-| Traefik | Reverse Proxy | Let's Encrypt SSL | Auto-renew, rate limiting |
-| Sentry | Error Tracking | Enabled | Real-time alerts |
+| React | Frontend | Production build | Cached, minified, CDN-ready |
+| Traefik | Reverse Proxy | Let's Encrypt SSL | Auto-renew, rate limiting, health checks |
+| Clerk | Authentication | Managed service | JWT verification, OAuth providers |
+| Sentry | Error Tracking | Enabled | Real-time alerts, performance monitoring |
 
 ### Deployment Process
 
@@ -281,50 +294,80 @@ See [Incidents Runbook](../runbooks/incidents.md) for:
 Set in `.env` file (git-ignored, never commit secrets):
 
 ```bash
-cp .env.example .env
-# Edit .env with your values
+# Create .env file with required secrets
+cat > .env << 'EOF'
+SUPABASE_URL=https://your-project.supabase.co
+SUPABASE_SERVICE_KEY=eyJhbGc...
+CLERK_SECRET_KEY=sk_test_...
+EOF
 ```
+
+The `.env` file is listed in `.gitignore` and will never be committed. All other optional variables use defaults defined in `backend/app/core/config.py`.
 
 ### Staging & Production
 
 Set via GitHub Secrets (encrypted, never logged):
 
-**Required secrets:**
-- `DOMAIN_STAGING`, `DOMAIN_PRODUCTION`
-- `STACK_NAME_STAGING`, `STACK_NAME_PRODUCTION`
-- `SECRET_KEY` (generate: `python -c "import secrets; print(secrets.token_urlsafe(32))"`)
-- `POSTGRES_PASSWORD` (generate secure password)
-- `FIRST_SUPERUSER_PASSWORD` (generate secure password)
-- `EMAILS_FROM_EMAIL` (e.g., noreply@example.com)
-- Other secrets as needed (SMTP, Sentry, etc.)
+**Required GitHub Secrets:**
+- `SUPABASE_URL` - Supabase project URL
+- `SUPABASE_SERVICE_KEY` - Supabase service role key
+- `CLERK_SECRET_KEY` - Clerk backend secret
+
+**Optional GitHub Secrets:**
+- `SENTRY_DSN` - Sentry error tracking (optional)
+- `LOG_LEVEL` - Override default INFO level
+- `HTTP_CLIENT_TIMEOUT` - Override default 30 seconds
+- Other variables as needed for your deployment
 
 **How to set:**
 
 1. Go to GitHub: Settings → Secrets and variables → Actions
 2. Click "New repository secret"
-3. Add each variable
+3. Enter secret name and value
 
 **How to reference in workflow:**
 
 ```yaml
 - name: Deploy
   env:
-    DOMAIN: ${{ secrets.DOMAIN_STAGING }}
-    SECRET_KEY: ${{ secrets.SECRET_KEY }}
+    SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+    SUPABASE_SERVICE_KEY: ${{ secrets.SUPABASE_SERVICE_KEY }}
+    CLERK_SECRET_KEY: ${{ secrets.CLERK_SECRET_KEY }}
 ```
 
-### Secret Rotation
+### Security & Secret Management
 
-For production:
+**Secret types used:**
+- `SUPABASE_SERVICE_KEY`: Supabase service role key (never shared with frontend)
+- `CLERK_SECRET_KEY`: Clerk backend secret for token verification
+- All secrets use Pydantic `SecretStr` type to prevent accidental logging
+
+**Security behavior:**
+- Settings are frozen after initialization (immutable configuration)
+- Secret values never appear in logs or error messages
+- In production, startup fails if secrets contain `"changethis"`
+- In production, wildcard CORS (`*`) is rejected for security
+
+**Secret Rotation for Production:**
+
+When rotating secrets:
 
 ```bash
-# Generate new secret key
-python -c "import secrets; print(secrets.token_urlsafe(32))"
+# 1. Generate new Clerk Secret Key from Clerk dashboard
+# 2. Generate new Supabase Service Key from Supabase dashboard
 
-# Update GitHub Secret
-# Redeploy application
+# 3. Update GitHub Secrets:
+#    - Go to Settings → Secrets and variables → Actions
+#    - Update CLERK_SECRET_KEY and SUPABASE_SERVICE_KEY
+
+# 4. Redeploy application (triggers CI/CD):
 git tag v1.2.4 && git push origin v1.2.4
 ```
+
+**Monitoring secrets in logs:**
+- Application uses `SecretStr` type for all sensitive values
+- Logs will show masked secrets like `***` instead of actual values
+- Check Sentry for any unmasked secrets and report immediately
 
 ---
 
@@ -345,23 +388,31 @@ docker compose logs -f
 
 See [Incidents Runbook](../runbooks/incidents.md) → Investigation steps
 
-### Database Connection Issues
+### Supabase Connection Issues
 
-- Verify `POSTGRES_SERVER` (localhost local, db in Docker, managed-db.example.com in cloud)
-- Verify `POSTGRES_PASSWORD` matches
-- Check networking: `docker compose logs db` (local) or SSH to server (prod)
+- Verify `SUPABASE_URL` is correct (check Supabase dashboard → Settings)
+- Verify `SUPABASE_SERVICE_KEY` matches the service role key (not anon key)
+- Check application startup logs for authentication errors
+- Verify network connectivity to Supabase endpoint
+
+### Clerk Authentication Issues
+
+- Verify `CLERK_SECRET_KEY` is correct (check Clerk dashboard → API Keys)
+- Verify `CLERK_JWKS_URL` matches your Clerk instance (auto-detected if not set)
+- Check application logs for JWT verification errors
+- Verify user exists in Clerk dashboard
+
+### Application Startup Failures
+
+- **Secret validation error**: Verify secrets are not `"changethis"` in non-local environments
+- **CORS validation error**: Verify `BACKEND_CORS_ORIGINS` doesn't contain wildcard `*` in production
+- **Settings frozen error**: Configuration cannot change after startup; restart application to reload env vars
 
 ### Traefik/HTTPS Issues
 
 - Check Traefik logs: `docker compose logs proxy` (local) or `docker logs traefik` (prod)
 - Verify domain DNS points to server IP
 - Let's Encrypt rate limits (production only)
-
-### Email Not Working
-
-- **Local**: Mailcatcher at http://localhost:1080
-- **Staging/Prod**: Check SMTP_HOST, SMTP_USER, SMTP_PASSWORD via Secrets
-- Test: Send email via admin panel, check logs, verify Sentry
 
 ## Related
 

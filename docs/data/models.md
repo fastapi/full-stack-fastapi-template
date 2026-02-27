@@ -4,10 +4,13 @@ doc-type: reference
 status: draft
 database: "PostgreSQL 18"
 schema: "public"
-last-updated: 2026-02-26
-updated-by: "initialise skill"
+last-updated: 2026-02-27
+updated-by: "data-model-docs-writer"
 related-code:
-  - backend/app/models.py
+  - backend/app/models/
+  - backend/app/models/auth.py
+  - backend/app/models/common.py
+  - backend/app/models/__init__.py
   - backend/app/core/db.py
   - backend/app/crud.py
   - backend/app/core/security.py
@@ -204,6 +207,144 @@ SQLModel uses a layered schema pattern. These classes are not database tables bu
 | `Token` | JWT access token response — access_token + token_type ("bearer") |
 | `TokenPayload` | JWT payload representation — sub: str or None |
 | `NewPassword` | Password reset via token — token + new_password (8-128 chars) |
+
+---
+
+## Shared Pydantic Models
+
+These models live in `backend/app/models/` and are **pure Pydantic types — not database tables**. They have no corresponding migrations, no ORM mapping, and no SQL representation. They define standard contracts for auth identity and API response envelopes shared across all routes.
+
+### Principal (`backend/app/models/auth.py`)
+
+Represents the authenticated caller extracted from a validated Clerk JWT. Used as a FastAPI dependency injection type in route handlers — the JWT verification middleware resolves this object and injects it directly into endpoint function signatures.
+
+```python
+class Principal(BaseModel):
+    user_id: str
+    roles: list[str] = []
+    org_id: str | None = None
+```
+
+**Fields:**
+
+| Field | Type | Required | Default | Description |
+|-------|------|----------|---------|-------------|
+| user_id | str | Yes | — | Clerk user ID (e.g. `user_2abc...`) extracted from the JWT `sub` claim |
+| roles | list[str] | No | `[]` | List of role names granted to this user |
+| org_id | str \| None | No | `None` | Clerk organisation ID, or `None` when the user has no active organisation |
+
+**Business Rules:**
+
+1. `user_id` is always present — it is the primary identity key for all authorization decisions in route handlers.
+2. `roles` defaults to an empty list; routes requiring a specific role must check membership explicitly.
+3. `org_id` is `None` for users operating outside an organisation context; multi-tenant routes must treat `None` as the personal workspace.
+4. `Principal` is never instantiated from user-supplied input; it is constructed only by the JWT verification dependency.
+
+---
+
+### ErrorResponse (`backend/app/models/common.py`)
+
+Standard error envelope returned for all API error responses (4xx and 5xx). Every error handler in `backend/app/core/errors.py` serializes to this shape, ensuring a consistent contract for API consumers.
+
+```python
+class ErrorResponse(BaseModel):
+    error: str
+    message: str
+    code: str
+    request_id: str
+```
+
+**Fields:**
+
+| Field | Type | Required | Default | Description |
+|-------|------|----------|---------|-------------|
+| error | str | Yes | — | HTTP status category in UPPER_SNAKE_CASE (e.g. `NOT_FOUND`, `INTERNAL_ERROR`) |
+| message | str | Yes | — | Human-readable error description suitable for display |
+| code | str | Yes | — | Machine-readable UPPER_SNAKE_CASE error code for programmatic handling |
+| request_id | str | Yes | — | UUID of the originating request for log correlation |
+
+**Business Rules:**
+
+1. `error` is derived from `STATUS_CODE_MAP` in `errors.py` — it reflects the HTTP status category, not the application-specific code.
+2. `code` is more granular than `error`; for example `error="NOT_FOUND"` and `code="ENTITY_NOT_FOUND"` can coexist.
+3. `request_id` must be a valid UUID string; it is generated per-request by the exception handler, not the caller.
+4. `message` is intended for human consumption; API clients should branch on `code`, not `message`.
+
+---
+
+### ValidationErrorDetail (`backend/app/models/common.py`)
+
+Represents a single field-level validation failure. Used as elements within the `details` list of `ValidationErrorResponse`. Field paths use dot notation for nested fields.
+
+```python
+class ValidationErrorDetail(BaseModel):
+    field: str
+    message: str
+    type: str
+```
+
+**Fields:**
+
+| Field | Type | Required | Default | Description |
+|-------|------|----------|---------|-------------|
+| field | str | Yes | — | Field path using dot notation for nested fields (e.g. `address.street`) |
+| message | str | Yes | — | Human-readable validation message for this specific field |
+| type | str | Yes | — | Error type identifier (e.g. `missing`, `string_type`, `value_error`) |
+
+**Business Rules:**
+
+1. `field` uses the raw field name without request-location prefixes — it must not start with `body.`, `query.`, or `path.`.
+2. `type` values correspond to Pydantic v2 error type identifiers.
+
+---
+
+### ValidationErrorResponse (`backend/app/models/common.py`)
+
+Extends `ErrorResponse` with a `details` list of per-field `ValidationErrorDetail` objects. Returned with HTTP 422 from the request validation exception handler.
+
+```python
+class ValidationErrorResponse(ErrorResponse):
+    details: list[ValidationErrorDetail]
+```
+
+**Fields:**
+
+Inherits all four fields from `ErrorResponse` (`error`, `message`, `code`, `request_id`) plus:
+
+| Field | Type | Required | Default | Description |
+|-------|------|----------|---------|-------------|
+| details | list[ValidationErrorDetail] | Yes | — | List of individual field validation errors; may be empty for non-field errors |
+
+**Business Rules:**
+
+1. `error` is always `"VALIDATION_ERROR"` and `code` is always `"VALIDATION_FAILED"` for request-body validation failures handled by the FastAPI `RequestValidationError` handler.
+2. `details` may be an empty list in edge cases where Pydantic provides no field-level breakdown.
+3. This type is a strict superset of `ErrorResponse` — any consumer that handles `ErrorResponse` handles `ValidationErrorResponse` as well.
+
+---
+
+### PaginatedResponse[T] (`backend/app/models/common.py`)
+
+Generic paginated list envelope for all list endpoints. The type parameter `T` is the item schema. `count` reflects the total across all pages, not just the current page.
+
+```python
+class PaginatedResponse(BaseModel, Generic[T]):
+    data: list[T]
+    count: int
+```
+
+**Fields:**
+
+| Field | Type | Required | Default | Description |
+|-------|------|----------|---------|-------------|
+| data | list[T] | Yes | — | Page of items; may be an empty list when no results match |
+| count | int | Yes | — | Total number of items across all pages (for pagination controls) |
+
+**Business Rules:**
+
+1. `count` represents the total result set size, not `len(data)` — callers must not assume `count == len(data)`.
+2. `data` may be an empty list when `count` is zero or when the requested page offset exceeds the total.
+3. Usage: `PaginatedResponse[UserPublic](data=users, count=total)` — the type parameter is passed at instantiation, not class definition.
 
 ---
 

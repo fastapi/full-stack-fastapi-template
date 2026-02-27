@@ -5,6 +5,7 @@ from starlette.middleware.cors import CORSMiddleware
 
 from app.api.main import api_router
 from app.core.config import settings
+from app.core.errors import register_exception_handlers
 
 
 def custom_generate_unique_id(route: APIRoute) -> str:
@@ -15,10 +16,13 @@ if settings.SENTRY_DSN and settings.ENVIRONMENT != "local":
     sentry_sdk.init(dsn=str(settings.SENTRY_DSN), enable_tracing=True)
 
 app = FastAPI(
-    title=settings.PROJECT_NAME,
+    title=settings.SERVICE_NAME,
     openapi_url=f"{settings.API_V1_STR}/openapi.json",
     generate_unique_id_function=custom_generate_unique_id,
 )
+
+# Register unified error handlers
+register_exception_handlers(app)
 
 # Set all CORS enabled origins
 if settings.all_cors_origins:

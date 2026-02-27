@@ -2,10 +2,10 @@
 title: "Setup Guide"
 doc-type: how-to
 status: published
-last-updated: 2026-02-26
-updated-by: "initialise skill"
+last-updated: 2026-02-27
+updated-by: "infra docs writer"
 related-code:
-  - .env
+  - backend/app/core/config.py
   - compose.yml
   - compose.override.yml
   - backend/Dockerfile
@@ -37,12 +37,20 @@ git clone https://github.com/your-org/your-repo.git
 cd Aygentic-starter-template
 ```
 
-### Copy Environment File
+### Set Up Environment Variables
+
+Create a `.env` file in the project root with required Supabase and Clerk credentials:
 
 ```bash
-cp .env.example .env
-# Edit .env with your local values (see Environment Variables section below)
+# Create .env file (note: .env is git-ignored)
+cat > .env << 'EOF'
+SUPABASE_URL=your-supabase-project-url
+SUPABASE_SERVICE_KEY=your-supabase-service-key
+CLERK_SECRET_KEY=your-clerk-secret-key
+EOF
 ```
+
+See the Environment Variables section below for complete configuration details.
 
 ### Start the Full Stack
 
@@ -93,34 +101,47 @@ bunx playwright test
 
 ## Environment Variables
 
-The `.env` file controls all configuration. Key variables for local development:
+Configuration is managed through environment variables loaded from the `.env` file. The application settings are **frozen and immutable** after initialization, and sensitive values use `SecretStr` type to prevent accidental logging.
 
-| Variable | Default | Required | Notes |
-|----------|---------|----------|-------|
-| `DOMAIN` | localhost | Yes | Used by Traefik for routing |
-| `FRONTEND_HOST` | http://localhost:5173 | Yes | URL for backend to send emails |
-| `ENVIRONMENT` | local | Yes | Set to: local, staging, production |
-| `PROJECT_NAME` | Full Stack FastAPI Project | Yes | Shown in API docs and emails |
-| `STACK_NAME` | full-stack-fastapi-project | Yes | Docker Compose labels (no spaces) |
-| `BACKEND_CORS_ORIGINS` | http://localhost,http://localhost:5173 | Yes | Comma-separated allowed origins |
-| `SECRET_KEY` | changethis | Yes | **Change this!** JWT signing key |
-| `FIRST_SUPERUSER` | admin@example.com | Yes | First admin email |
-| `FIRST_SUPERUSER_PASSWORD` | changethis | Yes | **Change this!** Admin password |
-| `POSTGRES_SERVER` | localhost | Yes | DB hostname (db in Docker) |
-| `POSTGRES_PORT` | 5432 | Yes | DB port |
-| `POSTGRES_DB` | app | Yes | Database name |
-| `POSTGRES_USER` | postgres | Yes | DB user |
-| `POSTGRES_PASSWORD` | changethis | Yes | **Change this!** DB password |
-| `SMTP_HOST` | [Optional] | No | Email server (uses Mailcatcher locally) |
-| `SMTP_USER` | [Optional] | No | Email server username |
-| `SMTP_PASSWORD` | [Optional] | No | Email server password |
-| `EMAILS_FROM_EMAIL` | info@example.com | No | Sender email address |
-| `SENTRY_DSN` | [Optional] | No | Sentry error tracking |
+### Required Variables (no defaults)
 
-**For development**, the defaults are mostly fine. Change at minimum:
-- `SECRET_KEY` - generate with: `python -c "import secrets; print(secrets.token_urlsafe(32))"`
-- `FIRST_SUPERUSER_PASSWORD` - choose a password for admin login
-- `POSTGRES_PASSWORD` - any secure string
+| Variable | Description | Example |
+|----------|-------------|---------|
+| `SUPABASE_URL` | Supabase project URL | https://your-project.supabase.co |
+| `SUPABASE_SERVICE_KEY` | Supabase service role key | eyJhbGc... (long JWT) |
+| `CLERK_SECRET_KEY` | Clerk secret key for JWT verification | sk_test_... |
+
+### Optional Variables (with defaults)
+
+| Variable | Default | Description | Notes |
+|----------|---------|-------------|-------|
+| `ENVIRONMENT` | local | Runtime environment | Values: `local`, `staging`, `production` |
+| `SERVICE_NAME` | my-service | Application identifier | Used in logs and metrics |
+| `SERVICE_VERSION` | 0.1.0 | Application version | Semantic versioning |
+| `LOG_LEVEL` | INFO | Logging level | Values: `DEBUG`, `INFO`, `WARNING`, `ERROR` |
+| `LOG_FORMAT` | json | Log output format | Values: `json`, `console` |
+| `API_V1_STR` | /api/v1 | API prefix | Used for all API routes |
+| `BACKEND_CORS_ORIGINS` | [] | Allowed CORS origins | Comma-separated or JSON array |
+| `WITH_UI` | false | Include UI endpoints | Boolean: true/false |
+| `CLERK_JWKS_URL` | None | Clerk JWKS endpoint | Auto-configured if not provided |
+| `CLERK_AUTHORIZED_PARTIES` | [] | Authorized JWT audiences | List of allowed parties |
+| `SENTRY_DSN` | None | Sentry error tracking | Optional error reporting URL |
+| `GIT_COMMIT` | unknown | Current git commit hash | Automatically set by build system |
+| `BUILD_TIME` | unknown | Build timestamp | Automatically set by build system |
+| `HTTP_CLIENT_TIMEOUT` | 30 | HTTP request timeout (seconds) | For external API calls |
+| `HTTP_CLIENT_MAX_RETRIES` | 3 | HTTP request retries | For resilience |
+
+### Security Notes
+
+- **Frozen settings**: All settings are immutable after the application starts. Configuration cannot be changed at runtime.
+- **Secret values**: Variables containing secrets (ending in `_KEY` or `_SECRET`) use Pydantic's `SecretStr` type, which:
+  - Prevents secret values from appearing in logs
+  - Hides secrets in error messages and repr output
+  - Must call `.get_secret_value()` to access actual value (framework handles this automatically)
+- **Production validation**: In production environment, the application enforces:
+  - Secret values cannot be `"changethis"` (will raise error on startup)
+  - CORS origins cannot include wildcard `*` (will raise error on startup)
+- **Local development**: Same validation applies, but `"changethis"` secrets emit warnings instead of errors
 
 ## Working with Specific Services
 

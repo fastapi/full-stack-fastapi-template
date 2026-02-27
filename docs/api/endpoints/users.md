@@ -2,13 +2,14 @@
 title: "Users API"
 doc-type: reference
 status: current
-version: "1.0.0"
+version: "1.1.0"
 base-url: "/api/v1"
-last-updated: 2026-02-26
-updated-by: "initialise skill"
+last-updated: 2026-02-27
+updated-by: "api-docs-writer (AYG-65)"
 related-code:
   - backend/app/api/routes/users.py
   - backend/app/api/deps.py
+  - backend/app/core/errors.py
   - backend/app/models.py
 related-docs:
   - docs/api/overview.md
@@ -24,8 +25,10 @@ tags: [api, rest, users]
 The users router manages user accounts: listing, creating, reading, updating, and deleting users. It supports both superuser-level admin operations (managing any account) and self-service operations (reading and modifying the caller's own account). Public registration is available via `/users/signup` without authentication. All paths are prefixed with `/api/v1/users`.
 
 **Base URL:** `/api/v1/users`
-**Authentication:** Bearer token (JWT HS256) — required for all endpoints except `/signup`
+**Authentication:** Clerk JWT Bearer token — required for all endpoints except `/signup`
 **Tag:** `users`
+
+> **AYG-65:** Auth dependency updated from internal HS256 JWT to Clerk JWT. The client must supply a Clerk-issued token as `Authorization: Bearer <clerk_jwt>`. See [API Overview — Authentication](../overview.md#authentication) for the full flow. All error responses now use the [unified error shape](../overview.md#standard-error-responses).
 
 ## Quick Start
 
@@ -95,11 +98,14 @@ curl -X GET "http://localhost:8000/api/v1/users/?skip=0&limit=20" \
 
 **Error Responses:**
 
-| Status | Detail | When |
-|--------|--------|------|
-| `403 Forbidden` | `"The user doesn't have enough privileges"` | Caller is not a superuser |
-| `403 Forbidden` | `"Could not validate credentials"` | Token is invalid or missing |
-| `422 Unprocessable Entity` | Pydantic validation error | `skip` or `limit` are not valid integers |
+All errors use the [standard error shape](../overview.md#standard-error-responses).
+
+| Status | `error` | `code` | When |
+|--------|---------|--------|------|
+| `401 Unauthorized` | `UNAUTHORIZED` | `UNAUTHORIZED` | No `Authorization` header supplied |
+| `403 Forbidden` | `FORBIDDEN` | `FORBIDDEN` | Caller is not a superuser |
+| `403 Forbidden` | `FORBIDDEN` | `FORBIDDEN` | Clerk token is invalid, expired, or cannot be verified |
+| `422 Unprocessable Entity` | `VALIDATION_ERROR` | `VALIDATION_FAILED` | `skip` or `limit` are not valid integers (includes `details` array) |
 
 ---
 
@@ -171,12 +177,15 @@ curl -X POST "http://localhost:8000/api/v1/users/" \
 
 **Error Responses:**
 
-| Status | Detail | When |
-|--------|--------|------|
-| `400 Bad Request` | `"The user with this email already exists in the system."` | Email is already registered |
-| `403 Forbidden` | `"The user doesn't have enough privileges"` | Caller is not a superuser |
-| `403 Forbidden` | `"Could not validate credentials"` | Token is invalid or missing |
-| `422 Unprocessable Entity` | Pydantic validation error | Missing required fields or constraint violations |
+All errors use the [standard error shape](../overview.md#standard-error-responses).
+
+| Status | `error` | `code` | When |
+|--------|---------|--------|------|
+| `400 Bad Request` | `BAD_REQUEST` | `BAD_REQUEST` | Email is already registered |
+| `401 Unauthorized` | `UNAUTHORIZED` | `UNAUTHORIZED` | No `Authorization` header supplied |
+| `403 Forbidden` | `FORBIDDEN` | `FORBIDDEN` | Caller is not a superuser |
+| `403 Forbidden` | `FORBIDDEN` | `FORBIDDEN` | Clerk token is invalid, expired, or cannot be verified |
+| `422 Unprocessable Entity` | `VALIDATION_ERROR` | `VALIDATION_FAILED` | Missing required fields or constraint violations (includes `details` array) |
 
 ---
 
@@ -222,11 +231,14 @@ curl -X GET "http://localhost:8000/api/v1/users/me" \
 
 **Error Responses:**
 
-| Status | Detail | When |
-|--------|--------|------|
-| `403 Forbidden` | `"Could not validate credentials"` | Token is invalid or missing |
-| `400 Bad Request` | `"Inactive user"` | Account has been deactivated |
-| `404 Not Found` | `"User not found"` | Token `sub` references a deleted user |
+All errors use the [standard error shape](../overview.md#standard-error-responses).
+
+| Status | `error` | `code` | When |
+|--------|---------|--------|------|
+| `401 Unauthorized` | `UNAUTHORIZED` | `UNAUTHORIZED` | No `Authorization` header supplied |
+| `403 Forbidden` | `FORBIDDEN` | `FORBIDDEN` | Clerk token is invalid, expired, or cannot be verified |
+| `400 Bad Request` | `BAD_REQUEST` | `BAD_REQUEST` | Account has been deactivated |
+| `404 Not Found` | `NOT_FOUND` | `NOT_FOUND` | Token `sub` references a deleted user |
 
 ---
 
@@ -279,11 +291,14 @@ curl -X PATCH "http://localhost:8000/api/v1/users/me" \
 
 **Error Responses:**
 
-| Status | Detail | When |
-|--------|--------|------|
-| `403 Forbidden` | `"Could not validate credentials"` | Token is invalid or missing |
-| `409 Conflict` | `"User with this email already exists"` | The requested email is already in use by another account |
-| `422 Unprocessable Entity` | Pydantic validation error | Invalid email format or field length exceeded |
+All errors use the [standard error shape](../overview.md#standard-error-responses).
+
+| Status | `error` | `code` | When |
+|--------|---------|--------|------|
+| `401 Unauthorized` | `UNAUTHORIZED` | `UNAUTHORIZED` | No `Authorization` header supplied |
+| `403 Forbidden` | `FORBIDDEN` | `FORBIDDEN` | Clerk token is invalid, expired, or cannot be verified |
+| `409 Conflict` | `CONFLICT` | `CONFLICT` | The requested email is already in use by another account |
+| `422 Unprocessable Entity` | `VALIDATION_ERROR` | `VALIDATION_FAILED` | Invalid email format or field length exceeded (includes `details` array) |
 
 ---
 
@@ -336,12 +351,15 @@ curl -X PATCH "http://localhost:8000/api/v1/users/me/password" \
 
 **Error Responses:**
 
-| Status | Detail | When |
-|--------|--------|------|
-| `400 Bad Request` | `"Incorrect password"` | `current_password` does not match the stored hash |
-| `400 Bad Request` | `"New password cannot be the same as the current one"` | `new_password` is identical to `current_password` |
-| `403 Forbidden` | `"Could not validate credentials"` | Token is invalid or missing |
-| `422 Unprocessable Entity` | Pydantic validation error | Password shorter than 8 characters |
+All errors use the [standard error shape](../overview.md#standard-error-responses).
+
+| Status | `error` | `code` | When |
+|--------|---------|--------|------|
+| `400 Bad Request` | `BAD_REQUEST` | `BAD_REQUEST` | `current_password` does not match the stored hash |
+| `400 Bad Request` | `BAD_REQUEST` | `BAD_REQUEST` | `new_password` is identical to `current_password` |
+| `401 Unauthorized` | `UNAUTHORIZED` | `UNAUTHORIZED` | No `Authorization` header supplied |
+| `403 Forbidden` | `FORBIDDEN` | `FORBIDDEN` | Clerk token is invalid, expired, or cannot be verified |
+| `422 Unprocessable Entity` | `VALIDATION_ERROR` | `VALIDATION_FAILED` | Password shorter than 8 characters (includes `details` array) |
 
 ---
 
@@ -375,10 +393,13 @@ curl -X DELETE "http://localhost:8000/api/v1/users/me" \
 
 **Error Responses:**
 
-| Status | Detail | When |
-|--------|--------|------|
-| `403 Forbidden` | `"Super users are not allowed to delete themselves"` | Caller is a superuser |
-| `403 Forbidden` | `"Could not validate credentials"` | Token is invalid or missing |
+All errors use the [standard error shape](../overview.md#standard-error-responses).
+
+| Status | `error` | `code` | When |
+|--------|---------|--------|------|
+| `401 Unauthorized` | `UNAUTHORIZED` | `UNAUTHORIZED` | No `Authorization` header supplied |
+| `403 Forbidden` | `FORBIDDEN` | `FORBIDDEN` | Caller is a superuser (superusers cannot self-delete) |
+| `403 Forbidden` | `FORBIDDEN` | `FORBIDDEN` | Clerk token is invalid, expired, or cannot be verified |
 
 ---
 
@@ -436,10 +457,12 @@ curl -X POST "http://localhost:8000/api/v1/users/signup" \
 
 **Error Responses:**
 
-| Status | Detail | When |
-|--------|--------|------|
-| `400 Bad Request` | `"The user with this email already exists in the system"` | Email is already registered |
-| `422 Unprocessable Entity` | Pydantic validation error | Invalid email, password too short, or missing required fields |
+All errors use the [standard error shape](../overview.md#standard-error-responses).
+
+| Status | `error` | `code` | When |
+|--------|---------|--------|------|
+| `400 Bad Request` | `BAD_REQUEST` | `BAD_REQUEST` | Email is already registered |
+| `422 Unprocessable Entity` | `VALIDATION_ERROR` | `VALIDATION_FAILED` | Invalid email, password too short, or missing required fields (includes `details` array) |
 
 ---
 
@@ -483,11 +506,14 @@ curl -X GET "http://localhost:8000/api/v1/users/550e8400-e29b-41d4-a716-44665544
 
 **Error Responses:**
 
-| Status | Detail | When |
-|--------|--------|------|
-| `403 Forbidden` | `"The user doesn't have enough privileges"` | Non-superuser requesting another user's record |
-| `403 Forbidden` | `"Could not validate credentials"` | Token is invalid or missing |
-| `404 Not Found` | `"User not found"` | No user exists with the given `user_id` (superuser only; non-superusers get 403 first) |
+All errors use the [standard error shape](../overview.md#standard-error-responses).
+
+| Status | `error` | `code` | When |
+|--------|---------|--------|------|
+| `401 Unauthorized` | `UNAUTHORIZED` | `UNAUTHORIZED` | No `Authorization` header supplied |
+| `403 Forbidden` | `FORBIDDEN` | `FORBIDDEN` | Non-superuser requesting another user's record |
+| `403 Forbidden` | `FORBIDDEN` | `FORBIDDEN` | Clerk token is invalid, expired, or cannot be verified |
+| `404 Not Found` | `NOT_FOUND` | `NOT_FOUND` | No user exists with the given `user_id` (superuser only; non-superusers receive 403 first) |
 
 > Note: The order of checks is: (1) if the requested user matches the caller, return immediately; (2) if the caller is not a superuser, raise 403; (3) if the user does not exist, raise 404.
 
@@ -554,13 +580,16 @@ curl -X PATCH "http://localhost:8000/api/v1/users/550e8400-e29b-41d4-a716-446655
 
 **Error Responses:**
 
-| Status | Detail | When |
-|--------|--------|------|
-| `403 Forbidden` | `"The user doesn't have enough privileges"` | Caller is not a superuser |
-| `403 Forbidden` | `"Could not validate credentials"` | Token is invalid or missing |
-| `404 Not Found` | `"The user with this id does not exist in the system"` | No user with the given `user_id` |
-| `409 Conflict` | `"User with this email already exists"` | The requested email is already in use by a different account |
-| `422 Unprocessable Entity` | Pydantic validation error | Constraint violations on submitted fields |
+All errors use the [standard error shape](../overview.md#standard-error-responses).
+
+| Status | `error` | `code` | When |
+|--------|---------|--------|------|
+| `401 Unauthorized` | `UNAUTHORIZED` | `UNAUTHORIZED` | No `Authorization` header supplied |
+| `403 Forbidden` | `FORBIDDEN` | `FORBIDDEN` | Caller is not a superuser |
+| `403 Forbidden` | `FORBIDDEN` | `FORBIDDEN` | Clerk token is invalid, expired, or cannot be verified |
+| `404 Not Found` | `NOT_FOUND` | `NOT_FOUND` | No user with the given `user_id` |
+| `409 Conflict` | `CONFLICT` | `CONFLICT` | The requested email is already in use by a different account |
+| `422 Unprocessable Entity` | `VALIDATION_ERROR` | `VALIDATION_FAILED` | Constraint violations on submitted fields (includes `details` array) |
 
 ---
 
@@ -602,12 +631,15 @@ curl -X DELETE "http://localhost:8000/api/v1/users/550e8400-e29b-41d4-a716-44665
 
 **Error Responses:**
 
-| Status | Detail | When |
-|--------|--------|------|
-| `403 Forbidden` | `"Super users are not allowed to delete themselves"` | Superuser attempting to delete their own account |
-| `403 Forbidden` | `"The user doesn't have enough privileges"` | Caller is not a superuser |
-| `403 Forbidden` | `"Could not validate credentials"` | Token is invalid or missing |
-| `404 Not Found` | `"User not found"` | No user with the given `user_id` |
+All errors use the [standard error shape](../overview.md#standard-error-responses).
+
+| Status | `error` | `code` | When |
+|--------|---------|--------|------|
+| `401 Unauthorized` | `UNAUTHORIZED` | `UNAUTHORIZED` | No `Authorization` header supplied |
+| `403 Forbidden` | `FORBIDDEN` | `FORBIDDEN` | Superuser attempting to delete their own account |
+| `403 Forbidden` | `FORBIDDEN` | `FORBIDDEN` | Caller is not a superuser |
+| `403 Forbidden` | `FORBIDDEN` | `FORBIDDEN` | Clerk token is invalid, expired, or cannot be verified |
+| `404 Not Found` | `NOT_FOUND` | `NOT_FOUND` | No user with the given `user_id` |
 
 ---
 
@@ -615,4 +647,5 @@ curl -X DELETE "http://localhost:8000/api/v1/users/550e8400-e29b-41d4-a716-44665
 
 | Version | Date | Change |
 |---------|------|--------|
-| 1.0.0 | 2026-02-25 | Initial release |
+| 1.1.0 | 2026-02-27 | AYG-65: Auth updated to Clerk JWT; all error tables updated to unified error shape |
+| 1.0.0 | 2026-02-26 | Initial release |

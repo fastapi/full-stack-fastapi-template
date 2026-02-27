@@ -2,8 +2,8 @@
 title: "Aygentic Starter Template - Architecture Overview"
 doc-type: reference
 status: active
-last-updated: 2026-02-26
-updated-by: "initialise skill"
+last-updated: 2026-02-27
+updated-by: "architecture-docs-writer"
 related-code:
   - backend/app/main.py
   - backend/app/api/main.py
@@ -12,7 +12,11 @@ related-code:
   - backend/app/core/config.py
   - backend/app/core/db.py
   - backend/app/core/security.py
-  - backend/app/models.py
+  - backend/app/core/errors.py
+  - backend/app/models/
+  - backend/app/models/__init__.py
+  - backend/app/models/common.py
+  - backend/app/models/auth.py
   - backend/app/crud.py
   - backend/app/alembic/
   - backend/scripts/prestart.sh
@@ -33,7 +37,7 @@ tags: [architecture, system-design, full-stack, fastapi, react]
 
 ## Purpose
 
-The Aygentic Starter Template is a full-stack monorepo providing a production-ready foundation for building web applications. It combines a Python/FastAPI REST API backend with a React/TypeScript single-page application frontend, backed by PostgreSQL, and deployed via Docker Compose with Traefik as a reverse proxy. The system delivers JWT-based authentication, user management with role-based access control (regular users and superusers), CRUD operations for domain entities (users and items), email-based password recovery, and an auto-generated type-safe API client that bridges backend and frontend.
+The Aygentic Starter Template is a full-stack monorepo providing a production-ready foundation for building web applications. It combines a Python/FastAPI REST API backend with a React/TypeScript single-page application frontend, backed by PostgreSQL, and deployed via Docker Compose with Traefik as a reverse proxy. The system delivers JWT-based authentication (transitioning to Clerk as the external identity provider), user management with role-based access control, CRUD operations for domain entities, a unified error handling framework that guarantees consistent JSON error responses across all endpoints, and an auto-generated type-safe API client that bridges backend and frontend.
 
 ## System Context
 
@@ -46,12 +50,14 @@ C4Context
 
     System(system, "Aygentic Starter Template", "Full-stack web application with auth, CRUD, and admin capabilities")
 
+    System_Ext(clerk, "Clerk", "External identity provider: JWT issuance, user authentication, organisation management")
     System_Ext(smtp, "SMTP Server", "Sends transactional emails: password reset, account creation, test emails")
     System_Ext(sentry, "Sentry", "Error monitoring and performance tracing (non-local environments only)")
     SystemDb_Ext(postgres, "PostgreSQL 18", "Persistent data storage for users and items")
 
     Rel(user, system, "Uses", "HTTPS")
     Rel(admin, system, "Administers", "HTTPS")
+    Rel(system, clerk, "Verifies JWTs via", "HTTPS (JWKS)")
     Rel(system, smtp, "Sends emails via", "SMTP/TLS port 587")
     Rel(system, sentry, "Reports errors to", "HTTPS DSN")
     Rel(system, postgres, "Reads/writes data", "psycopg3 (postgresql+psycopg)")
@@ -61,13 +67,15 @@ C4Context
 
 | Component | Purpose | Technology | Location |
 |-----------|---------|------------|----------|
-| FastAPI Backend | REST API server handling auth, CRUD, and business logic | Python 3.10+, FastAPI >=0.114.2, Pydantic 2.x | `backend/app/main.py` |
+| FastAPI Backend | REST API server (titled via `SERVICE_NAME` setting) handling auth, CRUD, and business logic; registers unified error handlers at startup | Python 3.10+, FastAPI >=0.114.2, Pydantic 2.x | `backend/app/main.py` |
 | API Router | Mounts versioned route modules under `/api/v1` | FastAPI APIRouter | `backend/app/api/main.py` |
-| Auth & Dependencies | JWT token validation, DB session injection, role-based guards | PyJWT, OAuth2PasswordBearer, Annotated Depends | `backend/app/api/deps.py` |
-| Security Module | Password hashing (Argon2 primary + Bcrypt fallback) and JWT token creation | pwdlib (Argon2Hasher, BcryptHasher), PyJWT (HS256) | `backend/app/core/security.py` |
+| Auth & Dependencies | JWT token validation, DB session injection, role-based guards; transitioning from internal HS256 JWT to Clerk JWT with `Principal` identity model (`user_id`, `roles`, `org_id`) | PyJWT, OAuth2PasswordBearer, Annotated Depends | `backend/app/api/deps.py` |
+| Security Module | Password hashing (Argon2 primary + Bcrypt fallback) and JWT token creation (legacy; being replaced by Clerk external auth) | pwdlib (Argon2Hasher, BcryptHasher), PyJWT (HS256) | `backend/app/core/security.py` |
+| Error Handling | Unified exception handler framework; `ServiceError` exception, `STATUS_CODE_MAP`, 4 global handlers registered at startup via `register_exception_handlers(app)` | FastAPI exception handlers, Pydantic response models | `backend/app/core/errors.py` |
 | Configuration | Environment-based settings with validation and secret enforcement | pydantic-settings, `.env` file, computed fields | `backend/app/core/config.py` |
 | Database Engine | SQLAlchemy engine creation and initial superuser seeding | SQLModel, psycopg3 (postgresql+psycopg) | `backend/app/core/db.py` |
-| Domain Models | SQLModel ORM tables + Pydantic request/response schemas | SQLModel (User, Item + 12 variant schemas) | `backend/app/models.py` |
+| Shared Models (Package) | Pure Pydantic response envelopes (`ErrorResponse`, `ValidationErrorResponse`, `PaginatedResponse[T]`) and auth identity model (`Principal`) | Pydantic 2.x | `backend/app/models/` |
+| Domain Models (Legacy) | SQLModel ORM tables + Pydantic request/response schemas (being migrated into models package) | SQLModel (User, Item + variant schemas) | `backend/app/models.py` |
 | CRUD Utilities | Data access functions with timing-attack-safe authentication | SQLModel Session, Argon2 dummy hash comparison | `backend/app/crud.py` |
 | Database Migrations | Schema version control and migration management | Alembic | `backend/app/alembic/` |
 | Login Routes | OAuth2 token login, token test, password recovery/reset | FastAPI router | `backend/app/api/routes/login.py` |
@@ -194,7 +202,22 @@ Browser --> :80/:443 (Traefik)
 
 ## Model Architecture
 
-The domain models follow a layered schema pattern using SQLModel:
+### Models Package (`backend/app/models/`)
+
+The models directory is now a Python package with two categories of pure Pydantic types, re-exported via `__init__.py` for flat imports (`from app.models import ErrorResponse, Principal`):
+
+**`backend/app/models/common.py`** -- Shared API response envelopes:
+- `ErrorResponse` -- Standard error envelope (`error`, `message`, `code`, `request_id`)
+- `ValidationErrorDetail` -- Single field-level validation failure (`field`, `message`, `type`)
+- `ValidationErrorResponse` -- Extends `ErrorResponse` with `details: list[ValidationErrorDetail]`
+- `PaginatedResponse[T]` -- Generic paginated list envelope (`data: list[T]`, `count: int`)
+
+**`backend/app/models/auth.py`** -- Authentication identity:
+- `Principal` -- Authenticated user principal extracted from a verified Clerk JWT. Fields: `user_id` (str, Clerk user ID), `roles` (list[str], default []), `org_id` (str | None, Clerk organisation ID)
+
+### Domain Models (Legacy, `backend/app/models.py`)
+
+The original domain models follow a layered schema pattern using SQLModel and are being incrementally migrated into the models package (AYG-65 through AYG-74):
 
 ```
 ModelBase (shared validated fields)
@@ -211,6 +234,82 @@ ModelBase (shared validated fields)
 
 **Additional schemas:** `UserRegister` (public signup), `UserUpdateMe` (self-service profile), `UpdatePassword` (current + new password), `Token` / `TokenPayload` (JWT), `NewPassword` (reset flow), `Message` (generic response).
 
+## Error Handling
+
+All API errors are routed through a unified exception handling framework (`backend/app/core/errors.py`) that guarantees every error response conforms to a standard JSON envelope.
+
+### Standard Error Response Shape
+
+```json
+{
+  "error": "NOT_FOUND",
+  "message": "Entity not found",
+  "code": "ENTITY_NOT_FOUND",
+  "request_id": "550e8400-e29b-41d4-a716-446655440000"
+}
+```
+
+For validation errors (HTTP 422), the response extends with field-level details:
+
+```json
+{
+  "error": "VALIDATION_ERROR",
+  "message": "Request validation failed.",
+  "code": "VALIDATION_FAILED",
+  "request_id": "...",
+  "details": [
+    { "field": "title", "message": "Field required", "type": "missing" }
+  ]
+}
+```
+
+### Components
+
+- **`ServiceError` exception** -- Application-level error with structured fields: `status_code` (int), `message` (str), `code` (str, machine-readable UPPER_SNAKE_CASE), and `error` (auto-resolved from `STATUS_CODE_MAP`)
+- **`STATUS_CODE_MAP`** -- Maps HTTP status codes (400, 401, 403, 404, 409, 422, 429, 500, 503) to UPPER_SNAKE_CASE error category strings
+- **4 global exception handlers**, registered at app startup via `register_exception_handlers(app)`:
+  1. `service_error_handler` -- Catches `ServiceError`, formats with the standard envelope
+  2. `http_exception_handler` -- Catches FastAPI/Starlette `HTTPException`, maps to standard envelope
+  3. `validation_exception_handler` -- Catches `RequestValidationError`, produces per-field `details` array with dot-notation field paths
+  4. `unhandled_exception_handler` -- Catch-all for `Exception`; logs full traceback via `logger.exception`, returns generic "An unexpected error occurred." to clients
+
+### Error Flow
+
+```mermaid
+sequenceDiagram
+    participant Client
+    participant FastAPI
+    participant Handler as Exception Handler
+    participant Logger
+
+    Client->>FastAPI: API Request
+    alt Application error
+        FastAPI->>FastAPI: raise ServiceError(404, "Not found", "ENTITY_NOT_FOUND")
+        FastAPI->>Handler: service_error_handler
+    else Framework HTTP error
+        FastAPI->>FastAPI: raise HTTPException(403)
+        FastAPI->>Handler: http_exception_handler
+    else Validation failure
+        FastAPI->>FastAPI: RequestValidationError
+        FastAPI->>Handler: validation_exception_handler
+    else Unexpected error
+        FastAPI->>FastAPI: unhandled Exception
+        FastAPI->>Handler: unhandled_exception_handler
+        Handler->>Logger: logger.exception (full traceback)
+    end
+    Handler-->>Client: JSONResponse {error, message, code, request_id}
+```
+
+### Response Models
+
+The error response Pydantic models live in `backend/app/models/common.py`:
+
+| Model | Fields | Usage |
+|-------|--------|-------|
+| `ErrorResponse` | `error`, `message`, `code`, `request_id` | Standard error envelope for all non-validation errors |
+| `ValidationErrorDetail` | `field`, `message`, `type` | Single field-level validation failure |
+| `ValidationErrorResponse` | Extends `ErrorResponse` + `details: list[ValidationErrorDetail]` | HTTP 422 validation errors |
+
 ## Security Architecture
 
 ### Password Hashing
@@ -219,12 +318,20 @@ ModelBase (shared validated fields)
 - **Auto-upgrade:** `verify_and_update()` returns a new hash if the stored hash uses an outdated algorithm, enabling transparent migration from Bcrypt to Argon2
 - **Timing-attack prevention:** When a login attempt targets a non-existent email, `crud.authenticate()` still runs `verify_password()` against a precomputed `DUMMY_HASH` to ensure constant response time
 
-### JWT Tokens
+### JWT Tokens (Transitioning to Clerk)
+
+**Current (legacy):**
 - **Algorithm:** HS256 (symmetric, signed with `SECRET_KEY`)
 - **Payload:** `{"sub": "<user_uuid>", "exp": <utc_timestamp>}`
 - **Expiry:** 8 days (configurable via `ACCESS_TOKEN_EXPIRE_MINUTES`, default 11520)
 - **Validation:** `jwt.decode()` in `get_current_user` dependency, followed by DB lookup and `is_active` check
 - **Storage:** Frontend stores token in `localStorage`, attached via `OpenAPI.TOKEN` callback on every Axios request
+
+**Target (Clerk external auth):**
+- Authentication will be delegated to Clerk as the external identity provider
+- JWTs are issued and signed by Clerk, verified by the backend using Clerk's public keys
+- The `Principal` model (`backend/app/models/auth.py`) represents the authenticated caller: `user_id` (Clerk user ID), `roles` (list of granted roles), `org_id` (Clerk organisation, optional)
+- Internal password hashing and token creation will be removed once the Clerk migration is complete
 
 ### Secret Enforcement
 - `Settings._check_default_secret()` raises `ValueError` in staging/production if `SECRET_KEY`, `POSTGRES_PASSWORD`, or `FIRST_SUPERUSER_PASSWORD` are left as `"changethis"`
@@ -277,9 +384,8 @@ Key decisions are documented as ADRs in `docs/architecture/decisions/`:
 
 | ADR | Title | Status | Date |
 |-----|-------|--------|------|
-| - | No ADRs recorded yet | - | - |
-
-<!-- TODO: Populate as architectural decisions are documented -->
+| [0001](decisions/0001-unified-error-handling-framework.md) | Unified Error Handling Framework | proposed | 2026-02-27 |
+| [0002](decisions/0002-shared-pydantic-models-package.md) | Shared Pydantic Models Package | proposed | 2026-02-27 |
 
 ## Known Constraints
 
@@ -296,6 +402,10 @@ Key decisions are documented as ADRs in `docs/architecture/decisions/`:
 6. **Environment-gated private routes** -- The `private` API router (unrestricted user creation) is only mounted when `ENVIRONMENT=local`. This is a configuration-based guard rather than an infrastructure-based one. Misconfigured environments could expose this endpoint.
 
 7. **Default secrets in local development** -- `SECRET_KEY`, `POSTGRES_PASSWORD`, and `FIRST_SUPERUSER_PASSWORD` default to `"changethis"`. The `Settings` validator warns in local mode but raises `ValueError` in staging/production, preventing deployment with default credentials.
+
+8. **Conditional integration test fixtures** -- `backend/tests/conftest.py` guards integration-level fixtures (DB session, test client, auth token helpers) behind a `try/except` import block (`_INTEGRATION_DEPS_AVAILABLE`). This allows unit tests in `backend/tests/unit/` to run in isolation without a database or the full app context. The guard is temporary while integration fixtures are being migrated (AYG-65 through AYG-74).
+
+9. **Auth in transition (legacy + Clerk)** -- The codebase currently contains both legacy internal HS256 JWT authentication (`backend/app/core/security.py`, `backend/app/api/deps.py`) and the new Clerk-oriented `Principal` model (`backend/app/models/auth.py`). Both coexist during the migration; the legacy auth path will be removed once Clerk integration is complete.
 
 ## Related Documents
 
