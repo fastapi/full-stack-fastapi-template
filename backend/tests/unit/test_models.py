@@ -138,8 +138,9 @@ def test_paginated_response_with_typed_items():
 
 def test_principal_defaults():
     """Principal defaults roles to [] and org_id to None when not supplied."""
-    principal = Principal(user_id="user_abc123")
+    principal = Principal(user_id="user_abc123", session_id="sess_abc")
     assert principal.user_id == "user_abc123"
+    assert principal.session_id == "sess_abc"
     assert principal.roles == []
     assert principal.org_id is None
 
@@ -148,10 +149,21 @@ def test_principal_full():
     """Principal serializes correctly when all fields are provided."""
     principal = Principal(
         user_id="user_xyz",
+        session_id="sess_xyz",
         roles=["admin", "editor"],
         org_id="org_001",
     )
     data = principal.model_dump()
     assert data["user_id"] == "user_xyz"
+    assert data["session_id"] == "sess_xyz"
     assert data["roles"] == ["admin", "editor"]
     assert data["org_id"] == "org_001"
+
+
+def test_principal_requires_session_id():
+    """Principal requires session_id (no default)."""
+    import pytest
+    from pydantic import ValidationError
+
+    with pytest.raises(ValidationError):
+        Principal(user_id="user_abc123")  # missing session_id

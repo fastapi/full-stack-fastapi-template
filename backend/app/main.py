@@ -1,3 +1,6 @@
+from collections.abc import AsyncGenerator
+from contextlib import asynccontextmanager
+
 import sentry_sdk
 from fastapi import FastAPI
 from fastapi.routing import APIRoute
@@ -6,11 +9,39 @@ from starlette.middleware.cors import CORSMiddleware
 from app.api.main import api_router
 from app.core.config import settings
 from app.core.errors import register_exception_handlers
-from app.core.logging import setup_logging
+from app.core.http_client import HttpClient
+from app.core.logging import get_logger, setup_logging
 from app.core.middleware import RequestPipelineMiddleware
+from app.core.supabase import create_supabase_client
 
 # Configure structured logging (JSON in production, console in local dev)
 setup_logging(settings)
+
+logger = get_logger(module=__name__)
+
+
+@asynccontextmanager
+async def lifespan(app: FastAPI) -> AsyncGenerator[None]:
+    """Application lifespan: initialise shared resources on startup, clean up on shutdown."""
+    # Startup
+    app.state.supabase = create_supabase_client(
+        url=str(settings.SUPABASE_URL),
+        key=settings.SUPABASE_SERVICE_KEY.get_secret_value(),
+    )
+    app.state.http_client = HttpClient(
+        read_timeout=float(settings.HTTP_CLIENT_TIMEOUT),
+        max_retries=settings.HTTP_CLIENT_MAX_RETRIES,
+    )
+    logger.info("app_startup_complete")
+
+    yield
+
+    # Shutdown
+    try:
+        await app.state.http_client.close()
+    except Exception:
+        logger.exception("http_client_close_failed")
+    logger.info("app_shutdown_complete")
 
 
 def custom_generate_unique_id(route: APIRoute) -> str:
@@ -24,6 +55,7 @@ app = FastAPI(
     title=settings.SERVICE_NAME,
     openapi_url=f"{settings.API_V1_STR}/openapi.json",
     generate_unique_id_function=custom_generate_unique_id,
+    lifespan=lifespan,
 )
 
 # Register unified error handlers
