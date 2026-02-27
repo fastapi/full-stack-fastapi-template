@@ -18,7 +18,7 @@ jobs:
         with:
           python-version: "3.13"
       - run: pip install smokeshow
-      - uses: actions/download-artifact@v7
+      - uses: actions/download-artifact@v8
         with:
           name: coverage-html
           path: backend/htmlcov
