@@ -13,6 +13,9 @@ class Principal(BaseModel):
     user_id: str
     """Clerk user ID (e.g. 'user_2abc...')."""
 
+    session_id: str
+    """Clerk session ID from the JWT 'sid' claim."""
+
     roles: list[str] = []
     """List of role names granted to this user. Defaults to empty list."""
 
