@@ -7,6 +7,7 @@ from fastapi.routing import APIRoute
 from starlette.middleware.cors import CORSMiddleware
 
 from app.api.main import api_router
+from app.api.routes.health import router as health_router
 from app.core.config import settings
 from app.core.errors import register_exception_handlers
 from app.core.http_client import HttpClient
@@ -78,3 +79,6 @@ if settings.all_cors_origins:
 app.add_middleware(RequestPipelineMiddleware, environment=settings.ENVIRONMENT)
 
 app.include_router(api_router, prefix=settings.API_V1_STR)
+
+# Operational endpoints at root level (no API prefix) — public, no auth required.
+app.include_router(health_router)
