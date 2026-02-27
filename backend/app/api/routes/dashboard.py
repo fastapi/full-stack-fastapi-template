@@ -64,6 +64,10 @@ from app.models.dashboard import (
     ReferenceSourcesResponse,
     CustomerReviewItem,
     CustomerReviewsResponse,
+    BrandImpressionTrendDataPoint,
+    BrandImpressionTrendResponse,
+    BrandRankingTrendDataPoint,
+    BrandRankingTrendResponse,
 )
 from kila_models.models import (
     UsersTable,
@@ -232,42 +236,27 @@ async def get_user_brands(
 async def get_brand_segments(
     brand_id: str = Query(..., description="Brand ID to get segments for"),
     db: AsyncSession = Depends(get_db),
-    current_user: UsersTable = Depends(get_current_user)
+    current_user: UsersTable = Depends(get_current_user),
 ):
     """
-    Retrieve the list of segments for a brand.
-
-    Queries BrandAwarenessWeeklyPerformanceTable for distinct segment values,
-    excluding the "All-Segment" aggregate entry.
-
-    Args:
-        brand_id: Brand identifier
-        db: Database session
-        current_user: Authenticated user
-
-    Returns:
-        BrandSegmentsResponse with list of segment names
+    Return distinct segment names for a brand from BrandSearchDailyBasicMetricsTable,
+    excluding the 'all-segment' rollup row.
     """
-    logger.info(f"Fetching segments for brand_id: {brand_id}")
+    logger.info(f"Fetching segments for user: {current_user.user_id}, brand_id: {brand_id}")
 
     query = (
-        select(distinct(BrandAwarenessWeeklyPerformanceTable.segment))
+        select(distinct(BrandSearchDailyBasicMetricsTable.segment))
         .where(
-            BrandAwarenessWeeklyPerformanceTable.brand_id == brand_id,
-            BrandAwarenessWeeklyPerformanceTable.segment != "All-Segment"
+            BrandSearchDailyBasicMetricsTable.search_target_brand_id == brand_id,
+            BrandSearchDailyBasicMetricsTable.segment != "all-segment",
         )
-        .order_by(asc(BrandAwarenessWeeklyPerformanceTable.segment))
+        .order_by(BrandSearchDailyBasicMetricsTable.segment)
     )
-
     result = await db.execute(query)
-    segments = [row[0] for row in result.all()]
+    segments = [row[0] for row in result.fetchall()]
 
     logger.info(f"Found {len(segments)} segments for brand_id: {brand_id}")
-
-    return BrandSegmentsResponse(
-        brand_id=brand_id,
-        segments=segments,
-    )
+    return BrandSegmentsResponse(brand_id=brand_id, segments=segments)
 
 
 @router.get("/awareness-score", response_model=Optional[AwarenessScoreResponse])
@@ -1839,33 +1828,32 @@ async def get_risk_history(
 @router.get("/brand-impression-summary", response_model=BrandImpressionSummaryResponse)
 async def get_brand_impression_summary(
     brand_id: str = Query(..., description="Brand ID to query"),
+    segment: str = Query(default="all-segment", description="Segment to filter by"),
     db: AsyncSession = Depends(get_db),
     current_user: UsersTable = Depends(get_current_user),
 ):
     """
     Retrieve the brand impression summary with 3 quick metrics for the selector card.
 
-    Queries BrandSearchDailyBasicMetricsTable for segment='all-segment' and returns
+    Queries BrandSearchDailyBasicMetricsTable for the given brand and segment and returns
     visibility rate, median ranking position, and final sentiment score for the latest
     7-day window, plus comparison with the prior 7-day window.
 
     Visibility  = search_visibility_count / total_search_count * 100
-    Position    = median_ranking (lower is better)
+    Position    = median_ranking (lower is better; null if brand never ranked)
     Sentiment   = final_sentiment_score (0-100, NULL if brand had no visibility)
     """
     logger.info(
         f"Fetching brand impression summary for user: {current_user.user_id}, "
-        f"brand_id: {brand_id}"
+        f"brand_id: {brand_id}, segment: {segment}"
     )
 
-    ALL_SEGMENT = "all-segment"
-
-    # ── Current record: latest search_date_end for this brand + all-segment ──
+    # ── Current record: latest search_date_end for this brand + segment ──
     current_query = (
         select(BrandSearchDailyBasicMetricsTable)
         .where(
             BrandSearchDailyBasicMetricsTable.search_target_brand_id == brand_id,
-            BrandSearchDailyBasicMetricsTable.segment == ALL_SEGMENT,
+            BrandSearchDailyBasicMetricsTable.segment == segment,
         )
         .order_by(desc(BrandSearchDailyBasicMetricsTable.search_date_end))
         .limit(1)
@@ -1893,7 +1881,7 @@ async def get_brand_impression_summary(
         select(BrandSearchDailyBasicMetricsTable)
         .where(
             BrandSearchDailyBasicMetricsTable.search_target_brand_id == brand_id,
-            BrandSearchDailyBasicMetricsTable.segment == ALL_SEGMENT,
+            BrandSearchDailyBasicMetricsTable.segment == segment,
             BrandSearchDailyBasicMetricsTable.search_date_end == previous_end,
         )
         .limit(1)
@@ -1970,33 +1958,6 @@ async def get_brand_impression_summary(
     )
 
 
-@router.get("/brand-segments", response_model=BrandSegmentsResponse)
-async def get_brand_segments(
-    brand_id: str = Query(..., description="Brand ID to get segments for"),
-    db: AsyncSession = Depends(get_db),
-    current_user: UsersTable = Depends(get_current_user),
-):
-    """
-    Return distinct segment names for a brand from BrandSearchDailyBasicMetricsTable,
-    excluding the 'all-segment' rollup row.
-    """
-    logger.info(f"Fetching segments for user: {current_user.user_id}, brand_id: {brand_id}")
-
-    query = (
-        select(distinct(BrandSearchDailyBasicMetricsTable.segment))
-        .where(
-            BrandSearchDailyBasicMetricsTable.search_target_brand_id == brand_id,
-            BrandSearchDailyBasicMetricsTable.segment != "all-segment",
-        )
-        .order_by(BrandSearchDailyBasicMetricsTable.segment)
-    )
-    result = await db.execute(query)
-    segments = [row[0] for row in result.fetchall()]
-
-    logger.info(f"Found {len(segments)} segments for brand_id: {brand_id}")
-    return BrandSegmentsResponse(brand_id=brand_id, segments=segments)
-
-
 def _parse_text_list(text: str | None) -> list[str]:
     """Parse a Text/String field that may be JSON array, newline-, or semicolon-separated."""
     if not text or not text.strip():
@@ -2014,6 +1975,89 @@ def _parse_text_list(text: str | None) -> list[str]:
     return [text.strip()] if text.strip() else []
 
 
+def _extract_reference_sources(raw: str | None) -> list[str]:
+    """
+    Extract reference source URLs from a search_return_reference_sources value.
+
+    Handles three cases:
+      - JSON array of objects: each object may have a "url" key — extract it; otherwise str(item)
+      - JSON array of strings: use each string directly
+      - JSON object with a "url" key: extract that URL
+      - Plain text (newline / semicolon / pipe separated): split and use as-is
+    """
+    if not raw or not raw.strip():
+        return []
+    try:
+        parsed = json_module.loads(raw)
+        results: list[str] = []
+        if isinstance(parsed, list):
+            for item in parsed:
+                if isinstance(item, dict):
+                    url = item.get("url") or item.get("URL") or item.get("href")
+                    results.append(str(url).strip() if url else str(item).strip())
+                elif item:
+                    results.append(str(item).strip())
+            return [r for r in results if r]
+        if isinstance(parsed, dict):
+            url = parsed.get("url") or parsed.get("URL") or parsed.get("href")
+            return [str(url).strip()] if url else [str(parsed).strip()]
+        return [str(parsed).strip()] if parsed else []
+    except (json_module.JSONDecodeError, ValueError):
+        pass
+    # Fallback: plain-text splitting
+    for sep in ["\n", ";", "|"]:
+        parts = [p.strip() for p in raw.split(sep) if p.strip()]
+        if len(parts) > 1:
+            return parts
+    return [raw.strip()] if raw.strip() else []
+
+
+def _extract_customer_reviews(raw: str | None) -> list[tuple[str, str]]:
+    """
+    Extract (review_text, sentiment) pairs from a search_return_customer_review value.
+
+    Handles:
+      - JSON object with "text" and "sentiment" keys  → single pair
+      - JSON array of such objects                    → multiple pairs
+      - Plain text                                    → (text, "Unknown")
+
+    Sentiment is title-cased and normalised to Positive / Neutral / Negative / Unknown.
+    """
+    VALID_SENTIMENTS = {"Positive", "Neutral", "Negative"}
+
+    def _norm_sentiment(s: str) -> str:
+        title = s.strip().title() if s else "Unknown"
+        return title if title in VALID_SENTIMENTS else "Unknown"
+
+    if not raw or not raw.strip():
+        return []
+    try:
+        parsed = json_module.loads(raw)
+        results: list[tuple[str, str]] = []
+        if isinstance(parsed, list):
+            for item in parsed:
+                if isinstance(item, dict):
+                    text = item.get("text") or item.get("review") or item.get("content") or ""
+                    sentiment = item.get("sentiment") or item.get("label") or "Unknown"
+                    if str(text).strip():
+                        results.append((str(text).strip(), _norm_sentiment(str(sentiment))))
+                elif item:
+                    results.append((str(item).strip(), "Unknown"))
+            return results
+        if isinstance(parsed, dict):
+            text = parsed.get("text") or parsed.get("review") or parsed.get("content") or ""
+            sentiment = parsed.get("sentiment") or parsed.get("label") or "Unknown"
+            if str(text).strip():
+                return [(str(text).strip(), _norm_sentiment(str(sentiment)))]
+            return []
+        return [(str(parsed).strip(), "Unknown")] if str(parsed).strip() else []
+    except (json_module.JSONDecodeError, ValueError):
+        pass
+    # Plain text fallback
+    text = raw.strip()
+    return [(text, "Unknown")] if text else []
+
+
 @router.get("/brand-reference-sources", response_model=ReferenceSourcesResponse)
 async def get_brand_reference_sources(
     brand_id: str = Query(..., description="Brand ID to query"),
@@ -2024,23 +2068,27 @@ async def get_brand_reference_sources(
     db: AsyncSession = Depends(get_db),
     current_user: UsersTable = Depends(get_current_user),
 ):
-    """Return deduplicated AI reference sources cited for the brand within the time range."""
-    today = date.today()
-    if time_range == TimeRange.CUSTOM and start_date and end_date:
+    """
+    Return deduplicated AI reference sources for rows where the brand appeared
+    under its own name (search_target_brand_name == search_return_brand_name).
+
+    Queries BrandSearchResultTable and aggregates search_return_reference_sources.
+    JSON values are parsed and the "url" field is extracted where present.
+    """
+    if time_range == TimeRange.CUSTOM:
+        if not start_date or not end_date:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="start_date and end_date are required for custom time range",
+            )
         query_start, query_end = start_date, end_date
-    elif time_range == TimeRange.ONE_MONTH:
-        query_start, query_end = today - timedelta(days=30), today
-    elif time_range == TimeRange.ONE_QUARTER:
-        query_start, query_end = today - timedelta(days=90), today
-    elif time_range == TimeRange.ONE_YEAR:
-        query_start, query_end = today - timedelta(days=365), today
-    elif time_range == TimeRange.YEAR_TO_DATE:
-        query_start, query_end = date(today.year, 1, 1), today
     else:
-        query_start, query_end = today - timedelta(days=30), today
+        query_start, query_end = get_date_range_for_time_range(time_range)
 
     filters = [
         BrandSearchResultTable.search_target_brand_id == brand_id,
+        # Only rows where the brand appeared under its own name
+        BrandSearchResultTable.search_target_brand_name == BrandSearchResultTable.search_return_brand_name,
         BrandSearchResultTable.search_date >= query_start,
         BrandSearchResultTable.search_date <= query_end,
         BrandSearchResultTable.search_return_reference_sources.isnot(None),
@@ -2052,17 +2100,33 @@ async def get_brand_reference_sources(
         select(BrandSearchResultTable.search_return_reference_sources)
         .where(*filters)
         .order_by(desc(BrandSearchResultTable.search_date))
-        .limit(200)
+        .limit(500)
     )
     result = await db.execute(query)
     rows = result.fetchall()
 
-    seen: set[str] = set()
+    def _normalize_url(url: str) -> str:
+        """Return a canonical form used only for dedup comparison (not stored)."""
+        u = url.lower().strip()
+        # Strip protocol for comparison: http/https treated as same
+        for prefix in ("https://", "http://"):
+            if u.startswith(prefix):
+                u = u[len(prefix):]
+                break
+        # Strip www.
+        if u.startswith("www."):
+            u = u[4:]
+        # Strip trailing slash
+        u = u.rstrip("/")
+        return u
+
+    seen_normalized: set[str] = set()
     sources: list[str] = []
     for (raw,) in rows:
-        for src in _parse_text_list(raw):
-            if src not in seen:
-                seen.add(src)
+        for src in _extract_reference_sources(raw):
+            key = _normalize_url(src)
+            if key and key not in seen_normalized:
+                seen_normalized.add(key)
                 sources.append(src)
 
     items = [ReferenceSourceItem(seq=i + 1, source=s) for i, s in enumerate(sources)]
@@ -2079,58 +2143,273 @@ async def get_brand_customer_reviews(
     db: AsyncSession = Depends(get_db),
     current_user: UsersTable = Depends(get_current_user),
 ):
-    """Return customer reviews with sentiment labels from the daily metrics aggregation."""
-    today = date.today()
-    if time_range == TimeRange.CUSTOM and start_date and end_date:
-        query_start, query_end = start_date, end_date
-    elif time_range == TimeRange.ONE_MONTH:
-        query_start, query_end = today - timedelta(days=30), today
-    elif time_range == TimeRange.ONE_QUARTER:
-        query_start, query_end = today - timedelta(days=90), today
-    elif time_range == TimeRange.ONE_YEAR:
-        query_start, query_end = today - timedelta(days=365), today
-    elif time_range == TimeRange.YEAR_TO_DATE:
-        query_start, query_end = date(today.year, 1, 1), today
-    else:
-        query_start, query_end = today - timedelta(days=30), today
+    """
+    Return deduplicated customer reviews with sentiment from BrandSearchResultTable
+    for rows where the brand appeared under its own name
+    (search_target_brand_name == search_return_brand_name).
 
-    seg_filter = segment if segment and segment != "all-segment" else "all-segment"
+    JSON values in search_return_customer_review are parsed; "text" maps to the
+    Customer Review column and "sentiment" maps to the Sentiment column.
+    """
+    if time_range == TimeRange.CUSTOM:
+        if not start_date or not end_date:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="start_date and end_date are required for custom time range",
+            )
+        query_start, query_end = start_date, end_date
+    else:
+        query_start, query_end = get_date_range_for_time_range(time_range)
+
+    filters = [
+        BrandSearchResultTable.search_target_brand_id == brand_id,
+        BrandSearchResultTable.search_target_brand_name == BrandSearchResultTable.search_return_brand_name,
+        BrandSearchResultTable.search_date >= query_start,
+        BrandSearchResultTable.search_date <= query_end,
+        BrandSearchResultTable.search_return_customer_review.isnot(None),
+    ]
+    if segment and segment != "all-segment":
+        filters.append(BrandSearchResultTable.segment == segment)
+
     query = (
-        select(
-            BrandSearchDailyBasicMetricsTable.positive_customer_reviews,
-            BrandSearchDailyBasicMetricsTable.neutral_customer_reviews,
-            BrandSearchDailyBasicMetricsTable.negative_customer_reviews,
-        )
-        .where(
-            BrandSearchDailyBasicMetricsTable.search_target_brand_id == brand_id,
-            BrandSearchDailyBasicMetricsTable.segment == seg_filter,
-            BrandSearchDailyBasicMetricsTable.search_date_end >= query_start,
-            BrandSearchDailyBasicMetricsTable.search_date_end <= query_end,
-        )
-        .order_by(desc(BrandSearchDailyBasicMetricsTable.search_date_end))
-        .limit(10)
+        select(BrandSearchResultTable.search_return_customer_review)
+        .where(*filters)
+        .order_by(desc(BrandSearchResultTable.search_date))
+        .limit(500)
     )
     result = await db.execute(query)
     rows = result.fetchall()
 
-    seen: set[str] = set()
+    seen_normalized: set[str] = set()
     reviews: list[CustomerReviewItem] = []
     seq = 1
-    for (pos_raw, neu_raw, neg_raw) in rows:
-        for text in _parse_text_list(pos_raw):
-            if text not in seen:
-                seen.add(text)
-                reviews.append(CustomerReviewItem(seq=seq, review=text, sentiment="Positive"))
-                seq += 1
-        for text in _parse_text_list(neu_raw):
-            if text not in seen:
-                seen.add(text)
-                reviews.append(CustomerReviewItem(seq=seq, review=text, sentiment="Neutral"))
-                seq += 1
-        for text in _parse_text_list(neg_raw):
-            if text not in seen:
-                seen.add(text)
-                reviews.append(CustomerReviewItem(seq=seq, review=text, sentiment="Negative"))
+    for (raw,) in rows:
+        for review_text, sentiment in _extract_customer_reviews(raw):
+            # Deduplicate by normalised review text (lowercase, stripped)
+            key = review_text.lower().strip()
+            if key and key not in seen_normalized:
+                seen_normalized.add(key)
+                reviews.append(CustomerReviewItem(seq=seq, review=review_text, sentiment=sentiment))
                 seq += 1
 
     return CustomerReviewsResponse(brand_id=brand_id, reviews=reviews)
+
+
+@router.get("/brand-impression-trend", response_model=BrandImpressionTrendResponse)
+async def get_brand_impression_trend(
+    brand_id: str = Query(..., description="Brand ID to query"),
+    segment: str = Query(default="all-segment", description="Segment to filter by"),
+    time_range: TimeRange = Query(TimeRange.ONE_MONTH, description="Predefined time range"),
+    start_date: Optional[date] = Query(None, description="Custom start date (when time_range=custom)"),
+    end_date: Optional[date] = Query(None, description="Custom end date (when time_range=custom)"),
+    db: AsyncSession = Depends(get_db),
+    current_user: UsersTable = Depends(get_current_user),
+):
+    """
+    Retrieve brand impression historical trend data from BrandSearchDailyBasicMetricsTable.
+
+    Returns a time series of 3 key metrics ordered by date:
+      - visibility: search_visibility_count / total_search_count * 100  (%)
+      - position:   median_ranking  (lower is better; null when brand never ranked)
+      - sentiment:  final_sentiment_score  (0-100; null when no reviews)
+
+    Null values are forward/backward interpolated using the nearest adjacent records:
+      - both neighbours present → average of the two
+      - only previous → use previous value
+      - only next     → use next value
+      - no neighbours → remains null
+    """
+    logger.info(
+        f"Fetching brand impression trend for user: {current_user.user_id}, "
+        f"brand_id: {brand_id}, segment: {segment}, time_range: {time_range}"
+    )
+
+    if time_range == TimeRange.CUSTOM:
+        if not start_date or not end_date:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="start_date and end_date are required for custom time range",
+            )
+        query_start = start_date
+        query_end = end_date
+    else:
+        query_start, query_end = get_date_range_for_time_range(time_range)
+
+    query = (
+        select(BrandSearchDailyBasicMetricsTable)
+        .where(
+            BrandSearchDailyBasicMetricsTable.search_target_brand_id == brand_id,
+            BrandSearchDailyBasicMetricsTable.segment == segment,
+            BrandSearchDailyBasicMetricsTable.search_date_end >= query_start,
+            BrandSearchDailyBasicMetricsTable.search_date_end <= query_end,
+        )
+        .order_by(asc(BrandSearchDailyBasicMetricsTable.search_date_end))
+    )
+    result = await db.execute(query)
+    records = result.scalars().all()
+
+    if not records:
+        logger.warning(f"No trend data found for brand_id: {brand_id}, segment: {segment}")
+        return BrandImpressionTrendResponse(brand_id=brand_id, segment=segment, data_points=[])
+
+    # ── Compute raw metric values (None where unavailable) ────────────────────
+    raw: list[dict] = []
+    for rec in records:
+        vis = (
+            None if rec.total_search_count == 0
+            else round(rec.search_visibility_count / rec.total_search_count * 100, 2)
+        )
+        pos = None if rec.search_visibility_count == 0 else float(rec.median_ranking)
+        sent = rec.final_sentiment_score  # may be None
+        raw.append({"date": rec.search_date_end.isoformat(), "visibility": vis, "position": pos, "sentiment": sent})
+
+    # ── Interpolate nulls using adjacent non-null values ─────────────────────
+    def interpolate_nulls(points: list[dict], key: str) -> None:
+        vals = [p[key] for p in points]
+        for i in range(len(vals)):
+            if vals[i] is not None:
+                continue
+            prev_val = next((vals[j] for j in range(i - 1, -1, -1) if vals[j] is not None), None)
+            next_val = next((vals[j] for j in range(i + 1, len(vals)) if vals[j] is not None), None)
+            if prev_val is not None and next_val is not None:
+                vals[i] = round((prev_val + next_val) / 2, 2)
+            elif prev_val is not None:
+                vals[i] = prev_val
+            elif next_val is not None:
+                vals[i] = next_val
+            # both None → remains None
+        for i, p in enumerate(points):
+            p[key] = vals[i]
+
+    interpolate_nulls(raw, "visibility")
+    interpolate_nulls(raw, "position")
+    interpolate_nulls(raw, "sentiment")
+
+    data_points = [
+        BrandImpressionTrendDataPoint(
+            date=p["date"],
+            visibility=p["visibility"],
+            position=p["position"],
+            sentiment=p["sentiment"],
+        )
+        for p in raw
+    ]
+
+    logger.info(f"Returning {len(data_points)} trend data points for brand_id: {brand_id}")
+    return BrandImpressionTrendResponse(brand_id=brand_id, segment=segment, data_points=data_points)
+
+
+@router.get("/brand-ranking-trend", response_model=BrandRankingTrendResponse)
+async def get_brand_ranking_trend(
+    brand_id: str = Query(..., description="Brand ID to query"),
+    segment: str = Query(default="all-segment", description="Segment to filter by"),
+    time_range: TimeRange = Query(TimeRange.ONE_MONTH, description="Predefined time range"),
+    start_date: Optional[date] = Query(None, description="Custom start date (when time_range=custom)"),
+    end_date: Optional[date] = Query(None, description="Custom end date (when time_range=custom)"),
+    db: AsyncSession = Depends(get_db),
+    current_user: UsersTable = Depends(get_current_user),
+):
+    """
+    Retrieve brand ranking trend data (min, max, median, avg) from BrandSearchDailyBasicMetricsTable.
+
+    Days where the brand had no visibility (search_visibility_count == 0) are marked
+    is_interpolated=True and their values are filled using true linear interpolation:
+      - Between two known points: rank = left + t * (right - left)
+      - Before the first known point: flat-extend using the first known value
+      - After the last known point: flat-extend using the last known value
+
+    The frontend renders interpolated points as connected chart segments but shows
+    "No ranking data (brand not found)" in the tooltip instead of actual values.
+    """
+    logger.info(
+        f"Fetching brand ranking trend for user: {current_user.user_id}, "
+        f"brand_id: {brand_id}, segment: {segment}, time_range: {time_range}"
+    )
+
+    if time_range == TimeRange.CUSTOM:
+        if not start_date or not end_date:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="start_date and end_date are required for custom time range",
+            )
+        query_start = start_date
+        query_end = end_date
+    else:
+        query_start, query_end = get_date_range_for_time_range(time_range)
+
+    query = (
+        select(BrandSearchDailyBasicMetricsTable)
+        .where(
+            BrandSearchDailyBasicMetricsTable.search_target_brand_id == brand_id,
+            BrandSearchDailyBasicMetricsTable.segment == segment,
+            BrandSearchDailyBasicMetricsTable.search_date_end >= query_start,
+            BrandSearchDailyBasicMetricsTable.search_date_end <= query_end,
+        )
+        .order_by(asc(BrandSearchDailyBasicMetricsTable.search_date_end))
+    )
+    result = await db.execute(query)
+    records = result.scalars().all()
+
+    if not records:
+        logger.warning(f"No ranking trend data for brand_id: {brand_id}, segment: {segment}")
+        return BrandRankingTrendResponse(brand_id=brand_id, segment=segment, data_points=[])
+
+    # ── Compute raw values; null when brand had no visibility ─────────────────
+    raw: list[dict] = []
+    for rec in records:
+        has_data = rec.search_visibility_count > 0
+        raw.append({
+            "date": rec.search_date_end.isoformat(),
+            "min_ranking": float(rec.min_ranking) if has_data else None,
+            "max_ranking": float(rec.max_ranking) if has_data else None,
+            "median_ranking": float(rec.median_ranking) if has_data else None,
+            "avg_ranking": round(rec.avg_ranking, 2) if has_data else None,
+            "is_interpolated": not has_data,
+        })
+
+    # ── Linear interpolation for null-valued metrics ──────────────────────────
+    def linear_interpolate(points: list[dict], key: str) -> None:
+        vals = [p[key] for p in points]
+        known = [i for i, v in enumerate(vals) if v is not None]
+        if not known:
+            return
+
+        # Flat-extend before the first known value
+        for i in range(known[0]):
+            vals[i] = vals[known[0]]
+
+        # Flat-extend after the last known value
+        for i in range(known[-1] + 1, len(vals)):
+            vals[i] = vals[known[-1]]
+
+        # True linear interpolation between consecutive known pairs
+        for k in range(len(known) - 1):
+            left, right = known[k], known[k + 1]
+            if right - left > 1:
+                left_val, right_val = vals[left], vals[right]
+                for i in range(left + 1, right):
+                    t = (i - left) / (right - left)
+                    vals[i] = round(left_val + t * (right_val - left_val), 2)
+
+        for i, p in enumerate(points):
+            p[key] = vals[i]
+
+    linear_interpolate(raw, "min_ranking")
+    linear_interpolate(raw, "max_ranking")
+    linear_interpolate(raw, "median_ranking")
+    linear_interpolate(raw, "avg_ranking")
+
+    data_points = [
+        BrandRankingTrendDataPoint(
+            date=p["date"],
+            min_ranking=p["min_ranking"],
+            max_ranking=p["max_ranking"],
+            median_ranking=p["median_ranking"],
+            avg_ranking=p["avg_ranking"],
+            is_interpolated=p["is_interpolated"],
+        )
+        for p in raw
+    ]
+
+    logger.info(f"Returning {len(data_points)} ranking trend points for brand_id: {brand_id}")
+    return BrandRankingTrendResponse(brand_id=brand_id, segment=segment, data_points=data_points)

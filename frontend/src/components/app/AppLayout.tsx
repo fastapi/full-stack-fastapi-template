@@ -26,7 +26,7 @@ interface MenuItem {
   name: string
   icon: React.ComponentType<{ size?: number }>
   path?: string
-  children?: { name: string; path: string }[]
+  children?: { name: string; path: string; hidden?: boolean }[]
 }
 
 export default function AppLayout({ children }: { children: React.ReactNode }) {
@@ -48,9 +48,9 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
       name: "Dashboard",
       icon: LayoutDashboard,
       children: [
-        { name: "Brand Overview", path: "/app/dashboard/overview" },
+        { name: "Brand Overview", path: "/app/dashboard/overview", hidden: true },
         { name: "Brand Impression", path: "/app/dashboard/brand-impression" },
-        { name: "Performance Detail", path: "/app/dashboard/performance" },
+        { name: "Performance Detail", path: "/app/dashboard/performance", hidden: true },
         { name: "Competitive Analysis", path: "/app/dashboard/competitors" },
       ],
     },
@@ -185,7 +185,7 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
 
                   {showFullContent && isExpanded && (
                     <div className="mt-1 ml-4 space-y-1">
-                      {item.children!.map((child) => {
+                      {item.children!.filter((child) => !child.hidden).map((child) => {
                         const isChildActive = location.pathname === child.path
                         return (
                           <Link

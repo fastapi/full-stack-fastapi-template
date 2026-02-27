@@ -40,11 +40,13 @@ interface DashboardPageLayoutProps {
   /** Whether to show Project and Role fields. Default: true */
   showProjectRole?: boolean
   /** Extra content rendered inside the brand card after the dropdown row */
-  brandCardExtras?: (selectedBrand: UserBrand | undefined) => React.ReactNode
+  brandCardExtras?: (selectedBrand: UserBrand | undefined, selectedSegment: string) => React.ReactNode
   children: (props: {
     selectedBrandId: string
     selectedBrand: UserBrand
     selectedSegment: string
+    /** All individual segment names for this brand (excludes the "All Segment" sentinel) */
+    segments: string[]
     timeRange: TimeRange
     customStartDate?: string
     customEndDate?: string
@@ -103,12 +105,13 @@ export function DashboardPageLayout({
     if (!selectedBrandId) return
     setIsLoadingSegments(true)
     setSegments([])
-    setSelectedSegment("")
+    setSelectedSegment("__all_segments__")
     dashboardAPI
       .getBrandSegments(selectedBrandId)
       .then((data: BrandSegmentsResponse) => {
         setSegments(data.segments)
-        setSelectedSegment(data.segments[0] ?? "")
+        // Default to "All Segment" — user can drill into a specific segment
+        setSelectedSegment("__all_segments__")
       })
       .catch(() => setSegments([]))
       .finally(() => setIsLoadingSegments(false))
@@ -120,7 +123,7 @@ export function DashboardPageLayout({
 
   const handleRefresh = async () => {
     try {
-      dashboardAPI.clearUserBrandsCache()
+      dashboardAPI.clearAllCache()
       await fetchUserBrands()
       toast.success("Data refreshed successfully")
     } catch {
@@ -227,14 +230,17 @@ export function DashboardPageLayout({
                 <div className="flex items-center gap-1.5">
                   <span className="text-[10px] text-slate-500 font-medium whitespace-nowrap">Segment</span>
                   <Select
-                    value={selectedSegment || undefined}
+                    value={selectedSegment}
                     onValueChange={setSelectedSegment}
-                    disabled={isLoadingSegments || segments.length === 0}
+                    disabled={isLoadingSegments}
                   >
                     <SelectTrigger className="w-[140px] !h-6 !py-0 px-2 text-[10px] [&_svg:last-child]:size-3">
-                      <SelectValue placeholder={isLoadingSegments ? "Loading…" : "Select segment"} />
+                      <SelectValue placeholder={isLoadingSegments ? "Loading…" : "All Segment"} />
                     </SelectTrigger>
                     <SelectContent className="max-h-40">
+                      <SelectItem value="__all_segments__" className="text-[10px] !py-0.5 px-2 font-medium">
+                        All Segment
+                      </SelectItem>
                       {segments.map((seg) => (
                         <SelectItem key={seg} value={seg} className="text-[10px] !py-0.5 px-2">
                           {seg}
@@ -255,7 +261,7 @@ export function DashboardPageLayout({
                 )}
                 {brandCardExtras && (
                   <div className="ml-auto flex items-center gap-2">
-                    {brandCardExtras(selectedBrand)}
+                    {brandCardExtras(selectedBrand, selectedSegment)}
                   </div>
                 )}
               </div>
@@ -270,6 +276,7 @@ export function DashboardPageLayout({
               selectedBrandId,
               selectedBrand,
               selectedSegment,
+              segments,
               timeRange,
               customStartDate: customDateApplied?.start,
               customEndDate: customDateApplied?.end,

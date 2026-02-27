@@ -498,3 +498,43 @@ class CustomerReviewsResponse(BaseModel):
     reviews: list[CustomerReviewItem] = Field(default_factory=list, description="Customer reviews with sentiment")
 
     model_config = ConfigDict(from_attributes=True)
+
+
+class BrandRankingTrendDataPoint(BaseModel):
+    """A single data point for the brand ranking trend chart."""
+    date: str = Field(..., description="Date (YYYY-MM-DD, equals search_date_end)")
+    min_ranking: Optional[float] = Field(None, description="Minimum ranking (best position reached)")
+    max_ranking: Optional[float] = Field(None, description="Maximum ranking (worst position reached)")
+    median_ranking: Optional[float] = Field(None, description="Median ranking")
+    avg_ranking: Optional[float] = Field(None, description="Average ranking")
+    is_interpolated: bool = Field(False, description="True if brand had no visibility this day — values are linearly interpolated")
+
+    model_config = ConfigDict(from_attributes=True)
+
+
+class BrandRankingTrendResponse(BaseModel):
+    """Response schema for the brand ranking historical trend chart."""
+    brand_id: str = Field(..., description="Brand identifier")
+    segment: str = Field(..., description="Segment name used for filtering")
+    data_points: list[BrandRankingTrendDataPoint] = Field(default_factory=list)
+
+    model_config = ConfigDict(from_attributes=True)
+
+
+class BrandImpressionTrendDataPoint(BaseModel):
+    """A single data point for the brand impression historical trend chart."""
+    date: str = Field(..., description="Date (YYYY-MM-DD, equals search_date_end)")
+    visibility: Optional[float] = Field(None, description="Visibility rate (0-100%): search_visibility_count / total_search_count * 100")
+    position: Optional[float] = Field(None, description="Median ranking position (lower is better)")
+    sentiment: Optional[float] = Field(None, description="Final sentiment score (0-100)")
+
+    model_config = ConfigDict(from_attributes=True)
+
+
+class BrandImpressionTrendResponse(BaseModel):
+    """Response schema for the brand impression historical trend chart."""
+    brand_id: str = Field(..., description="Brand identifier")
+    segment: str = Field(..., description="Segment name used for filtering")
+    data_points: list[BrandImpressionTrendDataPoint] = Field(default_factory=list)
+
+    model_config = ConfigDict(from_attributes=True)

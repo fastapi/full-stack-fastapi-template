@@ -28,6 +28,8 @@ import {
 interface AIReferenceSourceTableProps {
   brandId: string
   segment?: string
+  /** When provided, fetches all segments in parallel and merges results */
+  allSegments?: string[]
   timeRange: TimeRange
   customStartDate?: string
   customEndDate?: string
@@ -44,6 +46,7 @@ const PAGE_SIZE = 8
 export function AIReferenceSourceTable({
   brandId,
   segment,
+  allSegments,
   timeRange,
   customStartDate,
   customEndDate,
@@ -53,18 +56,31 @@ export function AIReferenceSourceTable({
   const [error, setError] = useState<string | null>(null)
   const [sorting, setSorting] = useState<SortingState>([])
 
+  const allSegmentsKey = allSegments?.join(",") ?? ""
+
   useEffect(() => {
     const fetchData = async () => {
       try {
         setIsLoading(true)
         setError(null)
-        const data: ReferenceSourcesResponse = await dashboardAPI.getBrandReferenceSources({
-          brandId,
-          segment,
-          timeRange,
-          startDate: customStartDate,
-          endDate: customEndDate,
-        })
+        let data: ReferenceSourcesResponse
+        if (allSegments && allSegments.length > 0) {
+          data = await dashboardAPI.getBrandReferenceSourcesAllSegments({
+            brandId,
+            segments: allSegments,
+            timeRange,
+            startDate: customStartDate,
+            endDate: customEndDate,
+          })
+        } else {
+          data = await dashboardAPI.getBrandReferenceSources({
+            brandId,
+            segment,
+            timeRange,
+            startDate: customStartDate,
+            endDate: customEndDate,
+          })
+        }
         setSources(data.sources)
       } catch (err) {
         setError(err instanceof Error ? err.message : "Failed to load reference sources")
@@ -73,7 +89,8 @@ export function AIReferenceSourceTable({
       }
     }
     fetchData()
-  }, [brandId, segment, timeRange, customStartDate, customEndDate])
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [brandId, segment, allSegmentsKey, timeRange, customStartDate, customEndDate])
 
   const columns = useMemo<ColumnDef<ReferenceSourceItem>[]>(
     () => [

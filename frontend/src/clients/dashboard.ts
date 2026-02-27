@@ -513,6 +513,58 @@ export interface BrandSegmentsResponse {
 }
 
 /**
+ * A single data point for the brand ranking trend chart.
+ * is_interpolated=true means the brand had no visibility that day — values are linearly filled.
+ */
+export interface BrandRankingTrendDataPoint {
+  date: string
+  min_ranking: number | null
+  max_ranking: number | null
+  median_ranking: number | null
+  avg_ranking: number | null
+  is_interpolated: boolean
+}
+
+export interface BrandRankingTrendResponse {
+  brand_id: string
+  segment: string
+  data_points: BrandRankingTrendDataPoint[]
+}
+
+export interface BrandRankingTrendParams {
+  brandId: string
+  segment: string
+  timeRange: TimeRange
+  startDate?: string
+  endDate?: string
+}
+
+/**
+ * A single data point for the brand impression historical trend chart.
+ * Nulls have been interpolated on the server side.
+ */
+export interface BrandImpressionTrendDataPoint {
+  date: string
+  visibility: number | null
+  position: number | null
+  sentiment: number | null
+}
+
+export interface BrandImpressionTrendResponse {
+  brand_id: string
+  segment: string
+  data_points: BrandImpressionTrendDataPoint[]
+}
+
+export interface BrandImpressionTrendParams {
+  brandId: string
+  segment: string
+  timeRange: TimeRange
+  startDate?: string
+  endDate?: string
+}
+
+/**
  * A single metric in the brand impression summary card
  */
 export interface BrandImpressionMetric {
@@ -679,6 +731,20 @@ class DashboardAPI {
   public clearCache(): void {
     localStorage.removeItem(CACHE_KEY_METRICS)
     console.log("[DashboardAPI] All dashboard cache cleared")
+  }
+
+  /**
+   * Clear every localStorage entry whose key starts with "dashboard_".
+   * Call this on user-initiated refresh so stale chart data is discarded.
+   */
+  public clearAllCache(): void {
+    const keysToRemove: string[] = []
+    for (let i = 0; i < localStorage.length; i++) {
+      const key = localStorage.key(i)
+      if (key && key.startsWith("dashboard_")) keysToRemove.push(key)
+    }
+    keysToRemove.forEach((k) => localStorage.removeItem(k))
+    console.log(`[DashboardAPI] Cleared ${keysToRemove.length} dashboard cache entries`)
   }
 
   /**
@@ -1822,15 +1888,16 @@ class DashboardAPI {
 
   // ── Brand Impression Summary ───────────────────────────────────
 
-  private getBrandImpressionSummaryCacheKey(brandId: string): string {
-    return `dashboard_brand_impression_summary_${brandId}`
+  private getBrandImpressionSummaryCacheKey(brandId: string, segment: string): string {
+    return `dashboard_brand_impression_summary_${brandId}_${segment}`
   }
 
   async getBrandImpressionSummary(
     brandId: string,
+    segment: string,
     forceRefresh = false,
   ): Promise<BrandImpressionSummaryResponse> {
-    const cacheKey = this.getBrandImpressionSummaryCacheKey(brandId)
+    const cacheKey = this.getBrandImpressionSummaryCacheKey(brandId, segment)
 
     if (!forceRefresh) {
       const cached = this.getCachedData<BrandImpressionSummaryResponse>(cacheKey)
@@ -1839,10 +1906,11 @@ class DashboardAPI {
       }
     }
 
-    console.log("[DashboardAPI] Fetching brand impression summary from API...", { brandId })
+    console.log("[DashboardAPI] Fetching brand impression summary from API...", { brandId, segment })
 
     const queryParams = new URLSearchParams()
     queryParams.append("brand_id", brandId)
+    queryParams.append("segment", segment || "all-segment")
 
     const url = `${this.baseUrl}${this.apiPrefix}/dashboard/brand-impression-summary?${queryParams.toString()}`
 
@@ -1866,26 +1934,119 @@ class DashboardAPI {
     return data
   }
 
+  async getBrandRankingTrend(
+    params: BrandRankingTrendParams,
+    forceRefresh = false,
+  ): Promise<BrandRankingTrendResponse> {
+    const cacheKey = `dashboard_brand_ranking_trend_${params.brandId}_${params.segment}_${params.timeRange}_${params.startDate ?? ""}_${params.endDate ?? ""}`
+
+    if (!forceRefresh) {
+      const cached = this.getCachedData<BrandRankingTrendResponse>(cacheKey)
+      if (cached) return cached
+    }
+
+    const queryParams = new URLSearchParams({
+      brand_id: params.brandId,
+      segment: params.segment || "all-segment",
+      time_range: params.timeRange,
+    })
+    if (params.timeRange === "custom") {
+      if (!params.startDate || !params.endDate) {
+        throw new Error("startDate and endDate are required for custom time range")
+      }
+      queryParams.append("start_date", params.startDate)
+      queryParams.append("end_date", params.endDate)
+    }
+
+    const response = await fetch(
+      `${this.baseUrl}${this.apiPrefix}/dashboard/brand-ranking-trend?${queryParams}`,
+      { method: "GET", headers: await this.getAuthHeaders() },
+    )
+    if (response.status === 401) throw new Error("Unauthorized - Please log in again")
+    if (!response.ok) {
+      const error: ApiError = await response.json()
+      throw new Error(error.detail || "Failed to fetch brand ranking trend")
+    }
+
+    const data: BrandRankingTrendResponse = await response.json()
+    // Only cache non-empty responses; empty means no data yet and shouldn't be served stale
+    if (data.data_points.length > 0) {
+      this.setCachedData(cacheKey, data)
+    }
+    return data
+  }
+
+  async getBrandImpressionTrend(
+    params: BrandImpressionTrendParams,
+    forceRefresh = false,
+  ): Promise<BrandImpressionTrendResponse> {
+    const cacheKey = `dashboard_brand_impression_trend_${params.brandId}_${params.segment}_${params.timeRange}_${params.startDate ?? ""}_${params.endDate ?? ""}`
+
+    if (!forceRefresh) {
+      const cached = this.getCachedData<BrandImpressionTrendResponse>(cacheKey)
+      if (cached) return cached
+    }
+
+    const queryParams = new URLSearchParams({
+      brand_id: params.brandId,
+      segment: params.segment || "all-segment",
+      time_range: params.timeRange,
+    })
+    if (params.timeRange === "custom") {
+      if (!params.startDate || !params.endDate) {
+        throw new Error("startDate and endDate are required for custom time range")
+      }
+      queryParams.append("start_date", params.startDate)
+      queryParams.append("end_date", params.endDate)
+    }
+
+    const response = await fetch(
+      `${this.baseUrl}${this.apiPrefix}/dashboard/brand-impression-trend?${queryParams}`,
+      { method: "GET", headers: await this.getAuthHeaders() },
+    )
+    if (response.status === 401) throw new Error("Unauthorized - Please log in again")
+    if (!response.ok) {
+      const error: ApiError = await response.json()
+      throw new Error(error.detail || "Failed to fetch brand impression trend")
+    }
+
+    const data: BrandImpressionTrendResponse = await response.json()
+    // Only cache non-empty responses; empty means no data yet and shouldn't be served stale
+    if (data.data_points.length > 0) {
+      this.setCachedData(cacheKey, data)
+    }
+    return data
+  }
+
   async getBrandReferenceSources({
     brandId,
     segment,
     timeRange,
     startDate,
     endDate,
+    forceRefresh = false,
   }: {
     brandId: string
     segment?: string
     timeRange: TimeRange
     startDate?: string
     endDate?: string
+    forceRefresh?: boolean
   }): Promise<ReferenceSourcesResponse> {
+    const cacheKey = `dashboard_brand_reference_sources_${brandId}_${segment ?? ""}_${timeRange}_${startDate ?? ""}_${endDate ?? ""}`
+
+    if (!forceRefresh) {
+      const cached = this.getCachedData<ReferenceSourcesResponse>(cacheKey)
+      if (cached) return cached
+    }
+
     const params = new URLSearchParams({ brand_id: brandId, time_range: timeRange })
     if (segment) params.append("segment", segment)
     if (startDate) params.append("start_date", startDate)
     if (endDate) params.append("end_date", endDate)
 
     const response = await fetch(
-      `${API_BASE_URL}${API_PREFIX}/dashboard/brand-reference-sources?${params}`,
+      `${this.baseUrl}${this.apiPrefix}/dashboard/brand-reference-sources?${params}`,
       { headers: await this.getAuthHeaders() },
     )
     if (response.status === 401) throw new Error("Unauthorized - Please log in again")
@@ -1893,7 +2054,9 @@ class DashboardAPI {
       const error: ApiError = await response.json()
       throw new Error(error.detail || "Failed to fetch reference sources")
     }
-    return response.json()
+    const data: ReferenceSourcesResponse = await response.json()
+    this.setCachedData(cacheKey, data)
+    return data
   }
 
   async getBrandCustomerReviews({
@@ -1902,20 +2065,29 @@ class DashboardAPI {
     timeRange,
     startDate,
     endDate,
+    forceRefresh = false,
   }: {
     brandId: string
     segment?: string
     timeRange: TimeRange
     startDate?: string
     endDate?: string
+    forceRefresh?: boolean
   }): Promise<CustomerReviewsResponse> {
+    const cacheKey = `dashboard_brand_customer_reviews_${brandId}_${segment ?? ""}_${timeRange}_${startDate ?? ""}_${endDate ?? ""}`
+
+    if (!forceRefresh) {
+      const cached = this.getCachedData<CustomerReviewsResponse>(cacheKey)
+      if (cached) return cached
+    }
+
     const params = new URLSearchParams({ brand_id: brandId, time_range: timeRange })
     if (segment) params.append("segment", segment)
     if (startDate) params.append("start_date", startDate)
     if (endDate) params.append("end_date", endDate)
 
     const response = await fetch(
-      `${API_BASE_URL}${API_PREFIX}/dashboard/brand-customer-reviews?${params}`,
+      `${this.baseUrl}${this.apiPrefix}/dashboard/brand-customer-reviews?${params}`,
       { headers: await this.getAuthHeaders() },
     )
     if (response.status === 401) throw new Error("Unauthorized - Please log in again")
@@ -1923,7 +2095,128 @@ class DashboardAPI {
       const error: ApiError = await response.json()
       throw new Error(error.detail || "Failed to fetch customer reviews")
     }
-    return response.json()
+    const data: CustomerReviewsResponse = await response.json()
+    this.setCachedData(cacheKey, data)
+    return data
+  }
+
+  /**
+   * Fetch reference sources across ALL individual segments, merge and deduplicate.
+   * Individual segment responses are each cached (10h). The merged result is also
+   * cached separately so subsequent calls are instant.
+   */
+  async getBrandReferenceSourcesAllSegments({
+    brandId,
+    segments,
+    timeRange,
+    startDate,
+    endDate,
+    forceRefresh = false,
+  }: {
+    brandId: string
+    segments: string[]
+    timeRange: TimeRange
+    startDate?: string
+    endDate?: string
+    forceRefresh?: boolean
+  }): Promise<ReferenceSourcesResponse> {
+    const cacheKey = `dashboard_brand_reference_sources_all_${brandId}_${timeRange}_${startDate ?? ""}_${endDate ?? ""}`
+
+    if (!forceRefresh) {
+      const cached = this.getCachedData<ReferenceSourcesResponse>(cacheKey)
+      if (cached) return cached
+    }
+
+    // Fetch each segment (individually cached); run in parallel
+    const results = await Promise.all(
+      segments.map((seg) =>
+        this.getBrandReferenceSources({ brandId, segment: seg, timeRange, startDate, endDate }),
+      ),
+    )
+
+    // Merge and deduplicate by normalized URL
+    const normalizeUrl = (url: string): string => {
+      let u = url.toLowerCase().trim()
+      for (const pfx of ["https://", "http://"]) {
+        if (u.startsWith(pfx)) { u = u.slice(pfx.length); break }
+      }
+      if (u.startsWith("www.")) u = u.slice(4)
+      return u.replace(/\/+$/, "")
+    }
+
+    const seenKeys = new Set<string>()
+    const merged: { source: string }[] = []
+    for (const res of results) {
+      for (const item of res.sources) {
+        const key = normalizeUrl(item.source)
+        if (key && !seenKeys.has(key)) {
+          seenKeys.add(key)
+          merged.push({ source: item.source })
+        }
+      }
+    }
+
+    const data: ReferenceSourcesResponse = {
+      brand_id: brandId,
+      sources: merged.map((m, i) => ({ seq: i + 1, source: m.source })),
+    }
+    this.setCachedData(cacheKey, data)
+    return data
+  }
+
+  /**
+   * Fetch customer reviews across ALL individual segments, merge and deduplicate.
+   * Individual segment responses are each cached (10h). The merged result is also
+   * cached separately so subsequent calls are instant.
+   */
+  async getBrandCustomerReviewsAllSegments({
+    brandId,
+    segments,
+    timeRange,
+    startDate,
+    endDate,
+    forceRefresh = false,
+  }: {
+    brandId: string
+    segments: string[]
+    timeRange: TimeRange
+    startDate?: string
+    endDate?: string
+    forceRefresh?: boolean
+  }): Promise<CustomerReviewsResponse> {
+    const cacheKey = `dashboard_brand_customer_reviews_all_${brandId}_${timeRange}_${startDate ?? ""}_${endDate ?? ""}`
+
+    if (!forceRefresh) {
+      const cached = this.getCachedData<CustomerReviewsResponse>(cacheKey)
+      if (cached) return cached
+    }
+
+    // Fetch each segment (individually cached); run in parallel
+    const results = await Promise.all(
+      segments.map((seg) =>
+        this.getBrandCustomerReviews({ brandId, segment: seg, timeRange, startDate, endDate }),
+      ),
+    )
+
+    // Merge and deduplicate by normalized review text
+    const seenKeys = new Set<string>()
+    const merged: { review: string; sentiment: string }[] = []
+    for (const res of results) {
+      for (const item of res.reviews) {
+        const key = item.review.toLowerCase().trim()
+        if (key && !seenKeys.has(key)) {
+          seenKeys.add(key)
+          merged.push({ review: item.review, sentiment: item.sentiment })
+        }
+      }
+    }
+
+    const data: CustomerReviewsResponse = {
+      brand_id: brandId,
+      reviews: merged.map((m, i) => ({ seq: i + 1, review: m.review, sentiment: m.sentiment })),
+    }
+    this.setCachedData(cacheKey, data)
+    return data
   }
 }
 

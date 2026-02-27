@@ -12,29 +12,39 @@ import {
   XAxis,
   YAxis,
 } from "recharts"
-import type { BrandOverviewDataPoint } from "@/clients/dashboard"
+import type { BrandImpressionTrendDataPoint } from "@/clients/dashboard"
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs"
 
 interface OverviewChartProps {
-  dataPoints: BrandOverviewDataPoint[]
+  dataPoints: BrandImpressionTrendDataPoint[]
 }
 
 interface ChartDataPoint {
   date: string
   displayDate: string
-  "Awareness Score": number
-  "Share of Visibility": number
-  "Search Share Index": number
-  "Position Strength": number
-  "Search Momentum": number
+  "Visibility (%)": number | null
+  "Position (#)": number | null
+  "Sentiment": number | null
 }
 
 const METRIC_COLORS: Record<string, string> = {
-  "Awareness Score": "#6366f1",
-  "Share of Visibility": "#f43f5e",
-  "Search Share Index": "#f59e0b",
-  "Position Strength": "#10b981",
-  "Search Momentum": "#06b6d4",
+  "Visibility (%)": "#6366f1",
+  "Position (#)": "#f43f5e",
+  "Sentiment": "#10b981",
+}
+
+// Units shown in the tooltip per metric key
+const METRIC_UNITS: Record<string, string> = {
+  "Visibility (%)": "%",
+  "Position (#)": "",
+  "Sentiment": "",
+}
+
+// Prefix shown before the value in the tooltip
+const METRIC_PREFIX: Record<string, string> = {
+  "Visibility (%)": "",
+  "Position (#)": "#",
+  "Sentiment": "",
 }
 
 const formatDateForDisplay = (isoDate: string): string => {
@@ -42,32 +52,35 @@ const formatDateForDisplay = (isoDate: string): string => {
   return `${date.getMonth() + 1}/${date.getDate()}`
 }
 
-function transformData(dataPoints: BrandOverviewDataPoint[]): ChartDataPoint[] {
+function transformData(dataPoints: BrandImpressionTrendDataPoint[]): ChartDataPoint[] {
   return dataPoints.map((point) => ({
     date: point.date,
     displayDate: formatDateForDisplay(point.date),
-    "Awareness Score": point.awareness_score,
-    "Share of Visibility": +(point.share_of_visibility * 100).toFixed(1),
-    "Search Share Index": +(point.search_share_index * 100).toFixed(1),
-    "Position Strength": +(point.position_strength * 100).toFixed(1),
-    "Search Momentum": +(point.search_momentum * 100).toFixed(1),
+    "Visibility (%)": point.visibility !== null ? +point.visibility.toFixed(1) : null,
+    "Position (#)": point.position !== null ? +point.position.toFixed(1) : null,
+    "Sentiment": point.sentiment !== null ? +point.sentiment.toFixed(1) : null,
   }))
 }
 
 const CustomTooltip = ({ active, payload, label }: any) => {
   if (!active || !payload || payload.length === 0) return null
   return (
-    <div className="bg-white border border-gray-100 rounded-xl shadow-xl p-3 min-w-[160px]">
+    <div className="bg-white border border-gray-100 rounded-xl shadow-xl p-3 min-w-[170px]">
       <p className="text-[10px] font-semibold text-gray-500 mb-2 uppercase tracking-wide">{label}</p>
-      {payload.map((entry: any) => (
-        <div key={entry.name} className="flex items-center justify-between gap-4 text-[10px] py-0.5">
-          <div className="flex items-center gap-1.5">
-            <span className="w-2 h-2 rounded-full flex-shrink-0" style={{ backgroundColor: entry.color }} />
-            <span className="text-gray-500">{entry.name}</span>
+      {payload.map((entry: any) => {
+        if (entry.value === null || entry.value === undefined) return null
+        const prefix = METRIC_PREFIX[entry.name] ?? ""
+        const unit = METRIC_UNITS[entry.name] ?? ""
+        return (
+          <div key={entry.name} className="flex items-center justify-between gap-4 text-[10px] py-0.5">
+            <div className="flex items-center gap-1.5">
+              <span className="w-2 h-2 rounded-full flex-shrink-0" style={{ backgroundColor: entry.color }} />
+              <span className="text-gray-500">{entry.name}</span>
+            </div>
+            <span className="font-semibold text-gray-800">{prefix}{entry.value}{unit}</span>
           </div>
-          <span className="font-semibold text-gray-800">{entry.value}</span>
-        </div>
-      ))}
+        )
+      })}
     </div>
   )
 }
@@ -157,7 +170,7 @@ export function OverviewChart({ dataPoints }: OverviewChartProps) {
             <LineChart data={chartData} margin={{ top: 4, right: 4, left: -16, bottom: 0 }}>
               <CartesianGrid strokeDasharray="3 3" stroke="#f1f5f9" vertical={false} />
               <XAxis dataKey="displayDate" {...commonAxisProps} />
-              <YAxis {...commonAxisProps} domain={[0, 100]} />
+              <YAxis {...commonAxisProps} />
               <Tooltip content={<CustomTooltip />} />
               <Legend content={<CustomLegend hiddenSeries={hiddenSeries} onToggle={toggleSeries} />} />
               {metricKeys.map((key) => (
@@ -168,6 +181,7 @@ export function OverviewChart({ dataPoints }: OverviewChartProps) {
                   stroke={METRIC_COLORS[key]}
                   strokeWidth={2}
                   dot={false}
+                  connectNulls={false}
                   activeDot={{ r: 4, strokeWidth: 2, stroke: "#fff", fill: METRIC_COLORS[key] }}
                   hide={hiddenSeries.has(key)}
                 />
@@ -177,7 +191,7 @@ export function OverviewChart({ dataPoints }: OverviewChartProps) {
             <BarChart data={chartData} margin={{ top: 4, right: 4, left: -16, bottom: 0 }} barCategoryGap="30%">
               <CartesianGrid strokeDasharray="3 3" stroke="#f1f5f9" vertical={false} />
               <XAxis dataKey="displayDate" {...commonAxisProps} />
-              <YAxis {...commonAxisProps} domain={[0, 100]} />
+              <YAxis {...commonAxisProps} />
               <Tooltip content={<CustomTooltip />} />
               <Legend content={<CustomLegend hiddenSeries={hiddenSeries} onToggle={toggleSeries} />} />
               {metricKeys.map((key) => (
