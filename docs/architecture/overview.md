@@ -13,6 +13,8 @@ related-code:
   - backend/app/core/db.py
   - backend/app/core/security.py
   - backend/app/core/errors.py
+  - backend/app/core/logging.py
+  - backend/app/core/middleware.py
   - backend/app/models/
   - backend/app/models/__init__.py
   - backend/app/models/common.py
@@ -67,11 +69,13 @@ C4Context
 
 | Component | Purpose | Technology | Location |
 |-----------|---------|------------|----------|
-| FastAPI Backend | REST API server (titled via `SERVICE_NAME` setting) handling auth, CRUD, and business logic; registers unified error handlers at startup | Python 3.10+, FastAPI >=0.114.2, Pydantic 2.x | `backend/app/main.py` |
+| FastAPI Backend | REST API server (titled via `SERVICE_NAME` setting) handling auth, CRUD, and business logic; registers unified error handlers at startup; initializes structured logging at startup via `setup_logging(settings)` and registers `RequestPipelineMiddleware` as the outermost middleware | Python 3.10+, FastAPI >=0.114.2, Pydantic 2.x | `backend/app/main.py` |
 | API Router | Mounts versioned route modules under `/api/v1` | FastAPI APIRouter | `backend/app/api/main.py` |
 | Auth & Dependencies | JWT token validation, DB session injection, role-based guards; transitioning from internal HS256 JWT to Clerk JWT with `Principal` identity model (`user_id`, `roles`, `org_id`) | PyJWT, OAuth2PasswordBearer, Annotated Depends | `backend/app/api/deps.py` |
 | Security Module | Password hashing (Argon2 primary + Bcrypt fallback) and JWT token creation (legacy; being replaced by Clerk external auth) | pwdlib (Argon2Hasher, BcryptHasher), PyJWT (HS256) | `backend/app/core/security.py` |
 | Error Handling | Unified exception handler framework; `ServiceError` exception, `STATUS_CODE_MAP`, 4 global handlers registered at startup via `register_exception_handlers(app)` | FastAPI exception handlers, Pydantic response models | `backend/app/core/errors.py` |
+| Structured Logging | Configures structlog with JSON (production/CI) or console (local) renderer; injects service metadata (service, version, environment) and request-scoped fields (request_id, correlation_id) via contextvars into every log entry | structlog >=24.1.0 | `backend/app/core/logging.py` |
+| Request Pipeline Middleware | Outermost middleware: generates UUID v4 request_id, propagates X-Correlation-ID (with validation), binds both to structlog contextvars, sets five security headers on all responses, applies HSTS in production only, logs each request at status-appropriate level (2xx=info, 4xx=warning, 5xx=error), always sets X-Request-ID response header | Starlette BaseHTTPMiddleware | `backend/app/core/middleware.py` |
 | Configuration | Environment-based settings with validation and secret enforcement | pydantic-settings, `.env` file, computed fields | `backend/app/core/config.py` |
 | Database Engine | SQLAlchemy engine creation and initial superuser seeding | SQLModel, psycopg3 (postgresql+psycopg) | `backend/app/core/db.py` |
 | Shared Models (Package) | Pure Pydantic response envelopes (`ErrorResponse`, `ValidationErrorResponse`, `PaginatedResponse[T]`) and auth identity model (`Principal`) | Pydantic 2.x | `backend/app/models/` |
@@ -310,6 +314,66 @@ The error response Pydantic models live in `backend/app/models/common.py`:
 | `ValidationErrorDetail` | `field`, `message`, `type` | Single field-level validation failure |
 | `ValidationErrorResponse` | Extends `ErrorResponse` + `details: list[ValidationErrorDetail]` | HTTP 422 validation errors |
 
+## Request Pipeline
+
+### Middleware Stack
+
+`RequestPipelineMiddleware` is registered as the **outermost** ASGI middleware by being added last via `app.add_middleware()`. In Starlette, last-added = outermost, which means it wraps `CORSMiddleware`. This ensures security headers and `X-Request-ID` are set on **all** responses, including CORS preflight OPTIONS responses that CORSMiddleware short-circuits before reaching route handlers.
+
+```
+Request
+  └── RequestPipelineMiddleware (outermost)
+        └── CORSMiddleware
+              └── FastAPI / Route Handlers
+```
+
+### Request Lifecycle (per request)
+
+1. Generate `request_id` (UUID v4)
+2. Read `X-Correlation-ID` header; validate against `^[a-zA-Z0-9\-_.]{1,128}$`; fall back to `request_id` if absent or invalid
+3. Store `request_id` and `correlation_id` in `request.state`
+4. Bind both to structlog contextvars (automatically present in all log lines)
+5. Process request via `call_next`; catch unhandled exceptions → log + return 500 JSON
+6. Calculate `duration_ms`
+7. Apply security headers
+8. Set `X-Request-ID` response header
+9. Log `request_completed` at status-appropriate level
+10. Clear contextvars
+
+### Security Headers
+
+| Header | Value | Condition |
+|--------|-------|-----------|
+| X-Content-Type-Options | nosniff | All responses |
+| X-Frame-Options | DENY | All responses |
+| X-XSS-Protection | 0 (disabled, CSP preferred) | All responses |
+| Referrer-Policy | strict-origin-when-cross-origin | All responses |
+| Permissions-Policy | camera=(), microphone=(), geolocation=() | All responses |
+| Strict-Transport-Security | max-age=31536000; includeSubDomains | Production only |
+
+### Structured Logging
+
+`setup_logging(settings)` is called once at module load in `main.py` before app creation.
+
+**Processor chain (in order):**
+1. `merge_contextvars` -- merges request-scoped fields bound by middleware
+2. `add_log_level` -- adds `level` field
+3. `TimeStamper(fmt="iso")` -- adds ISO 8601 `timestamp` field
+4. `_add_service_info` -- injects `service`, `version`, `environment` via `setdefault`
+5. `StackInfoRenderer` -- renders stack info if present
+6. `format_exc_info` -- formats exception info
+7. `UnicodeDecoder` -- decodes bytes to strings
+8. Renderer: `JSONRenderer` (LOG_FORMAT=json) or `ConsoleRenderer` (LOG_FORMAT=console)
+
+**Request log fields** (event: `request_completed`):
+- Always: `timestamp`, `level`, `event`, `service`, `version`, `environment`, `request_id`, `correlation_id`, `method`, `path`, `status_code`, `duration_ms`
+- Optional: `user_id` (when `request.state.user_id` is set by auth)
+
+**Log levels by status:**
+- 2xx → `info`
+- 4xx → `warning`
+- 5xx → `error`
+
 ## Security Architecture
 
 ### Password Hashing
@@ -386,6 +450,7 @@ Key decisions are documented as ADRs in `docs/architecture/decisions/`:
 |-----|-------|--------|------|
 | [0001](decisions/0001-unified-error-handling-framework.md) | Unified Error Handling Framework | proposed | 2026-02-27 |
 | [0002](decisions/0002-shared-pydantic-models-package.md) | Shared Pydantic Models Package | proposed | 2026-02-27 |
+| [0003](decisions/0003-structlog-and-request-pipeline-middleware.md) | Structlog Adoption and Request Pipeline Middleware | accepted | 2026-02-27 |
 
 ## Known Constraints
 
@@ -406,6 +471,8 @@ Key decisions are documented as ADRs in `docs/architecture/decisions/`:
 8. **Conditional integration test fixtures** -- `backend/tests/conftest.py` guards integration-level fixtures (DB session, test client, auth token helpers) behind a `try/except` import block (`_INTEGRATION_DEPS_AVAILABLE`). This allows unit tests in `backend/tests/unit/` to run in isolation without a database or the full app context. The guard is temporary while integration fixtures are being migrated (AYG-65 through AYG-74).
 
 9. **Auth in transition (legacy + Clerk)** -- The codebase currently contains both legacy internal HS256 JWT authentication (`backend/app/core/security.py`, `backend/app/api/deps.py`) and the new Clerk-oriented `Principal` model (`backend/app/models/auth.py`). Both coexist during the migration; the legacy auth path will be removed once Clerk integration is complete.
+
+10. **Middleware ordering sensitivity** -- `RequestPipelineMiddleware` must remain the last `add_middleware()` call in `main.py` to stay outermost. Adding new middleware after it will wrap it, causing security headers and X-Request-ID to be absent on responses short-circuited by the new middleware.
 
 ## Related Documents
 

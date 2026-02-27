@@ -245,6 +245,10 @@ git push  # Triggers redeploy
 | Clerk | Authentication | Managed service | JWT verification, OAuth providers |
 | Sentry | Error Tracking | Enabled | Real-time alerts, performance monitoring |
 
+### Logging & Monitoring
+
+Structured JSON log output from structlog (fields: `timestamp`, `level`, `event`, `service`, `version`, `environment`, `request_id`, `correlation_id`, `method`, `path`, `status_code`, `duration_ms`). Recommended: `LOG_FORMAT=json`, `LOG_LEVEL=WARNING` for production.
+
 ### Deployment Process
 
 1. Create Git tag: `git tag v1.2.3 && git push origin v1.2.3`
@@ -276,6 +280,10 @@ Production includes:
 - **Health checks**: Backend `/api/v1/utils/health-check/` returns 200 if healthy
 - **Traefik**: Monitors container health automatically
 - **Logs**: Stored on server and/or external logging service
+
+### Security
+
+`RequestPipelineMiddleware` automatically adds `Strict-Transport-Security: max-age=31536000; includeSubDomains` when `ENVIRONMENT=production`. Ensure DNS and subdomains are HTTPS-ready before setting this in production.
 
 ### Disaster Recovery
 

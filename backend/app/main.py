@@ -6,6 +6,11 @@ from starlette.middleware.cors import CORSMiddleware
 from app.api.main import api_router
 from app.core.config import settings
 from app.core.errors import register_exception_handlers
+from app.core.logging import setup_logging
+from app.core.middleware import RequestPipelineMiddleware
+
+# Configure structured logging (JSON in production, console in local dev)
+setup_logging(settings)
 
 
 def custom_generate_unique_id(route: APIRoute) -> str:
@@ -33,5 +38,11 @@ if settings.all_cors_origins:
         allow_methods=["*"],
         allow_headers=["*"],
     )
+
+# Request pipeline middleware: request ID, correlation, security headers, logging.
+# Added AFTER CORSMiddleware in code — Starlette adds middleware as a stack
+# (last-added = outermost), so this wraps CORS. This ensures security headers
+# and X-Request-ID are set on ALL responses, including CORS preflight OPTIONS.
+app.add_middleware(RequestPipelineMiddleware, environment=settings.ENVIRONMENT)
 
 app.include_router(api_router, prefix=settings.API_V1_STR)

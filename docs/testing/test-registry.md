@@ -21,6 +21,8 @@ tags: [testing, quality, registry]
 | backend/api/routes | 0 | 47 | 0 | 47 |
 | backend/core/config | 13 | 0 | 0 | 13 |
 | backend/core/errors | 20 | 0 | 0 | 20 |
+| backend/core/logging | 6 | 0 | 0 | 6 |
+| backend/core/middleware | 26 | 0 | 0 | 26 |
 | backend/crud | 10 | 0 | 0 | 10 |
 | backend/models/auth | 5 | 0 | 0 | 5 |
 | backend/models/common | 6 | 0 | 0 | 6 |
@@ -31,7 +33,7 @@ tags: [testing, quality, registry]
 | frontend/user-settings | 0 | 0 | 14 | 14 |
 | frontend/sign-up | 0 | 0 | 11 | 11 |
 | frontend/reset-password | 0 | 0 | 6 | 6 |
-| **Total** | **48** | **47** | **61** | **156** |
+| **Total** | **80** | **47** | **61** | **188** |
 
 > Unit tests in `backend/tests/unit/` can run without database env vars. The conftest guard pattern in that directory skips DB-dependent fixtures automatically.
 
@@ -146,6 +148,48 @@ tags: [testing, quality, registry]
 | test_validation_error_response_has_request_id | Validation error includes valid UUID request_id | unit | passing |
 
 > Note: `test_errors.py` declares 16 named test functions; the 20-test count includes parametrised iterations within `test_error_response_has_request_id` (4 endpoints) and internal assertion loops.
+
+### Backend — Unit: Logging (`backend/tests/unit/test_logging.py`)
+
+| Test Name | Description | Type | Status |
+|-----------|-------------|------|--------|
+| test_setup_logging_returns_none | setup_logging() is callable and returns None | unit | passing |
+| test_json_format_produces_valid_json | LOG_FORMAT=json produces valid JSON log output | unit | passing |
+| test_console_format_produces_readable_text | LOG_FORMAT=console produces non-JSON human-readable output | unit | passing |
+| test_base_fields_present_in_json | JSON log includes timestamp, level, event, service, version, environment | unit | passing |
+| test_log_level_filtering | DEBUG messages are filtered when LOG_LEVEL=INFO | unit | passing |
+| test_get_logger_returns_bound_logger | get_logger() returns a structlog BoundLogger with log methods | unit | passing |
+
+### Backend — Unit: Middleware (`backend/tests/unit/test_middleware.py`)
+
+| Test Name | Description | Type | Status |
+|-----------|-------------|------|--------|
+| test_request_id_generated_uuid4 | Response has X-Request-ID header with valid UUID v4 | unit | passing |
+| test_request_id_unique_per_request | Two requests get different request_ids | unit | passing |
+| test_request_id_in_request_state | request.state.request_id is set and accessible to handlers | unit | passing |
+| test_correlation_id_propagated_from_header | Incoming X-Correlation-ID is preserved, not regenerated | unit | passing |
+| test_correlation_id_in_request_state | correlation_id from X-Correlation-ID header is stored in request.state | unit | passing |
+| test_correlation_id_fallback_to_request_id | No X-Correlation-ID header causes request_id to be used as correlation_id | unit | passing |
+| test_security_header_x_content_type_options | X-Content-Type-Options: nosniff on every response | unit | passing |
+| test_security_header_x_frame_options | X-Frame-Options: DENY on every response | unit | passing |
+| test_security_header_x_xss_protection | X-XSS-Protection: 0 (disabled, CSP preferred) on every response | unit | passing |
+| test_security_header_referrer_policy | Referrer-Policy: strict-origin-when-cross-origin on every response | unit | passing |
+| test_security_header_permissions_policy | Permissions-Policy: camera=(), microphone=(), geolocation=() on every response | unit | passing |
+| test_hsts_production_only | HSTS header present when ENVIRONMENT=production | unit | passing |
+| test_hsts_absent_non_production | HSTS header absent when ENVIRONMENT=local | unit | passing |
+| test_cors_preflight_gets_security_headers | OPTIONS preflight response includes all five security headers | unit | passing |
+| test_cors_preflight_gets_request_id_header | OPTIONS preflight response includes X-Request-ID | unit | passing |
+| test_request_id_header_on_4xx | 404 response has X-Request-ID header | unit | passing |
+| test_request_id_header_on_5xx | 500 response has X-Request-ID header | unit | passing |
+| test_request_id_header_on_unhandled_exception | Unhandled exception response has X-Request-ID header | unit | passing |
+| test_log_level_info_for_2xx | 200 response is logged at info level | unit | passing |
+| test_log_level_warning_for_4xx | 404 response is logged at warning level | unit | passing |
+| test_log_level_error_for_5xx | 500 response is logged at error level | unit | passing |
+| test_request_log_fields | Request log includes method, path, status_code, duration_ms | unit | passing |
+| test_user_id_logged_when_authenticated | user_id is included in log when request.state has user_id | unit | passing |
+| test_user_id_absent_when_unauthenticated | user_id is not in log entry when no authentication | unit | passing |
+| test_authorization_header_not_logged | Authorization Bearer token must NOT appear in log output | unit | passing |
+| test_cookie_header_not_logged | Cookie header value must NOT appear in log output | unit | passing |
 
 ### Backend — Unit: Models (`backend/tests/unit/test_models.py`)
 

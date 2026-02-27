@@ -208,6 +208,7 @@ alembic upgrade head
 | Backend/frontend not connecting | Verify `FRONTEND_HOST` and `BACKEND_CORS_ORIGINS` in .env. Check logs: `docker compose logs backend` |
 | Mailcatcher not receiving emails | Check `SMTP_HOST` is set to `mailcatcher` in compose.override.yml (automatic) |
 | `docker compose watch` not syncing code | Volumes mount correctly. Check logs: `docker compose logs backend` or `docker compose logs frontend` |
+| Backend logs show plain text instead of JSON | Verify `LOG_FORMAT=json` in `.env`. Default is `json`; the console renderer only activates when `LOG_FORMAT=console`. |
 
 ## Docker Compose Files
 
