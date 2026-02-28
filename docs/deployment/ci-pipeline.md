@@ -2,10 +2,10 @@
 title: "CI/CD Pipeline"
 doc-type: reference
 status: published
-last-updated: 2026-02-28
-updated-by: "infra docs writer"
+last-updated: 2026-03-01
+updated-by: "infra docs writer (AYG-73)"
 related-code:
-  - .github/workflows/test-backend.yml
+  - .github/workflows/ci.yml
   - .github/workflows/playwright.yml
   - .github/workflows/pre-commit.yml
   - .github/workflows/deploy-staging.yml
@@ -39,12 +39,12 @@ Push / PR
    ├── playwright.yml      ─ 61 E2E tests across 4 shards
    │
    └── On merge to main:
-         ├── deploy-staging.yml   ─ Auto-deploy to staging (self-hosted runner)
+         ├── deploy-staging.yml   ─ Build+push to GHCR, pluggable deploy to staging
          ├── latest-changes.yml   ─ Update release-notes.md
          └── smokeshow.yml        ─ Publish coverage HTML report
 
 On GitHub Release (published):
-   └── deploy-production.yml ─ Deploy to production (self-hosted runner)
+   └── deploy-production.yml ─ Promote GHCR image (SHA→version+latest), pluggable deploy
 ```
 
 ---
@@ -56,8 +56,8 @@ On GitHub Release (published):
 | Test Backend | `test-backend.yml` | push main, PR (opened/sync) | Run Pytest + coverage | ubuntu-latest |
 | Playwright Tests | `playwright.yml` | push main, PR (opened/sync), workflow_dispatch | E2E tests (4-shard matrix) | ubuntu-latest |
 | pre-commit | `pre-commit.yml` | PR (opened/sync) | Lint, format, type check, client gen | ubuntu-latest |
-| Deploy to Staging | `deploy-staging.yml` | push main | Build + deploy to staging | self-hosted (staging) |
-| Deploy to Production | `deploy-production.yml` | release published | Build + deploy to production | self-hosted (production) |
+| Deploy to Staging | `deploy-staging.yml` | push main | Build+push to GHCR, pluggable deploy to staging | ubuntu-latest |
+| Deploy to Production | `deploy-production.yml` | release published | Promote GHCR image (no rebuild), pluggable deploy to production | ubuntu-latest |
 | Conflict Detector | `detect-conflicts.yml` | push, pull_request_target (sync) | Label PRs with merge conflicts | ubuntu-latest |
 | Issue Manager | `issue-manager.yml` | schedule (daily), issue events, PR labels, workflow_dispatch | Auto-close stale issues/PRs | ubuntu-latest |
 | Labels | `labeler.yml` | pull_request_target (opened/sync/reopened/labeled/unlabeled) | Auto-label PRs; enforce required labels | ubuntu-latest |
@@ -242,36 +242,59 @@ Checks `PRE_COMMIT` secret availability to differentiate own-repo vs fork:
 |-------|----------|------------|
 | `push` | main | All files |
 
-**Note:** Skipped when `github.repository_owner == 'fastapi'` (template repository guard).
+### Concurrency
+
+```
+group: deploy-staging
+cancel-in-progress: true
+```
+
+Concurrent staging deploys are cancelled — only the latest push to `main` deploys.
+
+### Permissions
+
+| Permission | Level |
+|-----------|-------|
+| `contents` | read |
+| `packages` | write (required for GHCR push) |
 
 ### Jobs
 
 | Job | Runner | Depends On |
 |-----|--------|------------|
-| `deploy` | self-hosted (staging label) | — |
+| `deploy` | ubuntu-latest | — |
 
 ### Steps
 
 1. Checkout (`actions/checkout@v6`)
-2. `docker compose -f compose.yml --project-name $STACK_NAME_STAGING build`
-3. `docker compose -f compose.yml --project-name $STACK_NAME_STAGING up -d`
+2. Log in to GHCR (`docker/login-action@v3`) — authenticates using `GITHUB_TOKEN` (automatic)
+3. Build and push Docker image (`docker/build-push-action@v6`):
+   - Context: `.` (repository root), Dockerfile: `backend/Dockerfile`
+   - Tags pushed: `ghcr.io/{repo}/backend:{sha}` and `ghcr.io/{repo}/backend:staging`
+   - Build args: `GIT_COMMIT=${{ github.sha }}`, `BUILD_TIME=${{ github.event.head_commit.timestamp }}`
+4. Pluggable Deploy — uncomment one platform block in the workflow file:
+   - **Railway**: `railway up --service` with `RAILWAY_TOKEN`
+   - **Alibaba Cloud ACR + ECS**: re-tag to ACR, update ECS service
+   - **Google Cloud Run**: `google-github-actions/deploy-cloudrun@v2` with `GCP_SERVICE_NAME`
+   - **Fly.io**: `flyctl deploy --image` with `FLY_API_TOKEN`
+   - **Self-hosted via SSH**: `ssh DEPLOY_HOST "docker pull ... && docker compose up -d"`
 
-### Environment Variables (from Secrets)
+### Secrets
 
-| Variable | Secret Source |
-|----------|---------------|
-| `ENVIRONMENT` | Hardcoded: `staging` |
-| `DOMAIN` | `secrets.DOMAIN_STAGING` |
-| `STACK_NAME` | `secrets.STACK_NAME_STAGING` |
-| `SECRET_KEY` | `secrets.SECRET_KEY` |
-| `FIRST_SUPERUSER` | `secrets.FIRST_SUPERUSER` |
-| `FIRST_SUPERUSER_PASSWORD` | `secrets.FIRST_SUPERUSER_PASSWORD` |
-| `SMTP_HOST` | `secrets.SMTP_HOST` |
-| `SMTP_USER` | `secrets.SMTP_USER` |
-| `SMTP_PASSWORD` | `secrets.SMTP_PASSWORD` |
-| `EMAILS_FROM_EMAIL` | `secrets.EMAILS_FROM_EMAIL` |
-| `POSTGRES_PASSWORD` | `secrets.POSTGRES_PASSWORD` |
-| `SENTRY_DSN` | `secrets.SENTRY_DSN` |
+| Secret | Source | Description |
+|--------|--------|-------------|
+| `GITHUB_TOKEN` | Automatic | Authenticates GHCR login and image push — no configuration required |
+| Platform secrets | Platform-dependent | See pluggable deploy options below |
+
+**Platform-specific secrets (depends on chosen deploy target):**
+
+| Secret | Platform |
+|--------|----------|
+| `RAILWAY_TOKEN` + `RAILWAY_SERVICE_ID_STAGING` | Railway |
+| `ALIBABA_ACCESS_KEY` + `ALIBABA_SECRET_KEY` | Alibaba Cloud (ACR + ECS) |
+| `GCP_SA_KEY` + `GCP_SERVICE_NAME` | Google Cloud Run |
+| `FLY_API_TOKEN` | Fly.io |
+| `DEPLOY_HOST` | Self-hosted via SSH |
 
 ---
 
@@ -285,36 +308,62 @@ Checks `PRE_COMMIT` secret availability to differentiate own-repo vs fork:
 |-------|------------|
 | `release` published | Triggered by publishing a GitHub Release |
 
-**Note:** Skipped when `github.repository_owner == 'fastapi'` (template repository guard).
+### Concurrency
+
+```
+group: deploy-production
+cancel-in-progress: false
+```
+
+Production deployments are never cancelled mid-flight — a second release queues behind the first.
+
+### Permissions
+
+| Permission | Level |
+|-----------|-------|
+| `contents` | read |
+| `packages` | write (required for GHCR push) |
 
 ### Jobs
 
 | Job | Runner | Depends On |
 |-----|--------|------------|
-| `deploy` | self-hosted (production label) | — |
+| `deploy` | ubuntu-latest | — |
 
 ### Steps
 
 1. Checkout (`actions/checkout@v6`)
-2. `docker compose -f compose.yml --project-name $STACK_NAME_PRODUCTION build`
-3. `docker compose -f compose.yml --project-name $STACK_NAME_PRODUCTION up -d`
+2. Log in to GHCR (`docker/login-action@v3`) — authenticates using `GITHUB_TOKEN` (automatic)
+3. Promote staging image to production (no rebuild — image promotion only):
+   - Pull `ghcr.io/{repo}/backend:{sha}` (the exact image built and validated on staging)
+   - Re-tag as `ghcr.io/{repo}/backend:{release.tag_name}` (e.g. `v1.2.3`)
+   - Re-tag as `ghcr.io/{repo}/backend:latest`
+   - Push both new tags to GHCR
+4. Pluggable Deploy — uncomment one platform block in the workflow file:
+   - **Railway**: `railway up --service` with `RAILWAY_TOKEN`
+   - **Alibaba Cloud ACR + ECS**: re-tag to ACR, update ECS service
+   - **Google Cloud Run**: `google-github-actions/deploy-cloudrun@v2` with `GCP_SERVICE_NAME`
+   - **Fly.io**: `flyctl deploy --image` with `FLY_API_TOKEN`
+   - **Self-hosted via SSH**: `ssh DEPLOY_HOST "docker pull ... && docker compose up -d"`
 
-### Environment Variables (from Secrets)
+**Important:** The production image is the same binary that ran on staging — no new build occurs. This guarantees what was tested is what ships.
 
-| Variable | Secret Source |
-|----------|---------------|
-| `ENVIRONMENT` | Hardcoded: `production` |
-| `DOMAIN` | `secrets.DOMAIN_PRODUCTION` |
-| `STACK_NAME` | `secrets.STACK_NAME_PRODUCTION` |
-| `SECRET_KEY` | `secrets.SECRET_KEY` |
-| `FIRST_SUPERUSER` | `secrets.FIRST_SUPERUSER` |
-| `FIRST_SUPERUSER_PASSWORD` | `secrets.FIRST_SUPERUSER_PASSWORD` |
-| `SMTP_HOST` | `secrets.SMTP_HOST` |
-| `SMTP_USER` | `secrets.SMTP_USER` |
-| `SMTP_PASSWORD` | `secrets.SMTP_PASSWORD` |
-| `EMAILS_FROM_EMAIL` | `secrets.EMAILS_FROM_EMAIL` |
-| `POSTGRES_PASSWORD` | `secrets.POSTGRES_PASSWORD` |
-| `SENTRY_DSN` | `secrets.SENTRY_DSN` |
+### Secrets
+
+| Secret | Source | Description |
+|--------|--------|-------------|
+| `GITHUB_TOKEN` | Automatic | Authenticates GHCR login and image push — no configuration required |
+| Platform secrets | Platform-dependent | See pluggable deploy options below |
+
+**Platform-specific secrets (depends on chosen deploy target):**
+
+| Secret | Platform |
+|--------|----------|
+| `RAILWAY_TOKEN` + `RAILWAY_SERVICE_ID_PRODUCTION` | Railway |
+| `ALIBABA_ACCESS_KEY` + `ALIBABA_SECRET_KEY` | Alibaba Cloud (ACR + ECS) |
+| `GCP_SA_KEY` + `GCP_SERVICE_NAME` | Google Cloud Run |
+| `FLY_API_TOKEN` | Fly.io |
+| `DEPLOY_HOST` | Self-hosted via SSH |
 
 ---
 
@@ -477,8 +526,8 @@ Sets a GitHub commit status `coverage` with the coverage percentage. Fails if co
 | Event | Workflows Triggered | Deploy Target |
 |-------|---------------------|---------------|
 | PR opened or updated | pre-commit, Test Backend, Playwright (if paths changed) | None |
-| Push to `main` | Test Backend, Playwright, Deploy Staging, Latest Changes | Staging |
-| GitHub Release published | Deploy Production | Production |
+| Push to `main` | Test Backend, Playwright, Deploy Staging, Latest Changes | Staging (GHCR + pluggable deploy) |
+| GitHub Release published | Deploy Production | Production (GHCR image promotion + pluggable deploy) |
 | `workflow_run: Test Backend` completes | Smokeshow | — (coverage report) |
 | PR opened/closed | Add to Project, Labels, Conflict Detector, Latest Changes | — |
 
@@ -490,21 +539,21 @@ Configure these in: **GitHub repository → Settings → Secrets and variables �
 
 ### Deployment Secrets (Required for staging/production)
 
-| Secret | Used By | Description |
-|--------|---------|-------------|
-| `DOMAIN_STAGING` | `deploy-staging.yml` | Staging domain (e.g. `staging.example.com`) |
-| `DOMAIN_PRODUCTION` | `deploy-production.yml` | Production domain (e.g. `example.com`) |
-| `STACK_NAME_STAGING` | `deploy-staging.yml` | Docker Compose project name for staging |
-| `STACK_NAME_PRODUCTION` | `deploy-production.yml` | Docker Compose project name for production |
-| `SECRET_KEY` | Both deploy workflows | JWT signing key — generate with `python -c "import secrets; print(secrets.token_urlsafe(32))"` |
-| `FIRST_SUPERUSER` | Both deploy workflows | Admin email for initial superuser |
-| `FIRST_SUPERUSER_PASSWORD` | Both deploy workflows | Admin password |
-| `POSTGRES_PASSWORD` | Both deploy workflows | Database password |
-| `SMTP_HOST` | Both deploy workflows | SMTP server hostname |
-| `SMTP_USER` | Both deploy workflows | SMTP username |
-| `SMTP_PASSWORD` | Both deploy workflows | SMTP password |
-| `EMAILS_FROM_EMAIL` | Both deploy workflows | Sender email address |
-| `SENTRY_DSN` | Both deploy workflows | Sentry DSN for error tracking (optional) |
+**GHCR authentication:** `GITHUB_TOKEN` is automatically provided by GitHub Actions for all workflows — no configuration required. Both deploy workflows use it to authenticate with `ghcr.io`.
+
+**Platform-specific deploy secrets** are required only for the pluggable deploy step. Configure only the secrets matching your chosen deploy platform:
+
+| Secret | Used By | Platform | Description |
+|--------|---------|----------|-------------|
+| `RAILWAY_TOKEN` | Both deploy workflows | Railway | Railway API token for deployment |
+| `RAILWAY_SERVICE_ID_STAGING` | `deploy-staging.yml` | Railway | Railway service ID for staging |
+| `RAILWAY_SERVICE_ID_PRODUCTION` | `deploy-production.yml` | Railway | Railway service ID for production |
+| `ALIBABA_ACCESS_KEY` | Both deploy workflows | Alibaba Cloud (ACR + ECS) | Alibaba Cloud access key ID |
+| `ALIBABA_SECRET_KEY` | Both deploy workflows | Alibaba Cloud (ACR + ECS) | Alibaba Cloud secret access key |
+| `GCP_SA_KEY` | Both deploy workflows | Google Cloud Run | Service account JSON key |
+| `GCP_SERVICE_NAME` | Both deploy workflows | Google Cloud Run | Cloud Run service name |
+| `FLY_API_TOKEN` | Both deploy workflows | Fly.io | Fly.io API token |
+| `DEPLOY_HOST` | Both deploy workflows | Self-hosted SSH | SSH connection string (user@host) |
 
 ### Automation Secrets (Optional)
 
@@ -519,19 +568,17 @@ Configure these in: **GitHub repository → Settings → Secrets and variables �
 
 ## Self-Hosted Runners
 
-Staging and production deployments require self-hosted runners registered with specific labels:
+Both deploy workflows (`deploy-staging.yml` and `deploy-production.yml`) run on `ubuntu-latest` (GitHub-hosted). Self-hosted runners are **not required** for the core build and image promotion steps.
 
-| Label | Used By | Purpose |
-|-------|---------|---------|
-| `staging` | `deploy-staging.yml` | Runner on staging server with Docker access |
-| `production` | `deploy-production.yml` | Runner on production server with Docker access |
+Self-hosted infrastructure is one of the five available pluggable deploy options. If you choose the SSH deploy pattern:
 
-The runner must have:
-- Docker and Docker Compose installed
-- Access to the deploy environment secrets via the workflow
-- The project code at `/root/code/app/` (or adjust workflow accordingly)
+| Secret | Purpose |
+|--------|---------|
+| `DEPLOY_HOST` | SSH connection string (e.g. `deploy@staging.example.com`) |
 
-To register a runner: **GitHub repository → Settings → Actions → Runners → New self-hosted runner**
+The SSH deploy step issues a `docker pull` and `docker compose up -d` on your server — the server only needs Docker and network access to `ghcr.io`. No GitHub Actions runner needs to be installed on the server.
+
+To use a self-hosted runner instead of `ubuntu-latest` for the build step, change `runs-on: ubuntu-latest` to `runs-on: self-hosted` in the workflow file and register a runner at: **GitHub repository → Settings → Actions → Runners → New self-hosted runner**
 
 ---
 
@@ -607,8 +654,10 @@ ENVIRONMENT=local                    # Relaxed validation for tests
 | Test Backend fails on migration step | DB not healthy yet | Check `docker compose up -d db mailcatcher` health check passes before prestart |
 | Coverage below 90% | New code without tests | Add tests; view coverage report in Artifacts → `coverage-html` |
 | Playwright shards fail inconsistently | Flaky tests (`--fail-on-flaky-tests`) | Identify flaky test from HTML report artifact; fix race conditions |
-| Deploy to staging fails | Self-hosted runner offline | Check runner status in Settings → Actions → Runners |
-| Deploy to production fails | Missing `DOMAIN_PRODUCTION` secret | Add all required deployment secrets to GitHub |
+| Deploy to staging fails | GHCR push permission denied | Verify `GITHUB_TOKEN` has `packages: write` permission in the workflow |
+| Deploy to staging fails | Pluggable deploy step not configured | Uncomment one platform block in `deploy-staging.yml` |
+| Deploy to production fails | Staging image not found by SHA | Ensure the staging workflow completed successfully before publishing the release |
+| Deploy to production fails | Pluggable deploy step not configured | Uncomment one platform block in `deploy-production.yml` |
 | pre-commit fails on fork | No `PRE_COMMIT` secret (expected) | Fork uses `pre-commit-ci/lite-action` fallback — this is normal |
 | Labels check fails | PR missing required label | Add one of: `breaking`, `security`, `feature`, `bug`, `refactor`, `upgrade`, `docs`, `lang-all`, `internal` |
 | Smokeshow fails | Missing `SMOKESHOW_AUTH_KEY` | Register at smokeshow.io and add key to secrets |

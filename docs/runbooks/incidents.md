@@ -172,17 +172,44 @@ docker compose logs db | tail -20
 
 **Option B: Rollback Deployment** (if recent deploy caused issue)
 
+Two rollback paths are available. Use Option B-1 (GHCR image rollback) whenever possible — it skips a full rebuild and is significantly faster.
+
+**Option B-1 (preferred — GHCR image rollback, no rebuild):**
+
+```bash
+# Find the last known-good commit SHA from GitHub Actions run history
+# GitHub → Actions → Deploy to Staging → identify the last successful run SHA
+
+# Staging rollback: re-tag a previous SHA as staging
+docker pull ghcr.io/{repo}/backend:{previous-sha}
+docker tag ghcr.io/{repo}/backend:{previous-sha} ghcr.io/{repo}/backend:staging
+docker push ghcr.io/{repo}/backend:staging
+# Then trigger your platform's deploy for the staging tag
+
+# Production rollback: re-tag a previous version as latest
+docker pull ghcr.io/{repo}/backend:v1.2.2
+docker tag ghcr.io/{repo}/backend:v1.2.2 ghcr.io/{repo}/backend:latest
+docker push ghcr.io/{repo}/backend:latest
+# Or create a new GitHub Release pointing to v1.2.2 to trigger the production deploy workflow
+```
+
+No code change is required. The previously validated image is redeployed immediately without waiting for a rebuild.
+
+**Option B-2 (git revert — triggers full rebuild):**
+
 ```bash
 # Check when incident started
 # If <10 minutes after deployment, likely caused by it
 
 # Revert last commit
 git revert HEAD
-git push  # This triggers automatic redeployment
+git push  # This triggers automatic redeployment (full image rebuild)
 
-# Wait 2-3 minutes for redeploy
+# Wait 3-5 minutes for image rebuild and redeploy
 # Verify: curl https://api.example.com/api/v1/utils/health-check/
 ```
+
+Use Option B-2 when the problematic image has already been removed from GHCR or when the rollback target predates GHCR image history.
 
 **Option C: Scale Resources** (if resource exhaustion)
 
@@ -417,7 +444,34 @@ docker compose restart backend
 
 ## Rollback Procedure (Complete)
 
-Use if deployment introduced critical bug:
+Use if deployment introduced a critical bug. Two options are available — prefer Option A when a previous GHCR image exists (faster, no rebuild).
+
+### Option A (preferred — GHCR image rollback, no rebuild)
+
+Re-tag a previously built and validated image and redeploy without triggering a full image rebuild:
+
+```bash
+# Find the last known-good commit SHA from GitHub Actions run history
+# GitHub → Actions → Deploy to Staging → last successful run
+
+# Staging rollback: re-tag a previous SHA as staging
+docker pull ghcr.io/{repo}/backend:{previous-sha}
+docker tag ghcr.io/{repo}/backend:{previous-sha} ghcr.io/{repo}/backend:staging
+docker push ghcr.io/{repo}/backend:staging
+# Then trigger your platform's deploy for the staging tag
+
+# Production rollback: re-tag a previous version as latest
+docker pull ghcr.io/{repo}/backend:v1.2.2
+docker tag ghcr.io/{repo}/backend:v1.2.2 ghcr.io/{repo}/backend:latest
+docker push ghcr.io/{repo}/backend:latest
+# Or create a new GitHub Release pointing to v1.2.2 to trigger the production deploy workflow
+```
+
+**Expected outcome:** Redeployment completes in 1-2 minutes (no rebuild). Verify with health check immediately after deploy completes.
+
+### Option B (git revert — triggers full rebuild)
+
+Use when the rollback target image is no longer available in GHCR, or when you need to roll back a code change that was never built:
 
 ```bash
 ssh root@example.com
@@ -429,10 +483,10 @@ git log --oneline -10
 # Revert the problematic commit
 git revert <commit-hash>
 
-# Push triggers automatic redeployment
+# Push triggers automatic redeployment (full image rebuild)
 git push
 
-# Wait 3-5 minutes for images to rebuild and deploy
+# Wait 3-5 minutes for image rebuild and deploy
 # Monitor
 docker compose logs backend | tail -20
 
@@ -440,7 +494,7 @@ docker compose logs backend | tail -20
 curl https://api.example.com/api/v1/utils/health-check/
 ```
 
-**Don't use `git reset --hard`** - it removes commit history. Use `git revert` instead.
+**Don't use `git reset --hard`** — it removes commit history. Use `git revert` instead.
 
 ---
 
@@ -588,7 +642,12 @@ docker compose exec db psql -U postgres -d app -c "SELECT COUNT(*) FROM users;"
 # View deployment history
 git log --oneline -20
 
-# Revert deployment
+# Rollback Option A (preferred — GHCR image, no rebuild)
+docker pull ghcr.io/{repo}/backend:{previous-sha}
+docker tag ghcr.io/{repo}/backend:{previous-sha} ghcr.io/{repo}/backend:staging
+docker push ghcr.io/{repo}/backend:staging
+
+# Rollback Option B (git revert — triggers full rebuild)
 git revert <commit-hash>
 git push
 

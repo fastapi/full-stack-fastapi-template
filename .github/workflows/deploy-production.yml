@@ -2,29 +2,90 @@ name: Deploy to Production
 
 on:
   release:
-    types:
-      - published
+    types: [published]
+
+concurrency:
+  group: deploy-production
+  cancel-in-progress: false
 
 jobs:
   deploy:
-    if: github.repository_owner != 'fastapi'
-    runs-on:
-      - self-hosted
-      - production
-    env:
-      ENVIRONMENT: production
-      DOMAIN: ${{ secrets.DOMAIN_PRODUCTION }}
-      STACK_NAME: ${{ secrets.STACK_NAME_PRODUCTION }}
-      SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
-      SUPABASE_SERVICE_KEY: ${{ secrets.SUPABASE_SERVICE_KEY }}
-      CLERK_SECRET_KEY: ${{ secrets.CLERK_SECRET_KEY }}
-      BACKEND_CORS_ORIGINS: ${{ secrets.BACKEND_CORS_ORIGINS }}
-      SENTRY_DSN: ${{ secrets.SENTRY_DSN }}
-      SERVICE_NAME: ${{ secrets.SERVICE_NAME }}
-      DOCKER_IMAGE_BACKEND: ${{ secrets.DOCKER_IMAGE_BACKEND }}
-      DOCKER_IMAGE_FRONTEND: ${{ secrets.DOCKER_IMAGE_FRONTEND }}
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
     steps:
       - name: Checkout
         uses: actions/checkout@v6
-      - run: docker compose -f compose.yml --project-name ${{ secrets.STACK_NAME_PRODUCTION }} build
-      - run: docker compose -f compose.yml --project-name ${{ secrets.STACK_NAME_PRODUCTION }} up -d
+
+      - name: Log in to GHCR
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Verify staging image exists in GHCR
+        env:
+          IMAGE: ghcr.io/${{ github.repository }}/backend:${{ github.sha }}
+        run: |
+          docker manifest inspect "${IMAGE}" > /dev/null || \
+            (echo "ERROR: Staging image not found for SHA ${{ github.sha }}. Ensure the staging deploy completed before publishing a release." && exit 1)
+
+      - name: Promote staging image to production (re-tag, no rebuild)
+        env:
+          REPO: ${{ github.repository }}
+          SHA: ${{ github.sha }}
+          TAG_NAME: ${{ github.event.release.tag_name }}
+        run: |
+          # Pull the exact image built and validated in the staging pipeline
+          docker pull "ghcr.io/${REPO}/backend:${SHA}"
+
+          # Re-tag as version and latest
+          docker tag "ghcr.io/${REPO}/backend:${SHA}" \
+            "ghcr.io/${REPO}/backend:${TAG_NAME}"
+          docker tag "ghcr.io/${REPO}/backend:${SHA}" \
+            "ghcr.io/${REPO}/backend:latest"
+
+          # Push version and latest tags
+          docker push "ghcr.io/${REPO}/backend:${TAG_NAME}"
+          docker push "ghcr.io/${REPO}/backend:latest"
+
+      # --- PLUGGABLE DEPLOY STEP ---
+      # Uncomment ONE of the following blocks for your platform.
+      # Use ${{ github.event.release.tag_name }} as the production image tag.
+      # The image is identical to what was validated on staging — no rebuild.
+
+      # --- Railway ---
+      # - name: Deploy to Railway
+      #   run: railway up --service ${{ secrets.RAILWAY_SERVICE_ID_PRODUCTION }}
+      #   env:
+      #     RAILWAY_TOKEN: ${{ secrets.RAILWAY_TOKEN }}
+
+      # --- Alibaba Cloud (ACR + ECS) ---
+      # - name: Push to Alibaba Cloud ACR
+      #   run: |
+      #     docker tag ghcr.io/${{ github.repository }}/backend:${{ github.event.release.tag_name }} \
+      #       registry.{region}.aliyuncs.com/{namespace}/{service}:${{ github.event.release.tag_name }}
+      #     docker push registry.{region}.aliyuncs.com/{namespace}/{service}:${{ github.event.release.tag_name }}
+      # - name: Deploy to ECS
+      #   run: aliyun ecs ... # Update ECS service with new image
+
+      # --- Google Cloud Run ---
+      # - name: Deploy to Cloud Run
+      #   uses: google-github-actions/deploy-cloudrun@v2
+      #   with:
+      #     service: ${{ secrets.GCP_SERVICE_NAME }}
+      #     image: ghcr.io/${{ github.repository }}/backend:${{ github.event.release.tag_name }}
+
+      # --- Fly.io ---
+      # - name: Deploy to Fly.io
+      #   uses: superfly/flyctl-actions/setup-flyctl@main
+      # - run: flyctl deploy --image ghcr.io/${{ github.repository }}/backend:${{ github.event.release.tag_name }}
+      #   env:
+      #     FLY_API_TOKEN: ${{ secrets.FLY_API_TOKEN }}
+
+      # --- Self-hosted (Docker Compose via SSH) ---
+      # - name: Deploy via SSH
+      #   run: |
+      #     ssh ${{ secrets.DEPLOY_HOST }} "docker pull ghcr.io/${{ github.repository }}/backend:${{ github.event.release.tag_name }} && docker compose up -d"

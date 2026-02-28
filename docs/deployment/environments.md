@@ -2,15 +2,16 @@
 title: "Deployment Environments"
 doc-type: reference
 status: published
-last-updated: 2026-02-28
-updated-by: "infra docs writer"
+last-updated: 2026-03-01
+updated-by: "infra docs writer (AYG-73)"
 related-code:
   - backend/app/core/config.py
   - compose.yml
   - compose.override.yml
   - backend/Dockerfile
   - frontend/Dockerfile
-  - .github/workflows/**
+  - .github/workflows/deploy-staging.yml
+  - .github/workflows/deploy-production.yml
   - supabase/config.toml
   - supabase/migrations/**
 related-docs:
@@ -170,13 +171,12 @@ See [Setup Guide](../getting-started/setup.md) for detailed instructions.
 
 ### Deployment Process
 
-1. Push to `main` branch triggers GitHub Actions
-2. Backend and frontend tests run in CI
-3. On success, Docker images are built
-4. Images pushed to registry
-5. Remote runner pulls new images
-6. `docker compose up -d` updates services
-7. Traefik routes traffic to new containers
+1. Push to `main` branch triggers `deploy-staging.yml` in GitHub Actions
+2. CI workflows (Test Backend, Playwright, pre-commit) run in parallel
+3. Backend Docker image is built with build args: `GIT_COMMIT={sha}` and `BUILD_TIME={timestamp}`
+4. Image pushed to GHCR with two tags: `ghcr.io/{repo}/backend:{sha}` and `ghcr.io/{repo}/backend:staging`
+5. Pluggable deploy step (configured in workflow) deploys the new image to the staging environment
+6. Health checks verify deployment: `/healthz`, `/readyz`, `/version`
 
 **How to Deploy:**
 
@@ -186,18 +186,28 @@ See [Setup Guide](../getting-started/setup.md) for detailed instructions.
 git push origin main
 ```
 
-Monitor deployment: GitHub Actions → staging workflow
+Monitor deployment: GitHub Actions → Deploy to Staging workflow
 
 ### Rollback
 
-If staging breaks:
+If staging breaks, re-deploy a previous GHCR image by SHA:
 
 ```bash
-# On staging server (or via SSH)
-cd /root/code/app/
+# Find the last known-good commit SHA from GitHub Actions run history
+# Then re-tag that image as staging and redeploy via your chosen platform
+
+# Example: re-tag a previous SHA as staging
+docker pull ghcr.io/{repo}/backend:{previous-sha}
+docker tag ghcr.io/{repo}/backend:{previous-sha} ghcr.io/{repo}/backend:staging
+docker push ghcr.io/{repo}/backend:staging
+# Then trigger your platform's deploy for the staging tag
+```
+
+Alternatively, revert the commit on `main` to trigger a fresh build:
+
+```bash
 git revert <commit-hash>
-git push  # Triggers redeploy
-# Or manually pull previous version and `docker compose up`
+git push origin main  # Triggers a new staging deploy
 ```
 
 ---
@@ -255,33 +265,33 @@ Structured JSON log output from structlog (fields: `timestamp`, `level`, `event`
 
 ### Deployment Process
 
-1. Create Git tag: `git tag v1.2.3 && git push origin v1.2.3`
-2. GitHub Actions detects tag
-3. Tests run (same as staging)
-4. Docker images built
-5. Manual approval before prod deploy (optional in workflow)
-6. Images pushed to registry
-7. Remote runner pulls images
-8. `docker compose up -d` updates services
-9. Health checks verify deployment success
+1. Create a GitHub Release (UI or CLI) with a semver tag (e.g. `v1.2.3`)
+2. Publishing the release triggers `deploy-production.yml` in GitHub Actions
+3. The staging image tagged with the release commit SHA is pulled from GHCR — no new build occurs
+4. Image is re-tagged as `ghcr.io/{repo}/backend:v1.2.3` and `ghcr.io/{repo}/backend:latest`
+5. Both new tags are pushed to GHCR
+6. Pluggable deploy step (configured in workflow) deploys the promoted image to production
+7. Health checks verify post-deploy: `/healthz`, `/readyz`, `/version`
+
+**The production image is the same binary validated on staging.** No code is recompiled at release time.
 
 **How to Deploy:**
 
 ```bash
-# Create and push a release tag
-git tag v1.2.3
-git push origin v1.2.3
+# Via GitHub CLI
+gh release create v1.2.3 --title "v1.2.3" --notes "Release notes here"
 
-# Or via GitHub UI: Create Release on main branch
+# Or via GitHub UI:
+# Repository → Releases → Draft a new release → Publish release
 ```
 
-Monitor deployment: GitHub Actions → production workflow
+Monitor deployment: GitHub Actions → Deploy to Production workflow
 
 ### Monitoring & Alerts
 
 Production includes:
 - **Sentry**: Error tracking and real-time alerts
-- **Health checks**: Backend `/api/v1/utils/health-check/` returns 200 if healthy
+- **Health checks**: Backend `/healthz` (liveness) and `/readyz` (readiness) return 200 if healthy
 - **Traefik**: Monitors container health automatically
 - **Logs**: Stored on server and/or external logging service
 
@@ -330,6 +340,18 @@ Set via GitHub Secrets (encrypted, never logged):
 - `SUPABASE_SERVICE_KEY` - Supabase service role key
 - `CLERK_SECRET_KEY` - Clerk backend secret
 
+**GHCR authentication:** `GITHUB_TOKEN` is provided automatically — no configuration required.
+
+**Platform-specific deploy secrets (configure one set matching your chosen deploy target):**
+
+| Secret | Platform |
+|--------|----------|
+| `RAILWAY_TOKEN` + `RAILWAY_SERVICE_ID_STAGING` / `RAILWAY_SERVICE_ID_PRODUCTION` | Railway |
+| `ALIBABA_ACCESS_KEY` + `ALIBABA_SECRET_KEY` | Alibaba Cloud (ACR + ECS) |
+| `GCP_SA_KEY` + `GCP_SERVICE_NAME` | Google Cloud Run |
+| `FLY_API_TOKEN` | Fly.io |
+| `DEPLOY_HOST` | Self-hosted via SSH |
+
 **Optional GitHub Secrets:**
 - `SENTRY_DSN` - Sentry error tracking (optional)
 - `LOG_LEVEL` - Override default INFO level
@@ -377,8 +399,12 @@ When rotating secrets:
 #    - Go to Settings → Secrets and variables → Actions
 #    - Update CLERK_SECRET_KEY and SUPABASE_SERVICE_KEY
 
-# 4. Redeploy application (triggers CI/CD):
-git tag v1.2.4 && git push origin v1.2.4
+# 4. Redeploy to pick up the new secrets by publishing a new GitHub Release:
+#    - Repository → Releases → Draft a new release → Publish release
+#    - Or via CLI: gh release create v1.2.4 --title "v1.2.4 (secret rotation)"
+#
+#    Note: The deploy workflow pulls the existing GHCR image (no rebuild needed).
+#    The new secrets are injected at deploy time by the pluggable deploy step.
 ```
 
 **Monitoring secrets in logs:**
