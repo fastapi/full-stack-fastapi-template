@@ -1,7 +1,7 @@
 ---
 title: "ADR-0004: Supabase Service Layer Pattern"
 doc-type: reference
-status: proposed
+status: accepted
 date: 2026-02-28
 decision-makers: ["@team"]
 last-updated: 2026-02-28

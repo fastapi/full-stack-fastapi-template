@@ -2,21 +2,16 @@
 title: "API Overview"
 doc-type: reference
 status: active
-version: "1.3.0"
+version: "1.5.0"
 base-url: "/api/v1"
 last-updated: 2026-02-28
-updated-by: "api-docs-writer (AYG-70)"
+updated-by: "api-docs-writer (AYG-71)"
 related-code:
   - backend/app/main.py
   - backend/app/api/main.py
   - backend/app/api/deps.py
-  - backend/app/api/routes/login.py
-  - backend/app/api/routes/users.py
-  - backend/app/api/routes/items.py
-  - backend/app/api/routes/utils.py
+  - backend/app/api/routes/entities.py
   - backend/app/api/routes/health.py
-  - backend/app/api/routes/private.py
-  - backend/app/models.py
   - backend/app/models/entity.py
   - backend/app/services/entity_service.py
   - backend/app/core/config.py
@@ -94,47 +89,6 @@ These endpoints are public (no authentication required) and mounted directly on 
 
 > **Note:** `/readyz` returns `200` when all checks pass and `503` when any dependency is unreachable. Container orchestrators (Kubernetes, ECS) use these distinct status codes to gate traffic routing. `/healthz` always returns `200` regardless of dependency state.
 
-### Auth / Login
-
-> **Deprecated (AYG-65):** These endpoints belong to the legacy internal-JWT auth system and are being removed as part of the Clerk migration. Use Clerk's SDK or hosted UI to authenticate in new integrations. See [Login & Authentication](endpoints/login.md) for the transition notice.
-
-| Method | Path | Description | Auth Required | Superuser |
-|--------|------|-------------|:-------------:|:---------:|
-| `POST` | `/login/access-token` | ~~Obtain a JWT access token (OAuth2 password flow)~~ — deprecated | No | No |
-| `POST` | `/login/test-token` | ~~Validate an access token and return the current user~~ — deprecated | Yes | No |
-| `POST` | `/password-recovery/{email}` | Send a password reset email | No | No |
-| `POST` | `/reset-password/` | Reset password using a recovery token | No | No |
-| `POST` | `/password-recovery-html-content/{email}` | Preview the password-reset email HTML | Yes | Yes |
-
-### Users
-
-| Method | Path | Description | Auth Required | Superuser |
-|--------|------|-------------|:-------------:|:---------:|
-| `GET` | `/users/` | List all users (paginated) | Yes | Yes |
-| `POST` | `/users/` | Create a new user (admin-only) | Yes | Yes |
-| `POST` | `/users/signup` | Self-register a new account | No | No |
-| `GET` | `/users/me` | Get the current authenticated user | Yes | No |
-| `PATCH` | `/users/me` | Update the current user's profile | Yes | No |
-| `PATCH` | `/users/me/password` | Change the current user's password | Yes | No |
-| `DELETE` | `/users/me` | Delete the current user's own account | Yes | No |
-| `GET` | `/users/{user_id}` | Get a specific user by ID | Yes | No* |
-| `PATCH` | `/users/{user_id}` | Update a specific user | Yes | Yes |
-| `DELETE` | `/users/{user_id}` | Delete a specific user | Yes | Yes |
-
-*Non-superusers can only retrieve their own record. Attempting to fetch another user's record returns `403`.
-
-### Items
-
-| Method | Path | Description | Auth Required | Superuser |
-|--------|------|-------------|:-------------:|:---------:|
-| `GET` | `/items/` | List items (all for superusers, own only for regular users) | Yes | No |
-| `POST` | `/items/` | Create a new item | Yes | No |
-| `GET` | `/items/{id}` | Get a specific item by ID | Yes | No |
-| `PUT` | `/items/{id}` | Replace an item | Yes | No |
-| `DELETE` | `/items/{id}` | Delete an item | Yes | No |
-
-Non-superusers can only access items they own. Accessing another user's item returns `403`.
-
 ### Entities
 
 > **Active (AYG-70):** Entity CRUD endpoints are implemented and registered at `/api/v1/entities`. See [Entities API](endpoints/entities.md) for full documentation.
@@ -148,21 +102,6 @@ All entity endpoints are scoped to the authenticated caller — `owner_id` isola
 | `GET` | `/entities/{entity_id}` | Get a single entity by UUID | Yes |
 | `PATCH` | `/entities/{entity_id}` | Partially update an entity | Yes |
 | `DELETE` | `/entities/{entity_id}` | Delete an entity (returns 204) | Yes |
-
-### Utils
-
-| Method | Path | Description | Auth Required | Superuser |
-|--------|------|-------------|:-------------:|:---------:|
-| `GET` | `/utils/health-check/` | Legacy liveness probe — returns `true` (superseded by `/healthz`) | No | No |
-| `POST` | `/utils/test-email/` | Send a test email to a given address | Yes | Yes |
-
-### Private (local environment only)
-
-These endpoints are only registered when `ENVIRONMENT=local`. They bypass normal validation and are intended for development and seeding.
-
-| Method | Path | Description | Auth Required | Superuser |
-|--------|------|-------------|:-------------:|:---------:|
-| `POST` | `/private/users/` | Create a user directly (no email check, no welcome email) | No | No |
 
 ## Standard Response Patterns
 
@@ -206,85 +145,6 @@ All resource identifiers (`id`, `owner_id`, `user_id`) are version-4 UUIDs:
 
 ## Data Models
 
-### UserPublic
-
-Returned when reading or creating users.
-
-```json
-{
-  "id": "550e8400-e29b-41d4-a716-446655440000",
-  "email": "user@example.com",
-  "is_active": true,
-  "is_superuser": false,
-  "full_name": "Jane Doe",
-  "created_at": "2026-02-24T12:00:00+00:00"
-}
-```
-
-### UsersPublic
-
-Returned by `GET /users/`.
-
-```json
-{
-  "data": [
-    {
-      "id": "550e8400-e29b-41d4-a716-446655440000",
-      "email": "user@example.com",
-      "is_active": true,
-      "is_superuser": false,
-      "full_name": "Jane Doe",
-      "created_at": "2026-02-24T12:00:00+00:00"
-    }
-  ],
-  "count": 1
-}
-```
-
-### ItemPublic
-
-Returned when reading or creating items.
-
-```json
-{
-  "id": "a1b2c3d4-e5f6-7890-abcd-ef1234567890",
-  "title": "My Item",
-  "description": "An optional description",
-  "owner_id": "550e8400-e29b-41d4-a716-446655440000",
-  "created_at": "2026-02-24T12:00:00+00:00"
-}
-```
-
-### ItemsPublic
-
-Returned by `GET /items/`.
-
-```json
-{
-  "data": [
-    {
-      "id": "a1b2c3d4-e5f6-7890-abcd-ef1234567890",
-      "title": "My Item",
-      "description": "An optional description",
-      "owner_id": "550e8400-e29b-41d4-a716-446655440000",
-      "created_at": "2026-02-24T12:00:00+00:00"
-    }
-  ],
-  "count": 1
-}
-```
-
-### Token
-
-Returned by `POST /login/access-token`.
-
-```json
-{
-  "access_token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...",
-  "token_type": "bearer"
-}
-```
-
 ### Message
 
 Returned by endpoints that perform an action with no resource to return (e.g. delete, password change).
@@ -297,7 +157,7 @@ Returned by endpoints that perform an action with no resource to return (e.g. de
 
 ## Standard Error Responses
 
-> **AYG-65:** All API errors now return a unified JSON shape. The previous `{"detail": "..."}` format is no longer used. Every `HTTPException`, `RequestValidationError`, and unhandled `Exception` goes through `backend/app/core/errors.py` and produces the structure below.
+> **AYG-65 / AYG-71:** All API errors return a unified JSON shape applied to every active endpoint. The previous `{"detail": "..."}` format is no longer used. Every `HTTPException`, `RequestValidationError`, and unhandled `Exception` goes through `backend/app/core/errors.py` and produces the structure below. As of AYG-71 only `/api/v1/entities` and the root-level operational endpoints (`/healthz`, `/readyz`, `/version`) are registered; all legacy routes (login, users, items, utils, private) have been removed from the router.
 
 ### Standard Error Shape
 
@@ -383,7 +243,6 @@ CORS allowed origins are controlled by two configuration values:
 
 | Feature | `local` | `staging` | `production` |
 |---------|---------|-----------|--------------|
-| Private endpoints (`/private/*`) | Enabled | Disabled | Disabled |
 | Default secret key warning | Warning logged | Error raised | Error raised |
 | Sentry error tracking | Optional | Configured via `SENTRY_DSN` | Configured via `SENTRY_DSN` |
 
@@ -401,16 +260,15 @@ CORS allowed origins are controlled by two configuration values:
 ## Endpoint Reference
 
 - [Operational Endpoints — Health, Readiness, Version](endpoints/health.md)
-- [Login & Authentication](endpoints/login.md)
-- [Users](endpoints/users.md)
-- [Items](endpoints/items.md)
 - [Entities](endpoints/entities.md)
-- [Utils](endpoints/utils.md)
+
+> **Removed in AYG-71:** Login, Users, Items, Utils, and Private routes have been removed from the router. Their documentation files are retained for historical reference with a `status: deprecated` marker.
 
 ## Changelog
 
 | Version | Date | Change |
 |---------|------|--------|
+| 1.5.0 | 2026-02-28 | AYG-71: Legacy routes (login, users, items, utils, private) removed from router; only /api/v1/entities and root operational endpoints active; unified error shape confirmed applied to all active endpoints |
 | 1.4.0 | 2026-02-28 | AYG-70: Entity CRUD route handlers registered; all five endpoints live |
 | 1.3.0 | 2026-02-28 | AYG-69: Entity resource forward-reference added; service layer complete, routes planned for AYG-70 |
 | 1.2.0 | 2026-02-28 | AYG-68: Operational endpoints (`/healthz`, `/readyz`, `/version`) added at root level; Utils `/health-check/` marked as legacy |

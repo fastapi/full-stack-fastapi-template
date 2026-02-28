@@ -2,8 +2,8 @@
 title: "CI/CD Pipeline"
 doc-type: reference
 status: published
-last-updated: 2026-02-26
-updated-by: "initialise skill"
+last-updated: 2026-02-28
+updated-by: "infra docs writer"
 related-code:
   - .github/workflows/test-backend.yml
   - .github/workflows/playwright.yml
@@ -93,6 +93,8 @@ On GitHub Release (published):
 5. `docker compose up -d db mailcatcher` — start dependencies only
 6. Run DB migrations: `uv run bash scripts/prestart.sh` (working-dir: `backend/`)
 7. Run tests: `uv run bash scripts/tests-start.sh "Coverage for ${{ github.sha }}"` (working-dir: `backend/`)
+   - Tests are located in `backend/tests/unit/` and `backend/tests/integration/`
+   - Legacy test directories (`backend/tests/api/`, `backend/tests/crud/`) fail collection and are pending cleanup (AYG-72)
 8. `docker compose down -v --remove-orphans` — cleanup
 9. Upload `backend/htmlcov` as artifact `coverage-html` (hidden files included)
 10. Enforce coverage: `uv run coverage report --fail-under=90`
@@ -545,7 +547,8 @@ uv run ruff format
 uv run mypy backend/app
 
 # Backend: tests with coverage
-uv run pytest tests/ -v --cov=app
+# Target unit and integration tests (legacy test directories are pending cleanup)
+uv run pytest backend/tests/unit/ backend/tests/integration/ -v --cov=app
 uv run coverage report --fail-under=90
 
 # Frontend: lint
@@ -562,6 +565,37 @@ uv run prek run --all-files
 
 # Generate API client (after backend changes)
 bash scripts/generate-client.sh
+```
+
+---
+
+## Dependencies
+
+### Backend Runtime Dependencies
+
+The backend requires these core dependencies (defined in `backend/pyproject.toml`):
+
+| Dependency | Version | Purpose |
+|-----------|---------|---------|
+| `fastapi` | >=0.114.2 | Web framework |
+| `sqlmodel` | >=0.0.21 | ORM with SQLAlchemy |
+| `pydantic-settings` | >=2.2.1 | Configuration management |
+| `sentry-sdk` | >=2.0.0 | Error tracking |
+| `structlog` | >=24.1.0 | Structured logging |
+| `supabase` | >=2.0.0 | Supabase client library |
+| `clerk-backend-api` | >=1.0.0 | Clerk authentication |
+| `pyjwt` | >=2.8.0 | JWT token handling |
+| `pwdlib` | >=0.3.0 | Password hashing (Argon2, Bcrypt) |
+
+**Test Environment Requirements:**
+
+For CI/CD pipelines, ensure these environment variables are set:
+
+```bash
+SUPABASE_URL=<project-url>           # Required
+SUPABASE_SERVICE_KEY=<service-key>   # Required, must be valid (not "changethis")
+CLERK_SECRET_KEY=<secret-key>        # Required, must be valid (not "changethis")
+ENVIRONMENT=local                    # Relaxed validation for tests
 ```
 
 ---

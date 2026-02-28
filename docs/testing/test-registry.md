@@ -3,7 +3,7 @@ title: "Test Registry"
 doc-type: reference
 status: draft
 last-updated: 2026-02-28
-updated-by: "api-docs-writer (AYG-70)"
+updated-by: "architecture-docs-writer (AYG-71)"
 related-code:
   - "backend/tests/**/*.py"
   - "frontend/tests/**/*.spec.ts"
@@ -19,11 +19,16 @@ tags: [testing, quality, registry]
 | Module | Unit | Integration | E2E | Total |
 |--------|------|-------------|-----|-------|
 | backend/api/routes | 0 | 82 | 0 | 82 |
+| backend/app/lifespan | 3 | 0 | 0 | 3 |
+| backend/core/auth | 12 | 0 | 0 | 12 |
 | backend/core/config | 13 | 0 | 0 | 13 |
 | backend/core/errors | 20 | 0 | 0 | 20 |
+| backend/core/http_client | 30 | 0 | 0 | 30 |
 | backend/core/logging | 6 | 0 | 0 | 6 |
 | backend/core/middleware | 26 | 0 | 0 | 26 |
+| backend/core/supabase | 4 | 0 | 0 | 4 |
 | backend/crud | 10 | 0 | 0 | 10 |
+| backend/integration/error_responses | 0 | 7 | 0 | 7 |
 | backend/models/auth | 5 | 0 | 0 | 5 |
 | backend/models/common | 6 | 0 | 0 | 6 |
 | backend/models/entity | 14 | 0 | 0 | 14 |
@@ -35,7 +40,7 @@ tags: [testing, quality, registry]
 | frontend/user-settings | 0 | 0 | 14 | 14 |
 | frontend/sign-up | 0 | 0 | 11 | 11 |
 | frontend/reset-password | 0 | 0 | 6 | 6 |
-| **Total** | **114** | **82** | **61** | **257** |
+| **Total** | **171** | **89** | **61** | **321** |
 
 > Unit tests in `backend/tests/unit/` can run without database env vars. The conftest guard pattern in that directory skips DB-dependent fixtures automatically.
 
@@ -130,6 +135,20 @@ tags: [testing, quality, registry]
 | test_custom_settings_values | Reflects custom settings in response body | integration | passing |
 | test_response_schema_exact (version) | Response has exactly five expected fields | integration | passing |
 | test_no_auth_required (version) | Succeeds without Authorization header | integration | passing |
+
+### Backend — Integration: Error Responses (`backend/tests/integration/test_error_responses.py`)
+
+| Test Name | Description | Type | Status |
+|-----------|-------------|------|--------|
+| TestUnifiedErrorShape::test_401_returns_unified_error_shape | Unauthenticated request returns 401 with unified error body | integration | passing |
+| TestUnifiedErrorShape::test_404_returns_unified_error_shape | Non-existent entity returns 404 with ENTITY_NOT_FOUND code | integration | passing |
+| TestUnifiedErrorShape::test_422_returns_unified_error_shape | POST with missing required field returns 422 with details array | integration | passing |
+| TestUnifiedErrorShape::test_500_returns_unified_error_shape | Unhandled server exception returns 500 without internal details | integration | passing |
+| TestErrorResponseMetadata::test_error_response_includes_valid_request_id | request_id in error body is a valid UUID string | integration | passing |
+| TestErrorResponseMetadata::test_error_response_has_security_headers | All five security headers present on error responses | integration | passing |
+| TestErrorResponseMetadata::test_error_response_has_request_id_header | X-Request-ID response header is present and is a valid UUID | integration | passing |
+
+> 7 integration tests verifying the full middleware + error handler pipeline end-to-end with the assembled app. Uses `client` (authenticated) and `unauthenticated_client` conftest fixtures.
 
 #### Backend — Integration: Entities (`backend/tests/integration/test_entities.py`)
 
@@ -299,6 +318,77 @@ tags: [testing, quality, registry]
 
 > All 20 tests use `unittest.mock.MagicMock` for the Supabase client -- no database or network required. Covers happy path CRUD (5), edge cases (7), and error propagation (8).
 
+### Backend — Unit: Lifespan (`backend/tests/unit/test_lifespan.py`)
+
+| Test Name | Description | Type | Status |
+|-----------|-------------|------|--------|
+| test_shutdown_order_log_then_close_then_flush | Shutdown calls in exact order: log, http_client close, sentry flush | unit | passing |
+| test_shutdown_closes_http_client_even_after_log | http_client.close() awaited after the shutdown log event | unit | passing |
+| test_sentry_flush_called_with_timeout | sentry_sdk.flush(timeout=2.0) called during shutdown | unit | passing |
+
+### Backend — Unit: HTTP Client (`backend/tests/unit/test_http_client.py`)
+
+| Test Name | Description | Type | Status |
+|-----------|-------------|------|--------|
+| test_circuit_breaker_initially_closed | Circuit breaker starts in closed state | unit | passing |
+| test_circuit_breaker_opens_after_threshold | Circuit opens after failure count reaches threshold | unit | passing |
+| test_circuit_breaker_does_not_open_below_threshold | Circuit stays closed below failure threshold | unit | passing |
+| test_circuit_breaker_success_resets_state | Recording success clears failure history and closes circuit | unit | passing |
+| test_circuit_breaker_half_open_after_window | After window expires circuit allows next request through | unit | passing |
+| test_circuit_breaker_old_failures_expire | Failures older than window are pruned from history | unit | passing |
+| test_timeout_configuration | Default timeouts are 5s connect and 30s read | unit | passing |
+| test_timeout_configuration_custom | Custom read_timeout and connect_timeout are set correctly | unit | passing |
+| test_header_propagation_request_id[asyncio] | X-Request-ID from structlog context added to outgoing request | unit | passing |
+| test_header_propagation_no_contextvars[asyncio] | Missing context vars don't cause errors in outgoing requests | unit | passing |
+| test_header_propagation_merges_with_existing_headers[asyncio] | Caller headers merged with propagated context headers | unit | passing |
+| test_retry_on_502[asyncio] | 502 response triggers automatic retry | unit | passing |
+| test_retry_on_503[asyncio] | 503 response triggers automatic retry | unit | passing |
+| test_retry_on_504[asyncio] | 504 response triggers automatic retry | unit | passing |
+| test_exponential_backoff_sequence[asyncio] | Retry delays follow 0.5s, 1.0s, 2.0s backoff sequence | unit | passing |
+| test_no_retry_on_4xx[asyncio] | 400 client errors are not retried | unit | passing |
+| test_no_retry_on_401[asyncio] | 401 unauthorized errors are not retried | unit | passing |
+| test_no_retry_on_404[asyncio] | 404 not found errors are not retried | unit | passing |
+| test_retries_exhausted_returns_last_502[asyncio] | After all retries a 502 response is returned as-is | unit | passing |
+| test_retries_exhausted_on_http_error_raises[asyncio] | Non-status httpx error after retries raises ServiceError | unit | passing |
+| test_circuit_open_raises_service_error_without_http_call[asyncio] | Open circuit raises ServiceError without making request | unit | passing |
+| test_circuit_breaker_records_failure_on_5xx[asyncio] | 5xx response records a circuit breaker failure | unit | passing |
+| test_circuit_breaker_records_success_on_2xx[asyncio] | 2xx response records a circuit breaker success | unit | passing |
+| test_get_method[asyncio] | GET convenience method sends GET request and returns response | unit | passing |
+| test_post_method[asyncio] | POST convenience method sends POST request and returns response | unit | passing |
+| test_put_method[asyncio] | PUT convenience method sends PUT request and returns response | unit | passing |
+| test_patch_method[asyncio] | PATCH convenience method sends PATCH request and returns response | unit | passing |
+| test_delete_method[asyncio] | DELETE convenience method sends DELETE request and returns response | unit | passing |
+| test_get_http_client_returns_from_app_state | get_http_client dependency returns app.state.http_client | unit | passing |
+| test_get_http_client_missing_raises_503 | Missing http_client in app.state raises ServiceError 503 | unit | passing |
+
+> 30 tests covering: CircuitBreaker (6 sync), HttpClient config (2 sync), header propagation (3 async), retry logic (8 async), circuit breaker integration (3 async), convenience methods (5 async), and FastAPI dependency (2 sync).
+
+### Backend — Unit: Supabase Client (`backend/tests/unit/test_supabase.py`)
+
+| Test Name | Description | Type | Status |
+|-----------|-------------|------|--------|
+| test_create_supabase_client_returns_client | Factory returns a Supabase client instance for valid credentials | unit | passing |
+| test_create_supabase_client_failure_raises_service_error | Constructor failure raises ServiceError 503 | unit | passing |
+| test_get_supabase_returns_from_app_state | FastAPI dependency returns client from app.state.supabase | unit | passing |
+| test_get_supabase_missing_state_raises_503 | Missing supabase in app.state raises ServiceError 503 | unit | passing |
+
+### Backend — Unit: Auth (`backend/tests/unit/test_auth.py`)
+
+| Test Name | Description | Type | Status |
+|-----------|-------------|------|--------|
+| test_valid_jwt_returns_principal | Valid Clerk JWT returns Principal with correct user_id and session_id | unit | passing |
+| test_missing_authorization_returns_401_auth_missing_token | Missing Authorization header returns 401 AUTH_MISSING_TOKEN | unit | passing |
+| test_expired_jwt_returns_401_auth_expired_token | Expired JWT returns 401 with AUTH_EXPIRED_TOKEN code | unit | passing |
+| test_invalid_signature_returns_401_auth_invalid_token | Invalid JWT signature returns 401 with AUTH_INVALID_TOKEN | unit | passing |
+| test_unauthorized_party_returns_401_auth_invalid_token | Unauthorized party JWT returns 401 with AUTH_INVALID_TOKEN | unit | passing |
+| test_user_id_set_on_request_state | Successful auth sets request.state.user_id to principal's user_id | unit | passing |
+| test_clerk_sdk_exception_returns_401 | Clerk SDK exception propagates as 401 ServiceError | unit | passing |
+| test_unknown_reason_returns_401_auth_invalid_token | Unknown error reason returns 401 with AUTH_INVALID_TOKEN | unit | passing |
+| test_roles_extracted_from_org_metadata | Org role from JWT 'o.rol' claim extracted into roles list | unit | passing |
+| test_no_org_id_returns_none | Missing org data in JWT results in org_id=None on Principal | unit | passing |
+| test_missing_sub_claim_returns_401 | Missing 'sub' claim in JWT payload returns 401 AUTH_INVALID_TOKEN | unit | passing |
+| test_none_payload_returns_401 | None JWT payload from Clerk SDK returns 401 AUTH_INVALID_TOKEN | unit | passing |
+
 ### Backend — CRUD: User (`backend/tests/crud/test_user.py`)
 
 | Test Name | Description | Type | Status |
@@ -419,10 +509,17 @@ tags: [testing, quality, registry]
 | backend/core/security | No unit tests for password hashing and JWT creation | - |
 | backend/core/db | No unit tests for engine creation and init_db | - |
 | backend/utils | No unit tests for email generation and token utilities | - |
+| backend/app/lifespan | No test for startup log event fields (service_name, version, environment) | - |
+| backend/core/http_client | No integration tests against real HTTP server | - |
 | frontend | No unit or integration tests (Playwright E2E only) | - |
 
 > `backend/core/config` was previously listed as a gap — now covered by 13 unit tests in `backend/tests/unit/test_config.py`.
 > `backend/core/errors` is a new module introduced in AYG-65 — covered by 20 unit tests in `backend/tests/unit/test_errors.py`.
 > `backend/models/auth` and `backend/models/common` are new modules introduced in AYG-65 — covered by 11 unit tests in `backend/tests/unit/test_models.py`.
 > `backend/models/entity` is a new module introduced in AYG-69 — covered by 14 unit tests in `backend/tests/unit/test_entity_models.py`.
-> `backend/services/entity_service` introduced in AYG-69 has no unit or integration tests yet — service-layer coverage is a gap.
+> `backend/services/entity_service` introduced in AYG-69 is now fully covered by 20 unit tests in `backend/tests/unit/test_entity_service.py` (AYG-70).
+> `backend/core/middleware` test_cookie_header_not_logged (26th test) addresses the security gap of sensitive cookie values leaking into structured logs.
+> `backend/app/lifespan` introduced in AYG-71 — covered by 3 unit tests verifying shutdown ordering (AC-10).
+> `backend/core/auth` introduced in AYG-71 — covered by 12 unit tests in `backend/tests/unit/test_auth.py`.
+> `backend/core/http_client` introduced in AYG-71 — covered by 30 unit tests in `backend/tests/unit/test_http_client.py`.
+> `backend/core/supabase` introduced in AYG-71 — covered by 4 unit tests in `backend/tests/unit/test_supabase.py`.

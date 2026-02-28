@@ -1,11 +1,11 @@
 ---
 title: "Users API"
 doc-type: reference
-status: current
-version: "1.1.0"
+status: deprecated
+version: "1.2.0"
 base-url: "/api/v1"
-last-updated: 2026-02-27
-updated-by: "api-docs-writer (AYG-65)"
+last-updated: 2026-02-28
+updated-by: "api-docs-writer (AYG-71)"
 related-code:
   - backend/app/api/routes/users.py
   - backend/app/api/deps.py
@@ -19,6 +19,8 @@ tags: [api, rest, users]
 ---
 
 # Users API
+
+> **DEPRECATED**: This endpoint was removed from the router in AYG-71. The file is retained for historical reference only.
 
 ## Overview
 
@@ -647,5 +649,6 @@ All errors use the [standard error shape](../overview.md#standard-error-response
 
 | Version | Date | Change |
 |---------|------|--------|
+| 1.2.0 | 2026-02-28 | AYG-71: Router removed; file marked deprecated — retained for historical reference |
 | 1.1.0 | 2026-02-27 | AYG-65: Auth updated to Clerk JWT; all error tables updated to unified error shape |
 | 1.0.0 | 2026-02-26 | Initial release |

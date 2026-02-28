@@ -8,8 +8,8 @@ severity: "P1-P4"
 owner: "DevOps Team"
 last-reviewed: 2026-02-26
 estimated-duration: "15-60 minutes"
-last-updated: 2026-02-26
-updated-by: "initialise skill"
+last-updated: 2026-02-28
+updated-by: "infra docs writer"
 related-code:
   - compose.yml
   - backend/app/core/config.py
@@ -535,9 +535,14 @@ git push
 Setup/verify these are configured:
 
 - [ ] **Health checks** - Backend responds to `/api/v1/utils/health-check/` every 10 seconds
-- [ ] **Sentry** - Error tracking enabled in production, alerts configured
+- [ ] **Sentry** - Error tracking initialized in lifespan startup (only if `SENTRY_DSN` is set), flushed gracefully on shutdown
 - [ ] **Uptime monitoring** - External service checks https://api.example.com every 5 minutes
 - [ ] **Resource monitoring** - Server monitoring memory, disk, CPU usage
+
+**Sentry Integration Notes:**
+- Sentry is conditionally initialized in the application lifespan (startup phase) if `SENTRY_DSN` environment variable is configured
+- On graceful shutdown, `sentry_sdk.flush(timeout=2.0)` ensures pending error events are sent before the HTTP client closes
+- If `SENTRY_DSN` is not set, Sentry remains disabled (no overhead)
 
 ### Testing
 

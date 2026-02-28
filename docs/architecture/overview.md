@@ -3,18 +3,21 @@ title: "Aygentic Starter Template - Architecture Overview"
 doc-type: reference
 status: active
 last-updated: 2026-02-28
-updated-by: "architecture-docs-writer"
+updated-by: "architecture-docs-writer (AYG-71)"
 related-code:
   - backend/app/main.py
   - backend/app/api/main.py
   - backend/app/api/deps.py
   - backend/app/api/routes/
+  - backend/app/core/auth.py
   - backend/app/core/config.py
   - backend/app/core/db.py
+  - backend/app/core/http_client.py
   - backend/app/core/security.py
   - backend/app/core/errors.py
   - backend/app/core/logging.py
   - backend/app/core/middleware.py
+  - backend/app/core/supabase.py
   - backend/app/models/
   - backend/app/models/__init__.py
   - backend/app/models/common.py
@@ -56,13 +59,15 @@ C4Context
     System(system, "Aygentic Starter Template", "Full-stack web application with auth, CRUD, and admin capabilities")
 
     System_Ext(clerk, "Clerk", "External identity provider: JWT issuance, user authentication, organisation management")
+    System_Ext(supabase, "Supabase", "Managed PostgreSQL with REST API (PostgREST); new entity resources use Supabase REST client")
     System_Ext(smtp, "SMTP Server", "Sends transactional emails: password reset, account creation, test emails")
     System_Ext(sentry, "Sentry", "Error monitoring and performance tracing (non-local environments only)")
-    SystemDb_Ext(postgres, "PostgreSQL 18", "Persistent data storage for users and items")
+    SystemDb_Ext(postgres, "PostgreSQL 18", "Persistent data storage for users and items (legacy ORM path)")
 
     Rel(user, system, "Uses", "HTTPS")
     Rel(admin, system, "Administers", "HTTPS")
     Rel(system, clerk, "Verifies JWTs via", "HTTPS (JWKS)")
+    Rel(system, supabase, "CRUD via REST", "HTTPS (supabase-py)")
     Rel(system, smtp, "Sends emails via", "SMTP/TLS port 587")
     Rel(system, sentry, "Reports errors to", "HTTPS DSN")
     Rel(system, postgres, "Reads/writes data", "psycopg3 (postgresql+psycopg)")
@@ -72,9 +77,12 @@ C4Context
 
 | Component | Purpose | Technology | Location |
 |-----------|---------|------------|----------|
-| FastAPI Backend | REST API server (titled via `SERVICE_NAME` setting) handling auth, CRUD, and business logic; registers unified error handlers at startup; initializes structured logging at startup via `setup_logging(settings)` and registers `RequestPipelineMiddleware` as the outermost middleware | Python 3.10+, FastAPI >=0.114.2, Pydantic 2.x | `backend/app/main.py` |
+| FastAPI Backend | REST API server (titled via `SERVICE_NAME` setting) handling auth, CRUD, and business logic; uses an async `lifespan` context manager to initialise shared resources (Supabase client, HttpClient, Sentry) on startup and clean them up on shutdown; registers unified error handlers at startup; initializes structured logging at startup via `setup_logging(settings)` and registers `RequestPipelineMiddleware` as the outermost middleware | Python 3.10+, FastAPI >=0.114.2, Pydantic 2.x | `backend/app/main.py` |
 | API Router | Mounts versioned route modules under `/api/v1` | FastAPI APIRouter | `backend/app/api/main.py` |
-| Auth & Dependencies | JWT token validation, DB session injection, role-based guards; transitioning from internal HS256 JWT to Clerk JWT with `Principal` identity model (`user_id`, `roles`, `org_id`) | PyJWT, OAuth2PasswordBearer, Annotated Depends | `backend/app/api/deps.py` |
+| Clerk Auth Dependency | Validates Clerk JWT Bearer tokens using the Clerk SDK; extracts `Principal` identity (user_id, session_id, roles, org_id) from JWT claims; maps auth failures to structured `AUTH_*` error codes; sets `request.state.user_id` for logging middleware | clerk-backend-api, httpx | `backend/app/core/auth.py` |
+| Auth & Dependencies (Legacy) | JWT token validation, DB session injection, role-based guards; transitioning from internal HS256 JWT to Clerk JWT with `Principal` identity model (`user_id`, `roles`, `org_id`) | PyJWT, OAuth2PasswordBearer, Annotated Depends | `backend/app/api/deps.py` |
+| HTTP Client | Shared async HTTP client with configurable timeouts (5s connect / 30s read), automatic retry with exponential backoff (0.5s, 1.0s, 2.0s) on 502/503/504, circuit breaker (5 failures / 60s window), and X-Request-ID / X-Correlation-ID header propagation from structlog contextvars; created once during lifespan startup and stored on `app.state.http_client` | httpx, structlog | `backend/app/core/http_client.py` |
+| Supabase Client Factory | Factory function `create_supabase_client()` initialises a Supabase Client from URL + service key; `get_supabase()` FastAPI dependency retrieves it from `app.state`; raises ServiceError 503 on initialisation failure or missing state | supabase-py | `backend/app/core/supabase.py` |
 | Security Module | Password hashing (Argon2 primary + Bcrypt fallback) and JWT token creation (legacy; being replaced by Clerk external auth) | pwdlib (Argon2Hasher, BcryptHasher), PyJWT (HS256) | `backend/app/core/security.py` |
 | Error Handling | Unified exception handler framework; `ServiceError` exception, `STATUS_CODE_MAP`, 4 global handlers registered at startup via `register_exception_handlers(app)` | FastAPI exception handlers, Pydantic response models | `backend/app/core/errors.py` |
 | Structured Logging | Configures structlog with JSON (production/CI) or console (local) renderer; injects service metadata (service, version, environment) and request-scoped fields (request_id, correlation_id) via contextvars into every log entry | structlog >=24.1.0 | `backend/app/core/logging.py` |
@@ -412,6 +420,44 @@ Request
 - 4xx → `warning`
 - 5xx → `error`
 
+## Application Lifespan
+
+The FastAPI app uses an async `lifespan` context manager (`backend/app/main.py`) to manage shared resources. This replaces the deprecated `on_startup` / `on_shutdown` event hooks.
+
+### Startup Sequence
+
+1. `create_supabase_client(url, key)` -- initialise Supabase REST client, store on `app.state.supabase`
+2. `HttpClient(read_timeout, max_retries)` -- create shared async HTTP client, store on `app.state.http_client`
+3. Sentry SDK init (conditional on `SENTRY_DSN` being set) -- StarletteIntegration + FastApiIntegration, 10% traces sample rate
+4. Log `app_startup` event with `service_name`, `version`, `environment`
+
+### Shutdown Sequence (AC-10 Order)
+
+Shutdown follows a strict ordering to ensure observability is preserved as long as possible:
+
+1. **Log `app_shutdown` event** -- structured log with service metadata (must happen first while logging infrastructure is still available)
+2. **Close `http_client`** -- `await app.state.http_client.close()` releases connection pool; wrapped in try/except to log failures without blocking shutdown
+3. **Flush Sentry** -- `sentry_sdk.flush(timeout=2.0)` drains any buffered error reports before process exit
+
+```mermaid
+sequenceDiagram
+    participant App as FastAPI Lifespan
+    participant Logger as structlog
+    participant HTTP as HttpClient
+    participant Sentry as Sentry SDK
+
+    Note over App: Startup
+    App->>App: create_supabase_client() -> app.state.supabase
+    App->>HTTP: HttpClient(read_timeout, max_retries) -> app.state.http_client
+    App->>Sentry: sentry_sdk.init() (if SENTRY_DSN set)
+    App->>Logger: log "app_startup"
+    Note over App: yield (app serves requests)
+    Note over App: Shutdown (AC-10 order)
+    App->>Logger: log "app_shutdown"
+    App->>HTTP: await http_client.close()
+    App->>Sentry: sentry_sdk.flush(timeout=2.0)
+```
+
 ## Security Architecture
 
 ### Password Hashing
@@ -486,10 +532,10 @@ Key decisions are documented as ADRs in `docs/architecture/decisions/`:
 
 | ADR | Title | Status | Date |
 |-----|-------|--------|------|
-| [0001](decisions/0001-unified-error-handling-framework.md) | Unified Error Handling Framework | proposed | 2026-02-27 |
-| [0002](decisions/0002-shared-pydantic-models-package.md) | Shared Pydantic Models Package | proposed | 2026-02-27 |
+| [0001](decisions/0001-unified-error-handling-framework.md) | Unified Error Handling Framework | accepted | 2026-02-28 |
+| [0002](decisions/0002-shared-pydantic-models-package.md) | Shared Pydantic Models Package | accepted | 2026-02-28 |
 | [0003](decisions/0003-structlog-and-request-pipeline-middleware.md) | Structlog Adoption and Request Pipeline Middleware | accepted | 2026-02-27 |
-| [0004](decisions/0004-supabase-service-layer-pattern.md) | Supabase Service Layer Pattern | proposed | 2026-02-28 |
+| [0004](decisions/0004-supabase-service-layer-pattern.md) | Supabase Service Layer Pattern | accepted | 2026-02-28 |
 
 ## Known Constraints
 

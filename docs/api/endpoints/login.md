@@ -2,10 +2,10 @@
 title: "Login & Authentication API"
 doc-type: reference
 status: deprecated
-version: "1.1.0"
+version: "1.2.0"
 base-url: "/api/v1"
-last-updated: 2026-02-27
-updated-by: "api-docs-writer (AYG-65)"
+last-updated: 2026-02-28
+updated-by: "api-docs-writer (AYG-71)"
 related-code:
   - backend/app/api/routes/login.py
   - backend/app/api/deps.py
@@ -20,6 +20,8 @@ tags: [api, rest, login, auth, jwt, deprecated]
 ---
 
 # Login & Authentication API
+
+> **DEPRECATED**: This endpoint was removed from the router in AYG-71. The file is retained for historical reference only.
 
 > **DEPRECATED — AYG-65**
 >
@@ -297,5 +299,6 @@ All errors use the [standard error shape](../overview.md#standard-error-response
 
 | Version | Date | Change |
 |---------|------|--------|
+| 1.2.0 | 2026-02-28 | AYG-71: Router removed; file marked deprecated — retained for historical reference |
 | 1.1.0 | 2026-02-27 | AYG-65: Marked deprecated — auth migrating to Clerk JWT; all error tables updated to unified error shape |
 | 1.0.0 | 2026-02-26 | Initial release |

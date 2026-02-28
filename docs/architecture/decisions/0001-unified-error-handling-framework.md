@@ -1,10 +1,10 @@
 ---
 title: "ADR-0001: Unified Error Handling Framework"
 doc-type: reference
-status: proposed
-date: 2026-02-27
+status: accepted
+date: 2026-02-28
 decision-makers: ["@amostan"]
-last-updated: 2026-02-27
+last-updated: 2026-02-28
 updated-by: "architecture-docs-writer"
 related-code:
   - backend/app/core/errors.py

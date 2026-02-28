@@ -351,6 +351,7 @@ Represents the authenticated caller extracted from a validated Clerk JWT. Used a
 ```python
 class Principal(BaseModel):
     user_id: str
+    session_id: str
     roles: list[str] = []
     org_id: str | None = None
 ```
@@ -360,15 +361,17 @@ class Principal(BaseModel):
 | Field | Type | Required | Default | Description |
 |-------|------|----------|---------|-------------|
 | user_id | str | Yes | — | Clerk user ID (e.g. `user_2abc...`) extracted from the JWT `sub` claim |
+| session_id | str | Yes | — | Clerk session ID extracted from the JWT `sid` claim |
 | roles | list[str] | No | `[]` | List of role names granted to this user |
 | org_id | str \| None | No | `None` | Clerk organisation ID, or `None` when the user has no active organisation |
 
 **Business Rules:**
 
 1. `user_id` is always present — it is the primary identity key for all authorization decisions in route handlers.
-2. `roles` defaults to an empty list; routes requiring a specific role must check membership explicitly.
-3. `org_id` is `None` for users operating outside an organisation context; multi-tenant routes must treat `None` as the personal workspace.
-4. `Principal` is never instantiated from user-supplied input; it is constructed only by the JWT verification dependency.
+2. `session_id` is always present — it is the Clerk session ID from the JWT `sid` claim, used for session-level identification and revocation checks.
+3. `roles` defaults to an empty list; routes requiring a specific role must check membership explicitly.
+4. `org_id` is `None` for users operating outside an organisation context; multi-tenant routes must treat `None` as the personal workspace.
+5. `Principal` is never instantiated from user-supplied input; it is constructed only by the JWT verification dependency.
 
 ---
 

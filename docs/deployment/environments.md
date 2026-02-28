@@ -150,9 +150,10 @@ See [Setup Guide](../getting-started/setup.md) for detailed instructions.
 | `LOG_LEVEL` | GitHub Secret | INFO |
 | `LOG_FORMAT` | GitHub Secret | json |
 | `BACKEND_CORS_ORIGINS` | GitHub Secret | https://dashboard.staging.example.com |
+| `CLERK_AUTHORIZED_PARTIES` | Default | [] |
 | `GIT_COMMIT` | GitHub Actions | SHA from commit |
 | `BUILD_TIME` | GitHub Actions | Timestamp from build |
-| `SENTRY_DSN` | GitHub Secret | https://xxxx@sentry.io/yyyy |
+| `SENTRY_DSN` | GitHub Secret | https://xxxx@sentry.io/yyyy (optional) |
 | `HTTP_CLIENT_TIMEOUT` | Default | 30 |
 | `HTTP_CLIENT_MAX_RETRIES` | Default | 3 |
 
@@ -230,9 +231,10 @@ git push  # Triggers redeploy
 | `LOG_LEVEL` | GitHub Secret | WARNING |
 | `LOG_FORMAT` | GitHub Secret | json |
 | `BACKEND_CORS_ORIGINS` | GitHub Secret | https://dashboard.example.com |
+| `CLERK_AUTHORIZED_PARTIES` | Default | [] |
 | `GIT_COMMIT` | GitHub Actions | SHA from release tag |
 | `BUILD_TIME` | GitHub Actions | Timestamp from build |
-| `SENTRY_DSN` | GitHub Secret | https://xxxx@sentry.io/yyyy |
+| `SENTRY_DSN` | GitHub Secret | https://xxxx@sentry.io/yyyy (optional) |
 | `HTTP_CLIENT_TIMEOUT` | Default | 30 |
 | `HTTP_CLIENT_MAX_RETRIES` | Default | 3 |
 
@@ -285,7 +287,12 @@ Production includes:
 
 ### Security
 
-`RequestPipelineMiddleware` automatically adds `Strict-Transport-Security: max-age=31536000; includeSubDomains` when `ENVIRONMENT=production`. Ensure DNS and subdomains are HTTPS-ready before setting this in production.
+`RequestPipelineMiddleware` automatically adds `Strict-Transport-Security: max-age=31536000; includeSubDomains` header when `ENVIRONMENT=production`. Ensure DNS and subdomains are HTTPS-ready before setting this in production.
+
+**Production-specific validations:**
+- Wildcard CORS (`*`) is rejected — must specify exact origins
+- Secret values cannot be `"changethis"` — must be valid credentials
+- Settings are frozen and immutable after initialization
 
 ### Disaster Recovery
 

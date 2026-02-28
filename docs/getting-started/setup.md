@@ -2,7 +2,7 @@
 title: "Setup Guide"
 doc-type: how-to
 status: published
-last-updated: 2026-02-27
+last-updated: 2026-02-28
 updated-by: "infra docs writer"
 related-code:
   - backend/app/core/config.py
@@ -204,11 +204,13 @@ alembic upgrade head
 | Port 8000 already in use | Kill the process: `lsof -ti:8000 \| xargs kill -9` or change in compose.override.yml |
 | Port 5432 (database) already in use | Kill the process: `lsof -ti:5432 \| xargs kill -9` |
 | Database connection refused | Wait 30+ seconds for `db` service healthcheck. Check logs: `docker compose logs db` |
-| Migrations failing | Ensure `POSTGRES_PASSWORD` matches in .env. Drop and recreate: `docker compose down -v && docker compose up` |
-| Backend/frontend not connecting | Verify `FRONTEND_HOST` and `BACKEND_CORS_ORIGINS` in .env. Check logs: `docker compose logs backend` |
-| Mailcatcher not receiving emails | Check `SMTP_HOST` is set to `mailcatcher` in compose.override.yml (automatic) |
+| Migrations failing | Check Alembic migration status: `alembic current`. Drop and recreate: `docker compose down -v && docker compose watch` |
+| Backend/frontend not connecting | Verify `BACKEND_CORS_ORIGINS` in .env. Check logs: `docker compose logs backend` |
 | `docker compose watch` not syncing code | Volumes mount correctly. Check logs: `docker compose logs backend` or `docker compose logs frontend` |
 | Backend logs show plain text instead of JSON | Verify `LOG_FORMAT=json` in `.env`. Default is `json`; the console renderer only activates when `LOG_FORMAT=console`. |
+| Supabase connection error | Verify `SUPABASE_URL` and `SUPABASE_SERVICE_KEY` are correct. Check Supabase dashboard. |
+| Clerk auth errors | Verify `CLERK_SECRET_KEY` is correct. Check Clerk dashboard for valid key. |
+| Settings validation error | Verify no secret values are `"changethis"` in non-local environments. Restart: `docker compose down && docker compose watch` |
 
 ## Docker Compose Files
 
