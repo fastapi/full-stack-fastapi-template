@@ -3,7 +3,7 @@ title: "Test Registry"
 doc-type: reference
 status: draft
 last-updated: 2026-02-28
-updated-by: "architecture-docs-writer"
+updated-by: "api-docs-writer (AYG-70)"
 related-code:
   - "backend/tests/**/*.py"
   - "frontend/tests/**/*.spec.ts"
@@ -18,7 +18,7 @@ tags: [testing, quality, registry]
 
 | Module | Unit | Integration | E2E | Total |
 |--------|------|-------------|-----|-------|
-| backend/api/routes | 0 | 64 | 0 | 64 |
+| backend/api/routes | 0 | 82 | 0 | 82 |
 | backend/core/config | 13 | 0 | 0 | 13 |
 | backend/core/errors | 20 | 0 | 0 | 20 |
 | backend/core/logging | 6 | 0 | 0 | 6 |
@@ -35,7 +35,7 @@ tags: [testing, quality, registry]
 | frontend/user-settings | 0 | 0 | 14 | 14 |
 | frontend/sign-up | 0 | 0 | 11 | 11 |
 | frontend/reset-password | 0 | 0 | 6 | 6 |
-| **Total** | **114** | **64** | **61** | **239** |
+| **Total** | **114** | **82** | **61** | **257** |
 
 > Unit tests in `backend/tests/unit/` can run without database env vars. The conftest guard pattern in that directory skips DB-dependent fixtures automatically.
 
@@ -130,6 +130,29 @@ tags: [testing, quality, registry]
 | test_custom_settings_values | Reflects custom settings in response body | integration | passing |
 | test_response_schema_exact (version) | Response has exactly five expected fields | integration | passing |
 | test_no_auth_required (version) | Succeeds without Authorization header | integration | passing |
+
+#### Backend — Integration: Entities (`backend/tests/integration/test_entities.py`)
+
+| Test | Description |
+|------|-------------|
+| `TestCreateEntity::test_create_returns_201_with_entity` | POST /entities returns 201 with created entity body |
+| `TestCreateEntity::test_create_sets_owner_id_from_principal` | owner_id set from JWT principal, not request body |
+| `TestCreateEntity::test_create_missing_title_returns_422` | Missing required title field returns 422 |
+| `TestCreateEntity::test_create_invalid_json_returns_422_with_details` | Empty title string returns 422 with details array |
+| `TestListEntities::test_list_returns_200_with_data_and_count` | GET /entities returns 200 with data array and count |
+| `TestListEntities::test_list_uses_default_pagination` | Default pagination uses offset=0, limit=20 (range 0-19) |
+| `TestListEntities::test_list_rejects_limit_over_100` | limit=200 rejected with 422 via Query constraint |
+| `TestListEntities::test_list_rejects_negative_offset` | Negative offset rejected with 422 via Query constraint |
+| `TestListEntities::test_list_respects_custom_offset_and_limit` | Custom offset and limit forwarded correctly to service |
+| `TestGetEntity::test_get_returns_200_for_owned_entity` | GET /entities/{id} returns 200 with entity data |
+| `TestGetEntity::test_get_nonexistent_returns_404` | Non-existent UUID returns 404 with ENTITY_NOT_FOUND code |
+| `TestGetEntity::test_get_non_owned_returns_404` | Non-owned entity returns 404 (not 403) for isolation |
+| `TestUpdateEntity::test_patch_updates_provided_fields_only` | PATCH updates only provided fields, leaves others unchanged |
+| `TestUpdateEntity::test_patch_nonexistent_returns_404` | PATCH non-existent entity returns 404 with ENTITY_NOT_FOUND |
+| `TestUpdateEntity::test_patch_empty_body_returns_current_entity` | Empty PATCH body is a no-op returning current entity |
+| `TestDeleteEntity::test_delete_returns_204` | DELETE returns 204 No Content with empty body |
+| `TestDeleteEntity::test_delete_nonexistent_returns_404` | DELETE non-existent entity returns 404 with ENTITY_NOT_FOUND |
+| `TestAuth::test_no_auth_returns_401` | All 5 entity endpoints return 401 without authentication |
 
 ### Backend — Unit: Config (`backend/tests/unit/test_config.py`)
 

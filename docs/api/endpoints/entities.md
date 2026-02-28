@@ -1,11 +1,11 @@
 ---
 title: "Entities API"
 doc-type: reference
-status: planned
+status: active
 version: "0.1.0"
 base-url: "/api/v1"
 last-updated: 2026-02-28
-updated-by: "api-docs-writer (AYG-69)"
+updated-by: "api-docs-writer (AYG-70)"
 related-code:
   - backend/app/models/entity.py
   - backend/app/services/entity_service.py
@@ -15,12 +15,12 @@ related-docs:
   - docs/api/overview.md
   - docs/architecture/overview.md
   - docs/data/models.md
-tags: [api, rest, entities, planned]
+tags: [api, rest, entities]
 ---
 
 # Entities API
 
-> **Planned — implementation in AYG-70.** The service layer and data models for this resource are complete (AYG-69). Route handlers have not yet been registered. This document is pre-scaffolded from the service contract so that consumer teams can review the interface before implementation begins. All details are derived directly from `backend/app/models/entity.py` and `backend/app/services/entity_service.py`.
+> **Active as of AYG-70.** The entity route handlers are registered and live under `/api/v1/entities`. All five CRUD operations are implemented and tested.
 
 ## Overview
 
@@ -30,12 +30,12 @@ The entities router will provide full CRUD operations for the `Entity` resource.
 **Authentication:** Clerk JWT Bearer token — required for all endpoints
 **Tag:** `entities`
 
-> **AYG-70 note:** Routes are implemented in AYG-70. The service functions `create_entity`, `get_entity`, `list_entities`, `update_entity`, and `delete_entity` in `backend/app/services/entity_service.py` define the exact behaviour documented here. See [API Overview — Authentication](../overview.md#authentication) for the full Clerk auth flow. All error responses use the [unified error shape](../overview.md#standard-error-responses).
+The service functions `create_entity`, `get_entity`, `list_entities`, `update_entity`, and `delete_entity` in `backend/app/services/entity_service.py` define the exact behaviour documented here. See [API Overview — Authentication](../overview.md#authentication) for the full Clerk auth flow. All error responses use the [unified error shape](../overview.md#standard-error-responses).
 
 ## Quick Start
 
 ```bash
-# List your entities (once AYG-70 is merged)
+# List your entities
 curl -X GET "http://localhost:8000/api/v1/entities" \
   -H "Authorization: Bearer <clerk_jwt>"
 ```

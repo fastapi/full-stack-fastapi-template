@@ -1,11 +1,11 @@
 ---
 title: "API Overview"
 doc-type: reference
-status: draft
+status: active
 version: "1.3.0"
 base-url: "/api/v1"
 last-updated: 2026-02-28
-updated-by: "api-docs-writer (AYG-69)"
+updated-by: "api-docs-writer (AYG-70)"
 related-code:
   - backend/app/main.py
   - backend/app/api/main.py
@@ -137,7 +137,7 @@ Non-superusers can only access items they own. Accessing another user's item ret
 
 ### Entities
 
-> **Planned (AYG-70):** The entity service layer and Supabase-backed data models are complete (AYG-69). Route handlers are not yet registered. The full API contract is pre-scaffolded in [Entities](endpoints/entities.md).
+> **Active (AYG-70):** Entity CRUD endpoints are implemented and registered at `/api/v1/entities`. See [Entities API](endpoints/entities.md) for full documentation.
 
 All entity endpoints are scoped to the authenticated caller — `owner_id` isolation is enforced at the service layer, so users can only access their own records.
 
@@ -404,13 +404,14 @@ CORS allowed origins are controlled by two configuration values:
 - [Login & Authentication](endpoints/login.md)
 - [Users](endpoints/users.md)
 - [Items](endpoints/items.md)
-- [Entities](endpoints/entities.md) *(Planned — routes in AYG-70; service layer complete in AYG-69)*
+- [Entities](endpoints/entities.md)
 - [Utils](endpoints/utils.md)
 
 ## Changelog
 
 | Version | Date | Change |
 |---------|------|--------|
+| 1.4.0 | 2026-02-28 | AYG-70: Entity CRUD route handlers registered; all five endpoints live |
 | 1.3.0 | 2026-02-28 | AYG-69: Entity resource forward-reference added; service layer complete, routes planned for AYG-70 |
 | 1.2.0 | 2026-02-28 | AYG-68: Operational endpoints (`/healthz`, `/readyz`, `/version`) added at root level; Utils `/health-check/` marked as legacy |
 | 1.1.0 | 2026-02-27 | AYG-65: Auth updated to Clerk JWT; unified error response shape documented; `PaginatedResponse[T]` and `offset`/`limit` pagination params documented |
