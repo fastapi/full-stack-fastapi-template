@@ -2,8 +2,8 @@
 title: "Development Workflow"
 doc-type: how-to
 status: published
-last-updated: 2026-02-26
-updated-by: "initialise skill"
+last-updated: 2026-02-28
+updated-by: "infra docs writer"
 related-code:
   - backend/pyproject.toml
   - frontend/package.json
@@ -11,6 +11,9 @@ related-code:
   - scripts/test.sh
   - scripts/generate-client.sh
   - compose.override.yml
+  - supabase/config.toml
+  - supabase/migrations/**
+  - backend/alembic/versions/**
 related-docs:
   - docs/getting-started/setup.md
   - docs/getting-started/contributing.md
@@ -210,18 +213,25 @@ from typing import Optional
 
 ## Database Management
 
-### Run Migrations
+### Two Migration Systems
 
-Migrations run automatically on startup. To run manually:
+This project uses two complementary migration tools:
+
+| System | Tool | Files | Purpose |
+|--------|------|-------|---------|
+| **Alembic** | SQLAlchemy | `backend/alembic/versions/` | Legacy SQLModel tables |
+| **Supabase CLI** | Supabase | `supabase/migrations/` | Entity tables with RLS |
+
+#### Alembic (SQLModel)
+
+Run migrations automatically on startup. To run manually:
 
 ```bash
 cd backend
 alembic upgrade head
 ```
 
-### Create Migration
-
-After modifying `app/models`:
+Create a migration after modifying `app/models`:
 
 ```bash
 cd backend
@@ -229,13 +239,53 @@ alembic revision --autogenerate -m "Add user email field"
 alembic upgrade head
 ```
 
-### Check Migration Status
+Check migration status:
 
 ```bash
 cd backend
 alembic current  # Show current revision
 alembic history  # Show all revisions
 ```
+
+#### Supabase CLI (Entity Tables)
+
+Before using Supabase CLI, configure your project:
+
+```bash
+# Edit supabase/config.toml and set project.id
+# Get it from Supabase dashboard → Settings → General → Project Ref
+[project]
+id = "your-project-ref"
+```
+
+Apply entity migrations:
+
+```bash
+# From repository root
+supabase db push
+```
+
+This applies all pending migrations from `supabase/migrations/` to your Supabase project.
+
+Create a new migration:
+
+```bash
+supabase migration new create_entities
+# Edit the generated file in supabase/migrations/
+supabase db push
+```
+
+### When to Use Each
+
+**Alembic:**
+- Changes to FastAPI/SQLModel tables
+- Python ORM-based schema management
+- Tables without row-level security
+
+**Supabase CLI:**
+- New entity tables with row-level security
+- PostgreSQL-specific features (triggers, functions, extensions)
+- Data requiring user isolation
 
 ## API Development
 

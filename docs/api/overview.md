@@ -2,10 +2,10 @@
 title: "API Overview"
 doc-type: reference
 status: draft
-version: "1.2.0"
+version: "1.3.0"
 base-url: "/api/v1"
 last-updated: 2026-02-28
-updated-by: "api-docs-writer (AYG-68)"
+updated-by: "api-docs-writer (AYG-69)"
 related-code:
   - backend/app/main.py
   - backend/app/api/main.py
@@ -17,6 +17,8 @@ related-code:
   - backend/app/api/routes/health.py
   - backend/app/api/routes/private.py
   - backend/app/models.py
+  - backend/app/models/entity.py
+  - backend/app/services/entity_service.py
   - backend/app/core/config.py
   - backend/app/core/security.py
   - backend/app/core/errors.py
@@ -132,6 +134,20 @@ These endpoints are public (no authentication required) and mounted directly on 
 | `DELETE` | `/items/{id}` | Delete an item | Yes | No |
 
 Non-superusers can only access items they own. Accessing another user's item returns `403`.
+
+### Entities
+
+> **Planned (AYG-70):** The entity service layer and Supabase-backed data models are complete (AYG-69). Route handlers are not yet registered. The full API contract is pre-scaffolded in [Entities](endpoints/entities.md).
+
+All entity endpoints are scoped to the authenticated caller — `owner_id` isolation is enforced at the service layer, so users can only access their own records.
+
+| Method | Path | Description | Auth Required |
+|--------|------|-------------|:-------------:|
+| `POST` | `/entities` | Create a new entity | Yes |
+| `GET` | `/entities` | List caller's entities (paginated, max 100 per page) | Yes |
+| `GET` | `/entities/{entity_id}` | Get a single entity by UUID | Yes |
+| `PATCH` | `/entities/{entity_id}` | Partially update an entity | Yes |
+| `DELETE` | `/entities/{entity_id}` | Delete an entity (returns 204) | Yes |
 
 ### Utils
 
@@ -388,12 +404,14 @@ CORS allowed origins are controlled by two configuration values:
 - [Login & Authentication](endpoints/login.md)
 - [Users](endpoints/users.md)
 - [Items](endpoints/items.md)
+- [Entities](endpoints/entities.md) *(Planned — routes in AYG-70; service layer complete in AYG-69)*
 - [Utils](endpoints/utils.md)
 
 ## Changelog
 
 | Version | Date | Change |
 |---------|------|--------|
+| 1.3.0 | 2026-02-28 | AYG-69: Entity resource forward-reference added; service layer complete, routes planned for AYG-70 |
 | 1.2.0 | 2026-02-28 | AYG-68: Operational endpoints (`/healthz`, `/readyz`, `/version`) added at root level; Utils `/health-check/` marked as legacy |
 | 1.1.0 | 2026-02-27 | AYG-65: Auth updated to Clerk JWT; unified error response shape documented; `PaginatedResponse[T]` and `offset`/`limit` pagination params documented |
 | 1.0.0 | 2026-02-26 | Initial release |

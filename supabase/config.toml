@@ -1,0 +1,8 @@
+# Supabase project configuration
+# Full reference: https://supabase.com/docs/guides/cli/config
+#
+# This is a minimal scaffold for the starter template.
+# Configure project_id after creating your Supabase project.
+
+[project]
+id = ""  # Set to your Supabase project ref (e.g., "abcdefghijklmnop")

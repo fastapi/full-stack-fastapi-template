@@ -2,7 +2,7 @@
 title: "Aygentic Starter Template - Architecture Overview"
 doc-type: reference
 status: active
-last-updated: 2026-02-27
+last-updated: 2026-02-28
 updated-by: "architecture-docs-writer"
 related-code:
   - backend/app/main.py
@@ -19,6 +19,9 @@ related-code:
   - backend/app/models/__init__.py
   - backend/app/models/common.py
   - backend/app/models/auth.py
+  - backend/app/models/entity.py
+  - backend/app/services/
+  - backend/app/services/entity_service.py
   - backend/app/crud.py
   - backend/app/alembic/
   - backend/scripts/prestart.sh
@@ -80,7 +83,8 @@ C4Context
 | Database Engine | SQLAlchemy engine creation and initial superuser seeding | SQLModel, psycopg3 (postgresql+psycopg) | `backend/app/core/db.py` |
 | Shared Models (Package) | Pure Pydantic response envelopes (`ErrorResponse`, `ValidationErrorResponse`, `PaginatedResponse[T]`) and auth identity model (`Principal`) | Pydantic 2.x | `backend/app/models/` |
 | Domain Models (Legacy) | SQLModel ORM tables + Pydantic request/response schemas (being migrated into models package) | SQLModel (User, Item + variant schemas) | `backend/app/models.py` |
-| CRUD Utilities | Data access functions with timing-attack-safe authentication | SQLModel Session, Argon2 dummy hash comparison | `backend/app/crud.py` |
+| Service Layer (Entity) | Module-level functions accepting `supabase.Client` as first param; owner-scoped CRUD via Supabase REST table builder; `ServiceError` propagation with `ENTITY_*` codes; no-op update short-circuit when no fields are set | Python, supabase-py, postgrest-py | `backend/app/services/entity_service.py` |
+| CRUD Utilities (Legacy) | Data access functions with timing-attack-safe authentication (being replaced by service layer for new resources) | SQLModel Session, Argon2 dummy hash comparison | `backend/app/crud.py` |
 | Database Migrations | Schema version control and migration management | Alembic | `backend/app/alembic/` |
 | Login Routes | OAuth2 token login, token test, password recovery/reset | FastAPI router | `backend/app/api/routes/login.py` |
 | Users Routes | User CRUD, self-registration (`/signup`), profile management | FastAPI router | `backend/app/api/routes/users.py` |
@@ -168,6 +172,31 @@ sequenceDiagram
     Note over TanStackQuery,Frontend: QueryCache.onError + MutationCache.onError:<br/>On 401/403 ApiError -> clear token, redirect /login
 ```
 
+### Entity CRUD Flow (Service Layer)
+
+```mermaid
+sequenceDiagram
+    participant Client
+    participant RouteHandler as Route Handler
+    participant Service as entity_service
+    participant Supabase as Supabase REST
+    participant DB as PostgreSQL
+
+    Client->>RouteHandler: POST /api/v1/entities/ (EntityCreate)
+    RouteHandler->>RouteHandler: Extract Principal from Clerk JWT
+    RouteHandler->>Service: create_entity(supabase, data, owner_id)
+    Service->>Service: Build payload {title, description, owner_id}
+    Service->>Supabase: table("entities").insert(payload).execute()
+    Supabase->>DB: INSERT INTO entities ...
+    DB-->>Supabase: Row data
+    Supabase-->>Service: APIResponse(data=[row])
+    Service->>Service: Validate → EntityPublic(**row)
+    Service-->>RouteHandler: EntityPublic
+    RouteHandler-->>Client: 201 JSON response
+
+    Note over Service: On failure: raises ServiceError<br/>with ENTITY_* code (404 or 500)
+```
+
 ## Deployment Architecture
 
 ### Docker Compose Services
@@ -218,6 +247,15 @@ The models directory is now a Python package with two categories of pure Pydanti
 
 **`backend/app/models/auth.py`** -- Authentication identity:
 - `Principal` -- Authenticated user principal extracted from a verified Clerk JWT. Fields: `user_id` (str, Clerk user ID), `roles` (list[str], default []), `org_id` (str | None, Clerk organisation ID)
+
+**`backend/app/models/entity.py`** -- Entity domain model (first resource using Supabase REST instead of ORM):
+- `EntityBase` -- Shared validated fields: `title` (str, 1-255 chars, required), `description` (str | None, max 1000 chars)
+- `EntityCreate(EntityBase)` -- Creation payload, inherits title + description
+- `EntityUpdate(BaseModel)` -- Partial update payload (does NOT inherit EntityBase); all fields optional for PATCH semantics
+- `EntityPublic(EntityBase)` -- Full API response shape: adds `id` (UUID), `owner_id` (str, Clerk user ID), `created_at` (datetime), `updated_at` (datetime)
+- `EntitiesPublic` -- Paginated collection: `data: list[EntityPublic]`, `count: int`
+
+All Entity models are re-exported via `backend/app/models/__init__.py` for flat imports (`from app.models import EntityCreate, EntityPublic`).
 
 ### Domain Models (Legacy, `backend/app/models.py`)
 
@@ -451,6 +489,7 @@ Key decisions are documented as ADRs in `docs/architecture/decisions/`:
 | [0001](decisions/0001-unified-error-handling-framework.md) | Unified Error Handling Framework | proposed | 2026-02-27 |
 | [0002](decisions/0002-shared-pydantic-models-package.md) | Shared Pydantic Models Package | proposed | 2026-02-27 |
 | [0003](decisions/0003-structlog-and-request-pipeline-middleware.md) | Structlog Adoption and Request Pipeline Middleware | accepted | 2026-02-27 |
+| [0004](decisions/0004-supabase-service-layer-pattern.md) | Supabase Service Layer Pattern | proposed | 2026-02-28 |
 
 ## Known Constraints
 

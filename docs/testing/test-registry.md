@@ -3,7 +3,7 @@ title: "Test Registry"
 doc-type: reference
 status: draft
 last-updated: 2026-02-28
-updated-by: "api-docs-writer"
+updated-by: "architecture-docs-writer"
 related-code:
   - "backend/tests/**/*.py"
   - "frontend/tests/**/*.spec.ts"
@@ -26,6 +26,8 @@ tags: [testing, quality, registry]
 | backend/crud | 10 | 0 | 0 | 10 |
 | backend/models/auth | 5 | 0 | 0 | 5 |
 | backend/models/common | 6 | 0 | 0 | 6 |
+| backend/models/entity | 14 | 0 | 0 | 14 |
+| backend/services/entity_service | 20 | 0 | 0 | 20 |
 | backend/scripts | 2 | 0 | 0 | 2 |
 | frontend/login | 0 | 0 | 9 | 9 |
 | frontend/admin | 0 | 0 | 12 | 12 |
@@ -33,7 +35,7 @@ tags: [testing, quality, registry]
 | frontend/user-settings | 0 | 0 | 14 | 14 |
 | frontend/sign-up | 0 | 0 | 11 | 11 |
 | frontend/reset-password | 0 | 0 | 6 | 6 |
-| **Total** | **80** | **64** | **61** | **205** |
+| **Total** | **114** | **64** | **61** | **239** |
 
 > Unit tests in `backend/tests/unit/` can run without database env vars. The conftest guard pattern in that directory skips DB-dependent fixtures automatically.
 
@@ -228,6 +230,52 @@ tags: [testing, quality, registry]
 
 > Note: 8 named test functions covering `ErrorResponse` (2), `ValidationErrorResponse` (2), `PaginatedResponse` (2), and `Principal` (2). The 11-test count in the task brief includes additional assertion branches counted individually.
 
+### Backend — Unit: Entity Models (`backend/tests/unit/test_entity_models.py`)
+
+| Test Name | Description | Type | Status |
+|-----------|-------------|------|--------|
+| test_entity_create_valid | Validates EntityCreate with valid title and description | unit | passing |
+| test_entity_create_missing_title_rejected | Rejects EntityCreate without required title field | unit | passing |
+| test_entity_create_empty_title_rejected | Rejects EntityCreate with empty string title | unit | passing |
+| test_entity_create_description_optional | EntityCreate without description defaults to None | unit | passing |
+| test_entity_update_all_optional | EntityUpdate with no fields is valid (all optional) | unit | passing |
+| test_entity_update_partial | EntityUpdate with only title set serializes correctly | unit | passing |
+| test_entity_update_empty_title_rejected | Rejects EntityUpdate with empty string title | unit | passing |
+| test_entity_public_includes_all_fields | EntityPublic includes all 6 required fields | unit | passing |
+| test_entity_public_serialization | EntityPublic round-trips through model_dump preserving values | unit | passing |
+| test_entities_public_wraps_list | EntitiesPublic serializes data list and count correctly | unit | passing |
+| test_entity_base_title_max_length | Rejects title longer than 255 characters | unit | passing |
+| test_entity_base_description_max_length | Rejects description longer than 1000 characters | unit | passing |
+| test_entity_base_title_max_length_boundary | Accepts title of exactly 255 characters | unit | passing |
+| test_entity_base_description_max_length_boundary | Accepts description of exactly 1000 characters | unit | passing |
+
+### Backend — Unit: Entity Service (`backend/tests/unit/test_entity_service.py`)
+
+| Test Name | Description | Type | Status |
+|-----------|-------------|------|--------|
+| test_create_entity_inserts_and_returns | Inserts new entity and returns populated EntityPublic | unit | passing |
+| test_create_entity_calls_insert_with_correct_payload | Verifies insert receives title, description, owner_id payload | unit | passing |
+| test_create_entity_empty_response_raises_500 | Raises ServiceError 500 when insert returns empty data | unit | passing |
+| test_get_entity_success | Returns EntityPublic when entity exists and caller is owner | unit | passing |
+| test_list_entities_paginated | Returns EntitiesPublic with data list and total count | unit | passing |
+| test_list_entities_default_pagination | Uses offset=0 limit=20 range when called with defaults | unit | passing |
+| test_update_entity_success | Applies update payload and returns updated EntityPublic | unit | passing |
+| test_delete_entity_success | Deletes entity and returns None on success | unit | passing |
+| test_get_entity_not_found_raises_404 | Raises ServiceError 404 when APIError from single() | unit | passing |
+| test_list_entities_caps_limit_at_100 | Caps limit at 100 even when larger value is passed | unit | passing |
+| test_list_entities_clamps_negative_offset | Clamps negative offset to 0 before range computation | unit | passing |
+| test_list_entities_clamps_zero_limit_to_one | Clamps limit=0 to 1 to avoid invalid range | unit | passing |
+| test_update_entity_not_found | Raises ServiceError 404 when update returns empty data | unit | passing |
+| test_delete_entity_not_found | Raises ServiceError 404 when delete returns empty data | unit | passing |
+| test_create_entity_supabase_error_raises_service_error | Raises ServiceError 500 when Supabase raises exception | unit | passing |
+| test_get_entity_infrastructure_error_raises_500 | Raises ServiceError 500 for non-APIError infrastructure failures | unit | passing |
+| test_list_entities_supabase_error_raises_service_error | Raises ServiceError 500 when Supabase raises exception | unit | passing |
+| test_update_entity_supabase_error_raises_service_error | Raises ServiceError 500 for unexpected update exceptions | unit | passing |
+| test_delete_entity_supabase_error_raises_service_error | Raises ServiceError 500 for unexpected delete exceptions | unit | passing |
+| test_update_entity_no_fields_to_update | Fetches current entity without calling update when no fields set | unit | passing |
+
+> All 20 tests use `unittest.mock.MagicMock` for the Supabase client -- no database or network required. Covers happy path CRUD (5), edge cases (7), and error propagation (8).
+
 ### Backend — CRUD: User (`backend/tests/crud/test_user.py`)
 
 | Test Name | Description | Type | Status |
@@ -353,3 +401,5 @@ tags: [testing, quality, registry]
 > `backend/core/config` was previously listed as a gap — now covered by 13 unit tests in `backend/tests/unit/test_config.py`.
 > `backend/core/errors` is a new module introduced in AYG-65 — covered by 20 unit tests in `backend/tests/unit/test_errors.py`.
 > `backend/models/auth` and `backend/models/common` are new modules introduced in AYG-65 — covered by 11 unit tests in `backend/tests/unit/test_models.py`.
+> `backend/models/entity` is a new module introduced in AYG-69 — covered by 14 unit tests in `backend/tests/unit/test_entity_models.py`.
+> `backend/services/entity_service` introduced in AYG-69 has no unit or integration tests yet — service-layer coverage is a gap.

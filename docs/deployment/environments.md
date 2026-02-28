@@ -2,7 +2,7 @@
 title: "Deployment Environments"
 doc-type: reference
 status: published
-last-updated: 2026-02-27
+last-updated: 2026-02-28
 updated-by: "infra docs writer"
 related-code:
   - backend/app/core/config.py
@@ -11,6 +11,8 @@ related-code:
   - backend/Dockerfile
   - frontend/Dockerfile
   - .github/workflows/**
+  - supabase/config.toml
+  - supabase/migrations/**
 related-docs:
   - docs/getting-started/setup.md
   - docs/runbooks/incidents.md
@@ -376,6 +378,85 @@ git tag v1.2.4 && git push origin v1.2.4
 - Application uses `SecretStr` type for all sensitive values
 - Logs will show masked secrets like `***` instead of actual values
 - Check Sentry for any unmasked secrets and report immediately
+
+---
+
+## Supabase Migrations
+
+This project uses two complementary migration systems:
+
+### Migration Systems
+
+| System | Tool | Location | Use Case | When to Run |
+|--------|------|----------|----------|------------|
+| **Alembic** | SQLAlchemy | `backend/alembic/versions/` | Legacy SQLModel tables | On backend model changes |
+| **Supabase CLI** | Supabase | `supabase/migrations/` | Entity tables with RLS | On entity model changes |
+
+**Why both?** During the transition to Supabase, Alembic manages existing SQLModel-based tables while Supabase CLI manages new entity tables with row-level security policies.
+
+### Supabase CLI Migrations
+
+Entity migrations are stored in `supabase/migrations/` and applied via the Supabase CLI.
+
+#### Configuration
+
+Before running CLI commands, configure your Supabase project:
+
+```bash
+# Edit supabase/config.toml
+[project]
+id = "your-supabase-project-ref"  # e.g., "abcdefghijklmnop"
+```
+
+Get your project ref from Supabase dashboard → Settings → General → Project Ref.
+
+#### Applying Migrations
+
+Run migrations on initial setup and after pulling new migration files:
+
+```bash
+# From repository root
+supabase db push
+
+# This applies all pending migrations from supabase/migrations/ to your Supabase project
+```
+
+Migrations run in timestamp order. Each migration file is idempotent — running them multiple times is safe.
+
+#### Example Migration
+
+`supabase/migrations/20260227000000_create_entities.sql`:
+- Creates `entities` table with UUID primary key
+- Adds owner-scoped index for performance
+- Configures Row-Level Security (RLS) policies
+- Users can only access their own entities via `owner_id = current_user_id`
+- Service role key (backend only) bypasses RLS for admin operations
+
+#### Required Environment Variables
+
+For local development and CI/CD pipelines:
+
+| Variable | Source | Purpose |
+|----------|--------|---------|
+| `SUPABASE_URL` | Supabase Settings | Project URL for database connection |
+| `SUPABASE_SERVICE_KEY` | Supabase Settings → API | Service role key for backend (bypasses RLS) |
+| `SUPABASE_DB_PASSWORD` | Supabase Settings | Database password (if using psql directly) |
+
+All Supabase secrets are managed via:
+- **Local**: `.env` file (git-ignored)
+- **Staging/Production**: GitHub Secrets
+
+#### When to Use Supabase CLI
+
+Use Supabase CLI for:
+- New entity tables requiring row-level security
+- Migrations with PostgreSQL-specific features (triggers, functions, extensions)
+- Data that requires user isolation
+
+Use Alembic for:
+- Changes to existing FastAPI/SQLModel tables
+- Python ORM-based schema management
+- Tables without RLS requirements
 
 ---
 
