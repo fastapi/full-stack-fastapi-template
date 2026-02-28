@@ -2,7 +2,7 @@ name: Smokeshow
 
 on:
   workflow_run:
-    workflows: [Test Backend]
+    workflows: [CI]
     types: [completed]
 
 jobs:

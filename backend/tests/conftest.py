@@ -6,9 +6,6 @@ Modern fixtures (always available):
   - client                  — TestClient with Supabase + auth overrides (function-scoped)
   - unauthenticated_client  — TestClient with only Supabase override (function-scoped)
 
-Legacy fixtures (guarded — remove in AYG-72):
-  - db, superuser_token_headers, normal_user_token_headers
-
 Env var defaults are set BEFORE any app imports to satisfy module-level
 Settings validation (SUPABASE_URL, SUPABASE_SERVICE_KEY, CLERK_SECRET_KEY).
 """
@@ -99,48 +96,3 @@ def unauthenticated_client(
         yield test_client
 
     app.dependency_overrides.clear()
-
-
-# ---------------------------------------------------------------------------
-# Legacy fixtures (AYG-72: remove these once legacy test files are deleted)
-# ---------------------------------------------------------------------------
-
-# Integration test fixtures require legacy SQLAlchemy/DB dependencies that are
-# being migrated away (AYG-65 through AYG-74). Guard imports so unit tests and
-# modern integration tests can run even when legacy deps are missing.
-try:
-    from sqlmodel import Session, delete
-
-    from app.core.config import settings
-    from app.core.db import engine, init_db
-    from app.models import Item, User
-    from tests.utils.user import authentication_token_from_email
-    from tests.utils.utils import get_superuser_token_headers
-
-    _LEGACY_DEPS_AVAILABLE = True
-except (ImportError, AttributeError):
-    _LEGACY_DEPS_AVAILABLE = False
-
-
-if _LEGACY_DEPS_AVAILABLE:
-
-    @pytest.fixture(scope="session", autouse=True)
-    def db() -> Generator[Session, None, None]:  # type: ignore[type-arg]
-        with Session(engine) as session:
-            init_db(session)
-            yield session
-            statement = delete(Item)
-            session.execute(statement)
-            statement = delete(User)
-            session.execute(statement)
-            session.commit()
-
-    @pytest.fixture(scope="module")
-    def superuser_token_headers(client: TestClient) -> dict[str, str]:
-        return get_superuser_token_headers(client)
-
-    @pytest.fixture(scope="module")
-    def normal_user_token_headers(client: TestClient, db: Session) -> dict[str, str]:
-        return authentication_token_from_email(
-            client=client, email=settings.EMAIL_TEST_USER, db=db
-        )

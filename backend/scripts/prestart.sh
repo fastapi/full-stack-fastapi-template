@@ -3,11 +3,7 @@
 set -e
 set -x
 
-# Let the DB start
-python app/backend_pre_start.py
-
-# Run migrations
-alembic upgrade head
-
-# Create initial data in DB
-python app/initial_data.py
+# Prestart checks
+# Database migrations are managed by Supabase CLI (supabase db push)
+# No local database or initial data seeding needed
+echo "Prestart complete — no migrations required (Supabase manages schema)"

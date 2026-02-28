@@ -9,16 +9,9 @@ dependencies = [
     "email-validator<3.0.0.0,>=2.1.0.post1",
     "tenacity<9.0.0,>=8.2.3",
     "pydantic>2.0",
-    "emails<1.0,>=0.6",
-    "jinja2<4.0.0,>=3.1.4",
-    "alembic<2.0.0,>=1.12.1",
     "httpx<1.0.0,>=0.25.1",
-    "psycopg[binary]<4.0.0,>=3.1.13",
-    "sqlmodel<1.0.0,>=0.0.21",
     "pydantic-settings<3.0.0,>=2.2.1",
     "sentry-sdk[fastapi]>=2.0.0,<3.0.0",
-    "pyjwt<3.0.0,>=2.8.0",
-    "pwdlib[argon2,bcrypt]>=0.3.0",
     "structlog>=24.1.0,<26.0.0",
     "supabase>=2.0.0,<3.0.0",
     "clerk-backend-api>=1.0.0,<2.0.0",
@@ -39,11 +32,10 @@ build-backend = "hatchling.build"
 
 [tool.mypy]
 strict = true
-exclude = ["venv", ".venv", "alembic"]
+exclude = ["venv", ".venv"]
 
 [tool.ruff]
 target-version = "py310"
-exclude = ["alembic"]
 
 [tool.ruff.lint]
 select = [
