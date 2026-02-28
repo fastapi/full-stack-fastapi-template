@@ -330,6 +330,119 @@ Run `alembic upgrade head` for Alembic migrations and `supabase db push` for Sup
 
 ---
 
+## Gateway-Ready Conventions
+
+This template is **gateway-ready, not gateway-inclusive** — every service follows conventions that make it routable through any API gateway (Traefik, Kong, AWS ALB, Alibaba Cloud API Gateway) without shipping one.
+
+### Service Discoverability
+
+Every service exposes standard endpoints that gateways use for health checking and service registration:
+
+| Endpoint | Purpose | Auth Required |
+|----------|---------|---------------|
+| `GET /version` | Returns `service_name`, `version`, `commit`, `build_time`, `environment` | No |
+| `GET /healthz` | Liveness probe — is the process running? | No |
+| `GET /readyz` | Readiness probe — can the service handle traffic? | No |
+
+### Routing Conventions
+
+All API routes use the `/api/v1` prefix (configured via `API_V1_STR` in `backend/app/core/config.py`). The service name belongs in the deployment URL, not the API path:
+
+```
+✓  https://user-service.example.com/api/v1/users
+✗  https://gateway.example.com/user-service/api/v1/users
+```
+
+Path-based gateway routing is possible but not the default convention.
+
+### Cross-Cutting Concerns
+
+| Concern | Template Responsibility | Gateway Responsibility |
+|---------|------------------------|------------------------|
+| Authentication | Clerk JWT verification per-service | Optional JWT pre-validation |
+| Rate limiting | None (defer to gateway) | Per-client rate limits |
+| API key management | None (Clerk handles user auth) | Machine-to-machine API keys |
+| CORS | Per-service `BACKEND_CORS_ORIGINS` | Aggregate CORS if fronting multiple services |
+| TLS termination | None (platform provides) | Certificate management |
+| Request routing | Responds to all requests on its port | Routes by domain/path to services |
+| Load balancing | None (platform provides) | Distributes across service instances |
+
+### Managed Platforms
+
+Teams deploying to managed platforms (Railway, Cloud Run, Fly.io, Alibaba Cloud) use the platform's built-in routing and load balancing — Traefik is not needed. The gateway-ready conventions (health endpoints, `/api/v1` prefix, structured error responses) still apply, as platforms rely on these for health checking and service discovery.
+
+For self-hosted deployments, see [`compose.gateway.yml`](compose.gateway.yml) for a reference Traefik 3.6 configuration.
+
+---
+
+## Service-to-Service Communication
+
+Service communication uses a deliberately simple pattern: environment variables pointing to URLs. No service registry, no DNS-based discovery, no service mesh. This works because container platforms (Railway, Cloud Run, Fly.io) provide stable internal URLs for services within the same project.
+
+### Service Discovery
+
+Each service dependency is configured via an environment variable following the `{SERVICE_NAME}_URL` pattern:
+
+```env
+# .env
+USER_SERVICE_URL=https://user-service.railway.internal
+BILLING_SERVICE_URL=https://billing-service.railway.internal
+```
+
+Add one `{SERVICE_NAME}_URL` variable per dependency. When a URL is not configured, the calling code should fail fast with a clear error (see [Error Handling](#error-handling-for-unconfigured-services) below).
+
+### Shared HTTP Client
+
+All inter-service calls use the shared `HttpClient` (`backend/app/core/http_client.py`), which automatically:
+
+- Propagates `X-Correlation-ID` and `X-Request-ID` headers
+- Applies configurable timeout, retry (with exponential backoff), and circuit breaker policies
+- Logs retries and exhausted retries with target URL and attempt count
+
+```python
+from app.api.deps import HttpClientDep
+from app.core.config import settings
+
+async def get_user(http: HttpClientDep, user_id: str):
+    response = await http.get(f"{settings.USER_SERVICE_URL}/api/v1/users/{user_id}")
+    response.raise_for_status()
+    return response.json()
+```
+
+### Correlation ID Propagation
+
+Every incoming request is assigned a `request_id` (UUID v4) by the request middleware (`backend/app/core/middleware.py`). The middleware also reads the `X-Correlation-ID` header from the incoming request:
+
+- **If `X-Correlation-ID` is present** and matches the expected format (alphanumeric, hyphens, underscores, dots; max 128 characters): it is used as the `correlation_id`
+- **If `X-Correlation-ID` is absent or invalid**: the `request_id` is used as the `correlation_id`
+
+Both values are bound to structlog context variables and automatically propagated to outgoing HTTP calls via the shared `HttpClient`. This creates a trace that spans multiple services — all logs for a single user action share the same `correlation_id`.
+
+### Error Handling for Unconfigured Services
+
+When a service URL is not configured, fail immediately with a descriptive `ServiceError` rather than making a request to an empty URL:
+
+```python
+from app.api.deps import HttpClientDep
+from app.core.config import settings
+from app.core.errors import ServiceError
+
+async def get_user(http: HttpClientDep, user_id: str):
+    if not settings.USER_SERVICE_URL:
+        raise ServiceError(
+            status_code=503,
+            message="User service not configured",
+            code="SERVICE_NOT_CONFIGURED",
+        )
+    response = await http.get(f"{settings.USER_SERVICE_URL}/api/v1/users/{user_id}")
+    response.raise_for_status()
+    return response.json()
+```
+
+This returns a structured `503 SERVICE_UNAVAILABLE` response with the `SERVICE_NOT_CONFIGURED` error code, making it clear that the issue is a missing configuration — not a downstream service failure.
+
+---
+
 ## Environment Variables
 
 Configuration is loaded from `.env` (development) or passed as container environment variables (staging/production). Copy `.env.example` to `.env` to get started.

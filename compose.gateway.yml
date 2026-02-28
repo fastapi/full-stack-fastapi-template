@@ -1,0 +1,139 @@
+# =============================================================================
+# REFERENCE ONLY — NOT PART OF THE TEMPLATE
+# =============================================================================
+#
+# This file documents a self-hosted Traefik 3.6 gateway configuration for teams
+# that manage their own reverse proxy instead of using a managed gateway.
+#
+# Teams deploying to managed platforms (Railway, Cloud Run, Fly.io) should use
+# the platform's built-in routing and load balancing instead of running a
+# self-hosted Traefik instance.
+#
+# This is for teams wanting a self-hosted Traefik gateway on a VPS or
+# bare-metal server with automatic TLS via Let's Encrypt.
+#
+# HOW TO USE:
+#   1. Create the external network: docker network create traefik-public
+#   2. Set ACME_EMAIL and DOMAIN in your .env (or export them)
+#   3. Start the gateway:           docker compose -f compose.gateway.yml up -d
+#   4. Add the example service labels (see bottom of this file) to your own
+#      compose.yml services, then bring them up on the same traefik-public network
+#
+# THIS FILE IS NEVER USED BY THE TEMPLATE DIRECTLY.
+# It is documentation — a reference for self-hosted gateway deployments.
+# =============================================================================
+
+services:
+
+  traefik:
+    image: traefik:3.6
+    restart: always
+    ports:
+      # HTTP — receives Let's Encrypt TLS challenges and redirects to HTTPS
+      - "80:80"
+      # HTTPS — TLS-terminated traffic
+      - "443:443"
+    volumes:
+      # Docker socket (read-only) — Traefik reads labels from running containers
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+      # Persistent volume for Let's Encrypt certificates
+      - traefik-certificates:/certificates
+    command:
+      # --- Docker provider ---
+      # Enable Docker label-based service discovery
+      - --providers.docker
+      # Only route containers that explicitly set traefik.enable=true
+      - --providers.docker.exposedbydefault=false
+      # Scope discovery to services tagged with traefik.constraint-label=traefik-public
+      - --providers.docker.constraints=Label(`traefik.constraint-label`, `traefik-public`)
+
+      # --- Entrypoints ---
+      - --entrypoints.http.address=:80
+      - --entrypoints.https.address=:443
+
+      # --- HTTP → HTTPS redirect (global, via entrypoint configuration) ---
+      - --entrypoints.http.http.redirections.entryPoint.to=https
+      - --entrypoints.http.http.redirections.entryPoint.scheme=https
+      - --entrypoints.http.http.redirections.entryPoint.permanent=true
+
+      # --- TLS / Let's Encrypt (ACME) ---
+      # TLS-ALPN-01 challenge — requires port 443 to be publicly reachable.
+      # If port 443 is firewalled or shared, switch to the HTTP-01 challenge:
+      #   - --certificatesresolvers.le.acme.httpchallenge=true
+      #   - --certificatesresolvers.le.acme.httpchallenge.entrypoint=http
+      - --certificatesresolvers.le.acme.tlschallenge=true
+      # Your email for Let's Encrypt renewal notifications
+      - --certificatesresolvers.le.acme.email=${ACME_EMAIL?Variable ACME_EMAIL not set}
+      # Store certificates in the mounted volume
+      - --certificatesresolvers.le.acme.storage=/certificates/acme.json
+
+      # --- Observability ---
+      - --accesslog
+      - --log
+    labels:
+      - traefik.enable=true
+      - traefik.docker.network=traefik-public
+
+      # https-redirect middleware — named alias so service routers can reference it
+      # The global redirect is enforced by the entrypoint command args above;
+      # this label makes the middleware available by name for per-router use.
+      - traefik.http.middlewares.https-redirect.redirectscheme.scheme=https
+      - traefik.http.middlewares.https-redirect.redirectscheme.permanent=true
+
+      # --- Rate limiting middleware (reference — not active by default) ---
+      # To enable rate limiting on a service, add these labels to that service
+      # and reference the middleware name in its router labels:
+      #   traefik.http.middlewares.rate-limit.ratelimit.average=100
+      #   traefik.http.middlewares.rate-limit.ratelimit.burst=50
+      #   traefik.http.middlewares.rate-limit.ratelimit.period=1m
+      # Then apply it to a router:
+      #   traefik.http.routers.<name>-https.middlewares=rate-limit
+    networks:
+      - traefik-public
+
+# =============================================================================
+# EXAMPLE BACKEND SERVICE (commented out — for reference only)
+# =============================================================================
+# Copy these labels into your compose.yml backend service.
+# Replace STACK_NAME, DOMAIN, the image reference, and the container port
+# to match your workload. The network and constraint-label entries are
+# required for Traefik to discover and route to your service.
+#
+#  backend:
+#    image: your-org/your-backend:latest
+#    restart: always
+#    networks:
+#      - traefik-public
+#      - default
+#    labels:
+#      - traefik.enable=true
+#      - traefik.docker.network=traefik-public
+#      - traefik.constraint-label=traefik-public
+#
+#      # Container port the backend listens on
+#      - traefik.http.services.${STACK_NAME:-app}-backend.loadbalancer.server.port=8000
+#
+#      # HTTP router — redirects to HTTPS via the https-redirect middleware
+#      - traefik.http.routers.${STACK_NAME:-app}-backend-http.rule=Host(`api.${DOMAIN:-localhost}`)
+#      - traefik.http.routers.${STACK_NAME:-app}-backend-http.entrypoints=http
+#      - traefik.http.routers.${STACK_NAME:-app}-backend-http.middlewares=https-redirect
+#
+#      # HTTPS router — serves TLS-terminated traffic with Let's Encrypt cert
+#      - traefik.http.routers.${STACK_NAME:-app}-backend-https.rule=Host(`api.${DOMAIN:-localhost}`)
+#      - traefik.http.routers.${STACK_NAME:-app}-backend-https.entrypoints=https
+#      - traefik.http.routers.${STACK_NAME:-app}-backend-https.tls=true
+#      - traefik.http.routers.${STACK_NAME:-app}-backend-https.tls.certresolver=le
+#
+#      # Optionally apply rate limiting (requires rate-limit middleware above):
+#      # - traefik.http.routers.${STACK_NAME:-app}-backend-https.middlewares=rate-limit
+# =============================================================================
+
+networks:
+  # Shared external network — must be created before running this file:
+  #   docker network create traefik-public
+  traefik-public:
+    external: true
+
+volumes:
+  # Stores Let's Encrypt certificates across container restarts
+  traefik-certificates:
