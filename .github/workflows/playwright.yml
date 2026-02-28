@@ -38,7 +38,9 @@ jobs:
   test-playwright:
     needs:
       - changes
-    if: ${{ needs.changes.outputs.changed == 'true' }}
+    # Opt-in: set repository variable PLAYWRIGHT_ENABLED=true to run E2E tests.
+    # Skipped by default in template/bootstrap repos where Supabase is not configured.
+    if: ${{ needs.changes.outputs.changed == 'true' && vars.PLAYWRIGHT_ENABLED == 'true' }}
     timeout-minutes: 60
     runs-on: ubuntu-latest
     strategy:
@@ -61,9 +63,15 @@ jobs:
       uses: astral-sh/setup-uv@v7
     - run: uv sync
       working-directory: backend
-    - run: bun ci
+    - run: bun install --frozen-lockfile
       working-directory: frontend
-    - run: bash scripts/generate-client.sh
+    - name: Generate API client
+      run: bash scripts/generate-client.sh
+      env:
+        SUPABASE_URL: "http://localhost:54321"
+        SUPABASE_SERVICE_KEY: "ci-dummy-key"
+        CLERK_SECRET_KEY: "ci-dummy-key"
+        ENVIRONMENT: "local"
     - run: docker compose build
     - run: docker compose down -v --remove-orphans
     - name: Run Playwright tests
@@ -83,13 +91,14 @@ jobs:
       - test-playwright
       - changes
     # Merge reports after playwright-tests, even if some shards have failed
-    if: ${{ !cancelled() && needs.changes.outputs.changed == 'true' }}
+    # Skip when test-playwright was skipped (template mode or no changes)
+    if: ${{ !cancelled() && needs.test-playwright.result != 'skipped' && needs.changes.outputs.changed == 'true' }}
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v6
     - uses: oven-sh/setup-bun@v2
     - name: Install dependencies
-      run: bun ci
+      run: bun install --frozen-lockfile
     - name: Download blob reports from GitHub Actions Artifacts
       uses: actions/download-artifact@v7
       with:

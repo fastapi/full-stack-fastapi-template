@@ -1,0 +1,29 @@
+# Secrets
+.env
+.env.*
+!.env.example
+
+# Version control
+.git
+.github
+
+# IDE
+.vscode
+.idea
+
+# Dependencies (installed in container)
+node_modules
+frontend/node_modules
+
+# Caches and build artifacts
+**/__pycache__
+**/.mypy_cache
+**/.pytest_cache
+**/htmlcov
+**/.coverage
+**/.ruff_cache
+
+# Documentation and config
+docs/
+*.md
+!backend/README.md

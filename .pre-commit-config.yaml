@@ -12,8 +12,7 @@ repos:
       - id: end-of-file-fixer
         exclude: |
             (?x)^(
-                frontend/src/client/.*|
-                backend/app/email-templates/build/.*
+                frontend/src/client/.*
             )$
       - id: trailing-whitespace
         exclude: ^frontend/src/client/.*
@@ -46,10 +45,3 @@ repos:
         require_serial: true
         language: unsupported
         pass_filenames: false
-
-      - id: generate-frontend-sdk
-        name: Generate Frontend SDK
-        entry: bash ./scripts/generate-client.sh
-        pass_filenames: false
-        language: unsupported
-        files: ^backend/.*$|^scripts/generate-client\.sh$

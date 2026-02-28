@@ -52,7 +52,7 @@ jobs:
       - name: Install backend dependencies
         run: uv sync --all-packages
       - name: Install frontend dependencies
-        run: bun ci
+        run: bun install --frozen-lockfile
       - name: Run prek - pre-commit
         id: precommit
         run: uvx prek run --from-ref origin/${GITHUB_BASE_REF} --to-ref HEAD --show-diff-on-failure

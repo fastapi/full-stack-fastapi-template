@@ -13,8 +13,12 @@ Error codes:
 from typing import Any
 
 import httpx
-from clerk_backend_api import AuthenticateRequestOptions, Clerk
-from clerk_backend_api.jwks_helpers import AuthErrorReason, TokenVerificationErrorReason
+from clerk_backend_api import Clerk
+from clerk_backend_api.jwks_helpers import (
+    AuthenticateRequestOptions,
+    AuthErrorReason,
+    TokenVerificationErrorReason,
+)
 from fastapi import Request
 
 from app.core.errors import ServiceError

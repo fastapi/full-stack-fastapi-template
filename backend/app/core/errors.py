@@ -119,9 +119,7 @@ async def validation_exception_handler(
     return JSONResponse(status_code=422, content=body.model_dump())
 
 
-async def unhandled_exception_handler(
-    request: Request, exc: Exception
-) -> JSONResponse:
+async def unhandled_exception_handler(request: Request, exc: Exception) -> JSONResponse:
     """Catch-all handler for unhandled exceptions."""
     request_id = _get_request_id(request)
     logger.exception("Unhandled exception [request_id=%s]", request_id, exc_info=exc)

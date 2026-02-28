@@ -9,7 +9,8 @@ from typing_extensions import Self
 
 def parse_cors(v: Any) -> list[str] | str:
     if isinstance(v, str) and v.startswith("["):
-        return json.loads(v)
+        parsed: list[str] = json.loads(v)
+        return parsed
     if isinstance(v, str):
         return [i.strip() for i in v.split(",") if i.strip()]
     elif isinstance(v, list):

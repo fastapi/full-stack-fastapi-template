@@ -22,6 +22,7 @@ Usage::
 
 import asyncio
 import time
+from typing import Any
 
 import httpx
 import structlog
@@ -112,7 +113,7 @@ class HttpClient:
             headers["X-Correlation-ID"] = ctx["correlation_id"]
         return headers
 
-    async def request(self, method: str, url: str, **kwargs: object) -> httpx.Response:
+    async def request(self, method: str, url: str, **kwargs: Any) -> httpx.Response:
         """Make an HTTP request with retry, circuit breaker, and header propagation.
 
         Retries are attempted on 502, 503, 504 responses with exponential
@@ -191,7 +192,7 @@ class HttpClient:
 
         # Safety net: should not be reached given the loop structure above.
         # last_exc is only set when we exhausted retries via exception path (already raised).
-        raise last_exc or ServiceError(  # type: ignore[misc]
+        raise last_exc or ServiceError(
             status_code=503,
             message="HTTP request failed after all retries",
             code="SERVICE_UNAVAILABLE",
@@ -201,23 +202,23 @@ class HttpClient:
     # Convenience methods
     # ------------------------------------------------------------------
 
-    async def get(self, url: str, **kwargs: object) -> httpx.Response:
+    async def get(self, url: str, **kwargs: Any) -> httpx.Response:
         """Send a GET request."""
         return await self.request("GET", url, **kwargs)
 
-    async def post(self, url: str, **kwargs: object) -> httpx.Response:
+    async def post(self, url: str, **kwargs: Any) -> httpx.Response:
         """Send a POST request."""
         return await self.request("POST", url, **kwargs)
 
-    async def put(self, url: str, **kwargs: object) -> httpx.Response:
+    async def put(self, url: str, **kwargs: Any) -> httpx.Response:
         """Send a PUT request."""
         return await self.request("PUT", url, **kwargs)
 
-    async def patch(self, url: str, **kwargs: object) -> httpx.Response:
+    async def patch(self, url: str, **kwargs: Any) -> httpx.Response:
         """Send a PATCH request."""
         return await self.request("PATCH", url, **kwargs)
 
-    async def delete(self, url: str, **kwargs: object) -> httpx.Response:
+    async def delete(self, url: str, **kwargs: Any) -> httpx.Response:
         """Send a DELETE request."""
         return await self.request("DELETE", url, **kwargs)
 
@@ -242,4 +243,4 @@ def get_http_client(request: Request) -> HttpClient:
             message="HTTP client not initialized",
             code="SERVICE_UNAVAILABLE",
         )
-    return client  # type: ignore[return-value]
+    return client  # type: ignore[no-any-return]
