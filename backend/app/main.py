@@ -4,6 +4,8 @@ from contextlib import asynccontextmanager
 import sentry_sdk
 from fastapi import FastAPI
 from fastapi.routing import APIRoute
+from sentry_sdk.integrations.fastapi import FastApiIntegration
+from sentry_sdk.integrations.starlette import StarletteIntegration
 from starlette.middleware.cors import CORSMiddleware
 
 from app.api.main import api_router
@@ -33,7 +35,24 @@ async def lifespan(app: FastAPI) -> AsyncGenerator[None]:
         read_timeout=float(settings.HTTP_CLIENT_TIMEOUT),
         max_retries=settings.HTTP_CLIENT_MAX_RETRIES,
     )
-    logger.info("app_startup_complete")
+    if settings.SENTRY_DSN:
+        sentry_sdk.init(
+            dsn=str(settings.SENTRY_DSN),
+            integrations=[
+                StarletteIntegration(transaction_style="endpoint"),
+                FastApiIntegration(transaction_style="endpoint"),
+            ],
+            enable_tracing=True,
+            traces_sample_rate=0.1,
+            send_default_pii=False,
+            environment=settings.ENVIRONMENT,
+        )
+    logger.info(
+        "app_startup",
+        service_name=settings.SERVICE_NAME,
+        version=settings.SERVICE_VERSION,
+        environment=settings.ENVIRONMENT,
+    )
 
     yield
 
@@ -42,15 +61,18 @@ async def lifespan(app: FastAPI) -> AsyncGenerator[None]:
         await app.state.http_client.close()
     except Exception:
         logger.exception("http_client_close_failed")
-    logger.info("app_shutdown_complete")
+    logger.info(
+        "app_shutdown",
+        service_name=settings.SERVICE_NAME,
+        version=settings.SERVICE_VERSION,
+        environment=settings.ENVIRONMENT,
+    )
+    sentry_sdk.flush(timeout=2.0)
 
 
 def custom_generate_unique_id(route: APIRoute) -> str:
     return f"{route.tags[0]}-{route.name}"
 
-
-if settings.SENTRY_DSN and settings.ENVIRONMENT != "local":
-    sentry_sdk.init(dsn=str(settings.SENTRY_DSN), enable_tracing=True)
 
 app = FastAPI(
     title=settings.SERVICE_NAME,
