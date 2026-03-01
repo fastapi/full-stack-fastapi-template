@@ -48,6 +48,8 @@ jobs:
       fail-fast: false
     steps:
     - uses: actions/checkout@v6
+    - name: Prepare env file for Docker Compose
+      run: cp .env.example .env
     - uses: oven-sh/setup-bun@v2
     - uses: actions/setup-python@v6
       with:
