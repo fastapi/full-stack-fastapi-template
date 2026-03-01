@@ -20,4 +20,3 @@ def read_recent_templates(
         current_user=current_user,
         limit=limit,
     )
-
