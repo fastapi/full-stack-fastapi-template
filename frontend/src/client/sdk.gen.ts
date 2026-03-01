@@ -3,7 +3,29 @@
 import type { CancelablePromise } from './core/CancelablePromise';
 import { OpenAPI } from './core/OpenAPI';
 import { request as __request } from './core/request';
-import type { GenerateExtractVariablesData, GenerateExtractVariablesResponse, GenerateRenderTemplateData, GenerateRenderTemplateResponse, GenerationsReadGenerationsData, GenerationsReadGenerationsResponse, GenerationsCreateGenerationData, GenerationsCreateGenerationResponse, GenerationsReadGenerationData, GenerationsReadGenerationResponse, GenerationsUpdateGenerationData, GenerationsUpdateGenerationResponse, ItemsReadItemsData, ItemsReadItemsResponse, ItemsCreateItemData, ItemsCreateItemResponse, ItemsReadItemData, ItemsReadItemResponse, ItemsUpdateItemData, ItemsUpdateItemResponse, ItemsDeleteItemData, ItemsDeleteItemResponse, LoginLoginAccessTokenData, LoginLoginAccessTokenResponse, LoginLoginGoogleData, LoginLoginGoogleResponse, LoginTestTokenResponse, LoginRecoverPasswordData, LoginRecoverPasswordResponse, LoginResetPasswordData, LoginResetPasswordResponse, LoginRecoverPasswordHtmlContentData, LoginRecoverPasswordHtmlContentResponse, PrivateCreateUserData, PrivateCreateUserResponse, TemplatesReadTemplatesData, TemplatesReadTemplatesResponse, TemplatesCreateTemplateData, TemplatesCreateTemplateResponse, TemplatesReadTemplateData, TemplatesReadTemplateResponse, TemplatesUpdateTemplateData, TemplatesUpdateTemplateResponse, TemplatesReadTemplateVersionsData, TemplatesReadTemplateVersionsResponse, TemplatesCreateTemplateVersionData, TemplatesCreateTemplateVersionResponse, UsersReadUsersData, UsersReadUsersResponse, UsersCreateUserData, UsersCreateUserResponse, UsersReadUserMeResponse, UsersDeleteUserMeResponse, UsersUpdateUserMeData, UsersUpdateUserMeResponse, UsersUpdatePasswordMeData, UsersUpdatePasswordMeResponse, UsersRegisterUserData, UsersRegisterUserResponse, UsersReadUserByIdData, UsersReadUserByIdResponse, UsersUpdateUserData, UsersUpdateUserResponse, UsersDeleteUserData, UsersDeleteUserResponse, UtilsTestEmailData, UtilsTestEmailResponse, UtilsHealthCheckResponse } from './types.gen';
+import type { DashboardReadRecentTemplatesData, DashboardReadRecentTemplatesResponse, GenerateExtractVariablesData, GenerateExtractVariablesResponse, GenerateRenderTemplateData, GenerateRenderTemplateResponse, GenerationsReadGenerationsData, GenerationsReadGenerationsResponse, GenerationsCreateGenerationData, GenerationsCreateGenerationResponse, GenerationsReadGenerationData, GenerationsReadGenerationResponse, GenerationsUpdateGenerationData, GenerationsUpdateGenerationResponse, ItemsReadItemsData, ItemsReadItemsResponse, ItemsCreateItemData, ItemsCreateItemResponse, ItemsReadItemData, ItemsReadItemResponse, ItemsUpdateItemData, ItemsUpdateItemResponse, ItemsDeleteItemData, ItemsDeleteItemResponse, LoginLoginAccessTokenData, LoginLoginAccessTokenResponse, LoginLoginGoogleData, LoginLoginGoogleResponse, LoginTestTokenResponse, LoginRecoverPasswordData, LoginRecoverPasswordResponse, LoginResetPasswordData, LoginResetPasswordResponse, LoginRecoverPasswordHtmlContentData, LoginRecoverPasswordHtmlContentResponse, PrivateCreateUserData, PrivateCreateUserResponse, TemplatesReadTemplatesData, TemplatesReadTemplatesResponse, TemplatesCreateTemplateData, TemplatesCreateTemplateResponse, TemplatesReadTemplateData, TemplatesReadTemplateResponse, TemplatesUpdateTemplateData, TemplatesUpdateTemplateResponse, TemplatesReadTemplateVersionsData, TemplatesReadTemplateVersionsResponse, TemplatesCreateTemplateVersionData, TemplatesCreateTemplateVersionResponse, UsersReadUsersData, UsersReadUsersResponse, UsersCreateUserData, UsersCreateUserResponse, UsersReadUserMeResponse, UsersDeleteUserMeResponse, UsersUpdateUserMeData, UsersUpdateUserMeResponse, UsersUpdatePasswordMeData, UsersUpdatePasswordMeResponse, UsersRegisterUserData, UsersRegisterUserResponse, UsersReadUserByIdData, UsersReadUserByIdResponse, UsersUpdateUserData, UsersUpdateUserResponse, UsersDeleteUserData, UsersDeleteUserResponse, UtilsTestEmailData, UtilsTestEmailResponse, UtilsHealthCheckResponse } from './types.gen';
+
+export class DashboardService {
+    /**
+     * Read Recent Templates
+     * @param data The data for the request.
+     * @param data.limit
+     * @returns RecentTemplatesPublic Successful Response
+     * @throws ApiError
+     */
+    public static readRecentTemplates(data: DashboardReadRecentTemplatesData = {}): CancelablePromise<DashboardReadRecentTemplatesResponse> {
+        return __request(OpenAPI, {
+            method: 'GET',
+            url: '/api/v1/dashboard/recent-templates',
+            query: {
+                limit: data.limit
+            },
+            errors: {
+                422: 'Validation Error'
+            }
+        });
+    }
+}
 
 export class GenerateService {
     /**

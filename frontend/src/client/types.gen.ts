@@ -116,6 +116,20 @@ export type PrivateUserCreate = {
     is_verified?: boolean;
 };
 
+export type RecentTemplatePublic = {
+    template_id: string;
+    template_name: string;
+    category: TemplateCategory;
+    language: TemplateLanguage;
+    last_used_at: string;
+    usage_count: number;
+};
+
+export type RecentTemplatesPublic = {
+    data: Array<RecentTemplatePublic>;
+    count: number;
+};
+
 export type RenderStyle = {
     tone?: string;
     length?: string;
@@ -279,6 +293,12 @@ export type ValidationError = {
         [key: string]: unknown;
     };
 };
+
+export type DashboardReadRecentTemplatesData = {
+    limit?: number;
+};
+
+export type DashboardReadRecentTemplatesResponse = (RecentTemplatesPublic);
 
 export type GenerateExtractVariablesData = {
     requestBody: ExtractVariablesRequest;

@@ -496,6 +496,57 @@ export const PrivateUserCreateSchema = {
     title: 'PrivateUserCreate'
 } as const;
 
+export const RecentTemplatePublicSchema = {
+    properties: {
+        template_id: {
+            type: 'string',
+            format: 'uuid',
+            title: 'Template Id'
+        },
+        template_name: {
+            type: 'string',
+            title: 'Template Name'
+        },
+        category: {
+            '$ref': '#/components/schemas/TemplateCategory'
+        },
+        language: {
+            '$ref': '#/components/schemas/TemplateLanguage'
+        },
+        last_used_at: {
+            type: 'string',
+            format: 'date-time',
+            title: 'Last Used At'
+        },
+        usage_count: {
+            type: 'integer',
+            title: 'Usage Count'
+        }
+    },
+    type: 'object',
+    required: ['template_id', 'template_name', 'category', 'language', 'last_used_at', 'usage_count'],
+    title: 'RecentTemplatePublic'
+} as const;
+
+export const RecentTemplatesPublicSchema = {
+    properties: {
+        data: {
+            items: {
+                '$ref': '#/components/schemas/RecentTemplatePublic'
+            },
+            type: 'array',
+            title: 'Data'
+        },
+        count: {
+            type: 'integer',
+            title: 'Count'
+        }
+    },
+    type: 'object',
+    required: ['data', 'count'],
+    title: 'RecentTemplatesPublic'
+} as const;
+
 export const RenderStyleSchema = {
     properties: {
         tone: {
