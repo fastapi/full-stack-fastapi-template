@@ -14,7 +14,9 @@ def get_by_email(*, session: Session, email: str) -> User | None:
     return session.exec(statement).first()
 
 
-def list_users(*, session: Session, skip: int = 0, limit: int = 100) -> tuple[list[User], int]:
+def list_users(
+    *, session: Session, skip: int = 0, limit: int = 100
+) -> tuple[list[User], int]:
     count_statement = select(func.count()).select_from(User)
     count = session.exec(count_statement).one()
 

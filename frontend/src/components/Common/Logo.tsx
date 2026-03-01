@@ -1,11 +1,7 @@
 import { Link } from "@tanstack/react-router"
 
-import { useTheme } from "@/components/theme-provider"
 import { cn } from "@/lib/utils"
-import icon from "/assets/images/fastapi-icon.svg"
-import iconLight from "/assets/images/fastapi-icon-light.svg"
-import logo from "/assets/images/fastapi-logo.svg"
-import logoLight from "/assets/images/fastapi-logo-light.svg"
+import logo from "/assets/images/forge_ai_logo.png"
 
 interface LogoProps {
   variant?: "full" | "icon" | "responsive"
@@ -18,38 +14,39 @@ export function Logo({
   className,
   asLink = true,
 }: LogoProps) {
-  const { resolvedTheme } = useTheme()
-  const isDark = resolvedTheme === "dark"
-
-  const fullLogo = isDark ? logoLight : logo
-  const iconLogo = isDark ? iconLight : icon
-
   const content =
     variant === "responsive" ? (
       <>
         <img
-          src={fullLogo}
-          alt="FastAPI"
+          src={logo}
+          alt="Forge AI"
           className={cn(
             "h-6 w-auto group-data-[collapsible=icon]:hidden",
             className,
           )}
         />
-        <img
-          src={iconLogo}
-          alt="FastAPI"
+        <span
           className={cn(
-            "size-5 hidden group-data-[collapsible=icon]:block",
-            className,
+            "hidden size-5 overflow-hidden rounded-sm group-data-[collapsible=icon]:inline-flex",
           )}
-        />
+        >
+          <img
+            src={logo}
+            alt="Forge AI"
+            className={cn("h-full w-full object-cover object-left", className)}
+          />
+        </span>
       </>
+    ) : variant === "full" ? (
+      <img src={logo} alt="Forge AI" className={cn("h-6 w-auto", className)} />
     ) : (
-      <img
-        src={variant === "full" ? fullLogo : iconLogo}
-        alt="FastAPI"
-        className={cn(variant === "full" ? "h-6 w-auto" : "size-5", className)}
-      />
+      <span className={cn("inline-flex size-5 overflow-hidden rounded-sm")}>
+        <img
+          src={logo}
+          alt="Forge AI"
+          className={cn("h-full w-full object-cover object-left", className)}
+        />
+      </span>
     )
 
   if (!asLink) {

@@ -22,7 +22,7 @@ export function Footer() {
     <footer className="border-t py-4 px-6">
       <div className="flex flex-col items-center justify-between gap-4 sm:flex-row">
         <p className="text-muted-foreground text-sm">
-          Full Stack FastAPI Template - {currentYear}
+          TemplateForge AI - {currentYear}
         </p>
         <div className="flex items-center gap-4">
           {socialLinks.map(({ icon: Icon, href, label }) => (

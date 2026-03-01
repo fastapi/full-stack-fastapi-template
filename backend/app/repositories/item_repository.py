@@ -9,7 +9,9 @@ def get_by_id(*, session: Session, item_id: uuid.UUID) -> Item | None:
     return session.get(Item, item_id)
 
 
-def list_all(*, session: Session, skip: int = 0, limit: int = 100) -> tuple[list[Item], int]:
+def list_all(
+    *, session: Session, skip: int = 0, limit: int = 100
+) -> tuple[list[Item], int]:
     count_statement = select(func.count()).select_from(Item)
     count = session.exec(count_statement).one()
     statement = (

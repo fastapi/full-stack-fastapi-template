@@ -8,7 +8,14 @@ from fastapi.security import OAuth2PasswordRequestForm
 from app.api.deps import CurrentUser, SessionDep, get_current_active_superuser
 from app.core import security
 from app.core.config import settings
-from app.models import Message, NewPassword, Token, UserPublic, UserUpdate
+from app.models import (
+    GoogleLoginRequest,
+    Message,
+    NewPassword,
+    Token,
+    UserPublic,
+    UserUpdate,
+)
 from app.services import auth_service, user_service
 from app.utils import (
     generate_password_reset_token,
@@ -34,6 +41,26 @@ def login_access_token(
         raise HTTPException(status_code=400, detail="Incorrect email or password")
     elif not user.is_active:
         raise HTTPException(status_code=400, detail="Inactive user")
+    access_token_expires = timedelta(minutes=settings.ACCESS_TOKEN_EXPIRE_MINUTES)
+    return Token(
+        access_token=security.create_access_token(
+            user.id, expires_delta=access_token_expires
+        )
+    )
+
+
+@router.post("/login/google")
+def login_google(session: SessionDep, body: GoogleLoginRequest) -> Token:
+    """
+    Google ID token login. Validates token with Google and returns local JWT.
+    """
+    try:
+        user = auth_service.authenticate_google_id_token(
+            session=session, id_token=body.id_token
+        )
+    except auth_service.GoogleAuthError as exc:
+        raise HTTPException(status_code=exc.status_code, detail=exc.detail)
+
     access_token_expires = timedelta(minutes=settings.ACCESS_TOKEN_EXPIRE_MINUTES)
     return Token(
         access_token=security.create_access_token(

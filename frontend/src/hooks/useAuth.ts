@@ -4,6 +4,7 @@ import { useNavigate } from "@tanstack/react-router"
 import {
   type Body_login_login_access_token as AccessToken,
   LoginService,
+  OpenAPI,
   type UserPublic,
   type UserRegister,
   UsersService,
@@ -45,12 +46,46 @@ const useAuth = () => {
     localStorage.setItem("access_token", response.access_token)
   }
 
+  const loginWithGoogleIdToken = async (idToken: string) => {
+    const apiBase = OpenAPI.BASE.replace(/\/$/, "")
+    const response = await fetch(`${apiBase}/api/v1/login/google`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ id_token: idToken }),
+    })
+
+    const payload = (await response.json().catch(() => ({}))) as {
+      access_token?: string
+      detail?: string
+    }
+
+    if (!response.ok || !payload.access_token) {
+      throw new Error(payload.detail || "Google login failed")
+    }
+
+    localStorage.setItem("access_token", payload.access_token)
+  }
+
   const loginMutation = useMutation({
     mutationFn: login,
     onSuccess: () => {
       navigate({ to: "/" })
     },
     onError: handleError.bind(showErrorToast),
+  })
+
+  const googleLoginMutation = useMutation({
+    mutationFn: loginWithGoogleIdToken,
+    onSuccess: () => {
+      navigate({ to: "/" })
+    },
+    onError: (error) => {
+      showErrorToast(
+        error instanceof Error ? error.message : "Google login failed",
+      )
+    },
   })
 
   const logout = () => {
@@ -61,6 +96,7 @@ const useAuth = () => {
   return {
     signUpMutation,
     loginMutation,
+    googleLoginMutation,
     logout,
     user,
   }
