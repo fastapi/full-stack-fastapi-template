@@ -17,6 +17,7 @@
 
 ### Internal
 
+* ⬆ Bump @tanstack/react-query from 5.90.20 to 5.90.21. PR [#2213](https://github.com/fastapi/full-stack-fastapi-template/pull/2213) by [@dependabot[bot]](https://github.com/apps/dependabot).
 * ⬆ Bump @types/node from 25.1.0 to 25.3.2. PR [#2214](https://github.com/fastapi/full-stack-fastapi-template/pull/2214) by [@dependabot[bot]](https://github.com/apps/dependabot).
 * ⬆ Bump tailwindcss from 4.1.18 to 4.2.0. PR [#2198](https://github.com/fastapi/full-stack-fastapi-template/pull/2198) by [@dependabot[bot]](https://github.com/apps/dependabot).
 * ⬆ Bump axios from 1.13.4 to 1.13.5. PR [#2199](https://github.com/fastapi/full-stack-fastapi-template/pull/2199) by [@dependabot[bot]](https://github.com/apps/dependabot).
