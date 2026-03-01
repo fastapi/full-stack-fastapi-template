@@ -91,7 +91,7 @@ jobs:
     - name: Install dependencies
       run: bun ci
     - name: Download blob reports from GitHub Actions Artifacts
-      uses: actions/download-artifact@v7
+      uses: actions/download-artifact@v8
       with:
         path: frontend/all-blob-reports
         pattern: blob-report-*
