@@ -37,6 +37,8 @@ jobs:
         # To be able to commit it needs the head branch of the PR, the remote one
           ref: ${{ github.event.pull_request.head.sha }}
           fetch-depth: 0
+      - name: Prepare env file for hooks
+        run: cp .env.example .env
       - uses: oven-sh/setup-bun@v2
       - name: Set up Python
         uses: actions/setup-python@v6
@@ -74,7 +76,7 @@ jobs:
         with:
           msg: 🎨 Auto format and update with pre-commit
       - name: Error out on pre-commit errors
-        if: steps.precommit.outcome == 'failure'
+        if: steps.precommit.outcome == 'failure' && env.HAS_SECRETS == 'true'
         run: exit 1
 
   # https://github.com/marketplace/actions/alls-green#why
