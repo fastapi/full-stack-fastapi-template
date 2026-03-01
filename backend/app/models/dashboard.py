@@ -538,3 +538,148 @@ class BrandImpressionTrendResponse(BaseModel):
     data_points: list[BrandImpressionTrendDataPoint] = Field(default_factory=list)
 
     model_config = ConfigDict(from_attributes=True)
+
+
+class CompetitorGapMetric(BaseModel):
+    """
+    A single gap metric comparing my brand against a competitor.
+
+    gap_value = my_metric - competitor_metric for visibility and sentiment.
+    gap_value = competitor_median_ranking - my_median_ranking for position
+                (positive = my brand is in a better position).
+    previous_gap_value is the same calculation for the window ending 7 days prior.
+    trend: 'up' = gap improved, 'down' = gap worsened, 'flat', or 'no_data'.
+    """
+    gap_value: Optional[float] = Field(None, description="Current gap value")
+    previous_gap_value: Optional[float] = Field(None, description="Gap value 7 days ago")
+    change: Optional[float] = Field(None, description="gap_value - previous_gap_value")
+    trend: str = Field("no_data", description="up | down | flat | no_data")
+
+    model_config = ConfigDict(from_attributes=True)
+
+
+class CompetitorGapSummaryResponse(BaseModel):
+    """
+    Gap summary between my brand and a specific competitor for a given segment.
+    Sourced from the latest two windows in brand_competitors_daily_basic_metrics
+    combined with brand_search_basic_metrics_daily.
+    """
+    brand_id: str = Field(..., description="My brand ID")
+    segment: str = Field(..., description="Segment used for the query")
+    competitor_brand_name: str = Field(..., description="Competitor brand name")
+    visibility_gap: CompetitorGapMetric = Field(..., description="Visibility rate gap (my% - competitor%)")
+    position_gap: CompetitorGapMetric = Field(..., description="Median ranking gap (competitor_rank - my_rank; positive = I rank better)")
+    sentiment_gap: CompetitorGapMetric = Field(..., description="Final sentiment score gap (my_score - competitor_score)")
+    current_period_end: Optional[str] = Field(None, description="End date of the current aggregation window")
+    previous_period_end: Optional[str] = Field(None, description="End date of the previous aggregation window (7 days prior)")
+
+    model_config = ConfigDict(from_attributes=True)
+
+
+class CompetitorsBySegmentResponse(BaseModel):
+    """Competitor names for a brand filtered by segment."""
+    brand_id: str = Field(..., description="My brand ID")
+    segment: str = Field(..., description="Segment used for filtering")
+    competitor_names: list[str] = Field(default_factory=list, description="Ordered list of competitor brand names")
+
+    model_config = ConfigDict(from_attributes=True)
+
+
+class CompetitorGapTrendDataPoint(BaseModel):
+    """A single time-series point of gap metrics between my brand and a competitor."""
+    date: str = Field(..., description="ISO date string (search_date_end)")
+    # Raw values
+    brand_visibility: Optional[float] = Field(None, description="My visibility rate (%)")
+    comp_visibility: Optional[float] = Field(None, description="Competitor visibility rate (%)")
+    brand_median_ranking: Optional[float] = Field(None, description="My median ranking position")
+    comp_median_ranking: Optional[float] = Field(None, description="Competitor median ranking position")
+    brand_sentiment: Optional[float] = Field(None, description="My sentiment score (0–100)")
+    comp_sentiment: Optional[float] = Field(None, description="Competitor sentiment score (0–100)")
+    # Gaps
+    visibility_gap: Optional[float] = Field(None, description="My visibility% minus competitor visibility%")
+    position_gap: Optional[float] = Field(None, description="Competitor median rank minus my median rank (positive = I rank better)")
+    sentiment_gap: Optional[float] = Field(None, description="My sentiment score minus competitor sentiment score")
+
+    model_config = ConfigDict(from_attributes=True)
+
+
+class CompetitorGapTrendResponse(BaseModel):
+    """Time series of gap metrics for a brand vs competitor over a date range."""
+    brand_id: str = Field(..., description="My brand ID")
+    segment: str = Field(..., description="Segment used for the query")
+    competitor_brand_name: str = Field(..., description="Competitor brand name")
+    data_points: list[CompetitorGapTrendDataPoint] = Field(default_factory=list)
+
+    model_config = ConfigDict(from_attributes=True)
+
+
+class CompetitorRankingDetailDataPoint(BaseModel):
+    """
+    One date window of brand vs competitor ranking stats.
+    All ranking values: lower number = better position (#1 is best).
+    Zero from the DB means the brand had no visibility → returned as None.
+    Gap = comp_value - brand_value; positive means brand ranks better (lower number).
+    """
+    date: str = Field(..., description="ISO date string (search_date_end)")
+    # Raw values
+    brand_best: Optional[int] = Field(None, description="Brand best (min) ranking in window")
+    brand_worst: Optional[int] = Field(None, description="Brand worst (max) ranking in window")
+    brand_avg: Optional[float] = Field(None, description="Brand average ranking in window")
+    comp_best: Optional[int] = Field(None, description="Competitor best (high_ranking) in window")
+    comp_worst: Optional[int] = Field(None, description="Competitor worst (low_ranking) in window")
+    comp_avg: Optional[float] = Field(None, description="Competitor average ranking in window")
+    # Gaps (comp - brand; positive = brand ranks better)
+    best_gap: Optional[float] = Field(None, description="comp_best - brand_best (positive = brand's best rank is higher)")
+    worst_gap: Optional[float] = Field(None, description="comp_worst - brand_worst (positive = brand's worst rank is higher)")
+    avg_gap: Optional[float] = Field(None, description="comp_avg - brand_avg (positive = brand's avg rank is higher)")
+
+    model_config = ConfigDict(from_attributes=True)
+
+
+class CompetitorRankingDetailResponse(BaseModel):
+    """Time series of brand vs competitor ranking stats."""
+    brand_id: str
+    segment: str
+    competitor_brand_name: str
+    data_points: list[CompetitorRankingDetailDataPoint] = Field(default_factory=list)
+
+    model_config = ConfigDict(from_attributes=True)
+
+
+class SentimentComparisonRow(BaseModel):
+    """One row of brand vs competitor customer review comparison, grouped by sentiment."""
+    sentiment: str = Field(..., description="Sentiment label: Positive | Neutral | Negative | Unknown")
+    brand_review: str = Field("", description="Brand customer review text (empty string if none for this slot)")
+    comp_review: str = Field("", description="Competitor customer review text (empty string if none for this slot)")
+
+    model_config = ConfigDict(from_attributes=True)
+
+
+class SentimentComparisonResponse(BaseModel):
+    """Side-by-side brand vs competitor customer review comparison table."""
+    brand_id: str
+    segment: str
+    competitor_brand_name: str
+    rows: list[SentimentComparisonRow] = Field(default_factory=list)
+
+    model_config = ConfigDict(from_attributes=True)
+
+
+class ReferenceSourceComparisonRow(BaseModel):
+    """One row in the reference source comparison table."""
+    seq: int = Field(..., description="Row sequence number")
+    category: str = Field(..., description="common | brand_only | comp_only")
+    brand_source: str = Field("", description="Brand reference source URL (empty if brand_only=False)")
+    comp_source: str = Field("", description="Competitor reference source URL (empty if comp_only=False)")
+
+    model_config = ConfigDict(from_attributes=True)
+
+
+class ReferenceSourceComparisonResponse(BaseModel):
+    """Side-by-side brand vs competitor reference source comparison."""
+    brand_id: str
+    segment: str
+    competitor_brand_name: str
+    rows: list[ReferenceSourceComparisonRow] = Field(default_factory=list)
+
+    model_config = ConfigDict(from_attributes=True)

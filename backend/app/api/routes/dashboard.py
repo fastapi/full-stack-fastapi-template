@@ -68,6 +68,17 @@ from app.models.dashboard import (
     BrandImpressionTrendResponse,
     BrandRankingTrendDataPoint,
     BrandRankingTrendResponse,
+    CompetitorGapMetric,
+    CompetitorGapSummaryResponse,
+    CompetitorsBySegmentResponse,
+    CompetitorGapTrendDataPoint,
+    CompetitorGapTrendResponse,
+    CompetitorRankingDetailDataPoint,
+    CompetitorRankingDetailResponse,
+    SentimentComparisonRow,
+    SentimentComparisonResponse,
+    ReferenceSourceComparisonRow,
+    ReferenceSourceComparisonResponse,
 )
 from kila_models.models import (
     UsersTable,
@@ -80,6 +91,7 @@ from kila_models.models import (
     BrandCompetitorsAwarenessWeeklyPerformanceTable,
     BrandSearchCompetitorsVisibilityTable,
     BrandSearchCompetitorsRankingTable,
+    BrandSearchCompetitorDailyBasicMetricsTable,
     BrandPerformanceInsightTable,
     BrandSearchDailyBasicMetricsTable,
     BrandSearchResultTable,
@@ -2413,3 +2425,735 @@ async def get_brand_ranking_trend(
 
     logger.info(f"Returning {len(data_points)} ranking trend points for brand_id: {brand_id}")
     return BrandRankingTrendResponse(brand_id=brand_id, segment=segment, data_points=data_points)
+
+
+# ── Competitor list filtered by segment ──────────────────────────────────────
+
+@router.get("/competitors-by-segment", response_model=CompetitorsBySegmentResponse)
+async def get_competitors_by_segment(
+    brand_id: str = Query(..., description="Brand ID to query"),
+    segment: str = Query(..., description="Segment name; use 'all-segment' to get all competitors regardless of segment"),
+    db: AsyncSession = Depends(get_db),
+    current_user: UsersTable = Depends(get_current_user),
+):
+    """
+    Return distinct competitor names for a brand filtered by segment.
+
+    When segment == 'all-segment', returns every competitor for the brand
+    regardless of segment (distinct names).  Otherwise filters by the exact
+    segment value from brand_competitors.
+    """
+    logger.info(
+        f"Fetching competitors by segment for brand_id: {brand_id}, segment: {segment}"
+    )
+
+    if segment == "all-segment":
+        query = (
+            select(distinct(BrandCompetitorsTable.competitor_brand_name))
+            .where(BrandCompetitorsTable.brand_id == brand_id)
+            .order_by(BrandCompetitorsTable.competitor_brand_name)
+        )
+    else:
+        query = (
+            select(BrandCompetitorsTable.competitor_brand_name)
+            .where(
+                BrandCompetitorsTable.brand_id == brand_id,
+                BrandCompetitorsTable.segment == segment,
+            )
+            .order_by(BrandCompetitorsTable.competitor_brand_name)
+        )
+
+    result = await db.execute(query)
+    competitor_names = [row[0] for row in result.all()]
+
+    logger.info(
+        f"Found {len(competitor_names)} competitors for brand_id: {brand_id}, segment: {segment}"
+    )
+
+    return CompetitorsBySegmentResponse(
+        brand_id=brand_id,
+        segment=segment,
+        competitor_names=competitor_names,
+    )
+
+
+# ── Competitor gap summary (current window vs 7-day-prior window) ─────────────
+
+def _make_gap_metric(
+    current_gap: Optional[float],
+    previous_gap: Optional[float],
+    higher_is_better: bool = True,
+) -> CompetitorGapMetric:
+    """
+    Build a CompetitorGapMetric from current and previous gap values.
+    trend = 'up' when the gap improved, 'down' when it worsened.
+    For higher_is_better metrics (visibility, sentiment): up = gap increased.
+    For lower_is_better metrics (position): up = gap increased (already inverted at call site).
+    """
+    if current_gap is None:
+        return CompetitorGapMetric(trend="no_data")
+
+    change: Optional[float] = None
+    trend = "flat"
+
+    if previous_gap is not None:
+        change = round(current_gap - previous_gap, 4)
+        if abs(change) < 0.001:
+            trend = "flat"
+        elif higher_is_better:
+            trend = "up" if change > 0 else "down"
+        else:
+            trend = "up" if change < 0 else "down"
+
+    return CompetitorGapMetric(
+        gap_value=round(current_gap, 4),
+        previous_gap_value=round(previous_gap, 4) if previous_gap is not None else None,
+        change=round(change, 4) if change is not None else None,
+        trend=trend,
+    )
+
+
+@router.get("/competitor-gap-summary", response_model=CompetitorGapSummaryResponse)
+async def get_competitor_gap_summary(
+    brand_id: str = Query(..., description="My brand ID"),
+    segment: str = Query(..., description="Segment; use 'all-segment' for the rollup row"),
+    competitor_brand_name: str = Query(..., description="Competitor brand name"),
+    db: AsyncSession = Depends(get_db),
+    current_user: UsersTable = Depends(get_current_user),
+):
+    """
+    Return visibility, position, and sentiment gap between my brand and a competitor.
+
+    Fetches the two most recent distinct search_date_end windows from
+    brand_competitors_daily_basic_metrics and brand_search_basic_metrics_daily,
+    then computes:
+      - visibility_gap   = my_visibility_rate  - competitor_visibility_rate  (higher = better)
+      - position_gap     = competitor_median_ranking - my_median_ranking      (higher = I rank better)
+      - sentiment_gap    = my_sentiment_score  - competitor_sentiment_score   (higher = better)
+
+    trend icon logic: 'up' = gap improved vs 7 days ago.
+    """
+    logger.info(
+        f"Fetching competitor gap summary for brand_id: {brand_id}, "
+        f"segment: {segment}, competitor: {competitor_brand_name}"
+    )
+
+    # ── Fetch the two most recent competitor metric windows ────────────────────
+    comp_query = (
+        select(BrandSearchCompetitorDailyBasicMetricsTable)
+        .where(
+            BrandSearchCompetitorDailyBasicMetricsTable.search_target_brand_id == brand_id,
+            BrandSearchCompetitorDailyBasicMetricsTable.segment == segment,
+            BrandSearchCompetitorDailyBasicMetricsTable.competitor_brand_name == competitor_brand_name,
+        )
+        .order_by(BrandSearchCompetitorDailyBasicMetricsTable.search_date_end.desc())
+        .limit(2)
+    )
+    comp_result = await db.execute(comp_query)
+    comp_records = comp_result.scalars().all()
+
+    if not comp_records:
+        empty = CompetitorGapMetric(trend="no_data")
+        return CompetitorGapSummaryResponse(
+            brand_id=brand_id,
+            segment=segment,
+            competitor_brand_name=competitor_brand_name,
+            visibility_gap=empty,
+            position_gap=empty,
+            sentiment_gap=empty,
+        )
+
+    current_comp = comp_records[0]
+    previous_comp = comp_records[1] if len(comp_records) > 1 else None
+
+    # ── Fetch matching brand metric windows ────────────────────────────────────
+    brand_dates = [current_comp.search_date_end]
+    if previous_comp:
+        brand_dates.append(previous_comp.search_date_end)
+
+    brand_query = (
+        select(BrandSearchDailyBasicMetricsTable)
+        .where(
+            BrandSearchDailyBasicMetricsTable.search_target_brand_id == brand_id,
+            BrandSearchDailyBasicMetricsTable.segment == segment,
+            BrandSearchDailyBasicMetricsTable.search_date_end.in_(brand_dates),
+        )
+        .order_by(BrandSearchDailyBasicMetricsTable.search_date_end.desc())
+    )
+    brand_result = await db.execute(brand_query)
+    brand_records = brand_result.scalars().all()
+
+    brand_by_date = {r.search_date_end: r for r in brand_records}
+    current_brand = brand_by_date.get(current_comp.search_date_end)
+    previous_brand = brand_by_date.get(previous_comp.search_date_end) if previous_comp else None
+
+    # ── Compute visibility rates ───────────────────────────────────────────────
+    def vis_rate(brand_rec, comp_rec) -> Optional[float]:
+        """Visibility rate = count / total * 100. Uses shared total_search_count."""
+        if brand_rec is None or comp_rec is None:
+            return None
+        total = comp_rec.total_search_count
+        if not total:
+            return None
+        my_rate = (brand_rec.search_visibility_count / total) * 100
+        comp_rate = (comp_rec.competitor_visibility_count / total) * 100
+        return my_rate - comp_rate
+
+    current_vis_gap = vis_rate(current_brand, current_comp)
+    previous_vis_gap = vis_rate(previous_brand, previous_comp) if previous_comp else None
+
+    # ── Compute position gaps ──────────────────────────────────────────────────
+    def pos_gap(brand_rec, comp_rec) -> Optional[float]:
+        """competitor_median - my_median; positive = my brand ranks better (lower position number)."""
+        if brand_rec is None or comp_rec is None:
+            return None
+        if brand_rec.median_ranking == 0 or comp_rec.median_ranking == 0:
+            return None
+        return float(comp_rec.median_ranking) - float(brand_rec.median_ranking)
+
+    current_pos_gap = pos_gap(current_brand, current_comp)
+    previous_pos_gap = pos_gap(previous_brand, previous_comp) if previous_comp else None
+
+    # ── Compute sentiment gaps ─────────────────────────────────────────────────
+    def sent_gap(brand_rec, comp_rec) -> Optional[float]:
+        if brand_rec is None or comp_rec is None:
+            return None
+        if brand_rec.final_sentiment_score is None or comp_rec.final_sentiment_score is None:
+            return None
+        return float(brand_rec.final_sentiment_score) - float(comp_rec.final_sentiment_score)
+
+    current_sent_gap = sent_gap(current_brand, current_comp)
+    previous_sent_gap = sent_gap(previous_brand, previous_comp) if previous_comp else None
+
+    # ── Build response ─────────────────────────────────────────────────────────
+    return CompetitorGapSummaryResponse(
+        brand_id=brand_id,
+        segment=segment,
+        competitor_brand_name=competitor_brand_name,
+        visibility_gap=_make_gap_metric(current_vis_gap, previous_vis_gap, higher_is_better=True),
+        position_gap=_make_gap_metric(current_pos_gap, previous_pos_gap, higher_is_better=True),
+        sentiment_gap=_make_gap_metric(current_sent_gap, previous_sent_gap, higher_is_better=True),
+        current_period_end=current_comp.search_date_end.isoformat(),
+        previous_period_end=previous_comp.search_date_end.isoformat() if previous_comp else None,
+    )
+
+
+# ── Competitor gap historical trend ───────────────────────────────────────────
+
+
+@router.get("/competitor-gap-trend", response_model=CompetitorGapTrendResponse)
+async def get_competitor_gap_trend(
+    brand_id: str = Query(..., description="My brand ID"),
+    segment: str = Query(..., description="Segment; use 'all-segment' for the rollup row"),
+    competitor_brand_name: str = Query(..., description="Competitor brand name"),
+    time_range: TimeRange = Query(TimeRange.ONE_MONTH, description="Predefined time range"),
+    start_date: Optional[date] = Query(None, description="Custom start date (when time_range=custom)"),
+    end_date: Optional[date] = Query(None, description="Custom end date (when time_range=custom)"),
+    db: AsyncSession = Depends(get_db),
+    current_user: UsersTable = Depends(get_current_user),
+):
+    """
+    Return time-series gap metrics between my brand and a competitor.
+
+    For each date window in the selected range, computes:
+      - visibility_gap   = my_visibility%  - competitor_visibility%   (positive = I appear more)
+      - position_gap     = competitor_median_rank - my_median_rank     (positive = I rank better)
+      - sentiment_gap    = my_sentiment    - competitor_sentiment      (positive = I'm perceived better)
+
+    Gaps are computed only for dates where both brand and competitor records exist.
+    """
+    logger.info(
+        f"Fetching competitor gap trend for brand_id: {brand_id}, segment: {segment}, "
+        f"competitor: {competitor_brand_name}, time_range: {time_range}"
+    )
+
+    if time_range == TimeRange.CUSTOM:
+        if not start_date or not end_date:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="start_date and end_date are required for custom time range",
+            )
+        query_start = start_date
+        query_end = end_date
+    else:
+        query_start, query_end = get_date_range_for_time_range(time_range)
+
+    # ── Fetch brand metrics over date range ────────────────────────────────────
+    brand_query = (
+        select(BrandSearchDailyBasicMetricsTable)
+        .where(
+            BrandSearchDailyBasicMetricsTable.search_target_brand_id == brand_id,
+            BrandSearchDailyBasicMetricsTable.segment == segment,
+            BrandSearchDailyBasicMetricsTable.search_date_end >= query_start,
+            BrandSearchDailyBasicMetricsTable.search_date_end <= query_end,
+        )
+        .order_by(asc(BrandSearchDailyBasicMetricsTable.search_date_end))
+    )
+    brand_result = await db.execute(brand_query)
+    brand_by_date = {r.search_date_end: r for r in brand_result.scalars().all()}
+
+    # ── Fetch competitor metrics over date range ────────────────────────────────
+    comp_query = (
+        select(BrandSearchCompetitorDailyBasicMetricsTable)
+        .where(
+            BrandSearchCompetitorDailyBasicMetricsTable.search_target_brand_id == brand_id,
+            BrandSearchCompetitorDailyBasicMetricsTable.segment == segment,
+            BrandSearchCompetitorDailyBasicMetricsTable.competitor_brand_name == competitor_brand_name,
+            BrandSearchCompetitorDailyBasicMetricsTable.search_date_end >= query_start,
+            BrandSearchCompetitorDailyBasicMetricsTable.search_date_end <= query_end,
+        )
+        .order_by(asc(BrandSearchCompetitorDailyBasicMetricsTable.search_date_end))
+    )
+    comp_result = await db.execute(comp_query)
+    comp_by_date = {r.search_date_end: r for r in comp_result.scalars().all()}
+
+    if not brand_by_date and not comp_by_date:
+        return CompetitorGapTrendResponse(
+            brand_id=brand_id,
+            segment=segment,
+            competitor_brand_name=competitor_brand_name,
+            data_points=[],
+        )
+
+    # ── Compute gap for each date where both records exist ─────────────────────
+    all_dates = sorted(set(brand_by_date.keys()) & set(comp_by_date.keys()))
+
+    data_points: list[CompetitorGapTrendDataPoint] = []
+    for d in all_dates:
+        brand_rec = brand_by_date[d]
+        comp_rec = comp_by_date[d]
+
+        # Raw visibility values
+        brand_vis: Optional[float] = None
+        comp_vis: Optional[float] = None
+        vis_gap: Optional[float] = None
+        if comp_rec.total_search_count:
+            brand_vis = round(brand_rec.search_visibility_count / comp_rec.total_search_count * 100, 2)
+            comp_vis = round(comp_rec.competitor_visibility_count / comp_rec.total_search_count * 100, 2)
+            vis_gap = round(brand_vis - comp_vis, 2)
+
+        # Raw ranking values and gap
+        brand_median: Optional[float] = float(brand_rec.median_ranking) if brand_rec.median_ranking else None
+        comp_median: Optional[float] = float(comp_rec.median_ranking) if comp_rec.median_ranking else None
+        pos_gap: Optional[float] = None
+        if brand_median is not None and comp_median is not None:
+            pos_gap = round(comp_median - brand_median, 2)
+
+        # Raw sentiment values and gap
+        brand_sent: Optional[float] = (
+            float(brand_rec.final_sentiment_score) if brand_rec.final_sentiment_score is not None else None
+        )
+        comp_sent: Optional[float] = (
+            float(comp_rec.final_sentiment_score) if comp_rec.final_sentiment_score is not None else None
+        )
+        sent_gap: Optional[float] = None
+        if brand_sent is not None and comp_sent is not None:
+            sent_gap = round(brand_sent - comp_sent, 2)
+
+        data_points.append(CompetitorGapTrendDataPoint(
+            date=d.isoformat(),
+            brand_visibility=brand_vis,
+            comp_visibility=comp_vis,
+            brand_median_ranking=brand_median,
+            comp_median_ranking=comp_median,
+            brand_sentiment=brand_sent,
+            comp_sentiment=comp_sent,
+            visibility_gap=vis_gap,
+            position_gap=pos_gap,
+            sentiment_gap=sent_gap,
+        ))
+
+    logger.info(
+        f"Returning {len(data_points)} gap trend points for brand_id: {brand_id}, "
+        f"competitor: {competitor_brand_name}"
+    )
+    return CompetitorGapTrendResponse(
+        brand_id=brand_id,
+        segment=segment,
+        competitor_brand_name=competitor_brand_name,
+        data_points=data_points,
+    )
+
+
+# ── Competitor ranking detail (brand vs competitor high/low/median/avg) ────────
+
+
+@router.get("/competitor-ranking-detail", response_model=CompetitorRankingDetailResponse)
+async def get_competitor_ranking_detail(
+    brand_id: str = Query(..., description="My brand ID"),
+    segment: str = Query(..., description="Segment; use 'all-segment' for the rollup row"),
+    competitor_brand_name: str = Query(..., description="Competitor brand name"),
+    time_range: TimeRange = Query(TimeRange.ONE_MONTH, description="Predefined time range"),
+    start_date: Optional[date] = Query(None, description="Custom start date (when time_range=custom)"),
+    end_date: Optional[date] = Query(None, description="Custom end date (when time_range=custom)"),
+    db: AsyncSession = Depends(get_db),
+    current_user: UsersTable = Depends(get_current_user),
+):
+    """
+    Return time-series ranking stats (best/worst/median/avg) for both brand and competitor.
+
+    Ranking is lower-is-better (#1 = best). Zero values from the DB mean the brand had
+    no visibility in that window and are returned as null.
+
+    Brand columns  : min_ranking (best), max_ranking (worst), median_ranking, avg_ranking
+    Competitor cols: high_ranking (best), low_ranking (worst), median_ranking, avg_ranking
+    """
+    logger.info(
+        f"Fetching competitor ranking detail for brand_id: {brand_id}, segment: {segment}, "
+        f"competitor: {competitor_brand_name}, time_range: {time_range}"
+    )
+
+    if time_range == TimeRange.CUSTOM:
+        if not start_date or not end_date:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="start_date and end_date are required for custom time range",
+            )
+        query_start = start_date
+        query_end = end_date
+    else:
+        query_start, query_end = get_date_range_for_time_range(time_range)
+
+    # ── Fetch brand ranking records ────────────────────────────────────────────
+    brand_query = (
+        select(BrandSearchDailyBasicMetricsTable)
+        .where(
+            BrandSearchDailyBasicMetricsTable.search_target_brand_id == brand_id,
+            BrandSearchDailyBasicMetricsTable.segment == segment,
+            BrandSearchDailyBasicMetricsTable.search_date_end >= query_start,
+            BrandSearchDailyBasicMetricsTable.search_date_end <= query_end,
+        )
+        .order_by(asc(BrandSearchDailyBasicMetricsTable.search_date_end))
+    )
+    brand_result = await db.execute(brand_query)
+    brand_by_date = {r.search_date_end: r for r in brand_result.scalars().all()}
+
+    # ── Fetch competitor ranking records ───────────────────────────────────────
+    comp_query = (
+        select(BrandSearchCompetitorDailyBasicMetricsTable)
+        .where(
+            BrandSearchCompetitorDailyBasicMetricsTable.search_target_brand_id == brand_id,
+            BrandSearchCompetitorDailyBasicMetricsTable.segment == segment,
+            BrandSearchCompetitorDailyBasicMetricsTable.competitor_brand_name == competitor_brand_name,
+            BrandSearchCompetitorDailyBasicMetricsTable.search_date_end >= query_start,
+            BrandSearchCompetitorDailyBasicMetricsTable.search_date_end <= query_end,
+        )
+        .order_by(asc(BrandSearchCompetitorDailyBasicMetricsTable.search_date_end))
+    )
+    comp_result = await db.execute(comp_query)
+    comp_by_date = {r.search_date_end: r for r in comp_result.scalars().all()}
+
+    if not brand_by_date and not comp_by_date:
+        return CompetitorRankingDetailResponse(
+            brand_id=brand_id, segment=segment,
+            competitor_brand_name=competitor_brand_name, data_points=[],
+        )
+
+    def _rank_or_none(value: int | float) -> Optional[float]:
+        """Return None when value == 0 (means no visibility in that window)."""
+        return None if not value else float(value)
+
+    # ── Build data points for dates where at least one side has data ───────────
+    all_dates = sorted(set(brand_by_date.keys()) | set(comp_by_date.keys()))
+    data_points: list[CompetitorRankingDetailDataPoint] = []
+
+    for d in all_dates:
+        br = brand_by_date.get(d)
+        cr = comp_by_date.get(d)
+
+        brand_best = int(br.min_ranking) if br and br.min_ranking else None
+        brand_worst = int(br.max_ranking) if br and br.max_ranking else None
+        brand_avg = round(float(br.avg_ranking), 2) if br and br.avg_ranking else None
+
+        comp_best = int(cr.high_ranking) if cr and cr.high_ranking else None
+        comp_worst = int(cr.low_ranking) if cr and cr.low_ranking else None
+        comp_avg = round(float(cr.avg_ranking), 2) if cr and cr.avg_ranking else None
+
+        # Gaps: comp - brand (positive = brand ranks better / lower position number)
+        best_gap = round(float(comp_best) - float(brand_best), 2) if brand_best and comp_best else None
+        worst_gap = round(float(comp_worst) - float(brand_worst), 2) if brand_worst and comp_worst else None
+        avg_gap = round(comp_avg - brand_avg, 2) if brand_avg and comp_avg else None
+
+        data_points.append(CompetitorRankingDetailDataPoint(
+            date=d.isoformat(),
+            brand_best=brand_best,
+            brand_worst=brand_worst,
+            brand_avg=brand_avg,
+            comp_best=comp_best,
+            comp_worst=comp_worst,
+            comp_avg=comp_avg,
+            best_gap=best_gap,
+            worst_gap=worst_gap,
+            avg_gap=avg_gap,
+        ))
+
+    logger.info(
+        f"Returning {len(data_points)} ranking detail points for brand_id: {brand_id}, "
+        f"competitor: {competitor_brand_name}"
+    )
+    return CompetitorRankingDetailResponse(
+        brand_id=brand_id,
+        segment=segment,
+        competitor_brand_name=competitor_brand_name,
+        data_points=data_points,
+    )
+
+
+# ── Sentiment comparison (brand vs competitor customer reviews) ─────────────
+
+
+@router.get("/sentiment-comparison", response_model=SentimentComparisonResponse)
+async def get_sentiment_comparison(
+    brand_id: str = Query(..., description="My brand ID"),
+    segment: str = Query(..., description="Segment; use 'all-segment' for all segments combined"),
+    competitor_brand_name: str = Query(..., description="Competitor brand name"),
+    time_range: TimeRange = Query(TimeRange.ONE_MONTH, description="Predefined time range"),
+    start_date: Optional[date] = Query(None, description="Custom start date (when time_range=custom)"),
+    end_date: Optional[date] = Query(None, description="Custom end date (when time_range=custom)"),
+    db: AsyncSession = Depends(get_db),
+    current_user: UsersTable = Depends(get_current_user),
+):
+    """
+    Return side-by-side brand vs competitor customer reviews from BrandSearchResultTable.
+
+    Brand reviews   : rows where search_return_brand_name == search_target_brand_name
+    Competitor reviews: rows where search_return_brand_name == competitor_brand_name
+
+    Reviews are deduped, grouped by sentiment (Positive → Neutral → Negative → Unknown),
+    then zipped into paired rows. Where one side has more reviews than the other, the
+    missing side is returned as an empty string.
+    """
+    logger.info(
+        f"Fetching sentiment comparison for brand_id: {brand_id}, segment: {segment}, "
+        f"competitor: {competitor_brand_name}, time_range: {time_range}"
+    )
+
+    if time_range == TimeRange.CUSTOM:
+        if not start_date or not end_date:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="start_date and end_date are required for custom time range",
+            )
+        query_start, query_end = start_date, end_date
+    else:
+        query_start, query_end = get_date_range_for_time_range(time_range)
+
+    # ── Fetch brand reviews (brand appears under its own name) ─────────────────
+    brand_filters = [
+        BrandSearchResultTable.search_target_brand_id == brand_id,
+        BrandSearchResultTable.search_target_brand_name == BrandSearchResultTable.search_return_brand_name,
+        BrandSearchResultTable.search_date >= query_start,
+        BrandSearchResultTable.search_date <= query_end,
+        BrandSearchResultTable.search_return_customer_review.isnot(None),
+    ]
+    if segment != "all-segment":
+        brand_filters.append(BrandSearchResultTable.segment == segment)
+
+    brand_query = (
+        select(BrandSearchResultTable.search_return_customer_review)
+        .where(*brand_filters)
+        .order_by(desc(BrandSearchResultTable.search_date))
+        .limit(500)
+    )
+    brand_result = await db.execute(brand_query)
+    brand_raw_rows = brand_result.fetchall()
+
+    # ── Fetch competitor reviews ───────────────────────────────────────────────
+    comp_filters = [
+        BrandSearchResultTable.search_target_brand_id == brand_id,
+        BrandSearchResultTable.search_return_brand_name == competitor_brand_name,
+        BrandSearchResultTable.search_date >= query_start,
+        BrandSearchResultTable.search_date <= query_end,
+        BrandSearchResultTable.search_return_customer_review.isnot(None),
+    ]
+    if segment != "all-segment":
+        comp_filters.append(BrandSearchResultTable.segment == segment)
+
+    comp_query = (
+        select(BrandSearchResultTable.search_return_customer_review)
+        .where(*comp_filters)
+        .order_by(desc(BrandSearchResultTable.search_date))
+        .limit(500)
+    )
+    comp_result = await db.execute(comp_query)
+    comp_raw_rows = comp_result.fetchall()
+
+    # ── Parse and deduplicate ──────────────────────────────────────────────────
+    def _deduplicated_reviews(raw_rows: list) -> list[tuple[str, str]]:
+        seen: set[str] = set()
+        reviews: list[tuple[str, str]] = []
+        for (raw,) in raw_rows:
+            for review_text, sentiment in _extract_customer_reviews(raw):
+                key = review_text.lower().strip()
+                if key and key not in seen:
+                    seen.add(key)
+                    reviews.append((review_text, sentiment))
+        return reviews
+
+    brand_reviews = _deduplicated_reviews(brand_raw_rows)
+    comp_reviews = _deduplicated_reviews(comp_raw_rows)
+
+    # ── Group by sentiment ─────────────────────────────────────────────────────
+    SENTIMENT_ORDER = ["Positive", "Neutral", "Negative", "Unknown"]
+    brand_by_sentiment: dict[str, list[str]] = {s: [] for s in SENTIMENT_ORDER}
+    for review_text, sentiment in brand_reviews:
+        bucket = sentiment if sentiment in brand_by_sentiment else "Unknown"
+        brand_by_sentiment[bucket].append(review_text)
+
+    comp_by_sentiment: dict[str, list[str]] = {s: [] for s in SENTIMENT_ORDER}
+    for review_text, sentiment in comp_reviews:
+        bucket = sentiment if sentiment in comp_by_sentiment else "Unknown"
+        comp_by_sentiment[bucket].append(review_text)
+
+    # ── Zip into paired rows ───────────────────────────────────────────────────
+    rows: list[SentimentComparisonRow] = []
+    for sentiment in SENTIMENT_ORDER:
+        b_list = brand_by_sentiment[sentiment]
+        c_list = comp_by_sentiment[sentiment]
+        max_len = max(len(b_list), len(c_list), 0)
+        for i in range(max_len):
+            rows.append(SentimentComparisonRow(
+                sentiment=sentiment,
+                brand_review=b_list[i] if i < len(b_list) else "",
+                comp_review=c_list[i] if i < len(c_list) else "",
+            ))
+
+    logger.info(
+        f"Returning {len(rows)} sentiment comparison rows for brand_id: {brand_id}, "
+        f"competitor: {competitor_brand_name}"
+    )
+    return SentimentComparisonResponse(
+        brand_id=brand_id,
+        segment=segment,
+        competitor_brand_name=competitor_brand_name,
+        rows=rows,
+    )
+
+
+# ── Reference source comparison (brand vs competitor) ─────────────────────────
+
+
+@router.get("/reference-source-comparison", response_model=ReferenceSourceComparisonResponse)
+async def get_reference_source_comparison(
+    brand_id: str = Query(..., description="My brand ID"),
+    segment: str = Query(..., description="Segment; use 'all-segment' for all segments combined"),
+    competitor_brand_name: str = Query(..., description="Competitor brand name"),
+    time_range: TimeRange = Query(TimeRange.ONE_MONTH, description="Predefined time range"),
+    start_date: Optional[date] = Query(None, description="Custom start date (when time_range=custom)"),
+    end_date: Optional[date] = Query(None, description="Custom end date (when time_range=custom)"),
+    db: AsyncSession = Depends(get_db),
+    current_user: UsersTable = Depends(get_current_user),
+):
+    """
+    Return a categorised comparison of reference sources for brand vs competitor.
+
+    Brand sources   : rows where search_return_brand_name == search_target_brand_name
+    Competitor sources: rows where search_return_brand_name == competitor_brand_name
+
+    Each row is tagged with a category:
+      - 'common'     : URL appears in both brand and competitor (deduped by normalised URL)
+      - 'brand_only' : URL appears only in brand
+      - 'comp_only'  : URL appears only in competitor
+
+    Rows are ordered: common first, then brand_only, then comp_only.
+    """
+    logger.info(
+        f"Fetching reference source comparison for brand_id: {brand_id}, segment: {segment}, "
+        f"competitor: {competitor_brand_name}, time_range: {time_range}"
+    )
+
+    if time_range == TimeRange.CUSTOM:
+        if not start_date or not end_date:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="start_date and end_date are required for custom time range",
+            )
+        query_start, query_end = start_date, end_date
+    else:
+        query_start, query_end = get_date_range_for_time_range(time_range)
+
+    def _normalize_url(url: str) -> str:
+        u = url.lower().strip()
+        for prefix in ("https://", "http://"):
+            if u.startswith(prefix):
+                u = u[len(prefix):]
+                break
+        if u.startswith("www."):
+            u = u[4:]
+        return u.rstrip("/")
+
+    async def _fetch_sources(extra_filters: list) -> dict[str, str]:
+        """Return {normalized_url: original_url} (first occurrence wins)."""
+        base_filters = [
+            BrandSearchResultTable.search_target_brand_id == brand_id,
+            BrandSearchResultTable.search_date >= query_start,
+            BrandSearchResultTable.search_date <= query_end,
+            BrandSearchResultTable.search_return_reference_sources.isnot(None),
+        ]
+        if segment != "all-segment":
+            base_filters.append(BrandSearchResultTable.segment == segment)
+
+        q = (
+            select(BrandSearchResultTable.search_return_reference_sources)
+            .where(*(base_filters + extra_filters))
+            .order_by(desc(BrandSearchResultTable.search_date))
+            .limit(500)
+        )
+        result = await db.execute(q)
+        sources_map: dict[str, str] = {}
+        for (raw,) in result.fetchall():
+            for src in _extract_reference_sources(raw):
+                key = _normalize_url(src)
+                if key and key not in sources_map:
+                    sources_map[key] = src
+        return sources_map
+
+    brand_map = await _fetch_sources([
+        BrandSearchResultTable.search_target_brand_name == BrandSearchResultTable.search_return_brand_name,
+    ])
+    comp_map = await _fetch_sources([
+        BrandSearchResultTable.search_return_brand_name == competitor_brand_name,
+    ])
+
+    # ── Categorise ────────────────────────────────────────────────────────────
+    brand_keys = set(brand_map.keys())
+    comp_keys = set(comp_map.keys())
+    common_keys = brand_keys & comp_keys
+    brand_only_keys = brand_keys - common_keys
+    comp_only_keys = comp_keys - brand_keys
+
+    rows: list[ReferenceSourceComparisonRow] = []
+    seq = 1
+
+    for key in sorted(common_keys):
+        rows.append(ReferenceSourceComparisonRow(
+            seq=seq, category="common",
+            brand_source=brand_map[key], comp_source=comp_map[key],
+        ))
+        seq += 1
+
+    for key in sorted(brand_only_keys):
+        rows.append(ReferenceSourceComparisonRow(
+            seq=seq, category="brand_only",
+            brand_source=brand_map[key], comp_source="",
+        ))
+        seq += 1
+
+    for key in sorted(comp_only_keys):
+        rows.append(ReferenceSourceComparisonRow(
+            seq=seq, category="comp_only",
+            brand_source="", comp_source=comp_map[key],
+        ))
+        seq += 1
+
+    logger.info(
+        f"Returning {len(rows)} reference source comparison rows "
+        f"({len(common_keys)} common, {len(brand_only_keys)} brand-only, {len(comp_only_keys)} comp-only) "
+        f"for brand_id: {brand_id}, competitor: {competitor_brand_name}"
+    )
+    return ReferenceSourceComparisonResponse(
+        brand_id=brand_id,
+        segment=segment,
+        competitor_brand_name=competitor_brand_name,
+        rows=rows,
+    )

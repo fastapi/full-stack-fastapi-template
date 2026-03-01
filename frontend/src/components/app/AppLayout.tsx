@@ -6,10 +6,11 @@ import {
   ChevronDown,
   ChevronRight,
   FolderKanban,
-  LayoutDashboard,
   Lightbulb,
   LogOut,
   Menu,
+  Swords,
+  TrendingUp,
   User,
   X,
 } from "lucide-react"
@@ -32,7 +33,7 @@ interface MenuItem {
 export default function AppLayout({ children }: { children: React.ReactNode }) {
   const [sidebarOpen, setSidebarOpen] = useState(true) // desktop: expanded by default
   const [mobileSidebarOpen, setMobileSidebarOpen] = useState(false) // mobile: closed by default
-  const [expandedMenus, setExpandedMenus] = useState<Set<string>>(new Set(["Dashboard"]))
+  const [expandedMenus, setExpandedMenus] = useState<Set<string>>(new Set())
   const location = useLocation()
 
   const { signOut } = useClerk()
@@ -44,16 +45,8 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
 
   const menuItems: MenuItem[] = [
     { name: "Projects", icon: FolderKanban, path: "/app/projects" },
-    {
-      name: "Dashboard",
-      icon: LayoutDashboard,
-      children: [
-        { name: "Brand Overview", path: "/app/dashboard/overview", hidden: true },
-        { name: "Brand Impression", path: "/app/dashboard/brand-impression" },
-        { name: "Performance Detail", path: "/app/dashboard/performance", hidden: true },
-        { name: "Competitive Analysis", path: "/app/dashboard/competitors" },
-      ],
-    },
+    { name: "Brand Impression", icon: TrendingUp, path: "/app/dashboard/brand-impression" },
+    { name: "Competitive Analysis", icon: Swords, path: "/app/dashboard/competitors" },
     {
       name: "Insight",
       icon: Lightbulb,

@@ -65,8 +65,8 @@ function transformData(dataPoints: BrandImpressionTrendDataPoint[]): ChartDataPo
 const CustomTooltip = ({ active, payload, label }: any) => {
   if (!active || !payload || payload.length === 0) return null
   return (
-    <div className="bg-white border border-gray-100 rounded-xl shadow-xl p-3 min-w-[170px]">
-      <p className="text-[10px] font-semibold text-gray-500 mb-2 uppercase tracking-wide">{label}</p>
+    <div className="bg-gray-900 border border-gray-700 rounded-xl shadow-xl p-3 min-w-[170px]">
+      <p className="text-[10px] font-semibold text-gray-400 mb-2 uppercase tracking-wide">{label}</p>
       {payload.map((entry: any) => {
         if (entry.value === null || entry.value === undefined) return null
         const prefix = METRIC_PREFIX[entry.name] ?? ""
@@ -75,9 +75,9 @@ const CustomTooltip = ({ active, payload, label }: any) => {
           <div key={entry.name} className="flex items-center justify-between gap-4 text-[10px] py-0.5">
             <div className="flex items-center gap-1.5">
               <span className="w-2 h-2 rounded-full flex-shrink-0" style={{ backgroundColor: entry.color }} />
-              <span className="text-gray-500">{entry.name}</span>
+              <span className="text-gray-300">{entry.name}</span>
             </div>
-            <span className="font-semibold text-gray-800">{prefix}{entry.value}{unit}</span>
+            <span className="font-semibold text-white">{prefix}{entry.value}{unit}</span>
           </div>
         )
       })}

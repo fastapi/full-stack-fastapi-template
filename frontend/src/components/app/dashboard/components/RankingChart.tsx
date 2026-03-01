@@ -1,6 +1,8 @@
-import { Loader2 } from "lucide-react"
+import { ChartColumnBig, ChartLine, Loader2 } from "lucide-react"
 import { useEffect, useState } from "react"
 import {
+  Bar,
+  BarChart,
   CartesianGrid,
   Legend,
   Line,
@@ -15,6 +17,7 @@ import {
   type TimeRange,
   dashboardAPI,
 } from "@/clients/dashboard"
+import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs"
 
 interface RankingChartProps {
   brandId: string
@@ -70,10 +73,10 @@ const CustomTooltip = ({ active, payload, label }: any) => {
   const isInterpolated = payload[0]?.payload?.is_interpolated ?? false
 
   return (
-    <div className="bg-white border border-gray-100 rounded-xl shadow-xl p-3 min-w-[190px]">
-      <p className="text-[10px] font-semibold text-gray-500 mb-2 uppercase tracking-wide">{label}</p>
+    <div className="bg-gray-900 border border-gray-700 rounded-xl shadow-xl p-3 min-w-[190px]">
+      <p className="text-[10px] font-semibold text-gray-400 mb-2 uppercase tracking-wide">{label}</p>
       {isInterpolated ? (
-        <p className="text-[10px] italic text-slate-400">No ranking data (brand not found)</p>
+        <p className="text-[10px] italic text-gray-500">No ranking data (brand not found)</p>
       ) : (
         payload.map((entry: any) => {
           if (entry.value === null || entry.value === undefined) return null
@@ -81,9 +84,9 @@ const CustomTooltip = ({ active, payload, label }: any) => {
             <div key={entry.name} className="flex items-center justify-between gap-4 text-[10px] py-0.5">
               <div className="flex items-center gap-1.5">
                 <span className="w-2 h-2 rounded-full flex-shrink-0" style={{ backgroundColor: entry.color }} />
-                <span className="text-gray-500">{entry.name}</span>
+                <span className="text-gray-300">{entry.name}</span>
               </div>
-              <span className="font-semibold text-gray-800">#{entry.value}</span>
+              <span className="font-semibold text-white">#{entry.value}</span>
             </div>
           )
         })
@@ -138,6 +141,7 @@ export function RankingChart({
   const [isLoading, setIsLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
   const [hiddenSeries, setHiddenSeries] = useState<Set<string>>(new Set())
+  const [chartType, setChartType] = useState<"line" | "bar">("line")
 
   useEffect(() => {
     setIsLoading(true)
@@ -196,34 +200,72 @@ export function RankingChart({
   }
 
   return (
-    <div className="w-full h-80">
-      <ResponsiveContainer width="100%" height="100%">
-        <LineChart data={data} margin={{ top: 4, right: 4, left: -16, bottom: 0 }}>
-          <CartesianGrid strokeDasharray="3 3" stroke="#f1f5f9" vertical={false} />
-          <XAxis dataKey="displayDate" {...commonAxisProps} />
-          {/* reversed: rank #1 at top (lower number = better) */}
-          <YAxis
-            {...commonAxisProps}
-            reversed
-            tickFormatter={(v) => `#${v}`}
-          />
-          <Tooltip content={<CustomTooltip />} />
-          <Legend content={<CustomLegend hiddenSeries={hiddenSeries} onToggle={toggleSeries} />} />
-          {METRIC_KEYS.map((key) => (
-            <Line
-              key={key}
-              type="linear"
-              dataKey={key}
-              stroke={METRIC_COLORS[key]}
-              strokeWidth={1.5}
-              dot={false}
-              activeDot={{ r: 4, strokeWidth: 2, stroke: "#fff", fill: METRIC_COLORS[key] }}
-              hide={hiddenSeries.has(key)}
-              connectNulls
-            />
-          ))}
-        </LineChart>
-      </ResponsiveContainer>
+    <div className="space-y-3">
+      <div className="flex justify-end">
+        <Tabs value={chartType} onValueChange={(v) => setChartType(v as "line" | "bar")}>
+          <TabsList className="h-7">
+            <TabsTrigger value="line" className="h-5 px-2">
+              <ChartLine size={13} />
+            </TabsTrigger>
+            <TabsTrigger value="bar" className="h-5 px-2">
+              <ChartColumnBig size={13} />
+            </TabsTrigger>
+          </TabsList>
+        </Tabs>
+      </div>
+
+      <div className="w-full h-72">
+        <ResponsiveContainer width="100%" height="100%">
+          {chartType === "line" ? (
+            <LineChart data={data} margin={{ top: 4, right: 4, left: -16, bottom: 0 }}>
+              <CartesianGrid strokeDasharray="3 3" stroke="#f1f5f9" vertical={false} />
+              <XAxis dataKey="displayDate" {...commonAxisProps} />
+              {/* reversed: rank #1 at top (lower number = better) */}
+              <YAxis
+                {...commonAxisProps}
+                reversed
+                tickFormatter={(v) => `#${v}`}
+              />
+              <Tooltip content={<CustomTooltip />} />
+              <Legend content={<CustomLegend hiddenSeries={hiddenSeries} onToggle={toggleSeries} />} />
+              {METRIC_KEYS.map((key) => (
+                <Line
+                  key={key}
+                  type="linear"
+                  dataKey={key}
+                  stroke={METRIC_COLORS[key]}
+                  strokeWidth={1.5}
+                  dot={false}
+                  activeDot={{ r: 4, strokeWidth: 2, stroke: "#fff", fill: METRIC_COLORS[key] }}
+                  hide={hiddenSeries.has(key)}
+                  connectNulls
+                />
+              ))}
+            </LineChart>
+          ) : (
+            <BarChart data={data} margin={{ top: 4, right: 4, left: -16, bottom: 0 }} barCategoryGap="30%">
+              <CartesianGrid strokeDasharray="3 3" stroke="#f1f5f9" vertical={false} />
+              <XAxis dataKey="displayDate" {...commonAxisProps} />
+              <YAxis
+                {...commonAxisProps}
+                reversed
+                tickFormatter={(v) => `#${v}`}
+              />
+              <Tooltip content={<CustomTooltip />} />
+              <Legend content={<CustomLegend hiddenSeries={hiddenSeries} onToggle={toggleSeries} />} />
+              {METRIC_KEYS.map((key) => (
+                <Bar
+                  key={key}
+                  dataKey={key}
+                  fill={METRIC_COLORS[key]}
+                  radius={[3, 3, 0, 0]}
+                  hide={hiddenSeries.has(key)}
+                />
+              ))}
+            </BarChart>
+          )}
+        </ResponsiveContainer>
+      </div>
     </div>
   )
 }

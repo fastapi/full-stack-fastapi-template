@@ -609,6 +609,136 @@ export interface CustomerReviewsResponse {
 }
 
 /**
+ * A single gap metric for competitive comparison
+ */
+export interface CompetitorGapMetric {
+  gap_value: number | null
+  previous_gap_value: number | null
+  change: number | null
+  trend: "up" | "down" | "flat" | "no_data"
+}
+
+/**
+ * Response for competitor gap summary (3 gap metrics)
+ */
+export interface CompetitorGapSummaryResponse {
+  brand_id: string
+  segment: string
+  competitor_brand_name: string
+  visibility_gap: CompetitorGapMetric
+  position_gap: CompetitorGapMetric
+  sentiment_gap: CompetitorGapMetric
+  current_period_end: string | null
+  previous_period_end: string | null
+}
+
+/**
+ * Response for competitors-by-segment endpoint
+ */
+export interface CompetitorsBySegmentResponse {
+  brand_id: string
+  segment: string
+  competitor_names: string[]
+}
+
+/**
+ * A single time-series point of gap metrics (brand vs competitor)
+ */
+export interface CompetitorGapTrendDataPoint {
+  date: string
+  // Raw values
+  brand_visibility: number | null
+  comp_visibility: number | null
+  brand_median_ranking: number | null
+  comp_median_ranking: number | null
+  brand_sentiment: number | null
+  comp_sentiment: number | null
+  // Gaps
+  visibility_gap: number | null
+  position_gap: number | null
+  sentiment_gap: number | null
+}
+
+/**
+ * Response for competitor gap historical trend endpoint
+ */
+export interface CompetitorGapTrendResponse {
+  brand_id: string
+  segment: string
+  competitor_brand_name: string
+  data_points: CompetitorGapTrendDataPoint[]
+}
+
+/**
+ * One date window of brand vs competitor ranking stats (lower number = better position).
+ * Null means the brand/competitor had no visibility in that window.
+ */
+export interface CompetitorRankingDetailDataPoint {
+  date: string
+  // Raw values
+  brand_best: number | null
+  brand_worst: number | null
+  brand_avg: number | null
+  comp_best: number | null
+  comp_worst: number | null
+  comp_avg: number | null
+  // Gaps (comp - brand; positive = brand ranks better)
+  best_gap: number | null
+  worst_gap: number | null
+  avg_gap: number | null
+}
+
+/**
+ * Response for competitor ranking detail endpoint
+ */
+export interface CompetitorRankingDetailResponse {
+  brand_id: string
+  segment: string
+  competitor_brand_name: string
+  data_points: CompetitorRankingDetailDataPoint[]
+}
+
+/**
+ * One row in the sentiment comparison table (brand review vs competitor review)
+ */
+export interface SentimentComparisonRow {
+  sentiment: string
+  brand_review: string
+  comp_review: string
+}
+
+/**
+ * Response for sentiment comparison endpoint
+ */
+export interface SentimentComparisonResponse {
+  brand_id: string
+  segment: string
+  competitor_brand_name: string
+  rows: SentimentComparisonRow[]
+}
+
+/**
+ * One row in the reference source comparison table
+ */
+export interface ReferenceSourceComparisonRow {
+  seq: number
+  /** "common" | "brand_only" | "comp_only" */
+  category: string
+  brand_source: string
+  comp_source: string
+}
+
+/**
+ * Response for reference source comparison endpoint
+ */
+export interface ReferenceSourceComparisonResponse {
+  brand_id: string
+  segment: string
+  competitor_brand_name: string
+  rows: ReferenceSourceComparisonRow[]
+}
+
+/**
  * Standard API error response interface
  */
 export interface ApiError {
@@ -2215,6 +2345,251 @@ class DashboardAPI {
       brand_id: brandId,
       reviews: merged.map((m, i) => ({ seq: i + 1, review: m.review, sentiment: m.sentiment })),
     }
+    this.setCachedData(cacheKey, data)
+    return data
+  }
+
+  // ── Competitors by segment ─────────────────────────────────────────────────
+
+  async getCompetitorsBySegment(
+    brandId: string,
+    segment: string,
+    forceRefresh = false,
+  ): Promise<CompetitorsBySegmentResponse> {
+    const cacheKey = `dashboard_competitors_by_segment_${brandId}_${segment}`
+
+    if (!forceRefresh) {
+      const cached = this.getCachedData<CompetitorsBySegmentResponse>(cacheKey)
+      if (cached) return cached
+    }
+
+    const queryParams = new URLSearchParams({ brand_id: brandId, segment })
+    const response = await fetch(
+      `${this.baseUrl}${this.apiPrefix}/dashboard/competitors-by-segment?${queryParams}`,
+      { method: "GET", headers: await this.getAuthHeaders() },
+    )
+    if (response.status === 401) throw new Error("Unauthorized - Please log in again")
+    if (!response.ok) {
+      const error: ApiError = await response.json()
+      throw new Error(error.detail || "Failed to fetch competitors by segment")
+    }
+
+    const data: CompetitorsBySegmentResponse = await response.json()
+    this.setCachedData(cacheKey, data)
+    return data
+  }
+
+  // ── Competitor gap historical trend ───────────────────────────────────────
+
+  async getCompetitorGapTrend(
+    brandId: string,
+    segment: string,
+    competitorBrandName: string,
+    timeRange: TimeRange,
+    startDate?: string,
+    endDate?: string,
+    forceRefresh = false,
+  ): Promise<CompetitorGapTrendResponse> {
+    const cacheKey = `dashboard_competitor_gap_trend_v2_${brandId}_${segment}_${competitorBrandName}_${timeRange}_${startDate ?? ""}_${endDate ?? ""}`
+
+    if (!forceRefresh) {
+      const cached = this.getCachedData<CompetitorGapTrendResponse>(cacheKey)
+      if (cached) return cached
+    }
+
+    const queryParams = new URLSearchParams({
+      brand_id: brandId,
+      segment,
+      competitor_brand_name: competitorBrandName,
+      time_range: timeRange,
+    })
+    if (timeRange === "custom") {
+      if (!startDate || !endDate) throw new Error("startDate and endDate required for custom range")
+      queryParams.append("start_date", startDate)
+      queryParams.append("end_date", endDate)
+    }
+
+    const response = await fetch(
+      `${this.baseUrl}${this.apiPrefix}/dashboard/competitor-gap-trend?${queryParams}`,
+      { method: "GET", headers: await this.getAuthHeaders() },
+    )
+    if (response.status === 401) throw new Error("Unauthorized - Please log in again")
+    if (!response.ok) {
+      const error: ApiError = await response.json()
+      throw new Error(error.detail || "Failed to fetch competitor gap trend")
+    }
+
+    const data: CompetitorGapTrendResponse = await response.json()
+    if (data.data_points.length > 0) this.setCachedData(cacheKey, data)
+    return data
+  }
+
+  // ── Competitor ranking detail ──────────────────────────────────────────────
+
+  async getCompetitorRankingDetail(
+    brandId: string,
+    segment: string,
+    competitorBrandName: string,
+    timeRange: TimeRange,
+    startDate?: string,
+    endDate?: string,
+    forceRefresh = false,
+  ): Promise<CompetitorRankingDetailResponse> {
+    const cacheKey = `dashboard_competitor_ranking_detail_v3_${brandId}_${segment}_${competitorBrandName}_${timeRange}_${startDate ?? ""}_${endDate ?? ""}`
+
+    if (!forceRefresh) {
+      const cached = this.getCachedData<CompetitorRankingDetailResponse>(cacheKey)
+      if (cached) return cached
+    }
+
+    const queryParams = new URLSearchParams({
+      brand_id: brandId,
+      segment,
+      competitor_brand_name: competitorBrandName,
+      time_range: timeRange,
+    })
+    if (timeRange === "custom") {
+      if (!startDate || !endDate) throw new Error("startDate and endDate required for custom range")
+      queryParams.append("start_date", startDate)
+      queryParams.append("end_date", endDate)
+    }
+
+    const response = await fetch(
+      `${this.baseUrl}${this.apiPrefix}/dashboard/competitor-ranking-detail?${queryParams}`,
+      { method: "GET", headers: await this.getAuthHeaders() },
+    )
+    if (response.status === 401) throw new Error("Unauthorized - Please log in again")
+    if (!response.ok) {
+      const error: ApiError = await response.json()
+      throw new Error(error.detail || "Failed to fetch competitor ranking detail")
+    }
+
+    const data: CompetitorRankingDetailResponse = await response.json()
+    if (data.data_points.length > 0) this.setCachedData(cacheKey, data)
+    return data
+  }
+
+  // ── Reference source comparison ───────────────────────────────────────────
+
+  async getReferenceSourceComparison(
+    brandId: string,
+    segment: string,
+    competitorBrandName: string,
+    timeRange: TimeRange,
+    startDate?: string,
+    endDate?: string,
+    forceRefresh = false,
+  ): Promise<ReferenceSourceComparisonResponse> {
+    const cacheKey = `dashboard_ref_source_comparison_${brandId}_${segment}_${competitorBrandName}_${timeRange}_${startDate ?? ""}_${endDate ?? ""}`
+
+    if (!forceRefresh) {
+      const cached = this.getCachedData<ReferenceSourceComparisonResponse>(cacheKey)
+      if (cached) return cached
+    }
+
+    const queryParams = new URLSearchParams({
+      brand_id: brandId,
+      segment,
+      competitor_brand_name: competitorBrandName,
+      time_range: timeRange,
+    })
+    if (timeRange === "custom") {
+      if (!startDate || !endDate) throw new Error("startDate and endDate required for custom range")
+      queryParams.append("start_date", startDate)
+      queryParams.append("end_date", endDate)
+    }
+
+    const response = await fetch(
+      `${this.baseUrl}${this.apiPrefix}/dashboard/reference-source-comparison?${queryParams}`,
+      { method: "GET", headers: await this.getAuthHeaders() },
+    )
+    if (response.status === 401) throw new Error("Unauthorized - Please log in again")
+    if (!response.ok) {
+      const error: ApiError = await response.json()
+      throw new Error(error.detail || "Failed to fetch reference source comparison")
+    }
+
+    const data: ReferenceSourceComparisonResponse = await response.json()
+    if (data.rows.length > 0) this.setCachedData(cacheKey, data)
+    return data
+  }
+
+  // ── Sentiment comparison ───────────────────────────────────────────────────
+
+  async getSentimentComparison(
+    brandId: string,
+    segment: string,
+    competitorBrandName: string,
+    timeRange: TimeRange,
+    startDate?: string,
+    endDate?: string,
+    forceRefresh = false,
+  ): Promise<SentimentComparisonResponse> {
+    const cacheKey = `dashboard_sentiment_comparison_${brandId}_${segment}_${competitorBrandName}_${timeRange}_${startDate ?? ""}_${endDate ?? ""}`
+
+    if (!forceRefresh) {
+      const cached = this.getCachedData<SentimentComparisonResponse>(cacheKey)
+      if (cached) return cached
+    }
+
+    const queryParams = new URLSearchParams({
+      brand_id: brandId,
+      segment,
+      competitor_brand_name: competitorBrandName,
+      time_range: timeRange,
+    })
+    if (timeRange === "custom") {
+      if (!startDate || !endDate) throw new Error("startDate and endDate required for custom range")
+      queryParams.append("start_date", startDate)
+      queryParams.append("end_date", endDate)
+    }
+
+    const response = await fetch(
+      `${this.baseUrl}${this.apiPrefix}/dashboard/sentiment-comparison?${queryParams}`,
+      { method: "GET", headers: await this.getAuthHeaders() },
+    )
+    if (response.status === 401) throw new Error("Unauthorized - Please log in again")
+    if (!response.ok) {
+      const error: ApiError = await response.json()
+      throw new Error(error.detail || "Failed to fetch sentiment comparison")
+    }
+
+    const data: SentimentComparisonResponse = await response.json()
+    if (data.rows.length > 0) this.setCachedData(cacheKey, data)
+    return data
+  }
+
+  // ── Competitor gap summary ─────────────────────────────────────────────────
+
+  async getCompetitorGapSummary(
+    brandId: string,
+    segment: string,
+    competitorBrandName: string,
+    forceRefresh = false,
+  ): Promise<CompetitorGapSummaryResponse> {
+    const cacheKey = `dashboard_competitor_gap_summary_${brandId}_${segment}_${competitorBrandName}`
+
+    if (!forceRefresh) {
+      const cached = this.getCachedData<CompetitorGapSummaryResponse>(cacheKey)
+      if (cached) return cached
+    }
+
+    const queryParams = new URLSearchParams({
+      brand_id: brandId,
+      segment,
+      competitor_brand_name: competitorBrandName,
+    })
+    const response = await fetch(
+      `${this.baseUrl}${this.apiPrefix}/dashboard/competitor-gap-summary?${queryParams}`,
+      { method: "GET", headers: await this.getAuthHeaders() },
+    )
+    if (response.status === 401) throw new Error("Unauthorized - Please log in again")
+    if (!response.ok) {
+      const error: ApiError = await response.json()
+      throw new Error(error.detail || "Failed to fetch competitor gap summary")
+    }
+
+    const data: CompetitorGapSummaryResponse = await response.json()
     this.setCachedData(cacheKey, data)
     return data
   }

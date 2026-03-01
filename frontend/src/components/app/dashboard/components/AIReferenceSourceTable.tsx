@@ -99,6 +99,11 @@ export function AIReferenceSourceTable({
         header: "#",
         enableSorting: false,
         size: 40,
+        cell: ({ getValue }) => (
+          <span className="inline-block px-1.5 py-0.5 rounded text-[10px] text-slate-400 border border-transparent">
+            {getValue() as number}
+          </span>
+        ),
       },
       {
         accessorKey: "source",
