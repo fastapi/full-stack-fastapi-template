@@ -17,6 +17,7 @@
 
 ### Internal
 
+* ⬆ Bump @tanstack/react-router from 1.157.3 to 1.163.3. PR [#2215](https://github.com/fastapi/full-stack-fastapi-template/pull/2215) by [@dependabot[bot]](https://github.com/apps/dependabot).
 * ⬆ Bump @tanstack/react-router-devtools from 1.159.10 to 1.163.3. PR [#2212](https://github.com/fastapi/full-stack-fastapi-template/pull/2212) by [@dependabot[bot]](https://github.com/apps/dependabot).
 * ⬆ Bump @tanstack/react-query from 5.90.20 to 5.90.21. PR [#2213](https://github.com/fastapi/full-stack-fastapi-template/pull/2213) by [@dependabot[bot]](https://github.com/apps/dependabot).
 * ⬆ Bump @types/node from 25.1.0 to 25.3.2. PR [#2214](https://github.com/fastapi/full-stack-fastapi-template/pull/2214) by [@dependabot[bot]](https://github.com/apps/dependabot).
