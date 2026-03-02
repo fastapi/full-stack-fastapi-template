@@ -25,8 +25,31 @@ jobs:
       EMAILS_FROM_EMAIL: ${{ secrets.EMAILS_FROM_EMAIL }}
       POSTGRES_PASSWORD: ${{ secrets.POSTGRES_PASSWORD }}
       SENTRY_DSN: ${{ secrets.SENTRY_DSN }}
+      GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+      GEMINI_MODEL: ${{ secrets.GEMINI_MODEL }}
     steps:
       - name: Checkout
         uses: actions/checkout@v6
+      - name: Prepare env file
+        run: |
+          cp .env.example .env
+          {
+            echo "ENVIRONMENT=${ENVIRONMENT}"
+            echo "DOMAIN=${DOMAIN}"
+            echo "STACK_NAME=${STACK_NAME}"
+            echo "FRONTEND_HOST=https://dashboard.${DOMAIN}"
+            echo "BACKEND_CORS_ORIGINS=https://dashboard.${DOMAIN},https://api.${DOMAIN}"
+            echo "SECRET_KEY=${SECRET_KEY}"
+            echo "FIRST_SUPERUSER=${FIRST_SUPERUSER}"
+            echo "FIRST_SUPERUSER_PASSWORD=${FIRST_SUPERUSER_PASSWORD}"
+            echo "SMTP_HOST=${SMTP_HOST}"
+            echo "SMTP_USER=${SMTP_USER}"
+            echo "SMTP_PASSWORD=${SMTP_PASSWORD}"
+            echo "EMAILS_FROM_EMAIL=${EMAILS_FROM_EMAIL}"
+            echo "POSTGRES_PASSWORD=${POSTGRES_PASSWORD}"
+            echo "SENTRY_DSN=${SENTRY_DSN}"
+            echo "GEMINI_API_KEY=${GEMINI_API_KEY}"
+            echo "GEMINI_MODEL=${GEMINI_MODEL}"
+          } >> .env
       - run: docker compose -f compose.yml --project-name ${{ secrets.STACK_NAME_PRODUCTION }} build
       - run: docker compose -f compose.yml --project-name ${{ secrets.STACK_NAME_PRODUCTION }} up -d
