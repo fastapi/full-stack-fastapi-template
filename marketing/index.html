@@ -1,0 +1,257 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>AITemplates - AI Templates for Proposals, Emails, and Outreach</title>
+    <meta
+      name="description"
+      content="AITemplates helps you generate high-quality proposal and outreach drafts from your context. Build faster, keep consistency, and export polished content."
+    />
+    <link rel="canonical" href="https://aitemplates.fr/" />
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content="AITemplates" />
+    <meta
+      property="og:description"
+      content="AI-powered template workflows for sales, freelance, and business communication."
+    />
+    <meta property="og:url" content="https://aitemplates.fr/" />
+    <meta property="og:site_name" content="AITemplates" />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="AITemplates" />
+    <meta
+      name="twitter:description"
+      content="Create better proposals and outreach drafts with AI-powered templates."
+    />
+    <script type="application/ld+json">
+      {
+        "@context": "https://schema.org",
+        "@type": "SoftwareApplication",
+        "name": "AITemplates",
+        "applicationCategory": "BusinessApplication",
+        "operatingSystem": "Web",
+        "url": "https://aitemplates.fr/",
+        "offers": {
+          "@type": "Offer",
+          "price": "0",
+          "priceCurrency": "EUR"
+        }
+      }
+    </script>
+    <style>
+      :root {
+        --bg: #f5f3ec;
+        --surface: #ffffff;
+        --ink: #111827;
+        --muted: #5a6475;
+        --brand: #2563eb;
+        --brand-strong: #1d4ed8;
+        --line: #d8deea;
+      }
+
+      * {
+        box-sizing: border-box;
+      }
+
+      body {
+        margin: 0;
+        color: var(--ink);
+        background:
+          radial-gradient(80rem 30rem at 20% -10%, #dbeafe 0%, transparent 60%),
+          radial-gradient(60rem 20rem at 90% 0%, #fde68a 0%, transparent 55%),
+          var(--bg);
+        font-family: "Trebuchet MS", "Segoe UI", system-ui, sans-serif;
+      }
+
+      .wrap {
+        max-width: 1120px;
+        margin: 0 auto;
+        padding: 1.25rem;
+      }
+
+      header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 1rem;
+      }
+
+      .logo {
+        font-weight: 800;
+        font-size: 1.1rem;
+        letter-spacing: 0.02em;
+      }
+
+      .btn {
+        border: 1px solid var(--line);
+        background: var(--surface);
+        color: var(--ink);
+        text-decoration: none;
+        padding: 0.6rem 0.9rem;
+        border-radius: 0.6rem;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.4rem;
+        font-weight: 600;
+      }
+
+      .btn.primary {
+        border-color: var(--brand);
+        background: var(--brand);
+        color: #fff;
+      }
+
+      .btn.primary:hover {
+        background: var(--brand-strong);
+      }
+
+      .hero {
+        margin-top: 2.5rem;
+        display: grid;
+        gap: 1.25rem;
+      }
+
+      h1 {
+        margin: 0;
+        font-size: clamp(2rem, 4vw, 3.2rem);
+        line-height: 1.1;
+      }
+
+      .lead {
+        margin: 0;
+        color: var(--muted);
+        font-size: 1.05rem;
+        max-width: 48rem;
+      }
+
+      .hero-cta {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.7rem;
+      }
+
+      .grid {
+        margin-top: 2rem;
+        display: grid;
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+        gap: 0.9rem;
+      }
+
+      .card {
+        background: var(--surface);
+        border: 1px solid var(--line);
+        border-radius: 0.9rem;
+        padding: 1rem;
+      }
+
+      .card h3 {
+        margin: 0 0 0.45rem 0;
+        font-size: 1rem;
+      }
+
+      .card p {
+        margin: 0;
+        color: var(--muted);
+        font-size: 0.95rem;
+        line-height: 1.45;
+      }
+
+      .demo {
+        margin-top: 2rem;
+      }
+
+      .demo-box {
+        background: #0f172a;
+        color: #e5e7eb;
+        border-radius: 0.9rem;
+        border: 1px solid #1e293b;
+        padding: 1rem;
+        font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+        white-space: pre-wrap;
+        line-height: 1.5;
+      }
+
+      footer {
+        margin-top: 2rem;
+        padding-top: 1rem;
+        border-top: 1px solid var(--line);
+        color: var(--muted);
+        font-size: 0.88rem;
+      }
+
+      @media (max-width: 900px) {
+        .grid {
+          grid-template-columns: 1fr;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="wrap">
+      <header>
+        <div class="logo">AITemplates</div>
+        <a class="btn" href="https://dashboard.aitemplates.fr/login">Login</a>
+      </header>
+
+      <main>
+        <section class="hero">
+          <h1>Generate high-converting proposals and outreach drafts in minutes</h1>
+          <p class="lead">
+            AITemplates turns your context into ready-to-send content. Keep your tone
+            consistent, reduce repetitive writing, and ship better communication faster.
+          </p>
+          <div class="hero-cta">
+            <a class="btn primary" href="https://dashboard.aitemplates.fr/login"
+              >Try the Demo</a
+            >
+            <a class="btn" href="https://api.aitemplates.fr/docs">API Docs</a>
+          </div>
+        </section>
+
+        <section class="grid">
+          <article class="card">
+            <h3>Template-Driven</h3>
+            <p>
+              Define structured templates once, then reuse them across business cases.
+            </p>
+          </article>
+          <article class="card">
+            <h3>Smart Variable Extraction</h3>
+            <p>
+              Paste requirement text and let the system extract missing information
+              automatically.
+            </p>
+          </article>
+          <article class="card">
+            <h3>Editable Output + Versioning</h3>
+            <p>
+              Fine-tune generated text, save versions, and build a repeatable content
+              system.
+            </p>
+          </article>
+        </section>
+
+        <section class="demo">
+          <h2>Quick Example</h2>
+          <div class="demo-box">
+Input:
+"Freelance product designer, B2B SaaS, need outreach email for founders"
+
+Output:
+"Hi [Founder Name],
+I help B2B SaaS teams improve conversion with UX-led product design...
+Would you be open to a quick call this week?"
+          </div>
+        </section>
+      </main>
+
+      <footer>
+        <span id="year"></span> AITemplates. Built for practical teams shipping real
+        work.
+      </footer>
+    </div>
+    <script>
+      document.getElementById("year").textContent = new Date().getFullYear()
+    </script>
+  </body>
+</html>

@@ -165,6 +165,33 @@ services:
 
       # Enable redirection for HTTP and HTTPS
       - traefik.http.routers.${STACK_NAME?Variable not set}-frontend-http.middlewares=https-redirect
+
+  marketing:
+    image: 'marketing:${TAG-latest}'
+    restart: always
+    networks:
+      - traefik-public
+      - default
+    build:
+      context: .
+      dockerfile: marketing/Dockerfile
+    labels:
+      - traefik.enable=true
+      - traefik.docker.network=traefik-public
+      - traefik.constraint-label=traefik-public
+
+      - traefik.http.services.${STACK_NAME?Variable not set}-marketing.loadbalancer.server.port=80
+
+      - traefik.http.routers.${STACK_NAME?Variable not set}-marketing-http.rule=Host(`${DOMAIN?Variable not set}`) || Host(`www.${DOMAIN?Variable not set}`)
+      - traefik.http.routers.${STACK_NAME?Variable not set}-marketing-http.entrypoints=http
+
+      - traefik.http.routers.${STACK_NAME?Variable not set}-marketing-https.rule=Host(`${DOMAIN?Variable not set}`) || Host(`www.${DOMAIN?Variable not set}`)
+      - traefik.http.routers.${STACK_NAME?Variable not set}-marketing-https.entrypoints=https
+      - traefik.http.routers.${STACK_NAME?Variable not set}-marketing-https.tls=true
+      - traefik.http.routers.${STACK_NAME?Variable not set}-marketing-https.tls.certresolver=le
+
+      # Enable redirection for HTTP and HTTPS
+      - traefik.http.routers.${STACK_NAME?Variable not set}-marketing-http.middlewares=https-redirect
 volumes:
   app-db-data:
 
