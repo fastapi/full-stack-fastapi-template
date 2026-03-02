@@ -1,257 +1,1262 @@
 <!doctype html>
 <html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>AITemplates - AI Templates for Proposals, Emails, and Outreach</title>
-    <meta
-      name="description"
-      content="AITemplates helps you generate high-quality proposal and outreach drafts from your context. Build faster, keep consistency, and export polished content."
-    />
-    <link rel="canonical" href="https://aitemplates.fr/" />
-    <meta property="og:type" content="website" />
-    <meta property="og:title" content="AITemplates" />
-    <meta
-      property="og:description"
-      content="AI-powered template workflows for sales, freelance, and business communication."
-    />
-    <meta property="og:url" content="https://aitemplates.fr/" />
-    <meta property="og:site_name" content="AITemplates" />
-    <meta name="twitter:card" content="summary_large_image" />
-    <meta name="twitter:title" content="AITemplates" />
-    <meta
-      name="twitter:description"
-      content="Create better proposals and outreach drafts with AI-powered templates."
-    />
-    <script type="application/ld+json">
-      {
-        "@context": "https://schema.org",
-        "@type": "SoftwareApplication",
-        "name": "AITemplates",
-        "applicationCategory": "BusinessApplication",
-        "operatingSystem": "Web",
-        "url": "https://aitemplates.fr/",
-        "offers": {
-          "@type": "Offer",
-          "price": "0",
-          "priceCurrency": "EUR"
-        }
-      }
-    </script>
-    <style>
-      :root {
-        --bg: #f5f3ec;
-        --surface: #ffffff;
-        --ink: #111827;
-        --muted: #5a6475;
-        --brand: #2563eb;
-        --brand-strong: #1d4ed8;
-        --line: #d8deea;
-      }
+<head>
+  <link rel="icon" href="/favicon.png" sizes="any">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Forge AI — Calm templates. Sharp results.</title>
+  <meta name="description" content="A Japandi-inspired, AI-powered template library and writing assistant. Choose a template, paste your needs, get a polished proposal in minutes." />
+  <style>
+    :root{
+      --bg: #F6F3EE;          /* warm sand */
+      --paper: #FBF9F6;       /* off-white paper */
+      --ink: #1F2328;         /* charcoal */
+      --muted: #5A6168;       /* soft graphite */
+      --line: rgba(31,35,40,.12);
+      --shadow: 0 14px 40px rgba(31,35,40,.10);
+      --sand: #E8E0D2;        /* warm neutral */
+      --sage: #91A89A;        /* muted sage */
+      --terra: #C9826A;       /* muted terracotta */
+      --accent: #2E3A33;      /* deep green-charcoal */
+      --radius: 18px;
+      --radius2: 28px;
+      --max: 1120px;
+    }
 
-      * {
-        box-sizing: border-box;
-      }
+    *{ box-sizing:border-box; }
+    html, body { height:100%; }
+    body{
+      margin:0;
+      font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, "Apple Color Emoji", "Segoe UI Emoji";
+      color: var(--ink);
+      background:
+        radial-gradient(1200px 800px at 20% 10%, rgba(145,168,154,.18), transparent 60%),
+        radial-gradient(900px 600px at 80% 30%, rgba(201,130,106,.16), transparent 55%),
+        linear-gradient(180deg, var(--bg), #F2EEE7 60%, #EFEAE2 100%);
+      overflow-x:hidden;
+    }
 
-      body {
-        margin: 0;
-        color: var(--ink);
-        background:
-          radial-gradient(80rem 30rem at 20% -10%, #dbeafe 0%, transparent 60%),
-          radial-gradient(60rem 20rem at 90% 0%, #fde68a 0%, transparent 55%),
-          var(--bg);
-        font-family: "Trebuchet MS", "Segoe UI", system-ui, sans-serif;
-      }
+    a{ color: inherit; text-decoration:none; }
+    button{ font: inherit; }
 
-      .wrap {
-        max-width: 1120px;
-        margin: 0 auto;
-        padding: 1.25rem;
-      }
+    .wrap{ width:min(var(--max), calc(100% - 40px)); margin:0 auto; }
 
-      header {
-        display: flex;
-        align-items: center;
-        justify-content: space-between;
-        gap: 1rem;
-      }
+    /* Top nav */
+    .nav{
+      position:sticky; top:0; z-index:50;
+      backdrop-filter: blur(10px);
+      background: rgba(246,243,238,.72);
+      border-bottom:1px solid var(--line);
+    }
+    .nav-inner{
+      display:flex; align-items:center; justify-content:space-between;
+      padding:14px 0;
+      gap:16px;
+    }
+    .brand{
+      display:flex; align-items:center; gap:10px;
+      font-weight:650; letter-spacing:.2px;
+    }
+    .mark{
+      width:34px; height:34px; border-radius:12px;
+      background:
+        radial-gradient(12px 12px at 30% 35%, rgba(255,255,255,.9), transparent 55%),
+        linear-gradient(135deg, rgba(145,168,154,.95), rgba(46,58,51,.95));
+      box-shadow: 0 10px 22px rgba(46,58,51,.20);
+      position:relative;
+      overflow:hidden;
+    }
+    .mark::after{
+      content:"";
+      position:absolute; inset:-20% -20%;
+      background:
+        radial-gradient(closest-side, rgba(201,130,106,.55), transparent 65%),
+        radial-gradient(closest-side, rgba(232,224,210,.65), transparent 70%);
+      transform: rotate(18deg);
+      opacity:.55;
+    }
+    .nav-links{
+      display:flex; align-items:center; gap:18px;
+      color: var(--muted);
+      font-size:14px;
+    }
+    .nav-links a{
+      padding:8px 10px;
+      border-radius: 999px;
+      transition: background .2s ease, color .2s ease;
+    }
+    .nav-links a:hover{ background: rgba(31,35,40,.06); color: var(--ink); }
 
-      .logo {
-        font-weight: 800;
-        font-size: 1.1rem;
-        letter-spacing: 0.02em;
-      }
+    .nav-cta{
+      display:flex; align-items:center; gap:10px;
+    }
+    .pill{
+      display:inline-flex; align-items:center; gap:8px;
+      border:1px solid var(--line);
+      background: rgba(251,249,246,.8);
+      padding:9px 12px;
+      border-radius:999px;
+      color: var(--muted);
+      font-size:13px;
+      box-shadow: 0 10px 26px rgba(31,35,40,.06);
+    }
+    .btn{
+      display:inline-flex; align-items:center; justify-content:center;
+      padding:11px 14px;
+      border-radius:999px;
+      border:1px solid rgba(46,58,51,.20);
+      background: rgba(46,58,51,.95);
+      color: #F9F7F3;
+      font-weight:600;
+      letter-spacing:.2px;
+      box-shadow: 0 16px 34px rgba(46,58,51,.22);
+      cursor:pointer;
+      transition: transform .15s ease, box-shadow .15s ease, background .15s ease;
+      white-space:nowrap;
+    }
+    .btn:hover{
+      transform: translateY(-1px);
+      box-shadow: 0 18px 40px rgba(46,58,51,.26);
+      background: rgba(46,58,51,1);
+    }
+    .btn.secondary{
+      background: rgba(251,249,246,.85);
+      color: var(--ink);
+      border:1px solid var(--line);
+      box-shadow: 0 12px 28px rgba(31,35,40,.06);
+    }
+    .btn.secondary:hover{ transform: translateY(-1px); }
 
-      .btn {
-        border: 1px solid var(--line);
-        background: var(--surface);
-        color: var(--ink);
-        text-decoration: none;
-        padding: 0.6rem 0.9rem;
-        border-radius: 0.6rem;
-        display: inline-flex;
-        align-items: center;
-        gap: 0.4rem;
-        font-weight: 600;
-      }
+    /* Hero */
+    .hero{
+      padding: 64px 0 38px;
+      position:relative;
+    }
+    .grid{
+      display:grid;
+      grid-template-columns: 1.15fr .85fr;
+      gap: 28px;
+      align-items:stretch;
+    }
+    @media (max-width: 920px){
+      .grid{ grid-template-columns: 1fr; }
+      .nav-links{ display:none; }
+    }
 
-      .btn.primary {
-        border-color: var(--brand);
-        background: var(--brand);
-        color: #fff;
-      }
+    .kicker{
+      display:inline-flex; align-items:center; gap:10px;
+      padding: 8px 12px;
+      border-radius:999px;
+      background: rgba(145,168,154,.14);
+      border: 1px solid rgba(145,168,154,.30);
+      color: rgba(46,58,51,.95);
+      font-size: 13px;
+      letter-spacing:.2px;
+    }
+    .kdot{
+      width:8px; height:8px; border-radius:999px;
+      background: var(--sage);
+      box-shadow: 0 0 0 6px rgba(145,168,154,.15);
+    }
+    h1{
+      margin: 18px 0 12px;
+      font-size: clamp(34px, 4.2vw, 56px);
+      line-height: 1.05;
+      letter-spacing: -0.8px;
+      font-weight: 720;
+    }
+    .lead{
+      margin: 0 0 22px;
+      color: var(--muted);
+      font-size: 16.5px;
+      line-height: 1.6;
+      max-width: 56ch;
+    }
+    .hero-actions{
+      display:flex; flex-wrap:wrap;
+      gap:10px;
+      align-items:center;
+    }
 
-      .btn.primary:hover {
-        background: var(--brand-strong);
-      }
+    .card{
+      background: rgba(251,249,246,.75);
+      border: 1px solid var(--line);
+      border-radius: var(--radius2);
+      box-shadow: var(--shadow);
+      overflow:hidden;
+      position:relative;
+    }
+    .card::before{
+      content:"";
+      position:absolute; inset:0;
+      background:
+        radial-gradient(600px 240px at 10% 5%, rgba(145,168,154,.16), transparent 55%),
+        radial-gradient(460px 240px at 90% 25%, rgba(201,130,106,.14), transparent 55%),
+        linear-gradient(180deg, rgba(255,255,255,.20), rgba(255,255,255,0));
+      pointer-events:none;
+    }
+    .preview{
+      padding: 18px;
+      display:flex;
+      flex-direction:column;
+      gap:14px;
+      position:relative;
+    }
+    .preview-top{
+      display:flex; align-items:center; justify-content:space-between;
+      gap:12px;
+      color: var(--muted);
+      font-size: 13px;
+    }
+    .chips{
+      display:flex; flex-wrap:wrap; gap:8px;
+    }
+    .chip{
+      border:1px solid var(--line);
+      padding:7px 10px;
+      border-radius:999px;
+      background: rgba(251,249,246,.85);
+      font-size: 12.5px;
+      color: var(--muted);
+    }
+    .chip.sage{ border-color: rgba(145,168,154,.35); background: rgba(145,168,154,.12); color: rgba(46,58,51,.95); }
+    .chip.terra{ border-color: rgba(201,130,106,.35); background: rgba(201,130,106,.12); color: rgba(89,41,30,.95); }
 
-      .hero {
-        margin-top: 2.5rem;
-        display: grid;
-        gap: 1.25rem;
-      }
+    .mini{
+      background: rgba(246,243,238,.6);
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      padding: 14px;
+      display:grid;
+      gap:10px;
+    }
+    .mini .row{
+      display:flex; align-items:flex-start; justify-content:space-between; gap:12px;
+      font-size: 13px;
+      color: var(--muted);
+    }
+    .mini .row b{ color: var(--ink); font-weight:650; }
+    .bar{
+      height:10px; border-radius:999px;
+      background: rgba(31,35,40,.08);
+      overflow:hidden;
+      border:1px solid rgba(31,35,40,.08);
+    }
+    .bar > i{
+      display:block; height:100%;
+      width: 78%;
+      background: linear-gradient(90deg, rgba(145,168,154,.95), rgba(46,58,51,.95));
+      border-radius:999px;
+    }
+    .divider{
+      height:1px; background: var(--line);
+      margin: 6px 0;
+    }
 
-      h1 {
-        margin: 0;
-        font-size: clamp(2rem, 4vw, 3.2rem);
-        line-height: 1.1;
-      }
+    /* Section blocks */
+    section{
+      padding: 34px 0;
+    }
+    .section-head{
+      display:flex; align-items:flex-end; justify-content:space-between; gap:16px;
+      margin-bottom: 14px;
+    }
+    h2{
+      margin:0;
+      font-size: clamp(22px, 2.4vw, 30px);
+      letter-spacing: -0.35px;
+    }
+    .sub{
+      margin:0;
+      color: var(--muted);
+      max-width: 62ch;
+      line-height:1.6;
+      font-size: 15px;
+    }
 
-      .lead {
-        margin: 0;
-        color: var(--muted);
-        font-size: 1.05rem;
-        max-width: 48rem;
-      }
+    .tiles{
+      display:grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 14px;
+      margin-top: 14px;
+    }
+    @media (max-width: 920px){
+      .tiles{ grid-template-columns: 1fr; }
+    }
+    .tile{
+      padding: 16px;
+      border-radius: var(--radius2);
+      border: 1px solid var(--line);
+      background: rgba(251,249,246,.7);
+      box-shadow: 0 18px 36px rgba(31,35,40,.06);
+      position:relative;
+      overflow:hidden;
+      min-height: 168px;
+    }
+    .tile::after{
+      content:"";
+      position:absolute; right:-40px; top:-40px;
+      width: 140px; height: 140px;
+      background: radial-gradient(circle at 30% 30%, rgba(201,130,106,.25), transparent 60%);
+      transform: rotate(18deg);
+      pointer-events:none;
+    }
+    .tile h3{
+      margin:0 0 8px;
+      font-size: 16px;
+      letter-spacing: -0.2px;
+    }
+    .tile p{
+      margin:0;
+      color: var(--muted);
+      font-size: 14px;
+      line-height:1.6;
+    }
+    .tile .meta{
+      margin-top: 12px;
+      display:flex; flex-wrap:wrap; gap:8px;
+    }
 
-      .hero-cta {
-        display: flex;
-        flex-wrap: wrap;
-        gap: 0.7rem;
-      }
+    /* Template gallery */
+    .gallery{
+      display:grid;
+      grid-template-columns: 1.4fr .6fr;
+      gap: 14px;
+      margin-top: 14px;
+      align-items:stretch;
+    }
+    @media (max-width: 920px){
+      .gallery{ grid-template-columns: 1fr; }
+    }
+    .panel{
+      padding: 16px;
+      border-radius: var(--radius2);
+      border: 1px solid var(--line);
+      background: rgba(251,249,246,.72);
+      box-shadow: 0 18px 36px rgba(31,35,40,.06);
+      overflow:hidden;
+      position:relative;
+    }
+    .panel::before{
+      content:"";
+      position:absolute; inset:0;
+      background: radial-gradient(520px 260px at 90% 10%, rgba(145,168,154,.16), transparent 55%);
+      pointer-events:none;
+    }
+    .tabs{
+      display:flex; gap:8px; flex-wrap:wrap;
+      margin-bottom: 12px;
+      position:relative;
+    }
+    .tab{
+      border: 1px solid var(--line);
+      background: rgba(246,243,238,.55);
+      padding: 8px 10px;
+      border-radius: 999px;
+      font-size: 13px;
+      color: var(--muted);
+      cursor:pointer;
+      transition: transform .12s ease, background .12s ease, color .12s ease, border-color .12s ease;
+      user-select:none;
+    }
+    .tab:hover{ transform: translateY(-1px); }
+    .tab.active{
+      background: rgba(145,168,154,.14);
+      border-color: rgba(145,168,154,.35);
+      color: rgba(46,58,51,.95);
+    }
+    .list{
+      display:grid;
+      gap:10px;
+      position:relative;
+    }
+    .item{
+      border: 1px solid var(--line);
+      background: rgba(251,249,246,.78);
+      border-radius: 16px;
+      padding: 12px;
+      display:flex; align-items:flex-start; justify-content:space-between; gap:10px;
+      cursor:pointer;
+      transition: transform .12s ease, box-shadow .12s ease, border-color .12s ease;
+    }
+    .item:hover{
+      transform: translateY(-1px);
+      box-shadow: 0 18px 34px rgba(31,35,40,.07);
+      border-color: rgba(31,35,40,.18);
+    }
+    .item b{ display:block; font-weight:700; letter-spacing:-.15px; }
+    .item span{ display:block; color: var(--muted); font-size: 13px; margin-top:4px; line-height:1.4; }
+    .badge{
+      font-size:12px;
+      padding:6px 10px;
+      border-radius:999px;
+      border:1px solid var(--line);
+      color: var(--muted);
+      white-space:nowrap;
+      height: fit-content;
+    }
 
-      .grid {
-        margin-top: 2rem;
-        display: grid;
-        grid-template-columns: repeat(3, minmax(0, 1fr));
-        gap: 0.9rem;
-      }
+    .sample{
+      position:relative;
+      padding: 16px;
+      border-radius: var(--radius2);
+      border: 1px solid var(--line);
+      background: rgba(246,243,238,.60);
+      overflow:hidden;
+    }
+    .sample::after{
+      content:"";
+      position:absolute; left:-70px; bottom:-70px;
+      width: 220px; height: 220px;
+      background: radial-gradient(circle at 60% 40%, rgba(201,130,106,.22), transparent 60%);
+      pointer-events:none;
+    }
+    .sample h4{
+      margin:0 0 8px;
+      font-size: 14px;
+      color: rgba(46,58,51,.95);
+      letter-spacing:.2px;
+      text-transform: uppercase;
+    }
+    .paper{
+      background: rgba(251,249,246,.86);
+      border: 1px solid rgba(31,35,40,.10);
+      border-radius: 16px;
+      padding: 12px;
+      font-size: 13px;
+      line-height: 1.6;
+      color: rgba(31,35,40,.88);
+      box-shadow: 0 16px 30px rgba(31,35,40,.06);
+      position:relative;
+    }
+    .paper .muted{ color: rgba(90,97,104,.95); }
+    .paper .hl{
+      background: rgba(145,168,154,.18);
+      border: 1px solid rgba(145,168,154,.28);
+      padding: 0 6px;
+      border-radius: 999px;
+      font-weight: 650;
+      color: rgba(46,58,51,.95);
+      white-space:nowrap;
+    }
 
-      .card {
-        background: var(--surface);
-        border: 1px solid var(--line);
-        border-radius: 0.9rem;
-        padding: 1rem;
-      }
+    /* Pricing + CTA */
+    .pricing{
+      display:grid;
+      grid-template-columns: 1fr 1fr 1fr;
+      gap: 14px;
+      margin-top: 14px;
+    }
+    @media (max-width: 920px){
+      .pricing{ grid-template-columns: 1fr; }
+    }
+    .price{
+      padding: 18px;
+      border-radius: var(--radius2);
+      border: 1px solid var(--line);
+      background: rgba(251,249,246,.72);
+      box-shadow: 0 18px 36px rgba(31,35,40,.06);
+      position:relative;
+      overflow:hidden;
+    }
+    .price.featured{
+      border-color: rgba(145,168,154,.42);
+      background: rgba(145,168,154,.10);
+    }
+    .price h3{ margin:0 0 8px; font-size:16px; }
+    .price .p{
+      margin:0 0 12px;
+      color: var(--muted);
+      font-size:14px; line-height:1.55;
+    }
+    .price .num{
+      font-size: 34px;
+      font-weight: 760;
+      letter-spacing: -0.8px;
+      margin: 6px 0 10px;
+    }
+    .price ul{
+      margin: 0;
+      padding: 0;
+      list-style:none;
+      display:grid;
+      gap:8px;
+      color: var(--muted);
+      font-size: 14px;
+    }
+    .price li{
+      display:flex; gap:10px; align-items:flex-start;
+    }
+    .tick{
+      width:18px; height:18px; border-radius: 999px;
+      background: rgba(145,168,154,.22);
+      border:1px solid rgba(145,168,154,.35);
+      flex: 0 0 18px;
+      margin-top:2px;
+      position:relative;
+    }
+    .tick::after{
+      content:"";
+      position:absolute;
+      left:5px; top:3px;
+      width:5px; height:9px;
+      border-right:2px solid rgba(46,58,51,.9);
+      border-bottom:2px solid rgba(46,58,51,.9);
+      transform: rotate(45deg);
+    }
 
-      .card h3 {
-        margin: 0 0 0.45rem 0;
-        font-size: 1rem;
-      }
+    .cta{
+      padding: 26px 0 66px;
+    }
+    .cta-box{
+      border-radius: calc(var(--radius2) + 6px);
+      border: 1px solid rgba(31,35,40,.12);
+      background:
+        radial-gradient(900px 360px at 10% 10%, rgba(145,168,154,.18), transparent 55%),
+        radial-gradient(900px 360px at 90% 35%, rgba(201,130,106,.16), transparent 55%),
+        rgba(251,249,246,.72);
+      box-shadow: var(--shadow);
+      padding: 18px;
+      overflow:hidden;
+      position:relative;
+    }
+    .cta-box::after{
+      content:"";
+      position:absolute; right:-110px; bottom:-120px;
+      width: 320px; height: 320px;
+      background: radial-gradient(circle at 40% 35%, rgba(232,224,210,.70), transparent 60%);
+      transform: rotate(-12deg);
+      opacity:.9;
+      pointer-events:none;
+    }
+    .cta-inner{
+      display:grid;
+      grid-template-columns: 1.2fr .8fr;
+      gap: 14px;
+      align-items:center;
+      position:relative;
+    }
+    @media (max-width: 920px){
+      .cta-inner{ grid-template-columns: 1fr; }
+    }
+    .cta h2{ margin:0 0 6px; }
+    .cta p{ margin:0; color: var(--muted); line-height:1.6; }
+    .form{
+      display:flex;
+      gap:10px;
+      flex-wrap:wrap;
+      justify-content:flex-end;
+    }
+    .input{
+      flex: 1 1 220px;
+      min-width: 220px;
+      padding: 12px 14px;
+      border-radius: 999px;
+      border: 1px solid rgba(31,35,40,.14);
+      background: rgba(251,249,246,.86);
+      outline: none;
+      color: var(--ink);
+      box-shadow: 0 14px 28px rgba(31,35,40,.06);
+    }
+    .input:focus{
+      border-color: rgba(145,168,154,.55);
+      box-shadow: 0 0 0 5px rgba(145,168,154,.18), 0 14px 28px rgba(31,35,40,.06);
+    }
 
-      .card p {
-        margin: 0;
-        color: var(--muted);
-        font-size: 0.95rem;
-        line-height: 1.45;
-      }
+    footer{
+      padding: 18px 0 32px;
+      border-top:1px solid var(--line);
+      color: var(--muted);
+      font-size: 13px;
+    }
+    .foot{
+      display:flex; align-items:center; justify-content:space-between; gap:12px;
+      flex-wrap:wrap;
+    }
+    .tiny-links{ display:flex; gap:14px; flex-wrap:wrap; }
+    .tiny-links a{ opacity:.9; }
+    .tiny-links a:hover{ opacity:1; text-decoration:underline; }
 
-      .demo {
-        margin-top: 2rem;
-      }
+    /* Reveal animation */
+    .reveal{
+      opacity: 0;
+      transform: translateY(10px);
+      transition: opacity .7s ease, transform .7s ease;
+    }
+    .reveal.on{
+      opacity: 1;
+      transform: translateY(0px);
+    }
 
-      .demo-box {
-        background: #0f172a;
-        color: #e5e7eb;
-        border-radius: 0.9rem;
-        border: 1px solid #1e293b;
-        padding: 1rem;
-        font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
-        white-space: pre-wrap;
-        line-height: 1.5;
-      }
+    /* Accessibility - reduce motion */
+    @media (prefers-reduced-motion: reduce){
+      *{ scroll-behavior:auto !important; }
+      .reveal{ opacity: 1; transform:none; transition:none; }
+      .btn, .tab, .item{ transition:none; }
+    }
+  </style>
+</head>
 
-      footer {
-        margin-top: 2rem;
-        padding-top: 1rem;
-        border-top: 1px solid var(--line);
-        color: var(--muted);
-        font-size: 0.88rem;
-      }
+<body>
+  <header class="nav">
+    <div class="wrap nav-inner">
+      <a class="brand" href="#top" aria-label="Forge AI Home">
+        <span class="mark" aria-hidden="true"></span>
+        <span>Forge AI</span>
+      </a>
 
-      @media (max-width: 900px) {
-        .grid {
-          grid-template-columns: 1fr;
-        }
-      }
-    </style>
-  </head>
-  <body>
-    <div class="wrap">
-      <header>
-        <div class="logo">AITemplates</div>
-        <a class="btn" href="https://dashboard.aitemplates.fr/login">Login</a>
-      </header>
+      <nav class="nav-links" aria-label="Primary">
+        <a href="#how">How it works</a>
+        <a href="#library">Template library</a>
+        <a href="#pricing">Pricing</a>
+      </nav>
 
-      <main>
-        <section class="hero">
-          <h1>Generate high-converting proposals and outreach drafts in minutes</h1>
-          <p class="lead">
-            AITemplates turns your context into ready-to-send content. Keep your tone
-            consistent, reduce repetitive writing, and ship better communication faster.
-          </p>
-          <div class="hero-cta">
-            <a class="btn primary" href="https://dashboard.aitemplates.fr/login"
-              >Try the Demo</a
-            >
-            <a class="btn" href="https://api.aitemplates.fr/docs">API Docs</a>
-          </div>
-        </section>
-
-        <section class="grid">
-          <article class="card">
-            <h3>Template-Driven</h3>
-            <p>
-              Define structured templates once, then reuse them across business cases.
-            </p>
-          </article>
-          <article class="card">
-            <h3>Smart Variable Extraction</h3>
-            <p>
-              Paste requirement text and let the system extract missing information
-              automatically.
-            </p>
-          </article>
-          <article class="card">
-            <h3>Editable Output + Versioning</h3>
-            <p>
-              Fine-tune generated text, save versions, and build a repeatable content
-              system.
-            </p>
-          </article>
-        </section>
-
-        <section class="demo">
-          <h2>Quick Example</h2>
-          <div class="demo-box">
-Input:
-"Freelance product designer, B2B SaaS, need outreach email for founders"
-
-Output:
-"Hi [Founder Name],
-I help B2B SaaS teams improve conversion with UX-led product design...
-Would you be open to a quick call this week?"
-          </div>
-        </section>
-      </main>
-
-      <footer>
-        <span id="year"></span> AITemplates. Built for practical teams shipping real
-        work.
-      </footer>
+      <div class="nav-cta">
+        <button class="btn" href="https://dashboard.aitemplates.fr/">Sign Up</button>
+      </div>
     </div>
-    <script>
-      document.getElementById("year").textContent = new Date().getFullYear()
-    </script>
-  </body>
+  </header>
+
+  <main id="top">
+    <section class="hero">
+      <div class="wrap">
+        <div class="grid">
+          <div class="reveal">
+            <div class="kicker">
+              <span class="kdot" aria-hidden="true"></span>
+              <span>Templates that feel handcrafted — filled by AI in seconds</span>
+            </div>
+
+            <h1>Quiet design.<br/>Powerful proposals.</h1>
+
+            <p class="lead">
+              Forge AI is a calm template library + writing assistant. Pick a category, paste your needs,
+              and let AI extract the right keywords and fill your template with a polished, professional tone.
+              One scroll. One flow. Zero chaos.
+            </p>
+
+            <div class="hero-actions">
+              <button class="btn" data-scroll="#library">Browse templates</button>
+              <button class="btn secondary" data-scroll="#how">See how it works</button>
+              <span class="pill" aria-label="Social proof">
+                <span aria-hidden="true">✦</span> Save 30–60 minutes per doc
+              </span>
+            </div>
+          </div>
+
+          <aside class="card reveal" aria-label="Product preview">
+            <div class="preview">
+              <div class="preview-top">
+                <span>Live preview</span>
+                <span class="pill"><span aria-hidden="true">⟡</span> Keyword capture</span>
+              </div>
+
+              <div class="chips" aria-label="Captured keywords">
+                <span class="chip sage">Investment ROI</span>
+                <span class="chip">Timeline</span>
+                <span class="chip terra">Client pain points</span>
+                <span class="chip">Scope</span>
+                <span class="chip">Deliverables</span>
+              </div>
+
+              <div class="mini" aria-label="Match score">
+                <div class="row">
+                  <b>Template match</b>
+                  <span>78%</span>
+                </div>
+                <div class="bar" role="img" aria-label="Match bar at 78 percent">
+                  <i></i>
+                </div>
+                <div class="divider"></div>
+                <div class="row">
+                  <b>Suggested edits</b>
+                  <span>3</span>
+                </div>
+                <div class="row">
+                  <b>Output tone</b>
+                  <span>Confident, calm</span>
+                </div>
+              </div>
+
+              <div class="mini" aria-label="Mini output">
+                <div class="row"><b>Generated snippet</b><span>Proposal</span></div>
+                <div class="row" style="gap:10px; align-items:flex-start;">
+                  <span style="color:var(--muted); font-size:13px; line-height:1.55;">
+                    “Based on your requirements, we recommend a phased rollout focusing on measurable ROI,
+                    clear ownership, and a timeline that protects operational continuity…”
+                  </span>
+                </div>
+              </div>
+            </div>
+          </aside>
+        </div>
+      </div>
+    </section>
+
+    <section id="how">
+      <div class="wrap">
+        <div class="section-head reveal">
+          <div>
+            <h2>One calm workflow</h2>
+            <p class="sub">A single-page journey: understand → structure → generate → refine. No prompt wizardry required.</p>
+          </div>
+        </div>
+
+        <div class="tiles">
+          <div class="tile reveal">
+            <h3>1) Choose a template</h3>
+            <p>Pick from curated categories: real estate, job search, recruiting, proposals, and formal letters.</p>
+            <div class="meta">
+              <span class="chip">Curated structure</span>
+              <span class="chip sage">Pro tone</span>
+            </div>
+          </div>
+
+          <div class="tile reveal">
+            <h3>2) Paste your needs</h3>
+            <p>Drop a brief, a job description, or client notes. Forge AI identifies the real signal — not fluff.</p>
+            <div class="meta">
+              <span class="chip terra">Keyword extraction</span>
+              <span class="chip">Clarity-first</span>
+            </div>
+          </div>
+
+          <div class="tile reveal">
+            <h3>3) Generate & polish</h3>
+            <p>Get a clean draft aligned with your template. Refine tone, length, and emphasis with subtle controls.</p>
+            <div class="meta">
+              <span class="chip sage">Multiple tones</span>
+              <span class="chip">Export-ready</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section id="library">
+      <div class="wrap">
+        <div class="section-head reveal">
+          <div>
+            <h2>Template library</h2>
+            <p class="sub">
+              Start from proven structure. Each template is built to feel human, professional, and easy to adapt.
+            </p>
+          </div>
+        </div>
+
+        <div class="gallery">
+          <div class="panel reveal" aria-label="Template categories">
+            <div class="tabs" role="tablist" aria-label="Template categories">
+              <div class="tab active" role="tab" tabindex="0" aria-selected="true" data-cat="realestate">Real estate</div>
+              <div class="tab" role="tab" tabindex="0" aria-selected="false" data-cat="job">Job search</div>
+              <div class="tab" role="tab" tabindex="0" aria-selected="false" data-cat="recruiting">Recruiting</div>
+              <div class="tab" role="tab" tabindex="0" aria-selected="false" data-cat="business">Business proposal</div>
+              <div class="tab" role="tab" tabindex="0" aria-selected="false" data-cat="formal">Formal letters</div>
+            </div>
+
+            <div class="list" id="templateList" aria-label="Templates list">
+              <!-- Filled by JS -->
+            </div>
+          </div>
+
+          <aside class="sample reveal" aria-label="Selected template preview">
+            <h4 id="sampleTitle">Selected template</h4>
+            <div class="paper" id="samplePaper">
+              <div class="muted">Pick a template to preview its structure.</div>
+            </div>
+            <div style="margin-top:12px; display:flex; gap:10px; flex-wrap:wrap;">
+              <button class="btn" data-scroll="#pricing">Unlock VIP templates</button>
+              <button class="btn secondary" id="copySample">Copy preview</button>
+            </div>
+          </aside>
+        </div>
+      </div>
+    </section>
+
+    <section id="pricing">
+      <div class="wrap">
+        <div class="section-head reveal">
+          <div>
+            <h2>Pricing</h2>
+            <p class="sub">Keep it simple: try free, upgrade when you want more templates + faster workflows.</p>
+          </div>
+        </div>
+
+        <div class="pricing">
+          <div class="price reveal">
+            <h3>Free</h3>
+            <p class="p">For quick drafts and exploring the library.</p>
+            <div class="num">€0</div>
+            <ul>
+              <li><span class="tick" aria-hidden="true"></span><span>Basic templates</span></li>
+              <li><span class="tick" aria-hidden="true"></span><span>Limited generations / day</span></li>
+              <li><span class="tick" aria-hidden="true"></span><span>Single output version</span></li>
+            </ul>
+            <div style="margin-top:14px;">
+              <button class="btn secondary" data-scroll="#library">Browse free templates</button>
+            </div>
+          </div>
+
+          <div class="price featured reveal">
+            <h3>VIP</h3>
+            <p class="p">For people who write proposals weekly and want consistency.</p>
+            <div class="num">€12<span style="font-size:14px; font-weight:600; color:var(--muted);">/mo</span></div>
+            <ul>
+              <li><span class="tick" aria-hidden="true"></span><span>Full template library</span></li>
+              <li><span class="tick" aria-hidden="true"></span><span>Keyword capture + smart fill</span></li>
+              <li><span class="tick" aria-hidden="true"></span><span>Multiple tones + versions</span></li>
+              <li><span class="tick" aria-hidden="true"></span><span>Export-ready formatting</span></li>
+            </ul>
+            <div style="margin-top:14px;">
+              <button class="btn" id="vipBtn">Start VIP</button>
+            </div>
+          </div>
+
+          <div class="price reveal">
+            <h3>Pro</h3>
+            <p class="p">For heavy users and teams who need repeatable quality.</p>
+            <div class="num">€29<span style="font-size:14px; font-weight:600; color:var(--muted);">/mo</span></div>
+            <ul>
+              <li><span class="tick" aria-hidden="true"></span><span>Everything in VIP</span></li>
+              <li><span class="tick" aria-hidden="true"></span><span>Shared template space</span></li>
+              <li><span class="tick" aria-hidden="true"></span><span>Reusable snippet library</span></li>
+              <li><span class="tick" aria-hidden="true"></span><span>Priority support</span></li>
+            </ul>
+            <div style="margin-top:14px;">
+              <button class="btn secondary" id="proBtn">Talk to us</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="cta">
+      <div class="wrap">
+        <div class="cta-box reveal">
+          <div class="cta-inner">
+            <div>
+              <h2>Make your next document feel effortless.</h2>
+              <p>
+                Drop your email and get early access to new categories (real estate, recruiting, job search, proposals),
+                plus a calm weekly pack of “done-for-you” templates.
+              </p>
+            </div>
+
+            <form class="form" id="waitlistForm" aria-label="Waitlist form">
+              <input class="input" type="email" name="email" placeholder="you@domain.com" required aria-label="Email address" />
+              <button class="btn" type="submit">Join the waitlist</button>
+            </form>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <footer>
+      <div class="wrap foot">
+        <div>© <span id="year"></span> Forge AI. Calm tools for serious work.</div>
+        <div class="tiny-links">
+          <a href="#top" data-scroll="#top">Top</a>
+          <a href="#library" data-scroll="#library">Templates</a>
+          <a href="#pricing" data-scroll="#pricing">VIP</a>
+        </div>
+      </div>
+    </footer>
+  </main>
+
+  <script>
+    // Smooth scroll (native) + button helpers
+    document.querySelectorAll("[data-scroll]").forEach(el => {
+      el.addEventListener("click", (e) => {
+        const target = el.getAttribute("data-scroll");
+        const node = document.querySelector(target);
+        if (!node) return;
+        e.preventDefault();
+        node.scrollIntoView({ behavior: "smooth", block: "start" });
+      });
+    });
+
+    // Reveal on scroll
+    const reveals = Array.from(document.querySelectorAll(".reveal"));
+    const io = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) entry.target.classList.add("on");
+      });
+    }, { threshold: 0.12 });
+    reveals.forEach(r => io.observe(r));
+
+    // Template data
+    const templates = {
+      realestate: [
+        {
+          title: "Premium property invitation",
+          badge: "VIP",
+          desc: "Warm, confident client outreach for a high-end visit.",
+          sample:
+`Subject: A quiet viewing, tailored to what matters to you
+
+Hello {{ClientName}},
+
+Based on what you shared — {{ClientFocus}} — I believe {{PropertyName}} is worth a calm, focused visit.
+Key points you’ll appreciate:
+• {{CoreSellingPoint1}}
+• {{CoreSellingPoint2}}
+• {{ScarcityOrTiming}}
+
+Would {{PreferredTime}} work for a 20–30 min viewing? I’ll keep it simple and answer only what you care about.
+
+Kind regards,
+{{YourName}}`
+        },
+        {
+          title: "Property recommendation proposal",
+          badge: "Pro",
+          desc: "Structured project-style proposal for investors or buyers.",
+          sample:
+`{{ProjectName}} — Recommendation Summary
+
+1) Overview
+Location: {{Location}}
+Positioning: {{TargetAudience}}
+
+2) Why now
+Market context: {{MarketContext}}
+Demand signal: {{DemandSignal}}
+
+3) Investment rationale
+Expected yield: {{Yield}}
+Value drivers: {{ValueDrivers}}
+
+4) Risk & mitigation
+Primary risk: {{Risk}}
+Mitigation: {{Mitigation}}
+
+Recommendation
+Proceed with {{NextStep}} on {{Timeline}}.`
+        },
+        {
+          title: "Follow-up after visit",
+          badge: "Free",
+          desc: "Short follow-up that keeps momentum without pressure.",
+          sample:
+`Hi {{ClientName}},
+
+Thank you for visiting {{PropertyName}} today.
+Based on your priorities ({{ClientFocus}}), the best fit seems to be {{BestFitAngle}}.
+
+If you’d like, I can share:
+• a concise comparison with {{AltOption}}
+• the next steps and timeline
+
+Would tomorrow {{TimeOption}} work?
+
+Best,
+{{YourName}}`
+        }
+      ],
+      job: [
+        {
+          title: "ATS-aligned cover letter",
+          badge: "VIP",
+          desc: "Keyword-forward letter that stays human and confident.",
+          sample:
+`Dear {{HiringManagerName}},
+
+I’m applying for {{Role}} at {{Company}}. What drew me in is your focus on {{CompanyPriority}}.
+I match the role through:
+• {{Keyword1}} — demonstrated by {{Proof1}}
+• {{Keyword2}} — demonstrated by {{Proof2}}
+• {{Keyword3}} — demonstrated by {{Proof3}}
+
+In my recent work, I achieved {{MetricResult}} by {{Action}}. I’d love to bring the same clarity and execution to {{Company}}.
+
+Sincerely,
+{{YourName}}`
+        },
+        {
+          title: "Interview thank-you note",
+          badge: "Free",
+          desc: "Short, sincere note with one value re-assertion.",
+          sample:
+`Hi {{InterviewerName}},
+
+Thank you for your time today — I enjoyed discussing {{Topic}}.
+I’m especially excited about {{ExcitingPart}}, and I believe my experience with {{Strength}} can help you {{Outcome}}.
+
+If helpful, I can share a brief follow-up on {{ExtraDetail}}.
+
+Best,
+{{YourName}}`
+        },
+        {
+          title: "Salary negotiation email",
+          badge: "Pro",
+          desc: "Calm, firm negotiation framing with options.",
+          sample:
+`Hi {{Name}},
+
+Thanks again — I’m excited about the opportunity.
+Based on the scope ({{Scope}}) and market benchmarks, I’d like to align on a compensation range of {{Range}}.
+
+I’m flexible on structure:
+Option A: {{BaseA}} + {{BonusA}}
+Option B: {{BaseB}} + {{EquityOrBenefits}}
+
+Happy to discuss and find a fair landing point.
+
+Best,
+{{YourName}}`
+        }
+      ],
+      recruiting: [
+        {
+          title: "Candidate recommendation report",
+          badge: "VIP",
+          desc: "Clear recruiter-style summary with fit + risks.",
+          sample:
+`Candidate: {{CandidateName}} — {{Title}}
+
+Snapshot
+• {{Years}} years in {{Domain}}
+• Strengths: {{Strengths}}
+• Motivations: {{Motivations}}
+
+Why they fit {{Company}} / {{Role}}
+1) {{FitPoint1}}
+2) {{FitPoint2}}
+3) {{FitPoint3}}
+
+Compensation expectations: {{Comp}}
+Risks / watch-outs: {{Risks}}
+Next step: {{NextStep}}`
+        },
+        {
+          title: "Inbound outreach (warm)",
+          badge: "Free",
+          desc: "Soft outreach that respects time and earns replies.",
+          sample:
+`Hi {{CandidateName}},
+
+I came across your work in {{Domain}} — especially {{SpecificSignal}}.
+I’m recruiting for a {{Role}} where the focus is {{Focus}}. Your experience with {{Skill}} looks relevant.
+
+If you’re open, I’d love a quick 15-min chat this week.
+
+Best,
+{{YourName}}`
+        }
+      ],
+      business: [
+        {
+          title: "SaaS partnership proposal",
+          badge: "VIP",
+          desc: "One-page collaboration pitch with ROI framing.",
+          sample:
+`Partnership Proposal — {{ClientCompany}} × {{YourCompany}}
+
+Context
+{{ClientPainPoint}}
+
+Solution
+{{YourSolution}} focused on {{Outcome}}.
+
+Plan
+Phase 1 ({{Weeks1}}): {{Phase1}}
+Phase 2 ({{Weeks2}}): {{Phase2}}
+
+Expected impact
+• {{Impact1}}
+• {{Impact2}}
+ROI estimate: {{ROI}}
+
+Next step
+A 20-min alignment call to confirm scope and timeline.`
+        },
+        {
+          title: "Freelance quote & scope",
+          badge: "Free",
+          desc: "Simple, professional quote that prevents scope creep.",
+          sample:
+`Quote — {{ProjectName}}
+
+Scope
+• {{Deliverable1}}
+• {{Deliverable2}}
+• {{Deliverable3}}
+
+Timeline
+Start: {{StartDate}}
+Delivery: {{DeliveryDate}}
+
+Price
+Total: {{Price}}
+Includes: {{Revisions}} revisions, handover documentation.
+
+Assumptions
+{{Assumptions}}
+
+Accepted by: {{ClientName}} / {{YourName}}`
+        }
+      ],
+      formal: [
+        {
+          title: "Payment reminder (firm, polite)",
+          badge: "VIP",
+          desc: "Formal reminder with clear deadline and next action.",
+          sample:
+`Subject: Payment reminder — {{InvoiceNumber}}
+
+Hello,
+
+We note that invoice {{InvoiceNumber}} dated {{InvoiceDate}} for {{Amount}} remains unpaid.
+Please arrange payment by {{Deadline}}.
+
+If payment has already been made, please disregard this message and share the transfer confirmation for reconciliation.
+
+Sincerely,
+{{YourName}}
+{{Company}}`
+        },
+        {
+          title: "Formal response letter",
+          badge: "Pro",
+          desc: "Structured reply: facts, position, resolution path.",
+          sample:
+`Subject: Response regarding {{Topic}}
+
+Hello,
+
+We acknowledge receipt of your message dated {{Date}}.
+Facts:
+1) {{Fact1}}
+2) {{Fact2}}
+
+Our position:
+{{Position}}
+
+Proposed resolution:
+{{Resolution}}
+
+We remain available to finalize this matter promptly.
+
+Sincerely,
+{{YourName}}
+{{Company}}`
+        }
+      ]
+    };
+
+    // Render list + sample
+    const listEl = document.getElementById("templateList");
+    const sampleTitle = document.getElementById("sampleTitle");
+    const samplePaper = document.getElementById("samplePaper");
+    let currentCat = "realestate";
+    let currentSample = "";
+
+    function renderList(cat){
+      currentCat = cat;
+      listEl.innerHTML = "";
+      templates[cat].forEach((t, idx) => {
+        const div = document.createElement("div");
+        div.className = "item";
+        div.setAttribute("role", "button");
+        div.setAttribute("tabindex", "0");
+        div.innerHTML = `
+          <div>
+            <b>${t.title}</b>
+            <span>${t.desc}</span>
+          </div>
+          <div class="badge">${t.badge}</div>
+        `;
+        const pick = () => setSample(t.title, t.sample);
+        div.addEventListener("click", pick);
+        div.addEventListener("keydown", (e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); pick(); }});
+        listEl.appendChild(div);
+
+        if (idx === 0) setSample(t.title, t.sample);
+      });
+    }
+
+    function setSample(title, text){
+      sampleTitle.textContent = title;
+      currentSample = text;
+      // Escape HTML then format lines
+      const esc = text.replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;");
+      const formatted = esc
+        .replace(/\{\{([^\}]+)\}\}/g, `<span class="hl">{{$1}}</span>`)
+        .replace(/\n/g, "<br/>");
+      samplePaper.innerHTML = formatted;
+    }
+
+    // Tabs
+    document.querySelectorAll(".tab").forEach(tab => {
+      tab.addEventListener("click", () => {
+        document.querySelectorAll(".tab").forEach(t => {
+          t.classList.remove("active");
+          t.setAttribute("aria-selected", "false");
+        });
+        tab.classList.add("active");
+        tab.setAttribute("aria-selected", "true");
+        renderList(tab.dataset.cat);
+      });
+      tab.addEventListener("keydown", (e) => {
+        if (e.key === "Enter" || e.key === " ") { e.preventDefault(); tab.click(); }
+      });
+    });
+
+    // Copy sample
+    document.getElementById("copySample").addEventListener("click", async () => {
+      try{
+        await navigator.clipboard.writeText(currentSample || "");
+        toast("Copied preview to clipboard.");
+      }catch{
+        toast("Couldn’t access clipboard. Select and copy manually.");
+      }
+    });
+
+    // Fake actions
+    document.getElementById("vipBtn").addEventListener("click", () => toast("VIP checkout placeholder — connect Stripe here."));
+    document.getElementById("proBtn").addEventListener("click", () => toast("Contact flow placeholder — open an email modal here."));
+    document.getElementById("waitlistForm").addEventListener("submit", (e) => {
+      e.preventDefault();
+      const email = new FormData(e.target).get("email");
+      toast(`Thanks! We’ll email ${email} soon.`);
+      e.target.reset();
+    });
+
+    // Tiny toast
+    const t = document.createElement("div");
+    t.style.position = "fixed";
+    t.style.left = "50%";
+    t.style.bottom = "22px";
+    t.style.transform = "translateX(-50%)";
+    t.style.padding = "10px 12px";
+    t.style.borderRadius = "999px";
+    t.style.border = "1px solid rgba(31,35,40,.14)";
+    t.style.background = "rgba(251,249,246,.92)";
+    t.style.boxShadow = "0 18px 40px rgba(31,35,40,.10)";
+    t.style.color = "rgba(31,35,40,.92)";
+    t.style.fontSize = "13px";
+    t.style.opacity = "0";
+    t.style.pointerEvents = "none";
+    t.style.transition = "opacity .2s ease, transform .2s ease";
+    t.style.backdropFilter = "blur(10px)";
+    document.body.appendChild(t);
+    let toastTimer = null;
+    function toast(msg){
+      clearTimeout(toastTimer);
+      t.textContent = msg;
+      t.style.opacity = "1";
+      t.style.transform = "translateX(-50%) translateY(-2px)";
+      toastTimer = setTimeout(() => {
+        t.style.opacity = "0";
+        t.style.transform = "translateX(-50%) translateY(0px)";
+      }, 2400);
+    }
+
+    // Initial render
+    renderList(currentCat);
+    document.getElementById("year").textContent = new Date().getFullYear();
+  </script>
+</body>
 </html>
+```
