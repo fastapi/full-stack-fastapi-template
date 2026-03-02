@@ -453,7 +453,7 @@ function GeneratePage() {
             ) : (
               <Copy className="size-4" />
             )}
-            {copiedText === outputText ? "Copied" : "test"}
+            {copiedText === outputText ? "Copied" : ""}
           </Button>
         </CardHeader>
         <CardContent className="space-y-3">
