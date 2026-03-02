@@ -1,7 +1,7 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
 import { createFileRoute } from "@tanstack/react-router"
+import { Check, Copy } from "lucide-react"
 import { useEffect, useMemo, useState } from "react"
-
 import { Button } from "@/components/ui/button"
 import {
   Card,
@@ -11,6 +11,7 @@ import {
   CardTitle,
 } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
+import { useCopyToClipboard } from "@/hooks/useCopyToClipboard"
 import useCustomToast from "@/hooks/useCustomToast"
 import {
   createGeneration,
@@ -19,12 +20,11 @@ import {
   getTemplate,
   listTemplates,
   listTemplateVersions,
-  renderTemplate,
   type Template,
   type TemplateVariableConfig,
   type TemplateVersion,
 } from "@/lib/templateMvpApi"
-import { errorToMessage } from "@/lib/templateVariables"
+import { errorToMessage, renderTemplateText } from "@/lib/templateVariables"
 
 function listToInput(value: unknown): string {
   if (!Array.isArray(value)) {
@@ -103,6 +103,7 @@ export const Route = createFileRoute("/_layout/generate")({
 function GeneratePage() {
   const queryClient = useQueryClient()
   const { showErrorToast, showSuccessToast } = useCustomToast()
+  const [copiedText, copy] = useCopyToClipboard()
 
   const [selectedTemplateId, setSelectedTemplateId] = useState<string>("")
   const [selectedVersionId, setSelectedVersionId] = useState<string>("")
@@ -168,10 +169,6 @@ function GeneratePage() {
     mutationFn: extractVariables,
   })
 
-  const renderMutation = useMutation({
-    mutationFn: renderTemplate,
-  })
-
   const saveGenerationMutation = useMutation({
     mutationFn: createGeneration,
   })
@@ -192,6 +189,7 @@ function GeneratePage() {
     if (!currentVersion) {
       setValues({})
       setMissingRequired([])
+      setOutputText("")
       return
     }
 
@@ -208,8 +206,14 @@ function GeneratePage() {
     }
     setValues(initialValues)
     setMissingRequired([])
-    setOutputText("")
-  }, [currentVersion?.id, currentVersion])
+  }, [currentVersion])
+
+  useEffect(() => {
+    if (!currentVersion) {
+      return
+    }
+    setOutputText(renderTemplateText(currentVersion.content, values))
+  }, [currentVersion, values])
 
   const handleExtract = async () => {
     if (!selectedVersionId) {
@@ -230,28 +234,6 @@ function GeneratePage() {
       setValues(result.values)
       setMissingRequired(result.missing_required)
       showSuccessToast("Variables extracted")
-    } catch (error) {
-      showErrorToast(errorToMessage(error))
-    }
-  }
-
-  const handleRender = async () => {
-    if (!selectedVersionId) {
-      showErrorToast("Select a template version first")
-      return
-    }
-
-    try {
-      const result = await renderMutation.mutateAsync({
-        template_version_id: selectedVersionId,
-        values,
-        style: {
-          tone: "professional",
-          length: "medium",
-        },
-      })
-      setOutputText(result.output_text)
-      showSuccessToast("Draft generated")
     } catch (error) {
       showErrorToast(errorToMessage(error))
     }
@@ -317,6 +299,19 @@ function GeneratePage() {
     }))
 
     setMissingRequired((current) => current.filter((item) => item !== variable))
+  }
+
+  const handleCopyOutput = async () => {
+    const text = outputText.trim()
+    if (!text) {
+      showErrorToast("Nothing to copy")
+      return
+    }
+
+    const ok = await copy(outputText)
+    if (!ok) {
+      showErrorToast("Copy failed")
+    }
   }
 
   return (
@@ -392,7 +387,7 @@ function GeneratePage() {
         <CardHeader>
           <CardTitle>Step C: Confirm Variables</CardTitle>
           <CardDescription>
-            Fill missing required fields before generating.
+            Fill missing required fields. Output updates in real time.
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
@@ -440,19 +435,26 @@ function GeneratePage() {
               Select a template version to load variables.
             </p>
           )}
-
-          <Button
-            onClick={handleRender}
-            disabled={renderMutation.isPending || !currentVersion}
-          >
-            Generate Draft
-          </Button>
         </CardContent>
       </Card>
 
       <Card>
-        <CardHeader>
+        <CardHeader className="flex flex-row items-center justify-between">
           <CardTitle>Step D: Output</CardTitle>
+          <Button
+            variant="outline"
+            size="sm"
+            className="gap-2"
+            onClick={handleCopyOutput}
+            disabled={!outputText.trim()}
+          >
+            {copiedText === outputText ? (
+              <Check className="size-4 text-green-500" />
+            ) : (
+              <Copy className="size-4" />
+            )}
+            {copiedText === outputText ? "Copied" : "test"}
+          </Button>
         </CardHeader>
         <CardContent className="space-y-3">
           <textarea
