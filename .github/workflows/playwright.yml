@@ -73,7 +73,7 @@ jobs:
     - run: docker compose down -v --remove-orphans
     - name: Upload blob report to GitHub Actions Artifacts
       if: ${{ !cancelled() }}
-      uses: actions/upload-artifact@v6
+      uses: actions/upload-artifact@v7
       with:
         name: blob-report-${{ matrix.shardIndex }}
         path: frontend/blob-report
@@ -93,7 +93,7 @@ jobs:
     - name: Install dependencies
       run: bun ci
     - name: Download blob reports from GitHub Actions Artifacts
-      uses: actions/download-artifact@v7
+      uses: actions/download-artifact@v8
       with:
         path: frontend/all-blob-reports
         pattern: blob-report-*
@@ -102,7 +102,7 @@ jobs:
       run: bunx playwright merge-reports --reporter html ./all-blob-reports
       working-directory: frontend
     - name: Upload HTML report
-      uses: actions/upload-artifact@v6
+      uses: actions/upload-artifact@v7
       with:
         name: html-report--attempt-${{ github.run_attempt }}
         path: frontend/playwright-report
