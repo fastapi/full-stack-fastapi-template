@@ -7,6 +7,7 @@ from app.core.db import get_db
 from kila_models.models import UsersTable, UsersProfileTable
 from app.models.user_auth import UserSignupRequest, UserLoginRequest, UserResponse, TokenResponse, ClerkSyncResponse
 from app.utils.auth import hash_password, verify_password, create_access_token, create_refresh_token
+from app.utils.subscription import create_free_trial_subscription
 from app.api.deps import get_current_user
 import logging
 
@@ -50,6 +51,10 @@ async def signup(
     )
 
     db.add(new_user)
+    await db.flush()  # assign user_id without committing
+    await db.refresh(new_user)
+
+    await create_free_trial_subscription(new_user.user_id, db)
     await db.commit()
     await db.refresh(new_user)
 
