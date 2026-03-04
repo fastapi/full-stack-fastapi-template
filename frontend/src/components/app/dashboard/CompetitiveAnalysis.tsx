@@ -1,5 +1,7 @@
 import { HelpCircle, Link2, Loader2, MessageCircle, Minus, TrendingDown, TrendingUp } from "lucide-react"
 import React, { useEffect, useState } from "react"
+import { FeatureGate } from "@/components/app/FeatureGate"
+import { useEntitlement } from "@/hooks/useEntitlement"
 import {
   type CompetitorGapMetric,
   type CompetitorGapSummaryResponse,
@@ -148,8 +150,11 @@ function CompetitorGapSummaryPills({
 
   if (!summary) return null
 
+  const { canAccess } = useEntitlement()
+
   return (
     <>
+      {/* Visibility Gap — available to all tiers */}
       <GapMetricPill
         label="Visibility Gap"
         metric={summary.visibility_gap}
@@ -157,20 +162,25 @@ function CompetitorGapSummaryPills({
         higherIsBetter={true}
         helpText="My visibility rate minus competitor's. Positive = I appear more often in AI search."
       />
-      <GapMetricPill
-        label="Position Gap"
-        metric={summary.position_gap}
-        formatValue={(v) => `${Math.round(Math.abs(v))}`}
-        higherIsBetter={true}
-        helpText="Competitor's median rank minus my median rank. Positive = I rank higher (lower number is better)."
-      />
-      <GapMetricPill
-        label="Sentiment Gap"
-        metric={summary.sentiment_gap}
-        formatValue={(v) => `${v.toFixed(1)}`}
-        higherIsBetter={true}
-        helpText="My sentiment score minus competitor's (0–100). Positive = my brand is perceived more positively."
-      />
+      {/* Position Gap and Sentiment Gap — Tier 2+ only */}
+      {canAccess("competitiveAnalysisFull") && (
+        <>
+          <GapMetricPill
+            label="Position Gap"
+            metric={summary.position_gap}
+            formatValue={(v) => `${Math.round(Math.abs(v))}`}
+            higherIsBetter={true}
+            helpText="Competitor's median rank minus my median rank. Positive = I rank higher (lower number is better)."
+          />
+          <GapMetricPill
+            label="Sentiment Gap"
+            metric={summary.sentiment_gap}
+            formatValue={(v) => `${v.toFixed(1)}`}
+            higherIsBetter={true}
+            helpText="My sentiment score minus competitor's (0–100). Positive = my brand is perceived more positively."
+          />
+        </>
+      )}
     </>
   )
 }
@@ -481,17 +491,22 @@ export function CompetitiveAnalysis() {
         timeRangeControls,
         customDateInputs,
       }) => (
-        <CompetitiveAnalysisContent
-          brandId={selectedBrandId}
-          brandName={selectedBrand.brand_name}
-          segment={selectedSegment}
-          selectedCompetitor={selectedCompetitor}
-          timeRange={timeRange}
-          customStartDate={customStartDate}
-          customEndDate={customEndDate}
-          timeRangeControls={timeRangeControls}
-          customDateInputs={customDateInputs}
-        />
+        <FeatureGate
+          feature="competitiveAnalysisFull"
+          upgradeMessage="Upgrade to Basic to unlock full competitive analysis charts and tables."
+        >
+          <CompetitiveAnalysisContent
+            brandId={selectedBrandId}
+            brandName={selectedBrand.brand_name}
+            segment={selectedSegment}
+            selectedCompetitor={selectedCompetitor}
+            timeRange={timeRange}
+            customStartDate={customStartDate}
+            customEndDate={customEndDate}
+            timeRangeControls={timeRangeControls}
+            customDateInputs={customDateInputs}
+          />
+        </FeatureGate>
       )}
     </DashboardPageLayout>
   )
