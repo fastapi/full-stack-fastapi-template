@@ -17,6 +17,8 @@ from nanoid import generate
 from app.core.db import get_db
 from app.config import settings
 from kila_models.models import UsersTable
+from kila_models.models.database import UserSubscriptionTable
+from app.utils.subscription import create_free_trial_subscription
 
 logger = logging.getLogger(__name__)
 
@@ -190,6 +192,11 @@ async def get_current_user(
             existing_user.external_user_id = clerk_user_id
             if user_name and not existing_user.user_name:
                 existing_user.user_name = user_name
+            # Ensure subscription exists (idempotent — for users created before this feature)
+            sub_stmt = select(UserSubscriptionTable).where(UserSubscriptionTable.user_id == existing_user.user_id)
+            sub_result = await db.execute(sub_stmt)
+            if not sub_result.scalar_one_or_none():
+                await create_free_trial_subscription(existing_user.user_id, db)
             await db.commit()
             await db.refresh(existing_user)
             logger.info(f"Linked existing user {existing_user.user_id} to Clerk: {email} (clerk_id={clerk_user_id})")
@@ -207,6 +214,9 @@ async def get_current_user(
             )
 
             db.add(new_user)
+            await db.flush()
+            await db.refresh(new_user)
+            await create_free_trial_subscription(new_user.user_id, db)
             await db.commit()
             await db.refresh(new_user)
 
