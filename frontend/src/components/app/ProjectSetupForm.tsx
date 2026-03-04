@@ -12,6 +12,7 @@
 
 import { Plus, Sparkles, X } from "lucide-react"
 import { useState } from "react"
+import { QuotaGate } from "@/components/app/QuotaGate"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
@@ -379,24 +380,30 @@ export function ProjectSetupForm({
                   {/* Add Segment Button (shown at right edge of last segment if not at max) */}
                   {index === formData.segments.length - 1 &&
                     formData.segments.length < MAX_SEGMENTS && (
-                      <TooltipProvider>
-                        <Tooltip>
-                          <TooltipTrigger asChild>
-                            <Button
-                              variant="outline"
-                              size="icon"
-                              className="absolute -right-4 top-1/2 -translate-y-1/2 h-8 w-8 rounded-full bg-white border-gray-300 hover:bg-blue-50 hover:border-blue-500"
-                              onClick={handleAddSegment}
-                              type="button"
-                            >
-                              <Plus className="h-4 w-4" />
-                            </Button>
-                          </TooltipTrigger>
-                          <TooltipContent>
-                            <p>Add more segment</p>
-                          </TooltipContent>
-                        </Tooltip>
-                      </TooltipProvider>
+                      <QuotaGate
+                        resource="segmentsPerBrand"
+                        currentCount={formData.segments.length}
+                        limitMessage="You've reached the segment limit for your plan. Upgrade to add more segments."
+                      >
+                        <TooltipProvider>
+                          <Tooltip>
+                            <TooltipTrigger asChild>
+                              <Button
+                                variant="outline"
+                                size="icon"
+                                className="absolute -right-4 top-1/2 -translate-y-1/2 h-8 w-8 rounded-full bg-white border-gray-300 hover:bg-blue-50 hover:border-blue-500"
+                                onClick={handleAddSegment}
+                                type="button"
+                              >
+                                <Plus className="h-4 w-4" />
+                              </Button>
+                            </TooltipTrigger>
+                            <TooltipContent>
+                              <p>Add more segment</p>
+                            </TooltipContent>
+                          </Tooltip>
+                        </TooltipProvider>
+                      </QuotaGate>
                     )}
                 </div>
               ))}

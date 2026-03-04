@@ -23,6 +23,7 @@ import {
   type ProjectFormData,
   ProjectSetupForm,
 } from "@/components/app/ProjectSetupForm"
+import { QuotaGate } from "@/components/app/QuotaGate"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Checkbox } from "@/components/ui/checkbox"
@@ -309,10 +310,12 @@ export default function Projects() {
         <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-4">
           <CardTitle className="text-xl font-bold">Project List</CardTitle>
           {!showSetupForm && !editingProject && (
-            <Button size="sm" onClick={handleAddNewProject} type="button">
-              <Plus className="h-4 w-4 mr-2" />
-              Add New Project
-            </Button>
+            <QuotaGate resource="projects" currentCount={projects.length}>
+              <Button size="sm" onClick={handleAddNewProject} type="button">
+                <Plus className="h-4 w-4 mr-2" />
+                Add New Project
+              </Button>
+            </QuotaGate>
           )}
         </CardHeader>
         <CardContent>
