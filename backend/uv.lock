@@ -250,6 +250,7 @@ dependencies = [
     { name = "sentry-sdk", extra = ["fastapi"] },
     { name = "sqlalchemy", extra = ["asyncio"] },
     { name = "sqlmodel" },
+    { name = "stripe" },
     { name = "tenacity" },
 ]
 
@@ -286,6 +287,7 @@ requires-dist = [
     { name = "sentry-sdk", extras = ["fastapi"], specifier = ">=1.40.6,<2.0.0" },
     { name = "sqlalchemy", extras = ["asyncio"], specifier = ">=2.0.0" },
     { name = "sqlmodel", specifier = ">=0.0.21,<1.0.0" },
+    { name = "stripe", specifier = ">=14.4.0" },
     { name = "tenacity", specifier = ">=8.2.3,<9.0.0" },
 ]
 
@@ -2354,6 +2356,19 @@ dependencies = [
 sdist = { url = "https://files.pythonhosted.org/packages/42/b4/e25c3b688ef703d85e55017c6edd0cbf38e5770ab748234363d54ff0251a/starlette-0.38.6.tar.gz", hash = "sha256:863a1588f5574e70a821dadefb41e4881ea451a47a3cd1b4df359d4ffefe5ead", size = 2569491 }
 wheels = [
     { url = "https://files.pythonhosted.org/packages/b7/9c/93f7bc03ff03199074e81974cc148908ead60dcf189f68ba1761a0ee35cf/starlette-0.38.6-py3-none-any.whl", hash = "sha256:4517a1409e2e73ee4951214ba012052b9e16f60e90d73cfb06192c19203bbb05", size = 71451 },
+]
+
+[[package]]
+name = "stripe"
+version = "14.4.0"
+source = { registry = "https://pypi.org/simple" }
+dependencies = [
+    { name = "requests" },
+    { name = "typing-extensions" },
+]
+sdist = { url = "https://files.pythonhosted.org/packages/6a/ec/0f17cff3f7c91b0215266959c5a2a96b0bf9f45ac041c50b99ad8f9b5047/stripe-14.4.0.tar.gz", hash = "sha256:ddaa06f5e38a582bef7e93e06fc304ba8ae3b4c0c2aac43da02c84926f05fa0a", size = 1472370 }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/38/09/fcecad01d76dbe027015dd559ec1b6dccfc319c2540991dde4b1de81ba34/stripe-14.4.0-py3-none-any.whl", hash = "sha256:357151a816cd0bb012d6cb29f108fae50b9f6eece8530d7bc31dfa90c9ceb84c", size = 2115405 },
 ]
 
 [[package]]

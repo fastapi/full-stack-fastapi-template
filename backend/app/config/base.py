@@ -57,6 +57,11 @@ class BaseConfig(BaseSettings):
     clerk_secret_key: str = ""
     clerk_publishable_key: str = ""
 
+    # Stripe
+    stripe_webhook_secret: str = ""
+    stripe_basic_price_id: str = ""
+    stripe_pro_price_id: str = ""
+
     # Rate Limiting
     rate_limit_enabled: bool = False
     rate_limit_requests: int = 100

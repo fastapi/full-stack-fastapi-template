@@ -27,6 +27,7 @@ dependencies = [
     "kila-models>=0.1.0",
     "nanoid>=2.0.0",
     "python-jose>=3.3.0",
+    "stripe>=14.4.0",
 ]
 
 [tool.uv]
