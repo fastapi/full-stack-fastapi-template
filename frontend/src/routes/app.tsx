@@ -2,6 +2,8 @@ import { useAuth } from "@clerk/clerk-react"
 import { createFileRoute, Outlet, useNavigate } from "@tanstack/react-router"
 import { useEffect, useState } from "react"
 import AppLayout from "@/components/app/AppLayout"
+import { SubscriptionContext } from "@/contexts/SubscriptionContext"
+import type { UserSubscription } from "@/lib/entitlements"
 
 export const Route = createFileRoute("/app")({
   component: AppGuard,
@@ -15,6 +17,7 @@ function AppGuard() {
   >("loading")
   const [profileComplete, setProfileComplete] = useState(false)
   const [retryCount, setRetryCount] = useState(0)
+  const [subscription, setSubscription] = useState<UserSubscription | null>(null)
 
   useEffect(() => {
     if (!isLoaded) return
@@ -47,6 +50,17 @@ function AppGuard() {
           const data = await response.json()
           setProfileComplete(data.profile_complete)
           setSyncState("synced")
+
+          // Load subscription from profile endpoint
+          const profileResponse = await fetch(`${apiUrl}/api/v1/profile/me`, {
+            headers: { Authorization: `Bearer ${token}` },
+          })
+          if (profileResponse.ok) {
+            const profileData = await profileResponse.json()
+            if (profileData?.subscription) {
+              setSubscription(profileData.subscription)
+            }
+          }
         } else {
           console.error("clerk-sync failed:", response.status)
           setSyncState("error")
@@ -105,8 +119,10 @@ function AppGuard() {
   }
 
   return (
-    <AppLayout>
-      <Outlet />
-    </AppLayout>
+    <SubscriptionContext.Provider value={{ subscription }}>
+      <AppLayout>
+        <Outlet />
+      </AppLayout>
+    </SubscriptionContext.Provider>
   )
 }
