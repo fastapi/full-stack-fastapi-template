@@ -7,6 +7,7 @@ import {
   ChevronRight,
   FolderKanban,
   Lightbulb,
+  Lock,
   LogOut,
   Menu,
   Swords,
@@ -22,12 +23,19 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
+import { useEntitlement } from "@/hooks/useEntitlement"
+import type { TierFeatures } from "@/lib/entitlements"
 
 interface MenuItem {
   name: string
   icon: React.ComponentType<{ size?: number }>
   path?: string
-  children?: { name: string; path: string; hidden?: boolean }[]
+  children?: {
+    name: string
+    path: string
+    hidden?: boolean
+    requiredFeature?: keyof TierFeatures
+  }[]
 }
 
 export default function AppLayout({ children }: { children: React.ReactNode }) {
@@ -39,6 +47,7 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
   const { signOut } = useClerk()
   const { user: clerkUser } = useUser()
   const userFirstName = clerkUser?.firstName || clerkUser?.username || "User"
+  const { isExpired, canAccess } = useEntitlement()
 
   // Show full sidebar content when desktop is expanded OR mobile drawer is open
   const showFullContent = sidebarOpen || mobileSidebarOpen
@@ -51,10 +60,10 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
       name: "Insight",
       icon: Lightbulb,
       children: [
-        { name: "Brand Risk Overview", path: "/app/insight/brand-risk" },
-        { name: "Competitive Risk", path: "/app/insight/competitive-risk" },
-        { name: "Growth Risk", path: "/app/insight/growth-risk" },
-        { name: "Ranking Position Risk", path: "/app/insight/ranking-risk" },
+        { name: "Brand Risk Overview", path: "/app/insight/brand-risk", requiredFeature: "insightBrandRisk" },
+        { name: "Competitive Risk", path: "/app/insight/competitive-risk", requiredFeature: "insightAll" },
+        { name: "Growth Risk", path: "/app/insight/growth-risk", requiredFeature: "insightAll" },
+        { name: "Ranking Position Risk", path: "/app/insight/ranking-risk", requiredFeature: "insightAll" },
       ],
     },
     { name: "My Profile", icon: User, path: "/app/users" },
@@ -180,6 +189,23 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
                     <div className="mt-1 ml-4 space-y-1">
                       {item.children!.filter((child) => !child.hidden).map((child) => {
                         const isChildActive = location.pathname === child.path
+                        const isLocked = child.requiredFeature
+                          ? !canAccess(child.requiredFeature)
+                          : false
+
+                        if (isLocked) {
+                          return (
+                            <div
+                              key={child.path}
+                              className="flex items-center pl-6 pr-3 py-1 rounded-lg text-xs text-gray-400 dark:text-gray-600 cursor-not-allowed select-none"
+                            >
+                              <span className="w-1 h-1 rounded-full mr-3 flex-shrink-0 bg-gray-300 dark:bg-gray-600" />
+                              {child.name}
+                              <Lock size={10} className="ml-auto opacity-50" />
+                            </div>
+                          )
+                        }
+
                         return (
                           <Link
                             key={child.path}
@@ -278,6 +304,21 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
             </DropdownMenu>
           </div>
         </header>
+
+        {/* Trial expiry banner */}
+        {isExpired && (
+          <div className="bg-amber-50 dark:bg-amber-900/20 border-b border-amber-200 dark:border-amber-700 px-4 py-2 flex items-center justify-between flex-shrink-0">
+            <p className="text-xs text-amber-800 dark:text-amber-300 font-medium">
+              Your free trial has ended. Your data is safe — upgrade to continue monitoring your brand.
+            </p>
+            <a
+              href="/pricing"
+              className="ml-4 text-xs font-semibold text-amber-900 dark:text-amber-200 underline underline-offset-2 whitespace-nowrap hover:text-amber-700"
+            >
+              View plans →
+            </a>
+          </div>
+        )}
 
         {/* Page Content */}
         <main className="flex-1 overflow-y-auto">{children}</main>
