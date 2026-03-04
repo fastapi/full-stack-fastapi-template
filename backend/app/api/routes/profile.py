@@ -1,6 +1,6 @@
 from fastapi import APIRouter, Depends, HTTPException, status, Query
 from sqlalchemy.ext.asyncio import AsyncSession
-from sqlalchemy import select
+from sqlalchemy import select, update
 from nanoid import generate
 from typing import Optional
 import logging
@@ -14,6 +14,7 @@ from app.models.profile import (
     CompanySearchResult,
 )
 from kila_models.models import UsersTable, UsersProfileTable, CompaniesTable
+from kila_models.models.database import UserSubscriptionTable
 
 logger = logging.getLogger(__name__)
 router = APIRouter(prefix="/profile", tags=["profile"])
@@ -139,6 +140,15 @@ async def setup_profile(
 
     await db.commit()
     await db.refresh(profile)
+
+    # Backfill company_id on subscription row (only if not already set)
+    await db.execute(
+        update(UserSubscriptionTable)
+        .where(UserSubscriptionTable.user_id == current_user.user_id)
+        .where(UserSubscriptionTable.company_id.is_(None))
+        .values(company_id=company.company_id)
+    )
+    await db.commit()
 
     return ProfileResponse(
         user_id=profile.user_id,
