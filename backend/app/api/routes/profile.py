@@ -12,9 +12,12 @@ from app.models.profile import (
     ProfileResponse,
     CompanyResponse,
     CompanySearchResult,
+    SubscriptionResponse,
 )
 from kila_models.models import UsersTable, UsersProfileTable, CompaniesTable
 from kila_models.models.database import UserSubscriptionTable
+from kila_models.models.base import SubscriptionTier, SubscriptionStatus
+from datetime import datetime, timezone
 
 logger = logging.getLogger(__name__)
 router = APIRouter(prefix="/profile", tags=["profile"])
@@ -55,6 +58,29 @@ async def get_profile(
                 company_name=company_record.company_name
             )
 
+    # Fetch subscription and apply lazy expiry check
+    sub_stmt = select(UserSubscriptionTable).where(UserSubscriptionTable.user_id == current_user.user_id)
+    sub_result = await db.execute(sub_stmt)
+    subscription_row = sub_result.scalar_one_or_none()
+
+    subscription = None
+    if subscription_row:
+        if (
+            subscription_row.tier == SubscriptionTier.free_trial
+            and subscription_row.status == SubscriptionStatus.active
+            and subscription_row.trial_expires_at
+            and subscription_row.trial_expires_at < datetime.now(timezone.utc)
+        ):
+            subscription_row.status = SubscriptionStatus.expired
+            await db.commit()
+            await db.refresh(subscription_row)
+
+        subscription = SubscriptionResponse(
+            tier=subscription_row.tier,
+            status=subscription_row.status,
+            trial_expires_at=subscription_row.trial_expires_at,
+        )
+
     return ProfileResponse(
         user_id=profile.user_id,
         first_name=profile.first_name,
@@ -64,6 +90,7 @@ async def get_profile(
         phone=profile.phone,
         job_title=profile.job_title,
         company=company,
+        subscription=subscription,
         created_at=profile.created_at,
         updated_at=profile.updated_at
     )

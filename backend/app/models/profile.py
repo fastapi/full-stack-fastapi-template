@@ -1,6 +1,16 @@
 from pydantic import BaseModel, Field, EmailStr, ConfigDict
 from typing import Optional
 from datetime import datetime
+from kila_models.models.base import SubscriptionTier, SubscriptionStatus
+
+
+class SubscriptionResponse(BaseModel):
+    """Subscription/tier data for the current user"""
+    tier: SubscriptionTier
+    status: SubscriptionStatus
+    trial_expires_at: Optional[datetime] = None
+
+    model_config = ConfigDict(from_attributes=True)
 
 
 class ProfileSetupRequest(BaseModel):
@@ -32,6 +42,7 @@ class ProfileResponse(BaseModel):
     phone: Optional[str] = None
     job_title: Optional[str] = None
     company: Optional[CompanyResponse] = None
+    subscription: Optional[SubscriptionResponse] = None
     created_at: datetime
     updated_at: Optional[datetime] = None
 
