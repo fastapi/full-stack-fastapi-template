@@ -10,6 +10,7 @@ export interface UserSubscription {
   tier: SubscriptionTier
   status: SubscriptionStatus
   trial_expires_at: string | null
+  is_super_user?: boolean
 }
 
 // ── Quota limits per tier ──────────────────────────────────────────────────────

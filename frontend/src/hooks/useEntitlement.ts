@@ -7,6 +7,14 @@ import {
   type SubscriptionTier,
 } from "@/lib/entitlements"
 
+const SUPER_USER_FEATURES = Object.fromEntries(
+  Object.keys(TIER_FEATURES.pro).map((k) => [k, true]),
+) as unknown as TierFeatures
+
+const SUPER_USER_QUOTA = Object.fromEntries(
+  Object.keys(TIER_QUOTAS.pro).map((k) => [k, Number.MAX_SAFE_INTEGER]),
+) as unknown as TierQuota
+
 interface EntitlementResult {
   tier: SubscriptionTier
   isExpired: boolean
@@ -20,22 +28,26 @@ interface EntitlementResult {
 export function useEntitlement(): EntitlementResult {
   const { subscription } = useSubscription()
 
+  const isSuperUser = subscription?.is_super_user === true
+
   // Default to free_trial if no subscription loaded yet
   const tier: SubscriptionTier = subscription?.tier ?? "free_trial"
   const status = subscription?.status ?? "active"
 
-  const isExpired = status === "expired"
-  const isReadOnly = isExpired || status === "cancelled"
+  const isExpired = isSuperUser ? false : status === "expired"
+  const isReadOnly = isSuperUser ? false : isExpired || status === "cancelled"
 
-  const features = TIER_FEATURES[tier]
-  const quota = TIER_QUOTAS[tier]
+  const features = isSuperUser ? SUPER_USER_FEATURES : TIER_FEATURES[tier]
+  const quota = isSuperUser ? SUPER_USER_QUOTA : TIER_QUOTAS[tier]
 
   const canAccess = (feature: keyof TierFeatures): boolean => {
+    if (isSuperUser) return true
     if (isReadOnly) return false
     return features[feature]
   }
 
   const isWithinQuota = (resource: keyof TierQuota, currentCount: number): boolean => {
+    if (isSuperUser) return true
     if (isReadOnly) return false
     return currentCount < quota[resource]
   }
