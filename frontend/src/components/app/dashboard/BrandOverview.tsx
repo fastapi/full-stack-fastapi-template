@@ -7,7 +7,7 @@ import {
 } from "@/clients/dashboard"
 import { DashboardPageLayout } from "@/components/app/dashboard/components/DashboardPageLayout"
 import { MetricCard } from "@/components/app/dashboard/components/MetricCard"
-import { OverviewChart } from "@/components/app/dashboard/components/OverviewChart"
+import { PerformanceChart } from "@/components/app/dashboard/components/PerformanceChart"
 import { SegmentMetricsTable } from "@/components/app/dashboard/components/SegmentMetricsTable"
 import {
   Card,
@@ -151,7 +151,7 @@ function BrandOverviewContent({
           <div className="h-px w-full bg-slate-200" />
         </CardHeader>
         <CardContent>
-          <OverviewChart dataPoints={data_points} />
+          <PerformanceChart dataPoints={data_points} />
         </CardContent>
       </Card>
 

@@ -2330,7 +2330,7 @@ class DashboardAPI {
 
     // Merge and deduplicate by normalized review text
     const seenKeys = new Set<string>()
-    const merged: { review: string; sentiment: string }[] = []
+    const merged: { review: string; sentiment: "Positive" | "Neutral" | "Negative" }[] = []
     for (const res of results) {
       for (const item of res.reviews) {
         const key = item.review.toLowerCase().trim()
