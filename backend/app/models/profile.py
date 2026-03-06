@@ -9,6 +9,7 @@ class SubscriptionResponse(BaseModel):
     tier: SubscriptionTier
     status: SubscriptionStatus
     trial_expires_at: Optional[datetime] = None
+    is_super_user: bool = False
 
     model_config = ConfigDict(from_attributes=True)
 
