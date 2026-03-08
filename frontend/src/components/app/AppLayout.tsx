@@ -61,10 +61,7 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
       icon: Lightbulb,
       children: [
         { name: "Market Dynamic", path: "/app/insight/market-dynamic", requiredFeature: "insightAll" },
-        { name: "Brand Risk Overview", path: "/app/insight/brand-risk", requiredFeature: "insightBrandRisk" },
-        { name: "Competitive Risk", path: "/app/insight/competitive-risk", requiredFeature: "insightAll" },
-        { name: "Growth Risk", path: "/app/insight/growth-risk", requiredFeature: "insightAll" },
-        { name: "Ranking Position Risk", path: "/app/insight/ranking-risk", requiredFeature: "insightAll" },
+        { name: "Risk Intelligence", path: "/app/insight/risk-intelligence", requiredFeature: "insightAll" },
       ],
     },
     { name: "My Profile", icon: User, path: "/app/users" },

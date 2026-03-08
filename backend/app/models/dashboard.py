@@ -431,6 +431,10 @@ class RiskHistoryDataPoint(BaseModel):
     competitor_breakthrough: Optional[int] = Field(None, description="Severity: Low=1, Medium=2, High=4")
     growth_deceleration: Optional[int] = Field(None, description="Severity: Low=1, Medium=2, High=4")
     position_weakness: Optional[int] = Field(None, description="Severity: Low=1, Medium=2, High=4")
+    rank_displacement: Optional[int] = Field(None, description="Severity: Low=1, Medium=2, High=4")
+    fragile_leadership: Optional[int] = Field(None, description="Severity: Low=1, Medium=2, High=4")
+    volatility_spike: Optional[int] = Field(None, description="Severity: Low=1, Medium=2, High=4")
+    new_entrant: Optional[int] = Field(None, description="Severity: Low=1, Medium=2, High=4")
 
     model_config = ConfigDict(from_attributes=True)
 

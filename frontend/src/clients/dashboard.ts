@@ -482,6 +482,10 @@ export interface RiskHistoryDataPoint {
   competitor_breakthrough: number | null
   growth_deceleration: number | null
   position_weakness: number | null
+  rank_displacement: number | null
+  fragile_leadership: number | null
+  volatility_spike: number | null
+  new_entrant: number | null
 }
 
 /**

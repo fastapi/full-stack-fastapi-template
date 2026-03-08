@@ -14,11 +14,8 @@ import { Route as IndexRouteImport } from './routes/index'
 import { Route as AppUsersRouteImport } from './routes/app.users'
 import { Route as AppProjectsRouteImport } from './routes/app.projects'
 import { Route as AppProfileSetupRouteImport } from './routes/app.profile-setup'
-import { Route as AppInsightRankingRiskRouteImport } from './routes/app.insight.ranking-risk'
+import { Route as AppInsightRiskIntelligenceRouteImport } from './routes/app.insight.risk-intelligence'
 import { Route as AppInsightMarketDynamicRouteImport } from './routes/app.insight.market-dynamic'
-import { Route as AppInsightGrowthRiskRouteImport } from './routes/app.insight.growth-risk'
-import { Route as AppInsightCompetitiveRiskRouteImport } from './routes/app.insight.competitive-risk'
-import { Route as AppInsightBrandRiskRouteImport } from './routes/app.insight.brand-risk'
 import { Route as AppDashboardPerformanceRouteImport } from './routes/app.dashboard.performance'
 import { Route as AppDashboardOverviewRouteImport } from './routes/app.dashboard.overview'
 import { Route as AppDashboardDashboardRouteImport } from './routes/app.dashboard.dashboard'
@@ -50,30 +47,15 @@ const AppProfileSetupRoute = AppProfileSetupRouteImport.update({
   path: '/profile-setup',
   getParentRoute: () => AppRoute,
 } as any)
-const AppInsightRankingRiskRoute = AppInsightRankingRiskRouteImport.update({
-  id: '/insight/ranking-risk',
-  path: '/insight/ranking-risk',
-  getParentRoute: () => AppRoute,
-} as any)
+const AppInsightRiskIntelligenceRoute =
+  AppInsightRiskIntelligenceRouteImport.update({
+    id: '/insight/risk-intelligence',
+    path: '/insight/risk-intelligence',
+    getParentRoute: () => AppRoute,
+  } as any)
 const AppInsightMarketDynamicRoute = AppInsightMarketDynamicRouteImport.update({
   id: '/insight/market-dynamic',
   path: '/insight/market-dynamic',
-  getParentRoute: () => AppRoute,
-} as any)
-const AppInsightGrowthRiskRoute = AppInsightGrowthRiskRouteImport.update({
-  id: '/insight/growth-risk',
-  path: '/insight/growth-risk',
-  getParentRoute: () => AppRoute,
-} as any)
-const AppInsightCompetitiveRiskRoute =
-  AppInsightCompetitiveRiskRouteImport.update({
-    id: '/insight/competitive-risk',
-    path: '/insight/competitive-risk',
-    getParentRoute: () => AppRoute,
-  } as any)
-const AppInsightBrandRiskRoute = AppInsightBrandRiskRouteImport.update({
-  id: '/insight/brand-risk',
-  path: '/insight/brand-risk',
   getParentRoute: () => AppRoute,
 } as any)
 const AppDashboardPerformanceRoute = AppDashboardPerformanceRouteImport.update({
@@ -114,11 +96,8 @@ export interface FileRoutesByFullPath {
   '/app/dashboard/dashboard': typeof AppDashboardDashboardRoute
   '/app/dashboard/overview': typeof AppDashboardOverviewRoute
   '/app/dashboard/performance': typeof AppDashboardPerformanceRoute
-  '/app/insight/brand-risk': typeof AppInsightBrandRiskRoute
-  '/app/insight/competitive-risk': typeof AppInsightCompetitiveRiskRoute
-  '/app/insight/growth-risk': typeof AppInsightGrowthRiskRoute
   '/app/insight/market-dynamic': typeof AppInsightMarketDynamicRoute
-  '/app/insight/ranking-risk': typeof AppInsightRankingRiskRoute
+  '/app/insight/risk-intelligence': typeof AppInsightRiskIntelligenceRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -131,11 +110,8 @@ export interface FileRoutesByTo {
   '/app/dashboard/dashboard': typeof AppDashboardDashboardRoute
   '/app/dashboard/overview': typeof AppDashboardOverviewRoute
   '/app/dashboard/performance': typeof AppDashboardPerformanceRoute
-  '/app/insight/brand-risk': typeof AppInsightBrandRiskRoute
-  '/app/insight/competitive-risk': typeof AppInsightCompetitiveRiskRoute
-  '/app/insight/growth-risk': typeof AppInsightGrowthRiskRoute
   '/app/insight/market-dynamic': typeof AppInsightMarketDynamicRoute
-  '/app/insight/ranking-risk': typeof AppInsightRankingRiskRoute
+  '/app/insight/risk-intelligence': typeof AppInsightRiskIntelligenceRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -149,11 +125,8 @@ export interface FileRoutesById {
   '/app/dashboard/dashboard': typeof AppDashboardDashboardRoute
   '/app/dashboard/overview': typeof AppDashboardOverviewRoute
   '/app/dashboard/performance': typeof AppDashboardPerformanceRoute
-  '/app/insight/brand-risk': typeof AppInsightBrandRiskRoute
-  '/app/insight/competitive-risk': typeof AppInsightCompetitiveRiskRoute
-  '/app/insight/growth-risk': typeof AppInsightGrowthRiskRoute
   '/app/insight/market-dynamic': typeof AppInsightMarketDynamicRoute
-  '/app/insight/ranking-risk': typeof AppInsightRankingRiskRoute
+  '/app/insight/risk-intelligence': typeof AppInsightRiskIntelligenceRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -168,11 +141,8 @@ export interface FileRouteTypes {
     | '/app/dashboard/dashboard'
     | '/app/dashboard/overview'
     | '/app/dashboard/performance'
-    | '/app/insight/brand-risk'
-    | '/app/insight/competitive-risk'
-    | '/app/insight/growth-risk'
     | '/app/insight/market-dynamic'
-    | '/app/insight/ranking-risk'
+    | '/app/insight/risk-intelligence'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -185,11 +155,8 @@ export interface FileRouteTypes {
     | '/app/dashboard/dashboard'
     | '/app/dashboard/overview'
     | '/app/dashboard/performance'
-    | '/app/insight/brand-risk'
-    | '/app/insight/competitive-risk'
-    | '/app/insight/growth-risk'
     | '/app/insight/market-dynamic'
-    | '/app/insight/ranking-risk'
+    | '/app/insight/risk-intelligence'
   id:
     | '__root__'
     | '/'
@@ -202,11 +169,8 @@ export interface FileRouteTypes {
     | '/app/dashboard/dashboard'
     | '/app/dashboard/overview'
     | '/app/dashboard/performance'
-    | '/app/insight/brand-risk'
-    | '/app/insight/competitive-risk'
-    | '/app/insight/growth-risk'
     | '/app/insight/market-dynamic'
-    | '/app/insight/ranking-risk'
+    | '/app/insight/risk-intelligence'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -251,11 +215,11 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AppProfileSetupRouteImport
       parentRoute: typeof AppRoute
     }
-    '/app/insight/ranking-risk': {
-      id: '/app/insight/ranking-risk'
-      path: '/insight/ranking-risk'
-      fullPath: '/app/insight/ranking-risk'
-      preLoaderRoute: typeof AppInsightRankingRiskRouteImport
+    '/app/insight/risk-intelligence': {
+      id: '/app/insight/risk-intelligence'
+      path: '/insight/risk-intelligence'
+      fullPath: '/app/insight/risk-intelligence'
+      preLoaderRoute: typeof AppInsightRiskIntelligenceRouteImport
       parentRoute: typeof AppRoute
     }
     '/app/insight/market-dynamic': {
@@ -263,27 +227,6 @@ declare module '@tanstack/react-router' {
       path: '/insight/market-dynamic'
       fullPath: '/app/insight/market-dynamic'
       preLoaderRoute: typeof AppInsightMarketDynamicRouteImport
-      parentRoute: typeof AppRoute
-    }
-    '/app/insight/growth-risk': {
-      id: '/app/insight/growth-risk'
-      path: '/insight/growth-risk'
-      fullPath: '/app/insight/growth-risk'
-      preLoaderRoute: typeof AppInsightGrowthRiskRouteImport
-      parentRoute: typeof AppRoute
-    }
-    '/app/insight/competitive-risk': {
-      id: '/app/insight/competitive-risk'
-      path: '/insight/competitive-risk'
-      fullPath: '/app/insight/competitive-risk'
-      preLoaderRoute: typeof AppInsightCompetitiveRiskRouteImport
-      parentRoute: typeof AppRoute
-    }
-    '/app/insight/brand-risk': {
-      id: '/app/insight/brand-risk'
-      path: '/insight/brand-risk'
-      fullPath: '/app/insight/brand-risk'
-      preLoaderRoute: typeof AppInsightBrandRiskRouteImport
       parentRoute: typeof AppRoute
     }
     '/app/dashboard/performance': {
@@ -333,11 +276,8 @@ interface AppRouteChildren {
   AppDashboardDashboardRoute: typeof AppDashboardDashboardRoute
   AppDashboardOverviewRoute: typeof AppDashboardOverviewRoute
   AppDashboardPerformanceRoute: typeof AppDashboardPerformanceRoute
-  AppInsightBrandRiskRoute: typeof AppInsightBrandRiskRoute
-  AppInsightCompetitiveRiskRoute: typeof AppInsightCompetitiveRiskRoute
-  AppInsightGrowthRiskRoute: typeof AppInsightGrowthRiskRoute
   AppInsightMarketDynamicRoute: typeof AppInsightMarketDynamicRoute
-  AppInsightRankingRiskRoute: typeof AppInsightRankingRiskRoute
+  AppInsightRiskIntelligenceRoute: typeof AppInsightRiskIntelligenceRoute
 }
 
 const AppRouteChildren: AppRouteChildren = {
@@ -349,11 +289,8 @@ const AppRouteChildren: AppRouteChildren = {
   AppDashboardDashboardRoute: AppDashboardDashboardRoute,
   AppDashboardOverviewRoute: AppDashboardOverviewRoute,
   AppDashboardPerformanceRoute: AppDashboardPerformanceRoute,
-  AppInsightBrandRiskRoute: AppInsightBrandRiskRoute,
-  AppInsightCompetitiveRiskRoute: AppInsightCompetitiveRiskRoute,
-  AppInsightGrowthRiskRoute: AppInsightGrowthRiskRoute,
   AppInsightMarketDynamicRoute: AppInsightMarketDynamicRoute,
-  AppInsightRankingRiskRoute: AppInsightRankingRiskRoute,
+  AppInsightRiskIntelligenceRoute: AppInsightRiskIntelligenceRoute,
 }
 
 const AppRouteWithChildren = AppRoute._addFileChildren(AppRouteChildren)

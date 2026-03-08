@@ -1700,6 +1700,10 @@ INSIGHT_SIGNAL_TYPES = [
     "competitive_breakthrough_signal",
     "deceleration_warning_signal",
     "weak_structural_position_signal",
+    "rank_displacement_signal",
+    "fragile_leadership_signal",
+    "volatility_spike_signal",
+    "new_entrant_signal",
 ]
 
 SIGNAL_DISPLAY_NAMES = {
@@ -1708,6 +1712,10 @@ SIGNAL_DISPLAY_NAMES = {
     "competitive_breakthrough_signal": "Competitor Breakthrough Risk",
     "deceleration_warning_signal": "Growth Deceleration Risk",
     "weak_structural_position_signal": "Position Structure Weakness Risk",
+    "rank_displacement_signal": "Rank Displacement Risk",
+    "fragile_leadership_signal": "Fragile Leadership Risk",
+    "volatility_spike_signal": "Visibility Volatility Risk",
+    "new_entrant_signal": "New Entrant Risk",
 }
 
 SEVERITY_TO_INT = {"Low": 1, "Medium": 2, "High": 4}
@@ -1718,6 +1726,10 @@ SIGNAL_TYPE_TO_HISTORY_KEY = {
     "competitive_breakthrough_signal": "competitor_breakthrough",
     "deceleration_warning_signal": "growth_deceleration",
     "weak_structural_position_signal": "position_weakness",
+    "rank_displacement_signal": "rank_displacement",
+    "fragile_leadership_signal": "fragile_leadership",
+    "volatility_spike_signal": "volatility_spike",
+    "new_entrant_signal": "new_entrant",
 }
 
 
@@ -1831,6 +1843,10 @@ async def get_risk_history(
             competitor_breakthrough=cols.get("competitor_breakthrough"),
             growth_deceleration=cols.get("growth_deceleration"),
             position_weakness=cols.get("position_weakness"),
+            rank_displacement=cols.get("rank_displacement"),
+            fragile_leadership=cols.get("fragile_leadership"),
+            volatility_spike=cols.get("volatility_spike"),
+            new_entrant=cols.get("new_entrant"),
         )
         for dt, cols in sorted(date_map.items())
     ]
