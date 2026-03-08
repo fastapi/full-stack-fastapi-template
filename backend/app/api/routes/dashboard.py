@@ -79,16 +79,21 @@ from app.models.dashboard import (
     SentimentComparisonResponse,
     ReferenceSourceComparisonRow,
     ReferenceSourceComparisonResponse,
+    MarketDynamicDataPoint,
+    MarketDynamicBrandData,
+    MarketDynamicResponse,
 )
 from kila_models.models import (
     UsersTable,
     BrandAwarenessWeeklyPerformanceTable,
+    BrandAwarenessDailyPerformanceTable,
     BrandSearchRankingTable,
     ProjectUserTable,
     ProjectsRecord,
     BrandPromptTable,
     BrandCompetitorsTable,
     BrandCompetitorsAwarenessWeeklyPerformanceTable,
+    BrandCompetitorsAwarenessDailyPerformanceTable,
     BrandSearchCompetitorsVisibilityTable,
     BrandSearchCompetitorsRankingTable,
     BrandSearchCompetitorDailyBasicMetricsTable,
@@ -3156,4 +3161,145 @@ async def get_reference_source_comparison(
         segment=segment,
         competitor_brand_name=competitor_brand_name,
         rows=rows,
+    )
+
+
+@router.get("/market-dynamic", response_model=MarketDynamicResponse)
+async def get_market_dynamic(
+    brand_id: str = Query(..., description="Target brand ID"),
+    segment: str = Query(..., description="Segment name (e.g. 'All-Segment' or specific segment)"),
+    time_range: TimeRange = Query(
+        TimeRange.ONE_MONTH,
+        description="Predefined time range for the query"
+    ),
+    start_date: Optional[date] = Query(
+        None,
+        description="Custom start date (required if time_range is 'custom')"
+    ),
+    end_date: Optional[date] = Query(
+        None,
+        description="Custom end date (required if time_range is 'custom')"
+    ),
+    db: AsyncSession = Depends(get_db),
+    current_user: UsersTable = Depends(get_current_user),
+) -> MarketDynamicResponse:
+    """
+    Retrieve market dynamic data for the target brand and all its competitors.
+
+    Returns time-series visibility_share, search_momentum, and position_strength
+    for the target brand plus every competitor, suitable for rendering pie, stacked
+    area, line/bar, and quadrant charts on the Market Dynamic page.
+    """
+    logger.info(
+        f"Fetching market dynamic for user: {current_user.user_id}, "
+        f"brand_id: {brand_id}, segment: {segment}, time_range: {time_range}"
+    )
+
+    # Determine date range
+    if time_range == TimeRange.CUSTOM:
+        if not start_date or not end_date:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="start_date and end_date are required for custom time range",
+            )
+        query_start = start_date
+        query_end = end_date
+    else:
+        query_start, query_end = get_date_range_for_time_range(time_range)
+
+    # ── Query target brand daily performance ──────────────────────────────────
+    brand_query = (
+        select(BrandAwarenessDailyPerformanceTable)
+        .where(
+            BrandAwarenessDailyPerformanceTable.brand_id == brand_id,
+            BrandAwarenessDailyPerformanceTable.segment == segment,
+            BrandAwarenessDailyPerformanceTable.created_date >= query_start,
+            BrandAwarenessDailyPerformanceTable.created_date <= query_end,
+        )
+        .order_by(asc(BrandAwarenessDailyPerformanceTable.created_date))
+    )
+    brand_result = await db.execute(brand_query)
+    brand_rows = brand_result.scalars().all()
+
+    # Get brand name from first row (fallback to brand_id)
+    brand_name = brand_rows[0].brand_name if brand_rows else brand_id
+
+    # ── Query all competitors daily performance ───────────────────────────────
+    comp_query = (
+        select(BrandCompetitorsAwarenessDailyPerformanceTable)
+        .where(
+            BrandCompetitorsAwarenessDailyPerformanceTable.search_target_brand_id == brand_id,
+            BrandCompetitorsAwarenessDailyPerformanceTable.segment == segment,
+            BrandCompetitorsAwarenessDailyPerformanceTable.created_date >= query_start,
+            BrandCompetitorsAwarenessDailyPerformanceTable.created_date <= query_end,
+        )
+        .order_by(
+            asc(BrandCompetitorsAwarenessDailyPerformanceTable.competitor_brand_name),
+            asc(BrandCompetitorsAwarenessDailyPerformanceTable.created_date),
+        )
+    )
+    comp_result = await db.execute(comp_query)
+    comp_rows = comp_result.scalars().all()
+
+    # ── Build target brand data ───────────────────────────────────────────────
+    brand_points = [
+        MarketDynamicDataPoint(
+            date=row.created_date.isoformat(),
+            visibility_share=round(row.share_of_visibility, 4) if row.share_of_visibility is not None else None,
+            search_momentum=round(row.search_momentum, 4) if row.search_momentum is not None else None,
+            position_strength=round(row.position_strength, 4) if row.position_strength is not None else None,
+        )
+        for row in brand_rows
+    ]
+
+    vis_vals = [r.share_of_visibility for r in brand_rows if r.share_of_visibility is not None]
+    ps_vals = [r.position_strength for r in brand_rows if r.position_strength is not None]
+
+    brands: list[MarketDynamicBrandData] = [
+        MarketDynamicBrandData(
+            brand_name=brand_name,
+            is_target=True,
+            data_points=brand_points,
+            avg_visibility_share=round(statistics.mean(vis_vals), 4) if vis_vals else 0.0,
+            median_position_strength=round(statistics.median(ps_vals), 4) if ps_vals else 0.0,
+        )
+    ]
+
+    # ── Build per-competitor data ─────────────────────────────────────────────
+    from collections import defaultdict
+    comp_by_name: dict[str, list] = defaultdict(list)
+    for row in comp_rows:
+        comp_by_name[row.competitor_brand_name].append(row)
+
+    for comp_name in sorted(comp_by_name.keys()):
+        rows_for_comp = comp_by_name[comp_name]
+        comp_points = [
+            MarketDynamicDataPoint(
+                date=row.created_date.isoformat(),
+                visibility_share=round(row.share_of_visibility, 4) if row.share_of_visibility is not None else None,
+                search_momentum=round(row.search_momentum, 4) if row.search_momentum is not None else None,
+                position_strength=round(row.position_strength, 4) if row.position_strength is not None else None,
+            )
+            for row in rows_for_comp
+        ]
+        c_vis = [r.share_of_visibility for r in rows_for_comp if r.share_of_visibility is not None]
+        c_ps = [r.position_strength for r in rows_for_comp if r.position_strength is not None]
+        brands.append(
+            MarketDynamicBrandData(
+                brand_name=comp_name,
+                is_target=False,
+                data_points=comp_points,
+                avg_visibility_share=round(statistics.mean(c_vis), 4) if c_vis else 0.0,
+                median_position_strength=round(statistics.median(c_ps), 4) if c_ps else 0.0,
+            )
+        )
+
+    logger.info(
+        f"Returning market dynamic for {len(brands)} brands "
+        f"({len(brand_points)} target data points, {len(comp_by_name)} competitors)"
+    )
+    return MarketDynamicResponse(
+        brands=brands,
+        start_date=query_start.isoformat(),
+        end_date=query_end.isoformat(),
     )

@@ -683,3 +683,33 @@ class ReferenceSourceComparisonResponse(BaseModel):
     rows: list[ReferenceSourceComparisonRow] = Field(default_factory=list)
 
     model_config = ConfigDict(from_attributes=True)
+
+
+class MarketDynamicDataPoint(BaseModel):
+    """One date's metrics for a single brand in the market dynamic view."""
+    date: str
+    visibility_share: Optional[float] = None
+    search_momentum: Optional[float] = None
+    position_strength: Optional[float] = None
+
+    model_config = ConfigDict(from_attributes=True)
+
+
+class MarketDynamicBrandData(BaseModel):
+    """Market dynamic time-series data for one brand (target or competitor)."""
+    brand_name: str
+    is_target: bool
+    data_points: list[MarketDynamicDataPoint] = Field(default_factory=list)
+    avg_visibility_share: float = 0.0
+    median_position_strength: float = 0.0
+
+    model_config = ConfigDict(from_attributes=True)
+
+
+class MarketDynamicResponse(BaseModel):
+    """Full market dynamic response for the target brand and all competitors."""
+    brands: list[MarketDynamicBrandData] = Field(default_factory=list)
+    start_date: str
+    end_date: str
+
+    model_config = ConfigDict(from_attributes=True)

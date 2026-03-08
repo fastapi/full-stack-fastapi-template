@@ -15,6 +15,7 @@ import { Route as AppUsersRouteImport } from './routes/app.users'
 import { Route as AppProjectsRouteImport } from './routes/app.projects'
 import { Route as AppProfileSetupRouteImport } from './routes/app.profile-setup'
 import { Route as AppInsightRankingRiskRouteImport } from './routes/app.insight.ranking-risk'
+import { Route as AppInsightMarketDynamicRouteImport } from './routes/app.insight.market-dynamic'
 import { Route as AppInsightGrowthRiskRouteImport } from './routes/app.insight.growth-risk'
 import { Route as AppInsightCompetitiveRiskRouteImport } from './routes/app.insight.competitive-risk'
 import { Route as AppInsightBrandRiskRouteImport } from './routes/app.insight.brand-risk'
@@ -52,6 +53,11 @@ const AppProfileSetupRoute = AppProfileSetupRouteImport.update({
 const AppInsightRankingRiskRoute = AppInsightRankingRiskRouteImport.update({
   id: '/insight/ranking-risk',
   path: '/insight/ranking-risk',
+  getParentRoute: () => AppRoute,
+} as any)
+const AppInsightMarketDynamicRoute = AppInsightMarketDynamicRouteImport.update({
+  id: '/insight/market-dynamic',
+  path: '/insight/market-dynamic',
   getParentRoute: () => AppRoute,
 } as any)
 const AppInsightGrowthRiskRoute = AppInsightGrowthRiskRouteImport.update({
@@ -111,6 +117,7 @@ export interface FileRoutesByFullPath {
   '/app/insight/brand-risk': typeof AppInsightBrandRiskRoute
   '/app/insight/competitive-risk': typeof AppInsightCompetitiveRiskRoute
   '/app/insight/growth-risk': typeof AppInsightGrowthRiskRoute
+  '/app/insight/market-dynamic': typeof AppInsightMarketDynamicRoute
   '/app/insight/ranking-risk': typeof AppInsightRankingRiskRoute
 }
 export interface FileRoutesByTo {
@@ -127,6 +134,7 @@ export interface FileRoutesByTo {
   '/app/insight/brand-risk': typeof AppInsightBrandRiskRoute
   '/app/insight/competitive-risk': typeof AppInsightCompetitiveRiskRoute
   '/app/insight/growth-risk': typeof AppInsightGrowthRiskRoute
+  '/app/insight/market-dynamic': typeof AppInsightMarketDynamicRoute
   '/app/insight/ranking-risk': typeof AppInsightRankingRiskRoute
 }
 export interface FileRoutesById {
@@ -144,6 +152,7 @@ export interface FileRoutesById {
   '/app/insight/brand-risk': typeof AppInsightBrandRiskRoute
   '/app/insight/competitive-risk': typeof AppInsightCompetitiveRiskRoute
   '/app/insight/growth-risk': typeof AppInsightGrowthRiskRoute
+  '/app/insight/market-dynamic': typeof AppInsightMarketDynamicRoute
   '/app/insight/ranking-risk': typeof AppInsightRankingRiskRoute
 }
 export interface FileRouteTypes {
@@ -162,6 +171,7 @@ export interface FileRouteTypes {
     | '/app/insight/brand-risk'
     | '/app/insight/competitive-risk'
     | '/app/insight/growth-risk'
+    | '/app/insight/market-dynamic'
     | '/app/insight/ranking-risk'
   fileRoutesByTo: FileRoutesByTo
   to:
@@ -178,6 +188,7 @@ export interface FileRouteTypes {
     | '/app/insight/brand-risk'
     | '/app/insight/competitive-risk'
     | '/app/insight/growth-risk'
+    | '/app/insight/market-dynamic'
     | '/app/insight/ranking-risk'
   id:
     | '__root__'
@@ -194,6 +205,7 @@ export interface FileRouteTypes {
     | '/app/insight/brand-risk'
     | '/app/insight/competitive-risk'
     | '/app/insight/growth-risk'
+    | '/app/insight/market-dynamic'
     | '/app/insight/ranking-risk'
   fileRoutesById: FileRoutesById
 }
@@ -244,6 +256,13 @@ declare module '@tanstack/react-router' {
       path: '/insight/ranking-risk'
       fullPath: '/app/insight/ranking-risk'
       preLoaderRoute: typeof AppInsightRankingRiskRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/app/insight/market-dynamic': {
+      id: '/app/insight/market-dynamic'
+      path: '/insight/market-dynamic'
+      fullPath: '/app/insight/market-dynamic'
+      preLoaderRoute: typeof AppInsightMarketDynamicRouteImport
       parentRoute: typeof AppRoute
     }
     '/app/insight/growth-risk': {
@@ -317,6 +336,7 @@ interface AppRouteChildren {
   AppInsightBrandRiskRoute: typeof AppInsightBrandRiskRoute
   AppInsightCompetitiveRiskRoute: typeof AppInsightCompetitiveRiskRoute
   AppInsightGrowthRiskRoute: typeof AppInsightGrowthRiskRoute
+  AppInsightMarketDynamicRoute: typeof AppInsightMarketDynamicRoute
   AppInsightRankingRiskRoute: typeof AppInsightRankingRiskRoute
 }
 
@@ -332,6 +352,7 @@ const AppRouteChildren: AppRouteChildren = {
   AppInsightBrandRiskRoute: AppInsightBrandRiskRoute,
   AppInsightCompetitiveRiskRoute: AppInsightCompetitiveRiskRoute,
   AppInsightGrowthRiskRoute: AppInsightGrowthRiskRoute,
+  AppInsightMarketDynamicRoute: AppInsightMarketDynamicRoute,
   AppInsightRankingRiskRoute: AppInsightRankingRiskRoute,
 }
 

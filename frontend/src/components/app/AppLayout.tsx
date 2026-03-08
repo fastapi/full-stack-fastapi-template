@@ -60,6 +60,7 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
       name: "Insight",
       icon: Lightbulb,
       children: [
+        { name: "Market Dynamic", path: "/app/insight/market-dynamic", requiredFeature: "insightAll" },
         { name: "Brand Risk Overview", path: "/app/insight/brand-risk", requiredFeature: "insightBrandRisk" },
         { name: "Competitive Risk", path: "/app/insight/competitive-risk", requiredFeature: "insightAll" },
         { name: "Growth Risk", path: "/app/insight/growth-risk", requiredFeature: "insightAll" },

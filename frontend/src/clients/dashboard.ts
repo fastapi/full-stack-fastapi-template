@@ -745,6 +745,27 @@ export interface ApiError {
   detail: string
 }
 
+export interface MarketDynamicDataPoint {
+  date: string
+  visibility_share: number | null
+  search_momentum: number | null
+  position_strength: number | null
+}
+
+export interface MarketDynamicBrandData {
+  brand_name: string
+  is_target: boolean
+  data_points: MarketDynamicDataPoint[]
+  avg_visibility_share: number
+  median_position_strength: number
+}
+
+export interface MarketDynamicResponse {
+  brands: MarketDynamicBrandData[]
+  start_date: string
+  end_date: string
+}
+
 /**
  * Dashboard API Client Class
  *
@@ -2591,6 +2612,42 @@ class DashboardAPI {
 
     const data: CompetitorGapSummaryResponse = await response.json()
     this.setCachedData(cacheKey, data)
+    return data
+  }
+
+  // ── Market dynamic ─────────────────────────────────────────────────────────
+
+  async getMarketDynamic(
+    brandId: string,
+    segment: string,
+    timeRange: TimeRange,
+    startDate?: string,
+    endDate?: string,
+    forceRefresh = false,
+  ): Promise<MarketDynamicResponse> {
+    const cacheKey = `dashboard_market_dynamic_${brandId}_${segment}_${timeRange}_${startDate ?? ""}_${endDate ?? ""}`
+
+    if (!forceRefresh) {
+      const cached = this.getCachedData<MarketDynamicResponse>(cacheKey)
+      if (cached) return cached
+    }
+
+    const queryParams = new URLSearchParams({ brand_id: brandId, segment, time_range: timeRange })
+    if (startDate) queryParams.set("start_date", startDate)
+    if (endDate) queryParams.set("end_date", endDate)
+
+    const response = await fetch(
+      `${this.baseUrl}${this.apiPrefix}/dashboard/market-dynamic?${queryParams}`,
+      { method: "GET", headers: await this.getAuthHeaders() },
+    )
+    if (response.status === 401) throw new Error("Unauthorized - Please log in again")
+    if (!response.ok) {
+      const error: ApiError = await response.json()
+      throw new Error(error.detail || "Failed to fetch market dynamic data")
+    }
+
+    const data: MarketDynamicResponse = await response.json()
+    if (data.brands.length > 0) this.setCachedData(cacheKey, data)
     return data
   }
 }
