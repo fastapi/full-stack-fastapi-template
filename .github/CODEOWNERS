@@ -1,0 +1,11 @@
+# Backend source
+backend/           @alexfdz
+
+# Frontend source
+frontend/          @alexfdz
+
+# CI workflows — changes require maintainer review
+.github/workflows/ @alexfdz
+
+# Agent rules — changes require maintainer review (CI gate also applies to base.md)
+.agents/rules/     @alexfdz

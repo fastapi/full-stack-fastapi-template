@@ -1,0 +1,75 @@
+name: Claude AI
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened]
+  issue_comment:
+    types: [created]
+  pull_request_review_comment:
+    types: [created]
+  pull_request_review:
+    types: [submitted]
+  issues:
+    types: [opened]
+
+permissions:
+  contents: write
+  pull-requests: write
+  issues: write
+  id-token: write
+  actions: read
+
+jobs:
+  pr-review:
+    name: Automated PR Review
+    runs-on: ubuntu-latest
+    if: >
+      github.event_name == 'pull_request' &&
+      github.event.pull_request.head.repo.full_name == github.repository
+    steps:
+      - name: Checkout
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683  # v4.2.2
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+
+      - name: Check for docs-only changes
+        id: docs-check
+        run: |
+          changed=$(git diff --name-only origin/${{ github.base_ref }}...HEAD)
+          echo "Changed files:"
+          echo "$changed"
+          non_docs=$(echo "$changed" | grep -vE '^(docs/|.*\.(md|txt|rst)$)' || true)
+          if [ -z "$non_docs" ]; then
+            echo "skip=true" >> "$GITHUB_OUTPUT"
+            echo "Docs-only changes detected — skipping Claude review."
+          else
+            echo "skip=false" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Run Claude Code Review
+        if: steps.docs-check.outputs.skip == 'false'
+        uses: anthropics/claude-code-action@26ec041249acb0a944c0a47b6c0c13f05dbc5b44  # v1.0.70
+        with:
+          anthropic_api_key: ${{ secrets.ANTHROPIC_API_KEY }}
+
+  claude-interact:
+    name: Claude Mention Response
+    runs-on: ubuntu-latest
+    if: >
+      github.event_name != 'pull_request' &&
+      (
+        contains(github.event.comment.body, '@claude') ||
+        contains(github.event.review.body, '@claude') ||
+        contains(github.event.issue.body, '@claude')
+      )
+    steps:
+      - name: Checkout
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683  # v4.2.2
+        with:
+          persist-credentials: false
+
+      - name: Respond to Claude mention
+        uses: anthropics/claude-code-action@26ec041249acb0a944c0a47b6c0c13f05dbc5b44  # v1.0.70
+        with:
+          anthropic_api_key: ${{ secrets.ANTHROPIC_API_KEY }}

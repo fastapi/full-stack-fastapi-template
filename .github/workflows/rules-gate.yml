@@ -1,0 +1,40 @@
+name: Rules Gate
+
+on:
+  pull_request:
+    paths:
+      - '.agents/rules/base.md'
+
+permissions:
+  contents: read
+  pull-requests: read
+
+jobs:
+  check-approval:
+    name: Verify Rule-Change-Approval
+    runs-on: ubuntu-latest
+    if: github.event.pull_request.head.repo.full_name == github.repository
+    steps:
+      - name: Check PR body for Rule-Change-Approval
+        env:
+          PR_BODY: ${{ github.event.pull_request.body }}
+        run: |
+          if echo "$PR_BODY" | grep -q "Rule-Change-Approval:"; then
+            echo "Rule-Change-Approval reference found — gate passed."
+            exit 0
+          else
+            echo ""
+            echo "ERROR: This PR modifies .agents/rules/base.md but is missing a Rule-Change-Approval reference."
+            echo ""
+            echo "To pass this gate, add the following line to your PR description:"
+            echo ""
+            echo "  Rule-Change-Approval: <link or reference to human approval>"
+            echo ""
+            echo "Where <reference> is one of:"
+            echo "  - A GitHub issue URL: https://github.com/owner/repo/issues/42"
+            echo "  - A PR comment URL: https://github.com/owner/repo/pull/10#issuecomment-12345"
+            echo "  - A discussion reference: Discussion #7, approved by @maintainer on YYYY-MM-DD"
+            echo ""
+            echo "Changes to base.md require explicit human approval to prevent silent rule drift."
+            exit 1
+          fi
