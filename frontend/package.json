@@ -45,7 +45,7 @@
     "react-icons": "^5.5.0",
     "sonner": "^2.0.7",
     "tailwind-merge": "^3.4.0",
-    "tailwindcss": "^4.2.0",
+    "tailwindcss": "^4.2.1",
     "zod": "^4.3.6"
   },
   "devDependencies": {
