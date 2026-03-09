@@ -1,0 +1,34 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(uv run pytest *)",
+      "Bash(uv run python -m pytest *)",
+      "Bash(uv run ruff *)",
+      "Bash(uv run *)",
+      "Bash(bun run *)",
+      "Bash(bunx *)",
+      "Bash(docker compose *)",
+      "Bash(git status)",
+      "Bash(git diff *)",
+      "Bash(git log *)",
+      "Bash(git fetch *)",
+      "Bash(git add *)",
+      "Bash(git commit *)",
+      "Bash(git checkout *)",
+      "Bash(git branch *)",
+      "Bash(.specify/scripts/bash/*)",
+      "Bash(cat *)",
+      "Bash(ls *)",
+      "Bash(fd *)",
+      "Bash(rg *)"
+    ],
+    "deny": [
+      "Bash(git push --force*)",
+      "Bash(git push *--force*)",
+      "Bash(git reset --hard *)",
+      "Bash(rm -rf *)",
+      "Bash(rm -fr *)",
+      "Bash(sudo *)"
+    ]
+  }
+}
