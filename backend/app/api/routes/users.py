@@ -55,7 +55,7 @@ def read_users(session: SessionDep, skip: int = 0, limit: int = 100) -> Any:
 )
 def create_user(*, session: SessionDep, user_in: UserCreate) -> Any:
     """
-    Create new user.
+    Create new user...
     """
     user = crud.get_user_by_email(session=session, email=user_in.email)
     if user:
