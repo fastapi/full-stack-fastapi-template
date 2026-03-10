@@ -57,13 +57,13 @@ OPTIONS:
 EXAMPLES:
   # Check task prerequisites (plan.md required)
   ./check-prerequisites.sh --json
-  
+
   # Check implementation prerequisites (plan.md + tasks.md required)
   ./check-prerequisites.sh --json --require-tasks --include-tasks
-  
+
   # Get feature paths only (no validation)
   ./check-prerequisites.sh --paths-only
-  
+
 EOF
             exit 0
             ;;
@@ -147,19 +147,19 @@ if $JSON_MODE; then
         json_docs=$(printf '"%s",' "${docs[@]}")
         json_docs="[${json_docs%,}]"
     fi
-    
+
     printf '{"FEATURE_DIR":"%s","AVAILABLE_DOCS":%s}\n' "$FEATURE_DIR" "$json_docs"
 else
     # Text output
     echo "FEATURE_DIR:$FEATURE_DIR"
     echo "AVAILABLE_DOCS:"
-    
+
     # Show status of each potential document
     check_file "$RESEARCH" "research.md"
     check_file "$DATA_MODEL" "data-model.md"
     check_dir "$CONTRACTS_DIR" "contracts/"
     check_file "$QUICKSTART" "quickstart.md"
-    
+
     if $INCLUDE_TASKS; then
         check_file "$TASKS" "tasks.md"
     fi
