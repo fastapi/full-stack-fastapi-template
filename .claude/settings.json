@@ -20,7 +20,17 @@
       "Bash(cat *)",
       "Bash(ls *)",
       "Bash(fd *)",
-      "Bash(rg *)"
+      "Bash(rg *)",
+      "Bash(git push *)",
+      "Bash(git push origin HEAD)",
+      "Bash(git rebase *)",
+      "Bash(git merge *)",
+      "Bash(gh pr *)",
+      "Bash(gh run *)",
+      "Bash(jq *)",
+      "Bash(mkdir *)",
+      "Bash(cp *)",
+      "Bash(chmod *)"
     ],
     "deny": [
       "Bash(git push --force*)",
