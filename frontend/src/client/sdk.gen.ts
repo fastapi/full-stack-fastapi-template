@@ -261,7 +261,7 @@ export class UsersService {
     
     /**
      * Create User
-     * Create new user.
+     * Create new user...
      * @param data The data for the request.
      * @param data.requestBody
      * @returns UserPublic Successful Response
