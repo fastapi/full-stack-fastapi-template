@@ -1,24 +1,29 @@
-import { Loader2, TrendingDown, TrendingUp, Minus, Globe, MessageSquare, LayoutList, HelpCircle } from "lucide-react"
-import React, { useEffect, useState } from "react"
+import {
+  Globe,
+  HelpCircle,
+  LayoutList,
+  Loader2,
+  MessageSquare,
+  Minus,
+  TrendingDown,
+  TrendingUp,
+} from "lucide-react"
+import type React from "react"
+import { useEffect, useState } from "react"
 import {
   type BrandImpressionMetric,
   type BrandImpressionSummaryResponse,
   type BrandImpressionTrendDataPoint,
+  dashboardAPI,
   type TimeRange,
   type UserBrand,
-  dashboardAPI,
 } from "@/clients/dashboard"
+import { AIReferenceSourceTable } from "@/components/app/dashboard/components/AIReferenceSourceTable"
+import { CustomerReviewTable } from "@/components/app/dashboard/components/CustomerReviewTable"
 import { DashboardPageLayout } from "@/components/app/dashboard/components/DashboardPageLayout"
 import { OverviewChart } from "@/components/app/dashboard/components/OverviewChart"
 import { RankingChart } from "@/components/app/dashboard/components/RankingChart"
-import { AIReferenceSourceTable } from "@/components/app/dashboard/components/AIReferenceSourceTable"
-import { CustomerReviewTable } from "@/components/app/dashboard/components/CustomerReviewTable"
-import {
-  Card,
-  CardContent,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card"
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import {
   Tooltip,
   TooltipContent,
@@ -50,7 +55,9 @@ function ImpressionMetricBox({
 }: ImpressionMetricBoxProps) {
   const { current_value, change, trend } = metric
 
-  const isNoData = trend === "no_data" && (current_value === null || current_value === undefined)
+  const isNoData =
+    trend === "no_data" &&
+    (current_value === null || current_value === undefined)
 
   const trendIcon =
     trend === "up" ? (
@@ -89,7 +96,9 @@ function ImpressionMetricBox({
             <span className="text-black">{label}</span>
             <span className="font-semibold text-slate-700">{valueStr}</span>
             {changeStr && (
-              <span className={`flex items-center gap-0.5 font-medium ${trendColour}`}>
+              <span
+                className={`flex items-center gap-0.5 font-medium ${trendColour}`}
+              >
                 {trendIcon}
                 {changeStr}
               </span>
@@ -97,7 +106,10 @@ function ImpressionMetricBox({
             <HelpCircle className="h-3 w-3 text-slate-400 flex-shrink-0" />
           </div>
         </TooltipTrigger>
-        <TooltipContent side="bottom" className="max-w-[220px] text-xs text-center">
+        <TooltipContent
+          side="bottom"
+          className="max-w-[220px] text-xs text-center"
+        >
           <p>{helpText}</p>
           {isNoData && edgeText && (
             <p className="mt-1 text-slate-300">{edgeText}</p>
@@ -117,14 +129,16 @@ function BrandImpressionSummaryBoxes({
   brandId: string
   segment: string
 }) {
-  const [summary, setSummary] =
-    useState<BrandImpressionSummaryResponse | null>(null)
+  const [summary, setSummary] = useState<BrandImpressionSummaryResponse | null>(
+    null,
+  )
   const [isLoading, setIsLoading] = useState(true)
 
   useEffect(() => {
     setIsLoading(true)
     setSummary(null)
-    const dbSeg = segment === ALL_SEGMENTS_VALUE ? "all-segment" : (segment || "all-segment")
+    const dbSeg =
+      segment === ALL_SEGMENTS_VALUE ? "all-segment" : segment || "all-segment"
     dashboardAPI
       .getBrandImpressionSummary(brandId, dbSeg)
       .then(setSummary)
@@ -205,7 +219,9 @@ function BrandImpressionContent({
   // pre-aggregated row. Map the sentinel to that value.
   const dbSegment = segment === ALL_SEGMENTS_VALUE ? "all-segment" : segment
   const isAllSegments = segment === ALL_SEGMENTS_VALUE
-  const [trendData, setTrendData] = useState<BrandImpressionTrendDataPoint[]>([])
+  const [trendData, setTrendData] = useState<BrandImpressionTrendDataPoint[]>(
+    [],
+  )
   const [isLoading, setIsLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
 
@@ -259,15 +275,17 @@ function BrandImpressionContent({
         <div className="flex items-center justify-between">
           <CardTitle>
             <div className="flex items-center gap-2">
-              <span className="text-base font-semibold text-slate-900 bg-indigo-50 px-3 py-1 rounded-full">Impression History</span>
-              <span className="text-xs font-normal text-slate-500">— {brandName}</span>
+              <span className="text-base font-semibold text-slate-900 bg-indigo-50 px-3 py-1 rounded-full">
+                Impression History
+              </span>
+              <span className="text-xs font-normal text-slate-500">
+                — {brandName}
+              </span>
             </div>
           </CardTitle>
           {timeRangeControls}
         </div>
-        {customDateInputs && (
-          <div className="mt-2">{customDateInputs}</div>
-        )}
+        {customDateInputs && <div className="mt-2">{customDateInputs}</div>}
         <div className="h-px w-full bg-slate-200/60" />
       </CardHeader>
       <CardContent>
@@ -280,14 +298,18 @@ function BrandImpressionContent({
             <div className="w-1/2 min-w-0 pr-4 flex flex-col">
               <div className="flex items-center gap-1.5 mb-3">
                 <TrendingUp className="h-3.5 w-3.5 text-indigo-500" />
-                <span className="text-xs font-semibold text-indigo-700 bg-indigo-50 px-2 py-0.5 rounded-full">Historical Trend</span>
+                <span className="text-xs font-semibold text-indigo-700 bg-indigo-50 px-2 py-0.5 rounded-full">
+                  Historical Trend
+                </span>
               </div>
               <OverviewChart dataPoints={trendData} />
             </div>
             <div className="w-1/2 min-w-0 pl-4 overflow-hidden">
               <div className="flex items-center gap-1.5 mb-3">
                 <LayoutList className="h-3.5 w-3.5 text-indigo-500" />
-                <span className="text-xs font-semibold text-indigo-700 bg-indigo-50 px-2 py-0.5 rounded-full">Ranking Details</span>
+                <span className="text-xs font-semibold text-indigo-700 bg-indigo-50 px-2 py-0.5 rounded-full">
+                  Ranking Details
+                </span>
               </div>
               <RankingChart
                 brandId={brandId}
@@ -307,7 +329,9 @@ function BrandImpressionContent({
             <div className="w-1/2 min-w-0 pr-4 overflow-hidden">
               <div className="flex items-center gap-1.5 mb-3">
                 <MessageSquare className="h-3.5 w-3.5 text-violet-500" />
-                <span className="text-xs font-semibold text-violet-700 bg-violet-50 px-2 py-0.5 rounded-full">Sentiment - Customer Review</span>
+                <span className="text-xs font-semibold text-violet-700 bg-violet-50 px-2 py-0.5 rounded-full">
+                  Sentiment - Customer Review
+                </span>
               </div>
               <CustomerReviewTable
                 brandId={brandId}
@@ -321,7 +345,9 @@ function BrandImpressionContent({
             <div className="w-1/2 min-w-0 pl-4 overflow-hidden">
               <div className="flex items-center gap-1.5 mb-3">
                 <Globe className="h-3.5 w-3.5 text-indigo-500" />
-                <span className="text-xs font-semibold text-indigo-700 bg-indigo-50 px-2 py-0.5 rounded-full">AI Reference Source</span>
+                <span className="text-xs font-semibold text-indigo-700 bg-indigo-50 px-2 py-0.5 rounded-full">
+                  AI Reference Source
+                </span>
               </div>
               <AIReferenceSourceTable
                 brandId={brandId}
@@ -349,7 +375,10 @@ export function BrandImpression() {
       brandCardTitle="Current Impression"
       brandCardDescription=""
       showProjectRole={false}
-      brandCardExtras={(selectedBrand: UserBrand | undefined, selectedSegment: string) =>
+      brandCardExtras={(
+        selectedBrand: UserBrand | undefined,
+        selectedSegment: string,
+      ) =>
         selectedBrand ? (
           <BrandImpressionSummaryBoxes
             brandId={selectedBrand.brand_id}
@@ -358,7 +387,17 @@ export function BrandImpression() {
         ) : null
       }
     >
-      {({ selectedBrandId, selectedBrand, selectedSegment, segments, timeRange, customStartDate, customEndDate, timeRangeControls, customDateInputs }) => (
+      {({
+        selectedBrandId,
+        selectedBrand,
+        selectedSegment,
+        segments,
+        timeRange,
+        customStartDate,
+        customEndDate,
+        timeRangeControls,
+        customDateInputs,
+      }) => (
         <BrandImpressionContent
           brandId={selectedBrandId}
           brandName={selectedBrand.brand_name}

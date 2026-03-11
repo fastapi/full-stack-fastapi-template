@@ -1,12 +1,12 @@
 import type { ReactNode } from "react"
-import { useEntitlement } from "@/hooks/useEntitlement"
-import type { TierQuota } from "@/lib/entitlements"
 import {
   Tooltip,
   TooltipContent,
   TooltipProvider,
   TooltipTrigger,
 } from "@/components/ui/tooltip"
+import { useEntitlement } from "@/hooks/useEntitlement"
+import type { TierQuota } from "@/lib/entitlements"
 
 interface QuotaGateProps {
   /** Which quota limit to check */
@@ -54,7 +54,10 @@ export function QuotaGate({
             <span className="pointer-events-none opacity-50">{children}</span>
           </span>
         </TooltipTrigger>
-        <TooltipContent side="top" className="max-w-[220px] text-xs text-center">
+        <TooltipContent
+          side="top"
+          className="max-w-[220px] text-xs text-center"
+        >
           <p>{message}</p>
         </TooltipContent>
       </Tooltip>

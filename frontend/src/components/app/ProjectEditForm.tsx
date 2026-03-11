@@ -123,9 +123,8 @@ export function ProjectEditForm({
         setIsLoading(true)
         setLoadError(null)
 
-        const detail: ProjectDetailResponse = await projectsAPI.getProjectDetail(
-          project.project_id,
-        )
+        const detail: ProjectDetailResponse =
+          await projectsAPI.getProjectDetail(project.project_id)
 
         // Transform segments from backend format
         const segments: Segment[] =
@@ -321,7 +320,7 @@ export function ProjectEditForm({
         <CardContent>
           <div className="flex flex-col items-center justify-center h-48">
             <Loader2 className="h-8 w-8 animate-spin text-blue-600" />
-            <p className="mt-4 text-sm text-gray-500">
+            <p className="mt-4 text-sm text-slate-500">
               Loading project details...
             </p>
           </div>
@@ -372,7 +371,9 @@ export function ProjectEditForm({
           {/* Tabs row with Edit button */}
           <div className="flex items-center justify-between mb-6">
             <TabsList className="grid w-[400px] grid-cols-2">
-              <TabsTrigger value="project-info">Project Information</TabsTrigger>
+              <TabsTrigger value="project-info">
+                Project Information
+              </TabsTrigger>
               <TabsTrigger value="brand-setting">Brand Setting</TabsTrigger>
             </TabsList>
             {!isEditMode && (
@@ -412,13 +413,13 @@ export function ProjectEditForm({
                 <Label htmlFor="edit-project-description">
                   Project Description
                 </Label>
-                <span className="text-xs text-gray-500">
+                <span className="text-xs text-slate-500">
                   {formData.projectDescription.length}/{MAX_DESCRIPTION_LENGTH}
                 </span>
               </div>
               <textarea
                 id="edit-project-description"
-                className="w-full min-h-[120px] px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 resize-none disabled:bg-gray-50 disabled:text-gray-500"
+                className="w-full min-h-[120px] px-3 py-2 border border-slate-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 resize-none disabled:bg-slate-50 disabled:text-slate-500"
                 placeholder="Describe your project (optional)"
                 value={formData.projectDescription}
                 onChange={(e) =>
@@ -430,7 +431,7 @@ export function ProjectEditForm({
             </div>
 
             {/* Active Status Toggle */}
-            <div className="flex items-center gap-4 p-4 border border-gray-200 rounded-lg">
+            <div className="flex items-center gap-4 p-4 border border-slate-200 rounded-lg">
               <Checkbox
                 id="edit-is-active"
                 checked={formData.isActive}
@@ -446,7 +447,7 @@ export function ProjectEditForm({
                 >
                   Project Active
                 </Label>
-                <p className="text-sm text-gray-500">
+                <p className="text-sm text-slate-500">
                   {formData.isActive
                     ? "Project is active and visible"
                     : "Project is inactive and hidden"}
@@ -488,7 +489,7 @@ export function ProjectEditForm({
             <div className="space-y-4">
               <div className="flex items-center justify-between">
                 <Label className="text-base font-semibold">Segments</Label>
-                <span className="text-xs text-gray-500">
+                <span className="text-xs text-slate-500">
                   {formData.segments.length}/{MAX_SEGMENTS} segments
                 </span>
               </div>
@@ -496,11 +497,11 @@ export function ProjectEditForm({
               {formData.segments.map((segment, index) => (
                 <div
                   key={segment.id}
-                  className="relative border border-gray-200 rounded-lg p-4 space-y-4"
+                  className="relative border border-slate-200 rounded-lg p-4 space-y-4"
                 >
                   {/* Segment Header */}
                   <div className="flex items-center justify-between">
-                    <span className="text-sm font-medium text-gray-700">
+                    <span className="text-sm font-medium text-slate-700">
                       Segment {index + 1}
                     </span>
                     {isEditMode && formData.segments.length > 1 && (
@@ -508,7 +509,7 @@ export function ProjectEditForm({
                         variant="ghost"
                         size="sm"
                         onClick={() => handleRemoveSegment(segment.id)}
-                        className="h-6 w-6 p-0 text-gray-400 hover:text-red-500"
+                        className="h-6 w-6 p-0 text-slate-400 hover:text-red-500"
                         type="button"
                       >
                         <X className="h-4 w-4" />
@@ -543,7 +544,7 @@ export function ProjectEditForm({
                     </Label>
                     <textarea
                       id={`edit-segment-prompts-${segment.id}`}
-                      className="w-full min-h-[100px] px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 resize-none disabled:bg-gray-50 disabled:text-gray-500"
+                      className="w-full min-h-[100px] px-3 py-2 border border-slate-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 resize-none disabled:bg-slate-50 disabled:text-slate-500"
                       placeholder="Enter prompts for AI search (e.g., What are the best brands for...)"
                       value={segment.prompts}
                       onChange={(e) =>
@@ -588,7 +589,7 @@ export function ProjectEditForm({
                               <Button
                                 variant="outline"
                                 size="icon"
-                                className="absolute -right-4 top-1/2 -translate-y-1/2 h-8 w-8 rounded-full bg-white border-gray-300 hover:bg-blue-50 hover:border-blue-500"
+                                className="absolute -right-4 top-1/2 -translate-y-1/2 h-8 w-8 rounded-full bg-white border-slate-300 hover:bg-blue-50 hover:border-blue-500"
                                 onClick={handleAddSegment}
                                 type="button"
                               >
@@ -609,7 +610,11 @@ export function ProjectEditForm({
             {/* Save & Submit Button - only show in edit mode */}
             {isEditMode && (
               <div className="flex justify-end gap-3 pt-4 border-t">
-                <Button variant="outline" onClick={handleCancelEdit} type="button">
+                <Button
+                  variant="outline"
+                  onClick={handleCancelEdit}
+                  type="button"
+                >
                   Cancel
                 </Button>
                 <Button

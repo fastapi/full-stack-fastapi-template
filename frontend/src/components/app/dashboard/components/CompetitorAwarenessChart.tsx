@@ -13,6 +13,14 @@ import {
   YAxis,
 } from "recharts"
 import type { CompetitorAwarenessDataPoint } from "@/clients/dashboard"
+import {
+  axisProps,
+  CHART_COLORS,
+  formatShortDate,
+  gridProps,
+  legendClasses,
+  tooltipClasses,
+} from "@/components/app/dashboard/components/chartTheme"
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs"
 
 interface CompetitorAwarenessChartProps {
@@ -30,22 +38,19 @@ interface ChartDataPoint {
 }
 
 const METRIC_COLORS: Record<string, string> = {
-  "Awareness Score": "#3b82f6",
-  "Share of Visibility": "#8b5cf6",
-  "Search Share Index": "#f97316",
-  "Position Strength": "#22c55e",
-  "Search Momentum": "#ec4899",
+  "Awareness Score": CHART_COLORS.blue,
+  "Share of Visibility": CHART_COLORS.purple,
+  "Search Share Index": CHART_COLORS.amber,
+  "Position Strength": CHART_COLORS.green,
+  "Search Momentum": CHART_COLORS.red,
 }
 
-const formatDateForDisplay = (isoDate: string): string => {
-  const date = new Date(isoDate)
-  return `${date.getMonth() + 1}/${date.getDate()}`
-}
-
-function transformData(dataPoints: CompetitorAwarenessDataPoint[]): ChartDataPoint[] {
+function transformData(
+  dataPoints: CompetitorAwarenessDataPoint[],
+): ChartDataPoint[] {
   return dataPoints.map((point) => ({
     date: point.date,
-    displayDate: formatDateForDisplay(point.date),
+    displayDate: formatShortDate(point.date),
     "Awareness Score": point.awareness_score,
     "Share of Visibility": +(point.share_of_visibility * 100).toFixed(1),
     "Search Share Index": +(point.search_share_index * 100).toFixed(1),
@@ -58,16 +63,18 @@ const CustomTooltip = ({ active, payload, label }: any) => {
   if (!active || !payload || payload.length === 0) return null
 
   return (
-    <div className="bg-white border border-gray-200 rounded-lg shadow-lg p-3">
-      <p className="text-sm font-medium text-gray-700 mb-2">{label}</p>
+    <div className={tooltipClasses.container}>
+      <p className={tooltipClasses.label}>{label}</p>
       {payload.map((entry: any) => (
-        <div key={entry.name} className="flex items-center gap-2 text-sm">
-          <span
-            className="w-3 h-3 rounded-full"
-            style={{ backgroundColor: entry.color }}
-          />
-          <span className="text-gray-600">{entry.name}:</span>
-          <span className="font-medium">{entry.value}</span>
+        <div key={entry.name} className={tooltipClasses.row}>
+          <div className="flex items-center gap-1.5">
+            <span
+              className="w-2 h-2 rounded-full"
+              style={{ backgroundColor: entry.color }}
+            />
+            <span className={tooltipClasses.name}>{entry.name}</span>
+          </div>
+          <span className={tooltipClasses.value}>{entry.value}</span>
         </div>
       ))}
     </div>
@@ -80,10 +87,14 @@ interface CustomLegendProps {
   onToggle: (name: string) => void
 }
 
-const CustomLegend = ({ payload, hiddenSeries, onToggle }: CustomLegendProps) => {
+const CustomLegend = ({
+  payload,
+  hiddenSeries,
+  onToggle,
+}: CustomLegendProps) => {
   if (!payload) return null
   return (
-    <div className="flex flex-wrap justify-center gap-4 mt-4">
+    <div className={legendClasses.container}>
       {payload.map((entry: any) => {
         const isHidden = hiddenSeries.has(entry.value)
         return (
@@ -91,15 +102,15 @@ const CustomLegend = ({ payload, hiddenSeries, onToggle }: CustomLegendProps) =>
             key={entry.value}
             type="button"
             onClick={() => onToggle(entry.value)}
-            className={`flex items-center gap-2 text-sm cursor-pointer transition-opacity ${
+            className={`${legendClasses.item} ${
               isHidden ? "opacity-30" : "opacity-100"
             }`}
           >
             <span
-              className="w-3 h-3 rounded-full"
+              className="w-2 h-2 rounded-full"
               style={{ backgroundColor: entry.color }}
             />
-            <span className="text-gray-600">{entry.value}</span>
+            <span className={legendClasses.label}>{entry.value}</span>
           </button>
         )
       })}
@@ -107,7 +118,9 @@ const CustomLegend = ({ payload, hiddenSeries, onToggle }: CustomLegendProps) =>
   )
 }
 
-export function CompetitorAwarenessChart({ dataPoints }: CompetitorAwarenessChartProps) {
+export function CompetitorAwarenessChart({
+  dataPoints,
+}: CompetitorAwarenessChartProps) {
   const [chartType, setChartType] = useState<"line" | "bar">("line")
   const [hiddenSeries, setHiddenSeries] = useState<Set<string>>(new Set())
 
@@ -129,8 +142,10 @@ export function CompetitorAwarenessChart({ dataPoints }: CompetitorAwarenessChar
 
   if (chartData.length === 0) {
     return (
-      <div className="w-full h-96 bg-gray-50 rounded-lg flex items-center justify-center">
-        <p className="text-slate-500">No data available for the selected time range</p>
+      <div className="w-full h-96 bg-white rounded-2xl border border-slate-200 flex items-center justify-center">
+        <p className="text-slate-500">
+          No data available for the selected time range
+        </p>
       </div>
     )
   }
@@ -154,23 +169,20 @@ export function CompetitorAwarenessChart({ dataPoints }: CompetitorAwarenessChar
         </Tabs>
       </div>
 
-      <div className="w-full h-96 bg-gray-50 rounded-lg p-4">
+      <div className="w-full h-96 bg-white rounded-2xl border border-slate-200 p-4">
         <ResponsiveContainer width="100%" height="100%">
           {chartType === "line" ? (
             <LineChart data={chartData}>
-              <CartesianGrid strokeDasharray="3 3" stroke="#e2e8f0" />
-              <XAxis
-                dataKey="displayDate"
-                tick={{ fontSize: 12, fill: "#64748b" }}
-              />
+              <CartesianGrid {...gridProps} />
+              <XAxis dataKey="displayDate" {...axisProps} />
               <YAxis
-                tick={{ fontSize: 12, fill: "#64748b" }}
+                {...axisProps}
                 domain={[0, 100]}
                 label={{
                   value: "Score",
                   angle: -90,
                   position: "insideLeft",
-                  style: { fontSize: "12px", fill: "#64748b" },
+                  style: { fontSize: "11px", fill: "#94a3b8" },
                 }}
               />
               <Tooltip content={<CustomTooltip />} />
@@ -197,19 +209,16 @@ export function CompetitorAwarenessChart({ dataPoints }: CompetitorAwarenessChar
             </LineChart>
           ) : (
             <BarChart data={chartData}>
-              <CartesianGrid strokeDasharray="3 3" stroke="#e2e8f0" />
-              <XAxis
-                dataKey="displayDate"
-                tick={{ fontSize: 12, fill: "#64748b" }}
-              />
+              <CartesianGrid {...gridProps} />
+              <XAxis dataKey="displayDate" {...axisProps} />
               <YAxis
-                tick={{ fontSize: 12, fill: "#64748b" }}
+                {...axisProps}
                 domain={[0, 100]}
                 label={{
                   value: "Score",
                   angle: -90,
                   position: "insideLeft",
-                  style: { fontSize: "12px", fill: "#64748b" },
+                  style: { fontSize: "11px", fill: "#94a3b8" },
                 }}
               />
               <Tooltip content={<CustomTooltip />} />

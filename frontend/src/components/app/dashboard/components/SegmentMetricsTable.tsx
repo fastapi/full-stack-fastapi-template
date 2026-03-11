@@ -1,20 +1,28 @@
 import {
+  type ColumnDef,
   flexRender,
   getCoreRowModel,
   getPaginationRowModel,
   getSortedRowModel,
-  useReactTable,
-  type ColumnDef,
   type SortingState,
+  useReactTable,
 } from "@tanstack/react-table"
-import { ArrowDown, ArrowUp, ArrowUpDown, ChevronLeft, ChevronRight, Loader2 } from "lucide-react"
+import {
+  ArrowDown,
+  ArrowUp,
+  ArrowUpDown,
+  ChevronLeft,
+  ChevronRight,
+  Loader2,
+} from "lucide-react"
 import { useEffect, useMemo, useState } from "react"
 import {
+  dashboardAPI,
   type SegmentMetricsResponse,
   type SegmentMetricsRow,
   type TimeRange,
-  dashboardAPI,
 } from "@/clients/dashboard"
+import { tableClasses } from "@/components/app/dashboard/components/tableTheme"
 import { Button } from "@/components/ui/button"
 import {
   Table,
@@ -56,15 +64,18 @@ export function SegmentMetricsTable({
       try {
         setIsLoading(true)
         setError(null)
-        const data: SegmentMetricsResponse = await dashboardAPI.getSegmentMetrics({
-          brandId,
-          timeRange,
-          startDate: customStartDate,
-          endDate: customEndDate,
-        })
+        const data: SegmentMetricsResponse =
+          await dashboardAPI.getSegmentMetrics({
+            brandId,
+            timeRange,
+            startDate: customStartDate,
+            endDate: customEndDate,
+          })
         setSegments(data.segments)
       } catch (err) {
-        setError(err instanceof Error ? err.message : "Failed to load segment metrics")
+        setError(
+          err instanceof Error ? err.message : "Failed to load segment metrics",
+        )
       } finally {
         setIsLoading(false)
       }
@@ -154,25 +165,35 @@ export function SegmentMetricsTable({
   return (
     <div className="flex flex-col gap-2">
       {/* Scrollable table */}
-      <div className="w-full overflow-auto rounded-lg border border-slate-100">
-        <Table className="min-w-max text-xs">
-          <TableHeader className="sticky top-0 z-30 bg-indigo-50">
+      <div className={`w-full overflow-auto ${tableClasses.wrapper}`}>
+        <Table className={`min-w-max ${tableClasses.table}`}>
+          <TableHeader
+            className={`sticky top-0 z-30 ${tableClasses.headerRow}`}
+          >
             {table.getHeaderGroups().map((headerGroup) => (
-              <TableRow key={headerGroup.id} className="border-b border-indigo-100 hover:bg-transparent">
+              <TableRow
+                key={headerGroup.id}
+                className="border-b border-slate-100 hover:bg-transparent"
+              >
                 {headerGroup.headers.map((header, idx) => (
                   <TableHead
                     key={header.id}
                     className={[
-                      "text-[10px] font-semibold text-indigo-700 py-2 whitespace-nowrap select-none",
+                      "text-xs font-semibold uppercase tracking-wide text-slate-500 py-2 whitespace-nowrap select-none",
                       idx === 0
-                        ? "sticky left-0 z-20 bg-indigo-50 pl-3"
+                        ? "sticky left-0 z-20 bg-slate-50 pl-3"
                         : "text-right pr-3",
                       header.column.getCanSort() ? "cursor-pointer" : "",
                     ].join(" ")}
                     onClick={header.column.getToggleSortingHandler()}
                   >
-                    <div className={`flex items-center gap-1 ${idx > 0 ? "justify-end" : ""}`}>
-                      {flexRender(header.column.columnDef.header, header.getContext())}
+                    <div
+                      className={`flex items-center gap-1 ${idx > 0 ? "justify-end" : ""}`}
+                    >
+                      {flexRender(
+                        header.column.columnDef.header,
+                        header.getContext(),
+                      )}
                       <SortIcon sorted={header.column.getIsSorted()} />
                     </div>
                   </TableHead>
@@ -184,18 +205,24 @@ export function SegmentMetricsTable({
             {table.getRowModel().rows.map((row, rowIdx) => (
               <TableRow
                 key={row.id}
-                className={rowIdx % 2 === 0 ? "bg-white hover:bg-slate-50" : "bg-slate-50/50 hover:bg-slate-100/60"}
+                className={
+                  rowIdx % 2 === 0
+                    ? "bg-white hover:bg-slate-50"
+                    : "bg-slate-50/40 hover:bg-slate-100/60"
+                }
               >
                 {row.getVisibleCells().map((cell, idx) => (
                   <TableCell
                     key={cell.id}
                     className={[
-                      "text-xs py-1.5",
+                      "text-xs py-1.5 text-slate-700",
                       idx === 0
                         ? "sticky left-0 z-10 font-medium whitespace-nowrap pl-3"
-                        : "text-right pr-3",
+                        : "text-right pr-3 tabular-nums",
                       idx === 0
-                        ? rowIdx % 2 === 0 ? "bg-white" : "bg-slate-50/50"
+                        ? rowIdx % 2 === 0
+                          ? "bg-white"
+                          : "bg-slate-50/40"
                         : "",
                     ].join(" ")}
                   >
@@ -211,15 +238,18 @@ export function SegmentMetricsTable({
       {/* Pagination */}
       {table.getPageCount() > 1 && (
         <div className="flex items-center justify-between px-1">
-          <span className="text-[10px] text-slate-400">
-            Page {table.getState().pagination.pageIndex + 1} of {table.getPageCount()}
-            <span className="ml-2 text-slate-300">({segments.length} rows)</span>
+          <span className="text-xs text-slate-500">
+            Page {table.getState().pagination.pageIndex + 1} of{" "}
+            {table.getPageCount()}
+            <span className="ml-2 text-slate-400">
+              ({segments.length} rows)
+            </span>
           </span>
           <div className="flex items-center gap-1">
             <Button
               variant="outline"
               size="sm"
-              className="h-6 w-6 p-0"
+              className="h-7 w-7 p-0"
               onClick={() => table.previousPage()}
               disabled={!table.getCanPreviousPage()}
             >
@@ -228,7 +258,7 @@ export function SegmentMetricsTable({
             <Button
               variant="outline"
               size="sm"
-              className="h-6 w-6 p-0"
+              className="h-7 w-7 p-0"
               onClick={() => table.nextPage()}
               disabled={!table.getCanNextPage()}
             >

@@ -66,10 +66,7 @@ const MAX_SEGMENTS = 3
  */
 const MAX_DESCRIPTION_LENGTH = 255
 
-export function BrandSetupForm({
-  onCancel,
-  onSubmit,
-}: BrandSetupFormProps) {
+export function BrandSetupForm({ onCancel, onSubmit }: BrandSetupFormProps) {
   // ============================================================================
   // State Management
   // ============================================================================
@@ -98,10 +95,7 @@ export function BrandSetupForm({
     field: "brandName" | "brandDescription",
     value: string,
   ) => {
-    if (
-      field === "brandDescription" &&
-      value.length > MAX_DESCRIPTION_LENGTH
-    ) {
+    if (field === "brandDescription" && value.length > MAX_DESCRIPTION_LENGTH) {
       return // Don't update if exceeds max length
     }
     setFormData((prev) => ({
@@ -216,13 +210,13 @@ export function BrandSetupForm({
           <div className="space-y-2">
             <div className="flex justify-between items-center">
               <Label htmlFor="brand-description">Brand Description</Label>
-              <span className="text-xs text-gray-500">
+              <span className="text-xs text-slate-500">
                 {formData.brandDescription.length}/{MAX_DESCRIPTION_LENGTH}
               </span>
             </div>
             <textarea
               id="brand-description"
-              className="w-full min-h-[120px] px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 resize-none"
+              className="w-full min-h-[120px] px-3 py-2 border border-slate-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 resize-none"
               placeholder="Describe your brand (optional)"
               value={formData.brandDescription}
               onChange={(e) =>
@@ -236,7 +230,7 @@ export function BrandSetupForm({
           <div className="space-y-4">
             <div className="flex items-center justify-between">
               <Label className="text-base font-semibold">Segments</Label>
-              <span className="text-xs text-gray-500">
+              <span className="text-xs text-slate-500">
                 {formData.segments.length}/{MAX_SEGMENTS} segments
               </span>
             </div>
@@ -244,11 +238,11 @@ export function BrandSetupForm({
             {formData.segments.map((segment, index) => (
               <div
                 key={segment.id}
-                className="relative border border-gray-200 rounded-lg p-4 space-y-4"
+                className="relative border border-slate-200 rounded-lg p-4 space-y-4"
               >
                 {/* Segment Header */}
                 <div className="flex items-center justify-between">
-                  <span className="text-sm font-medium text-gray-700">
+                  <span className="text-sm font-medium text-slate-700">
                     Segment {index + 1}
                   </span>
                   {formData.segments.length > 1 && (
@@ -256,7 +250,7 @@ export function BrandSetupForm({
                       variant="ghost"
                       size="sm"
                       onClick={() => handleRemoveSegment(segment.id)}
-                      className="h-6 w-6 p-0 text-gray-400 hover:text-red-500"
+                      className="h-6 w-6 p-0 text-slate-400 hover:text-red-500"
                       type="button"
                     >
                       <X className="h-4 w-4" />
@@ -266,9 +260,7 @@ export function BrandSetupForm({
 
                 {/* Segment Name Input */}
                 <div className="space-y-2">
-                  <Label htmlFor={`segment-name-${segment.id}`}>
-                    Segment
-                  </Label>
+                  <Label htmlFor={`segment-name-${segment.id}`}>Segment</Label>
                   <Input
                     id={`segment-name-${segment.id}`}
                     placeholder="Enter segment name (e.g., Consumer Electronics)"
@@ -290,15 +282,11 @@ export function BrandSetupForm({
                   </Label>
                   <textarea
                     id={`segment-prompts-${segment.id}`}
-                    className="w-full min-h-[100px] px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 resize-none"
+                    className="w-full min-h-[100px] px-3 py-2 border border-slate-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 resize-none"
                     placeholder="Enter prompts for AI search (e.g., What are the best brands for...)"
                     value={segment.prompts}
                     onChange={(e) =>
-                      handleSegmentChange(
-                        segment.id,
-                        "prompts",
-                        e.target.value,
-                      )
+                      handleSegmentChange(segment.id, "prompts", e.target.value)
                     }
                   />
                 </div>
@@ -331,7 +319,7 @@ export function BrandSetupForm({
                             <Button
                               variant="outline"
                               size="icon"
-                              className="absolute -right-4 top-1/2 -translate-y-1/2 h-8 w-8 rounded-full bg-white border-gray-300 hover:bg-blue-50 hover:border-blue-500"
+                              className="absolute -right-4 top-1/2 -translate-y-1/2 h-8 w-8 rounded-full bg-white border-slate-300 hover:bg-blue-50 hover:border-blue-500"
                               onClick={handleAddSegment}
                               type="button"
                             >

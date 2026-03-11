@@ -3,17 +3,12 @@ import { useCallback, useEffect, useState } from "react"
 import { toast } from "sonner"
 import {
   type BrandSegmentsResponse,
+  dashboardAPI,
   type TimeRange,
   type UserBrand,
   type UserBrandsResponse,
-  dashboardAPI,
 } from "@/clients/dashboard"
 import { Button } from "@/components/ui/button"
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipTrigger,
-} from "@/components/ui/tooltip"
 import {
   Card,
   CardContent,
@@ -29,6 +24,11 @@ import {
   SelectValue,
 } from "@/components/ui/select"
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs"
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from "@/components/ui/tooltip"
 
 interface DashboardPageLayoutProps {
   title: string
@@ -40,7 +40,10 @@ interface DashboardPageLayoutProps {
   /** Whether to show Project and Role fields. Default: true */
   showProjectRole?: boolean
   /** Extra content rendered inside the brand card after the dropdown row */
-  brandCardExtras?: (selectedBrand: UserBrand | undefined, selectedSegment: string) => React.ReactNode
+  brandCardExtras?: (
+    selectedBrand: UserBrand | undefined,
+    selectedSegment: string,
+  ) => React.ReactNode
   children: (props: {
     selectedBrandId: string
     selectedBrand: UserBrand
@@ -148,8 +151,8 @@ export function DashboardPageLayout({
       <div className="space-y-4">
         {/* Header */}
         <div>
-          <h1 className="text-lg font-bold text-slate-900">{title}</h1>
-          <p className="text-xs text-slate-600 mt-1">{description}</p>
+          <h1 className="text-2xl font-bold text-slate-900">{title}</h1>
+          <p className="text-sm text-slate-600 mt-1">{description}</p>
         </div>
 
         {/* Brand Selector */}
@@ -158,7 +161,9 @@ export function DashboardPageLayout({
             <div className="flex items-center justify-between">
               <div>
                 <CardTitle>
-                  <span className="text-base font-semibold text-slate-900 bg-indigo-50 px-3 py-1 rounded-full">{brandCardTitle}</span>
+                  <span className="text-sm font-semibold text-slate-900 bg-indigo-50 px-3 py-1 rounded-full">
+                    {brandCardTitle}
+                  </span>
                 </CardTitle>
                 {brandCardDescription && (
                   <CardDescription>{brandCardDescription}</CardDescription>
@@ -167,8 +172,9 @@ export function DashboardPageLayout({
               <Tooltip>
                 <TooltipTrigger asChild>
                   <button
+                    type="button"
                     onClick={handleRefresh}
-                    className="text-slate-400 hover:text-indigo-500 hover:bg-indigo-50 rounded-md p-1.5 transition-colors"
+                    className="text-slate-400 hover:text-blue-600 hover:bg-blue-50 rounded-md p-1.5 transition-colors"
                   >
                     <RefreshCw className="h-5 w-5" strokeWidth={2.5} />
                   </button>
@@ -205,20 +211,30 @@ export function DashboardPageLayout({
               <div className="flex items-center gap-4 flex-wrap">
                 {/* Brand dropdown */}
                 <div className="flex items-center gap-1.5">
-                  <span className="text-[10px] text-slate-500 font-medium whitespace-nowrap">Brand</span>
+                  <span className="text-xs text-slate-500 font-medium whitespace-nowrap">
+                    Brand
+                  </span>
                   <Select
                     value={selectedBrandId || undefined}
                     onValueChange={handleBrandChange}
                   >
-                    <SelectTrigger className="w-[140px] !h-6 !py-0 px-2 text-[10px] [&_svg:last-child]:size-3">
+                    <SelectTrigger className="w-[180px] !h-8 !py-0 px-2 text-xs [&_svg:last-child]:size-3">
                       <SelectValue placeholder="Select a brand" />
                     </SelectTrigger>
                     <SelectContent className="max-h-40">
                       {brands.map((brand) => (
-                        <SelectItem key={brand.brand_id} value={brand.brand_id} className="text-[10px] !py-0.5 px-2">
+                        <SelectItem
+                          key={brand.brand_id}
+                          value={brand.brand_id}
+                          className="text-xs !py-1 px-2"
+                        >
                           <div className="flex items-center gap-1">
-                            <span className="font-medium">{brand.brand_name}</span>
-                            <span className="text-slate-400">({brand.project_name})</span>
+                            <span className="font-medium">
+                              {brand.brand_name}
+                            </span>
+                            <span className="text-slate-400">
+                              ({brand.project_name})
+                            </span>
                           </div>
                         </SelectItem>
                       ))}
@@ -228,21 +244,34 @@ export function DashboardPageLayout({
 
                 {/* Segment dropdown */}
                 <div className="flex items-center gap-1.5">
-                  <span className="text-[10px] text-slate-500 font-medium whitespace-nowrap">Segment</span>
+                  <span className="text-xs text-slate-500 font-medium whitespace-nowrap">
+                    Segment
+                  </span>
                   <Select
                     value={selectedSegment}
                     onValueChange={setSelectedSegment}
                     disabled={isLoadingSegments}
                   >
-                    <SelectTrigger className="w-[140px] !h-6 !py-0 px-2 text-[10px] [&_svg:last-child]:size-3">
-                      <SelectValue placeholder={isLoadingSegments ? "Loading…" : "All Segment"} />
+                    <SelectTrigger className="w-[180px] !h-8 !py-0 px-2 text-xs [&_svg:last-child]:size-3">
+                      <SelectValue
+                        placeholder={
+                          isLoadingSegments ? "Loading…" : "All Segment"
+                        }
+                      />
                     </SelectTrigger>
                     <SelectContent className="max-h-40">
-                      <SelectItem value="__all_segments__" className="text-[10px] !py-0.5 px-2 font-medium">
+                      <SelectItem
+                        value="__all_segments__"
+                        className="text-xs !py-1 px-2 font-medium"
+                      >
                         All Segment
                       </SelectItem>
                       {segments.map((seg) => (
-                        <SelectItem key={seg} value={seg} className="text-[10px] !py-0.5 px-2">
+                        <SelectItem
+                          key={seg}
+                          value={seg}
+                          className="text-xs !py-1 px-2"
+                        >
                           {seg}
                         </SelectItem>
                       ))}
@@ -251,12 +280,14 @@ export function DashboardPageLayout({
                 </div>
 
                 {showProjectRole && selectedBrand && (
-                  <div className="text-[10px] text-slate-500">
+                  <div className="text-xs text-slate-500">
                     <span className="font-medium">Project:</span>{" "}
                     {selectedBrand.project_name}
                     <span className="mx-2">|</span>
                     <span className="font-medium">Role:</span>{" "}
-                    <span className="capitalize">{selectedBrand.user_role}</span>
+                    <span className="capitalize">
+                      {selectedBrand.user_role}
+                    </span>
                   </div>
                 )}
                 {brandCardExtras && (
@@ -334,7 +365,7 @@ export function DashboardPageLayout({
                     onClick={() => setShowCustomDate(!showCustomDate)}
                     size="sm"
                     type="button"
-                    className="h-7 text-xs px-2"
+                    className="h-8 text-xs px-3"
                   >
                     <Calendar className="h-3 w-3 mr-1" />
                     Custom
@@ -342,14 +373,18 @@ export function DashboardPageLayout({
                 </div>
               ),
               customDateInputs: showCustomDate ? (
-                <div className="flex gap-3 items-center p-3 bg-gray-50 rounded-lg">
+                <div className="flex gap-3 items-center p-3 bg-slate-50 rounded-lg">
                   <div className="flex-1">
-                    <label className="text-xs font-medium text-gray-700 block mb-1">
+                    <label
+                      htmlFor="dashboard-page-start-date"
+                      className="text-sm font-medium text-slate-700 block mb-1"
+                    >
                       Start Date
                     </label>
                     <input
+                      id="dashboard-page-start-date"
                       type="date"
-                      className="w-full px-2 py-1.5 text-xs border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      className="w-full px-2 py-1.5 text-sm border border-slate-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                       value={customDateRange.start}
                       onChange={(e) =>
                         setCustomDateRange({
@@ -360,12 +395,16 @@ export function DashboardPageLayout({
                     />
                   </div>
                   <div className="flex-1">
-                    <label className="text-xs font-medium text-gray-700 block mb-1">
+                    <label
+                      htmlFor="dashboard-page-end-date"
+                      className="text-sm font-medium text-slate-700 block mb-1"
+                    >
                       End Date
                     </label>
                     <input
+                      id="dashboard-page-end-date"
                       type="date"
-                      className="w-full px-2 py-1.5 text-xs border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      className="w-full px-2 py-1.5 text-sm border border-slate-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                       value={customDateRange.end}
                       onChange={(e) =>
                         setCustomDateRange({
@@ -376,7 +415,7 @@ export function DashboardPageLayout({
                     />
                   </div>
                   <Button
-                    className="self-end h-7 text-xs px-3"
+                    className="self-end h-8 text-xs px-3"
                     onClick={handleCustomDateApply}
                     type="button"
                   >

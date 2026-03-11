@@ -292,7 +292,7 @@ class BrandsAPI {
     const data: BrandDetailResponse = await response.json()
 
     console.log(
-      `[BrandsAPI] Brand detail fetched: ${data.brand_id}, segments=${data.segments.length}`
+      `[BrandsAPI] Brand detail fetched: ${data.brand_id}, segments=${data.segments.length}`,
     )
     return data
   }
@@ -336,7 +336,7 @@ class BrandsAPI {
     this.clearCache()
 
     console.log(
-      `[BrandsAPI] Brand setup completed: brand=${data.brand_id}, prompts=${data.prompt_count}`
+      `[BrandsAPI] Brand setup completed: brand=${data.brand_id}, prompts=${data.prompt_count}`,
     )
     return data
   }
@@ -350,7 +350,7 @@ class BrandsAPI {
    */
   async updateBrand(
     brandId: string,
-    updateData: BrandUpdateRequest
+    updateData: BrandUpdateRequest,
   ): Promise<BrandUpdateResponse> {
     console.log(`[BrandsAPI] Updating brand ${brandId}...`)
 
@@ -367,7 +367,9 @@ class BrandsAPI {
     }
 
     if (response.status === 404) {
-      throw new Error("Brand not found or you don't have permission to update it")
+      throw new Error(
+        "Brand not found or you don't have permission to update it",
+      )
     }
 
     if (!response.ok) {
@@ -393,7 +395,7 @@ class BrandsAPI {
    */
   async updateBrandFull(
     brandId: string,
-    updateData: BrandFullUpdateRequest
+    updateData: BrandFullUpdateRequest,
   ): Promise<BrandSetupResponse> {
     console.log(`[BrandsAPI] Full update brand ${brandId}...`)
 
@@ -410,7 +412,9 @@ class BrandsAPI {
     }
 
     if (response.status === 404) {
-      throw new Error("Brand not found or you don't have permission to update it")
+      throw new Error(
+        "Brand not found or you don't have permission to update it",
+      )
     }
 
     if (!response.ok) {
@@ -424,7 +428,7 @@ class BrandsAPI {
     this.clearCache()
 
     console.log(
-      `[BrandsAPI] Brand full update completed: brand=${data.brand_id}, prompts=${data.prompt_count}`
+      `[BrandsAPI] Brand full update completed: brand=${data.brand_id}, prompts=${data.prompt_count}`,
     )
     return data
   }
@@ -450,7 +454,9 @@ class BrandsAPI {
     }
 
     if (response.status === 404) {
-      throw new Error("Brand not found or you don't have permission to delete it")
+      throw new Error(
+        "Brand not found or you don't have permission to delete it",
+      )
     }
 
     if (!response.ok) {
@@ -503,7 +509,9 @@ class BrandsAPI {
    * @param userId - The user ID to remove
    */
   async removeBrandMember(brandId: string, userId: string): Promise<void> {
-    console.log(`[BrandsAPI] Removing member ${userId} from brand ${brandId}...`)
+    console.log(
+      `[BrandsAPI] Removing member ${userId} from brand ${brandId}...`,
+    )
 
     const url = `${this.baseUrl}${this.apiPrefix}/brands/${brandId}/members/${userId}`
 

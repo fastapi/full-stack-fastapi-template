@@ -12,12 +12,14 @@ export const Route = createFileRoute("/app")({
 function AppGuard() {
   const { isLoaded, isSignedIn, getToken } = useAuth()
   const navigate = useNavigate()
-  const [syncState, setSyncState] = useState<
-    "loading" | "synced" | "error"
-  >("loading")
+  const [syncState, setSyncState] = useState<"loading" | "synced" | "error">(
+    "loading",
+  )
   const [profileComplete, setProfileComplete] = useState(false)
-  const [retryCount, setRetryCount] = useState(0)
-  const [subscription, setSubscription] = useState<UserSubscription | null>(null)
+  const [_retryCount, setRetryCount] = useState(0)
+  const [subscription, setSubscription] = useState<UserSubscription | null>(
+    null,
+  )
 
   useEffect(() => {
     if (!isLoaded) return
@@ -72,7 +74,7 @@ function AppGuard() {
     }
 
     syncUser()
-  }, [isLoaded, isSignedIn, getToken, navigate, retryCount])
+  }, [isLoaded, isSignedIn, getToken, navigate])
 
   // Redirect to profile setup if not complete (moved to useEffect to avoid setState-in-render)
   useEffect(() => {
@@ -106,6 +108,7 @@ function AppGuard() {
           Failed to connect to server. Please try again.
         </p>
         <button
+          type="button"
           onClick={() => {
             setSyncState("loading")
             setRetryCount((c) => c + 1)

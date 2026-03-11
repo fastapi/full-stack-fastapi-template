@@ -1,20 +1,28 @@
 import {
+  type ColumnDef,
   flexRender,
   getCoreRowModel,
   getPaginationRowModel,
   getSortedRowModel,
-  useReactTable,
-  type ColumnDef,
   type SortingState,
+  useReactTable,
 } from "@tanstack/react-table"
-import { ArrowDown, ArrowUp, ArrowUpDown, ChevronLeft, ChevronRight, Loader2 } from "lucide-react"
+import {
+  ArrowDown,
+  ArrowUp,
+  ArrowUpDown,
+  ChevronLeft,
+  ChevronRight,
+  Loader2,
+} from "lucide-react"
 import { useEffect, useMemo, useState } from "react"
 import {
+  dashboardAPI,
   type ReferenceSourceItem,
   type ReferenceSourcesResponse,
   type TimeRange,
-  dashboardAPI,
 } from "@/clients/dashboard"
+import { tableClasses } from "@/components/app/dashboard/components/tableTheme"
 import { Button } from "@/components/ui/button"
 import {
   Table,
@@ -56,7 +64,7 @@ export function AIReferenceSourceTable({
   const [error, setError] = useState<string | null>(null)
   const [sorting, setSorting] = useState<SortingState>([])
 
-  const allSegmentsKey = allSegments?.join(",") ?? ""
+  const _allSegmentsKey = allSegments?.join(",") ?? ""
 
   useEffect(() => {
     const fetchData = async () => {
@@ -83,14 +91,18 @@ export function AIReferenceSourceTable({
         }
         setSources(data.sources)
       } catch (err) {
-        setError(err instanceof Error ? err.message : "Failed to load reference sources")
+        setError(
+          err instanceof Error
+            ? err.message
+            : "Failed to load reference sources",
+        )
       } finally {
         setIsLoading(false)
       }
     }
     fetchData()
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [brandId, segment, allSegmentsKey, timeRange, customStartDate, customEndDate])
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [brandId, segment, timeRange, customStartDate, customEndDate, allSegments])
 
   const columns = useMemo<ColumnDef<ReferenceSourceItem>[]>(
     () => [
@@ -100,7 +112,7 @@ export function AIReferenceSourceTable({
         enableSorting: false,
         size: 40,
         cell: ({ getValue }) => (
-          <span className="inline-block px-1.5 py-0.5 rounded text-[10px] text-slate-400 border border-transparent">
+          <span className="inline-block px-1.5 py-0.5 rounded text-xs text-slate-400 border border-transparent">
             {getValue() as number}
           </span>
         ),
@@ -148,24 +160,34 @@ export function AIReferenceSourceTable({
 
   return (
     <div className="flex flex-col gap-2">
-      <div className="w-full overflow-auto rounded-lg border border-slate-100">
-        <Table className="text-xs">
-          <TableHeader className="sticky top-0 z-30 bg-indigo-50">
+      <div className={`w-full overflow-auto ${tableClasses.wrapper}`}>
+        <Table className={tableClasses.table}>
+          <TableHeader
+            className={`sticky top-0 z-30 ${tableClasses.headerRow}`}
+          >
             {table.getHeaderGroups().map((headerGroup) => (
-              <TableRow key={headerGroup.id} className="border-b border-indigo-100 hover:bg-transparent">
+              <TableRow
+                key={headerGroup.id}
+                className="border-b border-slate-100 hover:bg-transparent"
+              >
                 {headerGroup.headers.map((header) => (
                   <TableHead
                     key={header.id}
                     className={[
-                      "text-[10px] font-semibold text-indigo-700 py-2 whitespace-nowrap select-none",
+                      "text-xs font-semibold uppercase tracking-wide text-slate-500 py-2 whitespace-nowrap select-none",
                       header.column.id === "seq" ? "w-10 pl-3" : "pr-3",
                       header.column.getCanSort() ? "cursor-pointer" : "",
                     ].join(" ")}
                     onClick={header.column.getToggleSortingHandler()}
                   >
                     <div className="flex items-center gap-1">
-                      {flexRender(header.column.columnDef.header, header.getContext())}
-                      {header.column.getCanSort() && <SortIcon sorted={header.column.getIsSorted()} />}
+                      {flexRender(
+                        header.column.columnDef.header,
+                        header.getContext(),
+                      )}
+                      {header.column.getCanSort() && (
+                        <SortIcon sorted={header.column.getIsSorted()} />
+                      )}
                     </div>
                   </TableHead>
                 ))}
@@ -176,14 +198,20 @@ export function AIReferenceSourceTable({
             {table.getRowModel().rows.map((row, rowIdx) => (
               <TableRow
                 key={row.id}
-                className={rowIdx % 2 === 0 ? "bg-white hover:bg-slate-50" : "bg-slate-50/50 hover:bg-slate-100/60"}
+                className={
+                  rowIdx % 2 === 0
+                    ? "bg-white hover:bg-slate-50"
+                    : "bg-slate-50/40 hover:bg-slate-100/60"
+                }
               >
                 {row.getVisibleCells().map((cell) => (
                   <TableCell
                     key={cell.id}
                     className={[
-                      "text-xs py-1.5",
-                      cell.column.id === "seq" ? "w-10 pl-3 text-slate-400" : "pr-3 break-all",
+                      "text-xs py-1.5 text-slate-700",
+                      cell.column.id === "seq"
+                        ? "w-10 pl-3 text-slate-400"
+                        : "pr-3 break-all",
                     ].join(" ")}
                   >
                     {flexRender(cell.column.columnDef.cell, cell.getContext())}
@@ -197,17 +225,28 @@ export function AIReferenceSourceTable({
 
       {table.getPageCount() > 1 && (
         <div className="flex items-center justify-between px-1">
-          <span className="text-[10px] text-slate-400">
-            Page {table.getState().pagination.pageIndex + 1} of {table.getPageCount()}
-            <span className="ml-2 text-slate-300">({sources.length} rows)</span>
+          <span className="text-xs text-slate-500">
+            Page {table.getState().pagination.pageIndex + 1} of{" "}
+            {table.getPageCount()}
+            <span className="ml-2 text-slate-400">({sources.length} rows)</span>
           </span>
           <div className="flex items-center gap-1">
-            <Button variant="outline" size="sm" className="h-6 w-6 p-0"
-              onClick={() => table.previousPage()} disabled={!table.getCanPreviousPage()}>
+            <Button
+              variant="outline"
+              size="sm"
+              className="h-7 w-7 p-0"
+              onClick={() => table.previousPage()}
+              disabled={!table.getCanPreviousPage()}
+            >
               <ChevronLeft className="h-3 w-3" />
             </Button>
-            <Button variant="outline" size="sm" className="h-6 w-6 p-0"
-              onClick={() => table.nextPage()} disabled={!table.getCanNextPage()}>
+            <Button
+              variant="outline"
+              size="sm"
+              className="h-7 w-7 p-0"
+              onClick={() => table.nextPage()}
+              disabled={!table.getCanNextPage()}
+            >
               <ChevronRight className="h-3 w-3" />
             </Button>
           </div>

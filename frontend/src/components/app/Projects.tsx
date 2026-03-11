@@ -13,17 +13,22 @@
 import { AlertCircle, Eye, Loader2, Plus, Trash2 } from "lucide-react"
 import { useCallback, useEffect, useState } from "react"
 import { toast } from "sonner"
-import { type ApiConflictError, type Project, projectsAPI } from "@/clients/projects"
-import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
 import {
-  type ProjectEditFormData,
+  type ApiConflictError,
+  type Project,
+  projectsAPI,
+} from "@/clients/projects"
+import { tableClasses } from "@/components/app/dashboard/components/tableTheme"
+import {
   ProjectEditForm,
+  type ProjectEditFormData,
 } from "@/components/app/ProjectEditForm"
 import {
   type ProjectFormData,
   ProjectSetupForm,
 } from "@/components/app/ProjectSetupForm"
 import { QuotaGate } from "@/components/app/QuotaGate"
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Checkbox } from "@/components/ui/checkbox"
@@ -69,7 +74,9 @@ export default function Projects() {
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [deletingProject, setDeletingProject] = useState<Project | null>(null)
   const [isDeleting, setIsDeleting] = useState(false)
-  const [brandConflictMessage, setBrandConflictMessage] = useState<string | null>(null)
+  const [brandConflictMessage, setBrandConflictMessage] = useState<
+    string | null
+  >(null)
 
   // ============================================================================
   // Data Fetching
@@ -87,12 +94,19 @@ export default function Projects() {
     } catch (err) {
       const errorMessage =
         err instanceof Error ? err.message : "Failed to load projects"
-      
+
       // Check if it's an authentication error specifically
-      if (errorMessage.includes("Unauthorized") || errorMessage.includes("401")) {
-        console.error("[Projects] Authentication issue detected - please log in again")
+      if (
+        errorMessage.includes("Unauthorized") ||
+        errorMessage.includes("401")
+      ) {
+        console.error(
+          "[Projects] Authentication issue detected - please log in again",
+        )
         // Show a specific message that indicates they might need to re-login
-        setError("Authentication failed. Please log in again to view your projects.")
+        setError(
+          "Authentication failed. Please log in again to view your projects.",
+        )
       } else {
         setError(errorMessage)
       }
@@ -206,7 +220,9 @@ export default function Projects() {
       if ((err as ApiConflictError).isConflict) {
         // Brand already exists in another project — show info box
         setBrandConflictMessage(
-          err instanceof Error ? err.message : "Brand already exists in another project"
+          err instanceof Error
+            ? err.message
+            : "Brand already exists in another project",
         )
       } else {
         const errorMessage =
@@ -267,7 +283,7 @@ export default function Projects() {
           <CardContent>
             <div className="flex flex-col items-center justify-center h-64">
               <Loader2 className="h-12 w-12 animate-spin text-blue-600" />
-              <p className="mt-4 text-sm text-gray-500">Loading projects...</p>
+              <p className="mt-4 text-sm text-slate-500">Loading projects...</p>
             </div>
           </CardContent>
         </Card>
@@ -320,69 +336,102 @@ export default function Projects() {
         </CardHeader>
         <CardContent>
           {projects.length === 0 ? (
-            <div className="flex flex-col items-center justify-center h-64 text-gray-500">
+            <div className="flex flex-col items-center justify-center h-64 text-slate-500">
               <p>No projects found</p>
               <p className="text-sm mt-2">
                 Click "Add New Project" to create your first project
               </p>
             </div>
           ) : (
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead className="w-[80px]">Seq No.</TableHead>
-                  <TableHead>Project Name</TableHead>
-                  <TableHead className="max-w-[300px]">Description</TableHead>
-                  <TableHead className="w-[150px]">Created At</TableHead>
-                  <TableHead className="w-[80px] text-center">Active</TableHead>
-                  <TableHead className="w-[60px] text-center">Detail</TableHead>
-                  <TableHead className="w-[60px] text-center">Delete</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {projects.map((project, index) => (
-                  <TableRow key={project.project_id}>
-                    <TableCell className="font-medium">{index + 1}</TableCell>
-                    <TableCell className="font-semibold">
-                      {project.project_name}
-                    </TableCell>
-                    <TableCell className="text-gray-600 max-w-[300px] truncate">
-                      {project.description || "-"}
-                    </TableCell>
-                    <TableCell>{formatDate(project.created_at)}</TableCell>
-                    <TableCell className="text-center">
-                      <Checkbox
-                        checked={project.is_active}
-                        disabled
-                        aria-label={`Project ${project.project_name} is ${project.is_active ? "active" : "inactive"}`}
-                      />
-                    </TableCell>
-                    <TableCell className="text-center">
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        onClick={() => handleViewProject(project)}
-                        className="h-8 w-8 p-0"
-                        aria-label={`View project ${project.project_name} details`}
-                      >
-                        <Eye className="h-4 w-4" />
-                      </Button>
-                    </TableCell>
-                    <TableCell className="text-center">
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        onClick={() => handleDeleteClick(project)}
-                        className="h-8 w-8 p-0 text-gray-400 hover:text-red-500"
-                        aria-label={`Delete project ${project.project_name}`}
-                      >
-                        <Trash2 className="h-4 w-4" />
-                      </Button>
-                    </TableCell>
+            <div className={`overflow-x-auto ${tableClasses.wrapper}`}>
+              <Table className={tableClasses.table}>
+                <TableHeader className={tableClasses.headerRow}>
+                  <TableRow>
+                    <TableHead className={`${tableClasses.head} w-[80px]`}>
+                      Seq No.
+                    </TableHead>
+                    <TableHead className={tableClasses.head}>
+                      Project Name
+                    </TableHead>
+                    <TableHead className={`${tableClasses.head} max-w-[300px]`}>
+                      Description
+                    </TableHead>
+                    <TableHead className={`${tableClasses.head} w-[150px]`}>
+                      Created At
+                    </TableHead>
+                    <TableHead
+                      className={`${tableClasses.head} w-[80px] text-center`}
+                    >
+                      Active
+                    </TableHead>
+                    <TableHead
+                      className={`${tableClasses.head} w-[60px] text-center`}
+                    >
+                      Detail
+                    </TableHead>
+                    <TableHead
+                      className={`${tableClasses.head} w-[60px] text-center`}
+                    >
+                      Delete
+                    </TableHead>
                   </TableRow>
-                ))}
-              </TableBody>
-            </Table>
+                </TableHeader>
+                <TableBody>
+                  {projects.map((project, index) => (
+                    <TableRow
+                      key={project.project_id}
+                      className={tableClasses.row}
+                    >
+                      <TableCell className="font-medium text-slate-800 tabular-nums">
+                        {index + 1}
+                      </TableCell>
+                      <TableCell className="font-semibold text-slate-900">
+                        {project.project_name}
+                      </TableCell>
+                      <TableCell
+                        className={`${tableClasses.cellMuted} max-w-[300px] truncate`}
+                      >
+                        {project.description || "-"}
+                      </TableCell>
+                      <TableCell
+                        className={`${tableClasses.cell} tabular-nums`}
+                      >
+                        {formatDate(project.created_at)}
+                      </TableCell>
+                      <TableCell className="text-center">
+                        <Checkbox
+                          checked={project.is_active}
+                          disabled
+                          aria-label={`Project ${project.project_name} is ${project.is_active ? "active" : "inactive"}`}
+                        />
+                      </TableCell>
+                      <TableCell className="text-center">
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => handleViewProject(project)}
+                          className="h-8 w-8 p-0"
+                          aria-label={`View project ${project.project_name} details`}
+                        >
+                          <Eye className="h-4 w-4" />
+                        </Button>
+                      </TableCell>
+                      <TableCell className="text-center">
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => handleDeleteClick(project)}
+                          className="h-8 w-8 p-0 text-slate-400 hover:text-red-500"
+                          aria-label={`Delete project ${project.project_name}`}
+                        >
+                          <Trash2 className="h-4 w-4" />
+                        </Button>
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            </div>
           )}
         </CardContent>
       </Card>
@@ -392,7 +441,9 @@ export default function Projects() {
         <div className="mt-4">
           <Alert className="border-amber-300 bg-amber-50">
             <AlertCircle className="h-4 w-4 text-amber-600" />
-            <AlertTitle className="text-amber-800">Brand Already Exists</AlertTitle>
+            <AlertTitle className="text-amber-800">
+              Brand Already Exists
+            </AlertTitle>
             <AlertDescription className="text-amber-700">
               {brandConflictMessage}
             </AlertDescription>
@@ -428,13 +479,17 @@ export default function Projects() {
       )}
 
       {/* Delete Confirmation Dialog */}
-      <Dialog open={!!deletingProject} onOpenChange={(open) => !open && handleCancelDelete()}>
+      <Dialog
+        open={!!deletingProject}
+        onOpenChange={(open) => !open && handleCancelDelete()}
+      >
         <DialogContent>
           <DialogHeader>
             <DialogTitle>Delete Project</DialogTitle>
             <DialogDescription>
-              Are you sure you want to delete the project "{deletingProject?.project_name}"?
-              This will also delete all associated brand prompts. This action cannot be undone.
+              Are you sure you want to delete the project "
+              {deletingProject?.project_name}"? This will also delete all
+              associated brand prompts. This action cannot be undone.
             </DialogDescription>
           </DialogHeader>
           <DialogFooter>

@@ -14,9 +14,17 @@ import {
 } from "recharts"
 import {
   type BrandRankingTrendDataPoint,
-  type TimeRange,
   dashboardAPI,
+  type TimeRange,
 } from "@/clients/dashboard"
+import {
+  axisProps,
+  CHART_COLORS,
+  formatShortDate,
+  gridProps,
+  legendClasses,
+  tooltipClasses,
+} from "@/components/app/dashboard/components/chartTheme"
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs"
 
 interface RankingChartProps {
@@ -40,23 +48,18 @@ interface ChartPoint {
 }
 
 const METRIC_COLORS: Record<string, string> = {
-  "Min (#)": "#10b981",   // emerald — best rank
-  "Max (#)": "#f43f5e",   // rose    — worst rank
-  "Median (#)": "#6366f1", // indigo  — median
-  "Avg (#)": "#f59e0b",   // amber   — average
+  "Min (#)": CHART_COLORS.green,
+  "Max (#)": CHART_COLORS.red,
+  "Median (#)": CHART_COLORS.blue,
+  "Avg (#)": CHART_COLORS.amber,
 }
 
 const METRIC_KEYS = Object.keys(METRIC_COLORS)
 
-const formatDate = (isoDate: string): string => {
-  const d = new Date(isoDate)
-  return `${d.getMonth() + 1}/${d.getDate()}`
-}
-
 function buildChartData(points: BrandRankingTrendDataPoint[]): ChartPoint[] {
   return points.map((p) => ({
     date: p.date,
-    displayDate: formatDate(p.date),
+    displayDate: formatShortDate(p.date),
     "Min (#)": p.min_ranking,
     "Max (#)": p.max_ranking,
     "Median (#)": p.median_ranking,
@@ -73,20 +76,23 @@ const CustomTooltip = ({ active, payload, label }: any) => {
   const isInterpolated = payload[0]?.payload?.is_interpolated ?? false
 
   return (
-    <div className="bg-gray-900 border border-gray-700 rounded-xl shadow-xl p-3 min-w-[190px]">
-      <p className="text-[10px] font-semibold text-gray-400 mb-2 uppercase tracking-wide">{label}</p>
+    <div className={tooltipClasses.container}>
+      <p className={tooltipClasses.label}>{label}</p>
       {isInterpolated ? (
-        <p className="text-[10px] italic text-gray-500">No ranking data (brand not found)</p>
+        <p className={tooltipClasses.note}>No ranking data (brand not found)</p>
       ) : (
         payload.map((entry: any) => {
           if (entry.value === null || entry.value === undefined) return null
           return (
-            <div key={entry.name} className="flex items-center justify-between gap-4 text-[10px] py-0.5">
+            <div key={entry.name} className={tooltipClasses.row}>
               <div className="flex items-center gap-1.5">
-                <span className="w-2 h-2 rounded-full flex-shrink-0" style={{ backgroundColor: entry.color }} />
-                <span className="text-gray-300">{entry.name}</span>
+                <span
+                  className="w-2 h-2 rounded-full flex-shrink-0"
+                  style={{ backgroundColor: entry.color }}
+                />
+                <span className={tooltipClasses.name}>{entry.name}</span>
               </div>
-              <span className="font-semibold text-white">#{entry.value}</span>
+              <span className={tooltipClasses.value}>#{entry.value}</span>
             </div>
           )
         })
@@ -103,10 +109,14 @@ interface CustomLegendProps {
   onToggle: (name: string) => void
 }
 
-const CustomLegend = ({ payload, hiddenSeries, onToggle }: CustomLegendProps) => {
+const CustomLegend = ({
+  payload,
+  hiddenSeries,
+  onToggle,
+}: CustomLegendProps) => {
   if (!payload) return null
   return (
-    <div className="flex flex-wrap justify-center gap-x-3 gap-y-1 mt-2">
+    <div className={legendClasses.container}>
       {payload.map((entry: any) => {
         const isHidden = hiddenSeries.has(entry.value)
         return (
@@ -114,16 +124,19 @@ const CustomLegend = ({ payload, hiddenSeries, onToggle }: CustomLegendProps) =>
             key={entry.value}
             type="button"
             onClick={() => onToggle(entry.value)}
-            className={`flex items-center gap-1.5 text-[10px] cursor-pointer transition-opacity ${
+            className={`${legendClasses.item} ${
               isHidden ? "opacity-30" : "opacity-100"
             }`}
           >
-            <span className="w-2 h-2 rounded-full flex-shrink-0" style={{ backgroundColor: entry.color }} />
-            <span className="text-gray-600">{entry.value}</span>
+            <span
+              className="w-2 h-2 rounded-full flex-shrink-0"
+              style={{ backgroundColor: entry.color }}
+            />
+            <span className={legendClasses.label}>{entry.value}</span>
           </button>
         )
       })}
-      <span className="text-[10px] text-slate-400 ml-1">· lower rank = better</span>
+      <span className="text-xs text-slate-400 ml-1">· lower rank = better</span>
     </div>
   )
 }
@@ -155,7 +168,11 @@ export function RankingChart({
         endDate: customEndDate,
       })
       .then((res) => setData(buildChartData(res.data_points)))
-      .catch((err) => setError(err instanceof Error ? err.message : "Failed to load ranking data"))
+      .catch((err) =>
+        setError(
+          err instanceof Error ? err.message : "Failed to load ranking data",
+        ),
+      )
       .finally(() => setIsLoading(false))
   }, [brandId, segment, timeRange, customStartDate, customEndDate])
 
@@ -193,16 +210,13 @@ export function RankingChart({
     )
   }
 
-  const commonAxisProps = {
-    tick: { fontSize: 10, fill: "#94a3b8" },
-    axisLine: false,
-    tickLine: false,
-  }
-
   return (
     <div className="space-y-3">
       <div className="flex justify-end">
-        <Tabs value={chartType} onValueChange={(v) => setChartType(v as "line" | "bar")}>
+        <Tabs
+          value={chartType}
+          onValueChange={(v) => setChartType(v as "line" | "bar")}
+        >
           <TabsList className="h-7">
             <TabsTrigger value="line" className="h-5 px-2">
               <ChartLine size={13} />
@@ -217,17 +231,23 @@ export function RankingChart({
       <div className="w-full h-72">
         <ResponsiveContainer width="100%" height="100%">
           {chartType === "line" ? (
-            <LineChart data={data} margin={{ top: 4, right: 4, left: -16, bottom: 0 }}>
-              <CartesianGrid strokeDasharray="3 3" stroke="#f1f5f9" vertical={false} />
-              <XAxis dataKey="displayDate" {...commonAxisProps} />
+            <LineChart
+              data={data}
+              margin={{ top: 4, right: 4, left: -16, bottom: 0 }}
+            >
+              <CartesianGrid {...gridProps} />
+              <XAxis dataKey="displayDate" {...axisProps} />
               {/* reversed: rank #1 at top (lower number = better) */}
-              <YAxis
-                {...commonAxisProps}
-                reversed
-                tickFormatter={(v) => `#${v}`}
-              />
+              <YAxis {...axisProps} reversed tickFormatter={(v) => `#${v}`} />
               <Tooltip content={<CustomTooltip />} />
-              <Legend content={<CustomLegend hiddenSeries={hiddenSeries} onToggle={toggleSeries} />} />
+              <Legend
+                content={
+                  <CustomLegend
+                    hiddenSeries={hiddenSeries}
+                    onToggle={toggleSeries}
+                  />
+                }
+              />
               {METRIC_KEYS.map((key) => (
                 <Line
                   key={key}
@@ -236,23 +256,35 @@ export function RankingChart({
                   stroke={METRIC_COLORS[key]}
                   strokeWidth={1.5}
                   dot={false}
-                  activeDot={{ r: 4, strokeWidth: 2, stroke: "#fff", fill: METRIC_COLORS[key] }}
+                  activeDot={{
+                    r: 4,
+                    strokeWidth: 2,
+                    stroke: "#fff",
+                    fill: METRIC_COLORS[key],
+                  }}
                   hide={hiddenSeries.has(key)}
                   connectNulls
                 />
               ))}
             </LineChart>
           ) : (
-            <BarChart data={data} margin={{ top: 4, right: 4, left: -16, bottom: 0 }} barCategoryGap="30%">
-              <CartesianGrid strokeDasharray="3 3" stroke="#f1f5f9" vertical={false} />
-              <XAxis dataKey="displayDate" {...commonAxisProps} />
-              <YAxis
-                {...commonAxisProps}
-                reversed
-                tickFormatter={(v) => `#${v}`}
-              />
+            <BarChart
+              data={data}
+              margin={{ top: 4, right: 4, left: -16, bottom: 0 }}
+              barCategoryGap="30%"
+            >
+              <CartesianGrid {...gridProps} />
+              <XAxis dataKey="displayDate" {...axisProps} />
+              <YAxis {...axisProps} reversed tickFormatter={(v) => `#${v}`} />
               <Tooltip content={<CustomTooltip />} />
-              <Legend content={<CustomLegend hiddenSeries={hiddenSeries} onToggle={toggleSeries} />} />
+              <Legend
+                content={
+                  <CustomLegend
+                    hiddenSeries={hiddenSeries}
+                    onToggle={toggleSeries}
+                  />
+                }
+              />
               {METRIC_KEYS.map((key) => (
                 <Bar
                   key={key}

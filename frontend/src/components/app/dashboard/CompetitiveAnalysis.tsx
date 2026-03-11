@@ -1,27 +1,30 @@
-import { HelpCircle, Link2, Loader2, MessageCircle, Minus, TrendingDown, TrendingUp } from "lucide-react"
-import React, { useEffect, useState } from "react"
-import { FeatureGate } from "@/components/app/FeatureGate"
-import { useEntitlement } from "@/hooks/useEntitlement"
+import {
+  HelpCircle,
+  Link2,
+  Loader2,
+  MessageCircle,
+  Minus,
+  TrendingDown,
+  TrendingUp,
+} from "lucide-react"
+import type React from "react"
+import { useEffect, useState } from "react"
 import {
   type CompetitorGapMetric,
   type CompetitorGapSummaryResponse,
   type CompetitorGapTrendDataPoint,
   type CompetitorRankingDetailDataPoint,
+  dashboardAPI,
   type TimeRange,
   type UserBrand,
-  dashboardAPI,
 } from "@/clients/dashboard"
+import { CompetitorGapTrendChart } from "@/components/app/dashboard/components/CompetitorGapTrendChart"
+import { CompetitorRankingDetailChart } from "@/components/app/dashboard/components/CompetitorRankingDetailChart"
 import { DashboardPageLayout } from "@/components/app/dashboard/components/DashboardPageLayout"
 import { ReferenceSourceComparisonTable } from "@/components/app/dashboard/components/ReferenceSourceComparisonTable"
 import { SentimentComparisonTable } from "@/components/app/dashboard/components/SentimentComparisonTable"
-import { CompetitorGapTrendChart } from "@/components/app/dashboard/components/CompetitorGapTrendChart"
-import { CompetitorRankingDetailChart } from "@/components/app/dashboard/components/CompetitorRankingDetailChart"
-import {
-  Card,
-  CardContent,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card"
+import { FeatureGate } from "@/components/app/FeatureGate"
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import {
   Select,
   SelectContent,
@@ -35,12 +38,15 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "@/components/ui/tooltip"
+import { useEntitlement } from "@/hooks/useEntitlement"
 
 /** Sentinel from DashboardPageLayout meaning "All Segment" */
 const ALL_SEGMENTS_VALUE = "__all_segments__"
 
 function segmentForApi(segment: string): string {
-  return segment === ALL_SEGMENTS_VALUE ? "all-segment" : (segment || "all-segment")
+  return segment === ALL_SEGMENTS_VALUE
+    ? "all-segment"
+    : segment || "all-segment"
 }
 
 // ── Gap metric pill ────────────────────────────────────────────────────────────
@@ -99,7 +105,9 @@ function GapMetricPill({
             <span className="text-black">{label}</span>
             <span className="font-semibold text-slate-700">{valueStr}</span>
             {changeStr && (
-              <span className={`flex items-center gap-0.5 font-medium ${trendColour}`}>
+              <span
+                className={`flex items-center gap-0.5 font-medium ${trendColour}`}
+              >
                 {trendIcon}
                 {changeStr}
               </span>
@@ -107,7 +115,10 @@ function GapMetricPill({
             <HelpCircle className="h-3 w-3 text-slate-400 flex-shrink-0" />
           </div>
         </TooltipTrigger>
-        <TooltipContent side="bottom" className="max-w-[220px] text-xs text-center">
+        <TooltipContent
+          side="bottom"
+          className="max-w-[220px] text-xs text-center"
+        >
           <p>{helpText}</p>
         </TooltipContent>
       </Tooltip>
@@ -126,14 +137,21 @@ function CompetitorGapSummaryPills({
   segment: string
   competitorBrandName: string
 }) {
-  const [summary, setSummary] = useState<CompetitorGapSummaryResponse | null>(null)
+  const [summary, setSummary] = useState<CompetitorGapSummaryResponse | null>(
+    null,
+  )
   const [isLoading, setIsLoading] = useState(true)
+  const { canAccess } = useEntitlement()
 
   useEffect(() => {
     setIsLoading(true)
     setSummary(null)
     dashboardAPI
-      .getCompetitorGapSummary(brandId, segmentForApi(segment), competitorBrandName)
+      .getCompetitorGapSummary(
+        brandId,
+        segmentForApi(segment),
+        competitorBrandName,
+      )
       .then(setSummary)
       .catch(() => setSummary(null))
       .finally(() => setIsLoading(false))
@@ -149,8 +167,6 @@ function CompetitorGapSummaryPills({
   }
 
   if (!summary) return null
-
-  const { canAccess } = useEntitlement()
 
   return (
     <>
@@ -216,7 +232,9 @@ function CompetitorSelector({
       .getCompetitorsBySegment(brandId, segmentForApi(segment))
       .then((data) => {
         setCompetitors(data.competitor_names)
-        onCompetitorChange(data.competitor_names.length > 0 ? data.competitor_names[0] : null)
+        onCompetitorChange(
+          data.competitor_names.length > 0 ? data.competitor_names[0] : null,
+        )
       })
       .catch(() => {
         setCompetitors([])
@@ -228,7 +246,9 @@ function CompetitorSelector({
   return (
     <>
       <div className="flex items-center gap-1.5">
-        <span className="text-[10px] text-slate-500 font-medium whitespace-nowrap">Competitor</span>
+        <span className="text-[10px] text-slate-500 font-medium whitespace-nowrap">
+          Competitor
+        </span>
         {isLoading ? (
           <div className="flex items-center gap-1 text-slate-400">
             <Loader2 className="h-3 w-3 animate-spin" />
@@ -243,7 +263,11 @@ function CompetitorSelector({
             </SelectTrigger>
             <SelectContent className="max-h-40">
               {competitors.map((name) => (
-                <SelectItem key={name} value={name} className="text-[10px] !py-0.5 px-2">
+                <SelectItem
+                  key={name}
+                  value={name}
+                  className="text-[10px] !py-0.5 px-2"
+                >
                   {name}
                 </SelectItem>
               ))}
@@ -293,40 +317,86 @@ function CompetitiveAnalysisContent({
   const dbSegment = segmentForApi(segment)
 
   // ── Gap trend data (col 1, row 1) ─────────────────────────────────────────
-  const [gapTrendData, setGapTrendData] = useState<CompetitorGapTrendDataPoint[]>([])
+  const [gapTrendData, setGapTrendData] = useState<
+    CompetitorGapTrendDataPoint[]
+  >([])
   const [isLoadingGapTrend, setIsLoadingGapTrend] = useState(false)
   const [gapTrendError, setGapTrendError] = useState<string | null>(null)
 
   useEffect(() => {
-    if (!selectedCompetitor) { setGapTrendData([]); return }
+    if (!selectedCompetitor) {
+      setGapTrendData([])
+      return
+    }
     if (timeRange === "custom" && (!customStartDate || !customEndDate)) return
 
     setIsLoadingGapTrend(true)
     setGapTrendError(null)
     dashboardAPI
-      .getCompetitorGapTrend(brandId, dbSegment, selectedCompetitor, timeRange, customStartDate, customEndDate)
+      .getCompetitorGapTrend(
+        brandId,
+        dbSegment,
+        selectedCompetitor,
+        timeRange,
+        customStartDate,
+        customEndDate,
+      )
       .then((data) => setGapTrendData(data.data_points))
-      .catch((err) => setGapTrendError(err instanceof Error ? err.message : "Failed to load gap trend"))
+      .catch((err) =>
+        setGapTrendError(
+          err instanceof Error ? err.message : "Failed to load gap trend",
+        ),
+      )
       .finally(() => setIsLoadingGapTrend(false))
-  }, [brandId, dbSegment, selectedCompetitor, timeRange, customStartDate, customEndDate])
+  }, [
+    brandId,
+    dbSegment,
+    selectedCompetitor,
+    timeRange,
+    customStartDate,
+    customEndDate,
+  ])
 
   // ── Ranking detail data (col 2, row 1) ────────────────────────────────────
-  const [rankingData, setRankingData] = useState<CompetitorRankingDetailDataPoint[]>([])
+  const [rankingData, setRankingData] = useState<
+    CompetitorRankingDetailDataPoint[]
+  >([])
   const [isLoadingRanking, setIsLoadingRanking] = useState(false)
   const [rankingError, setRankingError] = useState<string | null>(null)
 
   useEffect(() => {
-    if (!selectedCompetitor) { setRankingData([]); return }
+    if (!selectedCompetitor) {
+      setRankingData([])
+      return
+    }
     if (timeRange === "custom" && (!customStartDate || !customEndDate)) return
 
     setIsLoadingRanking(true)
     setRankingError(null)
     dashboardAPI
-      .getCompetitorRankingDetail(brandId, dbSegment, selectedCompetitor, timeRange, customStartDate, customEndDate)
+      .getCompetitorRankingDetail(
+        brandId,
+        dbSegment,
+        selectedCompetitor,
+        timeRange,
+        customStartDate,
+        customEndDate,
+      )
       .then((data) => setRankingData(data.data_points))
-      .catch((err) => setRankingError(err instanceof Error ? err.message : "Failed to load ranking data"))
+      .catch((err) =>
+        setRankingError(
+          err instanceof Error ? err.message : "Failed to load ranking data",
+        ),
+      )
       .finally(() => setIsLoadingRanking(false))
-  }, [brandId, dbSegment, selectedCompetitor, timeRange, customStartDate, customEndDate])
+  }, [
+    brandId,
+    dbSegment,
+    selectedCompetitor,
+    timeRange,
+    customStartDate,
+    customEndDate,
+  ])
 
   if (!selectedCompetitor) {
     return (
@@ -376,9 +446,15 @@ function CompetitiveAnalysisContent({
                   <span className="ml-2 text-slate-500 text-sm">Loading…</span>
                 </div>
               ) : gapTrendError ? (
-                <div className="flex items-center justify-center h-64 text-red-500 text-sm">{gapTrendError}</div>
+                <div className="flex items-center justify-center h-64 text-red-500 text-sm">
+                  {gapTrendError}
+                </div>
               ) : (
-                <CompetitorGapTrendChart dataPoints={gapTrendData} brandName={brandName} competitorName={selectedCompetitor} />
+                <CompetitorGapTrendChart
+                  dataPoints={gapTrendData}
+                  brandName={brandName}
+                  competitorName={selectedCompetitor}
+                />
               )}
             </div>
 
@@ -396,7 +472,9 @@ function CompetitiveAnalysisContent({
                   <span className="ml-2 text-slate-500 text-sm">Loading…</span>
                 </div>
               ) : rankingError ? (
-                <div className="flex items-center justify-center h-64 text-red-500 text-sm">{rankingError}</div>
+                <div className="flex items-center justify-center h-64 text-red-500 text-sm">
+                  {rankingError}
+                </div>
               ) : (
                 <CompetitorRankingDetailChart
                   dataPoints={rankingData}
@@ -461,7 +539,9 @@ function CompetitiveAnalysisContent({
 // ── Exported page component ────────────────────────────────────────────────────
 
 export function CompetitiveAnalysis() {
-  const [selectedCompetitor, setSelectedCompetitor] = useState<string | null>(null)
+  const [selectedCompetitor, setSelectedCompetitor] = useState<string | null>(
+    null,
+  )
 
   return (
     <DashboardPageLayout
@@ -470,7 +550,10 @@ export function CompetitiveAnalysis() {
       brandCardTitle="Competitive Current Status"
       brandCardDescription=""
       showProjectRole={false}
-      brandCardExtras={(selectedBrand: UserBrand | undefined, selectedSegment: string) =>
+      brandCardExtras={(
+        selectedBrand: UserBrand | undefined,
+        selectedSegment: string,
+      ) =>
         selectedBrand ? (
           <CompetitorSelector
             brandId={selectedBrand.brand_id}

@@ -1,17 +1,18 @@
 import {
+  type ColumnDef,
   flexRender,
   getCoreRowModel,
   getPaginationRowModel,
   useReactTable,
-  type ColumnDef,
 } from "@tanstack/react-table"
 import { ChevronLeft, ChevronRight, Loader2 } from "lucide-react"
 import { useEffect, useMemo, useState } from "react"
 import {
+  dashboardAPI,
   type SentimentComparisonRow,
   type TimeRange,
-  dashboardAPI,
 } from "@/clients/dashboard"
+import { tableClasses } from "@/components/app/dashboard/components/tableTheme"
 import { Button } from "@/components/ui/button"
 import {
   Table,
@@ -58,7 +59,10 @@ function ReviewCell({ text }: { text: string }) {
       <TooltipTrigger asChild>
         <div className="truncate cursor-default">{text}</div>
       </TooltipTrigger>
-      <TooltipContent side="bottom" className="max-w-[320px] text-xs whitespace-normal break-words">
+      <TooltipContent
+        side="bottom"
+        className="max-w-[320px] text-xs whitespace-normal break-words"
+      >
         {text}
       </TooltipContent>
     </Tooltip>
@@ -79,7 +83,10 @@ export function SentimentComparisonTable({
   const [isLoading, setIsLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
   const [sentimentFilter, setSentimentFilter] = useState<SentimentFilter>("All")
-  const [pagination, setPagination] = useState({ pageIndex: 0, pageSize: PAGE_SIZE })
+  const [pagination, setPagination] = useState({
+    pageIndex: 0,
+    pageSize: PAGE_SIZE,
+  })
 
   useEffect(() => {
     if (!competitorBrandName) return
@@ -88,16 +95,36 @@ export function SentimentComparisonTable({
     setIsLoading(true)
     setError(null)
     dashboardAPI
-      .getSentimentComparison(brandId, segment, competitorBrandName, timeRange, customStartDate, customEndDate)
+      .getSentimentComparison(
+        brandId,
+        segment,
+        competitorBrandName,
+        timeRange,
+        customStartDate,
+        customEndDate,
+      )
       .then((data) => setRows(data.rows))
-      .catch((err) => setError(err instanceof Error ? err.message : "Failed to load sentiment comparison"))
+      .catch((err) =>
+        setError(
+          err instanceof Error
+            ? err.message
+            : "Failed to load sentiment comparison",
+        ),
+      )
       .finally(() => setIsLoading(false))
-  }, [brandId, segment, competitorBrandName, timeRange, customStartDate, customEndDate])
+  }, [
+    brandId,
+    segment,
+    competitorBrandName,
+    timeRange,
+    customStartDate,
+    customEndDate,
+  ])
 
   // Reset page when filter changes
   useEffect(() => {
     setPagination((prev) => ({ ...prev, pageIndex: 0 }))
-  }, [sentimentFilter])
+  }, [])
 
   const filteredRows = useMemo(() => {
     if (sentimentFilter === "All") return rows
@@ -114,7 +141,7 @@ export function SentimentComparisonTable({
           const s = getValue() as string
           return (
             <span
-              className={`inline-block px-1.5 py-0.5 rounded text-[10px] font-medium ${SENTIMENT_STYLES[s] ?? ""}`}
+              className={`inline-block px-1.5 py-0.5 rounded text-xs font-medium ${SENTIMENT_STYLES[s] ?? ""}`}
             >
               {s}
             </span>
@@ -168,7 +195,7 @@ export function SentimentComparisonTable({
               type="button"
               onClick={() => setSentimentFilter(f)}
               className={[
-                "px-2 py-0.5 rounded text-[10px] font-medium transition-colors",
+                "px-2 py-0.5 rounded text-xs font-medium transition-colors",
                 sentimentFilter === f
                   ? "bg-indigo-600 text-white"
                   : "bg-slate-100 text-slate-500 hover:bg-slate-200",
@@ -177,7 +204,7 @@ export function SentimentComparisonTable({
               {f}
             </button>
           ))}
-          <span className="ml-auto text-[10px] text-slate-400">
+          <span className="ml-auto text-xs text-slate-400">
             {filteredRows.length} row{filteredRows.length !== 1 ? "s" : ""}
           </span>
         </div>
@@ -188,25 +215,30 @@ export function SentimentComparisonTable({
           </div>
         ) : (
           <>
-            <div className="w-full overflow-hidden rounded-lg border border-slate-100">
-              <Table className="text-xs table-fixed w-full">
+            <div className={`w-full overflow-hidden ${tableClasses.wrapper}`}>
+              <Table className={`${tableClasses.table} table-fixed`}>
                 <colgroup>
                   <col className="w-20" />
                   <col />
                   <col />
                 </colgroup>
-                <TableHeader className="sticky top-0 z-30 bg-indigo-50">
+                <TableHeader
+                  className={`sticky top-0 z-30 ${tableClasses.headerRow}`}
+                >
                   {table.getHeaderGroups().map((headerGroup) => (
                     <TableRow
                       key={headerGroup.id}
-                      className="border-b border-indigo-100 hover:bg-transparent"
+                      className="border-b border-slate-100 hover:bg-transparent"
                     >
                       {headerGroup.headers.map((header) => (
                         <TableHead
                           key={header.id}
-                          className="text-[10px] font-semibold text-indigo-700 py-2 pl-2 whitespace-nowrap"
+                          className="text-xs font-semibold uppercase tracking-wide text-slate-500 py-2 pl-2 whitespace-nowrap"
                         >
-                          {flexRender(header.column.columnDef.header, header.getContext())}
+                          {flexRender(
+                            header.column.columnDef.header,
+                            header.getContext(),
+                          )}
                         </TableHead>
                       ))}
                     </TableRow>
@@ -219,20 +251,24 @@ export function SentimentComparisonTable({
                       className={
                         rowIdx % 2 === 0
                           ? "bg-white hover:bg-slate-50"
-                          : "bg-slate-50/50 hover:bg-slate-100/60"
+                          : "bg-slate-50/40 hover:bg-slate-100/60"
                       }
                     >
                       {row.getVisibleCells().map((cell) => (
                         <TableCell
                           key={cell.id}
                           className={[
-                            "text-xs py-1.5 pl-2",
-                            cell.column.id === "brand_review" || cell.column.id === "comp_review"
+                            "text-xs py-1.5 pl-2 text-slate-700",
+                            cell.column.id === "brand_review" ||
+                            cell.column.id === "comp_review"
                               ? "max-w-0 pr-2"
                               : "",
                           ].join(" ")}
                         >
-                          {flexRender(cell.column.columnDef.cell, cell.getContext())}
+                          {flexRender(
+                            cell.column.columnDef.cell,
+                            cell.getContext(),
+                          )}
                         </TableCell>
                       ))}
                     </TableRow>
@@ -243,15 +279,18 @@ export function SentimentComparisonTable({
 
             {table.getPageCount() > 1 && (
               <div className="flex items-center justify-between px-1">
-                <span className="text-[10px] text-slate-400">
-                  Page {table.getState().pagination.pageIndex + 1} of {table.getPageCount()}
-                  <span className="ml-2 text-slate-300">({filteredRows.length} rows)</span>
+                <span className="text-xs text-slate-500">
+                  Page {table.getState().pagination.pageIndex + 1} of{" "}
+                  {table.getPageCount()}
+                  <span className="ml-2 text-slate-400">
+                    ({filteredRows.length} rows)
+                  </span>
                 </span>
                 <div className="flex items-center gap-1">
                   <Button
                     variant="outline"
                     size="sm"
-                    className="h-6 w-6 p-0"
+                    className="h-7 w-7 p-0"
                     onClick={() => table.previousPage()}
                     disabled={!table.getCanPreviousPage()}
                   >
@@ -260,7 +299,7 @@ export function SentimentComparisonTable({
                   <Button
                     variant="outline"
                     size="sm"
-                    className="h-6 w-6 p-0"
+                    className="h-7 w-7 p-0"
                     onClick={() => table.nextPage()}
                     disabled={!table.getCanNextPage()}
                   >

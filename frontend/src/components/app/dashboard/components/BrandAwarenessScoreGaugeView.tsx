@@ -36,7 +36,10 @@ interface BrandAwarenessScoreGaugeViewProps {
   segment?: string
 }
 
-export function BrandAwarenessScoreGaugeView({ brandId, segment = "All-Segment" }: BrandAwarenessScoreGaugeViewProps) {
+export function BrandAwarenessScoreGaugeView({
+  brandId,
+  segment = "All-Segment",
+}: BrandAwarenessScoreGaugeViewProps) {
   // ============================================================================
   // State Management
   // ============================================================================
@@ -138,7 +141,7 @@ export function BrandAwarenessScoreGaugeView({ brandId, segment = "All-Segment" 
       case "down":
         return <TrendingDown className={`${iconClass} text-red-600`} />
       default:
-        return <Minus className={`${iconClass} text-gray-600`} />
+        return <Minus className={`${iconClass} text-slate-600`} />
     }
   }
 
@@ -155,7 +158,7 @@ export function BrandAwarenessScoreGaugeView({ brandId, segment = "All-Segment" 
       case "down":
         return "text-red-600"
       default:
-        return "text-gray-600"
+        return "text-slate-600"
     }
   }
 
@@ -219,6 +222,7 @@ export function BrandAwarenessScoreGaugeView({ brandId, segment = "All-Segment" 
     return (
       <div className="relative w-64 h-32 mx-auto">
         <svg viewBox="0 0 200 100" className="w-full h-full">
+          <title>Brand awareness score gauge</title>
           {/* Background arc - gray track */}
           <path
             d="M 20 90 A 80 80 0 0 1 180 90"
@@ -282,7 +286,7 @@ export function BrandAwarenessScoreGaugeView({ brandId, segment = "All-Segment" 
                 x={x}
                 y={y + 5}
                 textAnchor="middle"
-                className="text-xs fill-gray-600"
+                className="text-xs fill-slate-600"
               >
                 {num}
               </text>
@@ -299,16 +303,16 @@ export function BrandAwarenessScoreGaugeView({ brandId, segment = "All-Segment" 
 
   if (isLoading) {
     return (
-      <div className="rounded-md bg-gradient-to-b p-6 border border-gray-200 h-full w-full">
+      <div className="rounded-2xl bg-white p-6 border border-slate-200 h-full w-full shadow-sm">
         <div className="flex justify-start">
-          <h3 className="text-md font-semibold mb-4">
+          <h3 className="text-base font-semibold mb-4 text-slate-900">
             Current Consistency Index
           </h3>
         </div>
         {/* Loading spinner centered in the card */}
         <div className="flex flex-col items-center justify-center h-64">
           <Loader2 className="h-12 w-12 animate-spin text-blue-600" />
-          <p className="mt-4 text-sm text-gray-500">
+          <p className="mt-4 text-sm text-slate-500">
             Loading consistency index...
           </p>
         </div>
@@ -322,9 +326,9 @@ export function BrandAwarenessScoreGaugeView({ brandId, segment = "All-Segment" 
 
   if (error) {
     return (
-      <div className="rounded-md bg-gradient-to-b p-6 border border-gray-200 h-full w-full">
+      <div className="rounded-2xl bg-white p-6 border border-slate-200 h-full w-full shadow-sm">
         <div className="flex justify-start">
-          <h3 className="text-md font-semibold mb-4">
+          <h3 className="text-base font-semibold mb-4 text-slate-900">
             Current Consistency Index
           </h3>
         </div>
@@ -345,15 +349,15 @@ export function BrandAwarenessScoreGaugeView({ brandId, segment = "All-Segment" 
 
   if (!indexData) {
     return (
-      <div className="rounded-md bg-gradient-to-b p-6 border border-gray-200 h-full w-full">
+      <div className="rounded-2xl bg-white p-6 border border-slate-200 h-full w-full shadow-sm">
         <div className="flex justify-start">
-          <h3 className="text-md font-semibold mb-4">
+          <h3 className="text-base font-semibold mb-4 text-slate-900">
             Current Consistency Index
           </h3>
         </div>
         {/* No data message centered in the card */}
         <div className="flex flex-col items-center justify-center h-64">
-          <p className="text-gray-500">No consistency index data available</p>
+          <p className="text-slate-500">No consistency index data available</p>
         </div>
       </div>
     )
@@ -365,9 +369,9 @@ export function BrandAwarenessScoreGaugeView({ brandId, segment = "All-Segment" 
 
   return (
     /* Current Consistency Index */
-    <div className="rounded-md bg-gradient-to-b p-6 border border-gray-200 h-full w-full">
+    <div className="rounded-2xl bg-white p-6 border border-slate-200 h-full w-full shadow-sm">
       <div className="flex justify-start">
-        <h3 className="text-md font-semibold mb-4">
+        <h3 className="text-base font-semibold mb-4 text-slate-900">
           Current Consistency Index
         </h3>
       </div>
@@ -384,7 +388,7 @@ export function BrandAwarenessScoreGaugeView({ brandId, segment = "All-Segment" 
           </span>
         </div>
       </div>
-      <p className="text-center text-sm text-gray-500 mb-6">
+      <p className="text-center text-sm text-slate-500 mb-6">
         {getTrend() === "up"
           ? "Improving"
           : getTrend() === "down"

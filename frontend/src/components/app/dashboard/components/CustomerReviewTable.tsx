@@ -1,20 +1,28 @@
 import {
+  type ColumnDef,
   flexRender,
   getCoreRowModel,
   getPaginationRowModel,
   getSortedRowModel,
-  useReactTable,
-  type ColumnDef,
   type SortingState,
+  useReactTable,
 } from "@tanstack/react-table"
-import { ArrowDown, ArrowUp, ArrowUpDown, ChevronLeft, ChevronRight, Loader2 } from "lucide-react"
+import {
+  ArrowDown,
+  ArrowUp,
+  ArrowUpDown,
+  ChevronLeft,
+  ChevronRight,
+  Loader2,
+} from "lucide-react"
 import { useEffect, useMemo, useState } from "react"
 import {
   type CustomerReviewItem,
   type CustomerReviewsResponse,
-  type TimeRange,
   dashboardAPI,
+  type TimeRange,
 } from "@/clients/dashboard"
+import { tableClasses } from "@/components/app/dashboard/components/tableTheme"
 import { Button } from "@/components/ui/button"
 import {
   Table,
@@ -69,7 +77,7 @@ export function CustomerReviewTable({
   const [error, setError] = useState<string | null>(null)
   const [sorting, setSorting] = useState<SortingState>([])
 
-  const allSegmentsKey = allSegments?.join(",") ?? ""
+  const _allSegmentsKey = allSegments?.join(",") ?? ""
 
   useEffect(() => {
     const fetchData = async () => {
@@ -96,14 +104,18 @@ export function CustomerReviewTable({
         }
         setReviews(data.reviews)
       } catch (err) {
-        setError(err instanceof Error ? err.message : "Failed to load customer reviews")
+        setError(
+          err instanceof Error
+            ? err.message
+            : "Failed to load customer reviews",
+        )
       } finally {
         setIsLoading(false)
       }
     }
     fetchData()
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [brandId, segment, allSegmentsKey, timeRange, customStartDate, customEndDate])
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [brandId, segment, timeRange, customStartDate, customEndDate, allSegments])
 
   const columns = useMemo<ColumnDef<CustomerReviewItem>[]>(
     () => [
@@ -124,7 +136,10 @@ export function CustomerReviewTable({
               <TooltipTrigger asChild>
                 <div className="truncate cursor-default">{text}</div>
               </TooltipTrigger>
-              <TooltipContent side="bottom" className="max-w-[320px] text-xs whitespace-normal break-words">
+              <TooltipContent
+                side="bottom"
+                className="max-w-[320px] text-xs whitespace-normal break-words"
+              >
                 {text}
               </TooltipContent>
             </Tooltip>
@@ -140,7 +155,9 @@ export function CustomerReviewTable({
           const s = getValue() as string
           if (!s || s === "Unknown") return null
           return (
-            <span className={`inline-block px-1.5 py-0.5 rounded text-[10px] font-medium ${SENTIMENT_STYLES[s] ?? ""}`}>
+            <span
+              className={`inline-block px-1.5 py-0.5 rounded text-xs font-medium ${SENTIMENT_STYLES[s] ?? ""}`}
+            >
               {s}
             </span>
           )
@@ -185,30 +202,44 @@ export function CustomerReviewTable({
   return (
     <TooltipProvider delayDuration={300}>
       <div className="flex flex-col gap-2">
-        <div className="w-full overflow-hidden rounded-lg border border-slate-100">
-          <Table className="text-xs table-fixed w-full">
+        <div className={`w-full overflow-hidden ${tableClasses.wrapper}`}>
+          <Table className={`${tableClasses.table} table-fixed`}>
             <colgroup>
               <col className="w-10" />
               <col />
               <col className="w-20" />
             </colgroup>
-            <TableHeader className="sticky top-0 z-30 bg-indigo-50">
+            <TableHeader
+              className={`sticky top-0 z-30 ${tableClasses.headerRow}`}
+            >
               {table.getHeaderGroups().map((headerGroup) => (
-                <TableRow key={headerGroup.id} className="border-b border-indigo-100 hover:bg-transparent">
+                <TableRow
+                  key={headerGroup.id}
+                  className="border-b border-slate-100 hover:bg-transparent"
+                >
                   {headerGroup.headers.map((header) => (
                     <TableHead
                       key={header.id}
                       className={[
-                        "text-[10px] font-semibold text-indigo-700 py-2 whitespace-nowrap select-none",
+                        "text-xs font-semibold uppercase tracking-wide text-slate-500 py-2 whitespace-nowrap select-none",
                         header.column.id === "seq" ? "pl-3" : "",
-                        header.column.id === "sentiment" ? "text-right pr-3" : "",
+                        header.column.id === "sentiment"
+                          ? "text-right pr-3"
+                          : "",
                         header.column.getCanSort() ? "cursor-pointer" : "",
                       ].join(" ")}
                       onClick={header.column.getToggleSortingHandler()}
                     >
-                      <div className={`flex items-center gap-1 ${header.column.id === "sentiment" ? "justify-end" : ""}`}>
-                        {flexRender(header.column.columnDef.header, header.getContext())}
-                        {header.column.getCanSort() && <SortIcon sorted={header.column.getIsSorted()} />}
+                      <div
+                        className={`flex items-center gap-1 ${header.column.id === "sentiment" ? "justify-end" : ""}`}
+                      >
+                        {flexRender(
+                          header.column.columnDef.header,
+                          header.getContext(),
+                        )}
+                        {header.column.getCanSort() && (
+                          <SortIcon sorted={header.column.getIsSorted()} />
+                        )}
                       </div>
                     </TableHead>
                   ))}
@@ -219,19 +250,28 @@ export function CustomerReviewTable({
               {table.getRowModel().rows.map((row, rowIdx) => (
                 <TableRow
                   key={row.id}
-                  className={rowIdx % 2 === 0 ? "bg-white hover:bg-slate-50" : "bg-slate-50/50 hover:bg-slate-100/60"}
+                  className={
+                    rowIdx % 2 === 0
+                      ? "bg-white hover:bg-slate-50"
+                      : "bg-slate-50/40 hover:bg-slate-100/60"
+                  }
                 >
                   {row.getVisibleCells().map((cell) => (
                     <TableCell
                       key={cell.id}
                       className={[
-                        "text-xs py-1.5",
+                        "text-xs py-1.5 text-slate-700",
                         cell.column.id === "seq" ? "pl-3 text-slate-400" : "",
                         cell.column.id === "review" ? "max-w-0 pr-2" : "",
-                        cell.column.id === "sentiment" ? "text-right pr-3" : "",
+                        cell.column.id === "sentiment"
+                          ? "text-right pr-3 tabular-nums"
+                          : "",
                       ].join(" ")}
                     >
-                      {flexRender(cell.column.columnDef.cell, cell.getContext())}
+                      {flexRender(
+                        cell.column.columnDef.cell,
+                        cell.getContext(),
+                      )}
                     </TableCell>
                   ))}
                 </TableRow>
@@ -242,17 +282,30 @@ export function CustomerReviewTable({
 
         {table.getPageCount() > 1 && (
           <div className="flex items-center justify-between px-1">
-            <span className="text-[10px] text-slate-400">
-              Page {table.getState().pagination.pageIndex + 1} of {table.getPageCount()}
-              <span className="ml-2 text-slate-300">({reviews.length} rows)</span>
+            <span className="text-xs text-slate-500">
+              Page {table.getState().pagination.pageIndex + 1} of{" "}
+              {table.getPageCount()}
+              <span className="ml-2 text-slate-400">
+                ({reviews.length} rows)
+              </span>
             </span>
             <div className="flex items-center gap-1">
-              <Button variant="outline" size="sm" className="h-6 w-6 p-0"
-                onClick={() => table.previousPage()} disabled={!table.getCanPreviousPage()}>
+              <Button
+                variant="outline"
+                size="sm"
+                className="h-7 w-7 p-0"
+                onClick={() => table.previousPage()}
+                disabled={!table.getCanPreviousPage()}
+              >
                 <ChevronLeft className="h-3 w-3" />
               </Button>
-              <Button variant="outline" size="sm" className="h-6 w-6 p-0"
-                onClick={() => table.nextPage()} disabled={!table.getCanNextPage()}>
+              <Button
+                variant="outline"
+                size="sm"
+                className="h-7 w-7 p-0"
+                onClick={() => table.nextPage()}
+                disabled={!table.getCanNextPage()}
+              >
                 <ChevronRight className="h-3 w-3" />
               </Button>
             </div>

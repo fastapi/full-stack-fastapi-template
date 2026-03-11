@@ -1,10 +1,10 @@
 import { useSubscription } from "@/contexts/SubscriptionContext"
 import {
+  type SubscriptionTier,
   TIER_FEATURES,
   TIER_QUOTAS,
   type TierFeatures,
   type TierQuota,
-  type SubscriptionTier,
 } from "@/lib/entitlements"
 
 const SUPER_USER_FEATURES = Object.fromEntries(
@@ -46,11 +46,22 @@ export function useEntitlement(): EntitlementResult {
     return features[feature]
   }
 
-  const isWithinQuota = (resource: keyof TierQuota, currentCount: number): boolean => {
+  const isWithinQuota = (
+    resource: keyof TierQuota,
+    currentCount: number,
+  ): boolean => {
     if (isSuperUser) return true
     if (isReadOnly) return false
     return currentCount < quota[resource]
   }
 
-  return { tier, isExpired, isReadOnly, features, quota, canAccess, isWithinQuota }
+  return {
+    tier,
+    isExpired,
+    isReadOnly,
+    features,
+    quota,
+    canAccess,
+    isWithinQuota,
+  }
 }

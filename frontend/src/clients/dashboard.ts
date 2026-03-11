@@ -896,10 +896,14 @@ class DashboardAPI {
     const keysToRemove: string[] = []
     for (let i = 0; i < localStorage.length; i++) {
       const key = localStorage.key(i)
-      if (key && key.startsWith("dashboard_")) keysToRemove.push(key)
+      if (key?.startsWith("dashboard_")) keysToRemove.push(key)
     }
-    keysToRemove.forEach((k) => localStorage.removeItem(k))
-    console.log(`[DashboardAPI] Cleared ${keysToRemove.length} dashboard cache entries`)
+    keysToRemove.forEach((k) => {
+      localStorage.removeItem(k)
+    })
+    console.log(
+      `[DashboardAPI] Cleared ${keysToRemove.length} dashboard cache entries`,
+    )
   }
 
   /**
@@ -1197,10 +1201,14 @@ class DashboardAPI {
    * @returns UserBrandsResponse with list of accessible brands
    * @throws Error if API call fails
    */
-  async getUserBrands(forceRefresh: boolean = false): Promise<UserBrandsResponse> {
+  async getUserBrands(
+    forceRefresh: boolean = false,
+  ): Promise<UserBrandsResponse> {
     // Check cache first (unless force refresh is requested)
     if (!forceRefresh) {
-      const cached = this.getCachedData<UserBrandsResponse>(CACHE_KEY_USER_BRANDS)
+      const cached = this.getCachedData<UserBrandsResponse>(
+        CACHE_KEY_USER_BRANDS,
+      )
       if (cached) {
         return cached
       }
@@ -1270,7 +1278,9 @@ class DashboardAPI {
       }
     }
 
-    console.log("[DashboardAPI] Fetching brand segments from API...", { brandId })
+    console.log("[DashboardAPI] Fetching brand segments from API...", {
+      brandId,
+    })
 
     const url = `${this.baseUrl}${this.apiPrefix}/dashboard/brand-segments?brand_id=${encodeURIComponent(brandId)}`
 
@@ -1442,8 +1452,17 @@ class DashboardAPI {
   /**
    * Generate a cache key for competitor metrics
    */
-  private getCompetitorMetricsCacheKey(params: CompetitorMetricsParams): string {
-    const { timeRange, startDate, endDate, brandId, competitorBrandName, segment } = params
+  private getCompetitorMetricsCacheKey(
+    params: CompetitorMetricsParams,
+  ): string {
+    const {
+      timeRange,
+      startDate,
+      endDate,
+      brandId,
+      competitorBrandName,
+      segment,
+    } = params
     const seg = segment || "all"
     if (timeRange === "custom") {
       return `dashboard_comp_metrics_custom_${startDate}_${endDate}_${brandId}_${competitorBrandName}_${seg}`
@@ -1467,7 +1486,10 @@ class DashboardAPI {
       }
     }
 
-    console.log("[DashboardAPI] Fetching competitor metrics from API...", params)
+    console.log(
+      "[DashboardAPI] Fetching competitor metrics from API...",
+      params,
+    )
 
     const queryParams = new URLSearchParams()
     queryParams.append("brand_id", params.brandId)
@@ -1560,7 +1582,9 @@ class DashboardAPI {
 
     if (params.timeRange === "custom") {
       if (!params.startDate || !params.endDate) {
-        throw new Error("Start date and end date are required for custom time range")
+        throw new Error(
+          "Start date and end date are required for custom time range",
+        )
       }
       queryParams.append("start_date", params.startDate)
       queryParams.append("end_date", params.endDate)
@@ -1632,7 +1656,9 @@ class DashboardAPI {
 
     if (params.timeRange === "custom") {
       if (!params.startDate || !params.endDate) {
-        throw new Error("Start date and end date are required for custom time range")
+        throw new Error(
+          "Start date and end date are required for custom time range",
+        )
       }
       queryParams.append("start_date", params.startDate)
       queryParams.append("end_date", params.endDate)
@@ -1667,7 +1693,9 @@ class DashboardAPI {
   /**
    * Generate a cache key for performance detail table
    */
-  private getPerformanceDetailTableCacheKey(params: PerformanceDetailTableParams): string {
+  private getPerformanceDetailTableCacheKey(
+    params: PerformanceDetailTableParams,
+  ): string {
     const { timeRange, startDate, endDate, brandId } = params
     if (timeRange === "custom") {
       return `dashboard_perf_detail_custom_${startDate}_${endDate}_${brandId}`
@@ -1685,13 +1713,17 @@ class DashboardAPI {
     const cacheKey = this.getPerformanceDetailTableCacheKey(params)
 
     if (!forceRefresh) {
-      const cached = this.getCachedData<PerformanceDetailTableResponse>(cacheKey)
+      const cached =
+        this.getCachedData<PerformanceDetailTableResponse>(cacheKey)
       if (cached) {
         return cached
       }
     }
 
-    console.log("[DashboardAPI] Fetching performance detail table from API...", params)
+    console.log(
+      "[DashboardAPI] Fetching performance detail table from API...",
+      params,
+    )
 
     const queryParams = new URLSearchParams()
     queryParams.append("brand_id", params.brandId)
@@ -1699,7 +1731,9 @@ class DashboardAPI {
 
     if (params.timeRange === "custom") {
       if (!params.startDate || !params.endDate) {
-        throw new Error("Start date and end date are required for custom time range")
+        throw new Error(
+          "Start date and end date are required for custom time range",
+        )
       }
       queryParams.append("start_date", params.startDate)
       queryParams.append("end_date", params.endDate)
@@ -1718,15 +1752,20 @@ class DashboardAPI {
 
     if (!response.ok) {
       const error: ApiError = await response.json()
-      throw new Error(error.detail || "Failed to fetch performance detail table")
+      throw new Error(
+        error.detail || "Failed to fetch performance detail table",
+      )
     }
 
     const data: PerformanceDetailTableResponse = await response.json()
     this.setCachedData(cacheKey, data)
 
-    console.log("[DashboardAPI] Performance detail table fetched successfully", {
-      rows: data.rows.length,
-    })
+    console.log(
+      "[DashboardAPI] Performance detail table fetched successfully",
+      {
+        rows: data.rows.length,
+      },
+    )
 
     return data
   }
@@ -1734,8 +1773,17 @@ class DashboardAPI {
   /**
    * Generate a cache key for competitor awareness
    */
-  private getCompetitorAwarenessCacheKey(params: CompetitorAwarenessParams): string {
-    const { timeRange, startDate, endDate, brandId, competitorBrandName, segment } = params
+  private getCompetitorAwarenessCacheKey(
+    params: CompetitorAwarenessParams,
+  ): string {
+    const {
+      timeRange,
+      startDate,
+      endDate,
+      brandId,
+      competitorBrandName,
+      segment,
+    } = params
     if (timeRange === "custom") {
       return `dashboard_comp_aware_custom_${startDate}_${endDate}_${brandId}_${competitorBrandName}_${segment}`
     }
@@ -1758,7 +1806,10 @@ class DashboardAPI {
       }
     }
 
-    console.log("[DashboardAPI] Fetching competitor awareness from API...", params)
+    console.log(
+      "[DashboardAPI] Fetching competitor awareness from API...",
+      params,
+    )
 
     const queryParams = new URLSearchParams()
     queryParams.append("brand_id", params.brandId)
@@ -1768,7 +1819,9 @@ class DashboardAPI {
 
     if (params.timeRange === "custom") {
       if (!params.startDate || !params.endDate) {
-        throw new Error("Start date and end date are required for custom time range")
+        throw new Error(
+          "Start date and end date are required for custom time range",
+        )
       }
       queryParams.append("start_date", params.startDate)
       queryParams.append("end_date", params.endDate)
@@ -1803,8 +1856,11 @@ class DashboardAPI {
   /**
    * Generate a cache key for competitor detail table
    */
-  private getCompetitorDetailTableCacheKey(params: CompetitorDetailTableParams): string {
-    const { timeRange, startDate, endDate, brandId, competitorBrandName } = params
+  private getCompetitorDetailTableCacheKey(
+    params: CompetitorDetailTableParams,
+  ): string {
+    const { timeRange, startDate, endDate, brandId, competitorBrandName } =
+      params
     if (timeRange === "custom") {
       return `dashboard_comp_detail_custom_${startDate}_${endDate}_${brandId}_${competitorBrandName}`
     }
@@ -1827,7 +1883,10 @@ class DashboardAPI {
       }
     }
 
-    console.log("[DashboardAPI] Fetching competitor detail table from API...", params)
+    console.log(
+      "[DashboardAPI] Fetching competitor detail table from API...",
+      params,
+    )
 
     const queryParams = new URLSearchParams()
     queryParams.append("brand_id", params.brandId)
@@ -1836,7 +1895,9 @@ class DashboardAPI {
 
     if (params.timeRange === "custom") {
       if (!params.startDate || !params.endDate) {
-        throw new Error("Start date and end date are required for custom time range")
+        throw new Error(
+          "Start date and end date are required for custom time range",
+        )
       }
       queryParams.append("start_date", params.startDate)
       queryParams.append("end_date", params.endDate)
@@ -1904,7 +1965,9 @@ class DashboardAPI {
 
     if (params.timeRange === "custom") {
       if (!params.startDate || !params.endDate) {
-        throw new Error("Start date and end date are required for custom time range")
+        throw new Error(
+          "Start date and end date are required for custom time range",
+        )
       }
       queryParams.append("start_date", params.startDate)
       queryParams.append("end_date", params.endDate)
@@ -2013,7 +2076,9 @@ class DashboardAPI {
 
     if (params.timeRange === "custom") {
       if (!params.startDate || !params.endDate) {
-        throw new Error("Start date and end date are required for custom time range")
+        throw new Error(
+          "Start date and end date are required for custom time range",
+        )
       }
       queryParams.append("start_date", params.startDate)
       queryParams.append("end_date", params.endDate)
@@ -2043,7 +2108,10 @@ class DashboardAPI {
 
   // ── Brand Impression Summary ───────────────────────────────────
 
-  private getBrandImpressionSummaryCacheKey(brandId: string, segment: string): string {
+  private getBrandImpressionSummaryCacheKey(
+    brandId: string,
+    segment: string,
+  ): string {
     return `dashboard_brand_impression_summary_${brandId}_${segment}`
   }
 
@@ -2055,13 +2123,17 @@ class DashboardAPI {
     const cacheKey = this.getBrandImpressionSummaryCacheKey(brandId, segment)
 
     if (!forceRefresh) {
-      const cached = this.getCachedData<BrandImpressionSummaryResponse>(cacheKey)
+      const cached =
+        this.getCachedData<BrandImpressionSummaryResponse>(cacheKey)
       if (cached) {
         return cached
       }
     }
 
-    console.log("[DashboardAPI] Fetching brand impression summary from API...", { brandId, segment })
+    console.log(
+      "[DashboardAPI] Fetching brand impression summary from API...",
+      { brandId, segment },
+    )
 
     const queryParams = new URLSearchParams()
     queryParams.append("brand_id", brandId)
@@ -2080,7 +2152,9 @@ class DashboardAPI {
 
     if (!response.ok) {
       const error: ApiError = await response.json()
-      throw new Error(error.detail || "Failed to fetch brand impression summary")
+      throw new Error(
+        error.detail || "Failed to fetch brand impression summary",
+      )
     }
 
     const data: BrandImpressionSummaryResponse = await response.json()
@@ -2107,7 +2181,9 @@ class DashboardAPI {
     })
     if (params.timeRange === "custom") {
       if (!params.startDate || !params.endDate) {
-        throw new Error("startDate and endDate are required for custom time range")
+        throw new Error(
+          "startDate and endDate are required for custom time range",
+        )
       }
       queryParams.append("start_date", params.startDate)
       queryParams.append("end_date", params.endDate)
@@ -2117,7 +2193,8 @@ class DashboardAPI {
       `${this.baseUrl}${this.apiPrefix}/dashboard/brand-ranking-trend?${queryParams}`,
       { method: "GET", headers: await this.getAuthHeaders() },
     )
-    if (response.status === 401) throw new Error("Unauthorized - Please log in again")
+    if (response.status === 401)
+      throw new Error("Unauthorized - Please log in again")
     if (!response.ok) {
       const error: ApiError = await response.json()
       throw new Error(error.detail || "Failed to fetch brand ranking trend")
@@ -2149,7 +2226,9 @@ class DashboardAPI {
     })
     if (params.timeRange === "custom") {
       if (!params.startDate || !params.endDate) {
-        throw new Error("startDate and endDate are required for custom time range")
+        throw new Error(
+          "startDate and endDate are required for custom time range",
+        )
       }
       queryParams.append("start_date", params.startDate)
       queryParams.append("end_date", params.endDate)
@@ -2159,7 +2238,8 @@ class DashboardAPI {
       `${this.baseUrl}${this.apiPrefix}/dashboard/brand-impression-trend?${queryParams}`,
       { method: "GET", headers: await this.getAuthHeaders() },
     )
-    if (response.status === 401) throw new Error("Unauthorized - Please log in again")
+    if (response.status === 401)
+      throw new Error("Unauthorized - Please log in again")
     if (!response.ok) {
       const error: ApiError = await response.json()
       throw new Error(error.detail || "Failed to fetch brand impression trend")
@@ -2195,7 +2275,10 @@ class DashboardAPI {
       if (cached) return cached
     }
 
-    const params = new URLSearchParams({ brand_id: brandId, time_range: timeRange })
+    const params = new URLSearchParams({
+      brand_id: brandId,
+      time_range: timeRange,
+    })
     if (segment) params.append("segment", segment)
     if (startDate) params.append("start_date", startDate)
     if (endDate) params.append("end_date", endDate)
@@ -2204,7 +2287,8 @@ class DashboardAPI {
       `${this.baseUrl}${this.apiPrefix}/dashboard/brand-reference-sources?${params}`,
       { headers: await this.getAuthHeaders() },
     )
-    if (response.status === 401) throw new Error("Unauthorized - Please log in again")
+    if (response.status === 401)
+      throw new Error("Unauthorized - Please log in again")
     if (!response.ok) {
       const error: ApiError = await response.json()
       throw new Error(error.detail || "Failed to fetch reference sources")
@@ -2236,7 +2320,10 @@ class DashboardAPI {
       if (cached) return cached
     }
 
-    const params = new URLSearchParams({ brand_id: brandId, time_range: timeRange })
+    const params = new URLSearchParams({
+      brand_id: brandId,
+      time_range: timeRange,
+    })
     if (segment) params.append("segment", segment)
     if (startDate) params.append("start_date", startDate)
     if (endDate) params.append("end_date", endDate)
@@ -2245,7 +2332,8 @@ class DashboardAPI {
       `${this.baseUrl}${this.apiPrefix}/dashboard/brand-customer-reviews?${params}`,
       { headers: await this.getAuthHeaders() },
     )
-    if (response.status === 401) throw new Error("Unauthorized - Please log in again")
+    if (response.status === 401)
+      throw new Error("Unauthorized - Please log in again")
     if (!response.ok) {
       const error: ApiError = await response.json()
       throw new Error(error.detail || "Failed to fetch customer reviews")
@@ -2285,7 +2373,13 @@ class DashboardAPI {
     // Fetch each segment (individually cached); run in parallel
     const results = await Promise.all(
       segments.map((seg) =>
-        this.getBrandReferenceSources({ brandId, segment: seg, timeRange, startDate, endDate }),
+        this.getBrandReferenceSources({
+          brandId,
+          segment: seg,
+          timeRange,
+          startDate,
+          endDate,
+        }),
       ),
     )
 
@@ -2293,7 +2387,10 @@ class DashboardAPI {
     const normalizeUrl = (url: string): string => {
       let u = url.toLowerCase().trim()
       for (const pfx of ["https://", "http://"]) {
-        if (u.startsWith(pfx)) { u = u.slice(pfx.length); break }
+        if (u.startsWith(pfx)) {
+          u = u.slice(pfx.length)
+          break
+        }
       }
       if (u.startsWith("www.")) u = u.slice(4)
       return u.replace(/\/+$/, "")
@@ -2349,13 +2446,22 @@ class DashboardAPI {
     // Fetch each segment (individually cached); run in parallel
     const results = await Promise.all(
       segments.map((seg) =>
-        this.getBrandCustomerReviews({ brandId, segment: seg, timeRange, startDate, endDate }),
+        this.getBrandCustomerReviews({
+          brandId,
+          segment: seg,
+          timeRange,
+          startDate,
+          endDate,
+        }),
       ),
     )
 
     // Merge and deduplicate by normalized review text
     const seenKeys = new Set<string>()
-    const merged: { review: string; sentiment: "Positive" | "Neutral" | "Negative" }[] = []
+    const merged: {
+      review: string
+      sentiment: "Positive" | "Neutral" | "Negative"
+    }[] = []
     for (const res of results) {
       for (const item of res.reviews) {
         const key = item.review.toLowerCase().trim()
@@ -2368,7 +2474,11 @@ class DashboardAPI {
 
     const data: CustomerReviewsResponse = {
       brand_id: brandId,
-      reviews: merged.map((m, i) => ({ seq: i + 1, review: m.review, sentiment: m.sentiment })),
+      reviews: merged.map((m, i) => ({
+        seq: i + 1,
+        review: m.review,
+        sentiment: m.sentiment,
+      })),
     }
     this.setCachedData(cacheKey, data)
     return data
@@ -2393,7 +2503,8 @@ class DashboardAPI {
       `${this.baseUrl}${this.apiPrefix}/dashboard/competitors-by-segment?${queryParams}`,
       { method: "GET", headers: await this.getAuthHeaders() },
     )
-    if (response.status === 401) throw new Error("Unauthorized - Please log in again")
+    if (response.status === 401)
+      throw new Error("Unauthorized - Please log in again")
     if (!response.ok) {
       const error: ApiError = await response.json()
       throw new Error(error.detail || "Failed to fetch competitors by segment")
@@ -2429,7 +2540,8 @@ class DashboardAPI {
       time_range: timeRange,
     })
     if (timeRange === "custom") {
-      if (!startDate || !endDate) throw new Error("startDate and endDate required for custom range")
+      if (!startDate || !endDate)
+        throw new Error("startDate and endDate required for custom range")
       queryParams.append("start_date", startDate)
       queryParams.append("end_date", endDate)
     }
@@ -2438,7 +2550,8 @@ class DashboardAPI {
       `${this.baseUrl}${this.apiPrefix}/dashboard/competitor-gap-trend?${queryParams}`,
       { method: "GET", headers: await this.getAuthHeaders() },
     )
-    if (response.status === 401) throw new Error("Unauthorized - Please log in again")
+    if (response.status === 401)
+      throw new Error("Unauthorized - Please log in again")
     if (!response.ok) {
       const error: ApiError = await response.json()
       throw new Error(error.detail || "Failed to fetch competitor gap trend")
@@ -2463,7 +2576,8 @@ class DashboardAPI {
     const cacheKey = `dashboard_competitor_ranking_detail_v3_${brandId}_${segment}_${competitorBrandName}_${timeRange}_${startDate ?? ""}_${endDate ?? ""}`
 
     if (!forceRefresh) {
-      const cached = this.getCachedData<CompetitorRankingDetailResponse>(cacheKey)
+      const cached =
+        this.getCachedData<CompetitorRankingDetailResponse>(cacheKey)
       if (cached) return cached
     }
 
@@ -2474,7 +2588,8 @@ class DashboardAPI {
       time_range: timeRange,
     })
     if (timeRange === "custom") {
-      if (!startDate || !endDate) throw new Error("startDate and endDate required for custom range")
+      if (!startDate || !endDate)
+        throw new Error("startDate and endDate required for custom range")
       queryParams.append("start_date", startDate)
       queryParams.append("end_date", endDate)
     }
@@ -2483,10 +2598,13 @@ class DashboardAPI {
       `${this.baseUrl}${this.apiPrefix}/dashboard/competitor-ranking-detail?${queryParams}`,
       { method: "GET", headers: await this.getAuthHeaders() },
     )
-    if (response.status === 401) throw new Error("Unauthorized - Please log in again")
+    if (response.status === 401)
+      throw new Error("Unauthorized - Please log in again")
     if (!response.ok) {
       const error: ApiError = await response.json()
-      throw new Error(error.detail || "Failed to fetch competitor ranking detail")
+      throw new Error(
+        error.detail || "Failed to fetch competitor ranking detail",
+      )
     }
 
     const data: CompetitorRankingDetailResponse = await response.json()
@@ -2508,7 +2626,8 @@ class DashboardAPI {
     const cacheKey = `dashboard_ref_source_comparison_${brandId}_${segment}_${competitorBrandName}_${timeRange}_${startDate ?? ""}_${endDate ?? ""}`
 
     if (!forceRefresh) {
-      const cached = this.getCachedData<ReferenceSourceComparisonResponse>(cacheKey)
+      const cached =
+        this.getCachedData<ReferenceSourceComparisonResponse>(cacheKey)
       if (cached) return cached
     }
 
@@ -2519,7 +2638,8 @@ class DashboardAPI {
       time_range: timeRange,
     })
     if (timeRange === "custom") {
-      if (!startDate || !endDate) throw new Error("startDate and endDate required for custom range")
+      if (!startDate || !endDate)
+        throw new Error("startDate and endDate required for custom range")
       queryParams.append("start_date", startDate)
       queryParams.append("end_date", endDate)
     }
@@ -2528,10 +2648,13 @@ class DashboardAPI {
       `${this.baseUrl}${this.apiPrefix}/dashboard/reference-source-comparison?${queryParams}`,
       { method: "GET", headers: await this.getAuthHeaders() },
     )
-    if (response.status === 401) throw new Error("Unauthorized - Please log in again")
+    if (response.status === 401)
+      throw new Error("Unauthorized - Please log in again")
     if (!response.ok) {
       const error: ApiError = await response.json()
-      throw new Error(error.detail || "Failed to fetch reference source comparison")
+      throw new Error(
+        error.detail || "Failed to fetch reference source comparison",
+      )
     }
 
     const data: ReferenceSourceComparisonResponse = await response.json()
@@ -2564,7 +2687,8 @@ class DashboardAPI {
       time_range: timeRange,
     })
     if (timeRange === "custom") {
-      if (!startDate || !endDate) throw new Error("startDate and endDate required for custom range")
+      if (!startDate || !endDate)
+        throw new Error("startDate and endDate required for custom range")
       queryParams.append("start_date", startDate)
       queryParams.append("end_date", endDate)
     }
@@ -2573,7 +2697,8 @@ class DashboardAPI {
       `${this.baseUrl}${this.apiPrefix}/dashboard/sentiment-comparison?${queryParams}`,
       { method: "GET", headers: await this.getAuthHeaders() },
     )
-    if (response.status === 401) throw new Error("Unauthorized - Please log in again")
+    if (response.status === 401)
+      throw new Error("Unauthorized - Please log in again")
     if (!response.ok) {
       const error: ApiError = await response.json()
       throw new Error(error.detail || "Failed to fetch sentiment comparison")
@@ -2608,7 +2733,8 @@ class DashboardAPI {
       `${this.baseUrl}${this.apiPrefix}/dashboard/competitor-gap-summary?${queryParams}`,
       { method: "GET", headers: await this.getAuthHeaders() },
     )
-    if (response.status === 401) throw new Error("Unauthorized - Please log in again")
+    if (response.status === 401)
+      throw new Error("Unauthorized - Please log in again")
     if (!response.ok) {
       const error: ApiError = await response.json()
       throw new Error(error.detail || "Failed to fetch competitor gap summary")
@@ -2636,7 +2762,11 @@ class DashboardAPI {
       if (cached) return cached
     }
 
-    const queryParams = new URLSearchParams({ brand_id: brandId, segment, time_range: timeRange })
+    const queryParams = new URLSearchParams({
+      brand_id: brandId,
+      segment,
+      time_range: timeRange,
+    })
     if (startDate) queryParams.set("start_date", startDate)
     if (endDate) queryParams.set("end_date", endDate)
 
@@ -2644,7 +2774,8 @@ class DashboardAPI {
       `${this.baseUrl}${this.apiPrefix}/dashboard/market-dynamic?${queryParams}`,
       { method: "GET", headers: await this.getAuthHeaders() },
     )
-    if (response.status === 401) throw new Error("Unauthorized - Please log in again")
+    if (response.status === 401)
+      throw new Error("Unauthorized - Please log in again")
     if (!response.ok) {
       const error: ApiError = await response.json()
       throw new Error(error.detail || "Failed to fetch market dynamic data")

@@ -3,9 +3,10 @@ import { useEffect, useState } from "react"
 import {
   type CompetitorDetailRow,
   type CompetitorDetailTableResponse,
-  type TimeRange,
   dashboardAPI,
+  type TimeRange,
 } from "@/clients/dashboard"
+import { tableClasses } from "@/components/app/dashboard/components/tableTheme"
 import {
   Table,
   TableBody,
@@ -23,7 +24,12 @@ interface CompetitorDetailTableProps {
   customEndDate?: string
 }
 
-type MetricKey = "awareness_score" | "share_of_visibility" | "search_share_index" | "position_strength" | "search_momentum"
+type MetricKey =
+  | "awareness_score"
+  | "share_of_visibility"
+  | "search_share_index"
+  | "position_strength"
+  | "search_momentum"
 
 const METRIC_COLUMNS: { key: MetricKey; label: string; isRatio: boolean }[] = [
   { key: "awareness_score", label: "Awareness", isRatio: false },
@@ -86,7 +92,9 @@ export function CompetitorDetailTable({
         setRows(data.rows)
       } catch (err) {
         setError(
-          err instanceof Error ? err.message : "Failed to load competitor detail table",
+          err instanceof Error
+            ? err.message
+            : "Failed to load competitor detail table",
         )
       } finally {
         setIsLoading(false)
@@ -122,30 +130,51 @@ export function CompetitorDetailTable({
   }
 
   return (
-    <div className="overflow-x-auto">
-      <Table>
-        <TableHeader>
+    <div className={`overflow-x-auto ${tableClasses.wrapper}`}>
+      <Table className={tableClasses.table}>
+        <TableHeader className={tableClasses.headerRow}>
           <TableRow>
-            <TableHead className="font-semibold">Segment</TableHead>
+            <TableHead className={tableClasses.head}>Segment</TableHead>
             {METRIC_COLUMNS.map((col) => (
-              <TableHead key={col.key} className="text-right font-semibold">
+              <TableHead
+                key={col.key}
+                className={`${tableClasses.head} ${tableClasses.cellRight}`}
+              >
                 {col.label}
               </TableHead>
             ))}
-            <TableHead className="text-right font-semibold">Date</TableHead>
-            <TableHead className="text-right font-semibold">Segment Gap</TableHead>
+            <TableHead
+              className={`${tableClasses.head} ${tableClasses.cellRight}`}
+            >
+              Date
+            </TableHead>
+            <TableHead
+              className={`${tableClasses.head} ${tableClasses.cellRight}`}
+            >
+              Segment Gap
+            </TableHead>
           </TableRow>
         </TableHeader>
         <TableBody>
           {rows.map((row, idx) => (
-            <TableRow key={`${row.segment}-${row.date}-${idx}`}>
-              <TableCell className="font-medium">{row.segment}</TableCell>
+            <TableRow
+              key={`${row.segment}-${row.date}-${idx}`}
+              className={tableClasses.row}
+            >
+              <TableCell className="font-medium text-slate-800">
+                {row.segment}
+              </TableCell>
               {METRIC_COLUMNS.map((col) => (
-                <TableCell key={col.key} className="text-right">
+                <TableCell
+                  key={col.key}
+                  className={`${tableClasses.cell} ${tableClasses.cellRight}`}
+                >
                   {formatValue(row[col.key], col.isRatio)}
                 </TableCell>
               ))}
-              <TableCell className="text-right text-slate-600">
+              <TableCell
+                className={`${tableClasses.cellMuted} ${tableClasses.cellRight}`}
+              >
                 {row.date}
               </TableCell>
               <TableCell className={getGapClassName(row.segment_gap)}>

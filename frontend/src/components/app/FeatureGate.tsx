@@ -19,7 +19,11 @@ interface FeatureGateProps {
  * If the user lacks access, renders a locked overlay with an upgrade CTA.
  * Children are kept in the DOM (not unmounted) to preserve layout.
  */
-export function FeatureGate({ feature, children, upgradeMessage }: FeatureGateProps) {
+export function FeatureGate({
+  feature,
+  children,
+  upgradeMessage,
+}: FeatureGateProps) {
   const { canAccess, tier } = useEntitlement()
 
   if (canAccess(feature)) {
@@ -36,12 +40,12 @@ export function FeatureGate({ feature, children, upgradeMessage }: FeatureGatePr
       </div>
 
       {/* Lock overlay */}
-      <div className="absolute inset-0 flex flex-col items-center justify-center bg-white/60 dark:bg-gray-900/60 rounded-lg z-10">
+      <div className="absolute inset-0 flex flex-col items-center justify-center bg-white/60 dark:bg-slate-950/60 rounded-lg z-10">
         <div className="flex flex-col items-center gap-2 p-4 text-center">
-          <div className="rounded-full bg-gray-100 dark:bg-gray-800 p-2">
-            <Lock className="h-5 w-5 text-gray-500" />
+          <div className="rounded-full bg-slate-100 dark:bg-slate-900 p-2">
+            <Lock className="h-5 w-5 text-slate-500" />
           </div>
-          <p className="text-sm font-medium text-gray-700 dark:text-gray-300">
+          <p className="text-sm font-medium text-slate-700 dark:text-slate-300">
             {message || "Upgrade to unlock this feature."}
           </p>
           <a

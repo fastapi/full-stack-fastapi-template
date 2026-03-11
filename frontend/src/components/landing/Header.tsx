@@ -14,13 +14,19 @@ export default function Header() {
   ]
 
   return (
-    <header className="sticky top-0 z-50 bg-white/80 dark:bg-gray-900/80 backdrop-blur-md border-b border-gray-200 dark:border-gray-800">
+    <header className="sticky top-0 z-50 bg-white/80 dark:bg-slate-950/80 backdrop-blur-md border-b border-slate-200 dark:border-slate-800">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between items-center h-16">
           {/* Logo */}
           <div className="flex items-center gap-2">
-            <img src="/assets/images/Kila_logo.svg" alt="Kila logo" className="h-8 w-auto" />
-            <span className="font-funnel-sans font-bold text-xl text-black dark:text-white tracking-tight">Kila</span>
+            <img
+              src="/assets/images/Kila_logo.svg"
+              alt="Kila logo"
+              className="h-8 w-auto"
+            />
+            <span className="font-display font-bold text-xl text-slate-900 dark:text-white tracking-tight">
+              Kila
+            </span>
           </div>
 
           {/* Desktop Navigation */}
@@ -39,7 +45,7 @@ export default function Header() {
 
               {productDropdownOpen && (
                 <div
-                  className="absolute top-full left-0 mt-2 w-56 bg-white dark:bg-gray-800 rounded-lg shadow-lg border border-gray-200 dark:border-gray-700 py-2"
+                  className="absolute top-full left-0 mt-2 w-56 bg-white dark:bg-slate-900 rounded-lg shadow-lg border border-slate-200 dark:border-slate-800 py-2"
                   onMouseEnter={() => setProductDropdownOpen(true)}
                   onMouseLeave={() => setProductDropdownOpen(false)}
                 >
@@ -47,7 +53,7 @@ export default function Header() {
                     <a
                       key={product.name}
                       href={product.href}
-                      className="block px-4 py-2 font-funnel-sans font-normal text-sm leading-[1.7] text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 transition"
+                      className="block px-4 py-2 font-body text-sm leading-relaxed text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 transition"
                     >
                       {product.name}
                     </a>
@@ -59,13 +65,13 @@ export default function Header() {
 
             <a
               href="#company"
-              className="font-funnel-sans text-sm tracking-[0.04em] text-gray-700 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400 transition"
+              className="font-body text-sm text-slate-600 dark:text-slate-300 hover:text-blue-600 dark:hover:text-blue-400 transition"
             >
               Features
             </a>
             <a
               href="#pricing"
-              className="font-funnel-sans text-sm tracking-[0.04em] text-gray-700 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400 transition"
+              className="font-body text-sm text-slate-600 dark:text-slate-300 hover:text-blue-600 dark:hover:text-blue-400 transition"
             >
               Pricing
             </a>
@@ -85,7 +91,8 @@ export default function Header() {
 
           {/* Mobile menu button */}
           <button
-            className="md:hidden text-gray-700 dark:text-gray-300"
+            type="button"
+            className="md:hidden text-slate-700 dark:text-slate-300"
             onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
           >
             {mobileMenuOpen ? <X size={24} /> : <Menu size={24} />}
@@ -94,17 +101,17 @@ export default function Header() {
 
         {/* Mobile Menu */}
         {mobileMenuOpen && (
-          <div className="md:hidden py-4 border-t border-gray-200 dark:border-gray-800">
+          <div className="md:hidden py-4 border-t border-slate-200 dark:border-slate-800">
             <nav className="flex flex-col space-y-4">
               <div className="space-y-2">
-                <div className="font-funnel-sans font-medium text-[11px] tracking-[0.2em] uppercase text-gray-500 dark:text-gray-400 px-2">
+                <div className="font-body font-medium text-xs tracking-[0.2em] uppercase text-slate-500 dark:text-slate-400 px-2">
                   Products
                 </div>
                 {products.map((product) => (
                   <a
                     key={product.name}
                     href={product.href}
-                    className="block px-4 py-2 font-funnel-sans font-normal text-sm leading-[1.7] text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-lg transition"
+                    className="block px-4 py-2 font-body text-sm leading-relaxed text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-lg transition"
                   >
                     {product.name}
                   </a>
@@ -112,13 +119,13 @@ export default function Header() {
               </div>
               <a
                 href="#company"
-                className="px-2 font-funnel-sans text-sm tracking-[0.04em] text-gray-700 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400 transition"
+                className="px-2 font-body text-sm text-slate-700 dark:text-slate-300 hover:text-blue-600 dark:hover:text-blue-400 transition"
               >
                 Company
               </a>
               <a
                 href="#pricing"
-                className="px-2 font-funnel-sans text-sm tracking-[0.04em] text-gray-700 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400 transition"
+                className="px-2 font-body text-sm text-slate-700 dark:text-slate-300 hover:text-blue-600 dark:hover:text-blue-400 transition"
               >
                 Pricing
               </a>

@@ -13,6 +13,12 @@ import {
   YAxis,
 } from "recharts"
 import type { CompetitorGapTrendDataPoint } from "@/clients/dashboard"
+import {
+  axisProps,
+  CHART_COLORS,
+  gridProps,
+  tooltipClasses,
+} from "@/components/app/dashboard/components/chartTheme"
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs"
 
 // ── Types ──────────────────────────────────────────────────────────────────────
@@ -65,8 +71,8 @@ const GROUPS: GroupConfig[] = [
     brandKey: "brand_visibility",
     compKey: "comp_visibility",
     gapKey: "visibility_gap",
-    brandColor: "#6366f1",
-    compColor: "#818cf8",
+    brandColor: CHART_COLORS.blue,
+    compColor: CHART_COLORS.indigoLight,
     gapColor: "#3730a3",
     yTickFormatter: (v) => `${v}%`,
     tooltipBrandFmt: (v) => `${v.toFixed(1)}%`,
@@ -81,8 +87,8 @@ const GROUPS: GroupConfig[] = [
     brandKey: "brand_median_ranking",
     compKey: "comp_median_ranking",
     gapKey: "position_gap",
-    brandColor: "#f97316",
-    compColor: "#fb923c",
+    brandColor: CHART_COLORS.amber,
+    compColor: CHART_COLORS.orangeLight,
     gapColor: "#c2410c",
     yTickFormatter: (v) => `#${Math.round(v)}`,
     tooltipBrandFmt: (v) => `#${Math.round(v)}`,
@@ -97,8 +103,8 @@ const GROUPS: GroupConfig[] = [
     brandKey: "brand_sentiment",
     compKey: "comp_sentiment",
     gapKey: "sentiment_gap",
-    brandColor: "#10b981",
-    compColor: "#34d399",
+    brandColor: CHART_COLORS.green,
+    compColor: CHART_COLORS.greenLight,
     gapColor: "#065f46",
     yTickFormatter: (v) => `${v.toFixed(0)}`,
     tooltipBrandFmt: (v) => v.toFixed(1),
@@ -120,14 +126,23 @@ function buildChartData(points: CompetitorGapTrendDataPoint[]): ChartPoint[] {
   return points.map((p) => ({
     date: p.date,
     displayDate: formatDate(p.date),
-    brand_visibility: p.brand_visibility != null ? +p.brand_visibility.toFixed(1) : null,
-    comp_visibility: p.comp_visibility != null ? +p.comp_visibility.toFixed(1) : null,
-    visibility_gap: p.visibility_gap != null ? +p.visibility_gap.toFixed(1) : null,
-    brand_median_ranking: p.brand_median_ranking != null ? +p.brand_median_ranking.toFixed(1) : null,
-    comp_median_ranking: p.comp_median_ranking != null ? +p.comp_median_ranking.toFixed(1) : null,
+    brand_visibility:
+      p.brand_visibility != null ? +p.brand_visibility.toFixed(1) : null,
+    comp_visibility:
+      p.comp_visibility != null ? +p.comp_visibility.toFixed(1) : null,
+    visibility_gap:
+      p.visibility_gap != null ? +p.visibility_gap.toFixed(1) : null,
+    brand_median_ranking:
+      p.brand_median_ranking != null
+        ? +p.brand_median_ranking.toFixed(1)
+        : null,
+    comp_median_ranking:
+      p.comp_median_ranking != null ? +p.comp_median_ranking.toFixed(1) : null,
     position_gap: p.position_gap != null ? +p.position_gap.toFixed(1) : null,
-    brand_sentiment: p.brand_sentiment != null ? +p.brand_sentiment.toFixed(1) : null,
-    comp_sentiment: p.comp_sentiment != null ? +p.comp_sentiment.toFixed(1) : null,
+    brand_sentiment:
+      p.brand_sentiment != null ? +p.brand_sentiment.toFixed(1) : null,
+    comp_sentiment:
+      p.comp_sentiment != null ? +p.comp_sentiment.toFixed(1) : null,
     sentiment_gap: p.sentiment_gap != null ? +p.sentiment_gap.toFixed(1) : null,
   }))
 }
@@ -155,46 +170,61 @@ const SubChartTooltip = ({
 
   const find = (key: string) => payload.find((e: any) => e.dataKey === key)
   const brandEntry = find(group.brandKey as string)
-  const compEntry  = find(group.compKey as string)
-  const gapEntry   = find(group.gapKey as string)
+  const compEntry = find(group.compKey as string)
+  const gapEntry = find(group.gapKey as string)
 
   const brandVal = brandEntry?.value
-  const compVal  = compEntry?.value
-  const gapVal   = gapEntry?.value
+  const compVal = compEntry?.value
+  const gapVal = gapEntry?.value
 
   return (
-    <div className="bg-gray-900 border border-gray-700 rounded-xl shadow-xl p-3 min-w-[180px]">
-      <p className="text-[10px] font-semibold text-gray-400 mb-2 uppercase tracking-wide">{label}</p>
+    <div className={tooltipClasses.container}>
+      <p className={tooltipClasses.label}>{label}</p>
       {brandVal != null && (
-        <div className="flex items-center justify-between gap-4 text-[10px] py-0.5">
+        <div className={tooltipClasses.row}>
           <div className="flex items-center gap-1.5">
-            <span className="w-2 h-2 rounded-full flex-shrink-0" style={{ backgroundColor: group.brandColor }} />
-            <span className="text-gray-300">{brandName}</span>
+            <span
+              className="w-2 h-2 rounded-full flex-shrink-0"
+              style={{ backgroundColor: group.brandColor }}
+            />
+            <span className={tooltipClasses.name}>{brandName}</span>
           </div>
-          <span className="font-semibold text-white">{group.tooltipBrandFmt(brandVal)}</span>
+          <span className={tooltipClasses.value}>
+            {group.tooltipBrandFmt(brandVal)}
+          </span>
         </div>
       )}
       {compVal != null && (
-        <div className="flex items-center justify-between gap-4 text-[10px] py-0.5">
+        <div className={tooltipClasses.row}>
           <div className="flex items-center gap-1.5">
-            <span className="w-2 h-2 rounded-full flex-shrink-0" style={{ backgroundColor: group.compColor }} />
-            <span className="text-gray-300">{competitorName}</span>
+            <span
+              className="w-2 h-2 rounded-full flex-shrink-0"
+              style={{ backgroundColor: group.compColor }}
+            />
+            <span className={tooltipClasses.name}>{competitorName}</span>
           </div>
-          <span className="font-semibold text-white">{group.tooltipCompFmt(compVal)}</span>
+          <span className={tooltipClasses.value}>
+            {group.tooltipCompFmt(compVal)}
+          </span>
         </div>
       )}
       {gapVal != null && (
-        <div className="flex items-center justify-between gap-4 text-[10px] py-0.5">
+        <div className={tooltipClasses.row}>
           <div className="flex items-center gap-1.5">
-            <span className="w-2 h-2 rounded-full flex-shrink-0" style={{ backgroundColor: group.gapColor }} />
-            <span className="text-gray-300">Gap</span>
+            <span
+              className="w-2 h-2 rounded-full flex-shrink-0"
+              style={{ backgroundColor: group.gapColor }}
+            />
+            <span className={tooltipClasses.name}>Gap</span>
           </div>
-          <span className={`font-semibold ${gapVal > 0 ? "text-emerald-400" : gapVal < 0 ? "text-red-400" : "text-gray-400"}`}>
+          <span
+            className={`font-semibold ${gapVal > 0 ? "text-emerald-400" : gapVal < 0 ? "text-red-400" : "text-slate-400"}`}
+          >
             {group.tooltipGapFmt(gapVal)}
           </span>
         </div>
       )}
-      <p className="text-[9px] text-gray-500 mt-2">{group.gapNote}</p>
+      <p className={tooltipClasses.note}>{group.gapNote}</p>
     </div>
   )
 }
@@ -209,26 +239,43 @@ interface SubChartProps {
   competitorName: string
 }
 
-function SubChart({ group, data, chartType, brandName, competitorName }: SubChartProps) {
-  const axisProps = {
-    tick: { fontSize: 10, fill: "#94a3b8" },
-    axisLine: false,
-    tickLine: false,
-  }
-
+function SubChart({
+  group,
+  data,
+  chartType,
+  brandName,
+  competitorName,
+}: SubChartProps) {
   const tooltipContent = (props: any) => (
-    <SubChartTooltip {...props} group={group} brandName={brandName} competitorName={competitorName} />
+    <SubChartTooltip
+      {...props}
+      group={group}
+      brandName={brandName}
+      competitorName={competitorName}
+    />
   )
 
   return (
     <div className="w-full h-40">
       <ResponsiveContainer width="100%" height="100%">
         {chartType === "line" ? (
-          <LineChart data={data} margin={{ top: 4, right: 4, left: -16, bottom: 0 }}>
-            <CartesianGrid strokeDasharray="3 3" stroke="#f1f5f9" vertical={false} />
-            <ReferenceLine y={0} stroke="#cbd5e1" strokeDasharray="4 2" strokeWidth={1} />
+          <LineChart
+            data={data}
+            margin={{ top: 4, right: 4, left: -16, bottom: 0 }}
+          >
+            <CartesianGrid {...gridProps} />
+            <ReferenceLine
+              y={0}
+              stroke="#cbd5e1"
+              strokeDasharray="4 2"
+              strokeWidth={1}
+            />
             <XAxis dataKey="displayDate" {...axisProps} />
-            <YAxis {...axisProps} reversed={group.reversed} tickFormatter={group.yTickFormatter} />
+            <YAxis
+              {...axisProps}
+              reversed={group.reversed}
+              tickFormatter={group.yTickFormatter}
+            />
             <Tooltip content={tooltipContent} />
             {/* Brand — solid */}
             <Line
@@ -238,7 +285,12 @@ function SubChart({ group, data, chartType, brandName, competitorName }: SubChar
               strokeWidth={2}
               dot={false}
               connectNulls={false}
-              activeDot={{ r: 3, strokeWidth: 2, stroke: "#fff", fill: group.brandColor }}
+              activeDot={{
+                r: 3,
+                strokeWidth: 2,
+                stroke: "#fff",
+                fill: group.brandColor,
+              }}
             />
             {/* Competitor — long dash */}
             <Line
@@ -249,7 +301,12 @@ function SubChart({ group, data, chartType, brandName, competitorName }: SubChar
               strokeDasharray="5 3"
               dot={false}
               connectNulls={false}
-              activeDot={{ r: 3, strokeWidth: 2, stroke: "#fff", fill: group.compColor }}
+              activeDot={{
+                r: 3,
+                strokeWidth: 2,
+                stroke: "#fff",
+                fill: group.compColor,
+              }}
             />
             {/* Gap — dot */}
             <Line
@@ -260,19 +317,50 @@ function SubChart({ group, data, chartType, brandName, competitorName }: SubChar
               strokeDasharray="2 4"
               dot={false}
               connectNulls={false}
-              activeDot={{ r: 3, strokeWidth: 2, stroke: "#fff", fill: group.gapColor }}
+              activeDot={{
+                r: 3,
+                strokeWidth: 2,
+                stroke: "#fff",
+                fill: group.gapColor,
+              }}
             />
           </LineChart>
         ) : (
-          <BarChart data={data} margin={{ top: 4, right: 4, left: -16, bottom: 0 }} barCategoryGap="25%">
-            <CartesianGrid strokeDasharray="3 3" stroke="#f1f5f9" vertical={false} />
-            <ReferenceLine y={0} stroke="#cbd5e1" strokeDasharray="4 2" strokeWidth={1} />
+          <BarChart
+            data={data}
+            margin={{ top: 4, right: 4, left: -16, bottom: 0 }}
+            barCategoryGap="25%"
+          >
+            <CartesianGrid {...gridProps} />
+            <ReferenceLine
+              y={0}
+              stroke="#cbd5e1"
+              strokeDasharray="4 2"
+              strokeWidth={1}
+            />
             <XAxis dataKey="displayDate" {...axisProps} />
-            <YAxis {...axisProps} reversed={group.reversed} tickFormatter={group.yTickFormatter} />
+            <YAxis
+              {...axisProps}
+              reversed={group.reversed}
+              tickFormatter={group.yTickFormatter}
+            />
             <Tooltip content={tooltipContent} />
-            <Bar dataKey={group.brandKey as string} fill={group.brandColor} radius={[2, 2, 0, 0]} />
-            <Bar dataKey={group.compKey as string} fill={group.compColor} radius={[2, 2, 0, 0]} />
-            <Bar dataKey={group.gapKey as string} fill={group.gapColor} fillOpacity={0.7} radius={[2, 2, 0, 0]} />
+            <Bar
+              dataKey={group.brandKey as string}
+              fill={group.brandColor}
+              radius={[2, 2, 0, 0]}
+            />
+            <Bar
+              dataKey={group.compKey as string}
+              fill={group.compColor}
+              radius={[2, 2, 0, 0]}
+            />
+            <Bar
+              dataKey={group.gapKey as string}
+              fill={group.gapColor}
+              fillOpacity={0.7}
+              radius={[2, 2, 0, 0]}
+            />
           </BarChart>
         )}
       </ResponsiveContainer>
@@ -282,24 +370,49 @@ function SubChart({ group, data, chartType, brandName, competitorName }: SubChar
 
 // ── Shared legend strip ────────────────────────────────────────────────────────
 
-function SharedLegend({ brandName, competitorName }: { brandName: string; competitorName: string }) {
+function SharedLegend({
+  brandName,
+  competitorName,
+}: {
+  brandName: string
+  competitorName: string
+}) {
   return (
-    <div className="flex flex-wrap items-center justify-center gap-x-4 gap-y-1 text-[10px] text-gray-500 mt-1">
+    <div className="flex flex-wrap items-center justify-center gap-x-4 gap-y-1 text-xs text-slate-500 mt-1">
       <div className="flex items-center gap-1.5">
         <svg width="18" height="8" className="flex-shrink-0">
+          <title>Brand trend line</title>
           <line x1="0" y1="4" x2="18" y2="4" stroke="#6366f1" strokeWidth="2" />
         </svg>
         <span>{brandName}</span>
       </div>
       <div className="flex items-center gap-1.5">
         <svg width="18" height="8" className="flex-shrink-0">
-          <line x1="0" y1="4" x2="18" y2="4" stroke="#6366f1" strokeWidth="2" strokeDasharray="5 3" />
+          <title>Competitor trend line</title>
+          <line
+            x1="0"
+            y1="4"
+            x2="18"
+            y2="4"
+            stroke="#6366f1"
+            strokeWidth="2"
+            strokeDasharray="5 3"
+          />
         </svg>
         <span>{competitorName}</span>
       </div>
       <div className="flex items-center gap-1.5">
         <svg width="18" height="8" className="flex-shrink-0">
-          <line x1="0" y1="4" x2="18" y2="4" stroke="#94a3b8" strokeWidth="1.5" strokeDasharray="2 4" />
+          <title>Gap line</title>
+          <line
+            x1="0"
+            y1="4"
+            x2="18"
+            y2="4"
+            stroke="#94a3b8"
+            strokeWidth="1.5"
+            strokeDasharray="2 4"
+          />
         </svg>
         <span>Gap</span>
       </div>
@@ -359,7 +472,7 @@ export function CompetitorGapTrendChart({
                 type="button"
                 onClick={() => toggleGroup(g.key)}
                 className={[
-                  "px-2 py-0.5 rounded text-[10px] font-medium transition-colors whitespace-nowrap",
+                  "px-2 py-0.5 rounded text-xs font-medium transition-colors whitespace-nowrap",
                   active
                     ? "text-white"
                     : "bg-slate-100 text-slate-400 hover:bg-slate-200",
@@ -373,7 +486,10 @@ export function CompetitorGapTrendChart({
         </div>
 
         {/* Line / Bar toggle */}
-        <Tabs value={chartType} onValueChange={(v) => setChartType(v as "line" | "bar")}>
+        <Tabs
+          value={chartType}
+          onValueChange={(v) => setChartType(v as "line" | "bar")}
+        >
           <TabsList className="h-7">
             <TabsTrigger value="line" className="h-5 px-2">
               <ChartLine size={13} />
@@ -393,7 +509,7 @@ export function CompetitorGapTrendChart({
         <div key={g.key}>
           {idx > 0 && <div className="h-px w-full bg-blue-100 my-4" />}
           <p
-            className="text-[10px] font-semibold uppercase tracking-wide mb-1"
+            className="text-xs font-semibold uppercase tracking-wide mb-1"
             style={{ color: g.brandColor }}
           >
             {g.label}

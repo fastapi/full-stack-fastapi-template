@@ -10,10 +10,18 @@
  * - Loads existing profile data from backend
  */
 
-import { Briefcase, Building2, Loader2, Mail, Pencil, Phone, User } from "lucide-react"
+import {
+  Briefcase,
+  Building2,
+  Loader2,
+  Mail,
+  Pencil,
+  Phone,
+  User,
+} from "lucide-react"
 import { useCallback, useEffect, useState } from "react"
 import { toast } from "sonner"
-import { profileAPI, type ProfileResponse } from "@/clients/profile"
+import { type ProfileResponse, profileAPI } from "@/clients/profile"
 import { Button } from "@/components/ui/button"
 import {
   Card,
@@ -248,7 +256,7 @@ export default function UserProfile() {
           <Card>
             <CardContent className="flex flex-col items-center justify-center h-64">
               <Loader2 className="h-8 w-8 animate-spin text-blue-600" />
-              <p className="mt-4 text-sm text-gray-500">Loading profile...</p>
+              <p className="mt-4 text-sm text-slate-500">Loading profile...</p>
             </CardContent>
           </Card>
         </div>
@@ -322,7 +330,10 @@ export default function UserProfile() {
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                   <div className="space-y-2">
                     <Label htmlFor="firstName">
-                      First Name {isEditMode && <span className="text-destructive">*</span>}
+                      First Name{" "}
+                      {isEditMode && (
+                        <span className="text-destructive">*</span>
+                      )}
                     </Label>
                     <Input
                       id="firstName"
@@ -361,7 +372,10 @@ export default function UserProfile() {
 
                   <div className="space-y-2">
                     <Label htmlFor="lastName">
-                      Last Name {isEditMode && <span className="text-destructive">*</span>}
+                      Last Name{" "}
+                      {isEditMode && (
+                        <span className="text-destructive">*</span>
+                      )}
                     </Label>
                     <Input
                       id="lastName"
@@ -390,10 +404,7 @@ export default function UserProfile() {
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div className="space-y-2">
-                    <Label
-                      htmlFor="phone"
-                      className="flex items-center gap-2"
-                    >
+                    <Label htmlFor="phone" className="flex items-center gap-2">
                       <Phone className="h-4 w-4" />
                       Phone Number
                     </Label>
@@ -408,12 +419,12 @@ export default function UserProfile() {
                   </div>
 
                   <div className="space-y-2">
-                    <Label
-                      htmlFor="email"
-                      className="flex items-center gap-2"
-                    >
+                    <Label htmlFor="email" className="flex items-center gap-2">
                       <Mail className="h-4 w-4" />
-                      Email {isEditMode && <span className="text-destructive">*</span>}
+                      Email{" "}
+                      {isEditMode && (
+                        <span className="text-destructive">*</span>
+                      )}
                     </Label>
                     <Input
                       id="email"
@@ -450,7 +461,10 @@ export default function UserProfile() {
                       className="flex items-center gap-2"
                     >
                       <Building2 className="h-4 w-4" />
-                      Company Name {isEditMode && <span className="text-destructive">*</span>}
+                      Company Name{" "}
+                      {isEditMode && (
+                        <span className="text-destructive">*</span>
+                      )}
                     </Label>
                     <Input
                       id="companyName"
@@ -481,20 +495,22 @@ export default function UserProfile() {
                       </p>
                     )}
                     {/* Company Autocomplete Dropdown */}
-                    {isEditMode && showCompanyDropdown && companyOptions.length > 0 && (
-                      <div className="absolute z-10 w-full mt-1 bg-white border border-gray-200 rounded-md shadow-lg max-h-60 overflow-auto">
-                        {companyOptions.map((option) => (
-                          <button
-                            key={option.company_id}
-                            type="button"
-                            className="w-full px-4 py-2 text-left hover:bg-gray-100 focus:bg-gray-100 focus:outline-none"
-                            onClick={() => handleCompanySelect(option)}
-                          >
-                            {option.company_name}
-                          </button>
-                        ))}
-                      </div>
-                    )}
+                    {isEditMode &&
+                      showCompanyDropdown &&
+                      companyOptions.length > 0 && (
+                        <div className="absolute z-10 w-full mt-1 bg-white border border-slate-200 rounded-md shadow-lg max-h-60 overflow-auto">
+                          {companyOptions.map((option) => (
+                            <button
+                              key={option.company_id}
+                              type="button"
+                              className="w-full px-4 py-2 text-left hover:bg-slate-100 focus:bg-slate-100 focus:outline-none"
+                              onClick={() => handleCompanySelect(option)}
+                            >
+                              {option.company_name}
+                            </button>
+                          ))}
+                        </div>
+                      )}
                     {isEditMode && searchingCompanies && (
                       <p className="text-xs text-muted-foreground mt-1">
                         Searching...

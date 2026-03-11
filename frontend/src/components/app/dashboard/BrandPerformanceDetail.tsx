@@ -3,8 +3,8 @@ import { useEffect, useState } from "react"
 import {
   type BrandOverviewDataPoint,
   type BrandSegmentsResponse,
-  type TimeRange,
   dashboardAPI,
+  type TimeRange,
 } from "@/clients/dashboard"
 import { DashboardPageLayout } from "@/components/app/dashboard/components/DashboardPageLayout"
 import { PerformanceChart } from "@/components/app/dashboard/components/PerformanceChart"
@@ -155,7 +155,8 @@ function PerformanceDetailContent({
               </span>
             </CardTitle>
             <CardDescription>
-              Share of Visibility, Search Share Index, Position Strength, and Momentum over time
+              Share of Visibility, Search Share Index, Position Strength, and
+              Momentum over time
             </CardDescription>
             <div className="h-px w-full bg-slate-200" />
           </CardHeader>
@@ -163,7 +164,9 @@ function PerformanceDetailContent({
             {isLoadingChart ? (
               <div className="flex items-center justify-center py-16">
                 <Loader2 className="h-8 w-8 animate-spin text-slate-400" />
-                <span className="ml-3 text-slate-500">Loading chart data...</span>
+                <span className="ml-3 text-slate-500">
+                  Loading chart data...
+                </span>
               </div>
             ) : chartError ? (
               <div className="text-center py-16 text-red-500">
@@ -186,7 +189,8 @@ function PerformanceDetailContent({
             </span>
           </CardTitle>
           <CardDescription>
-            All segment metrics with search dates. Highest scores highlighted in green, lowest in red.
+            All segment metrics with search dates. Highest scores highlighted in
+            green, lowest in red.
           </CardDescription>
           <div className="h-px w-full bg-slate-200" />
         </CardHeader>
@@ -209,7 +213,13 @@ export function BrandPerformanceDetail() {
       title="Brand Performance Detail"
       description="Track your brand's search visibility rate and ranking trends"
     >
-      {({ selectedBrandId, selectedBrand, timeRange, customStartDate, customEndDate }) => (
+      {({
+        selectedBrandId,
+        selectedBrand,
+        timeRange,
+        customStartDate,
+        customEndDate,
+      }) => (
         <PerformanceDetailContent
           brandId={selectedBrandId}
           brandName={selectedBrand.brand_name}

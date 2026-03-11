@@ -33,7 +33,10 @@ interface BrandAwarenessScoreCurrentScoreProps {
   segment?: string
 }
 
-export function BrandAwarenessScoreCurrentScore({ brandId, segment = "All-Segment" }: BrandAwarenessScoreCurrentScoreProps) {
+export function BrandAwarenessScoreCurrentScore({
+  brandId,
+  segment = "All-Segment",
+}: BrandAwarenessScoreCurrentScoreProps) {
   // ============================================================================
   // State Management
   // ============================================================================
@@ -133,7 +136,7 @@ export function BrandAwarenessScoreCurrentScore({ brandId, segment = "All-Segmen
       case "down":
         return <TrendingDown className={`${iconClass} text-red-600`} />
       default:
-        return <Minus className={`${iconClass} text-gray-600`} />
+        return <Minus className={`${iconClass} text-slate-600`} />
     }
   }
 
@@ -150,7 +153,7 @@ export function BrandAwarenessScoreCurrentScore({ brandId, segment = "All-Segmen
       case "down":
         return "text-red-600"
       default:
-        return "text-gray-600"
+        return "text-slate-600"
     }
   }
 
@@ -214,6 +217,7 @@ export function BrandAwarenessScoreCurrentScore({ brandId, segment = "All-Segmen
     return (
       <div className="relative w-64 h-32 mx-auto">
         <svg viewBox="0 0 200 100" className="w-full h-full">
+          <title>Brand awareness score gauge</title>
           {/* Background arc - gray track */}
           <path
             d="M 20 90 A 80 80 0 0 1 180 90"
@@ -277,7 +281,7 @@ export function BrandAwarenessScoreCurrentScore({ brandId, segment = "All-Segmen
                 x={x}
                 y={y + 5}
                 textAnchor="middle"
-                className="text-xs fill-gray-600"
+                className="text-xs fill-slate-600"
               >
                 {num}
               </text>
@@ -294,16 +298,16 @@ export function BrandAwarenessScoreCurrentScore({ brandId, segment = "All-Segmen
 
   if (isLoading) {
     return (
-      <div className="rounded-md bg-gradient-to-b p-6 border border-gray-200 h-full w-full">
+      <div className="rounded-2xl bg-white p-6 border border-slate-200 h-full w-full shadow-sm">
         <div className="flex justify-start">
-          <h3 className="text-md font-semibold mb-4">
+          <h3 className="text-base font-semibold mb-4 text-slate-900">
             Current Awareness Score
           </h3>
         </div>
         {/* Loading spinner centered in the card */}
         <div className="flex flex-col items-center justify-center h-64">
           <Loader2 className="h-12 w-12 animate-spin text-blue-600" />
-          <p className="mt-4 text-sm text-gray-500">
+          <p className="mt-4 text-sm text-slate-500">
             Loading awareness score...
           </p>
         </div>
@@ -317,9 +321,9 @@ export function BrandAwarenessScoreCurrentScore({ brandId, segment = "All-Segmen
 
   if (error) {
     return (
-      <div className="rounded-md bg-gradient-to-b p-6 border border-gray-200 h-full w-full">
+      <div className="rounded-2xl bg-white p-6 border border-slate-200 h-full w-full shadow-sm">
         <div className="flex justify-start">
-          <h3 className="text-md font-semibold mb-4">
+          <h3 className="text-base font-semibold mb-4 text-slate-900">
             Current Awareness Score
           </h3>
         </div>
@@ -332,6 +336,7 @@ export function BrandAwarenessScoreCurrentScore({ brandId, segment = "All-Segmen
               viewBox="0 0 24 24"
               stroke="currentColor"
             >
+              <title>Warning</title>
               <path
                 strokeLinecap="round"
                 strokeLinejoin="round"
@@ -341,7 +346,7 @@ export function BrandAwarenessScoreCurrentScore({ brandId, segment = "All-Segmen
             </svg>
           </div>
           <p className="text-sm text-red-600">{error}</p>
-          <p className="text-xs text-gray-500 mt-2">
+          <p className="text-xs text-slate-500 mt-2">
             Please try refreshing the page
           </p>
         </div>
@@ -355,18 +360,18 @@ export function BrandAwarenessScoreCurrentScore({ brandId, segment = "All-Segmen
 
   if (!scoreData) {
     return (
-      <div className="rounded-md bg-gradient-to-b p-6 border border-gray-200 h-full w-full">
+      <div className="rounded-2xl bg-white p-6 border border-slate-200 h-full w-full shadow-sm">
         <div className="flex justify-start">
-          <h3 className="text-md font-semibold mb-4">
+          <h3 className="text-base font-semibold mb-4 text-slate-900">
             Current Awareness Score
           </h3>
         </div>
         {/* No data message */}
         <div className="flex flex-col items-center justify-center h-64 text-center">
-          <p className="text-sm text-gray-500">
+          <p className="text-sm text-slate-500">
             No awareness score data available
           </p>
-          <p className="text-xs text-gray-400 mt-2">
+          <p className="text-xs text-slate-400 mt-2">
             Data will appear once brand performance is tracked
           </p>
         </div>
@@ -379,10 +384,12 @@ export function BrandAwarenessScoreCurrentScore({ brandId, segment = "All-Segmen
   // ============================================================================
 
   return (
-    <div className="rounded-md bg-gradient-to-b p-6 border border-gray-200 h-full w-full">
+    <div className="rounded-2xl bg-white p-6 border border-slate-200 h-full w-full shadow-sm">
       {/* Section Header */}
       <div className="flex justify-start">
-        <h3 className="text-md font-semibold mb-4">Current Awareness Score</h3>
+        <h3 className="text-base font-semibold mb-4 text-slate-900">
+          Current Awareness Score
+        </h3>
       </div>
 
       {/* Score Display with Trend */}
@@ -402,7 +409,7 @@ export function BrandAwarenessScoreCurrentScore({ brandId, segment = "All-Segmen
       </div>
 
       {/* Trend description text */}
-      <p className="text-center text-sm text-gray-500 mb-6">
+      <p className="text-center text-sm text-slate-500 mb-6">
         {getTrend() === "up"
           ? "Improving"
           : getTrend() === "down"
@@ -435,8 +442,8 @@ export function BrandAwarenessScoreCurrentScore({ brandId, segment = "All-Segmen
       </div>
 
       {/* Brand name and date info (subtle footer) */}
-      <div className="mt-4 pt-4 border-t border-gray-100 text-center">
-        <p className="text-xs text-gray-400">
+      <div className="mt-4 pt-4 border-t border-slate-100 text-center">
+        <p className="text-xs text-slate-400">
           Brand: {scoreData.brand_name} | Updated: {scoreData.current_date}
         </p>
       </div>

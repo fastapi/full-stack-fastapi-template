@@ -2,10 +2,10 @@ import { Activity, Calendar, Loader2 } from "lucide-react"
 import { useCallback, useEffect, useState } from "react"
 import { toast } from "sonner"
 import {
+  dashboardAPI,
   type TimeRange,
   type UserBrand,
   type UserBrandsResponse,
-  dashboardAPI,
 } from "@/clients/dashboard"
 import { BrandAwarenessScore } from "@/components/app/dashboard/components/BrandAwarenessScore"
 import { CompetitorMetricsView } from "@/components/app/dashboard/components/CompetitorMetricsView"
@@ -39,7 +39,10 @@ export default function Dashboard() {
   const [timeRange, setTimeRange] = useState<TimeRange>("1month")
   const [showCustomDate, setShowCustomDate] = useState(false)
   const [customDateRange, setCustomDateRange] = useState({ start: "", end: "" })
-  const [customDateApplied, setCustomDateApplied] = useState<{ start: string; end: string } | null>(null)
+  const [customDateApplied, setCustomDateApplied] = useState<{
+    start: string
+    end: string
+  } | null>(null)
 
   // ============================================================================
   // Data Fetching
@@ -96,7 +99,10 @@ export default function Dashboard() {
   const handleCustomDateApply = () => {
     if (customDateRange.start && customDateRange.end) {
       setTimeRange("custom")
-      setCustomDateApplied({ start: customDateRange.start, end: customDateRange.end })
+      setCustomDateApplied({
+        start: customDateRange.start,
+        end: customDateRange.end,
+      })
     }
   }
 
@@ -163,7 +169,10 @@ export default function Dashboard() {
               </div>
             ) : brands.length === 0 ? (
               <div className="text-slate-500">
-                <p>No brands found. Create a project with brand settings to get started.</p>
+                <p>
+                  No brands found. Create a project with brand settings to get
+                  started.
+                </p>
               </div>
             ) : (
               <div className="flex flex-col sm:flex-row sm:items-center gap-4">
@@ -178,7 +187,9 @@ export default function Dashboard() {
                     {brands.map((brand) => (
                       <SelectItem key={brand.brand_id} value={brand.brand_id}>
                         <div className="flex items-center gap-2">
-                          <span className="font-medium">{brand.brand_name}</span>
+                          <span className="font-medium">
+                            {brand.brand_name}
+                          </span>
                           <span className="text-xs text-slate-400">
                             ({brand.project_name})
                           </span>
@@ -193,7 +204,9 @@ export default function Dashboard() {
                     {selectedBrand.project_name}
                     <span className="mx-2">|</span>
                     <span className="font-medium">Role:</span>{" "}
-                    <span className="capitalize">{selectedBrand.user_role}</span>
+                    <span className="capitalize">
+                      {selectedBrand.user_role}
+                    </span>
                   </div>
                 )}
               </div>
@@ -207,9 +220,24 @@ export default function Dashboard() {
             <Tabs defaultValue="awareness">
               <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between mb-4">
                 <TabsList className="w-full sm:w-auto">
-                  <TabsTrigger value="awareness" className="flex-1 sm:flex-none">Awareness</TabsTrigger>
-                  <TabsTrigger value="detail-metrics" className="flex-1 sm:flex-none">Detail Metrics</TabsTrigger>
-                  <TabsTrigger value="competitors" className="flex-1 sm:flex-none">Competitors</TabsTrigger>
+                  <TabsTrigger
+                    value="awareness"
+                    className="flex-1 sm:flex-none"
+                  >
+                    Awareness
+                  </TabsTrigger>
+                  <TabsTrigger
+                    value="detail-metrics"
+                    className="flex-1 sm:flex-none"
+                  >
+                    Detail Metrics
+                  </TabsTrigger>
+                  <TabsTrigger
+                    value="competitors"
+                    className="flex-1 sm:flex-none"
+                  >
+                    Competitors
+                  </TabsTrigger>
                 </TabsList>
 
                 {/* Global Time Range Selection */}
@@ -278,28 +306,42 @@ export default function Dashboard() {
               {showCustomDate && (
                 <div className="flex flex-col sm:flex-row gap-3 sm:items-end p-4 bg-gray-50 rounded-lg mb-4">
                   <div className="flex-1">
-                    <label className="text-sm font-medium text-gray-700 block mb-1">
+                    <label
+                      htmlFor="dashboard-start-date"
+                      className="text-sm font-medium text-gray-700 block mb-1"
+                    >
                       Start Date
                     </label>
                     <input
+                      id="dashboard-start-date"
                       type="date"
                       className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                       value={customDateRange.start}
                       onChange={(e) =>
-                        setCustomDateRange({ ...customDateRange, start: e.target.value })
+                        setCustomDateRange({
+                          ...customDateRange,
+                          start: e.target.value,
+                        })
                       }
                     />
                   </div>
                   <div className="flex-1">
-                    <label className="text-sm font-medium text-gray-700 block mb-1">
+                    <label
+                      htmlFor="dashboard-end-date"
+                      className="text-sm font-medium text-gray-700 block mb-1"
+                    >
                       End Date
                     </label>
                     <input
+                      id="dashboard-end-date"
                       type="date"
                       className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                       value={customDateRange.end}
                       onChange={(e) =>
-                        setCustomDateRange({ ...customDateRange, end: e.target.value })
+                        setCustomDateRange({
+                          ...customDateRange,
+                          end: e.target.value,
+                        })
                       }
                     />
                   </div>
@@ -352,7 +394,8 @@ export default function Dashboard() {
                       )}
                     </CardTitle>
                     <CardDescription>
-                      Track your brand's search visibility rate and ranking trends
+                      Track your brand's search visibility rate and ranking
+                      trends
                     </CardDescription>
                     <div className="h-px w-full bg-slate-200 shadow-[0_4px_6px_-1px_rgba(0,0,0,0.1)]" />
                   </CardHeader>
@@ -379,7 +422,8 @@ export default function Dashboard() {
                       )}
                     </CardTitle>
                     <CardDescription>
-                      Analyze competitor visibility and ranking in AI search results
+                      Analyze competitor visibility and ranking in AI search
+                      results
                     </CardDescription>
                     <div className="h-px w-full bg-slate-200 shadow-[0_4px_6px_-1px_rgba(0,0,0,0.1)]" />
                   </CardHeader>
@@ -398,15 +442,18 @@ export default function Dashboard() {
         )}
 
         {/* Empty State when no brand selected */}
-        {!isLoadingBrands && !brandsError && brands.length > 0 && !selectedBrandId && (
-          <Card className="shadow-lg">
-            <CardContent className="flex flex-col items-center justify-center h-64">
-              <p className="text-slate-500">
-                Select a brand above to view its performance metrics
-              </p>
-            </CardContent>
-          </Card>
-        )}
+        {!isLoadingBrands &&
+          !brandsError &&
+          brands.length > 0 &&
+          !selectedBrandId && (
+            <Card className="shadow-lg">
+              <CardContent className="flex flex-col items-center justify-center h-64">
+                <p className="text-slate-500">
+                  Select a brand above to view its performance metrics
+                </p>
+              </CardContent>
+            </Card>
+          )}
       </div>
     </div>
   )

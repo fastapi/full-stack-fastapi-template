@@ -13,6 +13,14 @@ import {
   YAxis,
 } from "recharts"
 import type { BrandImpressionTrendDataPoint } from "@/clients/dashboard"
+import {
+  axisProps,
+  CHART_COLORS,
+  formatShortDate,
+  gridProps,
+  legendClasses,
+  tooltipClasses,
+} from "@/components/app/dashboard/components/chartTheme"
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs"
 
 interface OverviewChartProps {
@@ -24,60 +32,65 @@ interface ChartDataPoint {
   displayDate: string
   "Visibility (%)": number | null
   "Position (#)": number | null
-  "Sentiment": number | null
+  Sentiment: number | null
 }
 
 const METRIC_COLORS: Record<string, string> = {
-  "Visibility (%)": "#6366f1",
-  "Position (#)": "#f43f5e",
-  "Sentiment": "#10b981",
+  "Visibility (%)": CHART_COLORS.blue,
+  "Position (#)": CHART_COLORS.purple,
+  Sentiment: CHART_COLORS.green,
 }
 
 // Units shown in the tooltip per metric key
 const METRIC_UNITS: Record<string, string> = {
   "Visibility (%)": "%",
   "Position (#)": "",
-  "Sentiment": "",
+  Sentiment: "",
 }
 
 // Prefix shown before the value in the tooltip
 const METRIC_PREFIX: Record<string, string> = {
   "Visibility (%)": "",
   "Position (#)": "#",
-  "Sentiment": "",
+  Sentiment: "",
 }
 
-const formatDateForDisplay = (isoDate: string): string => {
-  const date = new Date(isoDate)
-  return `${date.getMonth() + 1}/${date.getDate()}`
-}
-
-function transformData(dataPoints: BrandImpressionTrendDataPoint[]): ChartDataPoint[] {
+function transformData(
+  dataPoints: BrandImpressionTrendDataPoint[],
+): ChartDataPoint[] {
   return dataPoints.map((point) => ({
     date: point.date,
-    displayDate: formatDateForDisplay(point.date),
-    "Visibility (%)": point.visibility !== null ? +point.visibility.toFixed(1) : null,
+    displayDate: formatShortDate(point.date),
+    "Visibility (%)":
+      point.visibility !== null ? +point.visibility.toFixed(1) : null,
     "Position (#)": point.position !== null ? +point.position.toFixed(1) : null,
-    "Sentiment": point.sentiment !== null ? +point.sentiment.toFixed(1) : null,
+    Sentiment: point.sentiment !== null ? +point.sentiment.toFixed(1) : null,
   }))
 }
 
 const CustomTooltip = ({ active, payload, label }: any) => {
   if (!active || !payload || payload.length === 0) return null
   return (
-    <div className="bg-gray-900 border border-gray-700 rounded-xl shadow-xl p-3 min-w-[170px]">
-      <p className="text-[10px] font-semibold text-gray-400 mb-2 uppercase tracking-wide">{label}</p>
+    <div className={tooltipClasses.container}>
+      <p className={tooltipClasses.label}>{label}</p>
       {payload.map((entry: any) => {
         if (entry.value === null || entry.value === undefined) return null
         const prefix = METRIC_PREFIX[entry.name] ?? ""
         const unit = METRIC_UNITS[entry.name] ?? ""
         return (
-          <div key={entry.name} className="flex items-center justify-between gap-4 text-[10px] py-0.5">
+          <div key={entry.name} className={tooltipClasses.row}>
             <div className="flex items-center gap-1.5">
-              <span className="w-2 h-2 rounded-full flex-shrink-0" style={{ backgroundColor: entry.color }} />
-              <span className="text-gray-300">{entry.name}</span>
+              <span
+                className="w-2 h-2 rounded-full flex-shrink-0"
+                style={{ backgroundColor: entry.color }}
+              />
+              <span className={tooltipClasses.name}>{entry.name}</span>
             </div>
-            <span className="font-semibold text-white">{prefix}{entry.value}{unit}</span>
+            <span className={tooltipClasses.value}>
+              {prefix}
+              {entry.value}
+              {unit}
+            </span>
           </div>
         )
       })}
@@ -91,10 +104,14 @@ interface CustomLegendProps {
   onToggle: (name: string) => void
 }
 
-const CustomLegend = ({ payload, hiddenSeries, onToggle }: CustomLegendProps) => {
+const CustomLegend = ({
+  payload,
+  hiddenSeries,
+  onToggle,
+}: CustomLegendProps) => {
   if (!payload) return null
   return (
-    <div className="flex flex-wrap justify-center gap-2 mt-2">
+    <div className={legendClasses.container}>
       {payload.map((entry: any) => {
         const isHidden = hiddenSeries.has(entry.value)
         return (
@@ -102,7 +119,7 @@ const CustomLegend = ({ payload, hiddenSeries, onToggle }: CustomLegendProps) =>
             key={entry.value}
             type="button"
             onClick={() => onToggle(entry.value)}
-            className={`flex items-center gap-1.5 text-[10px] cursor-pointer transition-opacity ${
+            className={`${legendClasses.item} ${
               isHidden ? "opacity-30" : "opacity-100"
             }`}
           >
@@ -110,7 +127,7 @@ const CustomLegend = ({ payload, hiddenSeries, onToggle }: CustomLegendProps) =>
               className="w-2 h-2 rounded-full flex-shrink-0"
               style={{ backgroundColor: entry.color }}
             />
-            <span className="text-gray-600">{entry.value}</span>
+            <span className={legendClasses.label}>{entry.value}</span>
           </button>
         )
       })}
@@ -142,17 +159,14 @@ export function OverviewChart({ dataPoints }: OverviewChartProps) {
     )
   }
 
-  const commonAxisProps = {
-    tick: { fontSize: 10, fill: "#94a3b8" },
-    axisLine: false,
-    tickLine: false,
-  }
-
   return (
     <div className="space-y-3">
       {/* Chart type toggle */}
       <div className="flex justify-end">
-        <Tabs value={chartType} onValueChange={(v) => setChartType(v as "line" | "bar")}>
+        <Tabs
+          value={chartType}
+          onValueChange={(v) => setChartType(v as "line" | "bar")}
+        >
           <TabsList className="h-7">
             <TabsTrigger value="line" className="h-5 px-2">
               <ChartLine size={13} />
@@ -167,12 +181,22 @@ export function OverviewChart({ dataPoints }: OverviewChartProps) {
       <div className="w-full h-80">
         <ResponsiveContainer width="100%" height="100%">
           {chartType === "line" ? (
-            <LineChart data={chartData} margin={{ top: 4, right: 4, left: -16, bottom: 0 }}>
-              <CartesianGrid strokeDasharray="3 3" stroke="#f1f5f9" vertical={false} />
-              <XAxis dataKey="displayDate" {...commonAxisProps} />
-              <YAxis {...commonAxisProps} />
+            <LineChart
+              data={chartData}
+              margin={{ top: 4, right: 4, left: -16, bottom: 0 }}
+            >
+              <CartesianGrid {...gridProps} />
+              <XAxis dataKey="displayDate" {...axisProps} />
+              <YAxis {...axisProps} />
               <Tooltip content={<CustomTooltip />} />
-              <Legend content={<CustomLegend hiddenSeries={hiddenSeries} onToggle={toggleSeries} />} />
+              <Legend
+                content={
+                  <CustomLegend
+                    hiddenSeries={hiddenSeries}
+                    onToggle={toggleSeries}
+                  />
+                }
+              />
               {metricKeys.map((key) => (
                 <Line
                   key={key}
@@ -182,18 +206,34 @@ export function OverviewChart({ dataPoints }: OverviewChartProps) {
                   strokeWidth={2}
                   dot={false}
                   connectNulls={false}
-                  activeDot={{ r: 4, strokeWidth: 2, stroke: "#fff", fill: METRIC_COLORS[key] }}
+                  activeDot={{
+                    r: 4,
+                    strokeWidth: 2,
+                    stroke: "#fff",
+                    fill: METRIC_COLORS[key],
+                  }}
                   hide={hiddenSeries.has(key)}
                 />
               ))}
             </LineChart>
           ) : (
-            <BarChart data={chartData} margin={{ top: 4, right: 4, left: -16, bottom: 0 }} barCategoryGap="30%">
-              <CartesianGrid strokeDasharray="3 3" stroke="#f1f5f9" vertical={false} />
-              <XAxis dataKey="displayDate" {...commonAxisProps} />
-              <YAxis {...commonAxisProps} />
+            <BarChart
+              data={chartData}
+              margin={{ top: 4, right: 4, left: -16, bottom: 0 }}
+              barCategoryGap="30%"
+            >
+              <CartesianGrid {...gridProps} />
+              <XAxis dataKey="displayDate" {...axisProps} />
+              <YAxis {...axisProps} />
               <Tooltip content={<CustomTooltip />} />
-              <Legend content={<CustomLegend hiddenSeries={hiddenSeries} onToggle={toggleSeries} />} />
+              <Legend
+                content={
+                  <CustomLegend
+                    hiddenSeries={hiddenSeries}
+                    onToggle={toggleSeries}
+                  />
+                }
+              />
               {metricKeys.map((key) => (
                 <Bar
                   key={key}

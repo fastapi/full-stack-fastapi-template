@@ -41,7 +41,7 @@ export function MetricCard({
       case "down":
         return <TrendingDown className={`${iconClass} text-red-600`} />
       default:
-        return <Minus className={`${iconClass} text-gray-400`} />
+        return <Minus className={`${iconClass} text-slate-400`} />
     }
   }
 
@@ -52,7 +52,7 @@ export function MetricCard({
       case "down":
         return "text-red-600"
       default:
-        return "text-gray-500"
+        return "text-slate-500"
     }
   }
 
@@ -66,10 +66,12 @@ export function MetricCard({
   }
 
   return (
-    <Card className="shadow-md hover:shadow-lg transition-shadow">
+    <Card className="rounded-2xl border border-slate-200/70 shadow-sm hover:shadow-md transition-shadow">
       <CardContent className="pt-6">
         <div className="space-y-2">
-          <p className="text-sm font-medium text-slate-500">{title}</p>
+          <p className="text-xs font-semibold uppercase tracking-wide text-slate-500">
+            {title}
+          </p>
           <div className="flex items-end justify-between">
             <p className="text-3xl font-bold text-slate-900">
               {formatValue(currentValue)}

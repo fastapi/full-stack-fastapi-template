@@ -1,11 +1,12 @@
 import { Loader2 } from "lucide-react"
 import { useEffect, useMemo, useState } from "react"
 import {
+  dashboardAPI,
   type PerformanceDetailRow,
   type PerformanceDetailTableResponse,
   type TimeRange,
-  dashboardAPI,
 } from "@/clients/dashboard"
+import { tableClasses } from "@/components/app/dashboard/components/tableTheme"
 import {
   Table,
   TableBody,
@@ -22,7 +23,12 @@ interface PerformanceDetailTableProps {
   customEndDate?: string
 }
 
-type NumericKey = "awareness_score" | "share_of_visibility" | "search_share_index" | "position_strength" | "search_momentum"
+type NumericKey =
+  | "awareness_score"
+  | "share_of_visibility"
+  | "search_share_index"
+  | "position_strength"
+  | "search_momentum"
 
 const METRIC_COLUMNS: { key: NumericKey; label: string; isRatio: boolean }[] = [
   { key: "awareness_score", label: "Awareness", isRatio: false },
@@ -71,7 +77,9 @@ export function PerformanceDetailTable({
         setRows(data.rows)
       } catch (err) {
         setError(
-          err instanceof Error ? err.message : "Failed to load performance detail table",
+          err instanceof Error
+            ? err.message
+            : "Failed to load performance detail table",
         )
       } finally {
         setIsLoading(false)
@@ -83,7 +91,8 @@ export function PerformanceDetailTable({
 
   // Calculate min/max for each metric column across all rows
   const columnExtremes = useMemo(() => {
-    if (rows.length === 0) return {} as Record<NumericKey, { min: number; max: number }>
+    if (rows.length === 0)
+      return {} as Record<NumericKey, { min: number; max: number }>
 
     const extremes: Record<NumericKey, { min: number; max: number }> = {} as any
 
@@ -124,36 +133,53 @@ export function PerformanceDetailTable({
   }
 
   return (
-    <div className="overflow-x-auto">
-      <Table>
-        <TableHeader>
+    <div className={`overflow-x-auto ${tableClasses.wrapper}`}>
+      <Table className={tableClasses.table}>
+        <TableHeader className={tableClasses.headerRow}>
           <TableRow>
-            <TableHead className="font-semibold">Segment</TableHead>
+            <TableHead className={tableClasses.head}>Segment</TableHead>
             {METRIC_COLUMNS.map((col) => (
-              <TableHead key={col.key} className="text-right font-semibold">
+              <TableHead
+                key={col.key}
+                className={`${tableClasses.head} ${tableClasses.cellRight}`}
+              >
                 {col.label}
               </TableHead>
             ))}
-            <TableHead className="text-right font-semibold">Date</TableHead>
+            <TableHead
+              className={`${tableClasses.head} ${tableClasses.cellRight}`}
+            >
+              Date
+            </TableHead>
           </TableRow>
         </TableHeader>
         <TableBody>
           {rows.map((row, idx) => (
-            <TableRow key={`${row.segment}-${row.date}-${idx}`}>
-              <TableCell className="font-medium">{row.segment}</TableCell>
+            <TableRow
+              key={`${row.segment}-${row.date}-${idx}`}
+              className={tableClasses.row}
+            >
+              <TableCell className="font-medium text-slate-800">
+                {row.segment}
+              </TableCell>
               {METRIC_COLUMNS.map((col) => {
                 const value = row[col.key]
                 const extremes = columnExtremes[col.key]
                 const cellClass = extremes
                   ? getCellClassName(value, extremes.min, extremes.max)
-                  : "text-right"
+                  : tableClasses.cellRight
                 return (
-                  <TableCell key={col.key} className={cellClass}>
+                  <TableCell
+                    key={col.key}
+                    className={`${tableClasses.cell} ${cellClass}`}
+                  >
                     {formatValue(value, col.isRatio)}
                   </TableCell>
                 )
               })}
-              <TableCell className="text-right text-slate-600">
+              <TableCell
+                className={`${tableClasses.cellMuted} ${tableClasses.cellRight}`}
+              >
                 {row.date}
               </TableCell>
             </TableRow>

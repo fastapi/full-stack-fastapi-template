@@ -2,8 +2,8 @@ import { Loader2 } from "lucide-react"
 import { useEffect, useState } from "react"
 import {
   type BrandOverviewResponse,
-  type TimeRange,
   dashboardAPI,
+  type TimeRange,
 } from "@/clients/dashboard"
 import { DashboardPageLayout } from "@/components/app/dashboard/components/DashboardPageLayout"
 import { MetricCard } from "@/components/app/dashboard/components/MetricCard"
@@ -188,7 +188,13 @@ export function BrandOverview() {
       title="Brand Overview"
       description="Monitor your brand's AI awareness performance at a glance"
     >
-      {({ selectedBrandId, selectedBrand, timeRange, customStartDate, customEndDate }) => (
+      {({
+        selectedBrandId,
+        selectedBrand,
+        timeRange,
+        customStartDate,
+        customEndDate,
+      }) => (
         <BrandOverviewContent
           brandId={selectedBrandId}
           brandName={selectedBrand.brand_name}

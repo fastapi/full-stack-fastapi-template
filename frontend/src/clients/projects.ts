@@ -241,7 +241,9 @@ class ProjectsAPI {
    * @param forceRefresh - If true, bypasses cache
    * @returns ProjectListResponse with projects array
    */
-  async getProjects(forceRefresh: boolean = false): Promise<ProjectListResponse> {
+  async getProjects(
+    forceRefresh: boolean = false,
+  ): Promise<ProjectListResponse> {
     // Check cache first
     if (!forceRefresh) {
       const cached = this.getCachedData<ProjectListResponse>(CACHE_KEY_PROJECTS)
@@ -261,7 +263,9 @@ class ProjectsAPI {
 
     if (response.status === 401) {
       // In case the token was invalidated
-      console.error("[ProjectsAPI] Authentication failed, clearing cache and trying again...")
+      console.error(
+        "[ProjectsAPI] Authentication failed, clearing cache and trying again...",
+      )
       this.clearCache()
       // Retry once with fresh headers and force refresh
       return await this.getProjects(true)
@@ -288,7 +292,7 @@ class ProjectsAPI {
    * @returns ProjectCreateResponse with new project ID
    */
   async createProject(
-    projectData: ProjectCreateRequest
+    projectData: ProjectCreateRequest,
   ): Promise<ProjectCreateResponse> {
     console.log("[ProjectsAPI] Creating new project...")
 
@@ -330,7 +334,7 @@ class ProjectsAPI {
    * @returns ProjectSetupResponse with project ID, brand ID, and prompt count
    */
   async setupProject(
-    setupData: ProjectSetupRequest
+    setupData: ProjectSetupRequest,
   ): Promise<ProjectSetupResponse> {
     console.log("[ProjectsAPI] Setting up project with brand and prompts...")
 
@@ -348,7 +352,9 @@ class ProjectsAPI {
 
     if (response.status === 409) {
       const error: ApiError = await response.json()
-      const conflictError = new Error(error.detail || "Brand already exists in another project")
+      const conflictError = new Error(
+        error.detail || "Brand already exists in another project",
+      )
       ;(conflictError as ApiConflictError).isConflict = true
       throw conflictError
     }
@@ -364,7 +370,7 @@ class ProjectsAPI {
     this.clearCache()
 
     console.log(
-      `[ProjectsAPI] Project setup completed: project=${data.project_id}, brand=${data.brand_id}, prompts=${data.prompt_count}`
+      `[ProjectsAPI] Project setup completed: project=${data.project_id}, brand=${data.brand_id}, prompts=${data.prompt_count}`,
     )
     return data
   }
@@ -378,7 +384,7 @@ class ProjectsAPI {
    */
   async updateProject(
     projectId: string,
-    updateData: ProjectUpdateRequest
+    updateData: ProjectUpdateRequest,
   ): Promise<ProjectUpdateResponse> {
     console.log(`[ProjectsAPI] Updating project ${projectId}...`)
 
@@ -395,7 +401,9 @@ class ProjectsAPI {
     }
 
     if (response.status === 404) {
-      throw new Error("Project not found or you don't have permission to update it")
+      throw new Error(
+        "Project not found or you don't have permission to update it",
+      )
     }
 
     if (!response.ok) {
@@ -433,7 +441,9 @@ class ProjectsAPI {
     }
 
     if (response.status === 404) {
-      throw new Error("Project not found or you don't have permission to view it")
+      throw new Error(
+        "Project not found or you don't have permission to view it",
+      )
     }
 
     if (!response.ok) {
@@ -444,7 +454,7 @@ class ProjectsAPI {
     const data: ProjectDetailResponse = await response.json()
 
     console.log(
-      `[ProjectsAPI] Project detail fetched: ${data.project_id}, brand=${data.brand_name}, segments=${data.segments.length}`
+      `[ProjectsAPI] Project detail fetched: ${data.project_id}, brand=${data.brand_name}, segments=${data.segments.length}`,
     )
     return data
   }
@@ -458,7 +468,7 @@ class ProjectsAPI {
    */
   async updateProjectFull(
     projectId: string,
-    updateData: ProjectFullUpdateRequest
+    updateData: ProjectFullUpdateRequest,
   ): Promise<ProjectSetupResponse> {
     console.log(`[ProjectsAPI] Full update project ${projectId}...`)
 
@@ -475,7 +485,9 @@ class ProjectsAPI {
     }
 
     if (response.status === 404) {
-      throw new Error("Project not found or you don't have permission to update it")
+      throw new Error(
+        "Project not found or you don't have permission to update it",
+      )
     }
 
     if (!response.ok) {
@@ -489,7 +501,7 @@ class ProjectsAPI {
     this.clearCache()
 
     console.log(
-      `[ProjectsAPI] Project full update completed: project=${data.project_id}, brand=${data.brand_id}, prompts=${data.prompt_count}`
+      `[ProjectsAPI] Project full update completed: project=${data.project_id}, brand=${data.brand_id}, prompts=${data.prompt_count}`,
     )
     return data
   }
@@ -515,7 +527,9 @@ class ProjectsAPI {
     }
 
     if (response.status === 404) {
-      throw new Error("Project not found or you don't have permission to delete it")
+      throw new Error(
+        "Project not found or you don't have permission to delete it",
+      )
     }
 
     if (!response.ok) {

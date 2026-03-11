@@ -1,6 +1,10 @@
 import { Loader2 } from "lucide-react"
 import { useEffect, useState } from "react"
-import { type BrandSegmentsResponse, type TimeRange, dashboardAPI } from "@/clients/dashboard"
+import {
+  type BrandSegmentsResponse,
+  dashboardAPI,
+  type TimeRange,
+} from "@/clients/dashboard"
 import { BrandAwarenessScoreGaugeView } from "@/components/app/dashboard/components/BrandAwarenessScoreGaugeView"
 import { BrandAwarenessScoreHistoricalView } from "@/components/app/dashboard/components/BrandAwarenessScoreHistoricalView"
 import { BrandAwarenessScoreCurrentScore } from "@/components/app/dashboard/components/BrandAwarnessScoreCurrentScore"
@@ -40,7 +44,8 @@ export function BrandAwarenessScore({
     const fetchSegments = async () => {
       try {
         setIsLoadingSegments(true)
-        const data: BrandSegmentsResponse = await dashboardAPI.getBrandSegments(brandId)
+        const data: BrandSegmentsResponse =
+          await dashboardAPI.getBrandSegments(brandId)
         setSegments(data.segments)
         // Default to first segment
         if (data.segments.length > 0) {
@@ -64,13 +69,21 @@ export function BrandAwarenessScore({
     <div className="space-y-8">
       {/* Section 1: All-Segment Overview */}
       <div>
-        <h3 className="text-lg font-semibold text-slate-700 mb-4">Overall Awareness (All Segments)</h3>
+        <h3 className="text-lg font-semibold text-slate-700 mb-4">
+          Overall Awareness (All Segments)
+        </h3>
         <div className="grid grid-cols-1 md:grid-cols-12 gap-4 md:gap-8 items-stretch">
           <div className="md:col-span-6 flex">
-            <BrandAwarenessScoreCurrentScore brandId={brandId} segment="All-Segment" />
+            <BrandAwarenessScoreCurrentScore
+              brandId={brandId}
+              segment="All-Segment"
+            />
           </div>
           <div className="md:col-span-6 flex">
-            <BrandAwarenessScoreGaugeView brandId={brandId} segment="All-Segment" />
+            <BrandAwarenessScoreGaugeView
+              brandId={brandId}
+              segment="All-Segment"
+            />
           </div>
           <div className="md:col-span-12">
             <BrandAwarenessScoreHistoricalView
@@ -90,7 +103,9 @@ export function BrandAwarenessScore({
       {/* Section 2: Per-Segment Detail */}
       <div>
         <div className="flex flex-col sm:flex-row sm:items-center gap-3 mb-4">
-          <h3 className="text-lg font-semibold text-slate-700">Segment Detail</h3>
+          <h3 className="text-lg font-semibold text-slate-700">
+            Segment Detail
+          </h3>
           {isLoadingSegments ? (
             <div className="flex items-center gap-2 text-slate-500">
               <Loader2 className="h-4 w-4 animate-spin" />
@@ -113,17 +128,25 @@ export function BrandAwarenessScore({
               </SelectContent>
             </Select>
           ) : (
-            <span className="text-sm text-slate-500">No segments available</span>
+            <span className="text-sm text-slate-500">
+              No segments available
+            </span>
           )}
         </div>
 
         {selectedSegment && (
           <div className="grid grid-cols-1 md:grid-cols-12 gap-4 md:gap-8 items-stretch">
             <div className="md:col-span-6 flex">
-              <BrandAwarenessScoreCurrentScore brandId={brandId} segment={selectedSegment} />
+              <BrandAwarenessScoreCurrentScore
+                brandId={brandId}
+                segment={selectedSegment}
+              />
             </div>
             <div className="md:col-span-6 flex">
-              <BrandAwarenessScoreGaugeView brandId={brandId} segment={selectedSegment} />
+              <BrandAwarenessScoreGaugeView
+                brandId={brandId}
+                segment={selectedSegment}
+              />
             </div>
             <div className="md:col-span-12">
               <BrandAwarenessScoreHistoricalView

@@ -39,26 +39,26 @@ export default function TestimonialSection() {
   }, [])
 
   return (
-    <section className="py-20 bg-gray-50 dark:bg-gray-800">
+    <section className="py-20 bg-slate-100 dark:bg-slate-900">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <h2 className="font-funnel-sans font-bold text-4xl tracking-[-0.02em] text-gray-900 dark:text-white mb-12 text-center">
+        <h2 className="font-display font-bold text-3xl sm:text-4xl tracking-tight text-slate-900 dark:text-white mb-12 text-center">
           What Our Customers Say
         </h2>
 
-        <div className="bg-white dark:bg-gray-900 p-8 rounded-lg shadow-md mb-12 min-h-[200px]">
+        <div className="bg-white dark:bg-slate-950 p-8 rounded-2xl shadow-sm border border-slate-200/70 dark:border-slate-800 mb-12 min-h-[200px]">
           <div className="text-3xl text-blue-600 mb-4">"</div>
-          <p className="font-funnel-sans font-normal text-base leading-[1.7] opacity-75 text-gray-700 dark:text-gray-300 mb-6 italic">
+          <p className="font-body text-base leading-relaxed text-slate-700 dark:text-slate-300 mb-6 italic">
             {testimonials[current].quote}
           </p>
           <div className="flex items-center">
-            <div className="w-12 h-12 bg-gradient-to-br from-blue-500 to-purple-500 rounded-full flex items-center justify-center text-white font-bold mr-4">
+            <div className="w-12 h-12 bg-gradient-to-br from-blue-600 to-sky-500 rounded-full flex items-center justify-center text-white font-bold mr-4">
               {testimonials[current].author.charAt(0)}
             </div>
             <div>
-              <div className="font-funnel-sans font-semibold text-base tracking-[-0.01em] text-gray-900 dark:text-white">
+              <div className="font-display font-semibold text-base tracking-tight text-slate-900 dark:text-white">
                 {testimonials[current].author}
               </div>
-              <div className="font-funnel-sans text-[11px] tracking-[0.2em] uppercase text-gray-600 dark:text-gray-400">
+              <div className="font-body text-xs tracking-[0.2em] uppercase text-slate-600 dark:text-slate-400">
                 {testimonials[current].role}
               </div>
             </div>
@@ -66,16 +66,16 @@ export default function TestimonialSection() {
         </div>
 
         <div>
-          <h3 className="font-funnel-sans font-medium text-[11px] tracking-[0.2em] uppercase text-center text-gray-600 dark:text-gray-400 mb-6">
+          <h3 className="font-body font-medium text-xs tracking-[0.2em] uppercase text-center text-slate-600 dark:text-slate-400 mb-6">
             Trusted by leading companies
           </h3>
           <div className="flex flex-wrap justify-center gap-8">
             {logos.map((logo, idx) => (
               <div
                 key={idx}
-                className="bg-white dark:bg-gray-900 px-6 py-4 rounded-lg border border-gray-200 dark:border-gray-700"
+                className="bg-white dark:bg-slate-950 px-6 py-4 rounded-xl border border-slate-200 dark:border-slate-800"
               >
-                <span className="font-funnel-sans font-medium text-sm tracking-[0.04em] text-gray-700 dark:text-gray-300">
+                <span className="font-display font-medium text-sm tracking-[0.04em] text-slate-700 dark:text-slate-300">
                   {logo}
                 </span>
               </div>

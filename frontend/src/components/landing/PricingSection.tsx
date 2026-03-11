@@ -1,5 +1,6 @@
 // src/components/landing/PricingSection.tsx
 import { SignUpButton } from "@clerk/clerk-react"
+import { Check } from "lucide-react"
 
 export default function PricingSection() {
   const plans = [
@@ -39,12 +40,12 @@ export default function PricingSection() {
   ]
 
   return (
-    <section id="pricing" className="py-20 bg-white dark:bg-gray-900">
+    <section id="pricing" className="py-20 bg-slate-50 dark:bg-slate-950">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <h2 className="font-funnel-sans font-bold text-4xl tracking-[-0.02em] text-gray-900 dark:text-white mb-4 text-center">
+        <h2 className="font-display font-bold text-3xl sm:text-4xl tracking-tight text-slate-900 dark:text-white mb-4 text-center">
           Simple, Transparent Pricing
         </h2>
-        <p className="font-funnel-sans font-normal text-base leading-[1.7] opacity-75 text-gray-600 dark:text-gray-400 mb-12 text-center">
+        <p className="font-body text-base leading-relaxed text-slate-600 dark:text-slate-300 mb-12 text-center">
           Choose the plan that's right for you
         </p>
 
@@ -52,22 +53,22 @@ export default function PricingSection() {
           {plans.map((plan, idx) => (
             <div
               key={idx}
-              className={`border ${plan.popular ? "border-blue-600 ring-2 ring-blue-600" : "border-gray-200 dark:border-gray-700"} rounded-xl p-8 relative`}
+              className={`border ${plan.popular ? "border-blue-600 bg-white dark:bg-slate-900 shadow-lg" : "border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900"} rounded-2xl p-8 relative`}
             >
               {plan.popular && (
-                <div className="absolute -top-4 left-1/2 -translate-x-1/2 bg-blue-600 text-white px-4 py-1 rounded-full font-funnel-sans font-medium text-[11px] tracking-[0.2em] uppercase">
+                <div className="absolute -top-4 left-1/2 -translate-x-1/2 bg-blue-600 text-white px-4 py-1 rounded-full font-body font-medium text-xs tracking-[0.2em] uppercase">
                   Most Popular
                 </div>
               )}
-              <h3 className="font-funnel-sans font-semibold text-2xl tracking-[-0.01em] text-gray-900 dark:text-white mb-2">
+              <h3 className="font-display font-semibold text-2xl tracking-tight text-slate-900 dark:text-white mb-2">
                 {plan.name}
               </h3>
               <div className="mb-6">
-                <span className="font-funnel-sans font-extrabold text-4xl tracking-[-0.04em] leading-[0.9] text-gray-900 dark:text-white">
+                <span className="font-display font-bold text-4xl tracking-tight leading-[0.95] text-slate-900 dark:text-white">
                   {plan.price}
                 </span>
                 {plan.price !== "Custom" && (
-                  <span className="font-funnel-sans font-normal text-base text-gray-600 dark:text-gray-400">
+                  <span className="font-body text-base text-slate-600 dark:text-slate-400">
                     /month
                   </span>
                 )}
@@ -76,19 +77,20 @@ export default function PricingSection() {
                 {plan.features.map((feature, i) => (
                   <li
                     key={i}
-                    className="flex items-center font-funnel-sans font-normal text-base leading-[1.7] text-gray-600 dark:text-gray-300"
+                    className="flex items-center font-body text-base leading-relaxed text-slate-600 dark:text-slate-300"
                   >
-                    <span className="text-green-500 mr-2">✓</span>
+                    <Check className="h-4 w-4 text-emerald-500 mr-2" />
                     {feature}
                   </li>
                 ))}
               </ul>
               <SignUpButton mode="modal" forceRedirectUrl="/app/projects">
                 <button
-                  className={`w-full py-3 rounded-lg font-funnel-sans font-semibold transition ${
+                  type="button"
+                  className={`w-full py-3 rounded-xl font-body font-semibold transition ${
                     plan.popular
                       ? "bg-blue-600 text-white hover:bg-blue-700"
-                      : "border-2 border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800"
+                      : "border-2 border-slate-300 dark:border-slate-700 text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800"
                   }`}
                 >
                   Get Started

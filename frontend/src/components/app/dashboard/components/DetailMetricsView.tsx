@@ -26,11 +26,19 @@ import {
 } from "recharts"
 import {
   type BrandSegmentsResponse,
-  dashboardAPI,
   type DetailMetricsResponse,
+  dashboardAPI,
   type MetricStatistics,
   type TimeRange,
 } from "@/clients/dashboard"
+import {
+  axisProps,
+  CHART_COLORS,
+  formatShortDate,
+  gridProps,
+  legendClasses,
+  tooltipClasses,
+} from "@/components/app/dashboard/components/chartTheme"
 import {
   Select,
   SelectContent,
@@ -47,17 +55,12 @@ interface ChartDataPoint {
   avgRanking: number
 }
 
-const formatDateForDisplay = (isoDate: string): string => {
-  const date = new Date(isoDate)
-  return `${date.getMonth() + 1}/${date.getDate()}`
-}
-
 const transformDataForChart = (
   response: DetailMetricsResponse,
 ): ChartDataPoint[] => {
   return response.data_points.map((point) => ({
     date: point.date,
-    displayDate: formatDateForDisplay(point.date),
+    displayDate: formatShortDate(point.date),
     visibilityRate: point.visibility_rate,
     avgRanking: point.avg_ranking,
   }))
@@ -101,7 +104,8 @@ export function DetailMetricsView({
     const fetchSegments = async () => {
       try {
         setIsLoadingSegments(true)
-        const data: BrandSegmentsResponse = await dashboardAPI.getBrandSegments(brandId)
+        const data: BrandSegmentsResponse =
+          await dashboardAPI.getBrandSegments(brandId)
         setSegments(data.segments)
         if (data.segments.length > 0) {
           setSelectedSegment(data.segments[0])
@@ -153,9 +157,7 @@ export function DetailMetricsView({
         })
       } catch (err) {
         const errorMessage =
-          err instanceof Error
-            ? err.message
-            : "Failed to load detail metrics"
+          err instanceof Error ? err.message : "Failed to load detail metrics"
         setError(errorMessage)
         console.error("[DetailMetrics] Error:", err)
       } finally {
@@ -191,21 +193,30 @@ export function DetailMetricsView({
     }>
   }) => {
     if (active && payload && payload.length) {
+      const label =
+        payload[0]?.payload?.displayDate ?? payload[0]?.payload?.date
       return (
-        <div className="bg-white p-3 border border-gray-200 rounded-lg shadow-lg">
-          <p className="text-sm font-medium mb-2">{payload[0].payload.date}</p>
+        <div className={tooltipClasses.container}>
+          <p className={tooltipClasses.label}>{label}</p>
           {payload.map((entry, index) => (
-            <p key={index} className="text-sm" style={{ color: entry.color }}>
-              {entry.dataKey === "visibilityRate"
-                ? "Visibility Rate"
-                : "Ranking Score"}
-              :{" "}
-              <span className="font-bold">
+            <div key={index} className={tooltipClasses.row}>
+              <div className="flex items-center gap-1.5">
+                <span
+                  className="w-2 h-2 rounded-full"
+                  style={{ backgroundColor: entry.color }}
+                />
+                <span className={tooltipClasses.name}>
+                  {entry.dataKey === "visibilityRate"
+                    ? "Visibility Rate"
+                    : "Ranking Score"}
+                </span>
+              </div>
+              <span className={tooltipClasses.value}>
                 {entry.dataKey === "visibilityRate"
                   ? `${entry.value.toFixed(1)}%`
                   : entry.value.toFixed(1)}
               </span>
-            </p>
+            </div>
           ))}
         </div>
       )
@@ -214,27 +225,38 @@ export function DetailMetricsView({
   }
 
   const legendItems = [
-    { dataKey: "visibilityRate", label: "Visibility Rate", color: "#3b82f6" },
-    { dataKey: "avgRanking", label: "Ranking Score", color: "#f97316" },
+    {
+      dataKey: "visibilityRate",
+      label: "Visibility Rate",
+      color: CHART_COLORS.blue,
+    },
+    {
+      dataKey: "avgRanking",
+      label: "Ranking Score",
+      color: CHART_COLORS.purple,
+    },
   ]
 
   const CustomLegend = () => {
     return (
-      <div className="flex justify-center gap-6 mt-2">
+      <div className={legendClasses.container}>
         {legendItems.map((item) => {
           const isHidden = hiddenSeries.has(item.dataKey)
           return (
             <button
               key={item.dataKey}
               type="button"
-              className="flex items-center gap-2 text-sm cursor-pointer transition-colors"
+              className={legendClasses.item}
               onClick={() => handleLegendClick(item.dataKey)}
             >
               <span
-                className="inline-block w-3 h-3 rounded-full"
-                style={{ backgroundColor: isHidden ? "#d1d5db" : item.color }}
+                className="inline-block w-2 h-2 rounded-full"
+                style={{ backgroundColor: isHidden ? "#cbd5f5" : item.color }}
               />
-              <span style={{ color: isHidden ? "#9ca3af" : "#374151" }}>
+              <span
+                className={legendClasses.label}
+                style={{ opacity: isHidden ? 0.5 : 1 }}
+              >
                 {item.label}
               </span>
             </button>
@@ -263,31 +285,35 @@ export function DetailMetricsView({
         <h4 className={`text-sm font-semibold mb-2 ${color}`}>{title}</h4>
         <div className="grid grid-cols-2 md:grid-cols-5 gap-4 text-center">
           <div>
-            <div className="text-xs text-gray-500">Average</div>
-            <div className="text-lg font-bold text-gray-600">
-              {stats.average.toFixed(2)}{suffix}
+            <div className="text-xs text-slate-500">Average</div>
+            <div className="text-lg font-bold text-slate-700">
+              {stats.average.toFixed(2)}
+              {suffix}
             </div>
           </div>
           <div>
-            <div className="text-xs text-gray-500">Highest</div>
-            <div className="text-lg font-bold text-gray-600">
-              {stats.highest.toFixed(2)}{suffix}
+            <div className="text-xs text-slate-500">Highest</div>
+            <div className="text-lg font-bold text-slate-700">
+              {stats.highest.toFixed(2)}
+              {suffix}
             </div>
           </div>
           <div>
-            <div className="text-xs text-gray-500">Lowest</div>
-            <div className="text-lg font-bold text-gray-600">
-              {stats.lowest.toFixed(2)}{suffix}
+            <div className="text-xs text-slate-500">Lowest</div>
+            <div className="text-lg font-bold text-slate-700">
+              {stats.lowest.toFixed(2)}
+              {suffix}
             </div>
           </div>
           <div>
-            <div className="text-xs text-gray-500">Median</div>
-            <div className="text-lg font-bold text-gray-600">
-              {stats.median.toFixed(2)}{suffix}
+            <div className="text-xs text-slate-500">Median</div>
+            <div className="text-lg font-bold text-slate-700">
+              {stats.median.toFixed(2)}
+              {suffix}
             </div>
           </div>
           <div>
-            <div className="text-xs text-gray-500">Avg Growth</div>
+            <div className="text-xs text-slate-500">Avg Growth</div>
             <div
               className={`text-lg font-bold ${
                 stats.average_growth >= 0 ? "text-green-600" : "text-red-600"
@@ -338,15 +364,15 @@ export function DetailMetricsView({
 
       {/* Chart Section */}
       {selectedSegment && (
-        <div className="rounded-md bg-gradient-to-b p-6 border border-gray-200 h-full w-full">
-          <h3 className="text-md font-semibold mb-4">
+        <div className="rounded-2xl bg-white p-6 border border-slate-200 h-full w-full shadow-sm">
+          <h3 className="text-base font-semibold mb-4 text-slate-900">
             Visibility &amp; Ranking Trends
           </h3>
 
           {isLoading ? (
             <div className="flex flex-col items-center justify-center h-96">
               <Loader2 className="h-12 w-12 animate-spin text-blue-600" />
-              <p className="mt-4 text-sm text-gray-500">
+              <p className="mt-4 text-sm text-slate-500">
                 Loading detail metrics...
               </p>
             </div>
@@ -364,7 +390,9 @@ export function DetailMetricsView({
                 <div className="ml-auto">
                   <Tabs
                     value={chartType}
-                    onValueChange={(value) => setChartType(value as "line" | "bar")}
+                    onValueChange={(value) =>
+                      setChartType(value as "line" | "bar")
+                    }
                   >
                     <TabsList className="bg-transparent rounded-none border-b w-full justify-start h-auto p-0">
                       <TabsTrigger
@@ -398,44 +426,46 @@ export function DetailMetricsView({
               )}
 
               {/* Chart */}
-              <div className="w-full h-96 bg-gray-50 rounded-lg p-4">
+              <div className="w-full h-96 bg-white rounded-2xl border border-slate-200 p-4">
                 {chartData.length === 0 ? (
-                  <div className="flex items-center justify-center h-full text-gray-500">
+                  <div className="flex items-center justify-center h-full text-slate-500">
                     No data available for the selected time range
                   </div>
                 ) : (
                   <ResponsiveContainer width="100%" height="100%">
                     {chartType === "line" ? (
                       <LineChart data={chartData}>
-                        <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />
-                        <XAxis
-                          dataKey="displayDate"
-                          stroke="#6b7280"
-                          style={{ fontSize: "12px" }}
-                        />
+                        <CartesianGrid {...gridProps} />
+                        <XAxis dataKey="displayDate" {...axisProps} />
                         <YAxis
                           yAxisId="left"
                           domain={[0, 100]}
-                          stroke="#3b82f6"
-                          style={{ fontSize: "12px" }}
+                          stroke={CHART_COLORS.blue}
+                          {...axisProps}
                           label={{
                             value: "Visibility (%)",
                             angle: -90,
                             position: "insideLeft",
-                            style: { fontSize: "12px", fill: "#3b82f6" },
+                            style: {
+                              fontSize: "11px",
+                              fill: CHART_COLORS.blue,
+                            },
                           }}
                         />
                         <YAxis
                           yAxisId="right"
                           orientation="right"
                           domain={[0, 10]}
-                          stroke="#f97316"
-                          style={{ fontSize: "12px" }}
+                          stroke={CHART_COLORS.purple}
+                          {...axisProps}
                           label={{
                             value: "Ranking Score (0-10)",
                             angle: 90,
                             position: "insideRight",
-                            style: { fontSize: "12px", fill: "#f97316" },
+                            style: {
+                              fontSize: "11px",
+                              fill: CHART_COLORS.purple,
+                            },
                           }}
                         />
                         <Tooltip content={<CustomTooltip />} />
@@ -444,9 +474,9 @@ export function DetailMetricsView({
                           yAxisId="left"
                           type="monotone"
                           dataKey="visibilityRate"
-                          stroke="#3b82f6"
+                          stroke={CHART_COLORS.blue}
                           strokeWidth={3}
-                          dot={{ fill: "#3b82f6", r: 3 }}
+                          dot={{ fill: CHART_COLORS.blue, r: 3 }}
                           activeDot={{ r: 5 }}
                           name="Visibility Rate"
                           hide={!showVisibility}
@@ -455,9 +485,9 @@ export function DetailMetricsView({
                           yAxisId="right"
                           type="monotone"
                           dataKey="avgRanking"
-                          stroke="#f97316"
+                          stroke={CHART_COLORS.purple}
                           strokeWidth={3}
-                          dot={{ fill: "#f97316", r: 3 }}
+                          dot={{ fill: CHART_COLORS.purple, r: 3 }}
                           activeDot={{ r: 5 }}
                           name="Ranking Score"
                           hide={!showRanking}
@@ -465,35 +495,37 @@ export function DetailMetricsView({
                       </LineChart>
                     ) : (
                       <BarChart data={chartData}>
-                        <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />
-                        <XAxis
-                          dataKey="displayDate"
-                          stroke="#6b7280"
-                          style={{ fontSize: "12px" }}
-                        />
+                        <CartesianGrid {...gridProps} />
+                        <XAxis dataKey="displayDate" {...axisProps} />
                         <YAxis
                           yAxisId="left"
                           domain={[0, 100]}
-                          stroke="#3b82f6"
-                          style={{ fontSize: "12px" }}
+                          stroke={CHART_COLORS.blue}
+                          {...axisProps}
                           label={{
                             value: "Visibility (%)",
                             angle: -90,
                             position: "insideLeft",
-                            style: { fontSize: "12px", fill: "#3b82f6" },
+                            style: {
+                              fontSize: "11px",
+                              fill: CHART_COLORS.blue,
+                            },
                           }}
                         />
                         <YAxis
                           yAxisId="right"
                           orientation="right"
                           domain={[0, 10]}
-                          stroke="#f97316"
-                          style={{ fontSize: "12px" }}
+                          stroke={CHART_COLORS.purple}
+                          {...axisProps}
                           label={{
                             value: "Ranking Score (0-10)",
                             angle: 90,
                             position: "insideRight",
-                            style: { fontSize: "12px", fill: "#f97316" },
+                            style: {
+                              fontSize: "11px",
+                              fill: CHART_COLORS.purple,
+                            },
                           }}
                         />
                         <Tooltip content={<CustomTooltip />} />
@@ -501,7 +533,7 @@ export function DetailMetricsView({
                         <Bar
                           yAxisId="left"
                           dataKey="visibilityRate"
-                          fill="#3b82f6"
+                          fill={CHART_COLORS.blue}
                           name="Visibility Rate"
                           radius={[4, 4, 0, 0]}
                           hide={!showVisibility}
@@ -509,7 +541,7 @@ export function DetailMetricsView({
                         <Bar
                           yAxisId="right"
                           dataKey="avgRanking"
-                          fill="#f97316"
+                          fill={CHART_COLORS.purple}
                           name="Ranking Score"
                           radius={[4, 4, 0, 0]}
                           hide={!showRanking}
@@ -531,7 +563,7 @@ export function DetailMetricsView({
                 <StatisticsRow
                   title="Ranking Score Statistics"
                   stats={rankingStats}
-                  color="text-orange-600"
+                  color="text-purple-600"
                 />
               </div>
             </div>

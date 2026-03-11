@@ -29,6 +29,13 @@ import {
   type MetricStatistics,
   type TimeRange,
 } from "@/clients/dashboard"
+import {
+  axisProps,
+  CHART_COLORS,
+  formatShortDate,
+  gridProps,
+  tooltipClasses,
+} from "@/components/app/dashboard/components/chartTheme"
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs"
 
 /**
@@ -44,11 +51,6 @@ interface ChartDataPoint {
 /**
  * Format ISO date string to display format (MM/DD)
  */
-const formatDateForDisplay = (isoDate: string): string => {
-  const date = new Date(isoDate)
-  return `${date.getMonth() + 1}/${date.getDate()}`
-}
-
 /**
  * Transform API response to chart-friendly format
  */
@@ -57,7 +59,7 @@ const transformDataForChart = (
 ): ChartDataPoint[] => {
   return response.data_points.map((point) => ({
     date: point.date,
-    displayDate: formatDateForDisplay(point.date),
+    displayDate: formatShortDate(point.date),
     awarenessScore: point.awareness_score,
     consistencyIndex: point.consistency_index,
   }))
@@ -159,16 +161,28 @@ export function BrandAwarenessScoreHistoricalView({
     }>
   }) => {
     if (active && payload && payload.length) {
+      const label =
+        payload[0]?.payload?.displayDate ?? payload[0]?.payload?.date
       return (
-        <div className="bg-white p-3 border border-gray-200 rounded-lg shadow-lg">
-          <p className="text-sm font-medium mb-2">{payload[0].payload.date}</p>
+        <div className={tooltipClasses.container}>
+          <p className={tooltipClasses.label}>{label}</p>
           {payload.map((entry, index) => (
-            <p key={index} className="text-sm" style={{ color: entry.color }}>
-              {entry.dataKey === "awarenessScore"
-                ? "Awareness Score"
-                : "Consistency Index"}
-              : <span className="font-bold">{entry.value.toFixed(2)}</span>
-            </p>
+            <div key={index} className={tooltipClasses.row}>
+              <div className="flex items-center gap-1.5">
+                <span
+                  className="w-2 h-2 rounded-full"
+                  style={{ backgroundColor: entry.color }}
+                />
+                <span className={tooltipClasses.name}>
+                  {entry.dataKey === "awarenessScore"
+                    ? "Awareness Score"
+                    : "Consistency Index"}
+                </span>
+              </div>
+              <span className={tooltipClasses.value}>
+                {entry.value.toFixed(2)}
+              </span>
+            </div>
           ))}
         </div>
       )
@@ -196,31 +210,31 @@ export function BrandAwarenessScoreHistoricalView({
         <h4 className={`text-sm font-semibold mb-2 ${color}`}>{title}</h4>
         <div className="grid grid-cols-2 md:grid-cols-5 gap-4 text-center">
           <div>
-            <div className="text-xs text-gray-500">Average</div>
-            <div className="text-lg font-bold text-gray-600">
+            <div className="text-xs text-slate-500">Average</div>
+            <div className="text-lg font-bold text-slate-700">
               {stats.average.toFixed(2)}
             </div>
           </div>
           <div>
-            <div className="text-xs text-gray-500">Highest</div>
-            <div className="text-lg font-bold text-gray-600">
+            <div className="text-xs text-slate-500">Highest</div>
+            <div className="text-lg font-bold text-slate-700">
               {stats.highest.toFixed(2)}
             </div>
           </div>
           <div>
-            <div className="text-xs text-gray-500">Lowest</div>
-            <div className="text-lg font-bold text-gray-600">
+            <div className="text-xs text-slate-500">Lowest</div>
+            <div className="text-lg font-bold text-slate-700">
               {stats.lowest.toFixed(2)}
             </div>
           </div>
           <div>
-            <div className="text-xs text-gray-500">Median</div>
-            <div className="text-lg font-bold text-gray-600">
+            <div className="text-xs text-slate-500">Median</div>
+            <div className="text-lg font-bold text-slate-700">
               {stats.median.toFixed(2)}
             </div>
           </div>
           <div>
-            <div className="text-xs text-gray-500">Avg Growth</div>
+            <div className="text-xs text-slate-500">Avg Growth</div>
             <div
               className={`text-lg font-bold ${
                 stats.average_growth >= 0 ? "text-green-600" : "text-red-600"
@@ -241,11 +255,13 @@ export function BrandAwarenessScoreHistoricalView({
 
   if (isLoading) {
     return (
-      <div className="rounded-md bg-gradient-to-b p-6 border border-gray-200 h-full w-full">
-        <h3 className="text-md font-semibold mb-4">Historical Trends</h3>
+      <div className="rounded-2xl bg-white p-6 border border-slate-200 h-full w-full shadow-sm">
+        <h3 className="text-base font-semibold mb-4 text-slate-900">
+          Historical Trends
+        </h3>
         <div className="flex flex-col items-center justify-center h-96">
           <Loader2 className="h-12 w-12 animate-spin text-blue-600" />
-          <p className="mt-4 text-sm text-gray-500">
+          <p className="mt-4 text-sm text-slate-500">
             Loading historical trends...
           </p>
         </div>
@@ -259,8 +275,10 @@ export function BrandAwarenessScoreHistoricalView({
 
   if (error && chartData.length === 0) {
     return (
-      <div className="rounded-md bg-gradient-to-b p-6 border border-gray-200 h-full w-full">
-        <h3 className="text-md font-semibold mb-4">Historical Trends</h3>
+      <div className="rounded-2xl bg-white p-6 border border-slate-200 h-full w-full shadow-sm">
+        <h3 className="text-base font-semibold mb-4 text-slate-900">
+          Historical Trends
+        </h3>
         <div className="flex flex-col items-center justify-center h-96">
           <div className="text-red-500 text-center">
             <p className="font-medium">Failed to load data</p>
@@ -276,8 +294,10 @@ export function BrandAwarenessScoreHistoricalView({
   // ============================================================================
 
   return (
-    <div className="rounded-md bg-gradient-to-b p-6 border border-gray-200 h-full w-full">
-      <h3 className="text-md font-semibold mb-4">Historical Trends</h3>
+    <div className="rounded-2xl bg-white p-6 border border-slate-200 h-full w-full shadow-sm">
+      <h3 className="text-base font-semibold mb-4 text-slate-900">
+        Historical Trends
+      </h3>
 
       <div className="space-y-4 mb-6">
         {/* Chart Type Selection */}
@@ -319,30 +339,25 @@ export function BrandAwarenessScoreHistoricalView({
         )}
 
         {/* Chart Display */}
-        <div className="w-full h-96 bg-gray-50 rounded-lg p-4">
+        <div className="w-full h-96 bg-white rounded-2xl border border-slate-200 p-4">
           {chartData.length === 0 ? (
-            <div className="flex items-center justify-center h-full text-gray-500">
+            <div className="flex items-center justify-center h-full text-slate-500">
               No data available for the selected time range
             </div>
           ) : (
             <ResponsiveContainer width="100%" height="100%">
               {chartType === "line" ? (
                 <LineChart data={chartData}>
-                  <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />
-                  <XAxis
-                    dataKey="displayDate"
-                    stroke="#6b7280"
-                    style={{ fontSize: "12px" }}
-                  />
+                  <CartesianGrid {...gridProps} />
+                  <XAxis dataKey="displayDate" {...axisProps} />
                   <YAxis
                     domain={[0, 10]}
-                    stroke="#6b7280"
-                    style={{ fontSize: "12px" }}
+                    {...axisProps}
                     label={{
                       value: "Score (0-10)",
                       angle: -90,
                       position: "insideLeft",
-                      style: { fontSize: "12px" },
+                      style: { fontSize: "11px", fill: "#94a3b8" },
                     }}
                   />
                   <Tooltip content={<CustomTooltip />} />
@@ -350,52 +365,47 @@ export function BrandAwarenessScoreHistoricalView({
                   <Line
                     type="monotone"
                     dataKey="awarenessScore"
-                    stroke="#3b82f6"
+                    stroke={CHART_COLORS.blue}
                     strokeWidth={3}
-                    dot={{ fill: "#3b82f6", r: 4 }}
+                    dot={{ fill: CHART_COLORS.blue, r: 4 }}
                     activeDot={{ r: 6 }}
                     name="Awareness Score"
                   />
                   <Line
                     type="monotone"
                     dataKey="consistencyIndex"
-                    stroke="#8b5cf6"
+                    stroke={CHART_COLORS.purple}
                     strokeWidth={3}
-                    dot={{ fill: "#8b5cf6", r: 4 }}
+                    dot={{ fill: CHART_COLORS.purple, r: 4 }}
                     activeDot={{ r: 6 }}
                     name="Consistency Index"
                   />
                 </LineChart>
               ) : (
                 <BarChart data={chartData}>
-                  <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />
-                  <XAxis
-                    dataKey="displayDate"
-                    stroke="#6b7280"
-                    style={{ fontSize: "12px" }}
-                  />
+                  <CartesianGrid {...gridProps} />
+                  <XAxis dataKey="displayDate" {...axisProps} />
                   <YAxis
                     domain={[0, 10]}
-                    stroke="#6b7280"
-                    style={{ fontSize: "12px" }}
+                    {...axisProps}
                     label={{
                       value: "Score (0-10)",
                       angle: -90,
                       position: "insideLeft",
-                      style: { fontSize: "12px" },
+                      style: { fontSize: "11px", fill: "#94a3b8" },
                     }}
                   />
                   <Tooltip content={<CustomTooltip />} />
                   <Legend />
                   <Bar
                     dataKey="awarenessScore"
-                    fill="#3b82f6"
+                    fill={CHART_COLORS.blue}
                     name="Awareness Score"
                     radius={[4, 4, 0, 0]}
                   />
                   <Bar
                     dataKey="consistencyIndex"
-                    fill="#8b5cf6"
+                    fill={CHART_COLORS.purple}
                     name="Consistency Index"
                     radius={[4, 4, 0, 0]}
                   />
