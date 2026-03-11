@@ -77,8 +77,6 @@ export function CustomerReviewTable({
   const [error, setError] = useState<string | null>(null)
   const [sorting, setSorting] = useState<SortingState>([])
 
-  const _allSegmentsKey = allSegments?.join(",") ?? ""
-
   useEffect(() => {
     const fetchData = async () => {
       try {
