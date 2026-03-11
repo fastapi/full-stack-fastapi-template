@@ -1,20 +1,22 @@
 import {
+  Activity,
   AlertTriangle,
   Calendar,
   ChartColumnBig,
   ChartLine,
+  Flag,
   Loader2,
   Shield,
   TrendingDown,
+  TrendingUp,
+  UserPlus,
   Zap,
 } from "lucide-react"
-import { useCallback, useEffect, useState } from "react"
-import { toast } from "sonner"
+import { useEffect, useState } from "react"
 import {
   Bar,
   BarChart,
   CartesianGrid,
-  Legend,
   Line,
   LineChart,
   ResponsiveContainer,
@@ -30,12 +32,7 @@ import {
   dashboardAPI,
 } from "@/clients/dashboard"
 import { Button } from "@/components/ui/button"
-import {
-  Card,
-  CardContent,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card"
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import {
   Select,
   SelectContent,
@@ -45,403 +42,561 @@ import {
 } from "@/components/ui/select"
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs"
 
-// ── Tab configuration ──────────────────────────────────────────
+// ── Tab + signal configuration ────────────────────────────────
 
 const TABS = [
   {
     id: "competitive",
     label: "Competitive Risk",
-    icon: Shield,
-    signalKeys: [
-      "competitive_dominance_signal",
-      "competitive_erosion_signal",
-      "competitive_breakthrough_signal",
-      "rank_displacement_signal",
+    Icon: Shield,
+    pillText: "text-indigo-700",
+    pillBg: "bg-indigo-50",
+    iconColor: "text-indigo-500",
+    hint: "These signals reflect how your brand's AI visibility compares to competitors. High severity means competitors are actively gaining ground in AI-generated responses.",
+    signals: [
+      { key: "competitive_dominance_signal",   histKey: "competitive_dominance",  label: "Competitive Dominance",   Icon: Shield,        color: "#3b82f6" },
+      { key: "competitive_erosion_signal",      histKey: "competitive_erosion",     label: "Competitive Erosion",     Icon: TrendingDown,  color: "#ef4444" },
+      { key: "competitive_breakthrough_signal", histKey: "competitor_breakthrough", label: "Competitor Breakthrough", Icon: TrendingUp,    color: "#f97316" },
+      { key: "rank_displacement_signal",        histKey: "rank_displacement",       label: "Rank Displacement",       Icon: AlertTriangle, color: "#8b5cf6" },
     ],
-    historyKeys: [
-      { key: "competitive_dominance", label: "Dominance", color: "#3b82f6" },
-      { key: "competitive_erosion", label: "Erosion", color: "#ef4444" },
-      { key: "competitor_breakthrough", label: "Breakthrough", color: "#f97316" },
-      { key: "rank_displacement", label: "Rank Displacement", color: "#8b5cf6" },
-    ],
-    hint: "These signals reflect how your brand's AI visibility compares to competitors. High severity means competitors are actively gaining ground in AI-generated responses. Monitor weekly to detect competitive pressure before it affects brand reach.",
   },
   {
     id: "growth",
     label: "Growth & Momentum",
-    icon: TrendingDown,
-    signalKeys: [
-      "deceleration_warning_signal",
-      "new_entrant_signal",
-    ],
-    historyKeys: [
-      { key: "growth_deceleration", label: "Growth Deceleration", color: "#f97316" },
-      { key: "new_entrant", label: "New Entrant", color: "#ec4899" },
-    ],
+    Icon: TrendingDown,
+    pillText: "text-orange-700",
+    pillBg: "bg-orange-50",
+    iconColor: "text-orange-500",
     hint: "Track whether your AI visibility trajectory is accelerating or stalling, and watch for new competitors entering the AI search landscape. A new entrant with High severity has gained meaningful AI visibility quickly and warrants immediate attention.",
+    signals: [
+      { key: "deceleration_warning_signal", histKey: "growth_deceleration", label: "Growth Deceleration", Icon: TrendingDown, color: "#f97316" },
+      { key: "new_entrant_signal",           histKey: "new_entrant",         label: "New Entrant",         Icon: UserPlus,     color: "#ec4899" },
+    ],
   },
   {
     id: "structural",
     label: "Structural Health",
-    icon: Zap,
-    signalKeys: [
-      "weak_structural_position_signal",
-      "fragile_leadership_signal",
-      "volatility_spike_signal",
-    ],
-    historyKeys: [
-      { key: "position_weakness", label: "Position Weakness", color: "#ef4444" },
-      { key: "fragile_leadership", label: "Fragile Leadership", color: "#f97316" },
-      { key: "volatility_spike", label: "Volatility Spike", color: "#8b5cf6" },
-    ],
+    Icon: Zap,
+    pillText: "text-rose-700",
+    pillBg: "bg-rose-50",
+    iconColor: "text-rose-500",
     hint: "Structural signals assess the stability and fundamentals of your AI presence. A weak or volatile structure means your brand appears inconsistently or at low positions — this is the foundation of long-term AI visibility.",
+    signals: [
+      { key: "weak_structural_position_signal", histKey: "position_weakness",  label: "Position Weakness",  Icon: AlertTriangle, color: "#ef4444" },
+      { key: "fragile_leadership_signal",        histKey: "fragile_leadership", label: "Fragile Leadership", Icon: Flag,          color: "#f97316" },
+      { key: "volatility_spike_signal",          histKey: "volatility_spike",   label: "Volatility Spike",   Icon: Activity,      color: "#8b5cf6" },
+    ],
   },
-]
+] as const
 
-const TIME_RANGES: { label: string; value: TimeRange }[] = [
-  { label: "1M", value: "1month" },
-  { label: "1Q", value: "1quarter" },
-  { label: "1Y", value: "1year" },
-  { label: "YTD", value: "ytd" },
-]
+type TabId = (typeof TABS)[number]["id"]
 
-// ── Sub-components ─────────────────────────────────────────────
+// ── Helpers ───────────────────────────────────────────────────
 
-function SeverityBadge({ severity }: { severity: string }) {
-  const lower = severity.toLowerCase()
-  let classes = "px-3 py-1 rounded-full text-xs font-semibold border "
-  if (lower === "high") {
-    classes += "text-red-600 bg-red-50 border-red-200"
-  } else if (lower === "medium") {
-    classes += "text-orange-600 bg-orange-50 border-orange-200"
-  } else {
-    classes += "text-green-600 bg-green-50 border-green-200"
-  }
-  return <span className={classes}>{severity}</span>
+const formatDate = (iso: string) => {
+  const d = new Date(iso)
+  return `${d.getMonth() + 1}/${d.getDate()}`
 }
 
-function SignalCard({ signal }: { signal: InsightSignalSeverity }) {
-  return (
-    <div className="rounded-lg border bg-card p-4 flex flex-col gap-2">
-      <div className="flex items-center justify-between">
-        <span className="text-sm font-medium text-slate-700">{signal.signal_name}</span>
-        <SeverityBadge severity={signal.severity} />
-      </div>
-      <p className="text-xs text-slate-500 leading-relaxed">{signal.business_meaning}</p>
-      {signal.signal_score !== undefined && (
-        <p className="text-xs text-slate-400">Score: {signal.signal_score.toFixed(2)}</p>
-      )}
-    </div>
-  )
-}
-
-function HintPanel({ text }: { text: string }) {
-  return (
-    <div className="flex items-start gap-3 rounded-lg border border-blue-100 bg-blue-50 p-4">
-      <AlertTriangle className="h-4 w-4 text-blue-500 mt-0.5 shrink-0" />
-      <p className="text-sm text-blue-700 leading-relaxed">{text}</p>
-    </div>
-  )
-}
-
-type ChartDataPoint = Record<string, string | number | null>
+type ChartRow = Record<string, string | number | null>
 
 function buildChartData(
   dataPoints: RiskHistoryDataPoint[],
-  historyKeys: { key: string; label: string }[],
-): ChartDataPoint[] {
+  tab: (typeof TABS)[number],
+): ChartRow[] {
   return dataPoints.map((pt) => {
-    const row: ChartDataPoint = { date: pt.date }
-    for (const { key, label } of historyKeys) {
-      row[label] = (pt as unknown as Record<string, number | null>)[key]
+    const row: ChartRow = { date: pt.date, displayDate: formatDate(pt.date) }
+    for (const sig of tab.signals) {
+      row[sig.label] = (pt as unknown as Record<string, number | null>)[sig.histKey]
     }
     return row
   })
 }
 
-// ── Main component ─────────────────────────────────────────────
+// ── Dark tooltip (matches MarketDynamic) ──────────────────────
+
+function RiskChartTooltip({ active, payload, label }: any) {
+  if (!active || !payload || payload.length === 0) return null
+  const severityLabel = (v: number | null) =>
+    v === 4 ? "High" : v === 2 ? "Medium" : v === 1 ? "Low" : "—"
+  return (
+    <div className="bg-black rounded-lg shadow-lg p-3 max-w-xs">
+      <p className="text-sm font-medium text-gray-200 mb-2">{label}</p>
+      {payload
+        .filter((e: any) => e.value !== null && e.value !== undefined)
+        .map((entry: any) => (
+          <div key={entry.name} className="flex items-center gap-2 text-xs">
+            <span
+              className="w-2 h-2 rounded-full flex-shrink-0"
+              style={{ backgroundColor: entry.color }}
+            />
+            <span className="text-gray-400 truncate">{entry.name}:</span>
+            <span className="font-medium text-white ml-auto pl-2">
+              {severityLabel(entry.value)}
+            </span>
+          </div>
+        ))}
+    </div>
+  )
+}
+
+// ── Signal row ────────────────────────────────────────────────
+
+function SignalRow({
+  signal,
+  tab,
+}: {
+  signal: InsightSignalSeverity
+  tab: (typeof TABS)[number]
+}) {
+  const sev = signal.severity?.toLowerCase()
+  const SigIcon =
+    tab.signals.find((s) => s.key === signal.signal_type)?.Icon ?? AlertTriangle
+
+  const severityText =
+    sev === "high"
+      ? "text-red-600"
+      : sev === "medium"
+        ? "text-orange-500"
+        : "text-emerald-600"
+  const severityBg =
+    sev === "high"
+      ? "bg-red-50"
+      : sev === "medium"
+        ? "bg-orange-50"
+        : "bg-emerald-50"
+
+  return (
+    <div className="flex flex-col gap-1.5">
+      <div className="flex items-center gap-1.5">
+        <SigIcon className={`h-3.5 w-3.5 ${tab.iconColor}`} />
+        <span
+          className={`text-xs font-semibold ${tab.pillText} ${tab.pillBg} px-2 py-0.5 rounded-full`}
+        >
+          {signal.signal_name}
+        </span>
+        <span
+          className={`ml-auto text-xs font-semibold px-2 py-0.5 rounded-full ${severityText} ${severityBg}`}
+        >
+          {signal.severity}
+        </span>
+      </div>
+      <p className="text-xs text-slate-500 leading-relaxed">{signal.business_meaning}</p>
+      {signal.signal_score !== undefined && (
+        <p className="text-[10px] text-slate-400">Score: {signal.signal_score.toFixed(2)}</p>
+      )}
+    </div>
+  )
+}
+
+// ── Loading / empty helpers ───────────────────────────────────
+
+const renderLoading = (h = "h-52") => (
+  <div className={`flex items-center justify-center ${h}`}>
+    <Loader2 className="h-6 w-6 animate-spin text-slate-400" />
+  </div>
+)
+
+const renderEmpty = (msg = "No data available", h = "h-52") => (
+  <div className={`flex items-center justify-center ${h} bg-gray-50 rounded-lg`}>
+    <p className="text-sm text-slate-400">{msg}</p>
+  </div>
+)
+
+// ── Main component ────────────────────────────────────────────
+
+const ALL_SEGMENT = "All-Segment"
 
 export default function RiskIntelligence() {
   const [brands, setBrands] = useState<UserBrand[]>([])
   const [selectedBrandId, setSelectedBrandId] = useState<string | null>(null)
-  const [segments, setSegments] = useState<string[]>([])
-  const [selectedSegment, setSelectedSegment] = useState("All-Segment")
+  const [isLoadingBrands, setIsLoadingBrands] = useState(true)
+  const [segments, setSegments] = useState<string[]>([ALL_SEGMENT])
+  const [selectedSegment, setSelectedSegment] = useState(ALL_SEGMENT)
+
+  const [activeTab, setActiveTab] = useState<TabId>("competitive")
 
   const [allSignals, setAllSignals] = useState<InsightSignalSeverity[]>([])
   const [isLoadingOverview, setIsLoadingOverview] = useState(false)
+  const [overviewError, setOverviewError] = useState<string | null>(null)
 
-  const [activeTab, setActiveTab] = useState("competitive")
   const [timeRange, setTimeRange] = useState<TimeRange>("1month")
   const [showCustomDate, setShowCustomDate] = useState(false)
   const [customDateRange, setCustomDateRange] = useState({ start: "", end: "" })
-  const [customDateApplied, setCustomDateApplied] = useState<{ start: string; end: string } | null>(null)
+  const [customDateApplied, setCustomDateApplied] = useState<{
+    start: string
+    end: string
+  } | null>(null)
 
-  const [chartData, setChartData] = useState<ChartDataPoint[]>([])
-  const [chartType, setChartType] = useState<"line" | "bar">("line")
+  const [chartData, setChartData] = useState<ChartRow[]>([])
   const [isLoadingChart, setIsLoadingChart] = useState(false)
+  const [chartError, setChartError] = useState<string | null>(null)
+  const [chartType, setChartType] = useState<"line" | "bar">("line")
 
-  // Load brands on mount
+  // ── Load brands ──
   useEffect(() => {
-    dashboardAPI.getUserBrands().then((res) => {
-      setBrands(res.brands)
-      if (res.brands.length > 0) setSelectedBrandId(res.brands[0].brand_id)
-    })
+    setIsLoadingBrands(true)
+    dashboardAPI
+      .getUserBrands()
+      .then((res) => {
+        setBrands(res.brands)
+        if (res.brands.length > 0) setSelectedBrandId(res.brands[0].brand_id)
+      })
+      .catch(() => {})
+      .finally(() => setIsLoadingBrands(false))
   }, [])
 
-  // Load segments when brand changes
+  // ── Load segments ──
   useEffect(() => {
     if (!selectedBrandId) return
-    dashboardAPI.getBrandSegments(selectedBrandId).then((res) => {
-      setSegments(res.segments)
-      setSelectedSegment("All-Segment")
-    })
+    dashboardAPI
+      .getBrandSegments(selectedBrandId)
+      .then((res) => {
+        setSegments([ALL_SEGMENT, ...res.segments.filter((s) => s !== ALL_SEGMENT)])
+        setSelectedSegment(ALL_SEGMENT)
+      })
+      .catch(() => setSegments([ALL_SEGMENT]))
   }, [selectedBrandId])
 
-  // Load risk overview when brand or segment changes
+  // ── Load risk overview ──
   useEffect(() => {
     if (!selectedBrandId) return
     setIsLoadingOverview(true)
+    setOverviewError(null)
     dashboardAPI
       .getRiskOverview({ brandId: selectedBrandId, segment: selectedSegment })
       .then((res) => setAllSignals(res.signals))
-      .catch(() => toast.error("Failed to load risk overview"))
+      .catch(() => setOverviewError("Failed to load risk signals"))
       .finally(() => setIsLoadingOverview(false))
   }, [selectedBrandId, selectedSegment])
 
-  // Load chart data when brand, segment, or time range changes
-  const loadChart = useCallback(async () => {
+  // ── Load chart history ──
+  useEffect(() => {
     if (!selectedBrandId) return
+    if (timeRange === "custom" && (!customDateApplied?.start || !customDateApplied?.end)) return
     setIsLoadingChart(true)
-    try {
-      const params =
-        timeRange === "custom" && customDateApplied
-          ? {
-              brandId: selectedBrandId,
-              segment: selectedSegment,
-              timeRange: "custom" as TimeRange,
-              startDate: customDateApplied.start,
-              endDate: customDateApplied.end,
-            }
-          : { brandId: selectedBrandId, segment: selectedSegment, timeRange }
-
-      const res = await dashboardAPI.getRiskHistory(params)
-      const tab = TABS.find((t) => t.id === activeTab)!
-      setChartData(buildChartData(res.data_points, tab.historyKeys))
-    } catch {
-      toast.error("Failed to load risk history")
-    } finally {
-      setIsLoadingChart(false)
-    }
+    setChartError(null)
+    const params =
+      timeRange === "custom" && customDateApplied
+        ? {
+            brandId: selectedBrandId,
+            segment: selectedSegment,
+            timeRange: "custom" as TimeRange,
+            startDate: customDateApplied.start,
+            endDate: customDateApplied.end,
+          }
+        : { brandId: selectedBrandId, segment: selectedSegment, timeRange }
+    dashboardAPI
+      .getRiskHistory(params)
+      .then((res) => {
+        const tab = TABS.find((t) => t.id === activeTab)!
+        setChartData(buildChartData(res.data_points, tab))
+      })
+      .catch(() => setChartError("Failed to load risk history"))
+      .finally(() => setIsLoadingChart(false))
   }, [selectedBrandId, selectedSegment, timeRange, customDateApplied, activeTab])
 
-  useEffect(() => {
-    loadChart()
-  }, [loadChart])
-
   const currentTab = TABS.find((t) => t.id === activeTab)!
-  const tabSignals = allSignals.filter((s) => currentTab.signalKeys.includes(s.signal_type))
-
-  const handleApplyCustomDate = () => {
-    if (customDateRange.start && customDateRange.end) {
-      setCustomDateApplied({ start: customDateRange.start, end: customDateRange.end })
-    }
-  }
+  const tabSignals = allSignals.filter((s) =>
+    currentTab.signals.some((cs) => cs.key === s.signal_type),
+  )
+  const CurrentTabIcon = currentTab.Icon
 
   return (
-    <div className="flex flex-col gap-6 p-6">
-      {/* Header */}
-      <div className="flex items-center justify-between">
-        <div className="flex items-center gap-2">
-          <Shield className="h-5 w-5 text-slate-600" />
-          <h1 className="text-xl font-semibold text-slate-800">Risk Intelligence</h1>
-        </div>
-        <Button variant="outline" size="sm" onClick={loadChart} disabled={isLoadingChart}>
-          {isLoadingChart ? <Loader2 className="h-4 w-4 animate-spin" /> : "Refresh"}
-        </Button>
-      </div>
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100 px-4 py-4">
+      <div className="space-y-4">
 
-      {/* Brand + Segment selectors */}
-      <Card>
-        <CardContent className="pt-4">
-          <div className="flex gap-3 flex-wrap">
-            <Select value={selectedBrandId ?? ""} onValueChange={setSelectedBrandId}>
-              <SelectTrigger className="w-[180px]">
-                <SelectValue placeholder="Select brand" />
-              </SelectTrigger>
-              <SelectContent>
-                {brands.map((b) => (
-                  <SelectItem key={b.brand_id} value={b.brand_id}>
-                    {b.brand_name}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-            <Select value={selectedSegment} onValueChange={setSelectedSegment}>
-              <SelectTrigger className="w-[180px]">
-                <SelectValue placeholder="Select segment" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="All-Segment">All Segments</SelectItem>
-                {segments.map((s) => (
-                  <SelectItem key={s} value={s}>
-                    {s}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
+        {/* ── Header ── */}
+        <div className="flex items-center gap-3">
+          <Shield className="h-7 w-7 text-red-600" />
+          <div>
+            <h1 className="text-2xl sm:text-3xl font-bold text-slate-900">Risk Intelligence</h1>
+            <p className="text-slate-500 text-sm mt-0.5">
+              Monitor competitive, growth, and structural risks in your AI search presence
+            </p>
           </div>
-        </CardContent>
-      </Card>
+        </div>
 
-      {/* Main content card */}
-      <Card>
-        <CardHeader>
-          <CardTitle className="text-base font-semibold text-slate-700">
-            Risk Signal Overview
-          </CardTitle>
-        </CardHeader>
-        <CardContent className="flex flex-col gap-6">
-          {/* Category tabs */}
-          <Tabs value={activeTab} onValueChange={setActiveTab}>
-            <TabsList>
-              {TABS.map((tab) => (
-                <TabsTrigger key={tab.id} value={tab.id} className="flex items-center gap-1.5">
-                  <tab.icon className="h-3.5 w-3.5" />
-                  {tab.label}
-                </TabsTrigger>
-              ))}
-            </TabsList>
-          </Tabs>
+        {/* ── Main card ── */}
+        <Card className="shadow-lg">
+          <CardHeader className="pb-3">
+            <CardTitle className="text-lg font-semibold">Risk Overview</CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-6">
 
-          {/* Signal cards */}
-          {isLoadingOverview ? (
-            <div className="flex items-center justify-center py-8">
-              <Loader2 className="h-6 w-6 animate-spin text-slate-400" />
-            </div>
-          ) : (
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
-              {tabSignals.length > 0
-                ? tabSignals.map((signal) => (
-                    <SignalCard key={signal.signal_type} signal={signal} />
-                  ))
-                : <p className="text-sm text-slate-400 col-span-full">No signal data available.</p>
-              }
-            </div>
-          )}
+            {/* Controls row */}
+            <div className="flex items-center gap-3 flex-wrap">
 
-          {/* Hint panel */}
-          <HintPanel text={currentTab.hint} />
+              {/* Brand selector */}
+              {isLoadingBrands ? (
+                <div className="flex items-center gap-2 text-slate-500 text-xs">
+                  <Loader2 className="h-3.5 w-3.5 animate-spin" />
+                  Loading brands…
+                </div>
+              ) : (
+                <div className="flex items-center gap-1.5">
+                  <span className="text-[10px] text-slate-500 font-medium whitespace-nowrap">
+                    Brand
+                  </span>
+                  <Select
+                    value={selectedBrandId ?? undefined}
+                    onValueChange={setSelectedBrandId}
+                  >
+                    <SelectTrigger className="w-[140px] !h-6 !py-0 px-2 text-[10px] [&_svg:last-child]:size-3">
+                      <SelectValue placeholder="Select brand" />
+                    </SelectTrigger>
+                    <SelectContent className="max-h-40">
+                      {brands.map((b) => (
+                        <SelectItem
+                          key={b.brand_id}
+                          value={b.brand_id}
+                          className="text-[10px] !py-0.5 px-2"
+                        >
+                          <span className="font-medium">{b.brand_name}</span>
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+              )}
 
-          {/* Historical chart section */}
-          <div className="flex flex-col gap-4">
-            <div className="flex items-center justify-between flex-wrap gap-3">
-              <div className="flex items-center gap-2">
-                <Tabs value={timeRange} onValueChange={(v) => setTimeRange(v as TimeRange)}>
-                  <TabsList>
-                    {TIME_RANGES.map((r) => (
-                      <TabsTrigger key={r.value} value={r.value}>
-                        {r.label}
+              {/* Segment selector */}
+              <div className="flex items-center gap-1.5">
+                <span className="text-[10px] text-slate-500 font-medium whitespace-nowrap">
+                  Segment
+                </span>
+                <Select value={selectedSegment} onValueChange={setSelectedSegment}>
+                  <SelectTrigger className="w-[140px] !h-6 !py-0 px-2 text-[10px] [&_svg:last-child]:size-3">
+                    <SelectValue placeholder="Select segment" />
+                  </SelectTrigger>
+                  <SelectContent className="max-h-40">
+                    {segments.map((seg) => (
+                      <SelectItem key={seg} value={seg} className="text-[10px] !py-0.5 px-2">
+                        {seg}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+
+              {/* Time range — pushed to right */}
+              <div className="ml-auto flex items-center gap-2">
+                <Tabs
+                  value={showCustomDate ? "custom" : timeRange}
+                  onValueChange={(v) => {
+                    if (v === "custom") {
+                      setShowCustomDate(true)
+                    } else {
+                      setTimeRange(v as TimeRange)
+                      setShowCustomDate(false)
+                      setCustomDateApplied(null)
+                    }
+                  }}
+                >
+                  <TabsList className="bg-transparent rounded-none border-b h-auto p-0">
+                    {(
+                      [
+                        ["1month", "1M"],
+                        ["1quarter", "1Q"],
+                        ["1year", "1Y"],
+                        ["ytd", "YTD"],
+                      ] as const
+                    ).map(([val, lbl]) => (
+                      <TabsTrigger
+                        key={val}
+                        value={val}
+                        className="bg-transparent rounded-none shadow-none px-3 py-1 text-xs
+                          data-[state=active]:bg-transparent data-[state=active]:shadow-none
+                          border-b-2 border-transparent data-[state=active]:border-primary"
+                      >
+                        {lbl}
                       </TabsTrigger>
                     ))}
                   </TabsList>
                 </Tabs>
                 <Button
-                  variant="outline"
+                  variant={showCustomDate ? "default" : "outline"}
                   size="sm"
-                  onClick={() => setShowCustomDate(!showCustomDate)}
-                  className="flex items-center gap-1"
+                  className="h-7 text-xs px-2"
+                  onClick={() => setShowCustomDate((v) => !v)}
                 >
-                  <Calendar className="h-3.5 w-3.5" />
+                  <Calendar className="h-3 w-3 mr-1" />
                   Custom
-                </Button>
-              </div>
-              <div className="flex items-center gap-1">
-                <Button
-                  variant={chartType === "line" ? "default" : "outline"}
-                  size="sm"
-                  onClick={() => setChartType("line")}
-                >
-                  <ChartLine className="h-4 w-4" />
-                </Button>
-                <Button
-                  variant={chartType === "bar" ? "default" : "outline"}
-                  size="sm"
-                  onClick={() => setChartType("bar")}
-                >
-                  <ChartColumnBig className="h-4 w-4" />
                 </Button>
               </div>
             </div>
 
+            {/* Custom date panel */}
             {showCustomDate && (
-              <div className="flex items-center gap-2 flex-wrap">
-                <input
-                  type="date"
-                  className="border rounded px-2 py-1 text-sm"
-                  value={customDateRange.start}
-                  onChange={(e) => setCustomDateRange((p) => ({ ...p, start: e.target.value }))}
-                />
-                <span className="text-sm text-slate-500">to</span>
-                <input
-                  type="date"
-                  className="border rounded px-2 py-1 text-sm"
-                  value={customDateRange.end}
-                  onChange={(e) => setCustomDateRange((p) => ({ ...p, end: e.target.value }))}
-                />
-                <Button size="sm" onClick={handleApplyCustomDate}>
+              <div className="flex flex-col sm:flex-row gap-3 sm:items-end p-4 bg-gray-50 rounded-lg">
+                {(["start", "end"] as const).map((key) => (
+                  <div key={key} className="flex-1">
+                    <label className="text-sm font-medium text-gray-700 block mb-1 capitalize">
+                      {key} Date
+                    </label>
+                    <input
+                      type="date"
+                      className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      value={customDateRange[key]}
+                      onChange={(e) =>
+                        setCustomDateRange((r) => ({ ...r, [key]: e.target.value }))
+                      }
+                    />
+                  </div>
+                ))}
+                <Button
+                  size="sm"
+                  onClick={() => {
+                    if (customDateRange.start && customDateRange.end) {
+                      setTimeRange("custom")
+                      setCustomDateApplied({
+                        start: customDateRange.start,
+                        end: customDateRange.end,
+                      })
+                    }
+                  }}
+                >
                   Apply
                 </Button>
               </div>
             )}
 
-            {isLoadingChart ? (
-              <div className="flex items-center justify-center py-12">
-                <Loader2 className="h-6 w-6 animate-spin text-slate-400" />
+            {/* Category tabs */}
+            <Tabs value={activeTab} onValueChange={(v) => setActiveTab(v as TabId)}>
+              <TabsList>
+                {TABS.map(({ id, label, Icon: TabIcon }) => (
+                  <TabsTrigger key={id} value={id} className="flex items-center gap-1.5">
+                    <TabIcon className="h-3.5 w-3.5" />
+                    {label}
+                  </TabsTrigger>
+                ))}
+              </TabsList>
+            </Tabs>
+
+            {/* Hint */}
+            <p className="text-xs text-slate-400 leading-relaxed">{currentTab.hint}</p>
+
+            <hr className="border-slate-200" />
+
+            {/* ── Signal cards ── */}
+            {overviewError ? (
+              <div className="text-sm text-red-500 bg-red-50 border border-red-200 rounded-lg p-3">
+                {overviewError}
               </div>
+            ) : isLoadingOverview ? (
+              renderLoading()
+            ) : tabSignals.length === 0 ? (
+              renderEmpty("No signal data available")
             ) : (
-              <ResponsiveContainer width="100%" height={300}>
-                {chartType === "line" ? (
-                  <LineChart data={chartData}>
-                    <CartesianGrid strokeDasharray="3 3" stroke="#f1f5f9" />
-                    <XAxis dataKey="date" tick={{ fontSize: 11 }} />
-                    <YAxis domain={[0, 4]} ticks={[1, 2, 4]} tick={{ fontSize: 11 }}
-                      tickFormatter={(v) => v === 1 ? "Low" : v === 2 ? "Med" : "High"} />
-                    <Tooltip
-                      formatter={(v: number | undefined) => v === 1 ? "Low" : v === 2 ? "Medium" : "High"}
-                    />
-                    <Legend />
-                    {currentTab.historyKeys.map(({ label, color }) => (
-                      <Line
-                        key={label}
-                        type="monotone"
-                        dataKey={label}
-                        stroke={color}
-                        strokeWidth={2}
-                        dot={false}
-                        connectNulls
-                      />
-                    ))}
-                  </LineChart>
-                ) : (
-                  <BarChart data={chartData}>
-                    <CartesianGrid strokeDasharray="3 3" stroke="#f1f5f9" />
-                    <XAxis dataKey="date" tick={{ fontSize: 11 }} />
-                    <YAxis domain={[0, 4]} ticks={[1, 2, 4]} tick={{ fontSize: 11 }}
-                      tickFormatter={(v) => v === 1 ? "Low" : v === 2 ? "Med" : "High"} />
-                    <Tooltip
-                      formatter={(v: number | undefined) => v === 1 ? "Low" : v === 2 ? "Medium" : "High"}
-                    />
-                    <Legend />
-                    {currentTab.historyKeys.map(({ label, color }) => (
-                      <Bar key={label} dataKey={label} fill={color} />
-                    ))}
-                  </BarChart>
-                )}
-              </ResponsiveContainer>
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                {tabSignals.map((signal) => (
+                  <SignalRow key={signal.signal_type} signal={signal} tab={currentTab} />
+                ))}
+              </div>
             )}
-          </div>
-        </CardContent>
-      </Card>
+
+            <hr className="border-slate-200" />
+
+            {/* ── Historical chart ── */}
+            <div>
+              <div className="flex items-center gap-1.5 mb-3">
+                <CurrentTabIcon className={`h-3.5 w-3.5 ${currentTab.iconColor}`} />
+                <span
+                  className={`text-xs font-semibold ${currentTab.pillText} ${currentTab.pillBg} px-2 py-0.5 rounded-full`}
+                >
+                  {currentTab.label} — Severity History
+                </span>
+                <Tabs
+                  value={chartType}
+                  onValueChange={(v) => setChartType(v as "line" | "bar")}
+                  className="ml-auto"
+                >
+                  <TabsList className="h-7">
+                    <TabsTrigger value="line" className="h-5 px-2">
+                      <ChartLine size={13} />
+                    </TabsTrigger>
+                    <TabsTrigger value="bar" className="h-5 px-2">
+                      <ChartColumnBig size={13} />
+                    </TabsTrigger>
+                  </TabsList>
+                </Tabs>
+              </div>
+
+              {chartError ? (
+                <div className="text-sm text-red-500 bg-red-50 border border-red-200 rounded-lg p-3">
+                  {chartError}
+                </div>
+              ) : isLoadingChart ? (
+                renderLoading("h-72")
+              ) : chartData.length === 0 ? (
+                renderEmpty("No history data for this period", "h-72")
+              ) : (
+                <div className="h-72 bg-gray-50 rounded-lg p-2">
+                  <ResponsiveContainer width="100%" height="100%">
+                    {chartType === "line" ? (
+                      <LineChart
+                        data={chartData}
+                        margin={{ top: 4, right: 8, bottom: 0, left: 0 }}
+                      >
+                        <CartesianGrid strokeDasharray="3 3" stroke="#e2e8f0" />
+                        <XAxis
+                          dataKey="displayDate"
+                          tick={{ fontSize: 10, fill: "#64748b" }}
+                        />
+                        <YAxis
+                          domain={[0, 5]}
+                          ticks={[1, 2, 4]}
+                          tick={{ fontSize: 10, fill: "#64748b" }}
+                          tickFormatter={(v) =>
+                            v === 1 ? "Low" : v === 2 ? "Med" : v === 4 ? "High" : ""
+                          }
+                        />
+                        <Tooltip content={<RiskChartTooltip />} />
+                        {currentTab.signals.map(({ label, color }) => (
+                          <Line
+                            key={label}
+                            type="monotone"
+                            dataKey={label}
+                            stroke={color}
+                            strokeWidth={2}
+                            dot={false}
+                            activeDot={{ r: 3 }}
+                            connectNulls
+                          />
+                        ))}
+                      </LineChart>
+                    ) : (
+                      <BarChart
+                        data={chartData}
+                        margin={{ top: 4, right: 8, bottom: 0, left: 0 }}
+                      >
+                        <CartesianGrid strokeDasharray="3 3" stroke="#e2e8f0" />
+                        <XAxis
+                          dataKey="displayDate"
+                          tick={{ fontSize: 10, fill: "#64748b" }}
+                        />
+                        <YAxis
+                          domain={[0, 5]}
+                          ticks={[1, 2, 4]}
+                          tick={{ fontSize: 10, fill: "#64748b" }}
+                          tickFormatter={(v) =>
+                            v === 1 ? "Low" : v === 2 ? "Med" : v === 4 ? "High" : ""
+                          }
+                        />
+                        <Tooltip content={<RiskChartTooltip />} />
+                        {currentTab.signals.map(({ label, color }) => (
+                          <Bar key={label} dataKey={label} fill={color} />
+                        ))}
+                      </BarChart>
+                    )}
+                  </ResponsiveContainer>
+                </div>
+              )}
+            </div>
+
+          </CardContent>
+        </Card>
+      </div>
     </div>
   )
 }

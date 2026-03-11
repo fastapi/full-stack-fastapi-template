@@ -1,4 +1,4 @@
-import { BarChart2, Calendar, Crosshair, Eye, Loader2, Target, TrendingUp, Zap } from "lucide-react"
+import { BarChart2, Calendar, ChartColumnBig, ChartLine, Crosshair, Eye, Loader2, Target, TrendingUp, Zap } from "lucide-react"
 import { useEffect, useState } from "react"
 import {
   Area,
@@ -615,23 +615,14 @@ export default function MarketDynamic() {
                   <span className="text-xs font-semibold text-indigo-700 bg-indigo-50 px-2 py-0.5 rounded-full">
                     Search Momentum
                   </span>
-                  <Tabs
-                    value={smChartType}
-                    onValueChange={(v) => setSmChartType(v as "line" | "bar")}
-                    className="ml-auto"
-                  >
-                    <TabsList className="bg-transparent rounded-none border-b h-auto p-0">
-                      {(["line", "bar"] as const).map((t) => (
-                        <TabsTrigger
-                          key={t}
-                          value={t}
-                          className="bg-transparent rounded-none shadow-none px-3 py-1 text-xs capitalize
-                            data-[state=active]:bg-transparent data-[state=active]:shadow-none
-                            border-b-2 border-transparent data-[state=active]:border-primary"
-                        >
-                          {t}
-                        </TabsTrigger>
-                      ))}
+                  <Tabs value={smChartType} onValueChange={(v) => setSmChartType(v as "line" | "bar")} className="ml-auto">
+                    <TabsList className="h-7">
+                      <TabsTrigger value="line" className="h-5 px-2">
+                        <ChartLine size={13} />
+                      </TabsTrigger>
+                      <TabsTrigger value="bar" className="h-5 px-2">
+                        <ChartColumnBig size={13} />
+                      </TabsTrigger>
                     </TabsList>
                   </Tabs>
                 </div>
@@ -688,23 +679,14 @@ export default function MarketDynamic() {
                   <span className="text-xs font-semibold text-indigo-700 bg-indigo-50 px-2 py-0.5 rounded-full">
                     Position Strength
                   </span>
-                  <Tabs
-                    value={psChartType}
-                    onValueChange={(v) => setPsChartType(v as "line" | "bar")}
-                    className="ml-auto"
-                  >
-                    <TabsList className="bg-transparent rounded-none border-b h-auto p-0">
-                      {(["line", "bar"] as const).map((t) => (
-                        <TabsTrigger
-                          key={t}
-                          value={t}
-                          className="bg-transparent rounded-none shadow-none px-3 py-1 text-xs capitalize
-                            data-[state=active]:bg-transparent data-[state=active]:shadow-none
-                            border-b-2 border-transparent data-[state=active]:border-primary"
-                        >
-                          {t}
-                        </TabsTrigger>
-                      ))}
+                  <Tabs value={psChartType} onValueChange={(v) => setPsChartType(v as "line" | "bar")} className="ml-auto">
+                    <TabsList className="h-7">
+                      <TabsTrigger value="line" className="h-5 px-2">
+                        <ChartLine size={13} />
+                      </TabsTrigger>
+                      <TabsTrigger value="bar" className="h-5 px-2">
+                        <ChartColumnBig size={13} />
+                      </TabsTrigger>
                     </TabsList>
                   </Tabs>
                 </div>

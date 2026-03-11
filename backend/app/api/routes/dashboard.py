@@ -90,6 +90,8 @@ from kila_models.models import (
     BrandSearchRankingTable,
     ProjectUserTable,
     ProjectsRecord,
+    BrandUserTable,
+    BrandsTable,
     BrandPromptTable,
     BrandCompetitorsTable,
     BrandCompetitorsAwarenessWeeklyPerformanceTable,
@@ -153,93 +155,51 @@ async def get_user_brands(
     """
     Get all brands accessible by the current user.
 
-    This endpoint retrieves all brands that belong to projects where
-    the user is either an OWNER or a Monitor. It uses the ProjectUserTable
-    to find user's projects and BrandPromptTable to find brands within
-    those projects.
-
-    Args:
-        db: Database session (injected by FastAPI)
-        current_user: Authenticated user (injected by FastAPI)
-
-    Returns:
-        UserBrandsResponse with list of accessible brands
-
-    Raises:
-        HTTPException 401: If user is not authenticated
+    Queries BrandUserTable to find brands where the user is OWNER or Monitor,
+    then returns brand details from BrandsTable.
     """
     logger.info(f"Fetching accessible brands for user: {current_user.user_id}")
 
     try:
-        # Step 1: Get all projects the user has access to (as owner or monitor)
-        project_user_query = select(ProjectUserTable).where(
-            ProjectUserTable.user_id == current_user.user_id
+        # Get all brand_user rows for this user
+        brand_user_query = select(BrandUserTable).where(
+            BrandUserTable.user_id == current_user.user_id
         )
-        project_user_result = await db.execute(project_user_query)
-        project_users = project_user_result.scalars().all()
+        brand_user_result = await db.execute(brand_user_query)
+        brand_users = brand_user_result.scalars().all()
 
-        if not project_users:
-            logger.info(f"No projects found for user: {current_user.user_id}")
+        if not brand_users:
+            logger.info(f"No brands found for user: {current_user.user_id}")
             return UserBrandsResponse(brands=[], total_count=0)
 
-        # Build a map of project_id -> user_role
-        project_roles = {pu.project_id: pu.user_role.value for pu in project_users}
-        project_ids = list(project_roles.keys())
+        # Build brand_id -> user_role map
+        brand_roles = {bu.brand_id: bu.user_role.value for bu in brand_users}
+        brand_ids = list(brand_roles.keys())
 
-        logger.info(f"Found {len(project_ids)} projects for user")
+        logger.info(f"Found {len(brand_ids)} brand memberships for user")
 
-        # Step 2: Get project details
-        projects_query = select(ProjectsRecord).where(
-            ProjectsRecord.project_id.in_(project_ids),
-            ProjectsRecord.is_active == True
-        )
-        projects_result = await db.execute(projects_query)
-        projects = projects_result.scalars().all()
-
-        # Build project name map
-        project_names = {p.project_id: p.project_name for p in projects}
-
-        # Step 3: Get unique brands from BrandPromptTable for these projects
-        brands_query = (
-            select(
-                BrandPromptTable.brand_id,
-                BrandPromptTable.brand_name,
-                BrandPromptTable.project_id
-            )
-            .where(
-                BrandPromptTable.project_id.in_(project_ids),
-                BrandPromptTable.is_active == True
-            )
-            .distinct(BrandPromptTable.brand_id, BrandPromptTable.project_id)
+        # Get active brands
+        brands_query = select(BrandsTable).where(
+            BrandsTable.brand_id.in_(brand_ids),
+            BrandsTable.is_active == True
         )
         brands_result = await db.execute(brands_query)
-        brand_records = brands_result.all()
+        brands = brands_result.scalars().all()
 
-        # Build unique brands list (dedupe by brand_id, keep first project)
-        seen_brands = {}
-        user_brands = []
+        user_brands = [
+            UserBrand(
+                brand_id=b.brand_id,
+                brand_name=b.brand_name,
+                project_id=b.brand_id,       # kept for backward compat with frontend
+                project_name=b.brand_name,    # kept for backward compat with frontend
+                user_role=brand_roles.get(b.brand_id, "monitor"),
+            )
+            for b in brands
+        ]
 
-        for record in brand_records:
-            brand_id = record.brand_id
-            brand_name = record.brand_name
-            project_id = record.project_id
+        logger.info(f"Found {len(user_brands)} accessible brands for user")
 
-            if brand_id not in seen_brands:
-                seen_brands[brand_id] = True
-                user_brands.append(UserBrand(
-                    brand_id=brand_id,
-                    brand_name=brand_name,
-                    project_id=project_id,
-                    project_name=project_names.get(project_id, "Unknown"),
-                    user_role=project_roles.get(project_id, "unknown")
-                ))
-
-        logger.info(f"Found {len(user_brands)} unique brands for user")
-
-        return UserBrandsResponse(
-            brands=user_brands,
-            total_count=len(user_brands)
-        )
+        return UserBrandsResponse(brands=user_brands, total_count=len(user_brands))
 
     except Exception as e:
         logger.error(f"Failed to fetch user brands: {e}")
@@ -256,21 +216,21 @@ async def get_brand_segments(
     current_user: UsersTable = Depends(get_current_user),
 ):
     """
-    Return distinct segment names for a brand from BrandSearchDailyBasicMetricsTable,
-    excluding the 'all-segment' rollup row.
+    Return distinct segment names for a brand from BrandPromptTable.
     """
     logger.info(f"Fetching segments for user: {current_user.user_id}, brand_id: {brand_id}")
 
     query = (
-        select(distinct(BrandSearchDailyBasicMetricsTable.segment))
+        select(distinct(BrandPromptTable.segment))
         .where(
-            BrandSearchDailyBasicMetricsTable.search_target_brand_id == brand_id,
-            BrandSearchDailyBasicMetricsTable.segment != "all-segment",
+            BrandPromptTable.brand_id == brand_id,
+            BrandPromptTable.is_active == True,  # noqa: E712
+            BrandPromptTable.segment != None,  # noqa: E711
         )
-        .order_by(BrandSearchDailyBasicMetricsTable.segment)
+        .order_by(BrandPromptTable.segment)
     )
     result = await db.execute(query)
-    segments = [row[0] for row in result.fetchall()]
+    segments = [row[0] for row in result.fetchall() if row[0]]
 
     logger.info(f"Found {len(segments)} segments for brand_id: {brand_id}")
     return BrandSegmentsResponse(brand_id=brand_id, segments=segments)

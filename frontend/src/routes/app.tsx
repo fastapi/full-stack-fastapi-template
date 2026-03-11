@@ -37,7 +37,7 @@ function AppGuard() {
           return
         }
 
-        const apiUrl = import.meta.env.VITE_API_URL || "http://localhost:8000"
+        const apiUrl = import.meta.env.VITE_API_URL ?? ""
         const response = await fetch(`${apiUrl}/api/v1/auth/clerk-sync`, {
           method: "POST",
           headers: {

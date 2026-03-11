@@ -14,6 +14,7 @@ import { Route as IndexRouteImport } from './routes/index'
 import { Route as AppUsersRouteImport } from './routes/app.users'
 import { Route as AppProjectsRouteImport } from './routes/app.projects'
 import { Route as AppProfileSetupRouteImport } from './routes/app.profile-setup'
+import { Route as AppBrandsRouteImport } from './routes/app.brands'
 import { Route as AppInsightRiskIntelligenceRouteImport } from './routes/app.insight.risk-intelligence'
 import { Route as AppInsightMarketDynamicRouteImport } from './routes/app.insight.market-dynamic'
 import { Route as AppDashboardPerformanceRouteImport } from './routes/app.dashboard.performance'
@@ -45,6 +46,11 @@ const AppProjectsRoute = AppProjectsRouteImport.update({
 const AppProfileSetupRoute = AppProfileSetupRouteImport.update({
   id: '/profile-setup',
   path: '/profile-setup',
+  getParentRoute: () => AppRoute,
+} as any)
+const AppBrandsRoute = AppBrandsRouteImport.update({
+  id: '/brands',
+  path: '/brands',
   getParentRoute: () => AppRoute,
 } as any)
 const AppInsightRiskIntelligenceRoute =
@@ -88,6 +94,7 @@ const AppDashboardBrandImpressionRoute =
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/app': typeof AppRouteWithChildren
+  '/app/brands': typeof AppBrandsRoute
   '/app/profile-setup': typeof AppProfileSetupRoute
   '/app/projects': typeof AppProjectsRoute
   '/app/users': typeof AppUsersRoute
@@ -102,6 +109,7 @@ export interface FileRoutesByFullPath {
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/app': typeof AppRouteWithChildren
+  '/app/brands': typeof AppBrandsRoute
   '/app/profile-setup': typeof AppProfileSetupRoute
   '/app/projects': typeof AppProjectsRoute
   '/app/users': typeof AppUsersRoute
@@ -117,6 +125,7 @@ export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/app': typeof AppRouteWithChildren
+  '/app/brands': typeof AppBrandsRoute
   '/app/profile-setup': typeof AppProfileSetupRoute
   '/app/projects': typeof AppProjectsRoute
   '/app/users': typeof AppUsersRoute
@@ -133,6 +142,7 @@ export interface FileRouteTypes {
   fullPaths:
     | '/'
     | '/app'
+    | '/app/brands'
     | '/app/profile-setup'
     | '/app/projects'
     | '/app/users'
@@ -147,6 +157,7 @@ export interface FileRouteTypes {
   to:
     | '/'
     | '/app'
+    | '/app/brands'
     | '/app/profile-setup'
     | '/app/projects'
     | '/app/users'
@@ -161,6 +172,7 @@ export interface FileRouteTypes {
     | '__root__'
     | '/'
     | '/app'
+    | '/app/brands'
     | '/app/profile-setup'
     | '/app/projects'
     | '/app/users'
@@ -213,6 +225,13 @@ declare module '@tanstack/react-router' {
       path: '/profile-setup'
       fullPath: '/app/profile-setup'
       preLoaderRoute: typeof AppProfileSetupRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/app/brands': {
+      id: '/app/brands'
+      path: '/brands'
+      fullPath: '/app/brands'
+      preLoaderRoute: typeof AppBrandsRouteImport
       parentRoute: typeof AppRoute
     }
     '/app/insight/risk-intelligence': {
@@ -268,6 +287,7 @@ declare module '@tanstack/react-router' {
 }
 
 interface AppRouteChildren {
+  AppBrandsRoute: typeof AppBrandsRoute
   AppProfileSetupRoute: typeof AppProfileSetupRoute
   AppProjectsRoute: typeof AppProjectsRoute
   AppUsersRoute: typeof AppUsersRoute
@@ -281,6 +301,7 @@ interface AppRouteChildren {
 }
 
 const AppRouteChildren: AppRouteChildren = {
+  AppBrandsRoute: AppBrandsRoute,
   AppProfileSetupRoute: AppProfileSetupRoute,
   AppProjectsRoute: AppProjectsRoute,
   AppUsersRoute: AppUsersRoute,

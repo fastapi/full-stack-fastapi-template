@@ -4,6 +4,7 @@ from app.api.routes import user_prompts, auth
 from app.api.routes import profile
 from app.api.routes import dashboard
 from app.api.routes import projects
+from app.api.routes import brands
 from app.api.routes import webhooks
 from app.config import settings
 
@@ -14,6 +15,7 @@ api_router.include_router(auth.router, tags=["authentication"])
 api_router.include_router(profile.router, tags=["profile"])
 api_router.include_router(dashboard.router, tags=["dashboard"])
 api_router.include_router(projects.router, tags=["projects"])
+api_router.include_router(brands.router, tags=["brands"])
 api_router.include_router(webhooks.router, tags=["webhooks"])
 
 

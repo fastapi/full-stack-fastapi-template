@@ -1,6 +1,6 @@
 import { getAuthToken } from "./auth-helper"
 
-const API_BASE_URL = import.meta.env.VITE_API_URL || "http://localhost:8000"
+const API_BASE_URL = import.meta.env.VITE_API_URL ?? ""
 const API_PREFIX: string = "/api/v1"
 
 export interface ProfileSetupRequest {

@@ -16,7 +16,7 @@ export interface UserSubscription {
 // ── Quota limits per tier ──────────────────────────────────────────────────────
 
 export interface TierQuota {
-  projects: number
+  brands: number
   brandsPerProject: number
   segmentsPerBrand: number
   promptsPerSegment: number
@@ -24,19 +24,19 @@ export interface TierQuota {
 
 export const TIER_QUOTAS: Record<SubscriptionTier, TierQuota> = {
   free_trial: {
-    projects: 1,
+    brands: 1,
     brandsPerProject: 1,
     segmentsPerBrand: 1,
     promptsPerSegment: 1,
   },
   basic: {
-    projects: 1,
+    brands: 1,
     brandsPerProject: 1,
     segmentsPerBrand: 3,
     promptsPerSegment: 1,
   },
   pro: {
-    projects: 3,
+    brands: 3,
     brandsPerProject: 1,
     segmentsPerBrand: 3,
     promptsPerSegment: 3,

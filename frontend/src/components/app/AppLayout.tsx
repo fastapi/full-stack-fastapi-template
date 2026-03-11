@@ -30,6 +30,7 @@ interface MenuItem {
   name: string
   icon: React.ComponentType<{ size?: number }>
   path?: string
+  beta?: boolean
   children?: {
     name: string
     path: string
@@ -53,12 +54,13 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
   const showFullContent = sidebarOpen || mobileSidebarOpen
 
   const menuItems: MenuItem[] = [
-    { name: "Projects", icon: FolderKanban, path: "/app/projects" },
+    { name: "Brands", icon: FolderKanban, path: "/app/brands" },
     { name: "Brand Impression", icon: TrendingUp, path: "/app/dashboard/brand-impression" },
     { name: "Competitive Analysis", icon: Swords, path: "/app/dashboard/competitors" },
     {
       name: "Insight",
       icon: Lightbulb,
+      beta: true,
       children: [
         { name: "Market Dynamic", path: "/app/insight/market-dynamic", requiredFeature: "insightAll" },
         { name: "Risk Intelligence", path: "/app/insight/risk-intelligence", requiredFeature: "insightAll" },
@@ -113,7 +115,7 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
           mobileSidebarOpen ? "translate-x-0" : "-translate-x-full",
           // Desktop: normal flow, toggle width
           "md:relative md:translate-x-0",
-          sidebarOpen ? "md:w-fit" : "md:w-12",
+          sidebarOpen ? "md:w-1/4" : "md:w-12",
         ].join(" ")}
       >
         {/* Workspace / User Header */}
@@ -143,7 +145,7 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
         </div>
 
         {/* Navigation */}
-        <nav className="flex-1 px-2 py-4 space-y-1 overflow-y-auto">
+        <nav className={`flex-1 py-4 space-y-1 overflow-y-auto ${showFullContent ? "px-2" : "px-1"}`}>
           {menuItems.map((item) => {
             const Icon = item.icon
             const hasChildren = item.children && item.children.length > 0
@@ -164,16 +166,21 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
                         setExpandedMenus((prev) => new Set(prev).add(item.name))
                       }
                     }}
-                    className={`flex items-center w-full px-3 py-1.5 rounded-lg transition ${
+                    className={`flex items-center w-full py-1.5 rounded-lg transition ${showFullContent ? "px-3" : "justify-center px-0"} ${
                       isParentActive
                         ? "bg-blue-50 dark:bg-blue-900/20 text-blue-600 dark:text-blue-400"
                         : "text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700"
                     }`}
                   >
-                    <Icon size={showFullContent ? 16 : 20} />
+                    <Icon size={18} />
                     {showFullContent && (
                       <>
                         <span className="ml-3 text-xs font-medium flex-1 text-left whitespace-nowrap">{item.name}</span>
+                        {item.beta && (
+                          <span className="ml-1.5 text-[9px] font-semibold uppercase tracking-wide bg-blue-100 dark:bg-blue-900/40 text-blue-600 dark:text-blue-400 px-1 py-0.5 rounded">
+                            Beta
+                          </span>
+                        )}
                         {isExpanded ? (
                           <ChevronDown size={12} className="ml-auto" />
                         ) : (
@@ -234,13 +241,13 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
                 key={item.path}
                 to={item.path!}
                 onClick={closeMobileSidebar}
-                className={`flex items-center px-3 py-1.5 rounded-lg transition ${
+                className={`flex items-center py-1.5 rounded-lg transition ${showFullContent ? "px-3" : "justify-center px-0"} ${
                   isParentActive
                     ? "bg-blue-50 dark:bg-blue-900/20 text-blue-600 dark:text-blue-400"
                     : "text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700"
                 }`}
               >
-                <Icon size={showFullContent ? 16 : 20} />
+                <Icon size={18} />
                 {showFullContent && <span className="ml-3 text-xs font-medium whitespace-nowrap">{item.name}</span>}
               </Link>
             )

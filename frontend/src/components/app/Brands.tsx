@@ -1,28 +1,28 @@
 /**
- * Projects Component
+ * Brands Component
  *
- * Displays a list of projects for the current user in a card with a table layout.
+ * Displays a list of brands for the current user in a card with a table layout.
  * Features:
- * - Table with sequence number, project name, description, created date, and active status
+ * - Table with sequence number, brand name, description, created date, and active status
  * - Active status shown as checkbox
  * - Ordered by created date (newest first)
- * - Add new project button that shows the ProjectSetupForm
+ * - Add new brand button that shows the BrandSetupForm
  * - Data fetched from backend API with caching
  */
 
 import { AlertCircle, Eye, Loader2, Plus, Trash2 } from "lucide-react"
 import { useCallback, useEffect, useState } from "react"
 import { toast } from "sonner"
-import { type ApiConflictError, type Project, projectsAPI } from "@/clients/projects"
+import { type ApiConflictError, type Brand, brandsAPI } from "@/clients/brands"
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
 import {
-  type ProjectEditFormData,
-  ProjectEditForm,
-} from "@/components/app/ProjectEditForm"
+  type BrandEditFormData,
+  BrandEditForm,
+} from "@/components/app/BrandEditForm"
 import {
-  type ProjectFormData,
-  ProjectSetupForm,
-} from "@/components/app/ProjectSetupForm"
+  type BrandFormData,
+  BrandSetupForm,
+} from "@/components/app/BrandSetupForm"
 import { QuotaGate } from "@/components/app/QuotaGate"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
@@ -56,18 +56,18 @@ const formatDate = (dateString: string): string => {
   })
 }
 
-export default function Projects() {
+export default function Brands() {
   // ============================================================================
   // State Management
   // ============================================================================
 
-  const [projects, setProjects] = useState<Project[]>([])
+  const [brands, setBrands] = useState<Brand[]>([])
   const [isLoading, setIsLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
   const [showSetupForm, setShowSetupForm] = useState(false)
-  const [editingProject, setEditingProject] = useState<Project | null>(null)
+  const [editingBrand, setEditingBrand] = useState<Brand | null>(null)
   const [isSubmitting, setIsSubmitting] = useState(false)
-  const [deletingProject, setDeletingProject] = useState<Project | null>(null)
+  const [deletingBrand, setDeletingBrand] = useState<Brand | null>(null)
   const [isDeleting, setIsDeleting] = useState(false)
   const [brandConflictMessage, setBrandConflictMessage] = useState<string | null>(null)
 
@@ -75,43 +75,42 @@ export default function Projects() {
   // Data Fetching
   // ============================================================================
 
-  const fetchProjects = useCallback(async () => {
+  const fetchBrands = useCallback(async () => {
     try {
       setIsLoading(true)
       setError(null)
 
-      const data = await projectsAPI.getProjects()
-      setProjects(data.projects)
+      const data = await brandsAPI.getBrands()
+      setBrands(data.brands)
 
-      console.log("[Projects] Loaded projects:", data.total_count)
+      console.log("[Brands] Loaded brands:", data.total_count)
     } catch (err) {
       const errorMessage =
-        err instanceof Error ? err.message : "Failed to load projects"
-      
+        err instanceof Error ? err.message : "Failed to load brands"
+
       // Check if it's an authentication error specifically
       if (errorMessage.includes("Unauthorized") || errorMessage.includes("401")) {
-        console.error("[Projects] Authentication issue detected - please log in again")
-        // Show a specific message that indicates they might need to re-login
-        setError("Authentication failed. Please log in again to view your projects.")
+        console.error("[Brands] Authentication issue detected - please log in again")
+        setError("Authentication failed. Please log in again to view your brands.")
       } else {
         setError(errorMessage)
       }
-      console.error("[Projects] Error:", err)
+      console.error("[Brands] Error:", err)
     } finally {
       setIsLoading(false)
     }
   }, [])
 
   useEffect(() => {
-    fetchProjects()
-  }, [fetchProjects])
+    fetchBrands()
+  }, [fetchBrands])
 
   // ============================================================================
   // Event Handlers
   // ============================================================================
 
-  const handleAddNewProject = () => {
-    setEditingProject(null) // Close edit form if open
+  const handleAddNewBrand = () => {
+    setEditingBrand(null) // Close edit form if open
     setBrandConflictMessage(null) // Clear any previous conflict message
     setShowSetupForm(true)
   }
@@ -121,30 +120,29 @@ export default function Projects() {
     setBrandConflictMessage(null)
   }
 
-  const handleViewProject = (project: Project) => {
+  const handleViewBrand = (brand: Brand) => {
     setShowSetupForm(false) // Close setup form if open
-    setEditingProject(project)
+    setEditingBrand(brand)
   }
 
   const handleCancelEdit = () => {
-    setEditingProject(null)
+    setEditingBrand(null)
   }
 
   const handleSubmitEdit = async (
-    projectId: string,
-    formData: ProjectEditFormData,
+    brandId: string,
+    formData: BrandEditFormData,
   ) => {
-    console.log("[Projects] Updating project:", projectId, formData)
+    console.log("[Brands] Updating brand:", brandId, formData)
 
     try {
       setIsSubmitting(true)
 
-      // Call full update API with brand and segments
-      const result = await projectsAPI.updateProjectFull(projectId, {
-        project_name: formData.projectName,
-        project_description: formData.projectDescription || undefined,
-        is_active: formData.isActive,
+      // Call full update API with segments
+      const result = await brandsAPI.updateBrandFull(brandId, {
         brand_name: formData.brandName,
+        description: formData.brandDescription || undefined,
+        is_active: formData.isActive,
         segments: formData.segments
           .filter((seg) => seg.segmentName.trim() && seg.prompts.trim())
           .map((seg) => ({
@@ -154,35 +152,34 @@ export default function Projects() {
       })
 
       toast.success(
-        `Project updated successfully! Prompts: ${result.prompt_count}`,
+        `Brand updated successfully! Prompts: ${result.prompt_count}`,
       )
 
-      // Close form and refresh project list
-      setEditingProject(null)
-      const freshData = await projectsAPI.getProjects(true)
-      setProjects(freshData.projects)
+      // Close form and refresh brand list
+      setEditingBrand(null)
+      const freshData = await brandsAPI.getBrands(true)
+      setBrands(freshData.brands)
     } catch (err) {
       const errorMessage =
-        err instanceof Error ? err.message : "Failed to update project"
+        err instanceof Error ? err.message : "Failed to update brand"
       toast.error(errorMessage)
-      console.error("[Projects] Error updating project:", err)
+      console.error("[Brands] Error updating brand:", err)
     } finally {
       setIsSubmitting(false)
     }
   }
 
-  const handleSubmitProject = async (formData: ProjectFormData) => {
-    console.log("[Projects] Submitting project setup:", formData)
+  const handleSubmitBrand = async (formData: BrandFormData) => {
+    console.log("[Brands] Submitting brand setup:", formData)
 
     try {
       setIsSubmitting(true)
       setBrandConflictMessage(null)
 
-      // Transform form data to API format and call setupProject
-      const result = await projectsAPI.setupProject({
-        project_name: formData.projectName,
-        project_description: formData.projectDescription || undefined,
+      // Transform form data to API format and call setupBrand
+      const result = await brandsAPI.setupBrand({
         brand_name: formData.brandName,
+        description: formData.brandDescription || undefined,
         segments: formData.segments
           .filter((seg) => seg.segmentName.trim() && seg.prompts.trim())
           .map((seg) => ({
@@ -191,63 +188,62 @@ export default function Projects() {
           })),
       })
 
-      console.log("[Projects] Project setup completed:", result)
+      console.log("[Brands] Brand setup completed:", result)
 
       toast.success(
-        `Project created successfully! Brand: ${result.brand_id}, Prompts: ${result.prompt_count}`,
+        `Brand created successfully! Prompts: ${result.prompt_count}`,
       )
 
-      // Hide form and refresh project list with force refresh to bypass cache
+      // Hide form and refresh brand list with force refresh to bypass cache
       setShowSetupForm(false)
-      // Note: setupProject already clears the cache, but we fetch fresh data anyway
-      const freshData = await projectsAPI.getProjects(true)
-      setProjects(freshData.projects)
+      const freshData = await brandsAPI.getBrands(true)
+      setBrands(freshData.brands)
     } catch (err) {
       if ((err as ApiConflictError).isConflict) {
-        // Brand already exists in another project — show info box
+        // Brand already exists — show info box
         setBrandConflictMessage(
-          err instanceof Error ? err.message : "Brand already exists in another project"
+          err instanceof Error ? err.message : "Brand already exists"
         )
       } else {
         const errorMessage =
-          err instanceof Error ? err.message : "Failed to create project"
+          err instanceof Error ? err.message : "Failed to create brand"
         toast.error(errorMessage)
       }
-      console.error("[Projects] Error setting up project:", err)
+      console.error("[Brands] Error setting up brand:", err)
     } finally {
       setIsSubmitting(false)
     }
   }
 
-  const handleDeleteClick = (project: Project) => {
-    setDeletingProject(project)
+  const handleDeleteClick = (brand: Brand) => {
+    setDeletingBrand(brand)
   }
 
   const handleCancelDelete = () => {
-    setDeletingProject(null)
+    setDeletingBrand(null)
   }
 
   const handleConfirmDelete = async () => {
-    if (!deletingProject) return
+    if (!deletingBrand) return
 
-    console.log("[Projects] Deleting project:", deletingProject.project_id)
+    console.log("[Brands] Deleting brand:", deletingBrand.brand_id)
 
     try {
       setIsDeleting(true)
 
-      const result = await projectsAPI.deleteProject(deletingProject.project_id)
+      const result = await brandsAPI.deleteBrand(deletingBrand.brand_id)
 
       toast.success(result.message)
 
-      // Close dialog and refresh project list
-      setDeletingProject(null)
-      const freshData = await projectsAPI.getProjects(true)
-      setProjects(freshData.projects)
+      // Close dialog and refresh brand list
+      setDeletingBrand(null)
+      const freshData = await brandsAPI.getBrands(true)
+      setBrands(freshData.brands)
     } catch (err) {
       const errorMessage =
-        err instanceof Error ? err.message : "Failed to delete project"
+        err instanceof Error ? err.message : "Failed to delete brand"
       toast.error(errorMessage)
-      console.error("[Projects] Error deleting project:", err)
+      console.error("[Brands] Error deleting brand:", err)
     } finally {
       setIsDeleting(false)
     }
@@ -262,12 +258,12 @@ export default function Projects() {
       <div className="p-6">
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-4">
-            <CardTitle className="text-xl font-bold">Project List</CardTitle>
+            <CardTitle className="text-xl font-bold">Brand List</CardTitle>
           </CardHeader>
           <CardContent>
             <div className="flex flex-col items-center justify-center h-64">
               <Loader2 className="h-12 w-12 animate-spin text-blue-600" />
-              <p className="mt-4 text-sm text-gray-500">Loading projects...</p>
+              <p className="mt-4 text-sm text-gray-500">Loading brands...</p>
             </div>
           </CardContent>
         </Card>
@@ -284,12 +280,12 @@ export default function Projects() {
       <div className="p-6">
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-4">
-            <CardTitle className="text-xl font-bold">Project List</CardTitle>
+            <CardTitle className="text-xl font-bold">Brand List</CardTitle>
           </CardHeader>
           <CardContent>
             <div className="flex flex-col items-center justify-center h-64">
               <div className="text-red-500 text-center">
-                <p className="font-medium">Failed to load projects</p>
+                <p className="font-medium">Failed to load brands</p>
                 <p className="text-sm mt-2">{error}</p>
               </div>
             </div>
@@ -305,25 +301,25 @@ export default function Projects() {
 
   return (
     <div className="p-6">
-      {/* Project List Card */}
+      {/* Brand List Card */}
       <Card>
         <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-4">
-          <CardTitle className="text-xl font-bold">Project List</CardTitle>
-          {!showSetupForm && !editingProject && (
-            <QuotaGate resource="brands" currentCount={projects.length}>
-              <Button size="sm" onClick={handleAddNewProject} type="button">
+          <CardTitle className="text-xl font-bold">Brand List</CardTitle>
+          {!showSetupForm && !editingBrand && (
+            <QuotaGate resource="brands" currentCount={brands.length}>
+              <Button size="sm" onClick={handleAddNewBrand} type="button">
                 <Plus className="h-4 w-4 mr-2" />
-                Add New Project
+                Add New Brand
               </Button>
             </QuotaGate>
           )}
         </CardHeader>
         <CardContent>
-          {projects.length === 0 ? (
+          {brands.length === 0 ? (
             <div className="flex flex-col items-center justify-center h-64 text-gray-500">
-              <p>No projects found</p>
+              <p>No brands found</p>
               <p className="text-sm mt-2">
-                Click "Add New Project" to create your first project
+                Click "Add New Brand" to create your first brand
               </p>
             </div>
           ) : (
@@ -331,7 +327,7 @@ export default function Projects() {
               <TableHeader>
                 <TableRow>
                   <TableHead className="w-[80px]">Seq No.</TableHead>
-                  <TableHead>Project Name</TableHead>
+                  <TableHead>Brand Name</TableHead>
                   <TableHead className="max-w-[300px]">Description</TableHead>
                   <TableHead className="w-[150px]">Created At</TableHead>
                   <TableHead className="w-[80px] text-center">Active</TableHead>
@@ -340,30 +336,30 @@ export default function Projects() {
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {projects.map((project, index) => (
-                  <TableRow key={project.project_id}>
+                {brands.map((brand, index) => (
+                  <TableRow key={brand.brand_id}>
                     <TableCell className="font-medium">{index + 1}</TableCell>
                     <TableCell className="font-semibold">
-                      {project.project_name}
+                      {brand.brand_name}
                     </TableCell>
                     <TableCell className="text-gray-600 max-w-[300px] truncate">
-                      {project.description || "-"}
+                      {brand.description || "-"}
                     </TableCell>
-                    <TableCell>{formatDate(project.created_at)}</TableCell>
+                    <TableCell>{formatDate(brand.created_at)}</TableCell>
                     <TableCell className="text-center">
                       <Checkbox
-                        checked={project.is_active}
+                        checked={brand.is_active}
                         disabled
-                        aria-label={`Project ${project.project_name} is ${project.is_active ? "active" : "inactive"}`}
+                        aria-label={`Brand ${brand.brand_name} is ${brand.is_active ? "active" : "inactive"}`}
                       />
                     </TableCell>
                     <TableCell className="text-center">
                       <Button
                         variant="ghost"
                         size="sm"
-                        onClick={() => handleViewProject(project)}
+                        onClick={() => handleViewBrand(brand)}
                         className="h-8 w-8 p-0"
-                        aria-label={`View project ${project.project_name} details`}
+                        aria-label={`View brand ${brand.brand_name} details`}
                       >
                         <Eye className="h-4 w-4" />
                       </Button>
@@ -372,9 +368,9 @@ export default function Projects() {
                       <Button
                         variant="ghost"
                         size="sm"
-                        onClick={() => handleDeleteClick(project)}
+                        onClick={() => handleDeleteClick(brand)}
                         className="h-8 w-8 p-0 text-gray-400 hover:text-red-500"
-                        aria-label={`Delete project ${project.project_name}`}
+                        aria-label={`Delete brand ${brand.brand_name}`}
                       >
                         <Trash2 className="h-4 w-4" />
                       </Button>
@@ -400,18 +396,18 @@ export default function Projects() {
         </div>
       )}
 
-      {/* Project Setup Form (shown when adding new project) */}
+      {/* Brand Setup Form (shown when adding new brand) */}
       {showSetupForm && (
-        <ProjectSetupForm
+        <BrandSetupForm
           onCancel={handleCancelSetup}
-          onSubmit={handleSubmitProject}
+          onSubmit={handleSubmitBrand}
         />
       )}
 
-      {/* Project Edit Form (shown when editing a project) */}
-      {editingProject && (
-        <ProjectEditForm
-          project={editingProject}
+      {/* Brand Edit Form (shown when editing a brand) */}
+      {editingBrand && (
+        <BrandEditForm
+          brand={editingBrand}
           onCancel={handleCancelEdit}
           onSubmit={handleSubmitEdit}
         />
@@ -422,19 +418,19 @@ export default function Projects() {
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
           <div className="bg-white p-6 rounded-lg flex items-center gap-4">
             <Loader2 className="h-6 w-6 animate-spin text-blue-600" />
-            <span>{editingProject ? "Updating" : "Creating"} project...</span>
+            <span>{editingBrand ? "Updating" : "Creating"} brand...</span>
           </div>
         </div>
       )}
 
       {/* Delete Confirmation Dialog */}
-      <Dialog open={!!deletingProject} onOpenChange={(open) => !open && handleCancelDelete()}>
+      <Dialog open={!!deletingBrand} onOpenChange={(open) => !open && handleCancelDelete()}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>Delete Project</DialogTitle>
+            <DialogTitle>Delete Brand</DialogTitle>
             <DialogDescription>
-              Are you sure you want to delete the project "{deletingProject?.project_name}"?
-              This will also delete all associated brand prompts. This action cannot be undone.
+              Are you sure you want to delete the brand "{deletingBrand?.brand_name}"?
+              This will also delete all associated segments and prompts. This action cannot be undone.
             </DialogDescription>
           </DialogHeader>
           <DialogFooter>

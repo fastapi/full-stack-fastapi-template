@@ -13,7 +13,7 @@ function IndexPage() {
 
   useEffect(() => {
     if (isLoaded && isSignedIn) {
-      navigate({ to: "/app/projects" })
+      navigate({ to: "/app/brands" })
     }
   }, [isLoaded, isSignedIn, navigate])
 
