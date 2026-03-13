@@ -61,6 +61,8 @@ class BaseConfig(BaseSettings):
     stripe_webhook_secret: str = ""
     stripe_basic_price_id: str = ""
     stripe_pro_price_id: str = ""
+    stripe_secret_key: str = ""
+    stripe_frontend_url: str = "http://localhost:5173"
 
     # Rate Limiting
     rate_limit_enabled: bool = False
