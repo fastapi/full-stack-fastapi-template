@@ -70,7 +70,10 @@ export function BillingPage() {
     }
   }
 
-  const hasStripeCustomer = tier !== "free_trial"
+  // Show "Manage Subscription" only for paid, non-cancelled users.
+  // stripe_customer_id is not exposed to the frontend; tier + status is used as proxy.
+  const hasStripeCustomer =
+    tier !== "free_trial" && subscription?.status !== "cancelled"
 
   return (
     <div className="mx-auto max-w-2xl px-4 py-10">

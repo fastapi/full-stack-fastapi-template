@@ -27,7 +27,6 @@ class BaseConfig(BaseSettings):
     pg_max_overflow: int = 20
 
     # JWT settings
-    secret_key: str = ""
     algorithm: str = "HS256"
     access_token_expires_minutes: int = 60
     refresh_token_expires_days: int = 7
