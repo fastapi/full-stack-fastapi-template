@@ -106,6 +106,125 @@ async def test_create_checkout_session_already_subscribed():
         assert resp.status_code == 400
 
 
+# ── Webhook tests ─────────────────────────────────────────────────────────────
+
+@pytest.mark.asyncio
+async def test_webhook_checkout_completed_uses_metadata_user_id():
+    """checkout.session.completed looks up user by metadata.user_id."""
+    sub = _make_sub()
+    mock_db = _mock_db(sub)
+
+    app.dependency_overrides[get_db] = lambda: mock_db
+
+    with (
+        patch("app.api.routes.webhooks.stripe") as mock_stripe,
+        patch("app.api.routes.webhooks.settings") as mock_settings,
+    ):
+        mock_settings.stripe_webhook_secret = "whsec_test"
+        mock_settings.stripe_basic_price_id = "price_basic"
+        mock_settings.stripe_pro_price_id = "price_pro"
+
+        mock_stripe.Webhook.construct_event.return_value = {
+            "type": "checkout.session.completed",
+            "data": {
+                "object": {
+                    "metadata": {"user_id": "U_test123"},
+                    "customer": "cus_new_123",
+                    "subscription": "sub_123",
+                }
+            },
+        }
+        mock_stripe.Subscription.retrieve.return_value = {
+            "items": {"data": [{"price": {"id": "price_basic"}}]}
+        }
+
+        transport = ASGITransport(app=app)
+        async with AsyncClient(transport=transport, base_url="http://test") as client:
+            resp = await client.post(
+                "/api/v1/webhooks/stripe",
+                content=b"test_payload",
+                headers={"stripe-signature": "test_sig"},
+            )
+
+        assert resp.status_code == 200
+        assert sub.stripe_customer_id == "cus_new_123"
+
+
+@pytest.mark.asyncio
+async def test_webhook_subscription_updated():
+    """customer.subscription.updated changes tier correctly."""
+    sub = _make_sub(tier=SubscriptionTier.basic, status=SubscriptionStatus.active)
+    mock_db = _mock_db(sub)
+
+    app.dependency_overrides[get_db] = lambda: mock_db
+
+    with (
+        patch("app.api.routes.webhooks.stripe") as mock_stripe,
+        patch("app.api.routes.webhooks.settings") as mock_settings,
+    ):
+        mock_settings.stripe_webhook_secret = "whsec_test"
+        mock_settings.stripe_basic_price_id = "price_basic"
+        mock_settings.stripe_pro_price_id = "price_pro"
+
+        mock_stripe.Webhook.construct_event.return_value = {
+            "type": "customer.subscription.updated",
+            "data": {
+                "object": {
+                    "metadata": {"user_id": "U_test123"},
+                    "status": "active",
+                    "items": {"data": [{"price": {"id": "price_pro"}}]},
+                }
+            },
+        }
+
+        transport = ASGITransport(app=app)
+        async with AsyncClient(transport=transport, base_url="http://test") as client:
+            resp = await client.post(
+                "/api/v1/webhooks/stripe",
+                content=b"test_payload",
+                headers={"stripe-signature": "test_sig"},
+            )
+
+        assert resp.status_code == 200
+        assert sub.tier == SubscriptionTier.pro
+
+
+@pytest.mark.asyncio
+async def test_webhook_payment_failed():
+    """invoice.payment_failed sets status to past_due."""
+    sub = _make_sub(
+        tier=SubscriptionTier.basic,
+        status=SubscriptionStatus.active,
+        stripe_subscription_id="sub_123",
+    )
+    mock_db = _mock_db(sub)
+
+    app.dependency_overrides[get_db] = lambda: mock_db
+
+    with (
+        patch("app.api.routes.webhooks.stripe") as mock_stripe,
+        patch("app.api.routes.webhooks.settings") as mock_settings,
+    ):
+        mock_settings.stripe_webhook_secret = "whsec_test"
+        mock_settings.stripe_basic_price_id = "price_basic"
+        mock_settings.stripe_pro_price_id = "price_pro"
+
+        mock_stripe.Webhook.construct_event.return_value = {
+            "type": "invoice.payment_failed",
+            "data": {"object": {"subscription": "sub_123"}},
+        }
+
+        transport = ASGITransport(app=app)
+        async with AsyncClient(transport=transport, base_url="http://test") as client:
+            resp = await client.post(
+                "/api/v1/webhooks/stripe",
+                content=b"test_payload",
+                headers={"stripe-signature": "test_sig"},
+            )
+
+        assert resp.status_code == 200
+        assert sub.status == SubscriptionStatus.past_due
+
 @pytest.mark.asyncio
 async def test_create_checkout_session_reuses_customer_id():
     sub = _make_sub(stripe_customer_id="cus_existing123")
