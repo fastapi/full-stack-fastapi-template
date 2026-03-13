@@ -134,8 +134,10 @@ Note: `stripe_webhook_secret`, `stripe_basic_price_id`, `stripe_pro_price_id` al
 Add billing router in `app/api/main.py`:
 ```python
 from app.api.routes import billing
-api_router.include_router(billing.router, prefix="/billing", tags=["billing"])
+api_router.include_router(billing.router, tags=["billing"])
 ```
+
+Note: The prefix `/billing` is defined on the router itself in `billing.py`, so do not pass it again in `include_router`.
 
 ## Frontend
 
@@ -253,13 +255,14 @@ Add `past_due` to the frontend `SubscriptionStatus` type in `src/lib/entitlement
 type SubscriptionStatus = "active" | "expired" | "cancelled" | "past_due"
 ```
 
-This requires an Alembic migration with explicit MySQL enum alteration:
+This requires an Alembic migration with explicit PostgreSQL enum alteration:
 ```python
 # In the migration's upgrade():
-op.execute("ALTER TABLE user_subscriptions MODIFY COLUMN status ENUM('active','expired','cancelled','past_due') NOT NULL DEFAULT 'active'")
+op.execute("ALTER TYPE subscriptionstatus ADD VALUE IF NOT EXISTS 'past_due'")
 
 # In the migration's downgrade():
-op.execute("ALTER TABLE user_subscriptions MODIFY COLUMN status ENUM('active','expired','cancelled') NOT NULL DEFAULT 'active'")
+# PostgreSQL enums cannot easily remove values — this is a one-way migration.
+pass
 ```
 
 ## Future iterations
