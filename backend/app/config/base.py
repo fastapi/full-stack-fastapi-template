@@ -61,7 +61,7 @@ class BaseConfig(BaseSettings):
     stripe_basic_price_id: str = ""
     stripe_pro_price_id: str = ""
     stripe_secret_key: str = ""
-    stripe_frontend_url: str = "http://localhost:5173"
+    stripe_frontend_url: str = "http://localhost:3000"
 
     # Rate Limiting
     rate_limit_enabled: bool = False
