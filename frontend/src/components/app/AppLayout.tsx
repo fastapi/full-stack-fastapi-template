@@ -5,6 +5,8 @@ import { Link, useLocation } from "@tanstack/react-router"
 import {
   ChevronDown,
   ChevronRight,
+  CreditCard,
+  DollarSign,
   FolderKanban,
   Lightbulb,
   Lock,
@@ -53,7 +55,7 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
     clerkUser?.fullName ||
     [clerkUser?.firstName, clerkUser?.lastName].filter(Boolean).join(" ") ||
     userFirstName
-  const { isExpired, canAccess } = useEntitlement()
+  const { isExpired, canAccess, tier: currentTier } = useEntitlement()
 
   // Show full sidebar content when desktop is expanded OR mobile drawer is open
   const showFullContent = sidebarOpen || mobileSidebarOpen
@@ -87,6 +89,10 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
         },
       ],
     },
+    { name: "Pricing", icon: DollarSign, path: "/app/pricing" },
+    ...(currentTier !== "free_trial"
+      ? [{ name: "Billing", icon: CreditCard, path: "/app/billing" } as MenuItem]
+      : []),
     { name: "My Profile", icon: User, path: "/app/users" },
   ]
 
@@ -406,7 +412,7 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
               monitoring your brand.
             </p>
             <a
-              href="/pricing"
+              href="/app/pricing"
               className="ml-4 text-xs font-semibold text-amber-900 dark:text-amber-200 underline underline-offset-2 whitespace-nowrap hover:text-amber-700"
             >
               View plans →
