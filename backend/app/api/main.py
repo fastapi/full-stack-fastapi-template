@@ -6,6 +6,7 @@ from app.api.routes import dashboard
 from app.api.routes import projects
 from app.api.routes import brands
 from app.api.routes import webhooks
+from app.api.routes import billing
 from app.config import settings
 
 
@@ -17,6 +18,7 @@ api_router.include_router(dashboard.router, tags=["dashboard"])
 api_router.include_router(projects.router, tags=["projects"])
 api_router.include_router(brands.router, tags=["brands"])
 api_router.include_router(webhooks.router, tags=["webhooks"])
+api_router.include_router(billing.router, tags=["billing"])
 
 
 # Private routes router (e.g., for debugging)
