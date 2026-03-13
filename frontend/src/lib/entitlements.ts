@@ -4,7 +4,7 @@
  */
 
 export type SubscriptionTier = "free_trial" | "basic" | "pro"
-export type SubscriptionStatus = "active" | "expired" | "cancelled"
+export type SubscriptionStatus = "active" | "expired" | "cancelled" | "past_due"
 
 export interface UserSubscription {
   tier: SubscriptionTier
