@@ -14,7 +14,9 @@ import { Route as IndexRouteImport } from './routes/index'
 import { Route as AppUsersRouteImport } from './routes/app.users'
 import { Route as AppProjectsRouteImport } from './routes/app.projects'
 import { Route as AppProfileSetupRouteImport } from './routes/app.profile-setup'
+import { Route as AppPricingRouteImport } from './routes/app.pricing'
 import { Route as AppBrandsRouteImport } from './routes/app.brands'
+import { Route as AppBillingRouteImport } from './routes/app.billing'
 import { Route as AppInsightRiskIntelligenceRouteImport } from './routes/app.insight.risk-intelligence'
 import { Route as AppInsightMarketDynamicRouteImport } from './routes/app.insight.market-dynamic'
 import { Route as AppDashboardPerformanceRouteImport } from './routes/app.dashboard.performance'
@@ -48,9 +50,19 @@ const AppProfileSetupRoute = AppProfileSetupRouteImport.update({
   path: '/profile-setup',
   getParentRoute: () => AppRoute,
 } as any)
+const AppPricingRoute = AppPricingRouteImport.update({
+  id: '/pricing',
+  path: '/pricing',
+  getParentRoute: () => AppRoute,
+} as any)
 const AppBrandsRoute = AppBrandsRouteImport.update({
   id: '/brands',
   path: '/brands',
+  getParentRoute: () => AppRoute,
+} as any)
+const AppBillingRoute = AppBillingRouteImport.update({
+  id: '/billing',
+  path: '/billing',
   getParentRoute: () => AppRoute,
 } as any)
 const AppInsightRiskIntelligenceRoute =
@@ -94,7 +106,9 @@ const AppDashboardBrandImpressionRoute =
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/app': typeof AppRouteWithChildren
+  '/app/billing': typeof AppBillingRoute
   '/app/brands': typeof AppBrandsRoute
+  '/app/pricing': typeof AppPricingRoute
   '/app/profile-setup': typeof AppProfileSetupRoute
   '/app/projects': typeof AppProjectsRoute
   '/app/users': typeof AppUsersRoute
@@ -109,7 +123,9 @@ export interface FileRoutesByFullPath {
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/app': typeof AppRouteWithChildren
+  '/app/billing': typeof AppBillingRoute
   '/app/brands': typeof AppBrandsRoute
+  '/app/pricing': typeof AppPricingRoute
   '/app/profile-setup': typeof AppProfileSetupRoute
   '/app/projects': typeof AppProjectsRoute
   '/app/users': typeof AppUsersRoute
@@ -125,7 +141,9 @@ export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/app': typeof AppRouteWithChildren
+  '/app/billing': typeof AppBillingRoute
   '/app/brands': typeof AppBrandsRoute
+  '/app/pricing': typeof AppPricingRoute
   '/app/profile-setup': typeof AppProfileSetupRoute
   '/app/projects': typeof AppProjectsRoute
   '/app/users': typeof AppUsersRoute
@@ -142,7 +160,9 @@ export interface FileRouteTypes {
   fullPaths:
     | '/'
     | '/app'
+    | '/app/billing'
     | '/app/brands'
+    | '/app/pricing'
     | '/app/profile-setup'
     | '/app/projects'
     | '/app/users'
@@ -157,7 +177,9 @@ export interface FileRouteTypes {
   to:
     | '/'
     | '/app'
+    | '/app/billing'
     | '/app/brands'
+    | '/app/pricing'
     | '/app/profile-setup'
     | '/app/projects'
     | '/app/users'
@@ -172,7 +194,9 @@ export interface FileRouteTypes {
     | '__root__'
     | '/'
     | '/app'
+    | '/app/billing'
     | '/app/brands'
+    | '/app/pricing'
     | '/app/profile-setup'
     | '/app/projects'
     | '/app/users'
@@ -227,11 +251,25 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AppProfileSetupRouteImport
       parentRoute: typeof AppRoute
     }
+    '/app/pricing': {
+      id: '/app/pricing'
+      path: '/pricing'
+      fullPath: '/app/pricing'
+      preLoaderRoute: typeof AppPricingRouteImport
+      parentRoute: typeof AppRoute
+    }
     '/app/brands': {
       id: '/app/brands'
       path: '/brands'
       fullPath: '/app/brands'
       preLoaderRoute: typeof AppBrandsRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/app/billing': {
+      id: '/app/billing'
+      path: '/billing'
+      fullPath: '/app/billing'
+      preLoaderRoute: typeof AppBillingRouteImport
       parentRoute: typeof AppRoute
     }
     '/app/insight/risk-intelligence': {
@@ -287,7 +325,9 @@ declare module '@tanstack/react-router' {
 }
 
 interface AppRouteChildren {
+  AppBillingRoute: typeof AppBillingRoute
   AppBrandsRoute: typeof AppBrandsRoute
+  AppPricingRoute: typeof AppPricingRoute
   AppProfileSetupRoute: typeof AppProfileSetupRoute
   AppProjectsRoute: typeof AppProjectsRoute
   AppUsersRoute: typeof AppUsersRoute
@@ -301,7 +341,9 @@ interface AppRouteChildren {
 }
 
 const AppRouteChildren: AppRouteChildren = {
+  AppBillingRoute: AppBillingRoute,
   AppBrandsRoute: AppBrandsRoute,
+  AppPricingRoute: AppPricingRoute,
   AppProfileSetupRoute: AppProfileSetupRoute,
   AppProjectsRoute: AppProjectsRoute,
   AppUsersRoute: AppUsersRoute,

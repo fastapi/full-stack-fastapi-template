@@ -216,18 +216,18 @@ async def get_brand_segments(
     current_user: UsersTable = Depends(get_current_user),
 ):
     """
-    Return distinct segment names for a brand from BrandPromptTable.
+    Return distinct segment names for a brand that have actual metrics data,
+    excluding the 'all-segment' rollup row.
     """
     logger.info(f"Fetching segments for user: {current_user.user_id}, brand_id: {brand_id}")
 
     query = (
-        select(distinct(BrandPromptTable.segment))
+        select(distinct(BrandSearchDailyBasicMetricsTable.segment))
         .where(
-            BrandPromptTable.brand_id == brand_id,
-            BrandPromptTable.is_active == True,  # noqa: E712
-            BrandPromptTable.segment != None,  # noqa: E711
+            BrandSearchDailyBasicMetricsTable.search_target_brand_id == brand_id,
+            BrandSearchDailyBasicMetricsTable.segment != "all-segment",
         )
-        .order_by(BrandPromptTable.segment)
+        .order_by(BrandSearchDailyBasicMetricsTable.segment)
     )
     result = await db.execute(query)
     segments = [row[0] for row in result.fetchall() if row[0]]
@@ -2252,7 +2252,10 @@ async def get_brand_impression_trend(
             None if rec.total_search_count == 0
             else round(rec.search_visibility_count / rec.total_search_count * 100, 2)
         )
-        pos = None if rec.search_visibility_count == 0 else float(rec.median_ranking)
+        pos = (
+            None if rec.search_visibility_count == 0 or rec.median_ranking is None
+            else float(rec.median_ranking)
+        )
         sent = rec.final_sentiment_score  # may be None
         raw.append({"date": rec.search_date_end.isoformat(), "visibility": vis, "position": pos, "sentiment": sent})
 
@@ -2353,10 +2356,10 @@ async def get_brand_ranking_trend(
         has_data = rec.search_visibility_count > 0
         raw.append({
             "date": rec.search_date_end.isoformat(),
-            "min_ranking": float(rec.min_ranking) if has_data else None,
-            "max_ranking": float(rec.max_ranking) if has_data else None,
-            "median_ranking": float(rec.median_ranking) if has_data else None,
-            "avg_ranking": round(rec.avg_ranking, 2) if has_data else None,
+            "min_ranking": float(rec.min_ranking) if has_data and rec.min_ranking is not None else None,
+            "max_ranking": float(rec.max_ranking) if has_data and rec.max_ranking is not None else None,
+            "median_ranking": float(rec.median_ranking) if has_data and rec.median_ranking is not None else None,
+            "avg_ranking": round(float(rec.avg_ranking), 2) if has_data and rec.avg_ranking is not None else None,
             "is_interpolated": not has_data,
         })
 
