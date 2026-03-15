@@ -42,7 +42,7 @@ from kila_models.models.database import (
     BrandUserTable,
     UserSubscriptionTable,
 )
-from kila_models.models.base import ProjectRole, SubscriptionTier
+from kila_models.models.base import ProjectRole, SubscriptionStatus, SubscriptionTier
 
 logger = logging.getLogger(__name__)
 router = APIRouter(prefix="/brands", tags=["brands"])
@@ -52,18 +52,30 @@ def generate_id(prefix: str) -> str:
     return f"{prefix}{nanoid_generate(size=10)}"
 
 
-async def _check_free_trial_active_brand_limit(user_id: str, db: AsyncSession, exclude_brand_id: str) -> None:
-    """For free trial users: raise 403 if they already have another active brand."""
+async def _check_active_brand_limit(user_id: str, db: AsyncSession, exclude_brand_id: str) -> None:
+    """Raise 403 if the subscription is expired/cancelled, or the user already has
+    another active brand (limit is 1 for all tiers).
+    Super users are exempt and always pass this check.
+    """
     sub_result = await db.execute(
-        select(UserSubscriptionTable.tier).where(UserSubscriptionTable.user_id == user_id)
+        select(
+            UserSubscriptionTable.is_super_user,
+            UserSubscriptionTable.status,
+        ).where(UserSubscriptionTable.user_id == user_id)
     )
-    tier = sub_result.scalar_one_or_none()
-    logger.info(f"[free-trial-check] user={user_id} tier={tier} exclude_brand={exclude_brand_id}")
+    row = sub_result.one_or_none()
+    if row and row.is_super_user:
+        return
 
-    if tier != SubscriptionTier.free_trial:
-        return  # pro users have no restriction
+    if row and row.status in (
+        SubscriptionStatus.expired,
+        SubscriptionStatus.cancelled,
+    ):
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Your subscription has expired. Please renew to add or activate brands.",
+        )
 
-    # Count active brands owned by this user, excluding the one being edited
     count_result = await db.execute(
         select(func.count(BrandsTable.brand_id))
         .join(BrandUserTable, BrandUserTable.brand_id == BrandsTable.brand_id)
@@ -72,12 +84,12 @@ async def _check_free_trial_active_brand_limit(user_id: str, db: AsyncSession, e
         .where(BrandsTable.brand_id != exclude_brand_id)
     )
     other_active = count_result.scalar_one()
-    logger.info(f"[free-trial-check] other_active_brands={other_active}")
+    logger.info(f"[brand-limit] user={user_id} other_active={other_active} exclude={exclude_brand_id}")
 
     if other_active >= 1:
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,
-            detail="Free trial is limited to 1 active brand. Deactivate your current brand before activating another.",
+            detail="You can only have 1 active brand at a time. Deactivate your current brand before activating another.",
         )
 
 
@@ -197,7 +209,7 @@ async def setup_brand(
         company_id = (user_profile.company_id if user_profile else None) or f"company_{current_user.user_id}"
 
         # Enforce free trial quota: max 1 active brand
-        await _check_free_trial_active_brand_limit(current_user.user_id, db, exclude_brand_id="")
+        await _check_active_brand_limit(current_user.user_id, db, exclude_brand_id="")
 
         # Check for duplicate brand name for this user
         brand_name_lower = setup_data.brand_name.strip().lower()
@@ -298,7 +310,7 @@ async def update_brand(
             brand.description = update_data.description.strip() if update_data.description else None
         if update_data.is_active is not None:
             if update_data.is_active:
-                await _check_free_trial_active_brand_limit(current_user.user_id, db, exclude_brand_id=brand_id)
+                await _check_active_brand_limit(current_user.user_id, db, exclude_brand_id=brand_id)
             brand.is_active = update_data.is_active
             await db.execute(
                 update(BrandPromptTable)
@@ -352,7 +364,7 @@ async def update_brand_full(
         company_id = (user_profile.company_id if user_profile else None) or f"company_{current_user.user_id}"
 
         if update_data.is_active:
-            await _check_free_trial_active_brand_limit(current_user.user_id, db, exclude_brand_id=brand_id)
+            await _check_active_brand_limit(current_user.user_id, db, exclude_brand_id=brand_id)
 
         brand.brand_name = update_data.brand_name.strip()
         brand.description = update_data.description

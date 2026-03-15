@@ -62,7 +62,71 @@ export function BillingPage() {
     try {
       setPortalLoading(true)
       const { portal_url } = await billingAPI.createPortalSession()
-      window.location.href = portal_url
+
+      // Open Stripe portal in a new tab so the user never loses their place.
+      const portalTab = window.open(portal_url, "_blank")
+
+      // When the user closes the Stripe tab and returns here, refresh the
+      // subscription so any changes (payment method, cancellation) reflect
+      // immediately without requiring a manual reload.
+      const snapshotStatus = subscription?.status
+      const snapshotTier = subscription?.tier
+      const snapshotCancelAtPeriodEnd = subscription?.cancel_at_period_end
+
+      const handleVisibilityChange = async () => {
+        if (document.visibilityState !== "visible") return
+        document.removeEventListener("visibilitychange", handleVisibilityChange)
+
+        const { profileAPI } = await import("@/clients/profile")
+        const maxAttempts = 10
+        for (let i = 0; i < maxAttempts; i++) {
+          const updated = await profileAPI.getProfile()
+          const updatedSub = (updated as any)?.subscription
+          if (!updatedSub) break
+
+          const changed =
+            updatedSub.tier !== snapshotTier ||
+            updatedSub.status !== snapshotStatus ||
+            updatedSub.cancel_at_period_end !== snapshotCancelAtPeriodEnd
+
+          if (changed) {
+            await refreshSubscription()
+            if (updatedSub.tier !== snapshotTier) {
+              toast.success("Subscription plan updated.")
+            } else if (updatedSub.cancel_at_period_end !== snapshotCancelAtPeriodEnd) {
+              toast.success(
+                updatedSub.cancel_at_period_end
+                  ? "Subscription scheduled for cancellation."
+                  : "Subscription reactivated.",
+              )
+            } else if (updatedSub.status !== snapshotStatus) {
+              toast.success("Subscription status updated.")
+            }
+            return
+          }
+
+          if (i < maxAttempts - 1) {
+            await new Promise((resolve) => setTimeout(resolve, 1000))
+          }
+        }
+
+        await refreshSubscription()
+      }
+
+      document.addEventListener("visibilitychange", handleVisibilityChange)
+
+      // Safety cleanup: if the portal tab was blocked or closed immediately,
+      // remove the listener after 30 minutes to avoid a stale handler.
+      setTimeout(
+        () =>
+          document.removeEventListener(
+            "visibilitychange",
+            handleVisibilityChange,
+          ),
+        30 * 60 * 1000,
+      )
+
+      void portalTab // suppress unused variable lint warning
     } catch (err) {
       toast.error(
         err instanceof Error ? err.message : "Failed to open billing portal",

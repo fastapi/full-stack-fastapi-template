@@ -12,7 +12,7 @@ from app.config import settings
 from app.core.db import get_db
 from sqlalchemy import update
 from kila_models.models.base import SubscriptionStatus, SubscriptionTier
-from kila_models.models.database import BrandPromptTable, UserSubscriptionTable
+from kila_models.models.database import BrandPromptTable, BrandsTable, BrandUserTable, UserSubscriptionTable
 
 logger = logging.getLogger(__name__)
 router = APIRouter(prefix="/webhooks", tags=["webhooks"])
@@ -107,22 +107,51 @@ async def stripe_webhook(
 
     elif event_type == "customer.subscription.updated":
         user_id = data_object.get("metadata", {}).get("user_id")
-        if not user_id:
-            logger.warning("customer.subscription.updated missing metadata.user_id")
+        stripe_sub_id = data_object.get("id")
+        customer_id = data_object.get("customer")
+        logger.info(
+            f"customer.subscription.updated received — "
+            f"user_id={user_id} stripe_sub_id={stripe_sub_id} customer_id={customer_id} "
+            f"status={data_object.get('status')} cancel_at_period_end={data_object.get('cancel_at_period_end')}"
+        )
+
+        # Lookup priority:
+        # 1. metadata.user_id  — set on subscription during checkout (most direct)
+        # 2. stripe_subscription_id — the subscription's own Stripe ID
+        # 3. stripe_customer_id — always present; same field used by .deleted handler
+        if user_id:
+            stmt = select(UserSubscriptionTable).where(
+                UserSubscriptionTable.user_id == user_id
+            )
+        elif stripe_sub_id:
+            logger.warning(
+                f"customer.subscription.updated missing metadata.user_id — "
+                f"falling back to stripe_subscription_id={stripe_sub_id}"
+            )
+            stmt = select(UserSubscriptionTable).where(
+                UserSubscriptionTable.stripe_subscription_id == stripe_sub_id
+            )
+        elif customer_id:
+            logger.warning(
+                f"customer.subscription.updated missing metadata and sub_id — "
+                f"falling back to stripe_customer_id={customer_id}"
+            )
+            stmt = select(UserSubscriptionTable).where(
+                UserSubscriptionTable.stripe_customer_id == customer_id
+            )
+        else:
+            logger.warning("customer.subscription.updated: no identifiers found, ignoring")
             return {"status": "ignored"}
 
         price_id = data_object["items"]["data"][0]["price"]["id"]
         tier = _get_price_to_tier().get(price_id)
         stripe_status = data_object.get("status")
 
-        stmt = select(UserSubscriptionTable).where(
-            UserSubscriptionTable.user_id == user_id
-        )
         result = await db.execute(stmt)
         sub = result.scalar_one_or_none()
 
         if not sub:
-            logger.warning(f"No subscription found for user_id: {user_id}")
+            logger.warning(f"No subscription found for user_id={user_id} / stripe_sub_id={stripe_sub_id}")
             return {"status": "not_found"}
 
         if tier:
@@ -136,14 +165,37 @@ async def stripe_webhook(
             sub.status = SubscriptionStatus.past_due
         elif stripe_status in ("canceled", "unpaid"):
             sub.status = SubscriptionStatus.cancelled
+            # Immediately deactivate brands and prompts for an instant cancellation.
+            # (customer.subscription.deleted will follow shortly, but this closes the gap.)
+            brand_ids_sq = select(BrandUserTable.brand_id).where(
+                BrandUserTable.user_id == sub.user_id
+            )
+            await db.execute(
+                update(BrandsTable)
+                .where(BrandsTable.brand_id.in_(brand_ids_sq))
+                .values(is_active=False)
+            )
+            await db.execute(
+                update(BrandPromptTable)
+                .where(BrandPromptTable.user_id == sub.user_id)
+                .values(is_active=False)
+            )
+            logger.info(f"Subscription {sub.subscription_id} canceled; deactivated all brands and prompts")
         elif stripe_status == "active":
             sub.status = SubscriptionStatus.active
 
-        # Sync cancel_at_period_end and current_period_end
-        sub.cancel_at_period_end = bool(data_object.get("cancel_at_period_end", False))
+        # Stripe Customer Portal uses `cancel_at` (specific timestamp) when configured as
+        # "Cancel at end of billing period" — NOT `cancel_at_period_end: true`.
+        # Treat either as a scheduled cancellation.
+        raw_cancel_at_period_end = bool(data_object.get("cancel_at_period_end", False))
+        cancel_at_ts = data_object.get("cancel_at")
+        sub.cancel_at_period_end = raw_cancel_at_period_end or bool(cancel_at_ts)
+
         period_end_ts = data_object.get("current_period_end")
-        if period_end_ts:
-            sub.current_period_end = datetime.fromtimestamp(period_end_ts, tz=timezone.utc)
+        # If cancel_at is set, use it as the effective period end (that's when access ends).
+        effective_end_ts = cancel_at_ts or period_end_ts
+        if effective_end_ts:
+            sub.current_period_end = datetime.fromtimestamp(effective_end_ts, tz=timezone.utc)
 
         await db.commit()
         logger.info(
@@ -163,7 +215,15 @@ async def stripe_webhook(
             sub.status = SubscriptionStatus.cancelled
             sub.cancel_at_period_end = False
 
-            # Deactivate all prompts for this user — offline scraper will skip them
+            # Deactivate all brands and prompts — scraper will skip them
+            brand_ids_sq = select(BrandUserTable.brand_id).where(
+                BrandUserTable.user_id == sub.user_id
+            )
+            await db.execute(
+                update(BrandsTable)
+                .where(BrandsTable.brand_id.in_(brand_ids_sq))
+                .values(is_active=False)
+            )
             await db.execute(
                 update(BrandPromptTable)
                 .where(BrandPromptTable.user_id == sub.user_id)
@@ -173,7 +233,7 @@ async def stripe_webhook(
             await db.commit()
             logger.info(
                 f"Cancelled subscription {sub.subscription_id}; "
-                f"deactivated all prompts for user {sub.user_id}"
+                f"deactivated all brands and prompts for user {sub.user_id}"
             )
 
     elif event_type == "invoice.payment_failed":

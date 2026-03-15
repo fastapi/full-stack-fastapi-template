@@ -1,6 +1,7 @@
 """Stripe billing endpoints: Checkout Session, Customer Portal, cancel/reactivate."""
 
 import logging
+from datetime import datetime, timezone
 
 import stripe
 from fastapi import APIRouter, Depends, HTTPException, status
@@ -133,8 +134,12 @@ async def cancel_subscription(
     if sub.cancel_at_period_end:
         raise HTTPException(status_code=400, detail="Subscription is already set to cancel.")
 
-    stripe.Subscription.modify(sub.stripe_subscription_id, cancel_at_period_end=True)
+    stripe_sub = stripe.Subscription.modify(sub.stripe_subscription_id, cancel_at_period_end=True)
     sub.cancel_at_period_end = True
+    if stripe_sub.get("current_period_end"):
+        sub.current_period_end = datetime.fromtimestamp(
+            stripe_sub["current_period_end"], tz=timezone.utc
+        )
     await db.commit()
     return MessageResponse(message="Subscription will cancel at end of billing period.")
 
@@ -154,7 +159,15 @@ async def reactivate_subscription(
     if not sub.cancel_at_period_end:
         raise HTTPException(status_code=400, detail="Subscription is not scheduled to cancel.")
 
-    stripe.Subscription.modify(sub.stripe_subscription_id, cancel_at_period_end=False)
+    # Determine which cancellation field Stripe has set — the in-app cancel button
+    # uses cancel_at_period_end=True, while the Customer Portal uses cancel_at
+    # (a specific timestamp). Stripe rejects requests that pass both, so we must
+    # fetch the live subscription and clear only the one that is set.
+    stripe_sub = stripe.Subscription.retrieve(sub.stripe_subscription_id)
+    if stripe_sub.get("cancel_at"):
+        stripe.Subscription.modify(sub.stripe_subscription_id, cancel_at="")
+    else:
+        stripe.Subscription.modify(sub.stripe_subscription_id, cancel_at_period_end=False)
     sub.cancel_at_period_end = False
     await db.commit()
     return MessageResponse(message="Subscription reactivated successfully.")

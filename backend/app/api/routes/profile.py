@@ -15,7 +15,7 @@ from app.models.profile import (
     SubscriptionResponse,
 )
 from kila_models.models import UsersTable, UsersProfileTable, CompaniesTable
-from kila_models.models.database import UserSubscriptionTable
+from kila_models.models.database import UserSubscriptionTable, BrandPromptTable, BrandsTable, BrandUserTable
 from kila_models.models.base import SubscriptionTier, SubscriptionStatus
 from datetime import datetime, timezone
 
@@ -66,14 +66,32 @@ async def get_profile(
     subscription = None
     if subscription_row:
         if (
-            subscription_row.tier == SubscriptionTier.free_trial
+            not subscription_row.is_super_user
+            and subscription_row.tier == SubscriptionTier.free_trial
             and subscription_row.status == SubscriptionStatus.active
             and subscription_row.trial_expires_at
             and subscription_row.trial_expires_at < datetime.now(timezone.utc)
         ):
             subscription_row.status = SubscriptionStatus.expired
+
+            # Deactivate all brands and prompts for this user
+            brand_ids_sq = select(BrandUserTable.brand_id).where(
+                BrandUserTable.user_id == current_user.user_id
+            )
+            await db.execute(
+                update(BrandsTable)
+                .where(BrandsTable.brand_id.in_(brand_ids_sq))
+                .values(is_active=False)
+            )
+            await db.execute(
+                update(BrandPromptTable)
+                .where(BrandPromptTable.user_id == current_user.user_id)
+                .values(is_active=False)
+            )
+
             await db.commit()
             await db.refresh(subscription_row)
+            logger.info(f"Free trial expired for user {current_user.user_id}; deactivated all brands and prompts")
 
         subscription = SubscriptionResponse.model_validate(subscription_row)
 
