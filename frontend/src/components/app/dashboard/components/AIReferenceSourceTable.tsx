@@ -119,6 +119,14 @@ export function AIReferenceSourceTable({
         accessorKey: "source",
         header: "Source",
         enableSorting: true,
+        cell: ({ getValue }) => {
+          const text = getValue() as string
+          return (
+            <span className="block truncate" title={text}>
+              {text}
+            </span>
+          )
+        },
       },
     ],
     [],
@@ -159,7 +167,11 @@ export function AIReferenceSourceTable({
   return (
     <div className="flex flex-col gap-2">
       <div className={`w-full overflow-auto ${tableClasses.wrapper}`}>
-        <Table className={tableClasses.table}>
+        <Table className={`${tableClasses.table} table-fixed`}>
+          <colgroup>
+            <col className="w-10" />
+            <col />
+          </colgroup>
           <TableHeader
             className={`sticky top-0 z-30 ${tableClasses.headerRow}`}
           >
@@ -209,7 +221,7 @@ export function AIReferenceSourceTable({
                       "text-xs py-1.5 text-slate-700",
                       cell.column.id === "seq"
                         ? "w-10 pl-3 text-slate-400"
-                        : "pr-3 break-all",
+                        : "pr-3 max-w-0",
                     ].join(" ")}
                   >
                     {flexRender(cell.column.columnDef.cell, cell.getContext())}

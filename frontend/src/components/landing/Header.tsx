@@ -79,12 +79,12 @@ export default function Header() {
 
           {/* Right Side - Auth Buttons */}
           <div className="hidden md:flex items-center space-x-4">
-            <SignInButton mode="modal" forceRedirectUrl="/app/projects">
+            <SignInButton mode="modal" forceRedirectUrl="/app/brands">
               <Button variant={"ghost"} size={"sm"}>
                 Sign In
               </Button>
             </SignInButton>
-            <SignUpButton mode="modal" forceRedirectUrl="/app/projects">
+            <SignUpButton mode="modal" forceRedirectUrl="/app/brands">
               <Button size={"sm"}>Sign Up Free</Button>
             </SignUpButton>
           </div>
@@ -129,10 +129,10 @@ export default function Header() {
               >
                 Pricing
               </a>
-              <SignInButton mode="modal" forceRedirectUrl="/app/projects">
+              <SignInButton mode="modal" forceRedirectUrl="/app/brands">
                 <Button variant={"ghost"}>Sign In</Button>
               </SignInButton>
-              <SignUpButton mode="modal" forceRedirectUrl="/app/projects">
+              <SignUpButton mode="modal" forceRedirectUrl="/app/brands">
                 <Button>Sign Up Free</Button>
               </SignUpButton>
             </nav>

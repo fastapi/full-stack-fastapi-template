@@ -141,7 +141,7 @@ export function SentimentComparisonTable({
           const s = getValue() as string
           return (
             <span
-              className={`inline-block px-1.5 py-0.5 rounded text-xs font-medium ${SENTIMENT_STYLES[s] ?? ""}`}
+              className={`inline-flex h-5 items-center rounded px-2 text-[11px] font-semibold ${SENTIMENT_STYLES[s] ?? ""}`}
             >
               {s}
             </span>
@@ -258,7 +258,7 @@ export function SentimentComparisonTable({
                         <TableCell
                           key={cell.id}
                           className={[
-                            "text-xs py-1.5 pl-2 text-slate-700",
+                            "h-8 text-xs py-1.5 pl-2 text-slate-700 align-middle",
                             cell.column.id === "brand_review" ||
                             cell.column.id === "comp_review"
                               ? "max-w-0 pr-2"

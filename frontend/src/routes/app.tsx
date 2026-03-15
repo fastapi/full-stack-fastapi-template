@@ -1,6 +1,6 @@
 import { useAuth } from "@clerk/clerk-react"
 import { createFileRoute, Outlet, useNavigate } from "@tanstack/react-router"
-import { useEffect, useState } from "react"
+import { useCallback, useEffect, useState } from "react"
 import AppLayout from "@/components/app/AppLayout"
 import { SubscriptionContext } from "@/contexts/SubscriptionContext"
 import type { UserSubscription } from "@/lib/entitlements"
@@ -20,6 +20,25 @@ function AppGuard() {
   const [subscription, setSubscription] = useState<UserSubscription | null>(
     null,
   )
+
+  const fetchSubscription = useCallback(async () => {
+    try {
+      const token = await getToken()
+      if (!token) return
+      const apiUrl = import.meta.env.VITE_API_URL ?? ""
+      const profileResponse = await fetch(`${apiUrl}/api/v1/profile/me`, {
+        headers: { Authorization: `Bearer ${token}` },
+      })
+      if (profileResponse.ok) {
+        const profileData = await profileResponse.json()
+        if (profileData?.subscription) {
+          setSubscription(profileData.subscription)
+        }
+      }
+    } catch {
+      // ignore
+    }
+  }, [getToken])
 
   useEffect(() => {
     if (!isLoaded) return
@@ -52,17 +71,7 @@ function AppGuard() {
           const data = await response.json()
           setProfileComplete(data.profile_complete)
           setSyncState("synced")
-
-          // Load subscription from profile endpoint
-          const profileResponse = await fetch(`${apiUrl}/api/v1/profile/me`, {
-            headers: { Authorization: `Bearer ${token}` },
-          })
-          if (profileResponse.ok) {
-            const profileData = await profileResponse.json()
-            if (profileData?.subscription) {
-              setSubscription(profileData.subscription)
-            }
-          }
+          await fetchSubscription()
         } else {
           console.error("clerk-sync failed:", response.status)
           setSyncState("error")
@@ -74,7 +83,7 @@ function AppGuard() {
     }
 
     syncUser()
-  }, [isLoaded, isSignedIn, getToken, navigate])
+  }, [isLoaded, isSignedIn, getToken, navigate, fetchSubscription])
 
   // Redirect to profile setup if not complete (moved to useEffect to avoid setState-in-render)
   useEffect(() => {
@@ -122,7 +131,7 @@ function AppGuard() {
   }
 
   return (
-    <SubscriptionContext.Provider value={{ subscription }}>
+    <SubscriptionContext.Provider value={{ subscription, refreshSubscription: fetchSubscription }}>
       <AppLayout>
         <Outlet />
       </AppLayout>

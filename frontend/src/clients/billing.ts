@@ -56,6 +56,40 @@ class BillingAPI {
 
     return response.json()
   }
+
+  async cancelSubscription(): Promise<{ message: string }> {
+    const response = await fetch(
+      `${this.baseUrl}${this.apiPrefix}/billing/cancel`,
+      {
+        method: "POST",
+        headers: await this.getAuthHeaders(),
+      },
+    )
+
+    if (!response.ok) {
+      const error = await response.json()
+      throw new Error(error.detail || "Failed to cancel subscription")
+    }
+
+    return response.json()
+  }
+
+  async reactivateSubscription(): Promise<{ message: string }> {
+    const response = await fetch(
+      `${this.baseUrl}${this.apiPrefix}/billing/reactivate`,
+      {
+        method: "POST",
+        headers: await this.getAuthHeaders(),
+      },
+    )
+
+    if (!response.ok) {
+      const error = await response.json()
+      throw new Error(error.detail || "Failed to reactivate subscription")
+    }
+
+    return response.json()
+  }
 }
 
 export const billingAPI = new BillingAPI()

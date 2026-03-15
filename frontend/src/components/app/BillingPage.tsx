@@ -17,7 +17,7 @@ import { useEntitlement } from "@/hooks/useEntitlement"
 import { TIER_NAMES } from "@/lib/entitlements"
 
 export function BillingPage() {
-  const { subscription } = useSubscription()
+  const { subscription, refreshSubscription } = useSubscription()
   const { tier, isExpired, isReadOnly } = useEntitlement()
   const navigate = useNavigate()
   const [portalLoading, setPortalLoading] = useState(false)
@@ -31,7 +31,7 @@ export function BillingPage() {
     pollingRef.current = true
 
     let attempts = 0
-    const maxAttempts = 5
+    const maxAttempts = 10
     const poll = setInterval(async () => {
       attempts++
       try {
@@ -39,8 +39,9 @@ export function BillingPage() {
         const sub = (profile as any)?.subscription
         if (sub && sub.tier !== "free_trial" && sub.status === "active") {
           clearInterval(poll)
+          await refreshSubscription()
           toast.success("Subscription activated!")
-          window.location.replace("/app/billing")
+          navigate({ to: "/app/billing", replace: true })
           return
         }
       } catch {
@@ -48,13 +49,14 @@ export function BillingPage() {
       }
       if (attempts >= maxAttempts) {
         clearInterval(poll)
+        await refreshSubscription()
         toast.success("Subscription activated! It may take a moment to reflect.")
-        window.location.replace("/app/billing")
+        navigate({ to: "/app/billing", replace: true })
       }
     }, 1000)
 
     return () => clearInterval(poll)
-  }, [statusParam])
+  }, [statusParam, refreshSubscription, navigate])
 
   const handleManageSubscription = async () => {
     try {
@@ -143,7 +145,7 @@ export function BillingPage() {
 
             <Button
               variant="ghost"
-              onClick={() => navigate({ to: "/app/pricing" })}
+              onClick={() => navigate({ to: "/app/settings" })}
             >
               {isExpired || isReadOnly ? "Subscribe" : "Change Plan"}
             </Button>

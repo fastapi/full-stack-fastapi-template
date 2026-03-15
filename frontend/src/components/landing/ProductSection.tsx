@@ -1,94 +1,195 @@
-import { BarChart3, Users, Zap } from "lucide-react"
+import { AlertTriangle, Eye, Swords, TrendingUp } from "lucide-react"
 
 export default function ProductSection() {
-  const products = [
-    {
-      icon: BarChart3,
-      title: "Analytics Dashboard",
-      description:
-        "Real-time insights and powerful analytics to make data-driven decisions",
-      accent: "bg-blue-50 text-blue-600 dark:bg-blue-900/30 dark:text-blue-300",
-    },
-    {
-      icon: Zap,
-      title: "Automation Engine",
-      description:
-        "Automate repetitive tasks and workflows to save time and reduce errors",
-      accent:
-        "bg-emerald-50 text-emerald-600 dark:bg-emerald-900/30 dark:text-emerald-300",
-    },
-    {
-      icon: Users,
-      title: "Team Collaboration",
-      description:
-        "Connect your team with seamless communication and project management",
-      accent: "bg-sky-50 text-sky-600 dark:bg-sky-900/30 dark:text-sky-300",
-    },
-  ]
-
   return (
-    <section className="py-20 bg-white dark:bg-slate-950">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="text-center mb-16">
-          <h2 className="font-display font-bold text-3xl sm:text-4xl tracking-tight text-slate-900 dark:text-white mb-4">
-            Our Products
+    <section className="relative py-24 bg-white">
+      <div className="pointer-events-none absolute inset-0">
+        <div className="absolute -top-32 left-[-10%] h-[420px] w-[420px] rounded-full bg-blue-500/10 blur-3xl" />
+        <div className="absolute top-[35%] right-[-15%] h-[460px] w-[460px] rounded-full bg-sky-400/10 blur-3xl" />
+      </div>
+      <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        {/* Row 1 — Problem statement */}
+        <div className="rounded-3xl border border-slate-200 bg-slate-50 px-6 py-10 sm:px-10">
+          <p className="font-body text-xs font-semibold uppercase tracking-[0.25em] text-slate-500">
+            The Problem
+          </p>
+          <h2 className="font-display font-bold text-3xl sm:text-4xl tracking-tight text-slate-900 mt-4">
+            AI answers are quietly redirecting your customers to competitors —
+            you won’t even know you’re losing without AI visibility.
           </h2>
-          <p className="font-body text-base text-slate-600 dark:text-slate-300 leading-relaxed">
-            Everything you need to succeed
+          <p className="font-body text-sm text-slate-600 mt-4 max-w-3xl">
+            Traditional SEO doesn’t reveal how AI systems rank, cite, and
+            describe your brand. Kila makes AI search performance measurable.
           </p>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 md:gap-8">
-          {products.map((product, idx) => {
-            const Icon = product.icon
-            return (
-              <div
-                key={idx}
-                className="bg-white dark:bg-slate-900 border border-slate-200/70 dark:border-slate-800 p-8 rounded-2xl shadow-sm hover:shadow-lg transition"
-              >
-                <div
-                  className={`h-11 w-11 rounded-2xl flex items-center justify-center ${product.accent} mb-4`}
-                >
-                  <Icon size={20} />
-                </div>
-                <h3 className="font-display font-semibold text-2xl tracking-tight text-slate-900 dark:text-white mb-3">
-                  {product.title}
-                </h3>
-                <p className="font-body text-base leading-relaxed text-slate-600 dark:text-slate-300">
-                  {product.description}
-                </p>
+        {/* Row 2 — Brand Impression */}
+        <div className="mt-20 overflow-hidden rounded-[32px] border border-slate-200/70 bg-white shadow-[0_28px_70px_-40px_rgba(15,23,42,0.45)]">
+          <div className="grid grid-cols-1 lg:grid-cols-2">
+            <div className="p-10 sm:p-12 lg:p-14">
+              <div className="inline-flex items-center gap-2 rounded-full bg-blue-50 text-blue-700 px-3 py-1 text-xs font-semibold">
+                <Eye className="h-4 w-4" />
+                Brand Impression
               </div>
-            )
-          })}
+              <h3 className="font-display font-semibold text-3xl sm:text-4xl tracking-tight text-slate-900 mt-5">
+                AI visibility, ranking, and citations — in one place.
+              </h3>
+              <p className="font-body text-base text-slate-600 mt-4 max-w-xl">
+                Track how AI systems surface your brand, which sources they cite,
+                and how your presence shifts over time.
+              </p>
+              <div className="mt-8 flex flex-wrap gap-2 text-xs font-semibold text-slate-600">
+                <span className="rounded-full border border-slate-200 bg-white px-3 py-1">
+                  Visibility Share
+                </span>
+                <span className="rounded-full border border-slate-200 bg-white px-3 py-1">
+                  Ranking Strength
+                </span>
+                <span className="rounded-full border border-slate-200 bg-white px-3 py-1">
+                  AI References
+                </span>
+              </div>
+            </div>
+            <div className="relative min-h-[300px] sm:min-h-[340px] lg:min-h-[380px]">
+              <div
+                className="absolute inset-0 bg-cover bg-left"
+                style={{
+                  backgroundImage:
+                    "url('/assets/screens/brand-impression.png')",
+                  WebkitMaskImage:
+                    "linear-gradient(90deg, transparent 0%, rgba(0,0,0,0.2) 20%, rgba(0,0,0,0.85) 55%, #000 100%)",
+                  maskImage:
+                    "linear-gradient(90deg, transparent 0%, rgba(0,0,0,0.2) 20%, rgba(0,0,0,0.85) 55%, #000 100%)",
+                }}
+              />
+            </div>
+          </div>
         </div>
 
-        <div className="mt-12 sm:mt-20 bg-gradient-to-r from-blue-600 to-sky-500 rounded-2xl p-6 sm:p-10 lg:p-12 text-white">
-          <h3 className="font-display font-bold text-2xl sm:text-4xl tracking-tight mb-6 sm:mb-8 text-center">
-            Why Customers Choose Us
-          </h3>
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-6 sm:gap-8">
-            <div className="text-center">
-              <div className="font-display font-bold text-4xl sm:text-5xl tracking-tight leading-[0.95] mb-2">
-                10x
+        {/* Row 3 — Competitive Analysis */}
+        <div className="mt-20 overflow-hidden rounded-[32px] border border-slate-200/70 bg-white shadow-[0_28px_70px_-40px_rgba(15,23,42,0.45)]">
+          <div className="grid grid-cols-1 lg:grid-cols-2">
+            <div className="relative min-h-[300px] sm:min-h-[340px] lg:min-h-[380px] order-2 lg:order-1">
+              <div
+                className="absolute inset-0 bg-cover bg-right"
+                style={{
+                  backgroundImage:
+                    "url('/assets/screens/competitive-analysis.png')",
+                  WebkitMaskImage:
+                    "linear-gradient(90deg, #000 0%, rgba(0,0,0,0.85) 45%, rgba(0,0,0,0.2) 80%, transparent 100%)",
+                  maskImage:
+                    "linear-gradient(90deg, #000 0%, rgba(0,0,0,0.85) 45%, rgba(0,0,0,0.2) 80%, transparent 100%)",
+                }}
+              />
+            </div>
+            <div className="p-10 sm:p-12 lg:p-14 order-1 lg:order-2">
+              <div className="inline-flex items-center gap-2 rounded-full bg-indigo-50 text-indigo-700 px-3 py-1 text-xs font-semibold">
+                <Swords className="h-4 w-4" />
+                Competitive Analysis
               </div>
-              <div className="font-body text-xs uppercase tracking-[0.2em] text-blue-100">
-                Faster Workflows
+              <h3 className="font-display font-semibold text-3xl sm:text-4xl tracking-tight text-slate-900 mt-5">
+                See who’s winning the AI shelf — and why.
+              </h3>
+              <p className="font-body text-base text-slate-600 mt-4 max-w-xl">
+                Compare visibility and ranking against competitors, spot
+                displacement early, and defend your position before it erodes.
+              </p>
+              <div className="mt-8 flex flex-wrap gap-2 text-xs font-semibold text-slate-600">
+                <span className="rounded-full border border-slate-200 bg-white px-3 py-1">
+                  Gap Tracking
+                </span>
+                <span className="rounded-full border border-slate-200 bg-white px-3 py-1">
+                  Competitor Breakthroughs
+                </span>
+                <span className="rounded-full border border-slate-200 bg-white px-3 py-1">
+                  Rank Displacement
+                </span>
               </div>
             </div>
-            <div className="text-center">
-              <div className="font-display font-bold text-4xl sm:text-5xl tracking-tight leading-[0.95] mb-2">
-                99.9%
+          </div>
+        </div>
+
+        {/* Row 4 — Market Dynamic */}
+        <div className="mt-20 overflow-hidden rounded-[32px] border border-slate-200/70 bg-white shadow-[0_28px_70px_-40px_rgba(15,23,42,0.45)]">
+          <div className="grid grid-cols-1 lg:grid-cols-2">
+            <div className="p-10 sm:p-12 lg:p-14">
+              <div className="inline-flex items-center gap-2 rounded-full bg-slate-100 text-slate-700 px-3 py-1 text-xs font-semibold">
+                <TrendingUp className="h-4 w-4" />
+                Market Dynamic
               </div>
-              <div className="font-body text-xs uppercase tracking-[0.2em] text-blue-100">
-                Uptime Guarantee
+              <h3 className="font-display font-semibold text-3xl sm:text-4xl tracking-tight text-slate-900 mt-5">
+                Track market momentum before it hits revenue.
+              </h3>
+              <p className="font-body text-base text-slate-600 mt-4 max-w-xl">
+                See category shifts, visibility volatility, and emerging patterns
+                driven by AI search behavior.
+              </p>
+              <div className="mt-8 flex flex-wrap gap-2 text-xs font-semibold text-slate-600">
+                <span className="rounded-full border border-slate-200 bg-white px-3 py-1">
+                  Momentum
+                </span>
+                <span className="rounded-full border border-slate-200 bg-white px-3 py-1">
+                  Volatility
+                </span>
+                <span className="rounded-full border border-slate-200 bg-white px-3 py-1">
+                  Share Shifts
+                </span>
               </div>
             </div>
-            <div className="text-center">
-              <div className="font-display font-bold text-4xl sm:text-5xl tracking-tight leading-[0.95] mb-2">
-                24/7
+            <div className="relative min-h-[300px] sm:min-h-[340px] lg:min-h-[380px]">
+              <div
+                className="absolute inset-0 bg-cover bg-left"
+                style={{
+                  backgroundImage:
+                    "url('/assets/screens/market-dynamic.png')",
+                  WebkitMaskImage:
+                    "linear-gradient(90deg, transparent 0%, rgba(0,0,0,0.2) 20%, rgba(0,0,0,0.85) 55%, #000 100%)",
+                  maskImage:
+                    "linear-gradient(90deg, transparent 0%, rgba(0,0,0,0.2) 20%, rgba(0,0,0,0.85) 55%, #000 100%)",
+                }}
+              />
+            </div>
+          </div>
+        </div>
+
+        {/* Row 5 — Risk Intelligence */}
+        <div className="mt-20 overflow-hidden rounded-[32px] border border-slate-200/70 bg-white shadow-[0_28px_70px_-40px_rgba(15,23,42,0.45)]">
+          <div className="grid grid-cols-1 lg:grid-cols-2">
+            <div className="relative min-h-[300px] sm:min-h-[340px] lg:min-h-[380px] order-2 lg:order-1">
+              <div
+                className="absolute inset-0 bg-cover bg-right"
+                style={{
+                  backgroundImage:
+                    "url('/assets/screens/risk-intelligence.png')",
+                  WebkitMaskImage:
+                    "linear-gradient(90deg, #000 0%, rgba(0,0,0,0.85) 45%, rgba(0,0,0,0.2) 80%, transparent 100%)",
+                  maskImage:
+                    "linear-gradient(90deg, #000 0%, rgba(0,0,0,0.85) 45%, rgba(0,0,0,0.2) 80%, transparent 100%)",
+                }}
+              />
+            </div>
+            <div className="p-10 sm:p-12 lg:p-14 order-1 lg:order-2">
+              <div className="inline-flex items-center gap-2 rounded-full bg-rose-50 text-rose-700 px-3 py-1 text-xs font-semibold">
+                <AlertTriangle className="h-4 w-4" />
+                Risk Intelligence
               </div>
-              <div className="font-body text-xs uppercase tracking-[0.2em] text-blue-100">
-                Expert Support
+              <h3 className="font-display font-semibold text-3xl sm:text-4xl tracking-tight text-slate-900 mt-5">
+                Early‑warning signals before your visibility drops.
+              </h3>
+              <p className="font-body text-base text-slate-600 mt-4 max-w-xl">
+                Detect erosion, rank displacement, and new entrants so you can
+                act before the market shifts against you.
+              </p>
+              <div className="mt-8 flex flex-wrap gap-2 text-xs font-semibold text-slate-600">
+                <span className="rounded-full border border-slate-200 bg-white px-3 py-1">
+                  Erosion Alerts
+                </span>
+                <span className="rounded-full border border-slate-200 bg-white px-3 py-1">
+                  New Entrants
+                </span>
+                <span className="rounded-full border border-slate-200 bg-white px-3 py-1">
+                  Volatility Spikes
+                </span>
               </div>
             </div>
           </div>

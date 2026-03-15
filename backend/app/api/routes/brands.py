@@ -14,7 +14,7 @@ Endpoints:
 
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.ext.asyncio import AsyncSession
-from sqlalchemy import select, desc, func, delete
+from sqlalchemy import select, desc, func, delete, update
 import logging
 import uuid
 from nanoid import generate as nanoid_generate
@@ -40,8 +40,9 @@ from kila_models.models.database import (
     BrandsTable,
     BrandPromptTable,
     BrandUserTable,
+    UserSubscriptionTable,
 )
-from kila_models.models.base import ProjectRole
+from kila_models.models.base import ProjectRole, SubscriptionTier
 
 logger = logging.getLogger(__name__)
 router = APIRouter(prefix="/brands", tags=["brands"])
@@ -49,6 +50,35 @@ router = APIRouter(prefix="/brands", tags=["brands"])
 
 def generate_id(prefix: str) -> str:
     return f"{prefix}{nanoid_generate(size=10)}"
+
+
+async def _check_free_trial_active_brand_limit(user_id: str, db: AsyncSession, exclude_brand_id: str) -> None:
+    """For free trial users: raise 403 if they already have another active brand."""
+    sub_result = await db.execute(
+        select(UserSubscriptionTable.tier).where(UserSubscriptionTable.user_id == user_id)
+    )
+    tier = sub_result.scalar_one_or_none()
+    logger.info(f"[free-trial-check] user={user_id} tier={tier} exclude_brand={exclude_brand_id}")
+
+    if tier != SubscriptionTier.free_trial:
+        return  # pro users have no restriction
+
+    # Count active brands owned by this user, excluding the one being edited
+    count_result = await db.execute(
+        select(func.count(BrandsTable.brand_id))
+        .join(BrandUserTable, BrandUserTable.brand_id == BrandsTable.brand_id)
+        .where(BrandUserTable.user_id == user_id)
+        .where(BrandsTable.is_active == True)  # noqa: E712
+        .where(BrandsTable.brand_id != exclude_brand_id)
+    )
+    other_active = count_result.scalar_one()
+    logger.info(f"[free-trial-check] other_active_brands={other_active}")
+
+    if other_active >= 1:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Free trial is limited to 1 active brand. Deactivate your current brand before activating another.",
+        )
 
 
 @router.get("", response_model=BrandListResponse)
@@ -72,10 +102,7 @@ async def get_brands(
 
     brands_query = (
         select(BrandsTable)
-        .where(
-            BrandsTable.brand_id.in_(brand_ids),
-            BrandsTable.is_active == True
-        )
+        .where(BrandsTable.brand_id.in_(brand_ids))
         .order_by(desc(BrandsTable.created_datetime))
     )
     brands_result = await db.execute(brands_query)
@@ -169,6 +196,9 @@ async def setup_brand(
         user_profile = profile_result.scalar_one_or_none()
         company_id = (user_profile.company_id if user_profile else None) or f"company_{current_user.user_id}"
 
+        # Enforce free trial quota: max 1 active brand
+        await _check_free_trial_active_brand_limit(current_user.user_id, db, exclude_brand_id="")
+
         # Check for duplicate brand name for this user
         brand_name_lower = setup_data.brand_name.strip().lower()
         existing_query = select(BrandsTable).where(
@@ -243,6 +273,7 @@ async def update_brand(
     current_user: UsersTable = Depends(get_current_user)
 ):
     """Update brand metadata (name, description, is_active). Owner only."""
+    logger.info(f"PATCH /brands/{brand_id} called, is_active={update_data.is_active}")
     try:
         # Verify OWNER access
         access_query = select(BrandUserTable).where(
@@ -266,7 +297,14 @@ async def update_brand(
         if update_data.description is not None:
             brand.description = update_data.description.strip() if update_data.description else None
         if update_data.is_active is not None:
+            if update_data.is_active:
+                await _check_free_trial_active_brand_limit(current_user.user_id, db, exclude_brand_id=brand_id)
             brand.is_active = update_data.is_active
+            await db.execute(
+                update(BrandPromptTable)
+                .where(BrandPromptTable.brand_id == brand_id)
+                .values(is_active=update_data.is_active)
+            )
 
         await db.commit()
         return BrandUpdateResponse(brand_id=brand_id)
@@ -287,6 +325,7 @@ async def update_brand_full(
     current_user: UsersTable = Depends(get_current_user)
 ):
     """Full update of brand: name, description, is_active, and all segments. Owner only."""
+    logger.info(f"PUT /brands/{brand_id} called, is_active={update_data.is_active}")
     try:
         # Verify OWNER access
         access_query = select(BrandUserTable).where(
@@ -312,6 +351,9 @@ async def update_brand_full(
         user_profile = profile_result.scalar_one_or_none()
         company_id = (user_profile.company_id if user_profile else None) or f"company_{current_user.user_id}"
 
+        if update_data.is_active:
+            await _check_free_trial_active_brand_limit(current_user.user_id, db, exclude_brand_id=brand_id)
+
         brand.brand_name = update_data.brand_name.strip()
         brand.description = update_data.description
         brand.is_active = update_data.is_active
@@ -331,7 +373,7 @@ async def update_brand_full(
                     user_id=current_user.user_id,
                     company_id=company_id,
                     idempotency_key=str(uuid.uuid4()),
-                    is_active=True,
+                    is_active=update_data.is_active,
                 ))
                 prompt_count += 1
 

@@ -1,6 +1,7 @@
 """Stripe webhook handler — keeps UserSubscriptionTable in sync."""
 
 import logging
+from datetime import datetime, timezone
 
 import stripe
 from fastapi import APIRouter, Depends, HTTPException, Request, status
@@ -9,8 +10,9 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.config import settings
 from app.core.db import get_db
+from sqlalchemy import update
 from kila_models.models.base import SubscriptionStatus, SubscriptionTier
-from kila_models.models.database import UserSubscriptionTable
+from kila_models.models.database import BrandPromptTable, UserSubscriptionTable
 
 logger = logging.getLogger(__name__)
 router = APIRouter(prefix="/webhooks", tags=["webhooks"])
@@ -20,7 +22,6 @@ stripe.api_key = settings.stripe_secret_key
 
 def _get_price_to_tier() -> dict[str, SubscriptionTier]:
     return {
-        settings.stripe_basic_price_id: SubscriptionTier.basic,
         settings.stripe_pro_price_id: SubscriptionTier.pro,
     }
 
@@ -67,6 +68,7 @@ async def stripe_webhook(
         sub_id = data_object.get("subscription")
         price_id = None
 
+        stripe_sub = None
         if sub_id:
             try:
                 stripe_sub = stripe.Subscription.retrieve(sub_id)
@@ -95,6 +97,11 @@ async def stripe_webhook(
         sub.trial_expires_at = None
         sub.stripe_customer_id = customer_id
         sub.stripe_subscription_id = sub_id
+        sub.cancel_at_period_end = False
+        if stripe_sub and stripe_sub.get("current_period_end"):
+            sub.current_period_end = datetime.fromtimestamp(
+                stripe_sub["current_period_end"], tz=timezone.utc
+            )
         await db.commit()
         logger.info(f"Upgraded subscription {sub.subscription_id} to {tier}")
 
@@ -132,6 +139,12 @@ async def stripe_webhook(
         elif stripe_status == "active":
             sub.status = SubscriptionStatus.active
 
+        # Sync cancel_at_period_end and current_period_end
+        sub.cancel_at_period_end = bool(data_object.get("cancel_at_period_end", False))
+        period_end_ts = data_object.get("current_period_end")
+        if period_end_ts:
+            sub.current_period_end = datetime.fromtimestamp(period_end_ts, tz=timezone.utc)
+
         await db.commit()
         logger.info(
             f"Updated subscription {sub.subscription_id}: tier={sub.tier}, status={sub.status}"
@@ -148,8 +161,20 @@ async def stripe_webhook(
 
         if sub:
             sub.status = SubscriptionStatus.cancelled
+            sub.cancel_at_period_end = False
+
+            # Deactivate all prompts for this user — offline scraper will skip them
+            await db.execute(
+                update(BrandPromptTable)
+                .where(BrandPromptTable.user_id == sub.user_id)
+                .values(is_active=False)
+            )
+
             await db.commit()
-            logger.info(f"Cancelled subscription {sub.subscription_id}")
+            logger.info(
+                f"Cancelled subscription {sub.subscription_id}; "
+                f"deactivated all prompts for user {sub.user_id}"
+            )
 
     elif event_type == "invoice.payment_failed":
         sub_id = data_object.get("subscription")

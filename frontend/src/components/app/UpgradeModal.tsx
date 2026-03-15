@@ -39,7 +39,7 @@ export function UpgradeModal({
           <Button
             onClick={() => {
               onOpenChange(false)
-              navigate({ to: "/app/pricing" })
+              navigate({ to: "/app/settings" })
             }}
           >
             View Plans

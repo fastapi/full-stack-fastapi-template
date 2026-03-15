@@ -1,24 +1,24 @@
 // src/components/app/AppLayout.tsx
 
 import { useClerk, useUser } from "@clerk/clerk-react"
-import { Link, useLocation } from "@tanstack/react-router"
+import { Link, useLocation, useNavigate } from "@tanstack/react-router"
 import {
+  Activity,
   ChevronDown,
   ChevronRight,
-  CreditCard,
-  DollarSign,
   FolderKanban,
-  Lightbulb,
-  Lock,
   LogOut,
   Menu,
+  Settings,
   Shield,
+  ShieldAlert,
+  Sparkles,
   Swords,
   TrendingUp,
   User,
   X,
 } from "lucide-react"
-import { useState } from "react"
+import { useEffect, useState } from "react"
 import { toast } from "sonner"
 import {
   DropdownMenu,
@@ -26,14 +26,26 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog"
+import { Button } from "@/components/ui/button"
 import { useEntitlement } from "@/hooks/useEntitlement"
+import { useSubscription } from "@/contexts/SubscriptionContext"
 import type { TierFeatures } from "@/lib/entitlements"
+import { TIER_NAMES } from "@/lib/entitlements"
 
 interface MenuItem {
   name: string
   icon: React.ComponentType<{ size?: number }>
   path?: string
   beta?: boolean
+  requiredFeature?: keyof TierFeatures
   children?: {
     name: string
     path: string
@@ -55,7 +67,24 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
     clerkUser?.fullName ||
     [clerkUser?.firstName, clerkUser?.lastName].filter(Boolean).join(" ") ||
     userFirstName
-  const { isExpired, canAccess, tier: currentTier } = useEntitlement()
+  const { isExpired, isReadOnly, tier, canAccess } = useEntitlement()
+  const { subscription } = useSubscription()
+  const navigate = useNavigate()
+
+  // Show expiry modal once per browser session
+  const SESSION_KEY = "kila_expiry_modal_shown"
+  const [expiryModalOpen, setExpiryModalOpen] = useState(false)
+
+  useEffect(() => {
+    if (!subscription) return
+    const shouldShow =
+      (subscription.status === "expired" || subscription.status === "cancelled") &&
+      !sessionStorage.getItem(SESSION_KEY)
+    if (shouldShow) {
+      setExpiryModalOpen(true)
+      sessionStorage.setItem(SESSION_KEY, "1")
+    }
+  }, [subscription])
 
   // Show full sidebar content when desktop is expanded OR mobile drawer is open
   const showFullContent = sidebarOpen || mobileSidebarOpen
@@ -73,27 +102,19 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
       path: "/app/dashboard/competitors",
     },
     {
-      name: "Insight",
-      icon: Lightbulb,
-      beta: true,
-      children: [
-        {
-          name: "Market Dynamic",
-          path: "/app/insight/market-dynamic",
-          requiredFeature: "insightAll",
-        },
-        {
-          name: "Risk Intelligence",
-          path: "/app/insight/risk-intelligence",
-          requiredFeature: "insightAll",
-        },
-      ],
+      name: "Market Dynamic",
+      icon: Activity,
+      path: "/app/insight/market-dynamic",
+      requiredFeature: "insightAll",
     },
-    { name: "Pricing", icon: DollarSign, path: "/app/pricing" },
-    ...(currentTier !== "free_trial"
-      ? [{ name: "Billing", icon: CreditCard, path: "/app/billing" } as MenuItem]
-      : []),
-    { name: "My Profile", icon: User, path: "/app/users" },
+    {
+      name: "Risk Intelligence",
+      icon: ShieldAlert,
+      path: "/app/insight/risk-intelligence",
+      beta: true,
+      requiredFeature: "insightAll",
+    },
+    { name: "Settings", icon: Settings, path: "/app/settings" },
   ]
 
   const toggleMenu = (name: string) => {
@@ -179,6 +200,28 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
           </button>
         </div>
 
+        {/* Subscription Plan Badge */}
+        {showFullContent && (
+          <div className="px-3 pt-2.5 pb-1 flex-shrink-0">
+            <button
+              type="button"
+              onClick={() => navigate({ to: "/app/settings" })}
+              className={`w-full flex items-center gap-2 px-2.5 py-1.5 rounded-lg text-xs font-medium transition ${
+                tier === "pro"
+                  ? "bg-blue-50 dark:bg-blue-900/20 text-blue-700 dark:text-blue-300 hover:bg-blue-100 dark:hover:bg-blue-900/30"
+                  : "bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 hover:bg-slate-200 dark:hover:bg-slate-700"
+              }`}
+            >
+              {tier === "pro" ? (
+                <Sparkles size={12} className="text-blue-500 flex-shrink-0" />
+              ) : (
+                <span className="w-1.5 h-1.5 rounded-full bg-slate-400 flex-shrink-0" />
+              )}
+              <span>{TIER_NAMES[tier] ?? "Free Trial"} Plan</span>
+            </button>
+          </div>
+        )}
+
         {/* Navigation */}
         <nav
           className={`flex-1 py-4 space-y-1 overflow-y-auto ${showFullContent ? "px-2" : "px-1"}`}
@@ -244,14 +287,19 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
                             return (
                               <div
                                 key={child.path}
-                                className="flex items-center pl-6 pr-3 py-1.5 rounded-lg text-xs text-slate-400 dark:text-slate-600 cursor-not-allowed select-none"
+                                className="flex items-center pl-6 pr-3 py-1.5 rounded-lg text-xs text-slate-400 dark:text-slate-600"
                               >
                                 <span className="w-1 h-1 rounded-full mr-3 flex-shrink-0 bg-slate-300 dark:bg-slate-600" />
-                                {child.name}
-                                <Lock
-                                  size={10}
-                                  className="ml-auto opacity-50"
-                                />
+                                <span className="flex-1">{child.name}</span>
+                                <button
+                                  type="button"
+                                  onClick={() => navigate({ to: "/app/settings" })}
+                                  title="Upgrade to Pro"
+                                  className="flex items-center gap-0.5 text-[10px] font-semibold text-blue-500 hover:text-blue-600 bg-blue-50 hover:bg-blue-100 dark:bg-blue-900/20 px-1.5 py-0.5 rounded-full transition"
+                                >
+                                  <Sparkles size={9} />
+                                  Pro
+                                </button>
                               </div>
                             )
                           }
@@ -285,6 +333,49 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
               )
             }
 
+            const isLocked = item.requiredFeature ? !canAccess(item.requiredFeature) : false
+
+            if (isLocked) {
+              return (
+                <div
+                  key={item.path}
+                  className={`flex items-center py-2 rounded-lg ${showFullContent ? "px-3" : "justify-center px-0"} text-slate-400 dark:text-slate-600`}
+                >
+                  <Icon size={18} />
+                  {showFullContent ? (
+                    <>
+                      <span className="ml-3 text-sm font-medium whitespace-nowrap flex-1">
+                        {item.name}
+                      </span>
+                      {item.beta && (
+                        <span className="mr-1.5 text-[10px] font-semibold uppercase tracking-wide bg-slate-100 dark:bg-slate-800 text-slate-400 px-1.5 py-0.5 rounded-full">
+                          Beta
+                        </span>
+                      )}
+                      <button
+                        type="button"
+                        onClick={() => navigate({ to: "/app/settings" })}
+                        title="Upgrade to Pro"
+                        className="flex items-center gap-1 text-[10px] font-semibold text-blue-500 hover:text-blue-600 bg-blue-50 hover:bg-blue-100 dark:bg-blue-900/20 dark:hover:bg-blue-900/40 px-1.5 py-0.5 rounded-full transition"
+                      >
+                        <Sparkles size={9} />
+                        Pro
+                      </button>
+                    </>
+                  ) : (
+                    <button
+                      type="button"
+                      onClick={() => navigate({ to: "/app/settings" })}
+                      title="Upgrade to Pro to unlock"
+                      className="ml-1 text-blue-400 hover:text-blue-500 transition"
+                    >
+                      <Sparkles size={10} />
+                    </button>
+                  )}
+                </div>
+              )
+            }
+
             return (
               <Link
                 key={item.path}
@@ -298,9 +389,16 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
               >
                 <Icon size={18} />
                 {showFullContent && (
-                  <span className="ml-3 text-sm font-medium whitespace-nowrap">
-                    {item.name}
-                  </span>
+                  <>
+                    <span className="ml-3 text-sm font-medium whitespace-nowrap flex-1">
+                      {item.name}
+                    </span>
+                    {item.beta && (
+                      <span className="ml-1.5 text-[10px] font-semibold uppercase tracking-wide bg-blue-100 dark:bg-blue-900/40 text-blue-600 dark:text-blue-400 px-1.5 py-0.5 rounded-full">
+                        Beta
+                      </span>
+                    )}
+                  </>
                 )}
               </Link>
             )
@@ -404,21 +502,77 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
           </div>
         </header>
 
-        {/* Trial expiry banner */}
-        {isExpired && (
-          <div className="bg-amber-50 dark:bg-amber-900/20 border-b border-amber-200 dark:border-amber-700 px-4 py-2 flex items-center justify-between flex-shrink-0">
-            <p className="text-xs text-amber-800 dark:text-amber-300 font-medium">
-              Your free trial has ended. Your data is safe — upgrade to continue
-              monitoring your brand.
+        {/* Persistent top banner for expired/cancelled */}
+        {(isExpired || isReadOnly) && (
+          <div className="bg-red-50 dark:bg-red-900/20 border-b border-red-200 dark:border-red-800 px-4 py-2 flex items-center justify-between flex-shrink-0">
+            <p className="text-xs text-red-800 dark:text-red-300 font-medium">
+              {tier === "free_trial"
+                ? "Your free trial has ended. Upgrade to Pro to continue full access."
+                : "Your Pro subscription is no longer active. Resubscribe to restore access."}
             </p>
-            <a
-              href="/app/pricing"
-              className="ml-4 text-xs font-semibold text-amber-900 dark:text-amber-200 underline underline-offset-2 whitespace-nowrap hover:text-amber-700"
+            <button
+              type="button"
+              onClick={() => navigate({ to: "/app/settings" })}
+              className="ml-4 text-xs font-semibold text-red-900 dark:text-red-200 underline underline-offset-2 whitespace-nowrap hover:text-red-700"
             >
-              View plans →
-            </a>
+              {tier === "free_trial" ? "Upgrade to Pro →" : "Resubscribe →"}
+            </button>
           </div>
         )}
+
+        {/* Expiry modal — shown once per session on login */}
+        <Dialog open={expiryModalOpen} onOpenChange={setExpiryModalOpen}>
+          <DialogContent className="max-w-md">
+            <DialogHeader>
+              <DialogTitle>
+                {tier === "free_trial"
+                  ? "Your free trial has ended"
+                  : "Your subscription has ended"}
+              </DialogTitle>
+              <DialogDescription asChild>
+                <div className="space-y-3 pt-1">
+                  {tier === "free_trial" ? (
+                    <>
+                      <p>
+                        Your 28-day free trial has expired. Your data is safe and
+                        your brands are still here.
+                      </p>
+                      <p>
+                        Upgrade to <strong>Pro ($299/month)</strong> to continue
+                        monitoring your brand with full access to all features.
+                      </p>
+                    </>
+                  ) : (
+                    <>
+                      <p>
+                        Your Pro subscription is no longer active. Your existing
+                        data is preserved.
+                      </p>
+                      <p>
+                        Resubscribe to <strong>Pro ($299/month)</strong> to
+                        restore full access. Until then, your account is limited
+                        to free trial features.
+                      </p>
+                    </>
+                  )}
+                </div>
+              </DialogDescription>
+            </DialogHeader>
+            <DialogFooter className="gap-2">
+              <Button variant="outline" onClick={() => setExpiryModalOpen(false)}>
+                Maybe Later
+              </Button>
+              <Button
+                onClick={() => {
+                  setExpiryModalOpen(false)
+                  navigate({ to: "/app/settings" })
+                }}
+              >
+                {tier === "free_trial" ? "Upgrade to Pro" : "Resubscribe"}
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
 
         {/* Page Content */}
         <main className="flex-1 overflow-y-auto">{children}</main>

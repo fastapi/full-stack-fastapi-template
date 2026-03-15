@@ -1,4 +1,4 @@
-"""Stripe billing endpoints: Checkout Session + Customer Portal."""
+"""Stripe billing endpoints: Checkout Session, Customer Portal, cancel/reactivate."""
 
 import logging
 
@@ -32,6 +32,10 @@ class PortalResponse(BaseModel):
     portal_url: str
 
 
+class MessageResponse(BaseModel):
+    message: str
+
+
 @router.post("/create-checkout-session", response_model=CheckoutResponse)
 async def create_checkout_session(
     body: CheckoutRequest,
@@ -39,7 +43,7 @@ async def create_checkout_session(
     current_user: UsersTable = Depends(get_current_user),
 ):
     """Create a Stripe Checkout session for subscription upgrade."""
-    valid_prices = {settings.stripe_basic_price_id, settings.stripe_pro_price_id}
+    valid_prices = {settings.stripe_pro_price_id}
     if body.price_id not in valid_prices:
         raise HTTPException(status_code=400, detail="Invalid price ID")
 
@@ -63,8 +67,8 @@ async def create_checkout_session(
     checkout_params: dict = {
         "mode": "subscription",
         "line_items": [{"price": body.price_id, "quantity": 1}],
-        "success_url": f"{settings.stripe_frontend_url}/app/billing?status=success",
-        "cancel_url": f"{settings.stripe_frontend_url}/app/pricing?status=cancelled",
+        "success_url": f"{settings.stripe_frontend_url}/app/settings?status=success",
+        "cancel_url": f"{settings.stripe_frontend_url}/app/settings?status=cancelled",
         "metadata": {"user_id": current_user.user_id},
         "subscription_data": {"metadata": {"user_id": current_user.user_id}},
     }
@@ -97,6 +101,60 @@ async def create_portal_session(
 
     portal_session = stripe.billing_portal.Session.create(
         customer=sub.stripe_customer_id,
-        return_url=f"{settings.stripe_frontend_url}/app/billing",
+        return_url=f"{settings.stripe_frontend_url}/app/settings",
     )
     return PortalResponse(portal_url=portal_session.url)
+
+
+async def _get_active_paid_sub(
+    db: AsyncSession, user_id: str
+) -> UserSubscriptionTable:
+    """Shared helper: fetch sub and assert it's an active paid subscription."""
+    result = await db.execute(
+        select(UserSubscriptionTable).where(UserSubscriptionTable.user_id == user_id)
+    )
+    sub = result.scalar_one_or_none()
+    if not sub or not sub.stripe_subscription_id:
+        raise HTTPException(status_code=400, detail="No active subscription found.")
+    if sub.tier == SubscriptionTier.free_trial or sub.status not in (
+        SubscriptionStatus.active,
+    ):
+        raise HTTPException(status_code=400, detail="No active paid subscription found.")
+    return sub
+
+
+@router.post("/cancel", response_model=MessageResponse)
+async def cancel_subscription(
+    db: AsyncSession = Depends(get_db),
+    current_user: UsersTable = Depends(get_current_user),
+):
+    """Cancel subscription at period end — access continues until current_period_end."""
+    sub = await _get_active_paid_sub(db, current_user.user_id)
+    if sub.cancel_at_period_end:
+        raise HTTPException(status_code=400, detail="Subscription is already set to cancel.")
+
+    stripe.Subscription.modify(sub.stripe_subscription_id, cancel_at_period_end=True)
+    sub.cancel_at_period_end = True
+    await db.commit()
+    return MessageResponse(message="Subscription will cancel at end of billing period.")
+
+
+@router.post("/reactivate", response_model=MessageResponse)
+async def reactivate_subscription(
+    db: AsyncSession = Depends(get_db),
+    current_user: UsersTable = Depends(get_current_user),
+):
+    """Reactivate a subscription that was set to cancel at period end."""
+    result = await db.execute(
+        select(UserSubscriptionTable).where(UserSubscriptionTable.user_id == current_user.user_id)
+    )
+    sub = result.scalar_one_or_none()
+    if not sub or not sub.stripe_subscription_id:
+        raise HTTPException(status_code=400, detail="No subscription found.")
+    if not sub.cancel_at_period_end:
+        raise HTTPException(status_code=400, detail="Subscription is not scheduled to cancel.")
+
+    stripe.Subscription.modify(sub.stripe_subscription_id, cancel_at_period_end=False)
+    sub.cancel_at_period_end = False
+    await db.commit()
+    return MessageResponse(message="Subscription reactivated successfully.")

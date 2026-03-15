@@ -75,11 +75,7 @@ async def get_profile(
             await db.commit()
             await db.refresh(subscription_row)
 
-        subscription = SubscriptionResponse(
-            tier=subscription_row.tier,
-            status=subscription_row.status,
-            trial_expires_at=subscription_row.trial_expires_at,
-        )
+        subscription = SubscriptionResponse.model_validate(subscription_row)
 
     return ProfileResponse(
         user_id=profile.user_id,

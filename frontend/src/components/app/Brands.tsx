@@ -316,7 +316,7 @@ export default function Brands() {
         <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-4">
           <CardTitle className="text-xl font-bold">Brand List</CardTitle>
           {!showSetupForm && !editingBrand && (
-            <QuotaGate resource="brands" currentCount={brands.length}>
+            <QuotaGate resource="brands" currentCount={brands.filter(b => b.is_active).length}>
               <Button size="sm" onClick={handleAddNewBrand} type="button">
                 <Plus className="h-4 w-4 mr-2" />
                 Add New Brand
@@ -368,12 +368,17 @@ export default function Brands() {
                 </TableHeader>
                 <TableBody>
                   {brands.map((brand, index) => (
-                    <TableRow key={brand.brand_id} className={tableClasses.row}>
+                    <TableRow key={brand.brand_id} className={`${tableClasses.row} ${!brand.is_active ? "opacity-50" : ""}`}>
                       <TableCell className="font-medium text-slate-800 tabular-nums">
                         {index + 1}
                       </TableCell>
                       <TableCell className="font-semibold text-slate-900">
                         {brand.brand_name}
+                        {!brand.is_active && (
+                          <span className="ml-2 text-[10px] font-semibold uppercase tracking-wide bg-slate-100 text-slate-500 px-1.5 py-0.5 rounded">
+                            Inactive
+                          </span>
+                        )}
                       </TableCell>
                       <TableCell
                         className={`${tableClasses.cellMuted} max-w-[300px] truncate`}

@@ -66,7 +66,7 @@ function SourceCell({ url }: { url: string }) {
           href={url}
           target="_blank"
           rel="noopener noreferrer"
-          className="text-blue-600 hover:underline truncate block"
+          className="text-blue-600 hover:underline truncate block leading-tight"
           onClick={(e) => e.stopPropagation()}
         >
           {label}
@@ -282,7 +282,7 @@ export function ReferenceSourceComparisonTable({
                         <TableCell
                           key={cell.id}
                           className={[
-                            "text-xs py-1.5 pl-2 text-slate-700",
+                            "h-8 text-xs py-1.5 pl-2 text-slate-700 align-middle",
                             cell.column.id === "brand_source" ||
                             cell.column.id === "comp_source"
                               ? "max-w-0 pr-2"

@@ -12,6 +12,7 @@ import { Route as rootRouteImport } from './routes/__root'
 import { Route as AppRouteImport } from './routes/app'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as AppUsersRouteImport } from './routes/app.users'
+import { Route as AppSettingsRouteImport } from './routes/app.settings'
 import { Route as AppProjectsRouteImport } from './routes/app.projects'
 import { Route as AppProfileSetupRouteImport } from './routes/app.profile-setup'
 import { Route as AppPricingRouteImport } from './routes/app.pricing'
@@ -38,6 +39,11 @@ const IndexRoute = IndexRouteImport.update({
 const AppUsersRoute = AppUsersRouteImport.update({
   id: '/users',
   path: '/users',
+  getParentRoute: () => AppRoute,
+} as any)
+const AppSettingsRoute = AppSettingsRouteImport.update({
+  id: '/settings',
+  path: '/settings',
   getParentRoute: () => AppRoute,
 } as any)
 const AppProjectsRoute = AppProjectsRouteImport.update({
@@ -111,6 +117,7 @@ export interface FileRoutesByFullPath {
   '/app/pricing': typeof AppPricingRoute
   '/app/profile-setup': typeof AppProfileSetupRoute
   '/app/projects': typeof AppProjectsRoute
+  '/app/settings': typeof AppSettingsRoute
   '/app/users': typeof AppUsersRoute
   '/app/dashboard/brand-impression': typeof AppDashboardBrandImpressionRoute
   '/app/dashboard/competitors': typeof AppDashboardCompetitorsRoute
@@ -128,6 +135,7 @@ export interface FileRoutesByTo {
   '/app/pricing': typeof AppPricingRoute
   '/app/profile-setup': typeof AppProfileSetupRoute
   '/app/projects': typeof AppProjectsRoute
+  '/app/settings': typeof AppSettingsRoute
   '/app/users': typeof AppUsersRoute
   '/app/dashboard/brand-impression': typeof AppDashboardBrandImpressionRoute
   '/app/dashboard/competitors': typeof AppDashboardCompetitorsRoute
@@ -146,6 +154,7 @@ export interface FileRoutesById {
   '/app/pricing': typeof AppPricingRoute
   '/app/profile-setup': typeof AppProfileSetupRoute
   '/app/projects': typeof AppProjectsRoute
+  '/app/settings': typeof AppSettingsRoute
   '/app/users': typeof AppUsersRoute
   '/app/dashboard/brand-impression': typeof AppDashboardBrandImpressionRoute
   '/app/dashboard/competitors': typeof AppDashboardCompetitorsRoute
@@ -165,6 +174,7 @@ export interface FileRouteTypes {
     | '/app/pricing'
     | '/app/profile-setup'
     | '/app/projects'
+    | '/app/settings'
     | '/app/users'
     | '/app/dashboard/brand-impression'
     | '/app/dashboard/competitors'
@@ -182,6 +192,7 @@ export interface FileRouteTypes {
     | '/app/pricing'
     | '/app/profile-setup'
     | '/app/projects'
+    | '/app/settings'
     | '/app/users'
     | '/app/dashboard/brand-impression'
     | '/app/dashboard/competitors'
@@ -199,6 +210,7 @@ export interface FileRouteTypes {
     | '/app/pricing'
     | '/app/profile-setup'
     | '/app/projects'
+    | '/app/settings'
     | '/app/users'
     | '/app/dashboard/brand-impression'
     | '/app/dashboard/competitors'
@@ -235,6 +247,13 @@ declare module '@tanstack/react-router' {
       path: '/users'
       fullPath: '/app/users'
       preLoaderRoute: typeof AppUsersRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/app/settings': {
+      id: '/app/settings'
+      path: '/settings'
+      fullPath: '/app/settings'
+      preLoaderRoute: typeof AppSettingsRouteImport
       parentRoute: typeof AppRoute
     }
     '/app/projects': {
@@ -330,6 +349,7 @@ interface AppRouteChildren {
   AppPricingRoute: typeof AppPricingRoute
   AppProfileSetupRoute: typeof AppProfileSetupRoute
   AppProjectsRoute: typeof AppProjectsRoute
+  AppSettingsRoute: typeof AppSettingsRoute
   AppUsersRoute: typeof AppUsersRoute
   AppDashboardBrandImpressionRoute: typeof AppDashboardBrandImpressionRoute
   AppDashboardCompetitorsRoute: typeof AppDashboardCompetitorsRoute
@@ -346,6 +366,7 @@ const AppRouteChildren: AppRouteChildren = {
   AppPricingRoute: AppPricingRoute,
   AppProfileSetupRoute: AppProfileSetupRoute,
   AppProjectsRoute: AppProjectsRoute,
+  AppSettingsRoute: AppSettingsRoute,
   AppUsersRoute: AppUsersRoute,
   AppDashboardBrandImpressionRoute: AppDashboardBrandImpressionRoute,
   AppDashboardCompetitorsRoute: AppDashboardCompetitorsRoute,

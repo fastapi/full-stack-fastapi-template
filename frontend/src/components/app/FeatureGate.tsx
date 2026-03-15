@@ -49,7 +49,7 @@ export function FeatureGate({
             {message || "Upgrade to unlock this feature."}
           </p>
           <a
-            href="/app/pricing"
+            href="/app/settings"
             className="mt-1 inline-flex items-center px-3 py-1.5 text-xs font-medium rounded-md bg-blue-600 text-white hover:bg-blue-700 transition"
           >
             View plans

@@ -40,7 +40,13 @@ export default function PricingSection() {
   ]
 
   return (
-    <section id="pricing" className="py-20 bg-slate-50 dark:bg-slate-950">
+    <section
+      id="pricing"
+      className="relative py-24 bg-gradient-to-b from-white via-slate-50 to-white"
+    >
+      <div className="pointer-events-none absolute inset-0">
+        <div className="absolute -top-32 right-[-10%] h-[380px] w-[380px] rounded-full bg-blue-500/10 blur-3xl" />
+      </div>
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <h2 className="font-display font-bold text-3xl sm:text-4xl tracking-tight text-slate-900 dark:text-white mb-4 text-center">
           Simple, Transparent Pricing
@@ -53,7 +59,7 @@ export default function PricingSection() {
           {plans.map((plan, idx) => (
             <div
               key={idx}
-              className={`border ${plan.popular ? "border-blue-600 bg-white dark:bg-slate-900 shadow-lg" : "border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900"} rounded-2xl p-8 relative`}
+              className={`border ${plan.popular ? "border-blue-600 bg-white shadow-[0_28px_80px_-60px_rgba(37,99,235,0.6)]" : "border-slate-200 bg-white shadow-[0_18px_60px_-50px_rgba(15,23,42,0.35)]"} rounded-2xl p-8 relative`}
             >
               {plan.popular && (
                 <div className="absolute -top-4 left-1/2 -translate-x-1/2 bg-blue-600 text-white px-4 py-1 rounded-full font-body font-medium text-xs tracking-[0.2em] uppercase">
@@ -84,7 +90,7 @@ export default function PricingSection() {
                   </li>
                 ))}
               </ul>
-              <SignUpButton mode="modal" forceRedirectUrl="/app/projects">
+              <SignUpButton mode="modal" forceRedirectUrl="/app/brands">
                 <button
                   type="button"
                   className={`w-full py-3 rounded-xl font-body font-semibold transition ${

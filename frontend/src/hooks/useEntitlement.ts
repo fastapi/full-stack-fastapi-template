@@ -30,8 +30,9 @@ export function useEntitlement(): EntitlementResult {
 
   const isSuperUser = subscription?.is_super_user === true
 
-  // Default to free_trial if no subscription loaded yet
-  const tier: SubscriptionTier = subscription?.tier ?? "free_trial"
+  // Default to free_trial if no subscription loaded yet, or if tier is unrecognized (e.g. legacy "basic")
+  const rawTier = subscription?.tier ?? "free_trial"
+  const tier: SubscriptionTier = rawTier in TIER_QUOTAS ? rawTier : "free_trial"
   const status = subscription?.status ?? "active"
 
   const isExpired = isSuperUser ? false : status === "expired"
