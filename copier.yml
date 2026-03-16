@@ -23,8 +23,9 @@ first_superuser:
 
 first_superuser_password:
   type: str
-  help: The password of the first superuser (in .env)
+  help: The password of the first superuser (in .env). Must be at least 8 characters.
   default: changethis
+  validator: "{% if first_superuser_password|length < 8 %}Password must be at least 8 characters long.{% endif %}"
 
 smtp_host:
   type: str
