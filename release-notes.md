@@ -17,6 +17,7 @@
 
 ### Internal
 
+* ⬆ Bump @types/node from 25.3.2 to 25.5.0. PR [#2233](https://github.com/fastapi/full-stack-fastapi-template/pull/2233) by [@dependabot[bot]](https://github.com/apps/dependabot).
 * ⬆ Bump @tanstack/router-devtools from 1.159.10 to 1.166.7. PR [#2234](https://github.com/fastapi/full-stack-fastapi-template/pull/2234) by [@dependabot[bot]](https://github.com/apps/dependabot).
 * ⬆ Bump tailwindcss from 4.2.0 to 4.2.1. PR [#2226](https://github.com/fastapi/full-stack-fastapi-template/pull/2226) by [@dependabot[bot]](https://github.com/apps/dependabot).
 * ⬆ Bump actions/download-artifact from 7 to 8. PR [#2208](https://github.com/fastapi/full-stack-fastapi-template/pull/2208) by [@dependabot[bot]](https://github.com/apps/dependabot).
