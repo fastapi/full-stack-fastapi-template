@@ -11,7 +11,6 @@ import {
   Menu,
   Settings,
   Shield,
-  ShieldAlert,
   Sparkles,
   Swords,
   TrendingUp,
@@ -107,13 +106,14 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
       path: "/app/insight/market-dynamic",
       requiredFeature: "insightAll",
     },
-    {
-      name: "Risk Intelligence",
-      icon: ShieldAlert,
-      path: "/app/insight/risk-intelligence",
-      beta: true,
-      requiredFeature: "insightAll",
-    },
+    // TODO: Risk Intelligence hidden — functionality needs revisiting before re-enabling
+    // {
+    //   name: "Risk Intelligence",
+    //   icon: ShieldAlert,
+    //   path: "/app/insight/risk-intelligence",
+    //   beta: true,
+    //   requiredFeature: "insightAll",
+    // },
     { name: "Settings", icon: Settings, path: "/app/settings" },
   ]
 
