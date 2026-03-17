@@ -4,6 +4,6 @@ set -e
 set -x
 
 mypy app
-ty app
+ty check app
 ruff check app
 ruff format app --check
