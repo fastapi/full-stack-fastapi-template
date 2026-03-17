@@ -3192,10 +3192,10 @@ async def get_market_dynamic(
         .where(
             BrandAwarenessDailyPerformanceTable.brand_id == brand_id,
             BrandAwarenessDailyPerformanceTable.segment == segment,
-            BrandAwarenessDailyPerformanceTable.created_date >= query_start,
-            BrandAwarenessDailyPerformanceTable.created_date <= query_end,
+            BrandAwarenessDailyPerformanceTable.search_date >= query_start,
+            BrandAwarenessDailyPerformanceTable.search_date <= query_end,
         )
-        .order_by(asc(BrandAwarenessDailyPerformanceTable.created_date))
+        .order_by(asc(BrandAwarenessDailyPerformanceTable.search_date))
     )
     brand_result = await db.execute(brand_query)
     brand_rows = brand_result.scalars().all()
@@ -3209,12 +3209,12 @@ async def get_market_dynamic(
         .where(
             BrandCompetitorsAwarenessDailyPerformanceTable.search_target_brand_id == brand_id,
             BrandCompetitorsAwarenessDailyPerformanceTable.segment == segment,
-            BrandCompetitorsAwarenessDailyPerformanceTable.created_date >= query_start,
-            BrandCompetitorsAwarenessDailyPerformanceTable.created_date <= query_end,
+            BrandCompetitorsAwarenessDailyPerformanceTable.search_date >= query_start,
+            BrandCompetitorsAwarenessDailyPerformanceTable.search_date <= query_end,
         )
         .order_by(
             asc(BrandCompetitorsAwarenessDailyPerformanceTable.competitor_brand_name),
-            asc(BrandCompetitorsAwarenessDailyPerformanceTable.created_date),
+            asc(BrandCompetitorsAwarenessDailyPerformanceTable.search_date),
         )
     )
     comp_result = await db.execute(comp_query)
@@ -3223,7 +3223,7 @@ async def get_market_dynamic(
     # ── Build target brand data ───────────────────────────────────────────────
     brand_points = [
         MarketDynamicDataPoint(
-            date=row.created_date.isoformat(),
+            date=row.search_date.isoformat(),
             visibility_share=round(row.share_of_visibility, 4) if row.share_of_visibility is not None else None,
             search_momentum=round(row.search_momentum, 4) if row.search_momentum is not None else None,
             position_strength=round(row.position_strength, 4) if row.position_strength is not None else None,
@@ -3254,7 +3254,7 @@ async def get_market_dynamic(
         rows_for_comp = comp_by_name[comp_name]
         comp_points = [
             MarketDynamicDataPoint(
-                date=row.created_date.isoformat(),
+                date=row.search_date.isoformat(),
                 visibility_share=round(row.share_of_visibility, 4) if row.share_of_visibility is not None else None,
                 search_momentum=round(row.search_momentum, 4) if row.search_momentum is not None else None,
                 position_strength=round(row.position_strength, 4) if row.position_strength is not None else None,
