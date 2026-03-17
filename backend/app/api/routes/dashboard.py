@@ -85,19 +85,14 @@ from app.models.dashboard import (
 )
 from kila_models.models import (
     UsersTable,
-    BrandAwarenessWeeklyPerformanceTable,
     BrandAwarenessDailyPerformanceTable,
-    BrandSearchRankingTable,
     ProjectUserTable,
     ProjectsRecord,
     BrandUserTable,
     BrandsTable,
     BrandPromptTable,
     BrandCompetitorsTable,
-    BrandCompetitorsAwarenessWeeklyPerformanceTable,
     BrandCompetitorsAwarenessDailyPerformanceTable,
-    BrandSearchCompetitorsVisibilityTable,
-    BrandSearchCompetitorsRankingTable,
     BrandSearchCompetitorDailyBasicMetricsTable,
     BrandPerformanceInsightTable,
     BrandSearchDailyBasicMetricsTable,
@@ -246,7 +241,7 @@ async def get_awareness_score(
     """
     Retrieve the latest brand awareness score.
 
-    This endpoint queries the BrandAwarenessWeeklyPerformanceTable to get
+    This endpoint queries the BrandAwarenessDailyPerformanceTable to get
     the most recent awareness score data. It returns both the current score
     and the previous period's score for trend calculation.
 
@@ -272,15 +267,15 @@ async def get_awareness_score(
     # Build query to get the two most recent records for trend calculation
     # We order by created_date descending to get the latest first
     query = (
-        select(BrandAwarenessWeeklyPerformanceTable)
-        .where(BrandAwarenessWeeklyPerformanceTable.segment == segment)
-        .order_by(desc(BrandAwarenessWeeklyPerformanceTable.created_date))
+        select(BrandAwarenessDailyPerformanceTable)
+        .where(BrandAwarenessDailyPerformanceTable.segment == segment)
+        .order_by(desc(BrandAwarenessDailyPerformanceTable.search_date))
         .limit(2)  # Get current and previous for trend
     )
 
     # Apply brand_id filter if provided
     if brand_id:
-        query = query.where(BrandAwarenessWeeklyPerformanceTable.brand_id == brand_id)
+        query = query.where(BrandAwarenessDailyPerformanceTable.brand_id == brand_id)
 
     # Execute query
     result = await db.execute(query)
@@ -308,8 +303,8 @@ async def get_awareness_score(
             normalize_score_to_ten_scale(previous_record.awareness_score)
             if previous_record else None
         ),
-        current_date=current_record.created_date,
-        previous_date=previous_record.created_date if previous_record else None,
+        current_date=current_record.search_date,
+        previous_date=previous_record.search_date if previous_record else None,
         has_previous=previous_record is not None
     )
 
@@ -331,7 +326,7 @@ async def get_consistency_index(
     """
     Retrieve the latest brand consistency index.
 
-    This endpoint queries the BrandAwarenessWeeklyPerformanceTable to get
+    This endpoint queries the BrandAwarenessDailyPerformanceTable to get
     the most recent consistency index data. It returns both the current index
     and the previous period's index for trend calculation.
 
@@ -356,15 +351,15 @@ async def get_consistency_index(
 
     # Build query to get the two most recent records for trend calculation
     query = (
-        select(BrandAwarenessWeeklyPerformanceTable)
-        .where(BrandAwarenessWeeklyPerformanceTable.segment == segment)
-        .order_by(desc(BrandAwarenessWeeklyPerformanceTable.created_date))
+        select(BrandAwarenessDailyPerformanceTable)
+        .where(BrandAwarenessDailyPerformanceTable.segment == segment)
+        .order_by(desc(BrandAwarenessDailyPerformanceTable.search_date))
         .limit(2)
     )
 
     # Apply brand_id filter if provided
     if brand_id:
-        query = query.where(BrandAwarenessWeeklyPerformanceTable.brand_id == brand_id)
+        query = query.where(BrandAwarenessDailyPerformanceTable.brand_id == brand_id)
 
     # Execute query
     result = await db.execute(query)
@@ -392,8 +387,8 @@ async def get_consistency_index(
             normalize_score_to_ten_scale(previous_record.consistency_index)
             if previous_record else None
         ),
-        current_date=current_record.created_date,
-        previous_date=previous_record.created_date if previous_record else None,
+        current_date=current_record.search_date,
+        previous_date=previous_record.search_date if previous_record else None,
         has_previous=previous_record is not None
     )
 
@@ -435,14 +430,14 @@ async def get_dashboard_metrics(
 
     # Build query to get the two most recent records
     query = (
-        select(BrandAwarenessWeeklyPerformanceTable)
-        .where(BrandAwarenessWeeklyPerformanceTable.segment == segment)
-        .order_by(desc(BrandAwarenessWeeklyPerformanceTable.created_date))
+        select(BrandAwarenessDailyPerformanceTable)
+        .where(BrandAwarenessDailyPerformanceTable.segment == segment)
+        .order_by(desc(BrandAwarenessDailyPerformanceTable.search_date))
         .limit(2)
     )
 
     if brand_id:
-        query = query.where(BrandAwarenessWeeklyPerformanceTable.brand_id == brand_id)
+        query = query.where(BrandAwarenessDailyPerformanceTable.brand_id == brand_id)
 
     result = await db.execute(query)
     records = result.scalars().all()
@@ -628,16 +623,16 @@ async def get_historical_trends(
 
     # Build query for historical data within date range
     query = (
-        select(BrandAwarenessWeeklyPerformanceTable)
-        .where(BrandAwarenessWeeklyPerformanceTable.created_date >= query_start_date)
-        .where(BrandAwarenessWeeklyPerformanceTable.created_date <= query_end_date)
-        .where(BrandAwarenessWeeklyPerformanceTable.segment == segment)
-        .order_by(asc(BrandAwarenessWeeklyPerformanceTable.created_date))
+        select(BrandAwarenessDailyPerformanceTable)
+        .where(BrandAwarenessDailyPerformanceTable.search_date >= query_start_date)
+        .where(BrandAwarenessDailyPerformanceTable.search_date <= query_end_date)
+        .where(BrandAwarenessDailyPerformanceTable.segment == segment)
+        .order_by(asc(BrandAwarenessDailyPerformanceTable.search_date))
     )
 
     # Apply brand_id filter if provided
     if brand_id:
-        query = query.where(BrandAwarenessWeeklyPerformanceTable.brand_id == brand_id)
+        query = query.where(BrandAwarenessDailyPerformanceTable.brand_id == brand_id)
 
     # Execute query
     result = await db.execute(query)
@@ -669,7 +664,7 @@ async def get_historical_trends(
         normalized_consistency = normalize_score_to_ten_scale(record.consistency_index)
 
         data_points.append(HistoricalDataPoint(
-            date=record.created_date.isoformat(),
+            date=record.search_date.isoformat(),
             awareness_score=normalized_awareness,
             consistency_index=normalized_consistency
         ))
@@ -762,60 +757,32 @@ async def get_detail_metrics(
     vis_result = await db.execute(vis_query)
     vis_records = vis_result.scalars().all()
 
-    # Group visibility by date (search_date_end is a Date column, already a date object)
-    vis_by_date: dict[str, list] = {}
+    # Group by date (search_date_end is a Date column, already a date object)
+    by_date: dict[str, list] = {}
     brand_name = "Unknown"
     for rec in vis_records:
         d = rec.search_date_end.isoformat()
-        vis_by_date.setdefault(d, []).append(rec)
+        by_date.setdefault(d, []).append(rec)
         brand_name = rec.search_target_brand_name
 
-    # ---- Query ranking data ----
-    rank_query = (
-        select(BrandSearchRankingTable)
-        .where(
-            BrandSearchRankingTable.brand_id == brand_id,
-            BrandSearchRankingTable.search_date >= query_start_date,
-            BrandSearchRankingTable.search_date <= query_end_date
-        )
-        .order_by(asc(BrandSearchRankingTable.search_date))
-    )
-    if segment:
-        rank_query = rank_query.where(BrandSearchRankingTable.segment == segment)
-    rank_result = await db.execute(rank_query)
-    rank_records = rank_result.scalars().all()
-
-    # Group ranking by date
-    rank_by_date: dict[str, list] = {}
-    for rec in rank_records:
-        d = rec.search_date.date().isoformat() if hasattr(rec.search_date, 'date') else str(rec.search_date)
-        rank_by_date.setdefault(d, []).append(rec)
-        if brand_name == "Unknown":
-            brand_name = rec.brand_name
-
     # ---- Build data points ----
-    all_dates = sorted(set(list(vis_by_date.keys()) + list(rank_by_date.keys())))
+    all_dates = sorted(by_date.keys())
 
     data_points = []
     visibility_values = []
     ranking_values = []
 
     for d in all_dates:
-        # Visibility rate for this date
-        vis_recs = vis_by_date.get(d, [])
-        if vis_recs:
-            total_search = sum(r.total_search_count for r in vis_recs)
-            total_visible = sum(r.search_visibility_count for r in vis_recs)
-            vis_rate = (total_visible / total_search * 100) if total_search > 0 else 0.0
-        else:
-            vis_rate = 0.0
+        recs = by_date[d]
 
-        # Average ranking for this date
-        rank_recs = rank_by_date.get(d, [])
-        if rank_recs:
-            avg_rank = sum(r.search_ranking for r in rank_recs) / len(rank_recs)
-        else:
-            avg_rank = 0.0
+        # Visibility rate: total visible / total searched across all segments for this date
+        total_search = sum(r.total_search_count for r in recs)
+        total_visible = sum(r.search_visibility_count for r in recs)
+        vis_rate = (total_visible / total_search * 100) if total_search > 0 else 0.0
+
+        # Average ranking: already aggregated in BrandSearchDailyBasicMetricsTable.avg_ranking
+        visible_recs = [r for r in recs if r.avg_ranking > 0]
+        avg_rank = sum(r.avg_ranking for r in visible_recs) / len(visible_recs) if visible_recs else 0.0
 
         data_points.append(DetailMetricsDataPoint(
             date=d,
@@ -943,73 +910,46 @@ async def get_competitor_metrics(
     else:
         query_start_date, query_end_date = get_date_range_for_time_range(time_range)
 
-    # ---- Query competitor visibility data ----
-    vis_query = (
-        select(BrandSearchCompetitorsVisibilityTable)
+    # ---- Query competitor metrics (visibility + ranking already aggregated) ----
+    metrics_query = (
+        select(BrandSearchCompetitorDailyBasicMetricsTable)
         .where(
-            BrandSearchCompetitorsVisibilityTable.search_target_brand_id == brand_id,
-            BrandSearchCompetitorsVisibilityTable.competitor_brand_name == competitor_brand_name,
-            BrandSearchCompetitorsVisibilityTable.search_date >= query_start_date,
-            BrandSearchCompetitorsVisibilityTable.search_date <= query_end_date,
+            BrandSearchCompetitorDailyBasicMetricsTable.search_target_brand_id == brand_id,
+            BrandSearchCompetitorDailyBasicMetricsTable.competitor_brand_name == competitor_brand_name,
+            BrandSearchCompetitorDailyBasicMetricsTable.search_date_end >= query_start_date,
+            BrandSearchCompetitorDailyBasicMetricsTable.search_date_end <= query_end_date,
         )
-        .order_by(asc(BrandSearchCompetitorsVisibilityTable.search_date))
+        .order_by(asc(BrandSearchCompetitorDailyBasicMetricsTable.search_date_end))
     )
     if segment:
-        vis_query = vis_query.where(BrandSearchCompetitorsVisibilityTable.segment == segment)
-    vis_result = await db.execute(vis_query)
-    vis_records = vis_result.scalars().all()
+        metrics_query = metrics_query.where(BrandSearchCompetitorDailyBasicMetricsTable.segment == segment)
+    metrics_result = await db.execute(metrics_query)
+    metrics_records = metrics_result.scalars().all()
 
-    # Group visibility by date
-    vis_by_date: dict[str, list] = {}
-    for rec in vis_records:
-        d = rec.search_date.date().isoformat() if hasattr(rec.search_date, 'date') else str(rec.search_date)
-        vis_by_date.setdefault(d, []).append(rec)
-
-    # ---- Query competitor ranking data ----
-    rank_query = (
-        select(BrandSearchCompetitorsRankingTable)
-        .where(
-            BrandSearchCompetitorsRankingTable.search_target_brand_id == brand_id,
-            BrandSearchCompetitorsRankingTable.competitor_brand_name == competitor_brand_name,
-            BrandSearchCompetitorsRankingTable.search_date >= query_start_date,
-            BrandSearchCompetitorsRankingTable.search_date <= query_end_date,
-        )
-        .order_by(asc(BrandSearchCompetitorsRankingTable.search_date))
-    )
-    if segment:
-        rank_query = rank_query.where(BrandSearchCompetitorsRankingTable.segment == segment)
-    rank_result = await db.execute(rank_query)
-    rank_records = rank_result.scalars().all()
-
-    # Group ranking by date
-    rank_by_date: dict[str, list] = {}
-    for rec in rank_records:
-        d = rec.search_date.date().isoformat() if hasattr(rec.search_date, 'date') else str(rec.search_date)
-        rank_by_date.setdefault(d, []).append(rec)
+    # Group by date
+    by_date: dict[str, list] = {}
+    for rec in metrics_records:
+        d = rec.search_date_end.isoformat()
+        by_date.setdefault(d, []).append(rec)
 
     # ---- Build data points ----
-    all_dates = sorted(set(list(vis_by_date.keys()) + list(rank_by_date.keys())))
+    all_dates = sorted(by_date.keys())
 
     data_points = []
     visibility_values = []
     ranking_values = []
 
     for d in all_dates:
-        # Visibility rate for this date
-        vis_recs = vis_by_date.get(d, [])
-        if vis_recs:
-            total_search = sum(r.total_search_count for r in vis_recs)
-            total_visible = sum(r.competitor_visibility_count for r in vis_recs)
-            vis_rate = (total_visible / total_search * 100) if total_search > 0 else 0.0
-        else:
-            vis_rate = 0.0
+        recs = by_date[d]
 
-        # Average ranking for this date
-        rank_recs = rank_by_date.get(d, [])
-        if rank_recs:
-            avg_rank = sum(r.search_ranking for r in rank_recs) / len(rank_recs)
-        else:
-            avg_rank = 0.0
+        # Visibility rate: already aggregated in BrandSearchCompetitorDailyBasicMetricsTable
+        total_search = sum(r.total_search_count for r in recs)
+        total_visible = sum(r.competitor_visibility_count for r in recs)
+        vis_rate = (total_visible / total_search * 100) if total_search > 0 else 0.0
+
+        # Average ranking: already aggregated in BrandSearchCompetitorDailyBasicMetricsTable.avg_ranking
+        visible_recs = [r for r in recs if r.avg_ranking > 0]
+        avg_rank = sum(r.avg_ranking for r in visible_recs) / len(visible_recs) if visible_recs else 0.0
 
         data_points.append(CompetitorMetricsDataPoint(
             date=d,
@@ -1098,14 +1038,14 @@ async def get_brand_overview(
 
     # Query weekly performance data within date range
     query = (
-        select(BrandAwarenessWeeklyPerformanceTable)
+        select(BrandAwarenessDailyPerformanceTable)
         .where(
-            BrandAwarenessWeeklyPerformanceTable.brand_id == brand_id,
-            BrandAwarenessWeeklyPerformanceTable.segment == segment,
-            BrandAwarenessWeeklyPerformanceTable.created_date >= query_start_date,
-            BrandAwarenessWeeklyPerformanceTable.created_date <= query_end_date,
+            BrandAwarenessDailyPerformanceTable.brand_id == brand_id,
+            BrandAwarenessDailyPerformanceTable.segment == segment,
+            BrandAwarenessDailyPerformanceTable.search_date >= query_start_date,
+            BrandAwarenessDailyPerformanceTable.search_date <= query_end_date,
         )
-        .order_by(asc(BrandAwarenessWeeklyPerformanceTable.created_date))
+        .order_by(asc(BrandAwarenessDailyPerformanceTable.search_date))
     )
 
     result = await db.execute(query)
@@ -1134,7 +1074,7 @@ async def get_brand_overview(
     data_points = []
     for record in records:
         data_points.append(BrandOverviewDataPoint(
-            date=record.created_date.isoformat(),
+            date=record.search_date.isoformat(),
             awareness_score=round(record.awareness_score or 0.0, 2),
             share_of_visibility=round(record.share_of_visibility or 0.0, 4),
             search_share_index=round(record.search_share_index or 0.0, 4),
@@ -1223,16 +1163,16 @@ async def get_segment_metrics(
 
     # Query all segment data within date range (excluding All-Segment)
     query = (
-        select(BrandAwarenessWeeklyPerformanceTable)
+        select(BrandAwarenessDailyPerformanceTable)
         .where(
-            BrandAwarenessWeeklyPerformanceTable.brand_id == brand_id,
-            BrandAwarenessWeeklyPerformanceTable.segment != "All-Segment",
-            BrandAwarenessWeeklyPerformanceTable.created_date >= query_start_date,
-            BrandAwarenessWeeklyPerformanceTable.created_date <= query_end_date,
+            BrandAwarenessDailyPerformanceTable.brand_id == brand_id,
+            BrandAwarenessDailyPerformanceTable.segment != "All-Segment",
+            BrandAwarenessDailyPerformanceTable.search_date >= query_start_date,
+            BrandAwarenessDailyPerformanceTable.search_date <= query_end_date,
         )
         .order_by(
-            asc(BrandAwarenessWeeklyPerformanceTable.segment),
-            desc(BrandAwarenessWeeklyPerformanceTable.created_date),
+            asc(BrandAwarenessDailyPerformanceTable.segment),
+            desc(BrandAwarenessDailyPerformanceTable.search_date),
         )
     )
 
@@ -1310,16 +1250,16 @@ async def get_performance_detail_table(
 
     # Query all segment data within date range (excluding All-Segment)
     query = (
-        select(BrandAwarenessWeeklyPerformanceTable)
+        select(BrandAwarenessDailyPerformanceTable)
         .where(
-            BrandAwarenessWeeklyPerformanceTable.brand_id == brand_id,
-            BrandAwarenessWeeklyPerformanceTable.segment != "All-Segment",
-            BrandAwarenessWeeklyPerformanceTable.created_date >= query_start_date,
-            BrandAwarenessWeeklyPerformanceTable.created_date <= query_end_date,
+            BrandAwarenessDailyPerformanceTable.brand_id == brand_id,
+            BrandAwarenessDailyPerformanceTable.segment != "All-Segment",
+            BrandAwarenessDailyPerformanceTable.search_date >= query_start_date,
+            BrandAwarenessDailyPerformanceTable.search_date <= query_end_date,
         )
         .order_by(
-            asc(BrandAwarenessWeeklyPerformanceTable.segment),
-            desc(BrandAwarenessWeeklyPerformanceTable.created_date),
+            asc(BrandAwarenessDailyPerformanceTable.segment),
+            desc(BrandAwarenessDailyPerformanceTable.search_date),
         )
     )
 
@@ -1338,7 +1278,7 @@ async def get_performance_detail_table(
             search_share_index=round(record.search_share_index or 0.0, 4),
             position_strength=round(record.position_strength or 0.0, 4),
             search_momentum=round(record.search_momentum or 0.0, 4),
-            date=record.created_date.isoformat(),
+            date=record.search_date.isoformat(),
         ))
 
     logger.info(f"Returning {len(rows)} performance detail rows for brand_id: {brand_id}")
@@ -1397,15 +1337,15 @@ async def get_competitor_awareness(
 
     # Query competitor awareness data
     query = (
-        select(BrandCompetitorsAwarenessWeeklyPerformanceTable)
+        select(BrandCompetitorsAwarenessDailyPerformanceTable)
         .where(
-            BrandCompetitorsAwarenessWeeklyPerformanceTable.search_target_brand_id == brand_id,
-            BrandCompetitorsAwarenessWeeklyPerformanceTable.competitor_brand_name == competitor_brand_name,
-            BrandCompetitorsAwarenessWeeklyPerformanceTable.segment == segment,
-            BrandCompetitorsAwarenessWeeklyPerformanceTable.created_date >= query_start_date,
-            BrandCompetitorsAwarenessWeeklyPerformanceTable.created_date <= query_end_date,
+            BrandCompetitorsAwarenessDailyPerformanceTable.search_target_brand_id == brand_id,
+            BrandCompetitorsAwarenessDailyPerformanceTable.competitor_brand_name == competitor_brand_name,
+            BrandCompetitorsAwarenessDailyPerformanceTable.segment == segment,
+            BrandCompetitorsAwarenessDailyPerformanceTable.search_date >= query_start_date,
+            BrandCompetitorsAwarenessDailyPerformanceTable.search_date <= query_end_date,
         )
-        .order_by(asc(BrandCompetitorsAwarenessWeeklyPerformanceTable.created_date))
+        .order_by(asc(BrandCompetitorsAwarenessDailyPerformanceTable.search_date))
     )
 
     result = await db.execute(query)
@@ -1414,7 +1354,7 @@ async def get_competitor_awareness(
     data_points = []
     for record in records:
         data_points.append(CompetitorAwarenessDataPoint(
-            date=record.created_date.isoformat(),
+            date=record.search_date.isoformat(),
             awareness_score=round(record.awareness_score or 0.0, 2),
             share_of_visibility=round(record.share_of_visibility or 0.0, 4),
             search_share_index=round(record.search_share_index or 0.0, 4),
@@ -1479,17 +1419,17 @@ async def get_competitor_detail_table(
 
     # Query competitor data (all segments except All-Segment)
     comp_query = (
-        select(BrandCompetitorsAwarenessWeeklyPerformanceTable)
+        select(BrandCompetitorsAwarenessDailyPerformanceTable)
         .where(
-            BrandCompetitorsAwarenessWeeklyPerformanceTable.search_target_brand_id == brand_id,
-            BrandCompetitorsAwarenessWeeklyPerformanceTable.competitor_brand_name == competitor_brand_name,
-            BrandCompetitorsAwarenessWeeklyPerformanceTable.segment != "All-Segment",
-            BrandCompetitorsAwarenessWeeklyPerformanceTable.created_date >= query_start_date,
-            BrandCompetitorsAwarenessWeeklyPerformanceTable.created_date <= query_end_date,
+            BrandCompetitorsAwarenessDailyPerformanceTable.search_target_brand_id == brand_id,
+            BrandCompetitorsAwarenessDailyPerformanceTable.competitor_brand_name == competitor_brand_name,
+            BrandCompetitorsAwarenessDailyPerformanceTable.segment != "All-Segment",
+            BrandCompetitorsAwarenessDailyPerformanceTable.search_date >= query_start_date,
+            BrandCompetitorsAwarenessDailyPerformanceTable.search_date <= query_end_date,
         )
         .order_by(
-            asc(BrandCompetitorsAwarenessWeeklyPerformanceTable.segment),
-            desc(BrandCompetitorsAwarenessWeeklyPerformanceTable.created_date),
+            asc(BrandCompetitorsAwarenessDailyPerformanceTable.segment),
+            desc(BrandCompetitorsAwarenessDailyPerformanceTable.search_date),
         )
     )
 
@@ -1498,12 +1438,12 @@ async def get_competitor_detail_table(
 
     # Query brand's own awareness scores for gap calculation
     brand_query = (
-        select(BrandAwarenessWeeklyPerformanceTable)
+        select(BrandAwarenessDailyPerformanceTable)
         .where(
-            BrandAwarenessWeeklyPerformanceTable.brand_id == brand_id,
-            BrandAwarenessWeeklyPerformanceTable.segment != "All-Segment",
-            BrandAwarenessWeeklyPerformanceTable.created_date >= query_start_date,
-            BrandAwarenessWeeklyPerformanceTable.created_date <= query_end_date,
+            BrandAwarenessDailyPerformanceTable.brand_id == brand_id,
+            BrandAwarenessDailyPerformanceTable.segment != "All-Segment",
+            BrandAwarenessDailyPerformanceTable.search_date >= query_start_date,
+            BrandAwarenessDailyPerformanceTable.search_date <= query_end_date,
         )
     )
 
@@ -1515,7 +1455,7 @@ async def get_competitor_detail_table(
     brand_name = "Unknown"
     for record in brand_records:
         brand_name = record.brand_name
-        key = (record.segment, record.created_date.isoformat())
+        key = (record.segment, record.search_date.isoformat())
         brand_awareness_map[key] = record.awareness_score or 0.0
 
     # Build rows with segment gap
@@ -1525,7 +1465,7 @@ async def get_competitor_detail_table(
             brand_name = record.search_target_brand_name or "Unknown"
 
         comp_awareness = round(record.awareness_score or 0.0, 2)
-        date_str = record.created_date.isoformat()
+        date_str = record.search_date.isoformat()
         key = (record.segment, date_str)
 
         # Calculate segment gap
@@ -1579,7 +1519,7 @@ async def get_top_competitor(
     Find the top competitor by average awareness score for a given brand,
     segment, and time range.
 
-    Queries BrandCompetitorsAwarenessWeeklyPerformanceTable grouped by
+    Queries BrandCompetitorsAwarenessDailyPerformanceTable grouped by
     competitor_brand_name, calculates average awareness_score, and returns
     the competitor with the highest average.
     """
@@ -1602,12 +1542,12 @@ async def get_top_competitor(
 
     # Query all competitor records for this brand + segment + date range
     query = (
-        select(BrandCompetitorsAwarenessWeeklyPerformanceTable)
+        select(BrandCompetitorsAwarenessDailyPerformanceTable)
         .where(
-            BrandCompetitorsAwarenessWeeklyPerformanceTable.search_target_brand_id == brand_id,
-            BrandCompetitorsAwarenessWeeklyPerformanceTable.segment == segment,
-            BrandCompetitorsAwarenessWeeklyPerformanceTable.created_date >= query_start_date,
-            BrandCompetitorsAwarenessWeeklyPerformanceTable.created_date <= query_end_date,
+            BrandCompetitorsAwarenessDailyPerformanceTable.search_target_brand_id == brand_id,
+            BrandCompetitorsAwarenessDailyPerformanceTable.segment == segment,
+            BrandCompetitorsAwarenessDailyPerformanceTable.search_date >= query_start_date,
+            BrandCompetitorsAwarenessDailyPerformanceTable.search_date <= query_end_date,
         )
     )
 
