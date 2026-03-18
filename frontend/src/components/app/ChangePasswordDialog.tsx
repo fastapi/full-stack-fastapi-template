@@ -28,7 +28,11 @@ export function ChangePasswordDialog({ open, onOpenChange }: Props) {
   const [showNew, setShowNew] = useState(false)
   const [showConfirm, setShowConfirm] = useState(false)
   const [saving, setSaving] = useState(false)
-  const [errors, setErrors] = useState<{ current?: string; new?: string; confirm?: string }>({})
+  const [errors, setErrors] = useState<{
+    current?: string
+    new?: string
+    confirm?: string
+  }>({})
 
   // useReverification wraps updatePassword so that if Clerk requires step-up
   // verification (email OTP), it automatically shows Clerk's verification modal
@@ -59,9 +63,11 @@ export function ChangePasswordDialog({ open, onOpenChange }: Props) {
     const next: typeof errors = {}
     if (!currentPassword) next.current = "Current password is required"
     if (!newPassword) next.new = "New password is required"
-    else if (newPassword.length < 8) next.new = "Password must be at least 8 characters"
+    else if (newPassword.length < 8)
+      next.new = "Password must be at least 8 characters"
     if (!confirmPassword) next.confirm = "Please confirm your new password"
-    else if (newPassword !== confirmPassword) next.confirm = "Passwords do not match"
+    else if (newPassword !== confirmPassword)
+      next.confirm = "Passwords do not match"
     setErrors(next)
     return Object.keys(next).length === 0
   }
@@ -77,7 +83,8 @@ export function ChangePasswordDialog({ open, onOpenChange }: Props) {
       reset()
       onOpenChange(false)
     } catch (err: any) {
-      const clerkMessage = err?.errors?.[0]?.longMessage ?? err?.errors?.[0]?.message
+      const clerkMessage =
+        err?.errors?.[0]?.longMessage ?? err?.errors?.[0]?.message
       if (clerkMessage?.toLowerCase().includes("current")) {
         setErrors({ current: clerkMessage })
       } else if (clerkMessage) {
@@ -114,10 +121,13 @@ export function ChangePasswordDialog({ open, onOpenChange }: Props) {
                 value={currentPassword}
                 onChange={(e) => {
                   setCurrentPassword(e.target.value)
-                  if (errors.current) setErrors((p) => ({ ...p, current: undefined }))
+                  if (errors.current)
+                    setErrors((p) => ({ ...p, current: undefined }))
                 }}
                 disabled={saving}
-                className={errors.current ? "border-destructive pr-10" : "pr-10"}
+                className={
+                  errors.current ? "border-destructive pr-10" : "pr-10"
+                }
                 autoComplete="current-password"
               />
               <button
@@ -129,7 +139,9 @@ export function ChangePasswordDialog({ open, onOpenChange }: Props) {
                 {showCurrent ? <EyeOff size={15} /> : <Eye size={15} />}
               </button>
             </div>
-            {errors.current && <p className="text-xs text-destructive">{errors.current}</p>}
+            {errors.current && (
+              <p className="text-xs text-destructive">{errors.current}</p>
+            )}
           </div>
 
           {/* New password */}
@@ -157,7 +169,9 @@ export function ChangePasswordDialog({ open, onOpenChange }: Props) {
                 {showNew ? <EyeOff size={15} /> : <Eye size={15} />}
               </button>
             </div>
-            {errors.new && <p className="text-xs text-destructive">{errors.new}</p>}
+            {errors.new && (
+              <p className="text-xs text-destructive">{errors.new}</p>
+            )}
           </div>
 
           {/* Confirm new password */}
@@ -170,10 +184,13 @@ export function ChangePasswordDialog({ open, onOpenChange }: Props) {
                 value={confirmPassword}
                 onChange={(e) => {
                   setConfirmPassword(e.target.value)
-                  if (errors.confirm) setErrors((p) => ({ ...p, confirm: undefined }))
+                  if (errors.confirm)
+                    setErrors((p) => ({ ...p, confirm: undefined }))
                 }}
                 disabled={saving}
-                className={errors.confirm ? "border-destructive pr-10" : "pr-10"}
+                className={
+                  errors.confirm ? "border-destructive pr-10" : "pr-10"
+                }
                 autoComplete="new-password"
               />
               <button
@@ -185,11 +202,18 @@ export function ChangePasswordDialog({ open, onOpenChange }: Props) {
                 {showConfirm ? <EyeOff size={15} /> : <Eye size={15} />}
               </button>
             </div>
-            {errors.confirm && <p className="text-xs text-destructive">{errors.confirm}</p>}
+            {errors.confirm && (
+              <p className="text-xs text-destructive">{errors.confirm}</p>
+            )}
           </div>
 
           <DialogFooter className="pt-2">
-            <Button type="button" variant="outline" onClick={() => handleOpenChange(false)} disabled={saving}>
+            <Button
+              type="button"
+              variant="outline"
+              onClick={() => handleOpenChange(false)}
+              disabled={saving}
+            >
               Cancel
             </Button>
             <Button type="submit" disabled={saving}>

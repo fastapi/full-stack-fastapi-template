@@ -55,7 +55,13 @@ function formatDate(dateStr: string) {
   })
 }
 
-function StatusBadge({ label, variant }: { label: string; variant: "green" | "amber" | "red" | "blue" | "slate" }) {
+function StatusBadge({
+  label,
+  variant,
+}: {
+  label: string
+  variant: "green" | "amber" | "red" | "blue" | "slate"
+}) {
   const styles = {
     green: "bg-green-100 text-green-700",
     amber: "bg-amber-100 text-amber-700",
@@ -64,7 +70,9 @@ function StatusBadge({ label, variant }: { label: string; variant: "green" | "am
     slate: "bg-slate-100 text-slate-600",
   }
   return (
-    <span className={`text-xs font-semibold px-2 py-0.5 rounded-full ${styles[variant]}`}>
+    <span
+      className={`text-xs font-semibold px-2 py-0.5 rounded-full ${styles[variant]}`}
+    >
       {label}
     </span>
   )
@@ -114,7 +122,9 @@ export function PricingPage({ embedded = false }: { embedded?: boolean }) {
       if (attempts >= 10) {
         clearInterval(poll)
         await refreshSubscription()
-        toast.success("Subscription activated! It may take a moment to reflect.")
+        toast.success(
+          "Subscription activated! It may take a moment to reflect.",
+        )
         navigate({ to: "/app/settings", replace: true })
       }
     }, 1000)
@@ -129,7 +139,9 @@ export function PricingPage({ embedded = false }: { embedded?: boolean }) {
       const { checkout_url } = await billingAPI.createCheckoutSession(priceId)
       window.location.href = checkout_url
     } catch (err) {
-      toast.error(err instanceof Error ? err.message : "Failed to start checkout")
+      toast.error(
+        err instanceof Error ? err.message : "Failed to start checkout",
+      )
     } finally {
       setCheckoutLoading(false)
     }
@@ -143,7 +155,9 @@ export function PricingPage({ embedded = false }: { embedded?: boolean }) {
       toast.success("Subscription will cancel at end of billing period.")
       setCancelDialogOpen(false)
     } catch (err) {
-      toast.error(err instanceof Error ? err.message : "Failed to cancel subscription")
+      toast.error(
+        err instanceof Error ? err.message : "Failed to cancel subscription",
+      )
     } finally {
       setCancelLoading(false)
     }
@@ -156,7 +170,11 @@ export function PricingPage({ embedded = false }: { embedded?: boolean }) {
       await refreshSubscription()
       toast.success("Subscription reactivated!")
     } catch (err) {
-      toast.error(err instanceof Error ? err.message : "Failed to reactivate subscription")
+      toast.error(
+        err instanceof Error
+          ? err.message
+          : "Failed to reactivate subscription",
+      )
     } finally {
       setReactivateLoading(false)
     }
@@ -198,7 +216,9 @@ export function PricingPage({ embedded = false }: { embedded?: boolean }) {
             await refreshSubscription()
             if (updatedSub.tier !== snapshotTier) {
               toast.success("Subscription plan updated.")
-            } else if (updatedSub.cancel_at_period_end !== snapshotCancelAtPeriodEnd) {
+            } else if (
+              updatedSub.cancel_at_period_end !== snapshotCancelAtPeriodEnd
+            ) {
               toast.success(
                 updatedSub.cancel_at_period_end
                   ? "Subscription scheduled for cancellation."
@@ -223,11 +243,17 @@ export function PricingPage({ embedded = false }: { embedded?: boolean }) {
       document.addEventListener("visibilitychange", handleVisibilityChange)
 
       setTimeout(
-        () => document.removeEventListener("visibilitychange", handleVisibilityChange),
+        () =>
+          document.removeEventListener(
+            "visibilitychange",
+            handleVisibilityChange,
+          ),
         30 * 60 * 1000,
       )
     } catch (err) {
-      toast.error(err instanceof Error ? err.message : "Failed to open billing portal")
+      toast.error(
+        err instanceof Error ? err.message : "Failed to open billing portal",
+      )
     } finally {
       setPortalLoading(false)
     }
@@ -245,8 +271,11 @@ export function PricingPage({ embedded = false }: { embedded?: boolean }) {
   const proAccessActive = isPro && status === "active" && !isExpired
 
   return (
-    <div className={embedded ? "space-y-5" : "mx-auto max-w-2xl px-4 py-10 space-y-5"}>
-
+    <div
+      className={
+        embedded ? "space-y-5" : "mx-auto max-w-2xl px-4 py-10 space-y-5"
+      }
+    >
       {/* ── Current plan: Free Trial ── */}
       {isFreeTrial && (
         <Card>
@@ -264,13 +293,15 @@ export function PricingPage({ embedded = false }: { embedded?: boolean }) {
           </CardHeader>
           <CardContent className="space-y-4">
             {trialExpiresAt && (
-              <div className={`rounded-lg px-4 py-3 text-sm ${
-                isExpired
-                  ? "bg-red-50 text-red-700"
-                  : trialDaysLeft !== null && trialDaysLeft <= 3
-                    ? "bg-amber-50 text-amber-700"
-                    : "bg-blue-50 text-blue-700"
-              }`}>
+              <div
+                className={`rounded-lg px-4 py-3 text-sm ${
+                  isExpired
+                    ? "bg-red-50 text-red-700"
+                    : trialDaysLeft !== null && trialDaysLeft <= 3
+                      ? "bg-amber-50 text-amber-700"
+                      : "bg-blue-50 text-blue-700"
+                }`}
+              >
                 {isExpired
                   ? "Your free trial has ended. Upgrade to Pro to continue."
                   : `Trial ends ${formatDate(trialExpiresAt)} — ${trialDaysLeft} day${trialDaysLeft === 1 ? "" : "s"} remaining.`}
@@ -282,7 +313,10 @@ export function PricingPage({ embedded = false }: { embedded?: boolean }) {
               </p>
               <ul className="space-y-1.5">
                 {FREE_TRIAL_FEATURES.map((f) => (
-                  <li key={f} className="flex items-center gap-2 text-sm text-slate-600">
+                  <li
+                    key={f}
+                    className="flex items-center gap-2 text-sm text-slate-600"
+                  >
                     <Check className="h-3.5 w-3.5 text-green-500 shrink-0" />
                     {f}
                   </li>
@@ -291,8 +325,14 @@ export function PricingPage({ embedded = false }: { embedded?: boolean }) {
             </div>
           </CardContent>
           <CardFooter>
-            <Button className="w-full" onClick={handleUpgrade} disabled={checkoutLoading}>
-              {checkoutLoading && <Loader2 className="h-4 w-4 animate-spin mr-2" />}
+            <Button
+              className="w-full"
+              onClick={handleUpgrade}
+              disabled={checkoutLoading}
+            >
+              {checkoutLoading && (
+                <Loader2 className="h-4 w-4 animate-spin mr-2" />
+              )}
               Upgrade to Pro — $299/month
             </Button>
           </CardFooter>
@@ -301,7 +341,9 @@ export function PricingPage({ embedded = false }: { embedded?: boolean }) {
 
       {/* ── Current plan: Pro ── */}
       {isPro && (
-        <Card className={`border-blue-200 ${!proAccessActive ? "opacity-80" : ""}`}>
+        <Card
+          className={`border-blue-200 ${!proAccessActive ? "opacity-80" : ""}`}
+        >
           <CardHeader className="pb-3">
             <div className="flex items-center justify-between">
               <CardTitle className="text-base flex items-center gap-2">
@@ -325,11 +367,16 @@ export function PricingPage({ embedded = false }: { embedded?: boolean }) {
             {/* Cancelling notice */}
             {cancelAtPeriodEnd && currentPeriodEnd && (
               <div className="rounded-lg px-4 py-3 text-sm bg-amber-50 text-amber-800 space-y-2">
-                <p className="font-medium">Your subscription is set to cancel.</p>
+                <p className="font-medium">
+                  Your subscription is set to cancel.
+                </p>
                 <p>
                   You have full Pro access until{" "}
-                  <span className="font-semibold">{formatDate(currentPeriodEnd)}</span>
-                  {" "}({daysUntil(currentPeriodEnd)} day{daysUntil(currentPeriodEnd) === 1 ? "" : "s"} remaining).
+                  <span className="font-semibold">
+                    {formatDate(currentPeriodEnd)}
+                  </span>{" "}
+                  ({daysUntil(currentPeriodEnd)} day
+                  {daysUntil(currentPeriodEnd) === 1 ? "" : "s"} remaining).
                 </p>
               </div>
             )}
@@ -337,14 +384,16 @@ export function PricingPage({ embedded = false }: { embedded?: boolean }) {
             {/* Past due notice */}
             {status === "past_due" && (
               <div className="rounded-lg px-4 py-3 text-sm bg-amber-50 text-amber-700">
-                Your last payment failed. Update your payment method to avoid losing access.
+                Your last payment failed. Update your payment method to avoid
+                losing access.
               </div>
             )}
 
             {/* Expired / truly cancelled */}
             {(isExpired || (isReadOnly && !cancelAtPeriodEnd)) && (
               <div className="rounded-lg px-4 py-3 text-sm bg-red-50 text-red-700">
-                Your Pro subscription is no longer active. Resubscribe to restore full access.
+                Your Pro subscription is no longer active. Resubscribe to
+                restore full access.
               </div>
             )}
 
@@ -354,7 +403,10 @@ export function PricingPage({ embedded = false }: { embedded?: boolean }) {
               </p>
               <ul className="space-y-1.5">
                 {PRO_FEATURES.map((f) => (
-                  <li key={f} className="flex items-center gap-2 text-sm text-slate-600">
+                  <li
+                    key={f}
+                    className="flex items-center gap-2 text-sm text-slate-600"
+                  >
                     <Check className="h-3.5 w-3.5 text-green-500 shrink-0" />
                     {f}
                   </li>
@@ -365,16 +417,28 @@ export function PricingPage({ embedded = false }: { embedded?: boolean }) {
           <CardFooter className="flex flex-col gap-2">
             {/* Truly expired/cancelled → resubscribe via Stripe checkout */}
             {(isExpired || (isReadOnly && !cancelAtPeriodEnd)) && (
-              <Button className="w-full" onClick={handleUpgrade} disabled={checkoutLoading}>
-                {checkoutLoading && <Loader2 className="h-4 w-4 animate-spin mr-2" />}
+              <Button
+                className="w-full"
+                onClick={handleUpgrade}
+                disabled={checkoutLoading}
+              >
+                {checkoutLoading && (
+                  <Loader2 className="h-4 w-4 animate-spin mr-2" />
+                )}
                 Resubscribe — $299/month
               </Button>
             )}
 
             {/* Scheduled to cancel → offer reactivation in-app */}
             {cancelAtPeriodEnd && (
-              <Button className="w-full" onClick={handleReactivate} disabled={reactivateLoading}>
-                {reactivateLoading && <Loader2 className="h-4 w-4 animate-spin mr-2" />}
+              <Button
+                className="w-full"
+                onClick={handleReactivate}
+                disabled={reactivateLoading}
+              >
+                {reactivateLoading && (
+                  <Loader2 className="h-4 w-4 animate-spin mr-2" />
+                )}
                 Reactivate Subscription
               </Button>
             )}
@@ -407,8 +471,14 @@ export function PricingPage({ embedded = false }: { embedded?: boolean }) {
 
             {/* Past due → send to portal to fix payment */}
             {status === "past_due" && (
-              <Button className="w-full" onClick={handlePortal} disabled={portalLoading}>
-                {portalLoading && <Loader2 className="h-4 w-4 animate-spin mr-2" />}
+              <Button
+                className="w-full"
+                onClick={handlePortal}
+                disabled={portalLoading}
+              >
+                {portalLoading && (
+                  <Loader2 className="h-4 w-4 animate-spin mr-2" />
+                )}
                 Update Payment Method
               </Button>
             )}
@@ -431,7 +501,10 @@ export function PricingPage({ embedded = false }: { embedded?: boolean }) {
           <CardContent>
             <ul className="space-y-1.5">
               {PRO_FEATURES.map((f) => (
-                <li key={f} className="flex items-center gap-2 text-sm text-slate-600">
+                <li
+                  key={f}
+                  className="flex items-center gap-2 text-sm text-slate-600"
+                >
                   <Check className="h-3.5 w-3.5 text-green-500 shrink-0" />
                   {f}
                 </li>
@@ -439,8 +512,14 @@ export function PricingPage({ embedded = false }: { embedded?: boolean }) {
             </ul>
           </CardContent>
           <CardFooter>
-            <Button className="w-full" onClick={handleUpgrade} disabled={checkoutLoading}>
-              {checkoutLoading && <Loader2 className="h-4 w-4 animate-spin mr-2" />}
+            <Button
+              className="w-full"
+              onClick={handleUpgrade}
+              disabled={checkoutLoading}
+            >
+              {checkoutLoading && (
+                <Loader2 className="h-4 w-4 animate-spin mr-2" />
+              )}
               Get Started with Pro
             </Button>
           </CardFooter>
@@ -458,8 +537,10 @@ export function PricingPage({ embedded = false }: { embedded?: boolean }) {
                 {currentPeriodEnd && (
                   <p>
                     You'll keep full Pro access until{" "}
-                    <span className="font-semibold text-slate-900">{formatDate(currentPeriodEnd)}</span>.
-                    After that, your account moves back to Free Trial limits.
+                    <span className="font-semibold text-slate-900">
+                      {formatDate(currentPeriodEnd)}
+                    </span>
+                    . After that, your account moves back to Free Trial limits.
                   </p>
                 )}
                 <p>You can reactivate any time before that date.</p>
@@ -467,11 +548,20 @@ export function PricingPage({ embedded = false }: { embedded?: boolean }) {
             </DialogDescription>
           </DialogHeader>
           <DialogFooter>
-            <Button variant="outline" onClick={() => setCancelDialogOpen(false)}>
+            <Button
+              variant="outline"
+              onClick={() => setCancelDialogOpen(false)}
+            >
               Keep My Plan
             </Button>
-            <Button variant="destructive" onClick={handleCancel} disabled={cancelLoading}>
-              {cancelLoading && <Loader2 className="h-4 w-4 animate-spin mr-2" />}
+            <Button
+              variant="destructive"
+              onClick={handleCancel}
+              disabled={cancelLoading}
+            >
+              {cancelLoading && (
+                <Loader2 className="h-4 w-4 animate-spin mr-2" />
+              )}
               Yes, Cancel
             </Button>
           </DialogFooter>

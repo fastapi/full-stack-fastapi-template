@@ -396,9 +396,7 @@ export default function MarketDynamic() {
       <div className="space-y-4">
         {/* Header */}
         <div>
-          <h1 className="text-2xl font-bold text-slate-900">
-            Market Dynamic
-          </h1>
+          <h1 className="text-2xl font-bold text-slate-900">Market Dynamic</h1>
           <p className="text-sm text-slate-600 mt-1">
             Competitive visibility, momentum, and position landscape
           </p>

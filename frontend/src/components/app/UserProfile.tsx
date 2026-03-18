@@ -276,285 +276,274 @@ export default function UserProfile() {
 
   return (
     <div>
-        <div className="mb-8 flex items-center justify-between">
-          <div>
-            <h1 className="text-3xl font-bold tracking-tight">My Profile</h1>
-            <p className="text-muted-foreground mt-2">
-              View and manage your profile information.
-            </p>
-          </div>
-          {!isEditMode && (
-            <Button variant="outline" onClick={handleEnableEdit}>
-              <Pencil className="h-4 w-4 mr-2" />
-              Edit
-            </Button>
-          )}
+      <div className="mb-8 flex items-center justify-between">
+        <div>
+          <h1 className="text-3xl font-bold tracking-tight">My Profile</h1>
+          <p className="text-muted-foreground mt-2">
+            View and manage your profile information.
+          </p>
         </div>
+        {!isEditMode && (
+          <Button variant="outline" onClick={handleEnableEdit}>
+            <Pencil className="h-4 w-4 mr-2" />
+            Edit
+          </Button>
+        )}
+      </div>
 
-        <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <User className="h-5 w-5" />
-              Profile Information
-            </CardTitle>
-            <CardDescription>
-              {isEditMode
-                ? "Update your personal and company details below"
-                : "Your personal and company details"}
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
-            <form onSubmit={handleSubmit} className="space-y-6">
-              {errors.general && (
-                <div className="rounded-md bg-destructive/10 p-3 text-sm text-destructive">
-                  {errors.general}
-                </div>
-              )}
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <User className="h-5 w-5" />
+            Profile Information
+          </CardTitle>
+          <CardDescription>
+            {isEditMode
+              ? "Update your personal and company details below"
+              : "Your personal and company details"}
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          <form onSubmit={handleSubmit} className="space-y-6">
+            {errors.general && (
+              <div className="rounded-md bg-destructive/10 p-3 text-sm text-destructive">
+                {errors.general}
+              </div>
+            )}
 
-              {/* Personal Information Section */}
-              <div className="space-y-4">
-                <h3 className="text-sm font-medium text-muted-foreground flex items-center gap-2">
-                  <User className="h-4 w-4" />
-                  Personal Information
-                </h3>
+            {/* Personal Information Section */}
+            <div className="space-y-4">
+              <h3 className="text-sm font-medium text-muted-foreground flex items-center gap-2">
+                <User className="h-4 w-4" />
+                Personal Information
+              </h3>
 
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                  <div className="space-y-2">
-                    <Label htmlFor="firstName">
-                      First Name{" "}
-                      {isEditMode && (
-                        <span className="text-destructive">*</span>
-                      )}
-                    </Label>
-                    <Input
-                      id="firstName"
-                      type="text"
-                      value={firstName}
-                      onChange={(e) => {
-                        setFirstName(e.target.value)
-                        if (errors.firstName) {
-                          setErrors((prev) => ({
-                            ...prev,
-                            firstName: undefined,
-                          }))
-                        }
-                      }}
-                      placeholder="John"
-                      disabled={!isEditMode || saving}
-                      className={errors.firstName ? "border-destructive" : ""}
-                    />
-                    {errors.firstName && (
-                      <p className="text-sm text-destructive">
-                        {errors.firstName}
-                      </p>
-                    )}
-                  </div>
-
-                  <div className="space-y-2">
-                    <Label htmlFor="middleName">Middle Name</Label>
-                    <Input
-                      id="middleName"
-                      type="text"
-                      value={middleName}
-                      onChange={(e) => setMiddleName(e.target.value)}
-                      disabled={!isEditMode || saving}
-                    />
-                  </div>
-
-                  <div className="space-y-2">
-                    <Label htmlFor="lastName">
-                      Last Name{" "}
-                      {isEditMode && (
-                        <span className="text-destructive">*</span>
-                      )}
-                    </Label>
-                    <Input
-                      id="lastName"
-                      type="text"
-                      value={lastName}
-                      onChange={(e) => {
-                        setLastName(e.target.value)
-                        if (errors.lastName) {
-                          setErrors((prev) => ({
-                            ...prev,
-                            lastName: undefined,
-                          }))
-                        }
-                      }}
-                      placeholder="Doe"
-                      disabled={!isEditMode || saving}
-                      className={errors.lastName ? "border-destructive" : ""}
-                    />
-                    {errors.lastName && (
-                      <p className="text-sm text-destructive">
-                        {errors.lastName}
-                      </p>
-                    )}
-                  </div>
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <div className="space-y-2">
+                  <Label htmlFor="firstName">
+                    First Name{" "}
+                    {isEditMode && <span className="text-destructive">*</span>}
+                  </Label>
+                  <Input
+                    id="firstName"
+                    type="text"
+                    value={firstName}
+                    onChange={(e) => {
+                      setFirstName(e.target.value)
+                      if (errors.firstName) {
+                        setErrors((prev) => ({
+                          ...prev,
+                          firstName: undefined,
+                        }))
+                      }
+                    }}
+                    placeholder="John"
+                    disabled={!isEditMode || saving}
+                    className={errors.firstName ? "border-destructive" : ""}
+                  />
+                  {errors.firstName && (
+                    <p className="text-sm text-destructive">
+                      {errors.firstName}
+                    </p>
+                  )}
                 </div>
 
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <div className="space-y-2">
-                    <Label htmlFor="phone" className="flex items-center gap-2">
-                      <Phone className="h-4 w-4" />
-                      Phone Number
-                    </Label>
-                    <Input
-                      id="phone"
-                      type="tel"
-                      value={phone}
-                      onChange={(e) => setPhone(e.target.value)}
-                      placeholder="+1 (555) 000-0000"
-                      disabled={!isEditMode || saving}
-                    />
-                  </div>
+                <div className="space-y-2">
+                  <Label htmlFor="middleName">Middle Name</Label>
+                  <Input
+                    id="middleName"
+                    type="text"
+                    value={middleName}
+                    onChange={(e) => setMiddleName(e.target.value)}
+                    disabled={!isEditMode || saving}
+                  />
+                </div>
 
-                  <div className="space-y-2">
-                    <Label htmlFor="email" className="flex items-center gap-2">
-                      <Mail className="h-4 w-4" />
-                      Email{" "}
-                      {isEditMode && (
-                        <span className="text-destructive">*</span>
-                      )}
-                    </Label>
-                    <Input
-                      id="email"
-                      type="email"
-                      value={email}
-                      onChange={(e) => {
-                        setEmail(e.target.value)
-                        if (errors.email) {
-                          setErrors((prev) => ({ ...prev, email: undefined }))
-                        }
-                      }}
-                      placeholder="john@example.com"
-                      disabled={!isEditMode || saving}
-                      className={errors.email ? "border-destructive" : ""}
-                    />
-                    {errors.email && (
-                      <p className="text-sm text-destructive">{errors.email}</p>
-                    )}
-                  </div>
+                <div className="space-y-2">
+                  <Label htmlFor="lastName">
+                    Last Name{" "}
+                    {isEditMode && <span className="text-destructive">*</span>}
+                  </Label>
+                  <Input
+                    id="lastName"
+                    type="text"
+                    value={lastName}
+                    onChange={(e) => {
+                      setLastName(e.target.value)
+                      if (errors.lastName) {
+                        setErrors((prev) => ({
+                          ...prev,
+                          lastName: undefined,
+                        }))
+                      }
+                    }}
+                    placeholder="Doe"
+                    disabled={!isEditMode || saving}
+                    className={errors.lastName ? "border-destructive" : ""}
+                  />
+                  {errors.lastName && (
+                    <p className="text-sm text-destructive">
+                      {errors.lastName}
+                    </p>
+                  )}
                 </div>
               </div>
 
-              {/* Company Information Section */}
-              <div className="space-y-4 pt-4 border-t">
-                <h3 className="text-sm font-medium text-muted-foreground flex items-center gap-2">
-                  <Building2 className="h-4 w-4" />
-                  Company Information
-                </h3>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label htmlFor="phone" className="flex items-center gap-2">
+                    <Phone className="h-4 w-4" />
+                    Phone Number
+                  </Label>
+                  <Input
+                    id="phone"
+                    type="tel"
+                    value={phone}
+                    onChange={(e) => setPhone(e.target.value)}
+                    placeholder="+1 (555) 000-0000"
+                    disabled={!isEditMode || saving}
+                  />
+                </div>
 
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <div className="space-y-2 relative">
-                    <Label
-                      htmlFor="companyName"
-                      className="flex items-center gap-2"
-                    >
-                      <Building2 className="h-4 w-4" />
-                      Company Name{" "}
-                      {isEditMode && (
-                        <span className="text-destructive">*</span>
-                      )}
-                    </Label>
-                    <Input
-                      id="companyName"
-                      type="text"
-                      value={companyName}
-                      onChange={(e) => {
-                        setCompanyName(e.target.value)
-                        if (errors.companyName) {
-                          setErrors((prev) => ({
-                            ...prev,
-                            companyName: undefined,
-                          }))
-                        }
-                      }}
-                      onFocus={() => {
-                        if (isEditMode && companyOptions.length > 0) {
-                          setShowCompanyDropdown(true)
-                        }
-                      }}
-                      placeholder="Acme Corporation"
-                      disabled={!isEditMode || saving}
-                      className={errors.companyName ? "border-destructive" : ""}
-                      autoComplete="off"
-                    />
-                    {errors.companyName && (
-                      <p className="text-sm text-destructive">
-                        {errors.companyName}
-                      </p>
-                    )}
-                    {/* Company Autocomplete Dropdown */}
-                    {isEditMode &&
-                      showCompanyDropdown &&
-                      companyOptions.length > 0 && (
-                        <div className="absolute z-10 w-full mt-1 bg-white border border-slate-200 rounded-md shadow-lg max-h-60 overflow-auto">
-                          {companyOptions.map((option) => (
-                            <button
-                              key={option.company_id}
-                              type="button"
-                              className="w-full px-4 py-2 text-left hover:bg-slate-100 focus:bg-slate-100 focus:outline-none"
-                              onClick={() => handleCompanySelect(option)}
-                            >
-                              {option.company_name}
-                            </button>
-                          ))}
-                        </div>
-                      )}
-                    {isEditMode && searchingCompanies && (
-                      <p className="text-xs text-muted-foreground mt-1">
-                        Searching...
-                      </p>
-                    )}
-                  </div>
-
-                  <div className="space-y-2">
-                    <Label
-                      htmlFor="jobTitle"
-                      className="flex items-center gap-2"
-                    >
-                      <Briefcase className="h-4 w-4" />
-                      Job Title
-                    </Label>
-                    <Input
-                      id="jobTitle"
-                      type="text"
-                      value={jobTitle}
-                      onChange={(e) => setJobTitle(e.target.value)}
-                      placeholder="Software Engineer"
-                      disabled={!isEditMode || saving}
-                    />
-                  </div>
+                <div className="space-y-2">
+                  <Label htmlFor="email" className="flex items-center gap-2">
+                    <Mail className="h-4 w-4" />
+                    Email{" "}
+                    {isEditMode && <span className="text-destructive">*</span>}
+                  </Label>
+                  <Input
+                    id="email"
+                    type="email"
+                    value={email}
+                    onChange={(e) => {
+                      setEmail(e.target.value)
+                      if (errors.email) {
+                        setErrors((prev) => ({ ...prev, email: undefined }))
+                      }
+                    }}
+                    placeholder="john@example.com"
+                    disabled={!isEditMode || saving}
+                    className={errors.email ? "border-destructive" : ""}
+                  />
+                  {errors.email && (
+                    <p className="text-sm text-destructive">{errors.email}</p>
+                  )}
                 </div>
               </div>
+            </div>
 
-              {/* Action Buttons - only show in edit mode */}
-              {isEditMode && (
-                <div className="flex justify-end gap-3 pt-4 border-t">
-                  <Button
-                    type="button"
-                    variant="outline"
-                    onClick={handleCancelEdit}
-                    disabled={saving}
+            {/* Company Information Section */}
+            <div className="space-y-4 pt-4 border-t">
+              <h3 className="text-sm font-medium text-muted-foreground flex items-center gap-2">
+                <Building2 className="h-4 w-4" />
+                Company Information
+              </h3>
+
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="space-y-2 relative">
+                  <Label
+                    htmlFor="companyName"
+                    className="flex items-center gap-2"
                   >
-                    Cancel
-                  </Button>
-                  <Button type="submit" disabled={saving}>
-                    {saving ? (
-                      <>
-                        <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                        Saving...
-                      </>
-                    ) : (
-                      "Save Changes"
+                    <Building2 className="h-4 w-4" />
+                    Company Name{" "}
+                    {isEditMode && <span className="text-destructive">*</span>}
+                  </Label>
+                  <Input
+                    id="companyName"
+                    type="text"
+                    value={companyName}
+                    onChange={(e) => {
+                      setCompanyName(e.target.value)
+                      if (errors.companyName) {
+                        setErrors((prev) => ({
+                          ...prev,
+                          companyName: undefined,
+                        }))
+                      }
+                    }}
+                    onFocus={() => {
+                      if (isEditMode && companyOptions.length > 0) {
+                        setShowCompanyDropdown(true)
+                      }
+                    }}
+                    placeholder="Acme Corporation"
+                    disabled={!isEditMode || saving}
+                    className={errors.companyName ? "border-destructive" : ""}
+                    autoComplete="off"
+                  />
+                  {errors.companyName && (
+                    <p className="text-sm text-destructive">
+                      {errors.companyName}
+                    </p>
+                  )}
+                  {/* Company Autocomplete Dropdown */}
+                  {isEditMode &&
+                    showCompanyDropdown &&
+                    companyOptions.length > 0 && (
+                      <div className="absolute z-10 w-full mt-1 bg-white border border-slate-200 rounded-md shadow-lg max-h-60 overflow-auto">
+                        {companyOptions.map((option) => (
+                          <button
+                            key={option.company_id}
+                            type="button"
+                            className="w-full px-4 py-2 text-left hover:bg-slate-100 focus:bg-slate-100 focus:outline-none"
+                            onClick={() => handleCompanySelect(option)}
+                          >
+                            {option.company_name}
+                          </button>
+                        ))}
+                      </div>
                     )}
-                  </Button>
+                  {isEditMode && searchingCompanies && (
+                    <p className="text-xs text-muted-foreground mt-1">
+                      Searching...
+                    </p>
+                  )}
                 </div>
-              )}
-            </form>
-          </CardContent>
-        </Card>
+
+                <div className="space-y-2">
+                  <Label htmlFor="jobTitle" className="flex items-center gap-2">
+                    <Briefcase className="h-4 w-4" />
+                    Job Title
+                  </Label>
+                  <Input
+                    id="jobTitle"
+                    type="text"
+                    value={jobTitle}
+                    onChange={(e) => setJobTitle(e.target.value)}
+                    placeholder="Software Engineer"
+                    disabled={!isEditMode || saving}
+                  />
+                </div>
+              </div>
+            </div>
+
+            {/* Action Buttons - only show in edit mode */}
+            {isEditMode && (
+              <div className="flex justify-end gap-3 pt-4 border-t">
+                <Button
+                  type="button"
+                  variant="outline"
+                  onClick={handleCancelEdit}
+                  disabled={saving}
+                >
+                  Cancel
+                </Button>
+                <Button type="submit" disabled={saving}>
+                  {saving ? (
+                    <>
+                      <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                      Saving...
+                    </>
+                  ) : (
+                    "Save Changes"
+                  )}
+                </Button>
+              </div>
+            )}
+          </form>
+        </CardContent>
+      </Card>
     </div>
   )
 }

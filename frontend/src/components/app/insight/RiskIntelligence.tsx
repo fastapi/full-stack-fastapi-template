@@ -433,13 +433,15 @@ export default function RiskIntelligence() {
               value: kpiStats.medium,
               tone: "text-amber-600",
             },
-            { label: "Low Risk", value: kpiStats.low, tone: "text-emerald-600" },
+            {
+              label: "Low Risk",
+              value: kpiStats.low,
+              tone: "text-emerald-600",
+            },
             {
               label: "Avg Score",
               value:
-                kpiStats.avgScore === null
-                  ? "—"
-                  : kpiStats.avgScore.toFixed(2),
+                kpiStats.avgScore === null ? "—" : kpiStats.avgScore.toFixed(2),
               tone: "text-slate-900",
             },
           ].map((item) => (

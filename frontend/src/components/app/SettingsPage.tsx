@@ -1,6 +1,6 @@
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
-import UserProfile from "@/components/app/UserProfile"
 import { PricingPage } from "@/components/app/PricingPage"
+import UserProfile from "@/components/app/UserProfile"
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 
 export function SettingsPage() {
   return (

@@ -36,7 +36,9 @@ export function useEntitlement(): EntitlementResult {
   const status = subscription?.status ?? "active"
 
   const isExpired = isSuperUser ? false : status === "expired"
-  const isReadOnly = isSuperUser ? false : isExpired || status === "cancelled" || status === "past_due"
+  const isReadOnly = isSuperUser
+    ? false
+    : isExpired || status === "cancelled" || status === "past_due"
 
   const features = isSuperUser ? SUPER_USER_FEATURES : TIER_FEATURES[tier]
   const quota = isSuperUser ? SUPER_USER_QUOTA : TIER_QUOTAS[tier]

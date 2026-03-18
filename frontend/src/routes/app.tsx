@@ -131,7 +131,9 @@ function AppGuard() {
   }
 
   return (
-    <SubscriptionContext.Provider value={{ subscription, refreshSubscription: fetchSubscription }}>
+    <SubscriptionContext.Provider
+      value={{ subscription, refreshSubscription: fetchSubscription }}
+    >
       <AppLayout>
         <Outlet />
       </AppLayout>

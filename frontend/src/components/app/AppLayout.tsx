@@ -18,14 +18,9 @@ import {
   X,
 } from "lucide-react"
 import { useEffect, useState } from "react"
-import { ChangePasswordDialog } from "@/components/app/ChangePasswordDialog"
 import { toast } from "sonner"
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu"
+import { ChangePasswordDialog } from "@/components/app/ChangePasswordDialog"
+import { Button } from "@/components/ui/button"
 import {
   Dialog,
   DialogContent,
@@ -34,9 +29,14 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog"
-import { Button } from "@/components/ui/button"
-import { useEntitlement } from "@/hooks/useEntitlement"
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu"
 import { useSubscription } from "@/contexts/SubscriptionContext"
+import { useEntitlement } from "@/hooks/useEntitlement"
 import type { TierFeatures } from "@/lib/entitlements"
 import { TIER_NAMES } from "@/lib/entitlements"
 
@@ -79,7 +79,8 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
   useEffect(() => {
     if (!subscription) return
     const shouldShow =
-      (subscription.status === "expired" || subscription.status === "cancelled") &&
+      (subscription.status === "expired" ||
+        subscription.status === "cancelled") &&
       !sessionStorage.getItem(SESSION_KEY)
     if (shouldShow) {
       setExpiryModalOpen(true)
@@ -167,9 +168,7 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
           mobileSidebarOpen ? "translate-x-0" : "-translate-x-full",
           // Desktop: normal flow, toggle width
           "md:relative md:translate-x-0",
-          sidebarOpen
-            ? "md:w-[clamp(240px,20vw,320px)]"
-            : "md:w-14",
+          sidebarOpen ? "md:w-[clamp(240px,20vw,320px)]" : "md:w-14",
         ].join(" ")}
       >
         {/* Workspace / User Header */}
@@ -295,7 +294,9 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
                                 <span className="flex-1">{child.name}</span>
                                 <button
                                   type="button"
-                                  onClick={() => navigate({ to: "/app/settings" })}
+                                  onClick={() =>
+                                    navigate({ to: "/app/settings" })
+                                  }
                                   title="Upgrade to Pro"
                                   className="flex items-center gap-0.5 text-[10px] font-semibold text-blue-500 hover:text-blue-600 bg-blue-50 hover:bg-blue-100 dark:bg-blue-900/20 px-1.5 py-0.5 rounded-full transition"
                                 >
@@ -335,7 +336,9 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
               )
             }
 
-            const isLocked = item.requiredFeature ? !canAccess(item.requiredFeature) : false
+            const isLocked = item.requiredFeature
+              ? !canAccess(item.requiredFeature)
+              : false
 
             if (isLocked) {
               return (
@@ -536,8 +539,8 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
                   {tier === "free_trial" ? (
                     <>
                       <p>
-                        Your 28-day free trial has expired. Your data is safe and
-                        your brands are still here.
+                        Your 28-day free trial has expired. Your data is safe
+                        and your brands are still here.
                       </p>
                       <p>
                         Upgrade to <strong>Pro ($299/month)</strong> to continue
@@ -561,7 +564,10 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
               </DialogDescription>
             </DialogHeader>
             <DialogFooter className="gap-2">
-              <Button variant="outline" onClick={() => setExpiryModalOpen(false)}>
+              <Button
+                variant="outline"
+                onClick={() => setExpiryModalOpen(false)}
+              >
                 Maybe Later
               </Button>
               <Button

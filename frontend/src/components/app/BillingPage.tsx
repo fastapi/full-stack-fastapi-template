@@ -50,7 +50,9 @@ export function BillingPage() {
       if (attempts >= maxAttempts) {
         clearInterval(poll)
         await refreshSubscription()
-        toast.success("Subscription activated! It may take a moment to reflect.")
+        toast.success(
+          "Subscription activated! It may take a moment to reflect.",
+        )
         navigate({ to: "/app/billing", replace: true })
       }
     }, 1000)
@@ -93,7 +95,9 @@ export function BillingPage() {
             await refreshSubscription()
             if (updatedSub.tier !== snapshotTier) {
               toast.success("Subscription plan updated.")
-            } else if (updatedSub.cancel_at_period_end !== snapshotCancelAtPeriodEnd) {
+            } else if (
+              updatedSub.cancel_at_period_end !== snapshotCancelAtPeriodEnd
+            ) {
               toast.success(
                 updatedSub.cancel_at_period_end
                   ? "Subscription scheduled for cancellation."
@@ -151,7 +155,9 @@ export function BillingPage() {
             <CreditCard className="h-5 w-5" />
             Subscription
           </CardTitle>
-          <CardDescription>Manage your subscription and billing</CardDescription>
+          <CardDescription>
+            Manage your subscription and billing
+          </CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
           <div className="flex items-center justify-between py-2 border-b border-slate-100">
