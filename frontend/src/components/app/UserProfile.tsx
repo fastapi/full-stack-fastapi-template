@@ -251,40 +251,31 @@ export default function UserProfile() {
   // Loading state
   if (loading) {
     return (
-      <div className="min-h-screen bg-background p-6">
-        <div className="mx-auto max-w-2xl">
-          <Card>
-            <CardContent className="flex flex-col items-center justify-center h-64">
-              <Loader2 className="h-8 w-8 animate-spin text-blue-600" />
-              <p className="mt-4 text-sm text-slate-500">Loading profile...</p>
-            </CardContent>
-          </Card>
-        </div>
-      </div>
+      <Card>
+        <CardContent className="flex flex-col items-center justify-center h-64">
+          <Loader2 className="h-8 w-8 animate-spin text-blue-600" />
+          <p className="mt-4 text-sm text-slate-500">Loading profile...</p>
+        </CardContent>
+      </Card>
     )
   }
 
   // Error state
   if (loadError) {
     return (
-      <div className="min-h-screen bg-background p-6">
-        <div className="mx-auto max-w-2xl">
-          <Card>
-            <CardContent className="flex flex-col items-center justify-center h-64">
-              <div className="text-red-500 text-center">
-                <p className="font-medium">Failed to load profile</p>
-                <p className="text-sm mt-2">{loadError}</p>
-              </div>
-            </CardContent>
-          </Card>
-        </div>
-      </div>
+      <Card>
+        <CardContent className="flex flex-col items-center justify-center h-64">
+          <div className="text-red-500 text-center">
+            <p className="font-medium">Failed to load profile</p>
+            <p className="text-sm mt-2">{loadError}</p>
+          </div>
+        </CardContent>
+      </Card>
     )
   }
 
   return (
-    <div className="min-h-screen bg-background p-6">
-      <div className="mx-auto max-w-2xl">
+    <div>
         <div className="mb-8 flex items-center justify-between">
           <div>
             <h1 className="text-3xl font-bold tracking-tight">My Profile</h1>
@@ -564,7 +555,6 @@ export default function UserProfile() {
             </form>
           </CardContent>
         </Card>
-      </div>
     </div>
   )
 }

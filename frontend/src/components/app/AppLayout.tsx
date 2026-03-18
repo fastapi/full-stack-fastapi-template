@@ -18,6 +18,7 @@ import {
   X,
 } from "lucide-react"
 import { useEffect, useState } from "react"
+import { ChangePasswordDialog } from "@/components/app/ChangePasswordDialog"
 import { toast } from "sonner"
 import {
   DropdownMenu,
@@ -73,6 +74,7 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
   // Show expiry modal once per browser session
   const SESSION_KEY = "kila_expiry_modal_shown"
   const [expiryModalOpen, setExpiryModalOpen] = useState(false)
+  const [changePasswordOpen, setChangePasswordOpen] = useState(false)
 
   useEffect(() => {
     if (!subscription) return
@@ -481,11 +483,11 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
                   </p>
                 </div>
                 <div className="my-1 h-px bg-slate-200" />
-                <DropdownMenuItem className="text-sm">
-                  <User size={14} className="mr-2 text-slate-500" />
-                  Account settings
-                </DropdownMenuItem>
-                <DropdownMenuItem className="text-sm">
+                {/* TODO: Account settings — hidden until feature is ready */}
+                <DropdownMenuItem
+                  onClick={() => setChangePasswordOpen(true)}
+                  className="text-sm cursor-pointer"
+                >
                   <Shield size={14} className="mr-2 text-slate-500" />
                   Security
                 </DropdownMenuItem>
@@ -573,6 +575,11 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
             </DialogFooter>
           </DialogContent>
         </Dialog>
+
+        <ChangePasswordDialog
+          open={changePasswordOpen}
+          onOpenChange={setChangePasswordOpen}
+        />
 
         {/* Page Content */}
         <main className="flex-1 overflow-y-auto">{children}</main>
