@@ -2,9 +2,8 @@ import {
   Eye,
   Target,
   TrendingUp,
-  AlertTriangle,
   BarChart3,
-  Users, StampIcon, UserStar,
+  Users, UserStar,
 } from "lucide-react"
 
 const features = [

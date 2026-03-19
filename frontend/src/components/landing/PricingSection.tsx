@@ -1,123 +1,86 @@
 // src/components/landing/PricingSection.tsx
 
+import { useState } from "react"
 import { SignUpButton } from "@clerk/clerk-react"
 import { Check, X } from "lucide-react"
-import { useState } from "react"
 
 interface Plan {
   name: string
-  monthlyPrice: number
-  yearlyPrice: number
+  price: number | null
   description: string
   features: string[]
   popular?: boolean
   cta: string
+  ctaVariant?: "primary" | "outline" | "contact"
 }
 
 const plans: Plan[] = [
   {
-    name: "Starter",
-    monthlyPrice: 29,
-    yearlyPrice: 24,
-    description: "Perfect for small teams getting started with GEO",
+    name: "Free Trial",
+    price: 0,
+    description: "4 weeks free — no credit card required",
     features: [
-      "Up to 3 brands",
-      "Basic analytics dashboard",
-      "Daily AI visibility tracking",
-      "Competitor basic tracking",
+      "1 active brand",
+      "Daily AI search visibility tracking",
+      "Brand impression dashboard",
+      "Ranking & citation monitoring",
+      "Basic competitive comparison",
+      "Segment-level prompt setup",
       "Email support",
-      "5 data exports/month",
     ],
     cta: "Start Free Trial",
+    ctaVariant: "outline",
   },
   {
-    name: "Professional",
-    monthlyPrice: 99,
-    yearlyPrice: 79,
-    description: "For growing teams needing advanced insights",
+    name: "Pro",
+    price: 299,
+    description: "Full AI search intelligence for growth teams",
     features: [
-      "Up to 10 brands",
-      "Advanced analytics & charts",
-      "Real-time competitor alerts",
-      "Sentiment analysis",
-      "Priority email & chat support",
-      "Unlimited data exports",
-      "API access",
-      "Custom segments",
+      "1 active brand",
+      "Everything in Free Trial",
+      "Advanced competitive analysis",
+      "Market dynamic insights",
+      "Risk intelligence & early-warning alerts",
+      "Multi-model AI tracking",
+      "Competitor breakthrough detection",
+      "Priority support",
     ],
     popular: true,
     cta: "Start Free Trial",
+    ctaVariant: "primary",
   },
   {
     name: "Enterprise",
-    monthlyPrice: 0,
-    yearlyPrice: 0,
-    description: "For large organizations with custom needs",
+    price: null,
+    description: "Custom scale for larger organizations",
     features: [
-      "Unlimited brands",
+      "Multiple brands",
+      "Everything in Pro",
       "Custom AI source monitoring",
       "Dedicated account manager",
-      "24/7 phone support",
-      "Custom integrations",
+      "Custom integrations & API access",
       "SLA guarantees",
-      "Advanced security features",
-      "On-premise deployment option",
+      "Advanced security & compliance",
+      "24/7 priority support",
     ],
     cta: "Contact Sales",
+    ctaVariant: "contact",
   },
 ]
 
 const comparisonFeatures = [
-  { name: "Brands", starter: "3", professional: "10", enterprise: "Unlimited" },
-  {
-    name: "Daily Tracking",
-    starter: true,
-    professional: true,
-    enterprise: true,
-  },
-  {
-    name: "Competitor Analysis",
-    starter: "Basic",
-    professional: "Advanced",
-    enterprise: "Full",
-  },
-  {
-    name: "Sentiment Analysis",
-    starter: false,
-    professional: true,
-    enterprise: true,
-  },
-  {
-    name: "Real-time Alerts",
-    starter: false,
-    professional: true,
-    enterprise: true,
-  },
-  { name: "API Access", starter: false, professional: true, enterprise: true },
-  {
-    name: "Custom Segments",
-    starter: false,
-    professional: true,
-    enterprise: true,
-  },
-  {
-    name: "Priority Support",
-    starter: false,
-    professional: true,
-    enterprise: true,
-  },
-  {
-    name: "Dedicated Manager",
-    starter: false,
-    professional: false,
-    enterprise: true,
-  },
-  {
-    name: "SLA Guarantee",
-    starter: false,
-    professional: false,
-    enterprise: true,
-  },
+  { name: "Active brands", free: "1", pro: "1", enterprise: "Multiple" },
+  { name: "Daily AI visibility tracking", free: true, pro: true, enterprise: true },
+  { name: "Brand impression dashboard", free: true, pro: true, enterprise: true },
+  { name: "Ranking & citation monitoring", free: true, pro: true, enterprise: true },
+  { name: "Competitive comparison", free: "Basic", pro: "Advanced", enterprise: "Full" },
+  { name: "Market dynamic insights", free: false, pro: true, enterprise: true },
+  { name: "Risk intelligence alerts", free: false, pro: true, enterprise: true },
+  { name: "Multi-model AI tracking", free: false, pro: true, enterprise: true },
+  { name: "API access", free: false, pro: false, enterprise: true },
+  { name: "Custom integrations", free: false, pro: false, enterprise: true },
+  { name: "Dedicated account manager", free: false, pro: false, enterprise: true },
+  { name: "SLA guarantee", free: false, pro: false, enterprise: true },
 ]
 
 function CheckIcon() {
@@ -144,7 +107,6 @@ function FeatureValue({ value }: { value: boolean | string }) {
 }
 
 export default function PricingSection() {
-  const [isYearly, setIsYearly] = useState(false)
   const [showComparison, setShowComparison] = useState(false)
 
   return (
@@ -160,44 +122,9 @@ export default function PricingSection() {
           <h2 className="font-display font-bold text-3xl sm:text-4xl tracking-tight text-slate-900 mb-4">
             Simple, Transparent Pricing
           </h2>
-          <p className="font-body text-base leading-relaxed text-slate-600 mb-8">
-            Choose the plan that's right for you
+          <p className="font-body text-base leading-relaxed text-slate-600">
+            Start free for 4 weeks — no credit card required
           </p>
-
-          {/* Billing Toggle */}
-          <div className="flex items-center justify-center gap-4 mb-8">
-            <span
-              className={`text-sm font-medium ${!isYearly ? "text-slate-900" : "text-slate-500"}`}
-            >
-              Monthly
-            </span>
-            <button
-              type="button"
-              onClick={() => setIsYearly(!isYearly)}
-              className={`
-                relative w-14 h-7 rounded-full transition-colors
-                ${isYearly ? "bg-blue-600" : "bg-slate-300"}
-              `}
-            >
-              <span
-                className={`
-                  absolute top-1 w-5 h-5 bg-white rounded-full shadow
-                  transition-transform duration-200
-                  ${isYearly ? "translate-x-8" : "translate-x-1"}
-                `}
-              />
-            </button>
-            <span
-              className={`text-sm font-medium ${isYearly ? "text-slate-900" : "text-slate-500"}`}
-            >
-              Yearly
-            </span>
-            {isYearly && (
-              <span className="ml-2 px-2 py-0.5 bg-emerald-100 text-emerald-700 text-xs font-semibold rounded-full">
-                Save 20%
-              </span>
-            )}
-          </div>
         </div>
 
         {/* Pricing Cards */}
@@ -209,7 +136,7 @@ export default function PricingSection() {
                 relative border-2 rounded-3xl p-8 transition-all duration-300
                 ${
                   plan.popular
-                    ? "border-blue-600 bg-white shadow-[0_28px_80px_-60px_rgba(37,99,235,0.6)] scale-105 hover:scale-107"
+                    ? "border-blue-600 bg-white shadow-[0_28px_80px_-60px_rgba(37,99,235,0.6)] scale-105"
                     : "border-slate-200 bg-white shadow-[0_18px_60px_-50px_rgba(15,23,42,0.35)] hover:shadow-[0_25px_70px_-50px_rgba(15,23,42,0.45)] hover:border-slate-300"
                 }
               `}
@@ -226,23 +153,23 @@ export default function PricingSection() {
                 {plan.description}
               </p>
               <div className="mb-6">
-                {plan.monthlyPrice === 0 ? (
+                {plan.price === null ? (
                   <div className="font-display font-bold text-4xl tracking-tight leading-[0.95] text-slate-900">
                     Custom
+                  </div>
+                ) : plan.price === 0 ? (
+                  <div className="font-display font-bold text-4xl tracking-tight leading-[0.95] text-slate-900">
+                    Free
+                    <span className="font-body text-base text-slate-500 ml-1">/ 4 weeks</span>
                   </div>
                 ) : (
                   <>
                     <span className="font-display font-bold text-4xl tracking-tight leading-[0.95] text-slate-900">
-                      ${isYearly ? plan.yearlyPrice : plan.monthlyPrice}
+                      ${plan.price}
                     </span>
                     <span className="font-body text-base text-slate-600">
                       /month
                     </span>
-                    {isYearly && (
-                      <div className="text-xs text-slate-400 mt-1">
-                        Billed ${plan.yearlyPrice * 12}/year
-                      </div>
-                    )}
                   </>
                 )}
               </div>
@@ -257,21 +184,30 @@ export default function PricingSection() {
                   </li>
                 ))}
               </ul>
-              <SignUpButton mode="modal" forceRedirectUrl="/app/brands">
-                <button
-                  type="button"
-                  className={`
-                    w-full py-3 rounded-xl font-body font-semibold transition-all
-                    ${
-                      plan.popular
-                        ? "bg-gradient-to-r from-blue-600 to-blue-500 text-white hover:from-blue-700 hover:to-blue-600 shadow-lg shadow-blue-500/25"
-                        : "border-2 border-slate-300 text-slate-700 hover:bg-slate-50 hover:border-slate-400"
-                    }
-                  `}
+              {plan.ctaVariant === "contact" ? (
+                <a
+                  href="mailto:hello@kila.ai"
+                  className="block w-full py-3 rounded-xl font-body font-semibold text-center transition-all border-2 border-slate-300 text-slate-700 hover:bg-slate-50 hover:border-slate-400"
                 >
                   {plan.cta}
-                </button>
-              </SignUpButton>
+                </a>
+              ) : (
+                <SignUpButton mode="modal" forceRedirectUrl="/app/brands">
+                  <button
+                    type="button"
+                    className={`
+                      w-full py-3 rounded-xl font-body font-semibold transition-all
+                      ${
+                        plan.ctaVariant === "primary"
+                          ? "bg-gradient-to-r from-blue-600 to-blue-500 text-white hover:from-blue-700 hover:to-blue-600 shadow-lg shadow-blue-500/25"
+                          : "border-2 border-slate-300 text-slate-700 hover:bg-slate-50 hover:border-slate-400"
+                      }
+                    `}
+                  >
+                    {plan.cta}
+                  </button>
+                </SignUpButton>
+              )}
             </div>
           ))}
         </div>
@@ -297,10 +233,10 @@ export default function PricingSection() {
                     Features
                   </th>
                   <th className="text-center py-4 px-4 font-display font-semibold text-slate-900">
-                    Starter
+                    Free Trial
                   </th>
                   <th className="text-center py-4 px-4 font-display font-semibold text-blue-600 bg-blue-50 rounded-t-2xl">
-                    Professional
+                    Pro
                   </th>
                   <th className="text-center py-4 px-4 font-display font-semibold text-slate-900">
                     Enterprise
@@ -318,12 +254,12 @@ export default function PricingSection() {
                     </td>
                     <td className="py-4 px-4 text-center">
                       <div className="flex justify-center">
-                        <FeatureValue value={feature.starter} />
+                        <FeatureValue value={feature.free} />
                       </div>
                     </td>
                     <td className="py-4 px-4 text-center bg-blue-50/50">
                       <div className="flex justify-center">
-                        <FeatureValue value={feature.professional} />
+                        <FeatureValue value={feature.pro} />
                       </div>
                     </td>
                     <td className="py-4 px-4 text-center">
