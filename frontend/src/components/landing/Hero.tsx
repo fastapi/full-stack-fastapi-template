@@ -1,4 +1,5 @@
 // src/components/landing/Hero.tsx
+import { Fragment } from "react"
 import { SignUpButton } from "@clerk/clerk-react"
 import { Button } from "@/components/ui/button.tsx"
 
@@ -135,10 +136,10 @@ export default function Hero() {
                     "Insight of Marketing Dynamic",
                     "Your Brand Performance Improvement Actions",
                   ].map((label, i) => (
-                    <div key={label} className="flex flex-col flex-1">
+                    <Fragment key={label}>
                       {/* Pill */}
                       <div
-                        className={`animate-pill-pulse w-full rounded-full px-8 text-center text-sm font-bold flex items-center justify-center flex-1 ${
+                        className={`animate-pill-pulse flex-shrink-0 w-full rounded-full px-8 text-center text-sm font-bold flex items-center justify-center ${
                           i === 4
                             ? "bg-gradient-to-r from-blue-600 to-sky-400 text-white"
                             : "bg-gradient-to-b from-blue-50 to-blue-100 text-slate-700"
@@ -153,11 +154,11 @@ export default function Hero() {
                       >
                         {label}
                       </div>
-                      {/* Connector (not after last pill) */}
+                      {/* Connector — flex-1 fills exactly the gap to the next pill */}
                       {i < 4 && (
                         <div
-                          className="relative mx-auto w-[2px] flex-shrink-0"
-                          style={{ height: "100%", minHeight: "1.5rem", background: "linear-gradient(180deg, rgba(59,130,246,0.3), rgba(59,130,246,0.7))" }}
+                          className="relative flex-1 mx-auto w-[2px]"
+                          style={{ minHeight: "1.5rem", background: "linear-gradient(180deg, rgba(59,130,246,0.3), rgba(59,130,246,0.7))" }}
                         >
                           <div
                             className="animate-dot-travel absolute left-1/2 -translate-x-1/2 size-[7px] rounded-full bg-blue-500"
@@ -165,7 +166,7 @@ export default function Hero() {
                           />
                         </div>
                       )}
-                    </div>
+                    </Fragment>
                   ))}
                 </div>
               </div>
