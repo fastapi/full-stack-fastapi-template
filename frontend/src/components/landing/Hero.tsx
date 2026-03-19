@@ -74,51 +74,112 @@ export default function Hero() {
             </div>
           </div>
           <div
-            className="relative animate-fade-in-right pr-8 group"
+            className="relative animate-fade-in-right group"
             style={{ animationDelay: "0.2s" }}
           >
-            {/* Ambient glow — unchanged */}
+            {/* Ambient glow */}
             <div
               className="absolute -inset-6 rounded-[36px] bg-gradient-to-tr from-blue-600/15 via-transparent to-sky-400/15 blur-2xl animate-pulse"
               style={{ animationDuration: "6s" }}
             />
-            {/* Scale wrapper — Tailwind hover scale must be on a separate div from the
-                inline transform, otherwise the inline style wins and scale is silently ignored */}
-            <div className="relative group-hover:scale-[1.02] transition-transform duration-500">
-              {/* Perspective tilt wrapper */}
-              <div
-                style={{
-                  transform: "perspective(900px) rotateY(8deg) rotateX(2deg)",
-                  transformOrigin: "left center",
-                }}
-              >
-                <div
-                  className="rounded-[28px] bg-white border border-blue-500/[0.14]"
-                  style={{
-                    boxShadow:
-                      "24px 32px 70px -10px rgba(15,23,42,0.35), -4px 4px 20px -4px rgba(59,130,246,0.2)",
-                  }}
-                >
-                  {/* Browser chrome bar */}
+            {/* Scene: image (70% left) + pills panel (50% right), overlapping in the middle */}
+            <div className="relative">
+              {/* Image — 70% width, left-anchored */}
+              <div className="relative w-[70%]">
+                {/* Scale wrapper */}
+                <div className="group-hover:scale-[1.02] transition-transform duration-500">
+                  {/* Perspective tilt wrapper */}
                   <div
-                    className="flex items-center gap-2 px-3 py-2 border-b border-slate-200 rounded-t-[28px] bg-[#f1f3f4]"
+                    style={{
+                      transform: "perspective(900px) rotateY(8deg) rotateX(2deg)",
+                      transformOrigin: "left center",
+                    }}
                   >
-                    <div className="flex gap-[5px]">
-                      <div className="size-[9px] rounded-full bg-[#ff5f57]" />
-                      <div className="size-[9px] rounded-full bg-[#ffbd2e]" />
-                      <div className="size-[9px] rounded-full bg-[#28c840]" />
-                    </div>
-                    <div className="flex-1 bg-white rounded border border-slate-200 px-2 py-[3px] text-[9px] text-slate-400">
-                      app.kila.ai
+                    <div
+                      className="rounded-[28px] bg-white border border-blue-500/[0.14]"
+                      style={{
+                        boxShadow:
+                          "24px 32px 70px -10px rgba(15,23,42,0.35), -4px 4px 20px -4px rgba(59,130,246,0.2)",
+                      }}
+                    >
+                      {/* Browser chrome bar */}
+                      <div className="flex items-center gap-2 px-3 py-2 border-b border-slate-200 rounded-t-[28px] bg-[#f1f3f4]">
+                        <div className="flex gap-[5px]">
+                          <div className="size-[9px] rounded-full bg-[#ff5f57]" />
+                          <div className="size-[9px] rounded-full bg-[#ffbd2e]" />
+                          <div className="size-[9px] rounded-full bg-[#28c840]" />
+                        </div>
+                        <div className="flex-1 bg-white rounded border border-slate-200 px-2 py-[3px] text-[9px] text-slate-400">
+                          app.kila.ai
+                        </div>
+                      </div>
+                      {/* Screenshot */}
+                      <img
+                        src="/assets/screens/brand-impression.png"
+                        alt="Kila brand impression dashboard"
+                        className="w-full object-cover"
+                        style={{ display: "block", borderRadius: "0 0 28px 28px" }}
+                      />
                     </div>
                   </div>
-                  {/* Screenshot */}
-                  <img
-                    src="/assets/screens/brand-impression.png"
-                    alt="Kila brand impression dashboard"
-                    className="w-full object-cover"
-                    style={{ display: "block", borderRadius: "0 0 28px 28px" }}
-                  />
+                </div>
+                {/* White → dark-gray gradient mask over the right portion of the image */}
+                <div
+                  className="absolute inset-0 pointer-events-none rounded-[28px]"
+                  style={{
+                    background:
+                      "linear-gradient(90deg, transparent 0%, transparent 20%, rgba(50,60,80,0.5) 58%, rgba(15,23,42,0.93) 100%)",
+                  }}
+                />
+              </div>
+
+              {/* Pills panel — 50% width, absolute right, vertically centered */}
+              <div className="absolute right-0 top-0 bottom-0 w-1/2 flex items-center py-4">
+                <div className="flex flex-col items-stretch w-full">
+                  {[
+                    "Brand AI Search Tracking",
+                    "Brand Impression Observability",
+                    "Competitive Comparison",
+                    "Insight of Marketing Dynamic",
+                    "Your Brand Performance Improvement Actions",
+                  ].map((label, i) => (
+                    <div key={label}>
+                      {/* Pill */}
+                      <div
+                        className={`animate-pill-pulse w-full rounded-full px-4 py-3 text-center text-xs font-bold ${
+                          i === 4
+                            ? "bg-gradient-to-r from-blue-600 to-sky-400 text-white"
+                            : "text-slate-200"
+                        }`}
+                        style={{
+                          animationDelay: `${i * 0.7}s`,
+                          ...(i === 4
+                            ? { boxShadow: "0 4px 18px rgba(37,99,235,0.45)" }
+                            : {
+                                background: "rgba(15,23,42,0.6)",
+                                border: "2px solid rgba(148,163,184,0.65)",
+                              }),
+                        }}
+                      >
+                        {label}
+                      </div>
+                      {/* Connector (not after last pill) */}
+                      {i < 4 && (
+                        <div
+                          className="relative mx-auto w-[2px] h-8"
+                          style={{
+                            background:
+                              "linear-gradient(180deg, rgba(255,255,255,0.35), rgba(255,255,255,0.85))",
+                          }}
+                        >
+                          <div
+                            className="animate-dot-travel absolute left-1/2 -translate-x-1/2 size-[7px] rounded-full bg-white"
+                            style={{ animationDelay: `${(i + 1) * 0.7}s` }}
+                          />
+                        </div>
+                      )}
+                    </div>
+                  ))}
                 </div>
               </div>
             </div>

@@ -178,3 +178,20 @@
 ::-webkit-scrollbar-thumb:hover {
   background: hsl(var(--muted-foreground) / 0.5);
 }
+
+@keyframes pill-pulse {
+  0%, 100% { opacity: 0.5; }
+  20%       { opacity: 1; box-shadow: 0 0 0 7px rgba(255, 255, 255, 0.1); }
+}
+@keyframes dot-travel {
+  0%   { top: 0%;   opacity: 0; }
+  8%   { top: 0%;   opacity: 1; }
+  92%  { top: 100%; opacity: 1; }
+  100% { top: 100%; opacity: 0; }
+}
+.animate-pill-pulse {
+  animation: pill-pulse 3.5s ease-in-out infinite;
+}
+.animate-dot-travel {
+  animation: dot-travel 3.5s ease-in-out infinite;
+}
