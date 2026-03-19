@@ -138,17 +138,17 @@ export default function Hero() {
                     <div key={label} className={i < 4 ? "flex flex-col flex-1" : "flex-shrink-0"}>
                       {/* Pill */}
                       <div
-                        className={`animate-pill-pulse w-full rounded-full px-4 text-center text-xs font-bold flex items-center justify-center flex-1 ${
+                        className={`animate-pill-pulse w-full rounded-full px-8 text-center text-sm font-bold flex items-center justify-center flex-1 ${
                           i === 4
                             ? "bg-gradient-to-r from-blue-600 to-sky-400 text-white"
                             : "bg-gradient-to-b from-blue-50 to-blue-100 text-slate-700"
                         }`}
                         style={{
                           animationDelay: `${i * 0.7}s`,
-                          minHeight: "2.75rem",
+                          minHeight: "3.5rem",
                           ...(i === 4
                             ? { boxShadow: "0 4px 18px rgba(37,99,235,0.45)" }
-                            : { border: "2px solid #3b82f6", boxShadow: "0 2px 8px rgba(59,130,246,0.15)" }),
+                            : { border: "3px solid #3b82f6", boxShadow: "0 2px 8px rgba(59,130,246,0.15)" }),
                         }}
                       >
                         {label}
