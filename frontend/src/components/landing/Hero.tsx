@@ -101,13 +101,12 @@ export default function Hero() {
                 >
                   {/* Browser chrome bar */}
                   <div
-                    className="flex items-center gap-2 px-3 py-2 border-b border-slate-200 rounded-t-[28px]"
-                    style={{ background: "#f1f3f4" }}
+                    className="flex items-center gap-2 px-3 py-2 border-b border-slate-200 rounded-t-[28px] bg-[#f1f3f4]"
                   >
                     <div className="flex gap-[5px]">
-                      <div className="size-[9px] rounded-full" style={{ background: "#ff5f57" }} />
-                      <div className="size-[9px] rounded-full" style={{ background: "#ffbd2e" }} />
-                      <div className="size-[9px] rounded-full" style={{ background: "#28c840" }} />
+                      <div className="size-[9px] rounded-full bg-[#ff5f57]" />
+                      <div className="size-[9px] rounded-full bg-[#ffbd2e]" />
+                      <div className="size-[9px] rounded-full bg-[#28c840]" />
                     </div>
                     <div className="flex-1 bg-white rounded border border-slate-200 px-2 py-[3px] text-[9px] text-slate-400">
                       app.kila.ai
