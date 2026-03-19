@@ -84,6 +84,14 @@ export default function Hero() {
             />
             {/* Scene: image (70% left) + pills panel (50% right), overlapping in the middle */}
             <div className="relative">
+              {/* Full-width gradient mask — covers entire scene */}
+              <div
+                className="pointer-events-none absolute inset-0 z-10 rounded-[28px]"
+                style={{
+                  background:
+                    "linear-gradient(to right, transparent 0%, rgba(15,23,42,0.15) 30%, rgba(15,23,42,0.55) 60%, rgba(15,23,42,0.85) 100%)",
+                }}
+              />
               {/* Image — 70% width, left-anchored */}
               <div className="relative w-[70%]">
                 {/* Scale wrapper */}
@@ -125,8 +133,8 @@ export default function Hero() {
                 </div>
               </div>
 
-              {/* Pills panel — 50% width, absolute right, full height at 85% */}
-              <div className="absolute right-0 top-0 bottom-0 w-1/2 flex items-center">
+              {/* Pills panel — 50% width, absolute right, full height at 85%, above mask */}
+              <div className="absolute right-0 top-0 bottom-0 w-1/2 z-20 flex items-center">
                 <div className="flex flex-col items-stretch w-full h-[85%]">
                   {[
                     "Brand AI Search Tracking",
@@ -139,14 +147,16 @@ export default function Hero() {
                       {/* Pill */}
                       <div
                         className={`animate-pill-pulse w-full rounded-full px-4 text-center text-xs font-bold flex items-center justify-center flex-1 ${
-                          i === 4 ? "bg-gradient-to-r from-blue-600 to-sky-400 text-white" : "text-slate-200"
+                          i === 4
+                            ? "bg-gradient-to-r from-blue-600 to-sky-400 text-white"
+                            : "bg-gradient-to-b from-blue-50 to-blue-100 text-slate-700"
                         }`}
                         style={{
                           animationDelay: `${i * 0.7}s`,
                           minHeight: "2.75rem",
                           ...(i === 4
                             ? { boxShadow: "0 4px 18px rgba(37,99,235,0.45)" }
-                            : { background: "rgba(15,23,42,0.6)", border: "2px solid rgba(148,163,184,0.65)" }),
+                            : { border: "2px solid #3b82f6", boxShadow: "0 2px 8px rgba(59,130,246,0.15)" }),
                         }}
                       >
                         {label}
@@ -155,10 +165,10 @@ export default function Hero() {
                       {i < 4 && (
                         <div
                           className="relative mx-auto w-[2px] flex-shrink-0"
-                          style={{ height: "100%", minHeight: "1.5rem", background: "linear-gradient(180deg, rgba(255,255,255,0.35), rgba(255,255,255,0.85))" }}
+                          style={{ height: "100%", minHeight: "1.5rem", background: "linear-gradient(180deg, rgba(59,130,246,0.3), rgba(59,130,246,0.7))" }}
                         >
                           <div
-                            className="animate-dot-travel absolute left-1/2 -translate-x-1/2 size-[7px] rounded-full bg-white"
+                            className="animate-dot-travel absolute left-1/2 -translate-x-1/2 size-[7px] rounded-full bg-blue-500"
                             style={{ animationDelay: `${(i + 1) * 0.7}s` }}
                           />
                         </div>
