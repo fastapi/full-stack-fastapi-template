@@ -123,19 +123,11 @@ export default function Hero() {
                     </div>
                   </div>
                 </div>
-                {/* White → dark-gray gradient mask over the right portion of the image */}
-                <div
-                  className="absolute inset-0 pointer-events-none rounded-[28px]"
-                  style={{
-                    background:
-                      "linear-gradient(90deg, transparent 0%, transparent 20%, rgba(50,60,80,0.5) 58%, rgba(15,23,42,0.93) 100%)",
-                  }}
-                />
               </div>
 
-              {/* Pills panel — 50% width, absolute right, vertically centered */}
-              <div className="absolute right-0 top-0 bottom-0 w-1/2 flex items-center py-4">
-                <div className="flex flex-col items-stretch w-full">
+              {/* Pills panel — 50% width, absolute right, full height at 85% */}
+              <div className="absolute right-0 top-0 bottom-0 w-1/2 flex items-center">
+                <div className="flex flex-col items-stretch w-full h-[85%]">
                   {[
                     "Brand AI Search Tracking",
                     "Brand Impression Observability",
@@ -143,22 +135,18 @@ export default function Hero() {
                     "Insight of Marketing Dynamic",
                     "Your Brand Performance Improvement Actions",
                   ].map((label, i) => (
-                    <div key={label}>
+                    <div key={label} className={i < 4 ? "flex flex-col flex-1" : "flex-shrink-0"}>
                       {/* Pill */}
                       <div
-                        className={`animate-pill-pulse w-full rounded-full px-4 py-3 text-center text-xs font-bold ${
-                          i === 4
-                            ? "bg-gradient-to-r from-blue-600 to-sky-400 text-white"
-                            : "text-slate-200"
-                        }`}
+                        className="animate-pill-pulse w-full rounded-full px-4 text-center text-xs font-bold text-[#272643] flex items-center justify-center flex-1"
                         style={{
                           animationDelay: `${i * 0.7}s`,
-                          ...(i === 4
-                            ? { boxShadow: "0 4px 18px rgba(37,99,235,0.45)" }
-                            : {
-                                background: "rgba(15,23,42,0.6)",
-                                border: "2px solid rgba(148,163,184,0.65)",
-                              }),
+                          background: i === 4
+                            ? "linear-gradient(135deg, #BAE8E8, #8fd8d8)"
+                            : "linear-gradient(135deg, #BAE8E8, #a0dede)",
+                          border: "2px solid #272643",
+                          boxShadow: i === 4 ? "0 4px 18px rgba(186,232,232,0.5)" : undefined,
+                          minHeight: "2.75rem",
                         }}
                       >
                         {label}
@@ -166,15 +154,12 @@ export default function Hero() {
                       {/* Connector (not after last pill) */}
                       {i < 4 && (
                         <div
-                          className="relative mx-auto w-[2px] h-8"
-                          style={{
-                            background:
-                              "linear-gradient(180deg, rgba(255,255,255,0.35), rgba(255,255,255,0.85))",
-                          }}
+                          className="relative mx-auto w-[2px] flex-shrink-0"
+                          style={{ height: "100%", minHeight: "1.5rem", background: "#272643" }}
                         >
                           <div
-                            className="animate-dot-travel absolute left-1/2 -translate-x-1/2 size-[7px] rounded-full bg-white"
-                            style={{ animationDelay: `${(i + 1) * 0.7}s` }}
+                            className="animate-dot-travel absolute left-1/2 -translate-x-1/2 size-[7px] rounded-full"
+                            style={{ background: "#272643", animationDelay: `${(i + 1) * 0.7}s` }}
                           />
                         </div>
                       )}
