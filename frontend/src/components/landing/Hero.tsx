@@ -138,15 +138,15 @@ export default function Hero() {
                     <div key={label} className={i < 4 ? "flex flex-col flex-1" : "flex-shrink-0"}>
                       {/* Pill */}
                       <div
-                        className="animate-pill-pulse w-full rounded-full px-4 text-center text-xs font-bold text-[#272643] flex items-center justify-center flex-1"
+                        className={`animate-pill-pulse w-full rounded-full px-4 text-center text-xs font-bold flex items-center justify-center flex-1 ${
+                          i === 4 ? "bg-gradient-to-r from-blue-600 to-sky-400 text-white" : "text-slate-200"
+                        }`}
                         style={{
                           animationDelay: `${i * 0.7}s`,
-                          background: i === 4
-                            ? "linear-gradient(135deg, #BAE8E8, #8fd8d8)"
-                            : "linear-gradient(135deg, #BAE8E8, #a0dede)",
-                          border: "2px solid #272643",
-                          boxShadow: i === 4 ? "0 4px 18px rgba(186,232,232,0.5)" : undefined,
                           minHeight: "2.75rem",
+                          ...(i === 4
+                            ? { boxShadow: "0 4px 18px rgba(37,99,235,0.45)" }
+                            : { background: "rgba(15,23,42,0.6)", border: "2px solid rgba(148,163,184,0.65)" }),
                         }}
                       >
                         {label}
@@ -155,11 +155,11 @@ export default function Hero() {
                       {i < 4 && (
                         <div
                           className="relative mx-auto w-[2px] flex-shrink-0"
-                          style={{ height: "100%", minHeight: "1.5rem", background: "#272643" }}
+                          style={{ height: "100%", minHeight: "1.5rem", background: "linear-gradient(180deg, rgba(255,255,255,0.35), rgba(255,255,255,0.85))" }}
                         >
                           <div
-                            className="animate-dot-travel absolute left-1/2 -translate-x-1/2 size-[7px] rounded-full"
-                            style={{ background: "#272643", animationDelay: `${(i + 1) * 0.7}s` }}
+                            className="animate-dot-travel absolute left-1/2 -translate-x-1/2 size-[7px] rounded-full bg-white"
+                            style={{ animationDelay: `${(i + 1) * 0.7}s` }}
                           />
                         </div>
                       )}
