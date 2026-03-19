@@ -89,7 +89,7 @@ export default function Hero() {
                 className="pointer-events-none absolute inset-0 z-10 rounded-[28px]"
                 style={{
                   background:
-                    "linear-gradient(to right, transparent 0%, rgba(15,23,42,0.15) 30%, rgba(15,23,42,0.55) 60%, rgba(15,23,42,0.85) 100%)",
+                    "linear-gradient(to right, transparent 0%, rgba(225,232,255,0.3) 30%, rgba(225,232,255,0.7) 60%, rgba(225,232,255,0.95) 100%)",
                 }}
               />
               {/* Image — 70% width, left-anchored */}
