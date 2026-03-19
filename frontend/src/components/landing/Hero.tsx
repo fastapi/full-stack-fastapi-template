@@ -96,18 +96,11 @@ export default function Hero() {
               <div className="relative w-[70%]">
                 {/* Scale wrapper */}
                 <div className="group-hover:scale-[1.02] transition-transform duration-500">
-                  {/* Perspective tilt wrapper */}
-                  <div
-                    style={{
-                      transform: "perspective(900px) rotateY(8deg) rotateX(2deg)",
-                      transformOrigin: "left center",
-                    }}
-                  >
                     <div
-                      className="rounded-[28px] bg-white border border-blue-500/[0.14]"
+                      className="rounded-[28px] bg-white border-2 border-blue-500/50"
                       style={{
                         boxShadow:
-                          "24px 32px 70px -10px rgba(15,23,42,0.35), -4px 4px 20px -4px rgba(59,130,246,0.2)",
+                          "0 20px 60px -10px rgba(15,23,42,0.25), 0 4px 20px -4px rgba(59,130,246,0.3)",
                       }}
                     >
                       {/* Browser chrome bar */}
@@ -129,7 +122,6 @@ export default function Hero() {
                         style={{ display: "block", borderRadius: "0 0 28px 28px" }}
                       />
                     </div>
-                  </div>
                 </div>
               </div>
 
