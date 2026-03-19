@@ -1,0 +1,63 @@
+<h2>Which screenshot treatment looks most professional?</h2>
+<p class="subtitle">All 3 options are pure CSS — no image editing needed. Using your actual brand-impression screenshot.</p>
+
+<div class="cards" style="gap: 32px; margin-top: 24px;">
+
+  <!-- Option A: Browser Frame -->
+  <div class="card" data-choice="a" onclick="toggleSelect(this)" style="flex: 1; min-width: 280px;">
+    <div class="card-image" style="padding: 24px; background: linear-gradient(135deg, #f0f7ff 0%, #e8f4fd 100%); border-radius: 12px 12px 0 0;">
+      <div style="background: white; border-radius: 14px; box-shadow: 0 20px 60px -10px rgba(15,23,42,0.35), 0 4px 16px -4px rgba(15,23,42,0.12); overflow: hidden;">
+        <!-- Browser chrome -->
+        <div style="background: #f1f3f4; padding: 10px 14px; display: flex; align-items: center; gap: 10px; border-bottom: 1px solid #e0e0e0;">
+          <div style="display: flex; gap: 5px;">
+            <div style="width: 10px; height: 10px; border-radius: 50%; background: #ff5f57;"></div>
+            <div style="width: 10px; height: 10px; border-radius: 50%; background: #ffbd2e;"></div>
+            <div style="width: 10px; height: 10px; border-radius: 50%; background: #28c840;"></div>
+          </div>
+          <div style="flex: 1; background: white; border-radius: 6px; padding: 4px 10px; font-size: 10px; color: #888; border: 1px solid #e0e0e0;">app.kila.ai/brands</div>
+        </div>
+        <img src="brand-impression.png" style="width: 100%; display: block; max-height: 180px; object-fit: cover; object-position: top;" />
+      </div>
+    </div>
+    <div class="card-body">
+      <h3>A — Browser Frame</h3>
+      <p>Simulated browser chrome above the screenshot. Clean, instantly recognizable as a web app. Professional SaaS standard.</p>
+    </div>
+  </div>
+
+  <!-- Option B: Floating on gradient blob -->
+  <div class="card" data-choice="b" onclick="toggleSelect(this)" style="flex: 1; min-width: 280px;">
+    <div class="card-image" style="padding: 24px; background: white; border-radius: 12px 12px 0 0; position: relative; overflow: hidden;">
+      <div style="position: absolute; top: -20px; right: -30px; width: 200px; height: 200px; border-radius: 50%; background: radial-gradient(circle, rgba(59,130,246,0.18), transparent 70%); pointer-events: none;"></div>
+      <div style="position: absolute; bottom: -10px; left: -20px; width: 160px; height: 160px; border-radius: 50%; background: radial-gradient(circle, rgba(14,165,233,0.15), transparent 70%); pointer-events: none;"></div>
+      <div style="position: relative; background: white; border-radius: 14px; box-shadow: 0 24px 64px -12px rgba(59,130,246,0.25), 0 8px 20px -4px rgba(15,23,42,0.1); overflow: hidden; border: 1px solid rgba(59,130,246,0.15);">
+        <img src="brand-impression.png" style="width: 100%; display: block; max-height: 180px; object-fit: cover; object-position: top;" />
+        <!-- floating badge -->
+        <div style="position: absolute; top: 10px; right: 10px; background: white; border-radius: 20px; padding: 5px 10px; font-size: 10px; font-weight: 700; color: #2563eb; box-shadow: 0 4px 12px rgba(0,0,0,0.12); border: 1px solid rgba(59,130,246,0.2);">↑ 92.5% Visibility</div>
+      </div>
+    </div>
+    <div class="card-body">
+      <h3>B — Floating with Glow + Badge</h3>
+      <p>Screenshot floats over a blue glow background with a small floating metric badge. Feels dynamic and data-driven.</p>
+    </div>
+  </div>
+
+  <!-- Option C: Tilted perspective card -->
+  <div class="card" data-choice="c" onclick="toggleSelect(this)" style="flex: 1; min-width: 280px;">
+    <div class="card-image" style="padding: 32px 24px 40px; background: linear-gradient(145deg, #f8faff 0%, #eef4ff 100%); border-radius: 12px 12px 0 0; overflow: hidden;">
+      <div style="transform: perspective(800px) rotateY(-6deg) rotateX(2deg); transform-origin: center center; transition: transform 0.3s;">
+        <div style="background: white; border-radius: 12px; box-shadow: 12px 20px 60px -10px rgba(15,23,42,0.3), 4px 4px 16px -4px rgba(59,130,246,0.2); overflow: hidden; border: 1px solid rgba(59,130,246,0.12);">
+          <div style="height: 4px; background: linear-gradient(90deg, #3b82f6, #38bdf8);"></div>
+          <img src="brand-impression.png" style="width: 100%; display: block; max-height: 180px; object-fit: cover; object-position: top;" />
+        </div>
+      </div>
+    </div>
+    <div class="card-body">
+      <h3>C — Perspective Tilt + Accent Bar</h3>
+      <p>Slight 3D perspective tilt with a blue accent bar on top. Dramatic depth effect popular on modern SaaS hero sections.</p>
+    </div>
+  </div>
+
+</div>
+
+<p class="subtitle" style="margin-top: 24px; text-align: center;">Click your preferred style — or say you want a mix of these approaches.</p>

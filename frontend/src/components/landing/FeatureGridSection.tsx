@@ -4,7 +4,7 @@ import {
   TrendingUp,
   AlertTriangle,
   BarChart3,
-  Users,
+  Users, StampIcon, UserStar,
 } from "lucide-react"
 
 const features = [
@@ -27,9 +27,9 @@ const features = [
     color: "sky",
   },
   {
-    icon: AlertTriangle,
-    title: "Risk Intelligence",
-    description: "Early warning signals before your visibility drops or competitors gain ground",
+    icon: UserStar,
+    title: "Brand Sentiment",
+    description: "Early sentiment signals before your visibility drops or competitors gain ground",
     color: "rose",
   },
   {
