@@ -9,8 +9,8 @@ import IntegrationsSection from "./IntegrationsSection"
 import PricingSection from "./PricingSection"
 import ProductSection from "./ProductSection"
 import SecuritySection from "./SecuritySection"
-import StatsSection from "./StatsSection"
-import TestimonialSection from "./TestimonialSection"
+// import StatsSection from "./StatsSection"
+// import TestimonialSection from "./TestimonialSection"
 
 export default function LandingPage() {
   return (
@@ -19,13 +19,13 @@ export default function LandingPage() {
 
       <main>
         <Hero />
-        <StatsSection />
+        {/* <StatsSection /> */}
         <FeatureGridSection />
         <ProductSection />
         <IntegrationsSection />
         <HowItWorksSection />
         <SecuritySection />
-        <TestimonialSection />
+        {/* <TestimonialSection /> */}
         <FAQSection />
         <PricingSection />
         <FinalCTASection />
