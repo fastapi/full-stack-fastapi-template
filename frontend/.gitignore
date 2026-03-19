@@ -30,4 +30,4 @@ openapi.json
 /playwright/.auth/
 
 # node modules
-/node_modules/
+/node_modules/frontend/.superpowers/
