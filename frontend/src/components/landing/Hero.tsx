@@ -135,7 +135,7 @@ export default function Hero() {
                     "Insight of Marketing Dynamic",
                     "Your Brand Performance Improvement Actions",
                   ].map((label, i) => (
-                    <div key={label} className={i < 4 ? "flex flex-col flex-1" : "flex-shrink-0"}>
+                    <div key={label} className="flex flex-col flex-1">
                       {/* Pill */}
                       <div
                         className={`animate-pill-pulse w-full rounded-full px-8 text-center text-sm font-bold flex items-center justify-center flex-1 ${
