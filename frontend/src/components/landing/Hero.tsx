@@ -74,74 +74,56 @@ export default function Hero() {
             </div>
           </div>
           <div
-  className="relative animate-fade-in-right pr-8 group"
-  style={{ animationDelay: "0.2s" }}
->
-  {/* Ambient glow — unchanged */}
-  <div
-    className="absolute -inset-6 rounded-[36px] bg-gradient-to-tr from-blue-600/15 via-transparent to-sky-400/15 blur-2xl animate-pulse"
-    style={{ animationDuration: "6s" }}
-  />
-  {/* Scale wrapper — Tailwind hover scale must be on a separate div from the
-      inline transform, otherwise the inline style wins and scale is silently ignored */}
-  <div className="relative group-hover:scale-[1.02] transition-transform duration-500">
-  {/* Perspective tilt wrapper */}
-  <div
-    style={{
-      transform: "perspective(700px) rotateY(14deg) rotateX(3deg)",
-      transformOrigin: "left center",
-    }}
-  >
-    <div
-      className="rounded-[28px] bg-white"
-      style={{
-        boxShadow:
-          "24px 32px 70px -10px rgba(15,23,42,0.35), -4px 4px 20px -4px rgba(59,130,246,0.2)",
-        border: "1px solid rgba(59,130,246,0.14)",
-      }}
-    >
-      {/* Browser chrome bar */}
-      <div
-        style={{
-          background: "#f1f3f4",
-          padding: "8px 12px",
-          display: "flex",
-          alignItems: "center",
-          gap: "8px",
-          borderBottom: "1px solid #e0e0e0",
-          borderRadius: "28px 28px 0 0",
-        }}
-      >
-        <div style={{ display: "flex", gap: "5px" }}>
-          <div style={{ width: "9px", height: "9px", borderRadius: "50%", background: "#ff5f57" }} />
-          <div style={{ width: "9px", height: "9px", borderRadius: "50%", background: "#ffbd2e" }} />
-          <div style={{ width: "9px", height: "9px", borderRadius: "50%", background: "#28c840" }} />
-        </div>
-        <div
-          style={{
-            flex: 1,
-            background: "white",
-            borderRadius: "5px",
-            padding: "3px 8px",
-            fontSize: "9px",
-            color: "#999",
-            border: "1px solid #e0e0e0",
-          }}
-        >
-          app.kila.ai
-        </div>
-      </div>
-      {/* Screenshot */}
-      <img
-        src="/assets/screens/brand-impression.png"
-        alt="Kila brand impression dashboard"
-        className="w-full object-cover"
-        style={{ display: "block", borderRadius: "0 0 28px 28px" }}
-      />
-    </div>
-  </div>{/* end tilt wrapper */}
-  </div>{/* end scale wrapper */}
-</div>
+            className="relative animate-fade-in-right pr-8 group"
+            style={{ animationDelay: "0.2s" }}
+          >
+            {/* Ambient glow — unchanged */}
+            <div
+              className="absolute -inset-6 rounded-[36px] bg-gradient-to-tr from-blue-600/15 via-transparent to-sky-400/15 blur-2xl animate-pulse"
+              style={{ animationDuration: "6s" }}
+            />
+            {/* Scale wrapper — Tailwind hover scale must be on a separate div from the
+                inline transform, otherwise the inline style wins and scale is silently ignored */}
+            <div className="relative group-hover:scale-[1.02] transition-transform duration-500">
+              {/* Perspective tilt wrapper */}
+              <div
+                style={{
+                  transform: "perspective(700px) rotateY(14deg) rotateX(3deg)",
+                  transformOrigin: "left center",
+                }}
+              >
+                <div
+                  className="rounded-[28px] bg-white border border-blue-500/[0.14]"
+                  style={{
+                    boxShadow:
+                      "24px 32px 70px -10px rgba(15,23,42,0.35), -4px 4px 20px -4px rgba(59,130,246,0.2)",
+                  }}
+                >
+                  {/* Browser chrome bar */}
+                  <div
+                    className="flex items-center gap-2 px-3 py-2 border-b border-slate-200 rounded-t-[28px]"
+                    style={{ background: "#f1f3f4" }}
+                  >
+                    <div className="flex gap-[5px]">
+                      <div className="size-[9px] rounded-full" style={{ background: "#ff5f57" }} />
+                      <div className="size-[9px] rounded-full" style={{ background: "#ffbd2e" }} />
+                      <div className="size-[9px] rounded-full" style={{ background: "#28c840" }} />
+                    </div>
+                    <div className="flex-1 bg-white rounded border border-slate-200 px-2 py-[3px] text-[9px] text-slate-400">
+                      app.kila.ai
+                    </div>
+                  </div>
+                  {/* Screenshot */}
+                  <img
+                    src="/assets/screens/brand-impression.png"
+                    alt="Kila brand impression dashboard"
+                    className="w-full object-cover"
+                    style={{ display: "block", borderRadius: "0 0 28px 28px" }}
+                  />
+                </div>
+              </div>
+            </div>
+          </div>
         </div>
       </div>
     </section>
