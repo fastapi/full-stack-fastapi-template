@@ -88,7 +88,7 @@ export default function Hero() {
               {/* Perspective tilt wrapper */}
               <div
                 style={{
-                  transform: "perspective(700px) rotateY(14deg) rotateX(3deg)",
+                  transform: "perspective(900px) rotateY(8deg) rotateX(2deg)",
                   transformOrigin: "left center",
                 }}
               >
