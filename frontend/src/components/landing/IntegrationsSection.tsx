@@ -18,12 +18,6 @@ const integrations = [
     imgClass: "h-8 w-8 object-contain invert",
   },
   {
-    name: "Microsoft Copilot",
-    logo: "https://cdn.worldvectorlogo.com/logos/microsoft-copilot-logo.svg",
-    bg: "bg-white",
-    imgClass: "h-10 w-10 object-contain",
-  },
-  {
     name: "Perplexity",
     logo: "https://cdn.simpleicons.org/perplexity",
     bg: "bg-[#20808D]",
