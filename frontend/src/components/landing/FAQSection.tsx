@@ -35,7 +35,7 @@ const faqs: FAQItem[] = [
   {
     question: "Is there a free trial?",
     answer:
-      "Yes, we offer a 14-day free trial with full access to all features. No credit card required. You can add up to 3 brands and explore the complete platform before deciding to upgrade.",
+      "Yes, we offer a 28-day free trial with full access to all features. No credit card required. You can add up to 3 segments of a brand and explore the complete platform before deciding to upgrade.",
   },
 ]
 
