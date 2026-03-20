@@ -31,7 +31,7 @@ export default function FinalCTASection() {
           <Button
             variant="outline"
             size="lg"
-            className="border-slate-600 text-white hover:bg-slate-800 hover:border-slate-500 px-8"
+            className="border-white bg-white text-slate-900 hover:bg-slate-100 hover:border-slate-100 px-8"
           >
             Book a Demo
           </Button>
