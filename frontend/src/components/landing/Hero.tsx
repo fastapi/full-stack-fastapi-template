@@ -83,7 +83,7 @@ export default function Hero() {
               className="absolute -inset-6 rounded-[36px] bg-gradient-to-tr from-blue-600/15 via-transparent to-sky-400/15 blur-2xl animate-pulse"
               style={{ animationDuration: "6s" }}
             />
-            {/* Scene: image (60% left, tilted) + pills panel (50% right), overlapping in the middle */}
+            {/* Scene: image (70% left, tilted) + pills panel (50% right), overlapping in the middle */}
             <div className="relative">
               {/* Full-width gradient mask — covers entire scene */}
               <div
@@ -94,7 +94,7 @@ export default function Hero() {
                 }}
               />
               {/* Image — 60% width, left-anchored */}
-              <div className="relative w-[60%]">
+              <div className="relative w-[70%]">
                 {/* Scale wrapper */}
                 <div className="group-hover:scale-[1.02] transition-transform duration-500">
                   {/* Perspective tilt — left edge flat, right drops away */}
