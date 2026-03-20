@@ -8,7 +8,7 @@ import HowItWorksSection from "./HowItWorksSection"
 import IntegrationsSection from "./IntegrationsSection"
 import PricingSection from "./PricingSection"
 import ProductSection from "./ProductSection"
-import SecuritySection from "./SecuritySection"
+// import SecuritySection from "./SecuritySection"
 // import StatsSection from "./StatsSection"
 // import TestimonialSection from "./TestimonialSection"
 
@@ -24,7 +24,7 @@ export default function LandingPage() {
         <ProductSection />
         <IntegrationsSection />
         <HowItWorksSection />
-        <SecuritySection />
+        {/* <SecuritySection /> */}{/* re-enable after MVP */}
         {/* <TestimonialSection /> */}
         <FAQSection />
         <PricingSection />
