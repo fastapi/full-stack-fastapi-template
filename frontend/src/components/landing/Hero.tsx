@@ -83,7 +83,7 @@ export default function Hero() {
               className="absolute -inset-6 rounded-[36px] bg-gradient-to-tr from-blue-600/15 via-transparent to-sky-400/15 blur-2xl animate-pulse"
               style={{ animationDuration: "6s" }}
             />
-            {/* Scene: image (70% left) + pills panel (50% right), overlapping in the middle */}
+            {/* Scene: image (60% left, tilted) + pills panel (50% right), overlapping in the middle */}
             <div className="relative">
               {/* Full-width gradient mask — covers entire scene */}
               <div
@@ -93,15 +93,22 @@ export default function Hero() {
                     "linear-gradient(to right, transparent 0%, rgba(225,232,255,0.3) 30%, rgba(225,232,255,0.7) 60%, rgba(225,232,255,0.95) 100%)",
                 }}
               />
-              {/* Image — 70% width, left-anchored */}
-              <div className="relative w-[70%]">
+              {/* Image — 60% width, left-anchored */}
+              <div className="relative w-[60%]">
                 {/* Scale wrapper */}
                 <div className="group-hover:scale-[1.02] transition-transform duration-500">
+                  {/* Perspective tilt — left edge flat, right drops away */}
+                  <div
+                    style={{
+                      transform: "perspective(900px) rotateY(10deg) rotateX(2deg)",
+                      transformOrigin: "left center",
+                    }}
+                  >
                     <div
                       className="rounded-[28px] bg-white border-2 border-blue-500/50"
                       style={{
                         boxShadow:
-                          "0 20px 60px -10px rgba(15,23,42,0.25), 0 4px 20px -4px rgba(59,130,246,0.3)",
+                          "20px 28px 70px -10px rgba(15,23,42,0.3), -4px 4px 20px -4px rgba(59,130,246,0.25)",
                       }}
                     >
                       {/* Browser chrome bar */}
@@ -123,6 +130,7 @@ export default function Hero() {
                         style={{ display: "block", borderRadius: "0 0 28px 28px" }}
                       />
                     </div>
+                  </div>{/* end tilt wrapper */}
                 </div>
               </div>
 
