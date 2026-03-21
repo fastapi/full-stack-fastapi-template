@@ -21,6 +21,8 @@ const plans: Plan[] = [
     description: "4 weeks free — no credit card required",
     features: [
       "1 active brand",
+      "1 segment",
+      "1 model result",
       "Daily AI search visibility tracking",
       "Brand impression dashboard",
       "Ranking & citation monitoring",
@@ -37,6 +39,8 @@ const plans: Plan[] = [
     description: "Full AI search intelligence for growth teams",
     features: [
       "1 active brand",
+      "3 segments under active brand",
+      "3 models results",
       "Everything in Free Trial",
       "Advanced competitive analysis",
       "Market dynamic insights",
@@ -70,6 +74,7 @@ const plans: Plan[] = [
 
 const comparisonFeatures = [
   { name: "Active brands", free: "1", pro: "1", enterprise: "Multiple" },
+  { name: "Segments", free: "1", pro: "3", enterprise: "3"},
   { name: "Daily AI visibility tracking", free: true, pro: true, enterprise: true },
   { name: "Brand impression dashboard", free: true, pro: true, enterprise: true },
   { name: "Ranking & citation monitoring", free: true, pro: true, enterprise: true },

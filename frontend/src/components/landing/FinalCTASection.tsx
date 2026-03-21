@@ -15,8 +15,8 @@ export default function FinalCTASection() {
           Ready to Master Your AI Visibility?
         </h2>
         <p className="font-body text-lg text-slate-300 mb-8 max-w-2xl mx-auto">
-          Join 500+ brands already tracking their AI search presence. 
-          Start your free 14-day trial — no credit card required.
+          Join brands already tracking their AI search presence.
+          Start your free 28-day trial — no credit card required.
         </p>
         
         <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
@@ -38,7 +38,7 @@ export default function FinalCTASection() {
         </div>
 
         <p className="mt-6 text-sm text-slate-400">
-          ✓ No credit card required &nbsp; ✓ 14-day free trial &nbsp; ✓ Cancel anytime
+          ✓ No credit card required &nbsp; ✓ 28-day free trial &nbsp; ✓ Cancel anytime
         </p>
       </div>
     </section>
