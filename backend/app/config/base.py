@@ -67,6 +67,10 @@ class BaseConfig(BaseSettings):
     rate_limit_requests: int = 100
     rate_limit_period: int = 60  # seconds
 
+    # Report storage
+    report_storage_backend: str = "local"
+    report_storage_path: str = "/app/storage/reports"
+
     # Computed Properties
     @property
     def database_url(self) -> str:
