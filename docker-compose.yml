@@ -108,6 +108,12 @@ services:
       - POSTGRES_PASSWORD=${POSTGRES_PASSWORD?Variable not set}
       - SENTRY_DSN=${SENTRY_DSN}
 
+    volumes:
+      - kila-reports:/app/storage/reports
+    environment:
+      - REPORT_STORAGE_BACKEND=local
+      - REPORT_STORAGE_PATH=/app/storage/reports
+
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:8000/api/v1/utils/health-check/"]
       interval: 10s
@@ -164,6 +170,7 @@ services:
       - traefik.http.routers.${STACK_NAME?Variable not set}-frontend-http.middlewares=https-redirect
 volumes:
   app-db-data:
+  kila-reports: {}
 
 networks:
   traefik-public:
