@@ -4,7 +4,15 @@ from typing import Any
 from sqlmodel import Session, select
 
 from app.core.security import get_password_hash, verify_password
-from app.models import Item, ItemCreate, User, UserCreate, UserUpdate
+from app.models import (
+    Company,
+    CompanyCreate,
+    Item,
+    ItemCreate,
+    User,
+    UserCreate,
+    UserUpdate,
+)
 
 
 def create_user(*, session: Session, user_create: UserCreate) -> User:
@@ -66,3 +74,16 @@ def create_item(*, session: Session, item_in: ItemCreate, owner_id: uuid.UUID) -
     session.commit()
     session.refresh(db_item)
     return db_item
+
+
+def get_company_by_cnpj(*, session: Session, cnpj: str) -> Company | None:
+    statement = select(Company).where(Company.cnpj == cnpj)
+    return session.exec(statement).first()
+
+
+def create_company(*, session: Session, company_in: CompanyCreate) -> Company:
+    db_company = Company.model_validate(company_in)
+    session.add(db_company)
+    session.commit()
+    session.refresh(db_company)
+    return db_company

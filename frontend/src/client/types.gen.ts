@@ -9,6 +9,82 @@ export type Body_login_login_access_token = {
     client_secret?: (string | null);
 };
 
+export type CompanyCreate = {
+    cnpj: string;
+    razao_social: string;
+    representante_legal: string;
+    data_abertura: string;
+    nome_fantasia: string;
+    porte: string;
+    atividade_economica_principal: string;
+    atividade_economica_secundaria: string;
+    natureza_juridica: string;
+    logradouro: string;
+    numero: string;
+    complemento: string;
+    cep: string;
+    bairro: string;
+    municipio: string;
+    uf: string;
+    endereco_eletronico: string;
+    telefone_comercial: string;
+    situacao_cadastral: string;
+    data_situacao_cadastral: string;
+    cpf_representante_legal: string;
+    identidade_representante_legal: string;
+    logradouro_representante_legal: string;
+    numero_representante_legal: string;
+    complemento_representante_legal: string;
+    cep_representante_legal: string;
+    bairro_representante_legal: string;
+    municipio_representante_legal: string;
+    uf_representante_legal: string;
+    endereco_eletronico_representante_legal: string;
+    telefones_representante_legal: string;
+    data_nascimento_representante_legal: string;
+    banco_cc_cnpj: string;
+    agencia_cc_cnpj: string;
+};
+
+export type CompanyPublic = {
+    cnpj: string;
+    razao_social: string;
+    representante_legal: string;
+    data_abertura: string;
+    nome_fantasia: string;
+    porte: string;
+    atividade_economica_principal: string;
+    atividade_economica_secundaria: string;
+    natureza_juridica: string;
+    logradouro: string;
+    numero: string;
+    complemento: string;
+    cep: string;
+    bairro: string;
+    municipio: string;
+    uf: string;
+    endereco_eletronico: string;
+    telefone_comercial: string;
+    situacao_cadastral: string;
+    data_situacao_cadastral: string;
+    cpf_representante_legal: string;
+    identidade_representante_legal: string;
+    logradouro_representante_legal: string;
+    numero_representante_legal: string;
+    complemento_representante_legal: string;
+    cep_representante_legal: string;
+    bairro_representante_legal: string;
+    municipio_representante_legal: string;
+    uf_representante_legal: string;
+    endereco_eletronico_representante_legal: string;
+    telefones_representante_legal: string;
+    data_nascimento_representante_legal: string;
+    banco_cc_cnpj: string;
+    agencia_cc_cnpj: string;
+    id: string;
+    created_at?: (string | null);
+};
+
 export type HTTPValidationError = {
     detail?: Array<ValidationError>;
 };
@@ -112,6 +188,12 @@ export type ValidationError = {
         [key: string]: unknown;
     };
 };
+
+export type CompaniesCreateCompanyRouteData = {
+    requestBody: CompanyCreate;
+};
+
+export type CompaniesCreateCompanyRouteResponse = (CompanyPublic);
 
 export type ItemsReadItemsData = {
     limit?: number;
