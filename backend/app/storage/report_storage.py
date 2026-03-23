@@ -30,9 +30,9 @@ class LocalReportStorage(ReportStorage):
         return p.read_bytes()
 
 
-def get_report_storage() -> ReportStorage:
-    backend = os.getenv("REPORT_STORAGE_BACKEND", "local")
-    if backend == "local":
-        base_path = os.getenv("REPORT_STORAGE_PATH", "/app/storage/reports")
-        return LocalReportStorage(base_path=base_path)
-    raise ValueError(f"Unknown REPORT_STORAGE_BACKEND: {backend}")
+def get_report_storage(backend: str | None = None, path: str | None = None) -> ReportStorage:
+    _backend = backend or os.getenv("REPORT_STORAGE_BACKEND", "local")
+    _path = path or os.getenv("REPORT_STORAGE_PATH", "/app/storage/reports")
+    if _backend == "local":
+        return LocalReportStorage(base_path=_path)
+    raise ValueError(f"Unknown REPORT_STORAGE_BACKEND: {_backend}")
