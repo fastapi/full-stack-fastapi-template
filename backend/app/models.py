@@ -167,6 +167,19 @@ class CompanyPublic(CompanyBase):
     created_at: datetime | None = None
 
 
+# Resume parsed data (not a DB table, just a response model)
+class ResumeData(SQLModel):
+    name: str = ""
+    email: str = ""
+    phone: str = ""
+    city: str = ""
+    state: str = ""
+    linkedin: str = ""
+    skills: list[str] = []
+    education: list[str] = []
+    experience: list[str] = []
+
+
 # Generic message
 class Message(SQLModel):
     message: str

@@ -1,10 +1,13 @@
 import { zodResolver } from "@hookform/resolvers/zod"
 import { useMutation } from "@tanstack/react-query"
 import { createFileRoute } from "@tanstack/react-router"
+import { useState } from "react"
 import { useForm } from "react-hook-form"
 import { z } from "zod"
 
-import { CompaniesService, type CompanyCreate } from "@/client"
+import { CompaniesService, type CompanyCreate, type ResumeData } from "@/client"
+import { ResumeConfirmationModal } from "@/components/Companies/ResumeConfirmationModal"
+import { ResumeUpload } from "@/components/Companies/ResumeUpload"
 import { Button } from "@/components/ui/button"
 import {
   Card,
@@ -324,8 +327,33 @@ function FieldGroup({
   )
 }
 
+type ResumeFieldMapping = {
+  resumeKey: keyof ResumeData
+  formKey: keyof FormData
+  transform?: (value: string | Array<string> | undefined) => string
+}
+
+const resumeToFormMapping: ResumeFieldMapping[] = [
+  { resumeKey: "name", formKey: "representante_legal" },
+  {
+    resumeKey: "email",
+    formKey: "endereco_eletronico_representante_legal",
+  },
+  { resumeKey: "phone", formKey: "telefones_representante_legal" },
+  { resumeKey: "city", formKey: "municipio_representante_legal" },
+  { resumeKey: "state", formKey: "uf_representante_legal" },
+  { resumeKey: "linkedin", formKey: "endereco_eletronico" },
+  {
+    resumeKey: "skills",
+    formKey: "atividade_economica_principal",
+    transform: (v) => (Array.isArray(v) ? v.join(", ") : (v ?? "")),
+  },
+]
+
 function Companies() {
   const { showSuccessToast, showErrorToast } = useCustomToast()
+  const [resumeData, setResumeData] = useState<ResumeData | null>(null)
+  const [modalOpen, setModalOpen] = useState(false)
 
   const form = useForm<FormData>({
     resolver: zodResolver(formSchema),
@@ -348,6 +376,41 @@ function Companies() {
     mutation.mutate(data)
   }
 
+  const handleResumeDataParsed = (data: ResumeData) => {
+    setResumeData(data)
+    setModalOpen(true)
+  }
+
+  const handleApplyResumeData = () => {
+    if (!resumeData) return
+
+    for (const mapping of resumeToFormMapping) {
+      const currentValue = form.getValues(mapping.formKey)
+      if (currentValue) continue
+
+      const rawValue = resumeData[mapping.resumeKey]
+      let value: string
+      if (mapping.transform) {
+        value = mapping.transform(rawValue)
+      } else if (typeof rawValue === "string") {
+        value = rawValue
+      } else {
+        continue
+      }
+
+      if (value) {
+        form.setValue(mapping.formKey, value, { shouldValidate: true })
+      }
+    }
+
+    setModalOpen(false)
+    showSuccessToast("Dados do currículo aplicados com sucesso!")
+  }
+
+  const handleCancelResume = () => {
+    setModalOpen(false)
+  }
+
   return (
     <div className="flex flex-col gap-6">
       <div>
@@ -357,6 +420,16 @@ function Companies() {
           de admissão.
         </p>
       </div>
+
+      <ResumeUpload onResumeDataParsed={handleResumeDataParsed} />
+
+      <ResumeConfirmationModal
+        open={modalOpen}
+        onOpenChange={setModalOpen}
+        resumeData={resumeData}
+        onApply={handleApplyResumeData}
+        onCancel={handleCancelResume}
+      />
 
       <Form {...form}>
         <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
