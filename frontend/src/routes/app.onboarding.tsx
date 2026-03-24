@@ -20,6 +20,7 @@ function OnboardingPage() {
   const navigate = useNavigate()
   const { plan } = useSearch({ from: "/app/onboarding" })
   const [error, setError] = useState<string | null>(null)
+  const [_retryCount, setRetryCount] = useState(0)
   const triggered = useRef(false)
 
   useEffect(() => {
@@ -47,7 +48,7 @@ function OnboardingPage() {
       .catch((err: Error) => {
         setError(err.message || "Failed to start checkout. Please try again.")
       })
-  }, [isLoaded, plan, navigate])
+  }, [isLoaded, plan, navigate, _retryCount])
 
   if (error) {
     return (
@@ -58,6 +59,7 @@ function OnboardingPage() {
           onClick={() => {
             triggered.current = false
             setError(null)
+            setRetryCount((c) => c + 1)
           }}
           className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition"
         >

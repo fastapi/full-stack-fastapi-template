@@ -232,7 +232,7 @@ export default function PricingSection() {
                 <SignUpButton
                   mode="modal"
                   {...(plan.name === "Pro"
-                    ? { afterSignUpUrl: "/app/onboarding?plan=pro" }
+                    ? { forceRedirectUrl: "/app/onboarding?plan=pro" }
                     : { forceRedirectUrl: "/app/brands" })}
                 >
                   <button
