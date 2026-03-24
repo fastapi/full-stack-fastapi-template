@@ -76,7 +76,7 @@ class BaseConfig(BaseSettings):
     @property
     def database_url(self) -> str:
         password_part = f":{self.pg_password}" if self.pg_password else ""
-        return f"postgresql+asyncpg://{self.pg_user}{password_part}@{self.pg_host}:{self.pg_port}/{self.pg_database}"
+        return f"postgresql+asyncpg://{self.pg_user}{password_part}@{self.pg_host}:{self.pg_port}/{self.pg_database}?ssl=disable"
 
     @property
     def is_production(self) -> bool:
