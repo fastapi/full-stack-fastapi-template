@@ -357,6 +357,16 @@ def test_calculate_trial_end_no_trial_record():
     assert _calculate_trial_end(sub) == 28
 
 
+def test_calculate_trial_end_naive_datetime_treated_as_utc():
+    """Naive datetime (no tzinfo) in trial_expires_at is treated as UTC."""
+    # Naive datetime 10 days in the future (no tzinfo — simulates DB returning naive timestamp)
+    future_naive = datetime.utcnow() + timedelta(days=10)
+    assert future_naive.tzinfo is None  # confirm it's actually naive
+    sub = _make_sub(trial_expires_at=future_naive, stripe_subscription_id=None)
+    result = _calculate_trial_end(sub)
+    assert result == 10  # should correctly compute 10 days remaining
+
+
 # ── create_checkout_session trial period integration tests ────────────────────
 
 @pytest.mark.asyncio
