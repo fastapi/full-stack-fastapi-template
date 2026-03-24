@@ -55,6 +55,7 @@ class BaseConfig(BaseSettings):
     # Clerk
     clerk_secret_key: str = ""
     clerk_publishable_key: str = ""
+    clerk_jwks_url: str = "https://cuddly-reindeer-57.clerk.accounts.dev/.well-known/jwks.json"
 
     # Stripe
     stripe_webhook_secret: str = ""

@@ -29,7 +29,7 @@ security = HTTPBearer()
 ssl_context = ssl.create_default_context(cafile=certifi.where())
 
 # Clerk JWKS client — caches public keys automatically
-CLERK_JWKS_URL = "https://cuddly-reindeer-57.clerk.accounts.dev/.well-known/jwks.json"
+CLERK_JWKS_URL = settings.clerk_jwks_url
 jwks_client = PyJWKClient(CLERK_JWKS_URL, cache_keys=True, ssl_context=ssl_context)
 
 # Clerk Backend API base URL
