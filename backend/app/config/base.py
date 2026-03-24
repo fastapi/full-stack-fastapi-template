@@ -1,5 +1,6 @@
 from pydantic_settings import BaseSettings, SettingsConfigDict
 from typing import Optional
+from urllib.parse import quote_plus
 
 
 class BaseConfig(BaseSettings):
@@ -75,7 +76,7 @@ class BaseConfig(BaseSettings):
     # Computed Properties
     @property
     def database_url(self) -> str:
-        password_part = f":{self.pg_password}" if self.pg_password else ""
+        password_part = f":{quote_plus(self.pg_password)}" if self.pg_password else ""
         return f"postgresql+asyncpg://{self.pg_user}{password_part}@{self.pg_host}:{self.pg_port}/{self.pg_database}?ssl=disable"
 
     @property
