@@ -49,7 +49,7 @@ jobs:
             # Write backend .env.prod from GitHub Secrets
             cat > /opt/geo/kila/backend/.env.prod << EOF
             ENVIRONMENT=production
-            PG_HOST=host.docker.internal
+            PG_HOST=172.17.0.1
             PG_PORT=5432
             PG_USER=yongzhang
             PG_PASSWORD=${PG_PASSWORD}
@@ -76,7 +76,7 @@ jobs:
             ENABLE_DOCS=False
             HOST=0.0.0.0
             PORT=8001
-            PG_HOST=host.docker.internal
+            PG_HOST=172.17.0.1
             PG_PORT=5432
             PG_USER=yongzhang
             PG_PASSWORD=${PG_PASSWORD}
