@@ -57,6 +57,441 @@ export const Body_login_login_access_tokenSchema = {
     title: 'Body_login-login_access_token'
 } as const;
 
+export const CompanyCreateSchema = {
+    properties: {
+        cnpj: {
+            type: 'string',
+            maxLength: 20,
+            minLength: 1,
+            title: 'Cnpj'
+        },
+        razao_social: {
+            type: 'string',
+            maxLength: 255,
+            minLength: 1,
+            title: 'Razao Social'
+        },
+        representante_legal: {
+            type: 'string',
+            maxLength: 255,
+            minLength: 1,
+            title: 'Representante Legal'
+        },
+        data_abertura: {
+            type: 'string',
+            format: 'date',
+            title: 'Data Abertura'
+        },
+        nome_fantasia: {
+            type: 'string',
+            maxLength: 255,
+            minLength: 1,
+            title: 'Nome Fantasia'
+        },
+        porte: {
+            type: 'string',
+            maxLength: 100,
+            minLength: 1,
+            title: 'Porte'
+        },
+        atividade_economica_principal: {
+            type: 'string',
+            maxLength: 255,
+            minLength: 1,
+            title: 'Atividade Economica Principal'
+        },
+        atividade_economica_secundaria: {
+            type: 'string',
+            maxLength: 255,
+            minLength: 1,
+            title: 'Atividade Economica Secundaria'
+        },
+        natureza_juridica: {
+            type: 'string',
+            maxLength: 255,
+            minLength: 1,
+            title: 'Natureza Juridica'
+        },
+        logradouro: {
+            type: 'string',
+            maxLength: 255,
+            minLength: 1,
+            title: 'Logradouro'
+        },
+        numero: {
+            type: 'string',
+            maxLength: 20,
+            minLength: 1,
+            title: 'Numero'
+        },
+        complemento: {
+            type: 'string',
+            maxLength: 255,
+            minLength: 1,
+            title: 'Complemento'
+        },
+        cep: {
+            type: 'string',
+            maxLength: 10,
+            minLength: 1,
+            title: 'Cep'
+        },
+        bairro: {
+            type: 'string',
+            maxLength: 255,
+            minLength: 1,
+            title: 'Bairro'
+        },
+        municipio: {
+            type: 'string',
+            maxLength: 255,
+            minLength: 1,
+            title: 'Municipio'
+        },
+        uf: {
+            type: 'string',
+            maxLength: 2,
+            minLength: 1,
+            title: 'Uf'
+        },
+        endereco_eletronico: {
+            type: 'string',
+            maxLength: 255,
+            minLength: 1,
+            title: 'Endereco Eletronico'
+        },
+        telefone_comercial: {
+            type: 'string',
+            maxLength: 20,
+            minLength: 1,
+            title: 'Telefone Comercial'
+        },
+        situacao_cadastral: {
+            type: 'string',
+            maxLength: 100,
+            minLength: 1,
+            title: 'Situacao Cadastral'
+        },
+        data_situacao_cadastral: {
+            type: 'string',
+            format: 'date',
+            title: 'Data Situacao Cadastral'
+        },
+        cpf_representante_legal: {
+            type: 'string',
+            maxLength: 14,
+            minLength: 1,
+            title: 'Cpf Representante Legal'
+        },
+        identidade_representante_legal: {
+            type: 'string',
+            maxLength: 20,
+            minLength: 1,
+            title: 'Identidade Representante Legal'
+        },
+        logradouro_representante_legal: {
+            type: 'string',
+            maxLength: 255,
+            minLength: 1,
+            title: 'Logradouro Representante Legal'
+        },
+        numero_representante_legal: {
+            type: 'string',
+            maxLength: 20,
+            minLength: 1,
+            title: 'Numero Representante Legal'
+        },
+        complemento_representante_legal: {
+            type: 'string',
+            maxLength: 255,
+            minLength: 1,
+            title: 'Complemento Representante Legal'
+        },
+        cep_representante_legal: {
+            type: 'string',
+            maxLength: 10,
+            minLength: 1,
+            title: 'Cep Representante Legal'
+        },
+        bairro_representante_legal: {
+            type: 'string',
+            maxLength: 255,
+            minLength: 1,
+            title: 'Bairro Representante Legal'
+        },
+        municipio_representante_legal: {
+            type: 'string',
+            maxLength: 255,
+            minLength: 1,
+            title: 'Municipio Representante Legal'
+        },
+        uf_representante_legal: {
+            type: 'string',
+            maxLength: 2,
+            minLength: 1,
+            title: 'Uf Representante Legal'
+        },
+        endereco_eletronico_representante_legal: {
+            type: 'string',
+            maxLength: 255,
+            minLength: 1,
+            title: 'Endereco Eletronico Representante Legal'
+        },
+        telefones_representante_legal: {
+            type: 'string',
+            maxLength: 40,
+            minLength: 1,
+            title: 'Telefones Representante Legal'
+        },
+        data_nascimento_representante_legal: {
+            type: 'string',
+            format: 'date',
+            title: 'Data Nascimento Representante Legal'
+        },
+        banco_cc_cnpj: {
+            type: 'string',
+            maxLength: 100,
+            minLength: 1,
+            title: 'Banco Cc Cnpj'
+        },
+        agencia_cc_cnpj: {
+            type: 'string',
+            maxLength: 20,
+            minLength: 1,
+            title: 'Agencia Cc Cnpj'
+        }
+    },
+    type: 'object',
+    required: ['cnpj', 'razao_social', 'representante_legal', 'data_abertura', 'nome_fantasia', 'porte', 'atividade_economica_principal', 'atividade_economica_secundaria', 'natureza_juridica', 'logradouro', 'numero', 'complemento', 'cep', 'bairro', 'municipio', 'uf', 'endereco_eletronico', 'telefone_comercial', 'situacao_cadastral', 'data_situacao_cadastral', 'cpf_representante_legal', 'identidade_representante_legal', 'logradouro_representante_legal', 'numero_representante_legal', 'complemento_representante_legal', 'cep_representante_legal', 'bairro_representante_legal', 'municipio_representante_legal', 'uf_representante_legal', 'endereco_eletronico_representante_legal', 'telefones_representante_legal', 'data_nascimento_representante_legal', 'banco_cc_cnpj', 'agencia_cc_cnpj'],
+    title: 'CompanyCreate'
+} as const;
+
+export const CompanyPublicSchema = {
+    properties: {
+        cnpj: {
+            type: 'string',
+            maxLength: 20,
+            minLength: 1,
+            title: 'Cnpj'
+        },
+        razao_social: {
+            type: 'string',
+            maxLength: 255,
+            minLength: 1,
+            title: 'Razao Social'
+        },
+        representante_legal: {
+            type: 'string',
+            maxLength: 255,
+            minLength: 1,
+            title: 'Representante Legal'
+        },
+        data_abertura: {
+            type: 'string',
+            format: 'date',
+            title: 'Data Abertura'
+        },
+        nome_fantasia: {
+            type: 'string',
+            maxLength: 255,
+            minLength: 1,
+            title: 'Nome Fantasia'
+        },
+        porte: {
+            type: 'string',
+            maxLength: 100,
+            minLength: 1,
+            title: 'Porte'
+        },
+        atividade_economica_principal: {
+            type: 'string',
+            maxLength: 255,
+            minLength: 1,
+            title: 'Atividade Economica Principal'
+        },
+        atividade_economica_secundaria: {
+            type: 'string',
+            maxLength: 255,
+            minLength: 1,
+            title: 'Atividade Economica Secundaria'
+        },
+        natureza_juridica: {
+            type: 'string',
+            maxLength: 255,
+            minLength: 1,
+            title: 'Natureza Juridica'
+        },
+        logradouro: {
+            type: 'string',
+            maxLength: 255,
+            minLength: 1,
+            title: 'Logradouro'
+        },
+        numero: {
+            type: 'string',
+            maxLength: 20,
+            minLength: 1,
+            title: 'Numero'
+        },
+        complemento: {
+            type: 'string',
+            maxLength: 255,
+            minLength: 1,
+            title: 'Complemento'
+        },
+        cep: {
+            type: 'string',
+            maxLength: 10,
+            minLength: 1,
+            title: 'Cep'
+        },
+        bairro: {
+            type: 'string',
+            maxLength: 255,
+            minLength: 1,
+            title: 'Bairro'
+        },
+        municipio: {
+            type: 'string',
+            maxLength: 255,
+            minLength: 1,
+            title: 'Municipio'
+        },
+        uf: {
+            type: 'string',
+            maxLength: 2,
+            minLength: 1,
+            title: 'Uf'
+        },
+        endereco_eletronico: {
+            type: 'string',
+            maxLength: 255,
+            minLength: 1,
+            title: 'Endereco Eletronico'
+        },
+        telefone_comercial: {
+            type: 'string',
+            maxLength: 20,
+            minLength: 1,
+            title: 'Telefone Comercial'
+        },
+        situacao_cadastral: {
+            type: 'string',
+            maxLength: 100,
+            minLength: 1,
+            title: 'Situacao Cadastral'
+        },
+        data_situacao_cadastral: {
+            type: 'string',
+            format: 'date',
+            title: 'Data Situacao Cadastral'
+        },
+        cpf_representante_legal: {
+            type: 'string',
+            maxLength: 14,
+            minLength: 1,
+            title: 'Cpf Representante Legal'
+        },
+        identidade_representante_legal: {
+            type: 'string',
+            maxLength: 20,
+            minLength: 1,
+            title: 'Identidade Representante Legal'
+        },
+        logradouro_representante_legal: {
+            type: 'string',
+            maxLength: 255,
+            minLength: 1,
+            title: 'Logradouro Representante Legal'
+        },
+        numero_representante_legal: {
+            type: 'string',
+            maxLength: 20,
+            minLength: 1,
+            title: 'Numero Representante Legal'
+        },
+        complemento_representante_legal: {
+            type: 'string',
+            maxLength: 255,
+            minLength: 1,
+            title: 'Complemento Representante Legal'
+        },
+        cep_representante_legal: {
+            type: 'string',
+            maxLength: 10,
+            minLength: 1,
+            title: 'Cep Representante Legal'
+        },
+        bairro_representante_legal: {
+            type: 'string',
+            maxLength: 255,
+            minLength: 1,
+            title: 'Bairro Representante Legal'
+        },
+        municipio_representante_legal: {
+            type: 'string',
+            maxLength: 255,
+            minLength: 1,
+            title: 'Municipio Representante Legal'
+        },
+        uf_representante_legal: {
+            type: 'string',
+            maxLength: 2,
+            minLength: 1,
+            title: 'Uf Representante Legal'
+        },
+        endereco_eletronico_representante_legal: {
+            type: 'string',
+            maxLength: 255,
+            minLength: 1,
+            title: 'Endereco Eletronico Representante Legal'
+        },
+        telefones_representante_legal: {
+            type: 'string',
+            maxLength: 40,
+            minLength: 1,
+            title: 'Telefones Representante Legal'
+        },
+        data_nascimento_representante_legal: {
+            type: 'string',
+            format: 'date',
+            title: 'Data Nascimento Representante Legal'
+        },
+        banco_cc_cnpj: {
+            type: 'string',
+            maxLength: 100,
+            minLength: 1,
+            title: 'Banco Cc Cnpj'
+        },
+        agencia_cc_cnpj: {
+            type: 'string',
+            maxLength: 20,
+            minLength: 1,
+            title: 'Agencia Cc Cnpj'
+        },
+        id: {
+            type: 'string',
+            format: 'uuid',
+            title: 'Id'
+        },
+        created_at: {
+            anyOf: [
+                {
+                    type: 'string',
+                    format: 'date-time'
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Created At'
+        }
+    },
+    type: 'object',
+    required: ['cnpj', 'razao_social', 'representante_legal', 'data_abertura', 'nome_fantasia', 'porte', 'atividade_economica_principal', 'atividade_economica_secundaria', 'natureza_juridica', 'logradouro', 'numero', 'complemento', 'cep', 'bairro', 'municipio', 'uf', 'endereco_eletronico', 'telefone_comercial', 'situacao_cadastral', 'data_situacao_cadastral', 'cpf_representante_legal', 'identidade_representante_legal', 'logradouro_representante_legal', 'numero_representante_legal', 'complemento_representante_legal', 'cep_representante_legal', 'bairro_representante_legal', 'municipio_representante_legal', 'uf_representante_legal', 'endereco_eletronico_representante_legal', 'telefones_representante_legal', 'data_nascimento_representante_legal', 'banco_cc_cnpj', 'agencia_cc_cnpj', 'id'],
+    title: 'CompanyPublic'
+} as const;
+
 export const HTTPValidationErrorSchema = {
     properties: {
         detail: {
