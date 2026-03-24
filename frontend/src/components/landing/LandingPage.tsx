@@ -24,7 +24,8 @@ export default function LandingPage() {
         <ProductSection />
         <IntegrationsSection />
         <HowItWorksSection />
-        {/* <SecuritySection /> */}{/* re-enable after MVP */}
+        {/* <SecuritySection /> */}
+        {/* re-enable after MVP */}
         {/* <TestimonialSection /> */}
         <FAQSection />
         <PricingSection />

@@ -41,7 +41,8 @@ export default function IntegrationsSection() {
             Works With All Major AI Platforms
           </h2>
           <p className="font-body text-base text-slate-600 mt-4 max-w-2xl mx-auto">
-            Kila monitors your brand visibility across the AI platforms your customers use
+            Kila monitors your brand visibility across the AI platforms your
+            customers use
           </p>
         </div>
 
@@ -51,7 +52,9 @@ export default function IntegrationsSection() {
               key={integration.name}
               className="group flex items-center gap-3 px-5 py-3.5 rounded-2xl bg-white border border-slate-200 shadow-sm hover:shadow-lg hover:border-slate-300 transition-all duration-300 hover:-translate-y-1"
             >
-              <div className={`flex-shrink-0 w-11 h-11 rounded-xl ${integration.bg} flex items-center justify-center border border-slate-100 overflow-hidden`}>
+              <div
+                className={`flex-shrink-0 w-11 h-11 rounded-xl ${integration.bg} flex items-center justify-center border border-slate-100 overflow-hidden`}
+              >
                 <img
                   src={integration.logo}
                   alt={integration.name}

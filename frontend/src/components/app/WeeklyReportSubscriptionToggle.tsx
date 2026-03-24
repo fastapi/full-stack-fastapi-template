@@ -65,10 +65,15 @@ export function WeeklyReportSubscriptionToggle({ brandId }: Props) {
         className="mt-0.5"
       />
       <div>
-        <Label htmlFor="weekly-report-toggle" className="font-medium cursor-pointer">
+        <Label
+          htmlFor="weekly-report-toggle"
+          className="font-medium cursor-pointer"
+        >
           Email me the weekly report every Monday
         </Label>
-        <p className="text-sm text-slate-500">Delivered every Monday at 8:00 AM UTC</p>
+        <p className="text-sm text-slate-500">
+          Delivered every Monday at 8:00 AM UTC
+        </p>
       </div>
     </div>
   )

@@ -174,13 +174,19 @@ function CategorySection({ cat }: { cat: Category }) {
   return (
     <div className="mt-20">
       {/* Category header */}
-      <div className={`rounded-2xl border ${cat.accent.border} bg-white px-6 py-6 sm:px-8 mb-6`}>
+      <div
+        className={`rounded-2xl border ${cat.accent.border} bg-white px-6 py-6 sm:px-8 mb-6`}
+      >
         <div className="flex items-start gap-4">
-          <div className={`flex-shrink-0 flex items-center justify-center w-10 h-10 rounded-xl ${cat.accent.badge}`}>
+          <div
+            className={`flex-shrink-0 flex items-center justify-center w-10 h-10 rounded-xl ${cat.accent.badge}`}
+          >
             <Icon className="h-5 w-5" />
           </div>
           <div>
-            <span className={`inline-block text-xs font-semibold uppercase tracking-[0.2em] ${cat.accent.heading} mb-1`}>
+            <span
+              className={`inline-block text-xs font-semibold uppercase tracking-[0.2em] ${cat.accent.heading} mb-1`}
+            >
               {cat.label}
             </span>
             <h3 className="font-display font-bold text-xl sm:text-2xl tracking-tight text-slate-900 leading-snug">

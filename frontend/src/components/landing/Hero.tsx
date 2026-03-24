@@ -1,6 +1,7 @@
 // src/components/landing/Hero.tsx
-import { Fragment } from "react"
+
 import { SignUpButton } from "@clerk/clerk-react"
+import { Fragment } from "react"
 import { Button } from "@/components/ui/button.tsx"
 
 export default function Hero() {
@@ -100,7 +101,8 @@ export default function Hero() {
                   {/* Perspective tilt — left edge flat, right drops away */}
                   <div
                     style={{
-                      transform: "perspective(900px) rotateY(10deg) rotateX(2deg)",
+                      transform:
+                        "perspective(900px) rotateY(10deg) rotateX(2deg)",
                       transformOrigin: "left center",
                     }}
                   >
@@ -127,10 +129,14 @@ export default function Hero() {
                         src="/assets/screens/brand-impression.png"
                         alt="Kila brand impression dashboard"
                         className="w-full object-cover"
-                        style={{ display: "block", borderRadius: "0 0 28px 28px" }}
+                        style={{
+                          display: "block",
+                          borderRadius: "0 0 28px 28px",
+                        }}
                       />
                     </div>
-                  </div>{/* end tilt wrapper */}
+                  </div>
+                  {/* end tilt wrapper */}
                 </div>
               </div>
 
@@ -157,7 +163,10 @@ export default function Hero() {
                           minHeight: "3.5rem",
                           ...(i === 4
                             ? { boxShadow: "0 4px 18px rgba(37,99,235,0.45)" }
-                            : { border: "3px solid #3b82f6", boxShadow: "0 2px 8px rgba(59,130,246,0.15)" }),
+                            : {
+                                border: "3px solid #3b82f6",
+                                boxShadow: "0 2px 8px rgba(59,130,246,0.15)",
+                              }),
                         }}
                       >
                         {label}
@@ -166,7 +175,11 @@ export default function Hero() {
                       {i < 4 && (
                         <div
                           className="relative flex-1 mx-auto w-[2px]"
-                          style={{ minHeight: "1.5rem", background: "linear-gradient(180deg, rgba(59,130,246,0.3), rgba(59,130,246,0.7))" }}
+                          style={{
+                            minHeight: "1.5rem",
+                            background:
+                              "linear-gradient(180deg, rgba(59,130,246,0.3), rgba(59,130,246,0.7))",
+                          }}
                         >
                           <div
                             className="animate-dot-travel absolute left-1/2 -translate-x-1/2 size-[7px] rounded-full bg-blue-500"

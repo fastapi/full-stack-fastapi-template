@@ -1,15 +1,17 @@
-import { Shield, Lock, Database, CheckCircle } from "lucide-react"
+import { CheckCircle, Database, Lock, Shield } from "lucide-react"
 
 const securityFeatures = [
   {
     icon: Shield,
     title: "Enterprise-Grade Security",
-    description: "Built with security-first architecture to protect your sensitive data",
+    description:
+      "Built with security-first architecture to protect your sensitive data",
   },
   {
     icon: Lock,
     title: "SOC 2 Compliant",
-    description: "Independently audited and certified for data protection standards",
+    description:
+      "Independently audited and certified for data protection standards",
   },
   {
     icon: Database,
@@ -30,7 +32,7 @@ export default function SecuritySection() {
         <div className="absolute top-0 left-0 w-[400px] h-[400px] bg-blue-500/5 rounded-full blur-3xl" />
         <div className="absolute bottom-0 right-0 w-[400px] h-[400px] bg-green-500/5 rounded-full blur-3xl" />
       </div>
-      
+
       <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="text-center mb-12">
           <p className="font-body text-xs font-semibold uppercase tracking-[0.25em] text-blue-600 mb-4">
@@ -40,16 +42,14 @@ export default function SecuritySection() {
             Your Data is Safe with Kila
           </h2>
           <p className="font-body text-base text-slate-600 mt-4 max-w-2xl mx-auto">
-            We take security seriously. Your brand data is protected by enterprise-grade measures
+            We take security seriously. Your brand data is protected by
+            enterprise-grade measures
           </p>
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
           {securityFeatures.map((feature, idx) => (
-            <div
-              key={idx}
-              className="text-center p-6"
-            >
+            <div key={idx} className="text-center p-6">
               <div className="w-16 h-16 mx-auto mb-4 rounded-2xl bg-gradient-to-br from-blue-50 to-indigo-50 flex items-center justify-center">
                 <feature.icon className="h-8 w-8 text-blue-600" />
               </div>
@@ -71,11 +71,15 @@ export default function SecuritySection() {
           </div>
           <div className="flex items-center gap-2 text-slate-500">
             <Lock className="h-5 w-5" />
-            <span className="font-body text-sm font-medium">256-bit Encryption</span>
+            <span className="font-body text-sm font-medium">
+              256-bit Encryption
+            </span>
           </div>
           <div className="flex items-center gap-2 text-slate-500">
             <Database className="h-5 w-5" />
-            <span className="font-body text-sm font-medium">GDPR Compliant</span>
+            <span className="font-body text-sm font-medium">
+              GDPR Compliant
+            </span>
           </div>
         </div>
       </div>
