@@ -16,6 +16,7 @@ import { Route as AppSettingsRouteImport } from './routes/app.settings'
 import { Route as AppProjectsRouteImport } from './routes/app.projects'
 import { Route as AppProfileSetupRouteImport } from './routes/app.profile-setup'
 import { Route as AppPricingRouteImport } from './routes/app.pricing'
+import { Route as AppOnboardingRouteImport } from './routes/app.onboarding'
 import { Route as AppBrandsRouteImport } from './routes/app.brands'
 import { Route as AppBillingRouteImport } from './routes/app.billing'
 import { Route as AppInsightRiskIntelligenceRouteImport } from './routes/app.insight.risk-intelligence'
@@ -59,6 +60,11 @@ const AppProfileSetupRoute = AppProfileSetupRouteImport.update({
 const AppPricingRoute = AppPricingRouteImport.update({
   id: '/pricing',
   path: '/pricing',
+  getParentRoute: () => AppRoute,
+} as any)
+const AppOnboardingRoute = AppOnboardingRouteImport.update({
+  id: '/onboarding',
+  path: '/onboarding',
   getParentRoute: () => AppRoute,
 } as any)
 const AppBrandsRoute = AppBrandsRouteImport.update({
@@ -114,6 +120,7 @@ export interface FileRoutesByFullPath {
   '/app': typeof AppRouteWithChildren
   '/app/billing': typeof AppBillingRoute
   '/app/brands': typeof AppBrandsRoute
+  '/app/onboarding': typeof AppOnboardingRoute
   '/app/pricing': typeof AppPricingRoute
   '/app/profile-setup': typeof AppProfileSetupRoute
   '/app/projects': typeof AppProjectsRoute
@@ -132,6 +139,7 @@ export interface FileRoutesByTo {
   '/app': typeof AppRouteWithChildren
   '/app/billing': typeof AppBillingRoute
   '/app/brands': typeof AppBrandsRoute
+  '/app/onboarding': typeof AppOnboardingRoute
   '/app/pricing': typeof AppPricingRoute
   '/app/profile-setup': typeof AppProfileSetupRoute
   '/app/projects': typeof AppProjectsRoute
@@ -151,6 +159,7 @@ export interface FileRoutesById {
   '/app': typeof AppRouteWithChildren
   '/app/billing': typeof AppBillingRoute
   '/app/brands': typeof AppBrandsRoute
+  '/app/onboarding': typeof AppOnboardingRoute
   '/app/pricing': typeof AppPricingRoute
   '/app/profile-setup': typeof AppProfileSetupRoute
   '/app/projects': typeof AppProjectsRoute
@@ -171,6 +180,7 @@ export interface FileRouteTypes {
     | '/app'
     | '/app/billing'
     | '/app/brands'
+    | '/app/onboarding'
     | '/app/pricing'
     | '/app/profile-setup'
     | '/app/projects'
@@ -189,6 +199,7 @@ export interface FileRouteTypes {
     | '/app'
     | '/app/billing'
     | '/app/brands'
+    | '/app/onboarding'
     | '/app/pricing'
     | '/app/profile-setup'
     | '/app/projects'
@@ -207,6 +218,7 @@ export interface FileRouteTypes {
     | '/app'
     | '/app/billing'
     | '/app/brands'
+    | '/app/onboarding'
     | '/app/pricing'
     | '/app/profile-setup'
     | '/app/projects'
@@ -275,6 +287,13 @@ declare module '@tanstack/react-router' {
       path: '/pricing'
       fullPath: '/app/pricing'
       preLoaderRoute: typeof AppPricingRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/app/onboarding': {
+      id: '/app/onboarding'
+      path: '/onboarding'
+      fullPath: '/app/onboarding'
+      preLoaderRoute: typeof AppOnboardingRouteImport
       parentRoute: typeof AppRoute
     }
     '/app/brands': {
@@ -346,6 +365,7 @@ declare module '@tanstack/react-router' {
 interface AppRouteChildren {
   AppBillingRoute: typeof AppBillingRoute
   AppBrandsRoute: typeof AppBrandsRoute
+  AppOnboardingRoute: typeof AppOnboardingRoute
   AppPricingRoute: typeof AppPricingRoute
   AppProfileSetupRoute: typeof AppProfileSetupRoute
   AppProjectsRoute: typeof AppProjectsRoute
@@ -363,6 +383,7 @@ interface AppRouteChildren {
 const AppRouteChildren: AppRouteChildren = {
   AppBillingRoute: AppBillingRoute,
   AppBrandsRoute: AppBrandsRoute,
+  AppOnboardingRoute: AppOnboardingRoute,
   AppPricingRoute: AppPricingRoute,
   AppProfileSetupRoute: AppProfileSetupRoute,
   AppProjectsRoute: AppProjectsRoute,

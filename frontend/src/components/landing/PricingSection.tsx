@@ -1,8 +1,8 @@
 // src/components/landing/PricingSection.tsx
 
-import { useState } from "react"
 import { SignUpButton } from "@clerk/clerk-react"
 import { Check, X } from "lucide-react"
+import { useState } from "react"
 
 interface Plan {
   name: string
@@ -50,7 +50,7 @@ const plans: Plan[] = [
       "Priority support",
     ],
     popular: true,
-    cta: "Start Free Trial",
+    cta: "Get Pro — 4 Weeks Free",
     ctaVariant: "primary",
   },
   {
@@ -74,17 +74,47 @@ const plans: Plan[] = [
 
 const comparisonFeatures = [
   { name: "Active brands", free: "1", pro: "1", enterprise: "Multiple" },
-  { name: "Segments", free: "1", pro: "3", enterprise: "3"},
-  { name: "Daily AI visibility tracking", free: true, pro: true, enterprise: true },
-  { name: "Brand impression dashboard", free: true, pro: true, enterprise: true },
-  { name: "Ranking & citation monitoring", free: true, pro: true, enterprise: true },
-  { name: "Competitive comparison", free: "Basic", pro: "Advanced", enterprise: "Full" },
+  { name: "Segments", free: "1", pro: "3", enterprise: "3" },
+  {
+    name: "Daily AI visibility tracking",
+    free: true,
+    pro: true,
+    enterprise: true,
+  },
+  {
+    name: "Brand impression dashboard",
+    free: true,
+    pro: true,
+    enterprise: true,
+  },
+  {
+    name: "Ranking & citation monitoring",
+    free: true,
+    pro: true,
+    enterprise: true,
+  },
+  {
+    name: "Competitive comparison",
+    free: "Basic",
+    pro: "Advanced",
+    enterprise: "Full",
+  },
   { name: "Market dynamic insights", free: false, pro: true, enterprise: true },
-  { name: "Risk intelligence alerts", free: false, pro: true, enterprise: true },
+  {
+    name: "Risk intelligence alerts",
+    free: false,
+    pro: true,
+    enterprise: true,
+  },
   { name: "Multi-model AI tracking", free: false, pro: true, enterprise: true },
   { name: "API access", free: false, pro: false, enterprise: true },
   { name: "Custom integrations", free: false, pro: false, enterprise: true },
-  { name: "Dedicated account manager", free: false, pro: false, enterprise: true },
+  {
+    name: "Dedicated account manager",
+    free: false,
+    pro: false,
+    enterprise: true,
+  },
   { name: "SLA guarantee", free: false, pro: false, enterprise: true },
 ]
 
@@ -165,7 +195,9 @@ export default function PricingSection() {
                 ) : plan.price === 0 ? (
                   <div className="font-display font-bold text-4xl tracking-tight leading-[0.95] text-slate-900">
                     Free
-                    <span className="font-body text-base text-slate-500 ml-1">/ 4 weeks</span>
+                    <span className="font-body text-base text-slate-500 ml-1">
+                      / 4 weeks
+                    </span>
                   </div>
                 ) : (
                   <>
@@ -197,7 +229,12 @@ export default function PricingSection() {
                   {plan.cta}
                 </a>
               ) : (
-                <SignUpButton mode="modal" forceRedirectUrl="/app/brands">
+                <SignUpButton
+                  mode="modal"
+                  {...(plan.name === "Pro"
+                    ? { afterSignUpUrl: "/app/onboarding?plan=pro" }
+                    : { forceRedirectUrl: "/app/brands" })}
+                >
                   <button
                     type="button"
                     className={`
