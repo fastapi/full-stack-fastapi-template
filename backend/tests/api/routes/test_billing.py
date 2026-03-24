@@ -1,6 +1,7 @@
 """Tests for billing endpoints (Stripe Checkout + Portal)."""
 
 import pytest
+from datetime import datetime, timedelta, timezone
 from unittest.mock import AsyncMock, MagicMock, patch
 from httpx import AsyncClient, ASGITransport
 
@@ -17,6 +18,8 @@ def _make_sub(
     status=SubscriptionStatus.active,
     stripe_customer_id=None,
     stripe_subscription_id=None,
+    trial_expires_at=None,
+    cancel_at_period_end=False,
 ):
     sub = MagicMock(spec=UserSubscriptionTable)
     sub.user_id = user_id
@@ -24,6 +27,8 @@ def _make_sub(
     sub.status = status
     sub.stripe_customer_id = stripe_customer_id
     sub.stripe_subscription_id = stripe_subscription_id
+    sub.trial_expires_at = trial_expires_at  # explicit assignment required
+    sub.cancel_at_period_end = cancel_at_period_end
     return sub
 
 
@@ -310,3 +315,195 @@ async def test_create_portal_session_no_customer():
             )
 
         assert resp.status_code == 400
+
+
+# ── _calculate_trial_end unit tests ──────────────────────────────────────────
+
+from app.api.routes.billing import _calculate_trial_end
+
+
+def test_calculate_trial_end_active_trial():
+    """Active trial returns ceiling of remaining days."""
+    now = datetime.now(timezone.utc)
+    expires_at = now + timedelta(days=14)
+    sub = _make_sub(trial_expires_at=expires_at, stripe_subscription_id=None)
+    result = _calculate_trial_end(sub)
+    assert result == 14
+
+
+def test_calculate_trial_end_expired_trial():
+    """Expired trial returns 0."""
+    now = datetime.now(timezone.utc)
+    sub = _make_sub(
+        trial_expires_at=now - timedelta(days=1),
+        stripe_subscription_id=None,
+    )
+    assert _calculate_trial_end(sub) == 0
+
+
+def test_calculate_trial_end_previously_paid():
+    """Previously paid user (stripe_subscription_id set) returns 0 regardless of trial_expires_at."""
+    now = datetime.now(timezone.utc)
+    sub = _make_sub(
+        trial_expires_at=now + timedelta(days=20),
+        stripe_subscription_id="sub_existing123",
+    )
+    assert _calculate_trial_end(sub) == 0
+
+
+def test_calculate_trial_end_no_trial_record():
+    """No trial record (trial_expires_at=None) and no prior payment returns 28."""
+    sub = _make_sub(trial_expires_at=None, stripe_subscription_id=None)
+    assert _calculate_trial_end(sub) == 28
+
+
+# ── create_checkout_session trial period integration tests ────────────────────
+
+@pytest.mark.asyncio
+async def test_checkout_session_active_trial_passes_remaining_days():
+    """Free trial user with 14 days left → Stripe receives trial_period_days=14."""
+    now = datetime.now(timezone.utc)
+    sub = _make_sub(
+        trial_expires_at=now + timedelta(days=14),
+        stripe_subscription_id=None,
+    )
+    mock_db = _mock_db(sub)
+    mock_user = _mock_user()
+
+    app.dependency_overrides[get_db] = lambda: mock_db
+    app.dependency_overrides[get_current_user] = lambda: mock_user
+
+    with (
+        patch("app.api.routes.billing.stripe") as mock_stripe,
+        patch("app.api.routes.billing.settings") as mock_settings,
+    ):
+        mock_settings.stripe_pro_price_id = "price_pro"
+        mock_settings.stripe_frontend_url = "http://localhost:3000"
+        mock_settings.stripe_secret_key = "sk_test_xxx"
+
+        mock_session = MagicMock()
+        mock_session.url = "https://checkout.stripe.com/test"
+        mock_stripe.checkout.Session.create.return_value = mock_session
+
+        transport = ASGITransport(app=app)
+        async with AsyncClient(transport=transport, base_url="http://test") as client:
+            resp = await client.post(
+                "/api/v1/billing/create-checkout-session",
+                json={"price_id": "price_pro"},
+                headers={"Authorization": "Bearer test"},
+            )
+
+    assert resp.status_code == 200
+    call_kwargs = mock_stripe.checkout.Session.create.call_args[1]
+    assert call_kwargs["subscription_data"]["trial_period_days"] == 14
+
+
+@pytest.mark.asyncio
+async def test_checkout_session_expired_trial_no_trial_period():
+    """Expired trial user → Stripe does NOT receive trial_period_days."""
+    now = datetime.now(timezone.utc)
+    sub = _make_sub(
+        trial_expires_at=now - timedelta(days=1),
+        stripe_subscription_id=None,
+    )
+    mock_db = _mock_db(sub)
+    mock_user = _mock_user()
+
+    app.dependency_overrides[get_db] = lambda: mock_db
+    app.dependency_overrides[get_current_user] = lambda: mock_user
+
+    with (
+        patch("app.api.routes.billing.stripe") as mock_stripe,
+        patch("app.api.routes.billing.settings") as mock_settings,
+    ):
+        mock_settings.stripe_pro_price_id = "price_pro"
+        mock_settings.stripe_frontend_url = "http://localhost:3000"
+        mock_settings.stripe_secret_key = "sk_test_xxx"
+
+        mock_session = MagicMock()
+        mock_session.url = "https://checkout.stripe.com/test"
+        mock_stripe.checkout.Session.create.return_value = mock_session
+
+        transport = ASGITransport(app=app)
+        async with AsyncClient(transport=transport, base_url="http://test") as client:
+            await client.post(
+                "/api/v1/billing/create-checkout-session",
+                json={"price_id": "price_pro"},
+                headers={"Authorization": "Bearer test"},
+            )
+
+    call_kwargs = mock_stripe.checkout.Session.create.call_args[1]
+    assert "trial_period_days" not in call_kwargs.get("subscription_data", {})
+
+
+@pytest.mark.asyncio
+async def test_checkout_session_previously_paid_no_trial_period():
+    """User with prior Stripe subscription → no trial_period_days (no repeat trial)."""
+    now = datetime.now(timezone.utc)
+    sub = _make_sub(
+        trial_expires_at=now + timedelta(days=20),
+        stripe_subscription_id="sub_prev123",
+    )
+    sub.tier = SubscriptionTier.free_trial
+    mock_db = _mock_db(sub)
+    mock_user = _mock_user()
+
+    app.dependency_overrides[get_db] = lambda: mock_db
+    app.dependency_overrides[get_current_user] = lambda: mock_user
+
+    with (
+        patch("app.api.routes.billing.stripe") as mock_stripe,
+        patch("app.api.routes.billing.settings") as mock_settings,
+    ):
+        mock_settings.stripe_pro_price_id = "price_pro"
+        mock_settings.stripe_frontend_url = "http://localhost:3000"
+        mock_settings.stripe_secret_key = "sk_test_xxx"
+
+        mock_session = MagicMock()
+        mock_session.url = "https://checkout.stripe.com/test"
+        mock_stripe.checkout.Session.create.return_value = mock_session
+
+        transport = ASGITransport(app=app)
+        async with AsyncClient(transport=transport, base_url="http://test") as client:
+            await client.post(
+                "/api/v1/billing/create-checkout-session",
+                json={"price_id": "price_pro"},
+                headers={"Authorization": "Bearer test"},
+            )
+
+    call_kwargs = mock_stripe.checkout.Session.create.call_args[1]
+    assert "trial_period_days" not in call_kwargs.get("subscription_data", {})
+
+
+@pytest.mark.asyncio
+async def test_checkout_session_no_trial_record_gets_28_days():
+    """New user with no trial_expires_at and no prior payment → trial_period_days=28."""
+    sub = _make_sub(trial_expires_at=None, stripe_subscription_id=None)
+    mock_db = _mock_db(sub)
+    mock_user = _mock_user()
+
+    app.dependency_overrides[get_db] = lambda: mock_db
+    app.dependency_overrides[get_current_user] = lambda: mock_user
+
+    with (
+        patch("app.api.routes.billing.stripe") as mock_stripe,
+        patch("app.api.routes.billing.settings") as mock_settings,
+    ):
+        mock_settings.stripe_pro_price_id = "price_pro"
+        mock_settings.stripe_frontend_url = "http://localhost:3000"
+        mock_settings.stripe_secret_key = "sk_test_xxx"
+
+        mock_session = MagicMock()
+        mock_session.url = "https://checkout.stripe.com/test"
+        mock_stripe.checkout.Session.create.return_value = mock_session
+
+        transport = ASGITransport(app=app)
+        async with AsyncClient(transport=transport, base_url="http://test") as client:
+            await client.post(
+                "/api/v1/billing/create-checkout-session",
+                json={"price_id": "price_pro"},
+                headers={"Authorization": "Bearer test"},
+            )
+
+    call_kwargs = mock_stripe.checkout.Session.create.call_args[1]
+    assert call_kwargs["subscription_data"]["trial_period_days"] == 28

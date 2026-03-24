@@ -1,6 +1,7 @@
 """Stripe billing endpoints: Checkout Session, Customer Portal, cancel/reactivate."""
 
 import logging
+import math
 from datetime import datetime, timezone
 
 import stripe
@@ -19,6 +20,28 @@ logger = logging.getLogger(__name__)
 router = APIRouter(prefix="/billing", tags=["billing"])
 
 stripe.api_key = settings.stripe_secret_key
+
+
+def _calculate_trial_end(sub: UserSubscriptionTable) -> int:
+    """Return trial days to pass to Stripe Checkout. Returns 0 if no trial applies.
+
+    This is a synchronous pure function — do not make it async.
+    """
+    # Previously paid users get no trial, ever (prevents gaming with cancel+resubscribe)
+    if sub.stripe_subscription_id:
+        return 0
+    # Active trial: honor remaining days using ceiling (0d 23h left → 1 day, not 0)
+    if sub.trial_expires_at:
+        now = datetime.now(timezone.utc)
+        expires = (
+            sub.trial_expires_at.replace(tzinfo=timezone.utc)
+            if sub.trial_expires_at.tzinfo is None
+            else sub.trial_expires_at
+        )
+        remaining = math.ceil((expires - now).total_seconds() / 86400)
+        return max(0, remaining)
+    # No trial record: safety net — give full 28 days
+    return 28
 
 
 class CheckoutRequest(BaseModel):
@@ -73,6 +96,10 @@ async def create_checkout_session(
         "metadata": {"user_id": current_user.user_id},
         "subscription_data": {"metadata": {"user_id": current_user.user_id}},
     }
+
+    trial_days = _calculate_trial_end(sub)
+    if trial_days > 0:
+        checkout_params["subscription_data"]["trial_period_days"] = trial_days
 
     if sub.stripe_customer_id:
         checkout_params["customer"] = sub.stripe_customer_id
