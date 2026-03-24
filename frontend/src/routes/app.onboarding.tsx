@@ -1,9 +1,12 @@
-import { useAuth } from "@clerk/clerk-react"
+import { loadStripe } from "@stripe/stripe-js"
+import { EmbeddedCheckout, EmbeddedCheckoutProvider } from "@stripe/react-stripe-js"
 import { createFileRoute, useNavigate, useSearch } from "@tanstack/react-router"
-import { useEffect, useRef, useState } from "react"
+import { useCallback, useEffect, useState } from "react"
+import { useAuth } from "@clerk/clerk-react"
 import { billingAPI } from "@/clients/billing"
 
-// Search params type — plan=pro is the only supported value
+const stripePromise = loadStripe(import.meta.env.VITE_STRIPE_PUBLISHABLE_KEY ?? "")
+
 type OnboardingSearch = {
   plan?: string
 }
@@ -20,35 +23,28 @@ function OnboardingPage() {
   const navigate = useNavigate()
   const { plan } = useSearch({ from: "/app/onboarding" })
   const [error, setError] = useState<string | null>(null)
-  const [_retryCount, setRetryCount] = useState(0)
-  const triggered = useRef(false)
 
   useEffect(() => {
-    // Only handle plan=pro; anything else → go to brands
     if (!isLoaded) return
     if (plan !== "pro") {
       navigate({ to: "/app/brands" })
-      return
     }
-    // Guard against double-fire in React StrictMode
-    if (triggered.current) return
-    triggered.current = true
+  }, [isLoaded, plan, navigate])
 
+  const fetchClientSecret = useCallback(async () => {
     const priceId = import.meta.env.VITE_STRIPE_PRO_PRICE_ID
-    if (!priceId) {
-      setError("Stripe price ID is not configured. Please contact support.")
-      return
-    }
+    if (!priceId) throw new Error("Stripe price ID is not configured.")
+    const { client_secret } = await billingAPI.createCheckoutSession(priceId)
+    return client_secret
+  }, [])
 
-    billingAPI
-      .createCheckoutSession(priceId)
-      .then(({ checkout_url }) => {
-        window.location.href = checkout_url
-      })
-      .catch((err: Error) => {
-        setError(err.message || "Failed to start checkout. Please try again.")
-      })
-  }, [isLoaded, plan, navigate, _retryCount])
+  if (!isLoaded || plan !== "pro") {
+    return (
+      <div className="h-screen flex items-center justify-center bg-gray-50">
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600" />
+      </div>
+    )
+  }
 
   if (error) {
     return (
@@ -56,19 +52,12 @@ function OnboardingPage() {
         <p className="text-gray-700 text-center max-w-sm">{error}</p>
         <button
           type="button"
-          onClick={() => {
-            triggered.current = false
-            setError(null)
-            setRetryCount((c) => c + 1)
-          }}
+          onClick={() => setError(null)}
           className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition"
         >
           Try Again
         </button>
-        <a
-          href="/app/settings"
-          className="text-sm text-blue-600 hover:underline"
-        >
+        <a href="/app/settings" className="text-sm text-blue-600 hover:underline">
           Go to Settings instead
         </a>
       </div>
@@ -76,9 +65,23 @@ function OnboardingPage() {
   }
 
   return (
-    <div className="h-screen flex flex-col items-center justify-center gap-3 bg-gray-50">
-      <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600" />
-      <p className="text-sm text-gray-500">Setting up your Pro trial…</p>
+    <div className="min-h-screen bg-gray-50 py-12 px-4">
+      <div className="max-w-2xl mx-auto">
+        <h1 className="text-2xl font-semibold text-gray-900 mb-8 text-center">
+          Start your Pro trial
+        </h1>
+        <EmbeddedCheckoutProvider
+          stripe={stripePromise}
+          options={{
+            fetchClientSecret,
+            onComplete: () => {
+              navigate({ to: "/app/settings", search: { checkout: "success" } })
+            },
+          }}
+        >
+          <EmbeddedCheckout />
+        </EmbeddedCheckoutProvider>
+      </div>
     </div>
   )
 }

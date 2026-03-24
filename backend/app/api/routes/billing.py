@@ -49,7 +49,7 @@ class CheckoutRequest(BaseModel):
 
 
 class CheckoutResponse(BaseModel):
-    checkout_url: str
+    client_secret: str
 
 
 class PortalResponse(BaseModel):
@@ -89,10 +89,10 @@ async def create_checkout_session(
         )
 
     checkout_params: dict = {
+        "ui_mode": "embedded",
         "mode": "subscription",
         "line_items": [{"price": body.price_id, "quantity": 1}],
-        "success_url": f"{settings.stripe_frontend_url}/app/settings?status=success",
-        "cancel_url": f"{settings.stripe_frontend_url}/app/settings?status=cancelled",
+        "return_url": f"{settings.stripe_frontend_url}/app/settings?session_id={{CHECKOUT_SESSION_ID}}",
         "metadata": {"user_id": current_user.user_id},
         "subscription_data": {"metadata": {"user_id": current_user.user_id}},
     }
@@ -107,7 +107,7 @@ async def create_checkout_session(
         checkout_params["customer_email"] = current_user.email
 
     session = stripe.checkout.Session.create(**checkout_params)
-    return CheckoutResponse(checkout_url=session.url)
+    return CheckoutResponse(client_secret=session.client_secret)
 
 
 @router.post("/create-portal-session", response_model=PortalResponse)

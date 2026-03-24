@@ -22,7 +22,7 @@ class BillingAPI {
 
   async createCheckoutSession(
     priceId: string,
-  ): Promise<{ checkout_url: string }> {
+  ): Promise<{ client_secret: string }> {
     const response = await fetch(
       `${this.baseUrl}${this.apiPrefix}/billing/create-checkout-session`,
       {

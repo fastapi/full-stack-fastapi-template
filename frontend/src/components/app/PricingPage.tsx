@@ -82,7 +82,7 @@ export function PricingPage({ embedded = false }: { embedded?: boolean }) {
   const { subscription, refreshSubscription } = useSubscription()
   const { tier, isExpired, isReadOnly } = useEntitlement()
   const navigate = useNavigate()
-  const [checkoutLoading, setCheckoutLoading] = useState(false)
+  const [checkoutLoading] = useState(false)
   const [portalLoading, setPortalLoading] = useState(false)
   const [cancelLoading, setCancelLoading] = useState(false)
   const [reactivateLoading, setReactivateLoading] = useState(false)
@@ -132,19 +132,8 @@ export function PricingPage({ embedded = false }: { embedded?: boolean }) {
     return () => clearInterval(poll)
   }, [statusParam, refreshSubscription, navigate])
 
-  const handleUpgrade = async () => {
-    try {
-      setCheckoutLoading(true)
-      const priceId = import.meta.env.VITE_STRIPE_PRO_PRICE_ID ?? ""
-      const { checkout_url } = await billingAPI.createCheckoutSession(priceId)
-      window.location.href = checkout_url
-    } catch (err) {
-      toast.error(
-        err instanceof Error ? err.message : "Failed to start checkout",
-      )
-    } finally {
-      setCheckoutLoading(false)
-    }
+  const handleUpgrade = () => {
+    navigate({ to: "/app/onboarding", search: { plan: "pro" } })
   }
 
   const handleCancel = async () => {

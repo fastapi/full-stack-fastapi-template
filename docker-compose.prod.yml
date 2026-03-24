@@ -20,6 +20,7 @@ services:
         VITE_API_URL: https://www.spekila.com
         VITE_CLERK_PUBLISHABLE_KEY: ${VITE_CLERK_PUBLISHABLE_KEY}
         VITE_STRIPE_PRO_PRICE_ID: ${VITE_STRIPE_PRO_PRICE_ID}
+        VITE_STRIPE_PUBLISHABLE_KEY: ${VITE_STRIPE_PUBLISHABLE_KEY}
     restart: unless-stopped
 
   backend:
