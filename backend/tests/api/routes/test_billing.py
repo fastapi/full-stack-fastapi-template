@@ -359,12 +359,13 @@ def test_calculate_trial_end_no_trial_record():
 
 def test_calculate_trial_end_naive_datetime_treated_as_utc():
     """Naive datetime (no tzinfo) in trial_expires_at is treated as UTC."""
-    # Naive datetime 10 days in the future (no tzinfo — simulates DB returning naive timestamp)
-    future_naive = datetime.utcnow() + timedelta(days=10)
+    # Add 1 extra second of margin so math.ceil reliably returns 11 (not 10)
+    # regardless of real-clock delta between test setup and function execution.
+    future_naive = datetime.utcnow() + timedelta(days=10, seconds=1)
     assert future_naive.tzinfo is None  # confirm it's actually naive
     sub = _make_sub(trial_expires_at=future_naive, stripe_subscription_id=None)
     result = _calculate_trial_end(sub)
-    assert result == 10  # should correctly compute 10 days remaining
+    assert result == 11  # 10d 1s → ceil(10.000011...) = 11
 
 
 # ── create_checkout_session trial period integration tests ────────────────────
