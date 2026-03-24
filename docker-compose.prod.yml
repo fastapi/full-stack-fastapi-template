@@ -18,7 +18,8 @@ services:
       dockerfile: Dockerfile
       args:
         VITE_API_URL: https://www.spekila.com
-        VITE_CLERK_PUBLISHABLE_KEY: pk_test_Y3VkZGx5LXJlaW5kZWVyLTU3LmNsZXJrLmFjY291bnRzLmRldiQ
+        VITE_CLERK_PUBLISHABLE_KEY: ${VITE_CLERK_PUBLISHABLE_KEY}
+        VITE_STRIPE_PRO_PRICE_ID: ${VITE_STRIPE_PRO_PRICE_ID}
     restart: unless-stopped
 
   backend:

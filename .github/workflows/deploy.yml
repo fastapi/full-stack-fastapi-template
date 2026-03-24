@@ -12,14 +12,26 @@ jobs:
         uses: appleboy/ssh-action@v1.2.0
         env:
           GH_PAT: ${{ secrets.GH_PAT }}
+          PG_PASSWORD: ${{ secrets.PG_PASSWORD }}
+          BACKEND_SECRET_KEY: ${{ secrets.BACKEND_SECRET_KEY }}
+          CLERK_SECRET_KEY: ${{ secrets.CLERK_SECRET_KEY }}
+          CLERK_PUBLISHABLE_KEY: ${{ secrets.CLERK_PUBLISHABLE_KEY }}
+          CLERK_JWKS_URL: ${{ secrets.CLERK_JWKS_URL }}
+          STRIPE_SECRET_KEY: ${{ secrets.STRIPE_SECRET_KEY }}
+          STRIPE_WEBHOOK_SECRET: ${{ secrets.STRIPE_WEBHOOK_SECRET }}
+          STRIPE_PRO_PRICE_ID: ${{ secrets.STRIPE_PRO_PRICE_ID }}
+          GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+          VITE_CLERK_PUBLISHABLE_KEY: ${{ vars.VITE_CLERK_PUBLISHABLE_KEY }}
+          VITE_STRIPE_PRO_PRICE_ID: ${{ vars.VITE_STRIPE_PRO_PRICE_ID }}
         with:
           host: 89.167.87.10
           username: deployer
           key: ${{ secrets.SSH_PRIVATE_KEY }}
-          envs: GH_PAT
+          envs: GH_PAT,PG_PASSWORD,BACKEND_SECRET_KEY,CLERK_SECRET_KEY,CLERK_PUBLISHABLE_KEY,CLERK_JWKS_URL,STRIPE_SECRET_KEY,STRIPE_WEBHOOK_SECRET,STRIPE_PRO_PRICE_ID,GEMINI_API_KEY,VITE_CLERK_PUBLISHABLE_KEY,VITE_STRIPE_PRO_PRICE_ID
           script: |
             set -e
 
+            # Pull latest code
             cd /opt/geo/kila
             BRANCH=$(git rev-parse --abbrev-ref HEAD)
             git remote set-url origin https://x-access-token:${GH_PAT}@github.com/brucezy/kila.git
@@ -33,6 +45,52 @@ jobs:
               cd /opt/geo
               git clone https://x-access-token:${GH_PAT}@github.com/brucezy/kila-models.git kila-models
             fi
+
+            # Write backend .env.prod from GitHub Secrets
+            cat > /opt/geo/kila/backend/.env.prod << EOF
+            ENVIRONMENT=production
+            PG_HOST=host.docker.internal
+            PG_PORT=5432
+            PG_USER=yongzhang
+            PG_PASSWORD=${PG_PASSWORD}
+            PG_DATABASE=kila_intelligence
+            SECRET_KEY=${BACKEND_SECRET_KEY}
+            CLERK_SECRET_KEY=${CLERK_SECRET_KEY}
+            CLERK_PUBLISHABLE_KEY=${CLERK_PUBLISHABLE_KEY}
+            CLERK_JWKS_URL=${CLERK_JWKS_URL}
+            STRIPE_SECRET_KEY=${STRIPE_SECRET_KEY}
+            STRIPE_WEBHOOK_SECRET=${STRIPE_WEBHOOK_SECRET}
+            STRIPE_PRO_PRICE_ID=${STRIPE_PRO_PRICE_ID}
+            STRIPE_FRONTEND_URL=https://www.spekila.com
+            ALLOWED_ORIGINS=["http://www.spekila.com","https://www.spekila.com"]
+            LOG_LEVEL=WARNING
+            RATE_LIMIT_ENABLED=true
+            RATE_LIMIT_REQUESTS=200
+            RATE_LIMIT_PERIOD=60
+            EOF
+
+            # Write scraper .env.prod from GitHub Secrets
+            cat > /opt/geo/kila-scraper/.env.prod << EOF
+            ENVIRONMENT=production
+            DEBUG=False
+            ENABLE_DOCS=False
+            HOST=0.0.0.0
+            PORT=8001
+            PG_HOST=host.docker.internal
+            PG_PORT=5432
+            PG_USER=yongzhang
+            PG_PASSWORD=${PG_PASSWORD}
+            PG_DATABASE=kila_intelligence
+            SECRET_KEY=${BACKEND_SECRET_KEY}
+            GEMINI_API_KEY=${GEMINI_API_KEY}
+            GEMINI_DEFAULT_MODEL=gemini-2.5-flash
+            BACKEND_CORS_ORIGINS=["http://www.spekila.com","https://www.spekila.com"]
+            LOG_LEVEL=WARNING
+            EOF
+
+            # Export frontend build-time vars for docker-compose
+            export VITE_CLERK_PUBLISHABLE_KEY=${VITE_CLERK_PUBLISHABLE_KEY}
+            export VITE_STRIPE_PRO_PRICE_ID=${VITE_STRIPE_PRO_PRICE_ID}
 
             cd /opt/geo
             docker compose -f kila/docker-compose.prod.yml up --build -d
