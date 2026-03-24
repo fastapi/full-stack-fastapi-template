@@ -70,6 +70,7 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
   const { isExpired, isReadOnly, tier, canAccess } = useEntitlement()
   const { subscription } = useSubscription()
   const navigate = useNavigate()
+  const isOnboarding = location.pathname.includes("/onboarding")
 
   // Show expiry modal once per browser session
   const SESSION_KEY = "kila_expiry_modal_shown"
@@ -203,7 +204,7 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
 
         {/* Subscription Plan Badge */}
         {showFullContent && (
-          <div className="px-3 pt-2.5 pb-1 flex-shrink-0">
+          <div className={`px-3 pt-2.5 pb-1 flex-shrink-0 ${isOnboarding ? "pointer-events-none opacity-40" : ""}`}>
             <button
               type="button"
               onClick={() => navigate({ to: "/app/settings" })}
@@ -225,7 +226,7 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
 
         {/* Navigation */}
         <nav
-          className={`flex-1 py-4 space-y-1 overflow-y-auto ${showFullContent ? "px-2" : "px-1"}`}
+          className={`flex-1 py-4 space-y-1 overflow-y-auto ${showFullContent ? "px-2" : "px-1"} ${isOnboarding ? "pointer-events-none opacity-40 select-none" : ""}`}
         >
           {menuItems.map((item) => {
             const Icon = item.icon
