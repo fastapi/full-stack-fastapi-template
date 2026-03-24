@@ -1,7 +1,7 @@
 import { loadStripe } from "@stripe/stripe-js"
 import { EmbeddedCheckout, EmbeddedCheckoutProvider } from "@stripe/react-stripe-js"
 import { createFileRoute, useNavigate, useSearch } from "@tanstack/react-router"
-import { useCallback, useEffect, useState } from "react"
+import { useCallback, useEffect } from "react"
 import { useAuth } from "@clerk/clerk-react"
 import { billingAPI } from "@/clients/billing"
 
@@ -22,7 +22,6 @@ function OnboardingPage() {
   const { isLoaded } = useAuth()
   const navigate = useNavigate()
   const { plan } = useSearch({ from: "/app/onboarding" })
-  const [error, setError] = useState<string | null>(null)
 
   useEffect(() => {
     if (!isLoaded) return
@@ -46,24 +45,6 @@ function OnboardingPage() {
     )
   }
 
-  if (error) {
-    return (
-      <div className="h-screen flex flex-col items-center justify-center gap-4 bg-gray-50">
-        <p className="text-gray-700 text-center max-w-sm">{error}</p>
-        <button
-          type="button"
-          onClick={() => setError(null)}
-          className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition"
-        >
-          Try Again
-        </button>
-        <a href="/app/settings" className="text-sm text-blue-600 hover:underline">
-          Go to Settings instead
-        </a>
-      </div>
-    )
-  }
-
   return (
     <div className="min-h-screen bg-gray-50 py-12 px-4">
       <div className="max-w-2xl mx-auto">
@@ -72,12 +53,7 @@ function OnboardingPage() {
         </h1>
         <EmbeddedCheckoutProvider
           stripe={stripePromise}
-          options={{
-            fetchClientSecret,
-            onComplete: () => {
-              navigate({ to: "/app/settings", search: { checkout: "success" } })
-            },
-          }}
+          options={{ fetchClientSecret }}
         >
           <EmbeddedCheckout />
         </EmbeddedCheckoutProvider>

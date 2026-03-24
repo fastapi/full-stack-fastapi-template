@@ -90,7 +90,8 @@ function AppGuard() {
     if (
       syncState === "synced" &&
       !profileComplete &&
-      !window.location.pathname.includes("/profile-setup")
+      !window.location.pathname.includes("/profile-setup") &&
+      !window.location.pathname.includes("/onboarding")
     ) {
       navigate({ to: "/app/profile-setup" })
     }
