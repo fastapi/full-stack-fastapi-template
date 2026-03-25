@@ -19,6 +19,8 @@ dependencies = [
     "sentry-sdk[fastapi]>=2.0.0,<3.0.0",
     "pyjwt<3.0.0,>=2.8.0",
     "pwdlib[argon2,bcrypt]>=0.3.0",
+    "pypdf2>=3.0.1",
+    "python-docx>=1.2.0",
 ]
 
 [dependency-groups]
