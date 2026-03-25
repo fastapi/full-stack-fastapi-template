@@ -26,6 +26,9 @@ from kila_models.models.database import BlogPostTable
 SLUG = "geo-generative-engine-optimization"
 BLOG_POST_PATH = Path(__file__).parent.parent.parent.parent / "docs" / "blog-geo-generative-engine-optimization.md"
 
+if not BLOG_POST_PATH.exists():
+    raise FileNotFoundError(f"Blog post markdown not found at: {BLOG_POST_PATH.resolve()}")
+
 
 def _read_content() -> str:
     """Read the markdown file and strip the final CTA line."""
@@ -75,4 +78,8 @@ async def seed():
 
 
 if __name__ == "__main__":
-    asyncio.run(seed())
+    try:
+        asyncio.run(seed())
+    except Exception as e:
+        print(f"Seed failed: {e}")
+        sys.exit(1)
