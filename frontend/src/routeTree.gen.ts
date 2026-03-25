@@ -11,6 +11,8 @@
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as AppRouteImport } from './routes/app'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as BlogIndexRouteImport } from './routes/blog.index'
+import { Route as BlogSlugRouteImport } from './routes/blog.$slug'
 import { Route as AppUsersRouteImport } from './routes/app.users'
 import { Route as AppSettingsRouteImport } from './routes/app.settings'
 import { Route as AppProjectsRouteImport } from './routes/app.projects'
@@ -35,6 +37,16 @@ const AppRoute = AppRouteImport.update({
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const BlogIndexRoute = BlogIndexRouteImport.update({
+  id: '/blog/',
+  path: '/blog/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const BlogSlugRoute = BlogSlugRouteImport.update({
+  id: '/blog/$slug',
+  path: '/blog/$slug',
   getParentRoute: () => rootRouteImport,
 } as any)
 const AppUsersRoute = AppUsersRouteImport.update({
@@ -126,6 +138,8 @@ export interface FileRoutesByFullPath {
   '/app/projects': typeof AppProjectsRoute
   '/app/settings': typeof AppSettingsRoute
   '/app/users': typeof AppUsersRoute
+  '/blog/$slug': typeof BlogSlugRoute
+  '/blog/': typeof BlogIndexRoute
   '/app/dashboard/brand-impression': typeof AppDashboardBrandImpressionRoute
   '/app/dashboard/competitors': typeof AppDashboardCompetitorsRoute
   '/app/dashboard/dashboard': typeof AppDashboardDashboardRoute
@@ -145,6 +159,8 @@ export interface FileRoutesByTo {
   '/app/projects': typeof AppProjectsRoute
   '/app/settings': typeof AppSettingsRoute
   '/app/users': typeof AppUsersRoute
+  '/blog/$slug': typeof BlogSlugRoute
+  '/blog': typeof BlogIndexRoute
   '/app/dashboard/brand-impression': typeof AppDashboardBrandImpressionRoute
   '/app/dashboard/competitors': typeof AppDashboardCompetitorsRoute
   '/app/dashboard/dashboard': typeof AppDashboardDashboardRoute
@@ -165,6 +181,8 @@ export interface FileRoutesById {
   '/app/projects': typeof AppProjectsRoute
   '/app/settings': typeof AppSettingsRoute
   '/app/users': typeof AppUsersRoute
+  '/blog/$slug': typeof BlogSlugRoute
+  '/blog/': typeof BlogIndexRoute
   '/app/dashboard/brand-impression': typeof AppDashboardBrandImpressionRoute
   '/app/dashboard/competitors': typeof AppDashboardCompetitorsRoute
   '/app/dashboard/dashboard': typeof AppDashboardDashboardRoute
@@ -186,6 +204,8 @@ export interface FileRouteTypes {
     | '/app/projects'
     | '/app/settings'
     | '/app/users'
+    | '/blog/$slug'
+    | '/blog/'
     | '/app/dashboard/brand-impression'
     | '/app/dashboard/competitors'
     | '/app/dashboard/dashboard'
@@ -205,6 +225,8 @@ export interface FileRouteTypes {
     | '/app/projects'
     | '/app/settings'
     | '/app/users'
+    | '/blog/$slug'
+    | '/blog'
     | '/app/dashboard/brand-impression'
     | '/app/dashboard/competitors'
     | '/app/dashboard/dashboard'
@@ -224,6 +246,8 @@ export interface FileRouteTypes {
     | '/app/projects'
     | '/app/settings'
     | '/app/users'
+    | '/blog/$slug'
+    | '/blog/'
     | '/app/dashboard/brand-impression'
     | '/app/dashboard/competitors'
     | '/app/dashboard/dashboard'
@@ -236,6 +260,8 @@ export interface FileRouteTypes {
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AppRoute: typeof AppRouteWithChildren
+  BlogSlugRoute: typeof BlogSlugRoute
+  BlogIndexRoute: typeof BlogIndexRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -252,6 +278,20 @@ declare module '@tanstack/react-router' {
       path: '/'
       fullPath: '/'
       preLoaderRoute: typeof IndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/blog/': {
+      id: '/blog/'
+      path: '/blog'
+      fullPath: '/blog/'
+      preLoaderRoute: typeof BlogIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/blog/$slug': {
+      id: '/blog/$slug'
+      path: '/blog/$slug'
+      fullPath: '/blog/$slug'
+      preLoaderRoute: typeof BlogSlugRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/app/users': {
@@ -403,6 +443,8 @@ const AppRouteWithChildren = AppRoute._addFileChildren(AppRouteChildren)
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AppRoute: AppRouteWithChildren,
+  BlogSlugRoute: BlogSlugRoute,
+  BlogIndexRoute: BlogIndexRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
