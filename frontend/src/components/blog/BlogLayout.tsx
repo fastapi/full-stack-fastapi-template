@@ -29,7 +29,7 @@ export default function BlogLayout({ children }: { children: React.ReactNode }) 
       <footer className="bg-slate-950 text-white py-8 mt-16">
         <div className="max-w-5xl mx-auto px-4 sm:px-6 flex flex-col sm:flex-row justify-between items-center gap-4">
           <span className="text-xs text-slate-400 uppercase tracking-widest">
-            © 2026 Kila, Inc.
+            © {new Date().getFullYear()} Kila, Inc.
           </span>
           <div className="flex gap-6 text-xs text-slate-400 uppercase tracking-widest">
             <a href="/blog" className="hover:text-white transition">Blog</a>

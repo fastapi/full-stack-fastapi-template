@@ -18,7 +18,7 @@ export default function BlogPostPage({ post }: BlogPostPageProps) {
     day: "numeric",
   })
 
-  const htmlContent = marked(post.content) as string
+  const htmlContent = marked.parse(post.content, { async: false })
   const categoryColor = CATEGORY_TEXT[post.category] ?? "text-slate-300"
 
   return (

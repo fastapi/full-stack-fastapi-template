@@ -12,14 +12,28 @@ export const Route = createFileRoute("/blog/")({
 function BlogIndex() {
   const [posts, setPosts] = useState<BlogPostListItem[]>([])
   const [loading, setLoading] = useState(true)
+  const [error, setError] = useState<boolean>(false)
 
   useEffect(() => {
     blogAPI
       .getPosts()
       .then(setPosts)
-      .catch(console.error)
+      .catch((err) => {
+        console.error(err)
+        setError(true)
+      })
       .finally(() => setLoading(false))
   }, [])
+
+  if (error) {
+    return (
+      <BlogLayout>
+        <div className="max-w-5xl mx-auto px-4 py-24 text-center text-slate-500">
+          Failed to load posts — please try again later.
+        </div>
+      </BlogLayout>
+    )
+  }
 
   if (loading) {
     return (
