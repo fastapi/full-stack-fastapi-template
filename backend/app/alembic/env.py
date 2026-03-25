@@ -30,7 +30,10 @@ target_metadata = Base.metadata
 
 
 def get_url():
-    return str(settings.database_url).replace("+asyncpg", "+psycopg")
+    url = str(settings.database_url).replace("+asyncpg", "+psycopg")
+    # psycopg (v3) does not accept the ssl=disable query param; strip it
+    url = url.replace("?ssl=disable", "").replace("&ssl=disable", "")
+    return url
 
 
 def run_migrations_offline():
