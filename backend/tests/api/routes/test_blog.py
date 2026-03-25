@@ -100,9 +100,9 @@ async def test_admin_create_post_requires_super_user():
     """POST /api/v1/blog/admin/posts returns 403 for non-super-user."""
     from fastapi import HTTPException
 
-    app.dependency_overrides[require_super_user] = lambda: (_ for _ in ()).throw(
-        HTTPException(status_code=403, detail="Admin access required")
-    )
+    def _raise_403():
+        raise HTTPException(status_code=403, detail="Admin access required")
+    app.dependency_overrides[require_super_user] = _raise_403
 
     async with AsyncClient(transport=ASGITransport(app=app), base_url="http://test") as client:
         response = await client.post(

@@ -4,10 +4,11 @@ import logging
 from datetime import datetime, timezone
 
 from fastapi import APIRouter, Depends, HTTPException
+from kila_models.models.database import BlogPostTable, UsersTable
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.api.deps import get_current_user, get_db, require_super_user
+from app.api.deps import get_db, require_super_user
 from app.models.blog import (
     BlogPostAdminResponse,
     BlogPostCreateRequest,
@@ -15,7 +16,6 @@ from app.models.blog import (
     BlogPostPublicResponse,
     BlogPostUpdateRequest,
 )
-from kila_models.models.database import BlogPostTable, UsersTable
 
 logger = logging.getLogger(__name__)
 router = APIRouter(prefix="/blog", tags=["blog"])
@@ -123,7 +123,7 @@ async def admin_update_post(
     if not post:
         raise HTTPException(status_code=404, detail="Post not found")
 
-    for field, value in body.model_dump(exclude_none=True).items():
+    for field, value in body.model_dump(exclude_unset=True).items():
         setattr(post, field, value)
 
     await db.commit()
