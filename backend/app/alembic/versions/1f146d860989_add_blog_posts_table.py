@@ -33,10 +33,8 @@ def upgrade():
     sa.UniqueConstraint('slug')
     )
     op.create_index('idx_blog_posts_published', 'blog_posts', ['is_published', 'published_at'], unique=False)
-    op.create_index('idx_blog_posts_slug', 'blog_posts', ['slug'], unique=False)
 
 
 def downgrade():
-    op.drop_index('idx_blog_posts_slug', table_name='blog_posts')
     op.drop_index('idx_blog_posts_published', table_name='blog_posts')
     op.drop_table('blog_posts')

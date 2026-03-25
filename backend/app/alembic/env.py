@@ -1,5 +1,6 @@
 import os
 from logging.config import fileConfig
+from urllib.parse import urlparse, urlencode, parse_qs, urlunparse
 
 from alembic import context
 from sqlalchemy import engine_from_config, pool
@@ -19,7 +20,6 @@ fileConfig(config.config_file_name)
 # target_metadata = None
 
 from kila_models import Base  # noqa
-from app.config import settings  # noqa
 
 target_metadata = Base.metadata
 
@@ -30,9 +30,15 @@ target_metadata = Base.metadata
 
 
 def get_url():
-    url = str(settings.database_url).replace("+asyncpg", "+psycopg")
-    # psycopg (v3) does not accept the ssl=disable query param; strip it
-    url = url.replace("?ssl=disable", "").replace("&ssl=disable", "")
+    from app.config import settings
+    url = str(settings.database_url)
+    # Strip +asyncpg driver and use psycopg v3 for migrations
+    url = url.replace("+asyncpg", "+psycopg")
+    # Strip ssl=disable query param — psycopg v3 doesn't accept it as a URL param
+    parsed = urlparse(url)
+    params = {k: v for k, v in parse_qs(parsed.query).items() if k != "ssl"}
+    new_query = urlencode(params, doseq=True)
+    url = urlunparse(parsed._replace(query=new_query))
     return url
 
 
