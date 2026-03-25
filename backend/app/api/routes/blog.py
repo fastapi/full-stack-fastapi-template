@@ -123,7 +123,16 @@ async def admin_update_post(
     if not post:
         raise HTTPException(status_code=404, detail="Post not found")
 
-    for field, value in body.model_dump(exclude_unset=True).items():
+    update_data = body.model_dump(exclude_unset=True)
+
+    if "slug" in update_data and update_data["slug"] != post.slug:
+        conflict = await db.execute(
+            select(BlogPostTable.id).where(BlogPostTable.slug == update_data["slug"])
+        )
+        if conflict.scalar_one_or_none():
+            raise HTTPException(status_code=409, detail="Slug already exists")
+
+    for field, value in update_data.items():
         setattr(post, field, value)
 
     await db.commit()
