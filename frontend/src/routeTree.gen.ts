@@ -28,6 +28,9 @@ import { Route as AppDashboardOverviewRouteImport } from './routes/app.dashboard
 import { Route as AppDashboardDashboardRouteImport } from './routes/app.dashboard.dashboard'
 import { Route as AppDashboardCompetitorsRouteImport } from './routes/app.dashboard.competitors'
 import { Route as AppDashboardBrandImpressionRouteImport } from './routes/app.dashboard.brand-impression'
+import { Route as AppAdminBlogRouteImport } from './routes/app.admin.blog'
+import { Route as AppAdminBlogNewRouteImport } from './routes/app.admin.blog.new'
+import { Route as AppAdminBlogIdEditRouteImport } from './routes/app.admin.blog.$id.edit'
 
 const AppRoute = AppRouteImport.update({
   id: '/app',
@@ -126,6 +129,21 @@ const AppDashboardBrandImpressionRoute =
     path: '/dashboard/brand-impression',
     getParentRoute: () => AppRoute,
   } as any)
+const AppAdminBlogRoute = AppAdminBlogRouteImport.update({
+  id: '/admin/blog',
+  path: '/admin/blog',
+  getParentRoute: () => AppRoute,
+} as any)
+const AppAdminBlogNewRoute = AppAdminBlogNewRouteImport.update({
+  id: '/new',
+  path: '/new',
+  getParentRoute: () => AppAdminBlogRoute,
+} as any)
+const AppAdminBlogIdEditRoute = AppAdminBlogIdEditRouteImport.update({
+  id: '/$id/edit',
+  path: '/$id/edit',
+  getParentRoute: () => AppAdminBlogRoute,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -140,6 +158,7 @@ export interface FileRoutesByFullPath {
   '/app/users': typeof AppUsersRoute
   '/blog/$slug': typeof BlogSlugRoute
   '/blog/': typeof BlogIndexRoute
+  '/app/admin/blog': typeof AppAdminBlogRouteWithChildren
   '/app/dashboard/brand-impression': typeof AppDashboardBrandImpressionRoute
   '/app/dashboard/competitors': typeof AppDashboardCompetitorsRoute
   '/app/dashboard/dashboard': typeof AppDashboardDashboardRoute
@@ -147,6 +166,8 @@ export interface FileRoutesByFullPath {
   '/app/dashboard/performance': typeof AppDashboardPerformanceRoute
   '/app/insight/market-dynamic': typeof AppInsightMarketDynamicRoute
   '/app/insight/risk-intelligence': typeof AppInsightRiskIntelligenceRoute
+  '/app/admin/blog/new': typeof AppAdminBlogNewRoute
+  '/app/admin/blog/$id/edit': typeof AppAdminBlogIdEditRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -161,6 +182,7 @@ export interface FileRoutesByTo {
   '/app/users': typeof AppUsersRoute
   '/blog/$slug': typeof BlogSlugRoute
   '/blog': typeof BlogIndexRoute
+  '/app/admin/blog': typeof AppAdminBlogRouteWithChildren
   '/app/dashboard/brand-impression': typeof AppDashboardBrandImpressionRoute
   '/app/dashboard/competitors': typeof AppDashboardCompetitorsRoute
   '/app/dashboard/dashboard': typeof AppDashboardDashboardRoute
@@ -168,6 +190,8 @@ export interface FileRoutesByTo {
   '/app/dashboard/performance': typeof AppDashboardPerformanceRoute
   '/app/insight/market-dynamic': typeof AppInsightMarketDynamicRoute
   '/app/insight/risk-intelligence': typeof AppInsightRiskIntelligenceRoute
+  '/app/admin/blog/new': typeof AppAdminBlogNewRoute
+  '/app/admin/blog/$id/edit': typeof AppAdminBlogIdEditRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -183,6 +207,7 @@ export interface FileRoutesById {
   '/app/users': typeof AppUsersRoute
   '/blog/$slug': typeof BlogSlugRoute
   '/blog/': typeof BlogIndexRoute
+  '/app/admin/blog': typeof AppAdminBlogRouteWithChildren
   '/app/dashboard/brand-impression': typeof AppDashboardBrandImpressionRoute
   '/app/dashboard/competitors': typeof AppDashboardCompetitorsRoute
   '/app/dashboard/dashboard': typeof AppDashboardDashboardRoute
@@ -190,6 +215,8 @@ export interface FileRoutesById {
   '/app/dashboard/performance': typeof AppDashboardPerformanceRoute
   '/app/insight/market-dynamic': typeof AppInsightMarketDynamicRoute
   '/app/insight/risk-intelligence': typeof AppInsightRiskIntelligenceRoute
+  '/app/admin/blog/new': typeof AppAdminBlogNewRoute
+  '/app/admin/blog/$id/edit': typeof AppAdminBlogIdEditRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -206,6 +233,7 @@ export interface FileRouteTypes {
     | '/app/users'
     | '/blog/$slug'
     | '/blog/'
+    | '/app/admin/blog'
     | '/app/dashboard/brand-impression'
     | '/app/dashboard/competitors'
     | '/app/dashboard/dashboard'
@@ -213,6 +241,8 @@ export interface FileRouteTypes {
     | '/app/dashboard/performance'
     | '/app/insight/market-dynamic'
     | '/app/insight/risk-intelligence'
+    | '/app/admin/blog/new'
+    | '/app/admin/blog/$id/edit'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -227,6 +257,7 @@ export interface FileRouteTypes {
     | '/app/users'
     | '/blog/$slug'
     | '/blog'
+    | '/app/admin/blog'
     | '/app/dashboard/brand-impression'
     | '/app/dashboard/competitors'
     | '/app/dashboard/dashboard'
@@ -234,6 +265,8 @@ export interface FileRouteTypes {
     | '/app/dashboard/performance'
     | '/app/insight/market-dynamic'
     | '/app/insight/risk-intelligence'
+    | '/app/admin/blog/new'
+    | '/app/admin/blog/$id/edit'
   id:
     | '__root__'
     | '/'
@@ -248,6 +281,7 @@ export interface FileRouteTypes {
     | '/app/users'
     | '/blog/$slug'
     | '/blog/'
+    | '/app/admin/blog'
     | '/app/dashboard/brand-impression'
     | '/app/dashboard/competitors'
     | '/app/dashboard/dashboard'
@@ -255,6 +289,8 @@ export interface FileRouteTypes {
     | '/app/dashboard/performance'
     | '/app/insight/market-dynamic'
     | '/app/insight/risk-intelligence'
+    | '/app/admin/blog/new'
+    | '/app/admin/blog/$id/edit'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -399,8 +435,43 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AppDashboardBrandImpressionRouteImport
       parentRoute: typeof AppRoute
     }
+    '/app/admin/blog': {
+      id: '/app/admin/blog'
+      path: '/admin/blog'
+      fullPath: '/app/admin/blog'
+      preLoaderRoute: typeof AppAdminBlogRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/app/admin/blog/new': {
+      id: '/app/admin/blog/new'
+      path: '/new'
+      fullPath: '/app/admin/blog/new'
+      preLoaderRoute: typeof AppAdminBlogNewRouteImport
+      parentRoute: typeof AppAdminBlogRoute
+    }
+    '/app/admin/blog/$id/edit': {
+      id: '/app/admin/blog/$id/edit'
+      path: '/$id/edit'
+      fullPath: '/app/admin/blog/$id/edit'
+      preLoaderRoute: typeof AppAdminBlogIdEditRouteImport
+      parentRoute: typeof AppAdminBlogRoute
+    }
   }
 }
+
+interface AppAdminBlogRouteChildren {
+  AppAdminBlogNewRoute: typeof AppAdminBlogNewRoute
+  AppAdminBlogIdEditRoute: typeof AppAdminBlogIdEditRoute
+}
+
+const AppAdminBlogRouteChildren: AppAdminBlogRouteChildren = {
+  AppAdminBlogNewRoute: AppAdminBlogNewRoute,
+  AppAdminBlogIdEditRoute: AppAdminBlogIdEditRoute,
+}
+
+const AppAdminBlogRouteWithChildren = AppAdminBlogRoute._addFileChildren(
+  AppAdminBlogRouteChildren,
+)
 
 interface AppRouteChildren {
   AppBillingRoute: typeof AppBillingRoute
@@ -411,6 +482,7 @@ interface AppRouteChildren {
   AppProjectsRoute: typeof AppProjectsRoute
   AppSettingsRoute: typeof AppSettingsRoute
   AppUsersRoute: typeof AppUsersRoute
+  AppAdminBlogRoute: typeof AppAdminBlogRouteWithChildren
   AppDashboardBrandImpressionRoute: typeof AppDashboardBrandImpressionRoute
   AppDashboardCompetitorsRoute: typeof AppDashboardCompetitorsRoute
   AppDashboardDashboardRoute: typeof AppDashboardDashboardRoute
@@ -429,6 +501,7 @@ const AppRouteChildren: AppRouteChildren = {
   AppProjectsRoute: AppProjectsRoute,
   AppSettingsRoute: AppSettingsRoute,
   AppUsersRoute: AppUsersRoute,
+  AppAdminBlogRoute: AppAdminBlogRouteWithChildren,
   AppDashboardBrandImpressionRoute: AppDashboardBrandImpressionRoute,
   AppDashboardCompetitorsRoute: AppDashboardCompetitorsRoute,
   AppDashboardDashboardRoute: AppDashboardDashboardRoute,
