@@ -17,6 +17,14 @@ export default function Footer() {
             <a href="#cookies" className="hover:text-white transition">
               Cookie Settings
             </a>
+            <a
+              href="/blog"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="hover:text-white transition"
+            >
+              Blog
+            </a>
           </div>
 
           <div className="flex items-center space-x-4">

@@ -9,6 +9,7 @@ import {
   FolderKanban,
   LogOut,
   Menu,
+  PenLine,
   Settings,
   Shield,
   Sparkles,
@@ -92,6 +93,8 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
   // Show full sidebar content when desktop is expanded OR mobile drawer is open
   const showFullContent = sidebarOpen || mobileSidebarOpen
 
+  const isSuperUser = subscription?.is_super_user === true
+
   const menuItems: MenuItem[] = [
     { name: "Brands", icon: FolderKanban, path: "/app/brands" },
     {
@@ -119,6 +122,7 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
     //   requiredFeature: "insightAll",
     // },
     { name: "Settings", icon: Settings, path: "/app/settings" },
+    ...(isSuperUser ? [{ name: "Blog Admin", icon: PenLine, path: "/app/admin/blog" }] : []),
   ]
 
   const toggleMenu = (name: string) => {

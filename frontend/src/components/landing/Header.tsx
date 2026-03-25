@@ -75,6 +75,14 @@ export default function Header() {
             >
               Pricing
             </a>
+            <a
+              href="/blog"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="font-body text-sm text-slate-600 dark:text-slate-300 hover:text-blue-600 dark:hover:text-blue-400 transition"
+            >
+              Blog
+            </a>
           </nav>
 
           {/* Right Side - Auth Buttons */}
@@ -128,6 +136,14 @@ export default function Header() {
                 className="px-2 font-body text-sm text-slate-700 dark:text-slate-300 hover:text-blue-600 dark:hover:text-blue-400 transition"
               >
                 Pricing
+              </a>
+              <a
+                href="/blog"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="px-2 font-body text-sm text-slate-700 dark:text-slate-300 hover:text-blue-600 dark:hover:text-blue-400 transition"
+              >
+                Blog
               </a>
               <SignInButton mode="modal" forceRedirectUrl="/app/brands">
                 <Button variant={"ghost"}>Sign In</Button>
