@@ -56,8 +56,7 @@ services:
       - traefik-public
       - default
     depends_on:
-     prestart:
-        condition: service_completed_successfully
+      - prestart
     env_file:
       - .env
     environment:
@@ -102,8 +101,6 @@ services:
   frontend:
     image: '${DOCKER_IMAGE_FRONTEND?Variable not set}:${TAG-latest}'
     restart: always
-    ports:
-      - "80:80"
     networks:
       - traefik-public
       - default
@@ -129,5 +126,3 @@ services:
 networks:
   traefik-public:
     external: true
-
-
