@@ -8,6 +8,7 @@ from app.api.routes import brands
 from app.api.routes import webhooks
 from app.api.routes import billing
 from app.api.routes import reports
+from app.api.routes import blog
 from app.config import settings
 
 
@@ -21,6 +22,7 @@ api_router.include_router(brands.router, tags=["brands"])
 api_router.include_router(webhooks.router, tags=["webhooks"])
 api_router.include_router(billing.router, tags=["billing"])
 api_router.include_router(reports.router, tags=["reports"])
+api_router.include_router(blog.router, tags=["blog"])
 
 
 # Private routes router (e.g., for debugging)

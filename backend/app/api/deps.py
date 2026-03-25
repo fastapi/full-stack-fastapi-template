@@ -233,3 +233,19 @@ async def get_current_user(
     _cache_set(token, user.user_id)
 
     return user
+
+
+async def require_super_user(
+    current_user: UsersTable = Depends(get_current_user),
+    db: AsyncSession = Depends(get_db),
+) -> UsersTable:
+    """FastAPI dependency: raise 403 if the current user is not a super user."""
+    result = await db.execute(
+        select(UserSubscriptionTable.is_super_user).where(
+            UserSubscriptionTable.user_id == current_user.user_id
+        )
+    )
+    row = result.one_or_none()
+    if not row or not row.is_super_user:
+        raise HTTPException(status_code=403, detail="Admin access required")
+    return current_user
