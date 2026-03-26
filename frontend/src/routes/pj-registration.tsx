@@ -1,6 +1,6 @@
 import { zodResolver } from "@hookform/resolvers/zod"
 import { useMutation, useQuery } from "@tanstack/react-query"
-import { createFileRoute, useNavigate } from "@tanstack/react-router"
+import { createFileRoute } from "@tanstack/react-router"
 import { useState } from "react"
 import { useForm } from "react-hook-form"
 import { z } from "zod"
@@ -396,7 +396,6 @@ function getDefaultValues(company: CompanyPublic | null): RegistrationFormData {
 function PjRegistration() {
   const { token } = Route.useSearch()
   const { showSuccessToast, showErrorToast } = useCustomToast()
-  const _navigate = useNavigate()
   const [confirmOpen, setConfirmOpen] = useState(false)
   const [completed, setCompleted] = useState(false)
 
