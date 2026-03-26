@@ -1,9 +1,15 @@
 import uuid
 from datetime import date, datetime, timezone
+from enum import Enum
 
 from pydantic import EmailStr
 from sqlalchemy import DateTime
 from sqlmodel import Field, Relationship, SQLModel
+
+
+class CompanyStatus(str, Enum):
+    pending = "pending"
+    completed = "completed"
 
 
 def get_datetime_utc() -> datetime:
@@ -111,6 +117,46 @@ class ItemsPublic(SQLModel):
 # Shared properties for Company (PJ)
 class CompanyBase(SQLModel):
     cnpj: str = Field(min_length=1, max_length=20)
+    razao_social: str | None = Field(default=None, max_length=255)
+    representante_legal: str | None = Field(default=None, max_length=255)
+    data_abertura: date | None = None
+    nome_fantasia: str | None = Field(default=None, max_length=255)
+    porte: str | None = Field(default=None, max_length=100)
+    atividade_economica_principal: str | None = Field(default=None, max_length=255)
+    atividade_economica_secundaria: str | None = Field(default=None, max_length=255)
+    natureza_juridica: str | None = Field(default=None, max_length=255)
+    logradouro: str | None = Field(default=None, max_length=255)
+    numero: str | None = Field(default=None, max_length=20)
+    complemento: str | None = Field(default=None, max_length=255)
+    cep: str | None = Field(default=None, max_length=10)
+    bairro: str | None = Field(default=None, max_length=255)
+    municipio: str | None = Field(default=None, max_length=255)
+    uf: str | None = Field(default=None, max_length=2)
+    endereco_eletronico: str | None = Field(default=None, max_length=255)
+    telefone_comercial: str | None = Field(default=None, max_length=20)
+    situacao_cadastral: str | None = Field(default=None, max_length=100)
+    data_situacao_cadastral: date | None = None
+    cpf_representante_legal: str | None = Field(default=None, max_length=14)
+    identidade_representante_legal: str | None = Field(default=None, max_length=20)
+    logradouro_representante_legal: str | None = Field(default=None, max_length=255)
+    numero_representante_legal: str | None = Field(default=None, max_length=20)
+    complemento_representante_legal: str | None = Field(default=None, max_length=255)
+    cep_representante_legal: str | None = Field(default=None, max_length=10)
+    bairro_representante_legal: str | None = Field(default=None, max_length=255)
+    municipio_representante_legal: str | None = Field(default=None, max_length=255)
+    uf_representante_legal: str | None = Field(default=None, max_length=2)
+    endereco_eletronico_representante_legal: str | None = Field(
+        default=None, max_length=255
+    )
+    telefones_representante_legal: str | None = Field(default=None, max_length=40)
+    data_nascimento_representante_legal: date | None = None
+    banco_cc_cnpj: str | None = Field(default=None, max_length=100)
+    agencia_cc_cnpj: str | None = Field(default=None, max_length=20)
+
+
+# Properties to receive on full company creation (all fields required)
+class CompanyCreate(SQLModel):
+    cnpj: str = Field(min_length=1, max_length=20)
     razao_social: str = Field(min_length=1, max_length=255)
     representante_legal: str = Field(min_length=1, max_length=255)
     data_abertura: date
@@ -139,32 +185,116 @@ class CompanyBase(SQLModel):
     bairro_representante_legal: str = Field(min_length=1, max_length=255)
     municipio_representante_legal: str = Field(min_length=1, max_length=255)
     uf_representante_legal: str = Field(min_length=1, max_length=2)
-    endereco_eletronico_representante_legal: str = Field(min_length=1, max_length=255)
+    endereco_eletronico_representante_legal: str = Field(
+        min_length=1, max_length=255
+    )
     telefones_representante_legal: str = Field(min_length=1, max_length=40)
     data_nascimento_representante_legal: date
     banco_cc_cnpj: str = Field(min_length=1, max_length=100)
     agencia_cc_cnpj: str = Field(min_length=1, max_length=20)
 
 
-# Properties to receive on company creation
-class CompanyCreate(CompanyBase):
-    pass
-
-
 # Database model, database table inferred from class name
 class Company(CompanyBase, table=True):
     id: uuid.UUID = Field(default_factory=uuid.uuid4, primary_key=True)
     cnpj: str = Field(unique=True, index=True, min_length=1, max_length=20)
+    email: str | None = Field(default=None, max_length=255)
+    status: CompanyStatus = Field(default=CompanyStatus.completed)
     created_at: datetime | None = Field(
         default_factory=get_datetime_utc,
         sa_type=DateTime(timezone=True),  # type: ignore
+    )
+    invites: list["CompanyInvite"] = Relationship(
+        back_populates="company", cascade_delete=True
     )
 
 
 # Properties to return via API, id is always required
 class CompanyPublic(CompanyBase):
     id: uuid.UUID
+    email: str | None = None
+    status: CompanyStatus = CompanyStatus.completed
     created_at: datetime | None = None
+
+
+# Invite model for PJ registration via email
+class CompanyInviteBase(SQLModel):
+    email: EmailStr = Field(max_length=255)
+
+
+class CompanyInviteCreate(SQLModel):
+    cnpj: str = Field(min_length=1, max_length=20)
+    email: EmailStr = Field(max_length=255)
+
+
+class CompanyInvite(CompanyInviteBase, table=True):
+    id: uuid.UUID = Field(default_factory=uuid.uuid4, primary_key=True)
+    company_id: uuid.UUID = Field(
+        foreign_key="company.id", nullable=False, ondelete="CASCADE"
+    )
+    token: str = Field(unique=True, index=True, max_length=500)
+    expires_at: datetime = Field(sa_type=DateTime(timezone=True))  # type: ignore
+    used: bool = Field(default=False)
+    created_at: datetime | None = Field(
+        default_factory=get_datetime_utc,
+        sa_type=DateTime(timezone=True),  # type: ignore
+    )
+    company: Company | None = Relationship(back_populates="invites")
+
+
+class CompanyInvitePublic(CompanyInviteBase):
+    id: uuid.UUID
+    company_id: uuid.UUID
+    expires_at: datetime
+    used: bool
+    created_at: datetime | None = None
+
+
+# Schema for PJ completing their registration via invite token
+class CompanyRegistrationComplete(SQLModel):
+    token: str
+    razao_social: str = Field(min_length=1, max_length=255)
+    representante_legal: str = Field(min_length=1, max_length=255)
+    data_abertura: date
+    nome_fantasia: str = Field(min_length=1, max_length=255)
+    porte: str = Field(min_length=1, max_length=100)
+    atividade_economica_principal: str = Field(min_length=1, max_length=255)
+    atividade_economica_secundaria: str = Field(min_length=1, max_length=255)
+    natureza_juridica: str = Field(min_length=1, max_length=255)
+    logradouro: str = Field(min_length=1, max_length=255)
+    numero: str = Field(min_length=1, max_length=20)
+    complemento: str = Field(min_length=1, max_length=255)
+    cep: str = Field(min_length=1, max_length=10)
+    bairro: str = Field(min_length=1, max_length=255)
+    municipio: str = Field(min_length=1, max_length=255)
+    uf: str = Field(min_length=1, max_length=2)
+    endereco_eletronico: str = Field(min_length=1, max_length=255)
+    telefone_comercial: str = Field(min_length=1, max_length=20)
+    situacao_cadastral: str = Field(min_length=1, max_length=100)
+    data_situacao_cadastral: date
+    cpf_representante_legal: str = Field(min_length=1, max_length=14)
+    identidade_representante_legal: str = Field(min_length=1, max_length=20)
+    logradouro_representante_legal: str = Field(min_length=1, max_length=255)
+    numero_representante_legal: str = Field(min_length=1, max_length=20)
+    complemento_representante_legal: str = Field(min_length=1, max_length=255)
+    cep_representante_legal: str = Field(min_length=1, max_length=10)
+    bairro_representante_legal: str = Field(min_length=1, max_length=255)
+    municipio_representante_legal: str = Field(min_length=1, max_length=255)
+    uf_representante_legal: str = Field(min_length=1, max_length=2)
+    endereco_eletronico_representante_legal: str = Field(
+        min_length=1, max_length=255
+    )
+    telefones_representante_legal: str = Field(min_length=1, max_length=40)
+    data_nascimento_representante_legal: date
+    banco_cc_cnpj: str = Field(min_length=1, max_length=100)
+    agencia_cc_cnpj: str = Field(min_length=1, max_length=20)
+
+
+# Schema for token validation response
+class CompanyInviteValidation(SQLModel):
+    valid: bool
+    company: CompanyPublic | None = None
+    message: str | None = None
 
 
 # Resume parsed data (not a DB table, just a response model)

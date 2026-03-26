@@ -3,7 +3,7 @@
 import type { CancelablePromise } from './core/CancelablePromise';
 import { OpenAPI } from './core/OpenAPI';
 import { request as __request } from './core/request';
-import type { CompaniesCreateCompanyRouteData, CompaniesCreateCompanyRouteResponse, CompaniesParseResumeData, CompaniesParseResumeResponse, ItemsReadItemsData, ItemsReadItemsResponse, ItemsCreateItemData, ItemsCreateItemResponse, ItemsReadItemData, ItemsReadItemResponse, ItemsUpdateItemData, ItemsUpdateItemResponse, ItemsDeleteItemData, ItemsDeleteItemResponse, LoginLoginAccessTokenData, LoginLoginAccessTokenResponse, LoginTestTokenResponse, LoginRecoverPasswordData, LoginRecoverPasswordResponse, LoginResetPasswordData, LoginResetPasswordResponse, LoginRecoverPasswordHtmlContentData, LoginRecoverPasswordHtmlContentResponse, PrivateCreateUserData, PrivateCreateUserResponse, UsersReadUsersData, UsersReadUsersResponse, UsersCreateUserData, UsersCreateUserResponse, UsersReadUserMeResponse, UsersDeleteUserMeResponse, UsersUpdateUserMeData, UsersUpdateUserMeResponse, UsersUpdatePasswordMeData, UsersUpdatePasswordMeResponse, UsersRegisterUserData, UsersRegisterUserResponse, UsersReadUserByIdData, UsersReadUserByIdResponse, UsersUpdateUserData, UsersUpdateUserResponse, UsersDeleteUserData, UsersDeleteUserResponse, UtilsTestEmailData, UtilsTestEmailResponse, UtilsHealthCheckResponse } from './types.gen';
+import type { CompaniesCreateCompanyRouteData, CompaniesCreateCompanyRouteResponse, CompaniesParseResumeData, CompaniesParseResumeResponse, ItemsReadItemsData, ItemsReadItemsResponse, ItemsCreateItemData, ItemsCreateItemResponse, ItemsReadItemData, ItemsReadItemResponse, ItemsUpdateItemData, ItemsUpdateItemResponse, ItemsDeleteItemData, ItemsDeleteItemResponse, LoginLoginAccessTokenData, LoginLoginAccessTokenResponse, LoginTestTokenResponse, LoginRecoverPasswordData, LoginRecoverPasswordResponse, LoginResetPasswordData, LoginResetPasswordResponse, LoginRecoverPasswordHtmlContentData, LoginRecoverPasswordHtmlContentResponse, PrivateCreateUserData, PrivateCreateUserResponse, UsersReadUsersData, UsersReadUsersResponse, UsersCreateUserData, UsersCreateUserResponse, UsersReadUserMeResponse, UsersDeleteUserMeResponse, UsersUpdateUserMeData, UsersUpdateUserMeResponse, UsersUpdatePasswordMeData, UsersUpdatePasswordMeResponse, UsersRegisterUserData, UsersRegisterUserResponse, UsersReadUserByIdData, UsersReadUserByIdResponse, UsersUpdateUserData, UsersUpdateUserResponse, UsersDeleteUserData, UsersDeleteUserResponse, UtilsTestEmailData, UtilsTestEmailResponse, UtilsHealthCheckResponse, InvitesSendInviteData, InvitesSendInviteResponse, InvitesResendInviteData, InvitesResendInviteResponse, InvitesValidateInviteTokenData, InvitesValidateInviteTokenResponse, InvitesCompleteRegistrationData, InvitesCompleteRegistrationResponse } from './types.gen';
 
 export class CompaniesService {
     /**
@@ -505,6 +505,90 @@ export class UtilsService {
         return __request(OpenAPI, {
             method: 'GET',
             url: '/api/v1/utils/health-check/'
+        });
+    }
+}
+
+export class InvitesService {
+    /**
+     * Send Invite
+     * Send a PJ registration invite. Creates initial company record and sends email.
+     * @param data The data for the request.
+     * @param data.requestBody
+     * @returns CompanyInvitePublic Successful Response
+     * @throws ApiError
+     */
+    public static sendInvite(data: InvitesSendInviteData): CancelablePromise<InvitesSendInviteResponse> {
+        return __request(OpenAPI, {
+            method: 'POST',
+            url: '/api/v1/invites/',
+            body: data.requestBody,
+            mediaType: 'application/json',
+            errors: {
+                422: 'Validation Error'
+            }
+        });
+    }
+    
+    /**
+     * Resend Invite
+     * Resend a PJ registration invite. Generates a new token and sends a new email.
+     * @param data The data for the request.
+     * @param data.inviteId
+     * @returns CompanyInvitePublic Successful Response
+     * @throws ApiError
+     */
+    public static resendInvite(data: InvitesResendInviteData): CancelablePromise<InvitesResendInviteResponse> {
+        return __request(OpenAPI, {
+            method: 'POST',
+            url: '/api/v1/invites/{invite_id}/resend',
+            path: {
+                invite_id: data.inviteId
+            },
+            errors: {
+                422: 'Validation Error'
+            }
+        });
+    }
+    
+    /**
+     * Validate Invite Token
+     * Validate an invite token. Public endpoint (no auth required).
+     * @param data The data for the request.
+     * @param data.token
+     * @returns CompanyInviteValidation Successful Response
+     * @throws ApiError
+     */
+    public static validateInviteToken(data: InvitesValidateInviteTokenData): CancelablePromise<InvitesValidateInviteTokenResponse> {
+        return __request(OpenAPI, {
+            method: 'GET',
+            url: '/api/v1/invites/validate',
+            query: {
+                token: data.token
+            },
+            errors: {
+                422: 'Validation Error'
+            }
+        });
+    }
+    
+    /**
+     * Complete Registration
+     * Complete PJ registration. Public endpoint (no auth required).
+     * @param data The data for the request.
+     * @param data.requestBody
+     * @returns CompanyPublic Successful Response
+     * @throws ApiError
+     */
+    public static completeRegistration(data: InvitesCompleteRegistrationData): CancelablePromise<InvitesCompleteRegistrationResponse> {
+        return __request(OpenAPI, {
+            method: 'PUT',
+            url: '/api/v1/invites/complete',
+            body: data.requestBody,
+            mediaType: 'application/json',
+            errors: {
+                422: 'Validation Error'
+            }
         });
     }
 }

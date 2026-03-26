@@ -7,6 +7,9 @@ from app.core.security import get_password_hash, verify_password
 from app.models import (
     Company,
     CompanyCreate,
+    CompanyInvite,
+    CompanyRegistrationComplete,
+    CompanyStatus,
     Item,
     ItemCreate,
     User,
@@ -87,3 +90,57 @@ def create_company(*, session: Session, company_in: CompanyCreate) -> Company:
     session.commit()
     session.refresh(db_company)
     return db_company
+
+
+def create_company_initial(
+    *, session: Session, cnpj: str, email: str
+) -> Company:
+    db_company = Company(
+        cnpj=cnpj,
+        email=email,
+        status=CompanyStatus.pending,
+    )
+    session.add(db_company)
+    session.commit()
+    session.refresh(db_company)
+    return db_company
+
+
+def create_company_invite(
+    *, session: Session, company_id: uuid.UUID, email: str, token: str, expires_at: Any
+) -> CompanyInvite:
+    db_invite = CompanyInvite(
+        company_id=company_id,
+        email=email,
+        token=token,
+        expires_at=expires_at,
+    )
+    session.add(db_invite)
+    session.commit()
+    session.refresh(db_invite)
+    return db_invite
+
+
+def get_invite_by_token(*, session: Session, token: str) -> CompanyInvite | None:
+    statement = select(CompanyInvite).where(CompanyInvite.token == token)
+    return session.exec(statement).first()
+
+
+def complete_company_registration(
+    *,
+    session: Session,
+    company: Company,
+    invite: CompanyInvite,
+    registration_data: CompanyRegistrationComplete,
+) -> Company:
+    update_data = registration_data.model_dump(exclude={"token"})
+    company.sqlmodel_update(update_data)
+    company.status = CompanyStatus.completed
+    session.add(company)
+
+    invite.used = True
+    session.add(invite)
+
+    session.commit()
+    session.refresh(company)
+    return company
