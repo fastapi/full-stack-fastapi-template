@@ -121,3 +121,45 @@ def verify_password_reset_token(token: str) -> str | None:
         return str(decoded_token["sub"])
     except InvalidTokenError:
         return None
+
+
+def generate_invite_token(company_id: str, email: str) -> tuple[str, datetime]:
+    delta = timedelta(days=settings.INVITE_TOKEN_EXPIRE_DAYS)
+    now = datetime.now(timezone.utc)
+    expires = now + delta
+    encoded_jwt = jwt.encode(
+        {"exp": expires, "nbf": now, "sub": company_id, "email": email, "type": "invite"},
+        settings.SECRET_KEY,
+        algorithm=security.ALGORITHM,
+    )
+    return encoded_jwt, expires
+
+
+def verify_invite_token(token: str) -> dict[str, str] | None:
+    try:
+        decoded_token = jwt.decode(
+            token, settings.SECRET_KEY, algorithms=[security.ALGORITHM]
+        )
+        if decoded_token.get("type") != "invite":
+            return None
+        return {
+            "company_id": str(decoded_token["sub"]),
+            "email": str(decoded_token["email"]),
+        }
+    except InvalidTokenError:
+        return None
+
+
+def generate_pj_invite_email(email_to: str, link: str, valid_days: int) -> EmailData:
+    project_name = settings.PROJECT_NAME
+    subject = f"{project_name} - Convite para completar cadastro PJ"
+    html_content = render_email_template(
+        template_name="pj_invite.html",
+        context={
+            "project_name": settings.PROJECT_NAME,
+            "email": email_to,
+            "link": link,
+            "valid_days": valid_days,
+        },
+    )
+    return EmailData(html_content=html_content, subject=subject)

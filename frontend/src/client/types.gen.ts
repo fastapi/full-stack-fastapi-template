@@ -52,6 +52,68 @@ export type CompanyCreate = {
 
 export type CompanyPublic = {
     cnpj: string;
+    razao_social?: (string | null);
+    representante_legal?: (string | null);
+    data_abertura?: (string | null);
+    nome_fantasia?: (string | null);
+    porte?: (string | null);
+    atividade_economica_principal?: (string | null);
+    atividade_economica_secundaria?: (string | null);
+    natureza_juridica?: (string | null);
+    logradouro?: (string | null);
+    numero?: (string | null);
+    complemento?: (string | null);
+    cep?: (string | null);
+    bairro?: (string | null);
+    municipio?: (string | null);
+    uf?: (string | null);
+    endereco_eletronico?: (string | null);
+    telefone_comercial?: (string | null);
+    situacao_cadastral?: (string | null);
+    data_situacao_cadastral?: (string | null);
+    cpf_representante_legal?: (string | null);
+    identidade_representante_legal?: (string | null);
+    logradouro_representante_legal?: (string | null);
+    numero_representante_legal?: (string | null);
+    complemento_representante_legal?: (string | null);
+    cep_representante_legal?: (string | null);
+    bairro_representante_legal?: (string | null);
+    municipio_representante_legal?: (string | null);
+    uf_representante_legal?: (string | null);
+    endereco_eletronico_representante_legal?: (string | null);
+    telefones_representante_legal?: (string | null);
+    data_nascimento_representante_legal?: (string | null);
+    banco_cc_cnpj?: (string | null);
+    agencia_cc_cnpj?: (string | null);
+    id: string;
+    email?: (string | null);
+    status?: string;
+    created_at?: (string | null);
+};
+
+export type CompanyInviteCreate = {
+    cnpj: string;
+    email: string;
+    razao_social: string;
+};
+
+export type CompanyInvitePublic = {
+    email: string;
+    id: string;
+    company_id: string;
+    expires_at: string;
+    used: boolean;
+    created_at?: (string | null);
+};
+
+export type CompanyInviteValidation = {
+    valid: boolean;
+    company?: (CompanyPublic | null);
+    message?: (string | null);
+};
+
+export type CompanyRegistrationComplete = {
+    token: string;
     razao_social: string;
     representante_legal: string;
     data_abertura: string;
@@ -85,8 +147,6 @@ export type CompanyPublic = {
     data_nascimento_representante_legal: string;
     banco_cc_cnpj: string;
     agencia_cc_cnpj: string;
-    id: string;
-    created_at?: (string | null);
 };
 
 export type HTTPValidationError = {
@@ -342,3 +402,27 @@ export type UtilsTestEmailData = {
 export type UtilsTestEmailResponse = (Message);
 
 export type UtilsHealthCheckResponse = (boolean);
+
+export type InvitesSendInviteData = {
+    requestBody: CompanyInviteCreate;
+};
+
+export type InvitesSendInviteResponse = (CompanyInvitePublic);
+
+export type InvitesResendInviteData = {
+    inviteId: string;
+};
+
+export type InvitesResendInviteResponse = (CompanyInvitePublic);
+
+export type InvitesValidateInviteTokenData = {
+    token: string;
+};
+
+export type InvitesValidateInviteTokenResponse = (CompanyInviteValidation);
+
+export type InvitesCompleteRegistrationData = {
+    requestBody: CompanyRegistrationComplete;
+};
+
+export type InvitesCompleteRegistrationResponse = (CompanyPublic);

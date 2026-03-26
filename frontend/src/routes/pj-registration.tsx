@@ -1,19 +1,16 @@
 import { zodResolver } from "@hookform/resolvers/zod"
-import { useMutation } from "@tanstack/react-query"
+import { useMutation, useQuery } from "@tanstack/react-query"
 import { createFileRoute } from "@tanstack/react-router"
 import { useState } from "react"
 import { useForm } from "react-hook-form"
 import { z } from "zod"
 
 import {
-  CompaniesService,
-  type CompanyCreate,
-  type CompanyInviteCreate,
+  type CompanyPublic,
+  type CompanyRegistrationComplete,
   InvitesService,
-  type ResumeData,
 } from "@/client"
-import { ResumeConfirmationModal } from "@/components/Companies/ResumeConfirmationModal"
-import { ResumeUpload } from "@/components/Companies/ResumeUpload"
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
 import { Button } from "@/components/ui/button"
 import {
   Card,
@@ -29,7 +26,6 @@ import {
   DialogFooter,
   DialogHeader,
   DialogTitle,
-  DialogTrigger,
 } from "@/components/ui/dialog"
 import {
   Form,
@@ -44,8 +40,11 @@ import { LoadingButton } from "@/components/ui/loading-button"
 import useCustomToast from "@/hooks/useCustomToast"
 import { handleError } from "@/utils"
 
-const formSchema = z.object({
-  cnpj: z.string().min(1, { message: "CNPJ é obrigatório" }),
+const searchSchema = z.object({
+  token: z.string().catch(""),
+})
+
+const registrationSchema = z.object({
   razao_social: z.string().min(1, { message: "Razão Social é obrigatória" }),
   representante_legal: z
     .string()
@@ -127,65 +126,34 @@ const formSchema = z.object({
     .min(1, { message: "Agência CC do CNPJ é obrigatória" }),
 })
 
-type FormData = z.infer<typeof formSchema>
+type RegistrationFormData = z.infer<typeof registrationSchema>
 
-const defaultValues: FormData = {
-  cnpj: "",
-  razao_social: "",
-  representante_legal: "",
-  data_abertura: "",
-  nome_fantasia: "",
-  porte: "",
-  atividade_economica_principal: "",
-  atividade_economica_secundaria: "",
-  natureza_juridica: "",
-  logradouro: "",
-  numero: "",
-  complemento: "",
-  cep: "",
-  bairro: "",
-  municipio: "",
-  uf: "",
-  endereco_eletronico: "",
-  telefone_comercial: "",
-  situacao_cadastral: "",
-  data_situacao_cadastral: "",
-  cpf_representante_legal: "",
-  identidade_representante_legal: "",
-  logradouro_representante_legal: "",
-  numero_representante_legal: "",
-  complemento_representante_legal: "",
-  cep_representante_legal: "",
-  bairro_representante_legal: "",
-  municipio_representante_legal: "",
-  uf_representante_legal: "",
-  endereco_eletronico_representante_legal: "",
-  telefones_representante_legal: "",
-  data_nascimento_representante_legal: "",
-  banco_cc_cnpj: "",
-  agencia_cc_cnpj: "",
-}
-
-export const Route = createFileRoute("/_layout/companies")({
-  component: Companies,
+export const Route = createFileRoute("/pj-registration")({
+  component: PjRegistration,
+  validateSearch: searchSchema,
   head: () => ({
     meta: [
       {
-        title: "Cadastro PJ - Controle de PJs",
+        title: "Completar Cadastro PJ - Controle de PJs",
       },
     ],
   }),
 })
 
 interface FieldConfig {
-  name: keyof FormData
+  name: keyof RegistrationFormData
   label: string
   type: string
+  readOnly?: boolean
 }
 
 const dadosEmpresaFields: FieldConfig[] = [
-  { name: "cnpj", label: "CNPJ", type: "text" },
-  { name: "razao_social", label: "Razão Social", type: "text" },
+  {
+    name: "razao_social",
+    label: "Razão Social",
+    type: "text",
+    readOnly: true,
+  },
   { name: "nome_fantasia", label: "Nome Fantasia", type: "text" },
   { name: "data_abertura", label: "Data de Abertura", type: "date" },
   { name: "porte", label: "Porte", type: "text" },
@@ -311,7 +279,7 @@ function FieldGroup({
   form,
 }: {
   fields: FieldConfig[]
-  form: ReturnType<typeof useForm<FormData>>
+  form: ReturnType<typeof useForm<RegistrationFormData>>
 }) {
   return (
     <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
@@ -330,6 +298,8 @@ function FieldGroup({
                   placeholder={fieldConfig.label}
                   type={fieldConfig.type}
                   {...field}
+                  readOnly={fieldConfig.readOnly}
+                  className={fieldConfig.readOnly ? "bg-muted" : ""}
                   required
                 />
               </FormControl>
@@ -342,222 +312,202 @@ function FieldGroup({
   )
 }
 
-type ResumeFieldMapping = {
-  resumeKey: keyof ResumeData
-  formKey: keyof FormData
-  transform?: (value: string | Array<string> | undefined) => string
+function getDefaultValues(company: CompanyPublic | null): RegistrationFormData {
+  if (!company) {
+    return {
+      razao_social: "",
+      representante_legal: "",
+      data_abertura: "",
+      nome_fantasia: "",
+      porte: "",
+      atividade_economica_principal: "",
+      atividade_economica_secundaria: "",
+      natureza_juridica: "",
+      logradouro: "",
+      numero: "",
+      complemento: "",
+      cep: "",
+      bairro: "",
+      municipio: "",
+      uf: "",
+      endereco_eletronico: "",
+      telefone_comercial: "",
+      situacao_cadastral: "",
+      data_situacao_cadastral: "",
+      cpf_representante_legal: "",
+      identidade_representante_legal: "",
+      logradouro_representante_legal: "",
+      numero_representante_legal: "",
+      complemento_representante_legal: "",
+      cep_representante_legal: "",
+      bairro_representante_legal: "",
+      municipio_representante_legal: "",
+      uf_representante_legal: "",
+      endereco_eletronico_representante_legal: "",
+      telefones_representante_legal: "",
+      data_nascimento_representante_legal: "",
+      banco_cc_cnpj: "",
+      agencia_cc_cnpj: "",
+    }
+  }
+  return {
+    razao_social: company.razao_social ?? "",
+    representante_legal: company.representante_legal ?? "",
+    data_abertura: company.data_abertura ?? "",
+    nome_fantasia: company.nome_fantasia ?? "",
+    porte: company.porte ?? "",
+    atividade_economica_principal: company.atividade_economica_principal ?? "",
+    atividade_economica_secundaria:
+      company.atividade_economica_secundaria ?? "",
+    natureza_juridica: company.natureza_juridica ?? "",
+    logradouro: company.logradouro ?? "",
+    numero: company.numero ?? "",
+    complemento: company.complemento ?? "",
+    cep: company.cep ?? "",
+    bairro: company.bairro ?? "",
+    municipio: company.municipio ?? "",
+    uf: company.uf ?? "",
+    endereco_eletronico: company.endereco_eletronico ?? "",
+    telefone_comercial: company.telefone_comercial ?? "",
+    situacao_cadastral: company.situacao_cadastral ?? "",
+    data_situacao_cadastral: company.data_situacao_cadastral ?? "",
+    cpf_representante_legal: company.cpf_representante_legal ?? "",
+    identidade_representante_legal:
+      company.identidade_representante_legal ?? "",
+    logradouro_representante_legal:
+      company.logradouro_representante_legal ?? "",
+    numero_representante_legal: company.numero_representante_legal ?? "",
+    complemento_representante_legal:
+      company.complemento_representante_legal ?? "",
+    cep_representante_legal: company.cep_representante_legal ?? "",
+    bairro_representante_legal: company.bairro_representante_legal ?? "",
+    municipio_representante_legal: company.municipio_representante_legal ?? "",
+    uf_representante_legal: company.uf_representante_legal ?? "",
+    endereco_eletronico_representante_legal:
+      company.endereco_eletronico_representante_legal ?? "",
+    telefones_representante_legal: company.telefones_representante_legal ?? "",
+    data_nascimento_representante_legal:
+      company.data_nascimento_representante_legal ?? "",
+    banco_cc_cnpj: company.banco_cc_cnpj ?? "",
+    agencia_cc_cnpj: company.agencia_cc_cnpj ?? "",
+  }
 }
 
-const resumeToFormMapping: ResumeFieldMapping[] = [
-  { resumeKey: "name", formKey: "representante_legal" },
-  {
-    resumeKey: "email",
-    formKey: "endereco_eletronico_representante_legal",
-  },
-  { resumeKey: "phone", formKey: "telefones_representante_legal" },
-  { resumeKey: "city", formKey: "municipio_representante_legal" },
-  { resumeKey: "state", formKey: "uf_representante_legal" },
-  { resumeKey: "linkedin", formKey: "endereco_eletronico" },
-  {
-    resumeKey: "skills",
-    formKey: "atividade_economica_principal",
-    transform: (v) => (Array.isArray(v) ? v.join(", ") : (v ?? "")),
-  },
-]
-
-const inviteFormSchema = z.object({
-  cnpj: z.string().min(1, { message: "CNPJ é obrigatório" }),
-  email: z.string().email({ message: "E-mail inválido" }),
-  razao_social: z.string().min(1, { message: "Razão Social é obrigatória" }),
-})
-
-type InviteFormData = z.infer<typeof inviteFormSchema>
-
-function Companies() {
+function PjRegistration() {
+  const { token } = Route.useSearch()
   const { showSuccessToast, showErrorToast } = useCustomToast()
-  const [resumeData, setResumeData] = useState<ResumeData | null>(null)
-  const [modalOpen, setModalOpen] = useState(false)
-  const [inviteDialogOpen, setInviteDialogOpen] = useState(false)
+  const [confirmOpen, setConfirmOpen] = useState(false)
+  const [completed, setCompleted] = useState(false)
 
-  const form = useForm<FormData>({
-    resolver: zodResolver(formSchema),
+  const validationQuery = useQuery({
+    queryKey: ["invite-validation", token],
+    queryFn: () => InvitesService.validateInviteToken({ token }),
+    enabled: !!token,
+    retry: false,
+  })
+
+  const company = validationQuery.data?.company ?? null
+  const isValid = validationQuery.data?.valid === true
+
+  const form = useForm<RegistrationFormData>({
+    resolver: zodResolver(registrationSchema),
     mode: "onBlur",
     criteriaMode: "all",
-    defaultValues,
+    defaultValues: getDefaultValues(null),
+    values: isValid ? getDefaultValues(company) : undefined,
   })
 
   const mutation = useMutation({
-    mutationFn: (data: CompanyCreate) =>
-      CompaniesService.createCompanyRoute({ requestBody: data }),
+    mutationFn: (data: CompanyRegistrationComplete) =>
+      InvitesService.completeRegistration({ requestBody: data }),
     onSuccess: () => {
-      showSuccessToast("Cadastro recebido com sucesso!")
-      form.reset()
+      showSuccessToast("Cadastro completado com sucesso!")
+      setCompleted(true)
+      setConfirmOpen(false)
     },
-    onError: handleError.bind(showErrorToast),
-  })
-
-  const onSubmit = (data: FormData) => {
-    mutation.mutate(data)
-  }
-
-  const handleResumeDataParsed = (data: ResumeData) => {
-    setResumeData(data)
-    setModalOpen(true)
-  }
-
-  const handleApplyResumeData = () => {
-    if (!resumeData) return
-
-    for (const mapping of resumeToFormMapping) {
-      const currentValue = form.getValues(mapping.formKey)
-      if (currentValue) continue
-
-      const rawValue = resumeData[mapping.resumeKey]
-      let value: string
-      if (mapping.transform) {
-        value = mapping.transform(rawValue)
-      } else if (typeof rawValue === "string") {
-        value = rawValue
-      } else {
-        continue
-      }
-
-      if (value) {
-        form.setValue(mapping.formKey, value, { shouldValidate: true })
-      }
-    }
-
-    setModalOpen(false)
-    showSuccessToast("Dados do currículo aplicados com sucesso!")
-  }
-
-  const handleCancelResume = () => {
-    setModalOpen(false)
-  }
-
-  const inviteForm = useForm<InviteFormData>({
-    resolver: zodResolver(inviteFormSchema),
-    mode: "onBlur",
-    criteriaMode: "all",
-    defaultValues: { cnpj: "", email: "", razao_social: "" },
-  })
-
-  const inviteMutation = useMutation({
-    mutationFn: (data: CompanyInviteCreate) =>
-      InvitesService.sendInvite({ requestBody: data }),
-    onSuccess: () => {
-      showSuccessToast("Convite enviado com sucesso!")
-      inviteForm.reset()
-      setInviteDialogOpen(false)
+    onError: (err) => {
+      setConfirmOpen(false)
+      handleError.call(showErrorToast, err)
     },
-    onError: handleError.bind(showErrorToast),
   })
 
-  const onInviteSubmit = (data: InviteFormData) => {
-    inviteMutation.mutate(data)
+  const onSubmit = () => {
+    setConfirmOpen(true)
+  }
+
+  const handleConfirmApply = () => {
+    const data = form.getValues()
+    mutation.mutate({ ...data, token })
+  }
+
+  if (!token) {
+    return (
+      <div className="flex min-h-svh items-center justify-center p-6">
+        <Alert variant="destructive" className="max-w-lg">
+          <AlertTitle>Link inválido</AlertTitle>
+          <AlertDescription>
+            Nenhum token foi fornecido. Verifique o link recebido por e-mail ou
+            solicite um novo convite ao responsável interno.
+          </AlertDescription>
+        </Alert>
+      </div>
+    )
+  }
+
+  if (validationQuery.isLoading) {
+    return (
+      <div className="flex min-h-svh items-center justify-center p-6">
+        <p className="text-muted-foreground">Validando seu acesso...</p>
+      </div>
+    )
+  }
+
+  if (!isValid) {
+    return (
+      <div className="flex min-h-svh items-center justify-center p-6">
+        <Alert variant="destructive" className="max-w-lg">
+          <AlertTitle>Acesso negado</AlertTitle>
+          <AlertDescription>
+            {validationQuery.data?.message ??
+              "O link é inválido ou expirou. Solicite um novo convite ao responsável interno."}
+          </AlertDescription>
+        </Alert>
+      </div>
+    )
+  }
+
+  if (completed) {
+    return (
+      <div className="flex min-h-svh items-center justify-center p-6">
+        <Card className="max-w-lg">
+          <CardHeader>
+            <CardTitle>Cadastro Completado</CardTitle>
+            <CardDescription>
+              Seu cadastro foi enviado com sucesso. Obrigado por completar as
+              informações.
+            </CardDescription>
+          </CardHeader>
+        </Card>
+      </div>
+    )
   }
 
   return (
-    <div className="flex flex-col gap-6">
-      <div className="flex items-start justify-between">
-        <div>
-          <h1 className="text-2xl font-bold tracking-tight">Cadastro PJ</h1>
-          <p className="text-muted-foreground">
-            Preencha os dados básicos da Pessoa Jurídica para iniciar o processo
-            de admissão.
+    <div className="mx-auto max-w-5xl p-6">
+      <div className="mb-6">
+        <h1 className="text-2xl font-bold tracking-tight">
+          Completar Cadastro PJ
+        </h1>
+        <p className="text-muted-foreground">
+          Preencha todos os campos obrigatórios para completar o cadastro da
+          empresa. A Razão Social não pode ser alterada.
+        </p>
+        {company?.cnpj && (
+          <p className="mt-1 text-sm text-muted-foreground">
+            CNPJ: <span className="font-medium">{company.cnpj}</span>
           </p>
-        </div>
-        <Dialog open={inviteDialogOpen} onOpenChange={setInviteDialogOpen}>
-          <DialogTrigger asChild>
-            <Button>Convidar PJ por E-mail</Button>
-          </DialogTrigger>
-          <DialogContent>
-            <DialogHeader>
-              <DialogTitle>Convidar PJ por E-mail</DialogTitle>
-              <DialogDescription>
-                Informe o CNPJ e o e-mail do representante legal para enviar um
-                convite de cadastro. O PJ receberá um link válido por 3 dias.
-              </DialogDescription>
-            </DialogHeader>
-            <form
-              onSubmit={inviteForm.handleSubmit(onInviteSubmit)}
-              className="grid gap-4"
-            >
-              <Form {...inviteForm}>
-                <FormField
-                  control={inviteForm.control}
-                  name="cnpj"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>CNPJ</FormLabel>
-                      <FormControl>
-                        <Input placeholder="00.000.000/0000-00" {...field} />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-                <FormField
-                  control={inviteForm.control}
-                  name="razao_social"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Razão Social</FormLabel>
-                      <FormControl>
-                        <Input
-                          placeholder="Razão Social da empresa"
-                          {...field}
-                        />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-                <FormField
-                  control={inviteForm.control}
-                  name="email"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>E-mail do PJ</FormLabel>
-                      <FormControl>
-                        <Input
-                          placeholder="email@empresa.com"
-                          type="email"
-                          {...field}
-                        />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-              </Form>
-              <DialogFooter>
-                <Button
-                  type="button"
-                  variant="outline"
-                  onClick={() => setInviteDialogOpen(false)}
-                  disabled={inviteMutation.isPending}
-                >
-                  Cancelar
-                </Button>
-                <LoadingButton type="submit" loading={inviteMutation.isPending}>
-                  Enviar Convite
-                </LoadingButton>
-              </DialogFooter>
-            </form>
-          </DialogContent>
-        </Dialog>
+        )}
       </div>
-
-      <ResumeUpload onResumeDataParsed={handleResumeDataParsed} />
-
-      <ResumeConfirmationModal
-        open={modalOpen}
-        onOpenChange={setModalOpen}
-        resumeData={resumeData}
-        onApply={handleApplyResumeData}
-        onCancel={handleCancelResume}
-      />
 
       <Form {...form}>
         <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
@@ -627,21 +577,45 @@ function Companies() {
             </CardContent>
           </Card>
 
-          <div className="flex justify-end gap-4">
-            <Button
-              type="button"
-              variant="outline"
-              onClick={() => form.reset()}
-              disabled={mutation.isPending}
+          <div className="flex justify-end">
+            <LoadingButton
+              type="submit"
+              loading={mutation.isPending}
+              disabled={!form.formState.isValid}
             >
-              Limpar
-            </Button>
-            <LoadingButton type="submit" loading={mutation.isPending}>
-              Cadastrar
+              Salvar
             </LoadingButton>
           </div>
         </form>
       </Form>
+
+      <Dialog open={confirmOpen} onOpenChange={setConfirmOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Confirmar envio do cadastro</DialogTitle>
+            <DialogDescription>
+              Deseja realmente salvar os dados do cadastro? Após a confirmação,
+              os dados serão persistidos e o convite será marcado como
+              utilizado.
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter>
+            <Button
+              variant="outline"
+              onClick={() => setConfirmOpen(false)}
+              disabled={mutation.isPending}
+            >
+              Cancelar
+            </Button>
+            <LoadingButton
+              onClick={handleConfirmApply}
+              loading={mutation.isPending}
+            >
+              Aplicar
+            </LoadingButton>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   )
 }

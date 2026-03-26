@@ -13,7 +13,7 @@ import { Toaster } from "./components/ui/sonner"
 import "./index.css"
 import { routeTree } from "./routeTree.gen"
 
-OpenAPI.BASE = import.meta.env.VITE_API_URL
+OpenAPI.BASE = (import.meta.env.VITE_API_URL || "").replace(/\/+$/, "")
 OpenAPI.TOKEN = async () => {
   return localStorage.getItem("access_token") || ""
 }

@@ -84,6 +84,7 @@ class Settings(BaseSettings):
         return self
 
     EMAIL_RESET_TOKEN_EXPIRE_HOURS: int = 48
+    INVITE_TOKEN_EXPIRE_DAYS: int = 3
 
     @computed_field  # type: ignore[prop-decorator]
     @property
