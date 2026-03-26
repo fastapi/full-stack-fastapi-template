@@ -225,6 +225,7 @@ class CompanyInviteBase(SQLModel):
 class CompanyInviteCreate(SQLModel):
     cnpj: str = Field(min_length=1, max_length=20)
     email: EmailStr = Field(max_length=255)
+    razao_social: str = Field(min_length=1, max_length=255)
 
 
 class CompanyInvite(CompanyInviteBase, table=True):

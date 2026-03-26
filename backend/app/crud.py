@@ -93,11 +93,12 @@ def create_company(*, session: Session, company_in: CompanyCreate) -> Company:
 
 
 def create_company_initial(
-    *, session: Session, cnpj: str, email: str
+    *, session: Session, cnpj: str, email: str, razao_social: str
 ) -> Company:
     db_company = Company(
         cnpj=cnpj,
         email=email,
+        razao_social=razao_social,
         status=CompanyStatus.pending,
     )
     session.add(db_company)

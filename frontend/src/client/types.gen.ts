@@ -94,6 +94,7 @@ export type CompanyPublic = {
 export type CompanyInviteCreate = {
     cnpj: string;
     email: string;
+    razao_social: string;
 };
 
 export type CompanyInvitePublic = {

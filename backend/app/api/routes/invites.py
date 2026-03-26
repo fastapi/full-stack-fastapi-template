@@ -57,6 +57,7 @@ def send_invite(
     if existing_company:
         company = existing_company
         company.email = invite_in.email
+        company.razao_social = invite_in.razao_social
         session.add(company)
         session.commit()
         session.refresh(company)
@@ -65,6 +66,7 @@ def send_invite(
             session=session,
             cnpj=invite_in.cnpj,
             email=invite_in.email,
+            razao_social=invite_in.razao_social,
         )
 
     token, expires_at = generate_invite_token(
@@ -263,6 +265,12 @@ def complete_registration(
         raise HTTPException(
             status_code=404,
             detail="Empresa não encontrada.",
+        )
+
+    if company.status == CompanyStatus.completed:
+        raise HTTPException(
+            status_code=400,
+            detail="O cadastro desta empresa já foi completado.",
         )
 
     updated_company = complete_company_registration(

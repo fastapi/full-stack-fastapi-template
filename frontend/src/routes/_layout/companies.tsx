@@ -368,6 +368,7 @@ const resumeToFormMapping: ResumeFieldMapping[] = [
 const inviteFormSchema = z.object({
   cnpj: z.string().min(1, { message: "CNPJ é obrigatório" }),
   email: z.string().email({ message: "E-mail inválido" }),
+  razao_social: z.string().min(1, { message: "Razão Social é obrigatória" }),
 })
 
 type InviteFormData = z.infer<typeof inviteFormSchema>
@@ -438,7 +439,7 @@ function Companies() {
     resolver: zodResolver(inviteFormSchema),
     mode: "onBlur",
     criteriaMode: "all",
-    defaultValues: { cnpj: "", email: "" },
+    defaultValues: { cnpj: "", email: "", razao_social: "" },
   })
 
   const inviteMutation = useMutation({
@@ -491,6 +492,22 @@ function Companies() {
                       <FormLabel>CNPJ</FormLabel>
                       <FormControl>
                         <Input placeholder="00.000.000/0000-00" {...field} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  control={inviteForm.control}
+                  name="razao_social"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Razão Social</FormLabel>
+                      <FormControl>
+                        <Input
+                          placeholder="Razão Social da empresa"
+                          {...field}
+                        />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
