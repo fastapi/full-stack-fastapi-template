@@ -1,5 +1,2 @@
 [tool.uv.workspace]
 members = ["backend"]
-
-[tool.ty.terminal]
-error-on-warning = true
