@@ -40,23 +40,12 @@ import { handleError } from "@/utils"
 
 const roleOptions: UserRole[] = ['comercial', 'juridico', 'financeiro', 'rh', 'pj', 'super_admin']
 
-const formSchema = z
-  .object({
-    email: z.email({ message: "Invalid email address" }),
-    full_name: z.string().optional(),
-    role: z.enum(['comercial', 'juridico', 'financeiro', 'rh', 'pj', 'super_admin']),
-    is_active: z.boolean().optional(),
-    password: z
-      .string()
-      .min(8, { message: "Password must be at least 8 characters" })
-      .optional()
-      .or(z.literal("")),
-    confirm_password: z.string().optional(),
-  })
-  .refine((data) => !data.password || data.password === data.confirm_password, {
-    message: "The passwords don't match",
-    path: ["confirm_password"],
-  })
+const formSchema = z.object({
+  email: z.email({ message: "Invalid email address" }),
+  full_name: z.string().optional(),
+  role: z.enum(['comercial', 'juridico', 'financeiro', 'rh', 'pj', 'super_admin']),
+  is_active: z.boolean().optional(),
+})
 
 type FormData = z.infer<typeof formSchema>
 
@@ -97,12 +86,7 @@ const EditUser = ({ user, onSuccess }: EditUserProps) => {
   })
 
   const onSubmit = (data: FormData) => {
-    // exclude confirm_password from submission data and remove password if empty
-    const { confirm_password: _, ...submitData } = data
-    if (!submitData.password) {
-      delete submitData.password
-    }
-    mutation.mutate(submitData)
+    mutation.mutate(data)
   }
 
   return (
@@ -205,41 +189,6 @@ const EditUser = ({ user, onSuccess }: EditUserProps) => {
                 )}
               />
 
-              <FormField
-                control={form.control}
-                name="password"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Set Password</FormLabel>
-                    <FormControl>
-                      <Input
-                        placeholder="Password"
-                        type="password"
-                        {...field}
-                      />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-
-              <FormField
-                control={form.control}
-                name="confirm_password"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Confirm Password</FormLabel>
-                    <FormControl>
-                      <Input
-                        placeholder="Password"
-                        type="password"
-                        {...field}
-                      />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
             </div>
 
             <DialogFooter>
