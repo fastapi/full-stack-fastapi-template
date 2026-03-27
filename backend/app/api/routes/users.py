@@ -65,6 +65,16 @@ def create_user(
     Create new user. Requires email and role at minimum.
     Password is optional (generated automatically for passwordless flow).
     """
+    # Only Super Admin can create another Super Admin
+    if (
+        user_in.role == UserRole.super_admin
+        and current_user.role != UserRole.super_admin
+    ):
+        raise HTTPException(
+            status_code=403,
+            detail="Only a Super Admin can create another Super Admin",
+        )
+
     user = crud.get_user_by_email(session=session, email=user_in.email)
     if user:
         raise HTTPException(
@@ -199,7 +209,13 @@ def read_user_by_id(
     user = session.get(User, user_id)
     if user == current_user:
         return user
-    if not current_user.is_superuser:
+    if not current_user.role or current_user.role not in [
+        UserRole.comercial,
+        UserRole.juridico,
+        UserRole.financeiro,
+        UserRole.rh,
+        UserRole.super_admin,
+    ]:
         raise HTTPException(
             status_code=403,
             detail="The user doesn't have enough privileges",
@@ -230,6 +246,24 @@ def update_user(
         raise HTTPException(
             status_code=404,
             detail="The user with this id does not exist in the system",
+        )
+    # Only Super Admin can modify a Super Admin user
+    if (
+        db_user.role == UserRole.super_admin
+        and current_user.role != UserRole.super_admin
+    ):
+        raise HTTPException(
+            status_code=403,
+            detail="Only a Super Admin can modify another Super Admin",
+        )
+    # Only Super Admin can assign the Super Admin role
+    if (
+        user_in.role == UserRole.super_admin
+        and current_user.role != UserRole.super_admin
+    ):
+        raise HTTPException(
+            status_code=403,
+            detail="Only a Super Admin can assign the Super Admin role",
         )
     if user_in.email:
         existing_user = crud.get_user_by_email(session=session, email=user_in.email)

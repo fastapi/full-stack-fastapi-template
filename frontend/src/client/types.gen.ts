@@ -236,6 +236,8 @@ export type AuditLogPublic = {
     performed_by_id: string;
     changes: string;
     created_at?: (string | null);
+    target_user_email?: (string | null);
+    performed_by_email?: (string | null);
 };
 
 export type AuditLogsPublic = {
