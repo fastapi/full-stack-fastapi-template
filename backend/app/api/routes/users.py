@@ -8,11 +8,13 @@ from app import crud
 from app.api.deps import (
     CurrentUser,
     SessionDep,
-    get_current_active_superuser,
+    get_current_user_manager,
 )
 from app.core.config import settings
 from app.core.security import get_password_hash, verify_password
 from app.models import (
+    AuditAction,
+    AuditLogsPublic,
     Item,
     Message,
     UpdatePassword,
@@ -20,6 +22,7 @@ from app.models import (
     UserCreate,
     UserPublic,
     UserRegister,
+    UserRole,
     UsersPublic,
     UserUpdate,
     UserUpdateMe,
@@ -31,7 +34,7 @@ router = APIRouter(prefix="/users", tags=["users"])
 
 @router.get(
     "/",
-    dependencies=[Depends(get_current_active_superuser)],
+    dependencies=[Depends(get_current_user_manager)],
     response_model=UsersPublic,
 )
 def read_users(session: SessionDep, skip: int = 0, limit: int = 100) -> Any:
@@ -51,11 +54,16 @@ def read_users(session: SessionDep, skip: int = 0, limit: int = 100) -> Any:
 
 
 @router.post(
-    "/", dependencies=[Depends(get_current_active_superuser)], response_model=UserPublic
+    "/",
+    dependencies=[Depends(get_current_user_manager)],
+    response_model=UserPublic,
 )
-def create_user(*, session: SessionDep, user_in: UserCreate) -> Any:
+def create_user(
+    *, session: SessionDep, user_in: UserCreate, current_user: CurrentUser
+) -> Any:
     """
-    Create new user.
+    Create new user. Requires email and role at minimum.
+    Password is optional (generated automatically for passwordless flow).
     """
     user = crud.get_user_by_email(session=session, email=user_in.email)
     if user:
@@ -67,13 +75,23 @@ def create_user(*, session: SessionDep, user_in: UserCreate) -> Any:
     user = crud.create_user(session=session, user_create=user_in)
     if settings.emails_enabled and user_in.email:
         email_data = generate_new_account_email(
-            email_to=user_in.email, username=user_in.email, password=user_in.password
+            email_to=user_in.email,
+            username=user_in.email,
+            password=user_in.password or "",
         )
         send_email(
             email_to=user_in.email,
             subject=email_data.subject,
             html_content=email_data.html_content,
         )
+
+    crud.create_audit_log(
+        session=session,
+        action=AuditAction.created,
+        target_user_id=user.id,
+        performed_by_id=current_user.id,
+        changes=f"User created with role={user_in.role.value}",
+    )
     return user
 
 
@@ -158,6 +176,19 @@ def register_user(session: SessionDep, user_in: UserRegister) -> Any:
     return user
 
 
+@router.get(
+    "/audit-log",
+    dependencies=[Depends(get_current_user_manager)],
+    response_model=AuditLogsPublic,
+)
+def read_audit_logs(session: SessionDep, skip: int = 0, limit: int = 100) -> Any:
+    """
+    Retrieve user audit logs.
+    """
+    logs, count = crud.get_audit_logs(session=session, skip=skip, limit=limit)
+    return AuditLogsPublic(data=logs, count=count)
+
+
 @router.get("/{user_id}", response_model=UserPublic)
 def read_user_by_id(
     user_id: uuid.UUID, session: SessionDep, current_user: CurrentUser
@@ -180,7 +211,7 @@ def read_user_by_id(
 
 @router.patch(
     "/{user_id}",
-    dependencies=[Depends(get_current_active_superuser)],
+    dependencies=[Depends(get_current_user_manager)],
     response_model=UserPublic,
 )
 def update_user(
@@ -188,9 +219,10 @@ def update_user(
     session: SessionDep,
     user_id: uuid.UUID,
     user_in: UserUpdate,
+    current_user: CurrentUser,
 ) -> Any:
     """
-    Update a user.
+    Update a user (role, active status, etc.).
     """
 
     db_user = session.get(User, user_id)
@@ -206,16 +238,49 @@ def update_user(
                 status_code=409, detail="User with this email already exists"
             )
 
+    changes_parts = []
+    user_data = user_in.model_dump(exclude_unset=True)
+    if "role" in user_data and user_data["role"] is not None:
+        changes_parts.append(f"role: {db_user.role.value} -> {user_data['role']}")
+    if "is_active" in user_data and user_data["is_active"] is not None:
+        changes_parts.append(
+            f"is_active: {db_user.is_active} -> {user_data['is_active']}"
+        )
+    if "email" in user_data and user_data["email"] is not None:
+        changes_parts.append(f"email: {db_user.email} -> {user_data['email']}")
+    if "full_name" in user_data:
+        changes_parts.append(
+            f"full_name: {db_user.full_name} -> {user_data['full_name']}"
+        )
+
+    is_deactivation = (
+        "is_active" in user_data
+        and user_data["is_active"] is False
+        and db_user.is_active is True
+    )
+
     db_user = crud.update_user(session=session, db_user=db_user, user_in=user_in)
+
+    audit_action = AuditAction.deactivated if is_deactivation else AuditAction.updated
+    crud.create_audit_log(
+        session=session,
+        action=audit_action,
+        target_user_id=db_user.id,
+        performed_by_id=current_user.id,
+        changes="; ".join(changes_parts) if changes_parts else "No changes",
+    )
     return db_user
 
 
-@router.delete("/{user_id}", dependencies=[Depends(get_current_active_superuser)])
+@router.delete(
+    "/{user_id}",
+    dependencies=[Depends(get_current_user_manager)],
+)
 def delete_user(
     session: SessionDep, current_user: CurrentUser, user_id: uuid.UUID
 ) -> Message:
     """
-    Delete a user.
+    Delete a user. Only a Super Admin can delete another Super Admin.
     """
     user = session.get(User, user_id)
     if not user:
@@ -223,6 +288,11 @@ def delete_user(
     if user == current_user:
         raise HTTPException(
             status_code=403, detail="Super users are not allowed to delete themselves"
+        )
+    if user.role == UserRole.super_admin and current_user.role != UserRole.super_admin:
+        raise HTTPException(
+            status_code=403,
+            detail="Only a Super Admin can delete another Super Admin",
         )
     statement = delete(Item).where(col(Item.owner_id) == user_id)
     session.exec(statement)

@@ -1,6 +1,7 @@
 import type { ColumnDef } from "@tanstack/react-table"
 
-import type { UserPublic } from "@/client"
+import type { UserPublic, UserRole } from "@/client"
+import { USER_ROLE_LABELS } from "@/client"
 import { Badge } from "@/components/ui/badge"
 import { cn } from "@/lib/utils"
 import { UserActionsMenu } from "./UserActionsMenu"
@@ -39,13 +40,14 @@ export const columns: ColumnDef<UserTableData>[] = [
     ),
   },
   {
-    accessorKey: "is_superuser",
+    accessorKey: "role",
     header: "Role",
-    cell: ({ row }) => (
-      <Badge variant={row.original.is_superuser ? "default" : "secondary"}>
-        {row.original.is_superuser ? "Superuser" : "User"}
-      </Badge>
-    ),
+    cell: ({ row }) => {
+      const role = row.original.role as UserRole | undefined
+      const label = role ? USER_ROLE_LABELS[role] : "User"
+      const variant = role === "super_admin" ? "default" : "secondary"
+      return <Badge variant={variant}>{label}</Badge>
+    },
   },
   {
     accessorKey: "is_active",
