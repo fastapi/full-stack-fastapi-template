@@ -23,7 +23,8 @@ export function PublicFooter() {
           <div className="space-y-4">
             <h3 className="text-lg font-bold">RaceHub</h3>
             <p className="text-sm text-muted-foreground leading-relaxed">
-              Find and register for races near you. Built with FastAPI Full-Stack Template.
+              Find and register for races near you. Built with FastAPI
+              Full-Stack Template.
             </p>
           </div>
 

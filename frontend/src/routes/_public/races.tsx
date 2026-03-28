@@ -1,5 +1,6 @@
 import { createFileRoute, Link } from "@tanstack/react-router"
 import { Calendar, MapPin, Users } from "lucide-react"
+import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import {
   Card,
@@ -9,7 +10,6 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card"
-import { Badge } from "@/components/ui/badge"
 
 export const Route = createFileRoute("/_public/races")({
   component: RacesPage,
@@ -17,7 +17,8 @@ export const Route = createFileRoute("/_public/races")({
     meta: [
       {
         title: "Browse Races - RaceHub",
-        description: "Find and register for upcoming running races near you. Filter by distance, date, and location.",
+        description:
+          "Find and register for upcoming running races near you. Filter by distance, date, and location.",
       },
     ],
   }),
@@ -32,7 +33,8 @@ const upcomingRaces = [
     location: "Central Park, New York",
     distance: "Marathon",
     participants: 2500,
-    description: "Join us for the annual Spring Marathon through beautiful Central Park.",
+    description:
+      "Join us for the annual Spring Marathon through beautiful Central Park.",
   },
   {
     id: "2",
@@ -50,7 +52,8 @@ const upcomingRaces = [
     location: "Mountain View Trail, Colorado",
     distance: "Half Marathon",
     participants: 800,
-    description: "Experience stunning mountain views on this challenging trail race.",
+    description:
+      "Experience stunning mountain views on this challenging trail race.",
   },
 ]
 
@@ -61,10 +64,12 @@ function RacesPage() {
         <div className="mx-auto max-w-7xl space-y-8">
           {/* Header */}
           <div className="space-y-4">
-            <h1 className="text-3xl font-bold tracking-tight md:text-4xl">Upcoming Races</h1>
+            <h1 className="text-3xl font-bold tracking-tight md:text-4xl">
+              Upcoming Races
+            </h1>
             <p className="text-lg text-muted-foreground max-w-2xl">
-              Browse and register for upcoming races. Find the perfect event that matches your goals
-              and fitness level.
+              Browse and register for upcoming races. Find the perfect event
+              that matches your goals and fitness level.
             </p>
           </div>
 
@@ -78,7 +83,10 @@ function RacesPage() {
           {/* Races Grid */}
           <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
             {upcomingRaces.map((race) => (
-              <Card key={race.id} className="flex flex-col transition-shadow hover:shadow-lg">
+              <Card
+                key={race.id}
+                className="flex flex-col transition-shadow hover:shadow-lg"
+              >
                 <CardHeader className="space-y-3">
                   <div className="flex items-center justify-between">
                     <Badge variant="outline">{race.distance}</Badge>
@@ -112,7 +120,9 @@ function RacesPage() {
           {/* Empty State */}
           {upcomingRaces.length === 0 && (
             <div className="py-12 text-center">
-              <p className="text-lg text-muted-foreground">No races found. Check back soon!</p>
+              <p className="text-lg text-muted-foreground">
+                No races found. Check back soon!
+              </p>
             </div>
           )}
         </div>

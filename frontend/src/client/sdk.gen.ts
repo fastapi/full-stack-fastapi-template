@@ -3,7 +3,7 @@
 import type { CancelablePromise } from './core/CancelablePromise';
 import { OpenAPI } from './core/OpenAPI';
 import { request as __request } from './core/request';
-import type { ItemsReadItemsData, ItemsReadItemsResponse, ItemsCreateItemData, ItemsCreateItemResponse, ItemsReadItemData, ItemsReadItemResponse, ItemsUpdateItemData, ItemsUpdateItemResponse, ItemsDeleteItemData, ItemsDeleteItemResponse, LoginLoginAccessTokenData, LoginLoginAccessTokenResponse, LoginTestTokenResponse, LoginRecoverPasswordData, LoginRecoverPasswordResponse, LoginResetPasswordData, LoginResetPasswordResponse, LoginRecoverPasswordHtmlContentData, LoginRecoverPasswordHtmlContentResponse, PrivateCreateUserData, PrivateCreateUserResponse, RolesReadRolesData, RolesReadRolesResponse, RolesCreateRoleData, RolesCreateRoleResponse, RolesReadRoleData, RolesReadRoleResponse, RolesUpdateRoleData, RolesUpdateRoleResponse, RolesDeleteRoleData, RolesDeleteRoleResponse, RolesAssignRoleToUserData, RolesAssignRoleToUserResponse, RolesRemoveRoleFromUserData, RolesRemoveRoleFromUserResponse, UsersReadUsersData, UsersReadUsersResponse, UsersCreateUserData, UsersCreateUserResponse, UsersReadUserMeResponse, UsersDeleteUserMeResponse, UsersUpdateUserMeData, UsersUpdateUserMeResponse, UsersUpdatePasswordMeData, UsersUpdatePasswordMeResponse, UsersRegisterUserData, UsersRegisterUserResponse, UsersReadUserByIdData, UsersReadUserByIdResponse, UsersUpdateUserData, UsersUpdateUserResponse, UsersDeleteUserData, UsersDeleteUserResponse, UtilsTestEmailData, UtilsTestEmailResponse, UtilsHealthCheckResponse } from './types.gen';
+import type { ItemsReadItemsData, ItemsReadItemsResponse, ItemsCreateItemData, ItemsCreateItemResponse, ItemsReadItemData, ItemsReadItemResponse, ItemsUpdateItemData, ItemsUpdateItemResponse, ItemsDeleteItemData, ItemsDeleteItemResponse, LoginLoginAccessTokenData, LoginLoginAccessTokenResponse, LoginTestTokenResponse, LoginRecoverPasswordData, LoginRecoverPasswordResponse, LoginResetPasswordData, LoginResetPasswordResponse, LoginRecoverPasswordHtmlContentData, LoginRecoverPasswordHtmlContentResponse, PrivateCreateUserData, PrivateCreateUserResponse, RaceAttributesReadRaceAttributesData, RaceAttributesReadRaceAttributesResponse, RaceAttributesCreateRaceAttributeData, RaceAttributesCreateRaceAttributeResponse, RaceAttributesReadRaceAttributeData, RaceAttributesReadRaceAttributeResponse, RaceAttributesUpdateRaceAttributeData, RaceAttributesUpdateRaceAttributeResponse, RaceAttributesDeleteRaceAttributeData, RaceAttributesDeleteRaceAttributeResponse, RaceCategoriesReadRaceCategoriesData, RaceCategoriesReadRaceCategoriesResponse, RaceCategoriesCreateRaceCategoryData, RaceCategoriesCreateRaceCategoryResponse, RaceCategoriesReadRaceCategoryData, RaceCategoriesReadRaceCategoryResponse, RaceCategoriesUpdateRaceCategoryData, RaceCategoriesUpdateRaceCategoryResponse, RaceCategoriesDeleteRaceCategoryData, RaceCategoriesDeleteRaceCategoryResponse, RaceRegistrationsReadRaceRegistrationsData, RaceRegistrationsReadRaceRegistrationsResponse, RaceRegistrationsCreateRaceRegistrationData, RaceRegistrationsCreateRaceRegistrationResponse, RaceRegistrationsReadMyRegistrationsData, RaceRegistrationsReadMyRegistrationsResponse, RaceRegistrationsReadRaceRegistrationData, RaceRegistrationsReadRaceRegistrationResponse, RaceRegistrationsUpdateRaceRegistrationData, RaceRegistrationsUpdateRaceRegistrationResponse, RaceRegistrationsDeleteRaceRegistrationData, RaceRegistrationsDeleteRaceRegistrationResponse, RaceResultsReadRaceResultsData, RaceResultsReadRaceResultsResponse, RaceResultsCreateRaceResultData, RaceResultsCreateRaceResultResponse, RaceResultsReadRaceResultData, RaceResultsReadRaceResultResponse, RaceResultsUpdateRaceResultData, RaceResultsUpdateRaceResultResponse, RaceResultsDeleteRaceResultData, RaceResultsDeleteRaceResultResponse, RaceResultsReadRaceResultByRegistrationData, RaceResultsReadRaceResultByRegistrationResponse, RacesReadRacesData, RacesReadRacesResponse, RacesCreateRaceData, RacesCreateRaceResponse, RacesReadRaceData, RacesReadRaceResponse, RacesUpdateRaceData, RacesUpdateRaceResponse, RacesDeleteRaceData, RacesDeleteRaceResponse, RacesReadMyOrganizedRacesData, RacesReadMyOrganizedRacesResponse, RolesReadRolesData, RolesReadRolesResponse, RolesCreateRoleData, RolesCreateRoleResponse, RolesReadRoleData, RolesReadRoleResponse, RolesUpdateRoleData, RolesUpdateRoleResponse, RolesDeleteRoleData, RolesDeleteRoleResponse, RolesAssignRoleToUserData, RolesAssignRoleToUserResponse, RolesRemoveRoleFromUserData, RolesRemoveRoleFromUserResponse, UsersReadUsersData, UsersReadUsersResponse, UsersCreateUserData, UsersCreateUserResponse, UsersReadUserMeResponse, UsersDeleteUserMeResponse, UsersUpdateUserMeData, UsersUpdateUserMeResponse, UsersUpdatePasswordMeData, UsersUpdatePasswordMeResponse, UsersRegisterUserData, UsersRegisterUserResponse, UsersReadUserByIdData, UsersReadUserByIdResponse, UsersUpdateUserData, UsersUpdateUserResponse, UsersDeleteUserData, UsersDeleteUserResponse, UtilsTestEmailData, UtilsTestEmailResponse, UtilsHealthCheckResponse } from './types.gen';
 
 export class ItemsService {
     /**
@@ -228,6 +228,663 @@ export class PrivateService {
             url: '/api/v1/private/users/',
             body: data.requestBody,
             mediaType: 'application/json',
+            errors: {
+                422: 'Validation Error'
+            }
+        });
+    }
+}
+
+export class RaceAttributesService {
+    /**
+     * Read Race Attributes
+     * Retrieve race attributes for a specific race.
+     * Public endpoint - filters by is_public by default unless authenticated organizer/admin.
+     * @param data The data for the request.
+     * @param data.raceId
+     * @param data.isPublic
+     * @returns RaceAttributesPublic Successful Response
+     * @throws ApiError
+     */
+    public static readRaceAttributes(data: RaceAttributesReadRaceAttributesData): CancelablePromise<RaceAttributesReadRaceAttributesResponse> {
+        return __request(OpenAPI, {
+            method: 'GET',
+            url: '/api/v1/race-attributes/',
+            query: {
+                race_id: data.raceId,
+                is_public: data.isPublic
+            },
+            errors: {
+                422: 'Validation Error'
+            }
+        });
+    }
+    
+    /**
+     * Create Race Attribute
+     * Create new race attribute.
+     * Only the race organizer or admin can create attributes.
+     * @param data The data for the request.
+     * @param data.requestBody
+     * @returns RaceAttributePublic Successful Response
+     * @throws ApiError
+     */
+    public static createRaceAttribute(data: RaceAttributesCreateRaceAttributeData): CancelablePromise<RaceAttributesCreateRaceAttributeResponse> {
+        return __request(OpenAPI, {
+            method: 'POST',
+            url: '/api/v1/race-attributes/',
+            body: data.requestBody,
+            mediaType: 'application/json',
+            errors: {
+                422: 'Validation Error'
+            }
+        });
+    }
+    
+    /**
+     * Read Race Attribute
+     * Get race attribute by ID.
+     * @param data The data for the request.
+     * @param data.attributeId
+     * @returns RaceAttributePublic Successful Response
+     * @throws ApiError
+     */
+    public static readRaceAttribute(data: RaceAttributesReadRaceAttributeData): CancelablePromise<RaceAttributesReadRaceAttributeResponse> {
+        return __request(OpenAPI, {
+            method: 'GET',
+            url: '/api/v1/race-attributes/{attribute_id}',
+            path: {
+                attribute_id: data.attributeId
+            },
+            errors: {
+                422: 'Validation Error'
+            }
+        });
+    }
+    
+    /**
+     * Update Race Attribute
+     * Update a race attribute.
+     * Only the race organizer or admin can update.
+     * @param data The data for the request.
+     * @param data.attributeId
+     * @param data.requestBody
+     * @returns RaceAttributePublic Successful Response
+     * @throws ApiError
+     */
+    public static updateRaceAttribute(data: RaceAttributesUpdateRaceAttributeData): CancelablePromise<RaceAttributesUpdateRaceAttributeResponse> {
+        return __request(OpenAPI, {
+            method: 'PUT',
+            url: '/api/v1/race-attributes/{attribute_id}',
+            path: {
+                attribute_id: data.attributeId
+            },
+            body: data.requestBody,
+            mediaType: 'application/json',
+            errors: {
+                422: 'Validation Error'
+            }
+        });
+    }
+    
+    /**
+     * Delete Race Attribute
+     * Delete a race attribute.
+     * Only the race organizer or admin can delete.
+     * @param data The data for the request.
+     * @param data.attributeId
+     * @returns Message Successful Response
+     * @throws ApiError
+     */
+    public static deleteRaceAttribute(data: RaceAttributesDeleteRaceAttributeData): CancelablePromise<RaceAttributesDeleteRaceAttributeResponse> {
+        return __request(OpenAPI, {
+            method: 'DELETE',
+            url: '/api/v1/race-attributes/{attribute_id}',
+            path: {
+                attribute_id: data.attributeId
+            },
+            errors: {
+                422: 'Validation Error'
+            }
+        });
+    }
+}
+
+export class RaceCategoriesService {
+    /**
+     * Read Race Categories
+     * Retrieve race categories for a specific race. Public endpoint.
+     * @param data The data for the request.
+     * @param data.raceId
+     * @param data.skip
+     * @param data.limit
+     * @returns RaceCategoriesPublic Successful Response
+     * @throws ApiError
+     */
+    public static readRaceCategories(data: RaceCategoriesReadRaceCategoriesData): CancelablePromise<RaceCategoriesReadRaceCategoriesResponse> {
+        return __request(OpenAPI, {
+            method: 'GET',
+            url: '/api/v1/race-categories/',
+            query: {
+                race_id: data.raceId,
+                skip: data.skip,
+                limit: data.limit
+            },
+            errors: {
+                422: 'Validation Error'
+            }
+        });
+    }
+    
+    /**
+     * Create Race Category
+     * Create new race category.
+     * Only the race organizer or admin can create categories.
+     * @param data The data for the request.
+     * @param data.requestBody
+     * @returns RaceCategoryPublic Successful Response
+     * @throws ApiError
+     */
+    public static createRaceCategory(data: RaceCategoriesCreateRaceCategoryData): CancelablePromise<RaceCategoriesCreateRaceCategoryResponse> {
+        return __request(OpenAPI, {
+            method: 'POST',
+            url: '/api/v1/race-categories/',
+            body: data.requestBody,
+            mediaType: 'application/json',
+            errors: {
+                422: 'Validation Error'
+            }
+        });
+    }
+    
+    /**
+     * Read Race Category
+     * Get race category by ID with details. Public endpoint.
+     * @param data The data for the request.
+     * @param data.categoryId
+     * @returns RaceCategoryPublicWithDetails Successful Response
+     * @throws ApiError
+     */
+    public static readRaceCategory(data: RaceCategoriesReadRaceCategoryData): CancelablePromise<RaceCategoriesReadRaceCategoryResponse> {
+        return __request(OpenAPI, {
+            method: 'GET',
+            url: '/api/v1/race-categories/{category_id}',
+            path: {
+                category_id: data.categoryId
+            },
+            errors: {
+                422: 'Validation Error'
+            }
+        });
+    }
+    
+    /**
+     * Update Race Category
+     * Update a race category.
+     * Only the race organizer or admin can update.
+     * @param data The data for the request.
+     * @param data.categoryId
+     * @param data.requestBody
+     * @returns RaceCategoryPublic Successful Response
+     * @throws ApiError
+     */
+    public static updateRaceCategory(data: RaceCategoriesUpdateRaceCategoryData): CancelablePromise<RaceCategoriesUpdateRaceCategoryResponse> {
+        return __request(OpenAPI, {
+            method: 'PUT',
+            url: '/api/v1/race-categories/{category_id}',
+            path: {
+                category_id: data.categoryId
+            },
+            body: data.requestBody,
+            mediaType: 'application/json',
+            errors: {
+                422: 'Validation Error'
+            }
+        });
+    }
+    
+    /**
+     * Delete Race Category
+     * Delete a race category.
+     * Only the race organizer or admin can delete.
+     * @param data The data for the request.
+     * @param data.categoryId
+     * @returns Message Successful Response
+     * @throws ApiError
+     */
+    public static deleteRaceCategory(data: RaceCategoriesDeleteRaceCategoryData): CancelablePromise<RaceCategoriesDeleteRaceCategoryResponse> {
+        return __request(OpenAPI, {
+            method: 'DELETE',
+            url: '/api/v1/race-categories/{category_id}',
+            path: {
+                category_id: data.categoryId
+            },
+            errors: {
+                422: 'Validation Error'
+            }
+        });
+    }
+}
+
+export class RaceRegistrationsService {
+    /**
+     * Read Race Registrations
+     * Retrieve race registrations.
+     * - Runners see only their own registrations
+     * - Organizers see registrations for their races
+     * - Admins see all registrations
+     * @param data The data for the request.
+     * @param data.raceId
+     * @param data.categoryId
+     * @param data.skip
+     * @param data.limit
+     * @returns RaceRegistrationsPublic Successful Response
+     * @throws ApiError
+     */
+    public static readRaceRegistrations(data: RaceRegistrationsReadRaceRegistrationsData = {}): CancelablePromise<RaceRegistrationsReadRaceRegistrationsResponse> {
+        return __request(OpenAPI, {
+            method: 'GET',
+            url: '/api/v1/race-registrations/',
+            query: {
+                race_id: data.raceId,
+                category_id: data.categoryId,
+                skip: data.skip,
+                limit: data.limit
+            },
+            errors: {
+                422: 'Validation Error'
+            }
+        });
+    }
+    
+    /**
+     * Create Race Registration
+     * Create new race registration.
+     * Runners can register themselves for races.
+     * @param data The data for the request.
+     * @param data.requestBody
+     * @returns RaceRegistrationPublic Successful Response
+     * @throws ApiError
+     */
+    public static createRaceRegistration(data: RaceRegistrationsCreateRaceRegistrationData): CancelablePromise<RaceRegistrationsCreateRaceRegistrationResponse> {
+        return __request(OpenAPI, {
+            method: 'POST',
+            url: '/api/v1/race-registrations/',
+            body: data.requestBody,
+            mediaType: 'application/json',
+            errors: {
+                422: 'Validation Error'
+            }
+        });
+    }
+    
+    /**
+     * Read My Registrations
+     * Retrieve current user's race registrations.
+     * @param data The data for the request.
+     * @param data.skip
+     * @param data.limit
+     * @returns RaceRegistrationsPublic Successful Response
+     * @throws ApiError
+     */
+    public static readMyRegistrations(data: RaceRegistrationsReadMyRegistrationsData = {}): CancelablePromise<RaceRegistrationsReadMyRegistrationsResponse> {
+        return __request(OpenAPI, {
+            method: 'GET',
+            url: '/api/v1/race-registrations/my',
+            query: {
+                skip: data.skip,
+                limit: data.limit
+            },
+            errors: {
+                422: 'Validation Error'
+            }
+        });
+    }
+    
+    /**
+     * Read Race Registration
+     * Get race registration by ID with details.
+     * @param data The data for the request.
+     * @param data.registrationId
+     * @returns RaceRegistrationPublicWithDetails Successful Response
+     * @throws ApiError
+     */
+    public static readRaceRegistration(data: RaceRegistrationsReadRaceRegistrationData): CancelablePromise<RaceRegistrationsReadRaceRegistrationResponse> {
+        return __request(OpenAPI, {
+            method: 'GET',
+            url: '/api/v1/race-registrations/{registration_id}',
+            path: {
+                registration_id: data.registrationId
+            },
+            errors: {
+                422: 'Validation Error'
+            }
+        });
+    }
+    
+    /**
+     * Update Race Registration
+     * Update a race registration.
+     * - Runners can update their own registration details
+     * - Organizers can update any field for their races
+     * - Admins can update anything
+     * @param data The data for the request.
+     * @param data.registrationId
+     * @param data.requestBody
+     * @returns RaceRegistrationPublic Successful Response
+     * @throws ApiError
+     */
+    public static updateRaceRegistration(data: RaceRegistrationsUpdateRaceRegistrationData): CancelablePromise<RaceRegistrationsUpdateRaceRegistrationResponse> {
+        return __request(OpenAPI, {
+            method: 'PUT',
+            url: '/api/v1/race-registrations/{registration_id}',
+            path: {
+                registration_id: data.registrationId
+            },
+            body: data.requestBody,
+            mediaType: 'application/json',
+            errors: {
+                422: 'Validation Error'
+            }
+        });
+    }
+    
+    /**
+     * Delete Race Registration
+     * Delete/Cancel a race registration.
+     * - Runners can cancel their own registrations
+     * - Organizers can cancel registrations for their races
+     * - Admins can cancel any registration
+     * @param data The data for the request.
+     * @param data.registrationId
+     * @returns Message Successful Response
+     * @throws ApiError
+     */
+    public static deleteRaceRegistration(data: RaceRegistrationsDeleteRaceRegistrationData): CancelablePromise<RaceRegistrationsDeleteRaceRegistrationResponse> {
+        return __request(OpenAPI, {
+            method: 'DELETE',
+            url: '/api/v1/race-registrations/{registration_id}',
+            path: {
+                registration_id: data.registrationId
+            },
+            errors: {
+                422: 'Validation Error'
+            }
+        });
+    }
+}
+
+export class RaceResultsService {
+    /**
+     * Read Race Results
+     * Retrieve race results for a specific race. Public endpoint.
+     * @param data The data for the request.
+     * @param data.raceId
+     * @param data.skip
+     * @param data.limit
+     * @returns RaceResultsPublic Successful Response
+     * @throws ApiError
+     */
+    public static readRaceResults(data: RaceResultsReadRaceResultsData): CancelablePromise<RaceResultsReadRaceResultsResponse> {
+        return __request(OpenAPI, {
+            method: 'GET',
+            url: '/api/v1/race-results/',
+            query: {
+                race_id: data.raceId,
+                skip: data.skip,
+                limit: data.limit
+            },
+            errors: {
+                422: 'Validation Error'
+            }
+        });
+    }
+    
+    /**
+     * Create Race Result
+     * Create new race result.
+     * Only race organizers, volunteers, or admins can create results.
+     * @param data The data for the request.
+     * @param data.requestBody
+     * @returns RaceResultPublic Successful Response
+     * @throws ApiError
+     */
+    public static createRaceResult(data: RaceResultsCreateRaceResultData): CancelablePromise<RaceResultsCreateRaceResultResponse> {
+        return __request(OpenAPI, {
+            method: 'POST',
+            url: '/api/v1/race-results/',
+            body: data.requestBody,
+            mediaType: 'application/json',
+            errors: {
+                422: 'Validation Error'
+            }
+        });
+    }
+    
+    /**
+     * Read Race Result
+     * Get race result by ID. Public endpoint.
+     * @param data The data for the request.
+     * @param data.resultId
+     * @returns RaceResultPublic Successful Response
+     * @throws ApiError
+     */
+    public static readRaceResult(data: RaceResultsReadRaceResultData): CancelablePromise<RaceResultsReadRaceResultResponse> {
+        return __request(OpenAPI, {
+            method: 'GET',
+            url: '/api/v1/race-results/{result_id}',
+            path: {
+                result_id: data.resultId
+            },
+            errors: {
+                422: 'Validation Error'
+            }
+        });
+    }
+    
+    /**
+     * Update Race Result
+     * Update a race result.
+     * Only race organizers, volunteers, or admins can update results.
+     * @param data The data for the request.
+     * @param data.resultId
+     * @param data.requestBody
+     * @returns RaceResultPublic Successful Response
+     * @throws ApiError
+     */
+    public static updateRaceResult(data: RaceResultsUpdateRaceResultData): CancelablePromise<RaceResultsUpdateRaceResultResponse> {
+        return __request(OpenAPI, {
+            method: 'PUT',
+            url: '/api/v1/race-results/{result_id}',
+            path: {
+                result_id: data.resultId
+            },
+            body: data.requestBody,
+            mediaType: 'application/json',
+            errors: {
+                422: 'Validation Error'
+            }
+        });
+    }
+    
+    /**
+     * Delete Race Result
+     * Delete a race result.
+     * Only race organizers or admins can delete results.
+     * @param data The data for the request.
+     * @param data.resultId
+     * @returns Message Successful Response
+     * @throws ApiError
+     */
+    public static deleteRaceResult(data: RaceResultsDeleteRaceResultData): CancelablePromise<RaceResultsDeleteRaceResultResponse> {
+        return __request(OpenAPI, {
+            method: 'DELETE',
+            url: '/api/v1/race-results/{result_id}',
+            path: {
+                result_id: data.resultId
+            },
+            errors: {
+                422: 'Validation Error'
+            }
+        });
+    }
+    
+    /**
+     * Read Race Result By Registration
+     * Get race result by registration ID. Public endpoint.
+     * @param data The data for the request.
+     * @param data.registrationId
+     * @returns RaceResultPublic Successful Response
+     * @throws ApiError
+     */
+    public static readRaceResultByRegistration(data: RaceResultsReadRaceResultByRegistrationData): CancelablePromise<RaceResultsReadRaceResultByRegistrationResponse> {
+        return __request(OpenAPI, {
+            method: 'GET',
+            url: '/api/v1/race-results/registration/{registration_id}',
+            path: {
+                registration_id: data.registrationId
+            },
+            errors: {
+                422: 'Validation Error'
+            }
+        });
+    }
+}
+
+export class RacesService {
+    /**
+     * Read Races
+     * Retrieve races. Public endpoint - anyone can view races.
+     * Optionally filter by organizer_id.
+     * @param data The data for the request.
+     * @param data.skip
+     * @param data.limit
+     * @param data.organizerId
+     * @returns RacesPublic Successful Response
+     * @throws ApiError
+     */
+    public static readRaces(data: RacesReadRacesData = {}): CancelablePromise<RacesReadRacesResponse> {
+        return __request(OpenAPI, {
+            method: 'GET',
+            url: '/api/v1/races/',
+            query: {
+                skip: data.skip,
+                limit: data.limit,
+                organizer_id: data.organizerId
+            },
+            errors: {
+                422: 'Validation Error'
+            }
+        });
+    }
+    
+    /**
+     * Create Race
+     * Create new race.
+     * Requires organizer or admin role.
+     * @param data The data for the request.
+     * @param data.requestBody
+     * @returns RacePublic Successful Response
+     * @throws ApiError
+     */
+    public static createRace(data: RacesCreateRaceData): CancelablePromise<RacesCreateRaceResponse> {
+        return __request(OpenAPI, {
+            method: 'POST',
+            url: '/api/v1/races/',
+            body: data.requestBody,
+            mediaType: 'application/json',
+            errors: {
+                422: 'Validation Error'
+            }
+        });
+    }
+    
+    /**
+     * Read Race
+     * Get race by ID with details. Public endpoint.
+     * @param data The data for the request.
+     * @param data.raceId
+     * @returns RacePublicWithDetails Successful Response
+     * @throws ApiError
+     */
+    public static readRace(data: RacesReadRaceData): CancelablePromise<RacesReadRaceResponse> {
+        return __request(OpenAPI, {
+            method: 'GET',
+            url: '/api/v1/races/{race_id}',
+            path: {
+                race_id: data.raceId
+            },
+            errors: {
+                422: 'Validation Error'
+            }
+        });
+    }
+    
+    /**
+     * Update Race
+     * Update a race.
+     * Only the organizer or admin can update.
+     * @param data The data for the request.
+     * @param data.raceId
+     * @param data.requestBody
+     * @returns RacePublic Successful Response
+     * @throws ApiError
+     */
+    public static updateRace(data: RacesUpdateRaceData): CancelablePromise<RacesUpdateRaceResponse> {
+        return __request(OpenAPI, {
+            method: 'PUT',
+            url: '/api/v1/races/{race_id}',
+            path: {
+                race_id: data.raceId
+            },
+            body: data.requestBody,
+            mediaType: 'application/json',
+            errors: {
+                422: 'Validation Error'
+            }
+        });
+    }
+    
+    /**
+     * Delete Race
+     * Delete a race.
+     * Only the organizer or admin can delete.
+     * @param data The data for the request.
+     * @param data.raceId
+     * @returns Message Successful Response
+     * @throws ApiError
+     */
+    public static deleteRace(data: RacesDeleteRaceData): CancelablePromise<RacesDeleteRaceResponse> {
+        return __request(OpenAPI, {
+            method: 'DELETE',
+            url: '/api/v1/races/{race_id}',
+            path: {
+                race_id: data.raceId
+            },
+            errors: {
+                422: 'Validation Error'
+            }
+        });
+    }
+    
+    /**
+     * Read My Organized Races
+     * Retrieve races organized by the current user.
+     * Requires organizer or admin role.
+     * @param data The data for the request.
+     * @param data.skip
+     * @param data.limit
+     * @returns RacesPublic Successful Response
+     * @throws ApiError
+     */
+    public static readMyOrganizedRaces(data: RacesReadMyOrganizedRacesData = {}): CancelablePromise<RacesReadMyOrganizedRacesResponse> {
+        return __request(OpenAPI, {
+            method: 'GET',
+            url: '/api/v1/races/my/organized',
+            query: {
+                skip: data.skip,
+                limit: data.limit
+            },
             errors: {
                 422: 'Validation Error'
             }

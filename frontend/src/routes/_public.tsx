@@ -1,6 +1,6 @@
 import { createFileRoute, Outlet } from "@tanstack/react-router"
-import { PublicHeader } from "@/components/Public/PublicHeader"
 import { PublicFooter } from "@/components/Public/PublicFooter"
+import { PublicHeader } from "@/components/Public/PublicHeader"
 
 export const Route = createFileRoute("/_public")({
   component: PublicLayout,

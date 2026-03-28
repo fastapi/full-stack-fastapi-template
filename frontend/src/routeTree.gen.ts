@@ -22,8 +22,12 @@ import { Route as LayoutAdminRouteImport } from './routes/_layout.admin'
 import { Route as LayoutAdminIndexRouteImport } from './routes/_layout.admin/index'
 import { Route as LayoutAdminUsersRouteImport } from './routes/_layout.admin/users'
 import { Route as LayoutAdminSettingsRouteImport } from './routes/_layout.admin/settings'
+import { Route as LayoutAdminRacesRouteImport } from './routes/_layout.admin/races'
 import { Route as LayoutAdminItemsRouteImport } from './routes/_layout.admin/items'
 import { Route as LayoutAdminDashboardRouteImport } from './routes/_layout.admin/dashboard'
+import { Route as LayoutAdminRacesIndexRouteImport } from './routes/_layout.admin/races.index'
+import { Route as LayoutAdminRacesNewRouteImport } from './routes/_layout.admin/races.new'
+import { Route as LayoutAdminRacesRaceIdEditRouteImport } from './routes/_layout.admin/races.$raceId.edit'
 
 const SignupRoute = SignupRouteImport.update({
   id: '/signup',
@@ -88,6 +92,11 @@ const LayoutAdminSettingsRoute = LayoutAdminSettingsRouteImport.update({
   path: '/settings',
   getParentRoute: () => LayoutAdminRoute,
 } as any)
+const LayoutAdminRacesRoute = LayoutAdminRacesRouteImport.update({
+  id: '/races',
+  path: '/races',
+  getParentRoute: () => LayoutAdminRoute,
+} as any)
 const LayoutAdminItemsRoute = LayoutAdminItemsRouteImport.update({
   id: '/items',
   path: '/items',
@@ -98,6 +107,22 @@ const LayoutAdminDashboardRoute = LayoutAdminDashboardRouteImport.update({
   path: '/dashboard',
   getParentRoute: () => LayoutAdminRoute,
 } as any)
+const LayoutAdminRacesIndexRoute = LayoutAdminRacesIndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => LayoutAdminRacesRoute,
+} as any)
+const LayoutAdminRacesNewRoute = LayoutAdminRacesNewRouteImport.update({
+  id: '/new',
+  path: '/new',
+  getParentRoute: () => LayoutAdminRacesRoute,
+} as any)
+const LayoutAdminRacesRaceIdEditRoute =
+  LayoutAdminRacesRaceIdEditRouteImport.update({
+    id: '/$raceId/edit',
+    path: '/$raceId/edit',
+    getParentRoute: () => LayoutAdminRacesRoute,
+  } as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof PublicIndexRoute
@@ -110,9 +135,13 @@ export interface FileRoutesByFullPath {
   '/races': typeof PublicRacesRoute
   '/admin/dashboard': typeof LayoutAdminDashboardRoute
   '/admin/items': typeof LayoutAdminItemsRoute
+  '/admin/races': typeof LayoutAdminRacesRouteWithChildren
   '/admin/settings': typeof LayoutAdminSettingsRoute
   '/admin/users': typeof LayoutAdminUsersRoute
   '/admin/': typeof LayoutAdminIndexRoute
+  '/admin/races/new': typeof LayoutAdminRacesNewRoute
+  '/admin/races/': typeof LayoutAdminRacesIndexRoute
+  '/admin/races/$raceId/edit': typeof LayoutAdminRacesRaceIdEditRoute
 }
 export interface FileRoutesByTo {
   '/': typeof PublicIndexRoute
@@ -127,6 +156,9 @@ export interface FileRoutesByTo {
   '/admin/settings': typeof LayoutAdminSettingsRoute
   '/admin/users': typeof LayoutAdminUsersRoute
   '/admin': typeof LayoutAdminIndexRoute
+  '/admin/races/new': typeof LayoutAdminRacesNewRoute
+  '/admin/races': typeof LayoutAdminRacesIndexRoute
+  '/admin/races/$raceId/edit': typeof LayoutAdminRacesRaceIdEditRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -142,9 +174,13 @@ export interface FileRoutesById {
   '/_public/': typeof PublicIndexRoute
   '/_layout/admin/dashboard': typeof LayoutAdminDashboardRoute
   '/_layout/admin/items': typeof LayoutAdminItemsRoute
+  '/_layout/admin/races': typeof LayoutAdminRacesRouteWithChildren
   '/_layout/admin/settings': typeof LayoutAdminSettingsRoute
   '/_layout/admin/users': typeof LayoutAdminUsersRoute
   '/_layout/admin/': typeof LayoutAdminIndexRoute
+  '/_layout/admin/races/new': typeof LayoutAdminRacesNewRoute
+  '/_layout/admin/races/': typeof LayoutAdminRacesIndexRoute
+  '/_layout/admin/races/$raceId/edit': typeof LayoutAdminRacesRaceIdEditRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -159,9 +195,13 @@ export interface FileRouteTypes {
     | '/races'
     | '/admin/dashboard'
     | '/admin/items'
+    | '/admin/races'
     | '/admin/settings'
     | '/admin/users'
     | '/admin/'
+    | '/admin/races/new'
+    | '/admin/races/'
+    | '/admin/races/$raceId/edit'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -176,6 +216,9 @@ export interface FileRouteTypes {
     | '/admin/settings'
     | '/admin/users'
     | '/admin'
+    | '/admin/races/new'
+    | '/admin/races'
+    | '/admin/races/$raceId/edit'
   id:
     | '__root__'
     | '/_layout'
@@ -190,9 +233,13 @@ export interface FileRouteTypes {
     | '/_public/'
     | '/_layout/admin/dashboard'
     | '/_layout/admin/items'
+    | '/_layout/admin/races'
     | '/_layout/admin/settings'
     | '/_layout/admin/users'
     | '/_layout/admin/'
+    | '/_layout/admin/races/new'
+    | '/_layout/admin/races/'
+    | '/_layout/admin/races/$raceId/edit'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -297,6 +344,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof LayoutAdminSettingsRouteImport
       parentRoute: typeof LayoutAdminRoute
     }
+    '/_layout/admin/races': {
+      id: '/_layout/admin/races'
+      path: '/races'
+      fullPath: '/admin/races'
+      preLoaderRoute: typeof LayoutAdminRacesRouteImport
+      parentRoute: typeof LayoutAdminRoute
+    }
     '/_layout/admin/items': {
       id: '/_layout/admin/items'
       path: '/items'
@@ -311,12 +365,49 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof LayoutAdminDashboardRouteImport
       parentRoute: typeof LayoutAdminRoute
     }
+    '/_layout/admin/races/': {
+      id: '/_layout/admin/races/'
+      path: '/'
+      fullPath: '/admin/races/'
+      preLoaderRoute: typeof LayoutAdminRacesIndexRouteImport
+      parentRoute: typeof LayoutAdminRacesRoute
+    }
+    '/_layout/admin/races/new': {
+      id: '/_layout/admin/races/new'
+      path: '/new'
+      fullPath: '/admin/races/new'
+      preLoaderRoute: typeof LayoutAdminRacesNewRouteImport
+      parentRoute: typeof LayoutAdminRacesRoute
+    }
+    '/_layout/admin/races/$raceId/edit': {
+      id: '/_layout/admin/races/$raceId/edit'
+      path: '/$raceId/edit'
+      fullPath: '/admin/races/$raceId/edit'
+      preLoaderRoute: typeof LayoutAdminRacesRaceIdEditRouteImport
+      parentRoute: typeof LayoutAdminRacesRoute
+    }
   }
 }
+
+interface LayoutAdminRacesRouteChildren {
+  LayoutAdminRacesNewRoute: typeof LayoutAdminRacesNewRoute
+  LayoutAdminRacesIndexRoute: typeof LayoutAdminRacesIndexRoute
+  LayoutAdminRacesRaceIdEditRoute: typeof LayoutAdminRacesRaceIdEditRoute
+}
+
+const LayoutAdminRacesRouteChildren: LayoutAdminRacesRouteChildren = {
+  LayoutAdminRacesNewRoute: LayoutAdminRacesNewRoute,
+  LayoutAdminRacesIndexRoute: LayoutAdminRacesIndexRoute,
+  LayoutAdminRacesRaceIdEditRoute: LayoutAdminRacesRaceIdEditRoute,
+}
+
+const LayoutAdminRacesRouteWithChildren =
+  LayoutAdminRacesRoute._addFileChildren(LayoutAdminRacesRouteChildren)
 
 interface LayoutAdminRouteChildren {
   LayoutAdminDashboardRoute: typeof LayoutAdminDashboardRoute
   LayoutAdminItemsRoute: typeof LayoutAdminItemsRoute
+  LayoutAdminRacesRoute: typeof LayoutAdminRacesRouteWithChildren
   LayoutAdminSettingsRoute: typeof LayoutAdminSettingsRoute
   LayoutAdminUsersRoute: typeof LayoutAdminUsersRoute
   LayoutAdminIndexRoute: typeof LayoutAdminIndexRoute
@@ -325,6 +416,7 @@ interface LayoutAdminRouteChildren {
 const LayoutAdminRouteChildren: LayoutAdminRouteChildren = {
   LayoutAdminDashboardRoute: LayoutAdminDashboardRoute,
   LayoutAdminItemsRoute: LayoutAdminItemsRoute,
+  LayoutAdminRacesRoute: LayoutAdminRacesRouteWithChildren,
   LayoutAdminSettingsRoute: LayoutAdminSettingsRoute,
   LayoutAdminUsersRoute: LayoutAdminUsersRoute,
   LayoutAdminIndexRoute: LayoutAdminIndexRoute,

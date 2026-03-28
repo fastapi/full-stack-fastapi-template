@@ -151,14 +151,33 @@
 }
 
 @layer base {
+  *,
+  *::before,
+  *::after {
+    border-color: var(--color-border);
+  }
+
   * {
-    @apply border-border outline-ring/50;
+    outline-color: oklch(from var(--color-ring) calc(l * 0.5) c h / 0.5);
   }
+
   body {
-    @apply bg-background text-foreground;
+    background-color: var(--color-background);
+    color: var(--color-foreground);
+    font-feature-settings:
+      "rlig" 1,
+      "calt" 1;
+    font-synthesis-weight: none;
+    text-rendering: optimizeLegibility;
   }
+
   button,
   [role="button"] {
     cursor: pointer;
+  }
+
+  button:disabled,
+  [role="button"][aria-disabled="true"] {
+    cursor: not-allowed;
   }
 }

@@ -1,6 +1,5 @@
-import { createFileRoute } from "@tanstack/react-router"
+import { createFileRoute, Link } from "@tanstack/react-router"
 import { ArrowRight, Calendar, MapPin, Trophy } from "lucide-react"
-import { Link } from "@tanstack/react-router"
 import { Button } from "@/components/ui/button"
 import {
   Card,
@@ -27,17 +26,20 @@ const features = [
   {
     icon: Calendar,
     title: "Discover Races",
-    description: "Browse upcoming races in your area and find the perfect event for your goals.",
+    description:
+      "Browse upcoming races in your area and find the perfect event for your goals.",
   },
   {
     icon: MapPin,
     title: "Easy Registration",
-    description: "Register online in minutes with our simple and secure registration process.",
+    description:
+      "Register online in minutes with our simple and secure registration process.",
   },
   {
     icon: Trophy,
     title: "Track Progress",
-    description: "View your race history, track your PRs, and celebrate your achievements.",
+    description:
+      "View your race history, track your PRs, and celebrate your achievements.",
   },
 ]
 
@@ -52,8 +54,8 @@ function HomePage() {
               Find Your Next Race
             </h1>
             <p className="text-lg text-muted-foreground md:text-xl">
-              Discover and register for running races near you. Join thousands of runners
-              achieving their goals.
+              Discover and register for running races near you. Join thousands
+              of runners achieving their goals.
             </p>
             <div className="flex flex-col gap-4 sm:flex-row sm:justify-center">
               <Button size="lg" asChild>
@@ -77,18 +79,24 @@ function HomePage() {
               Why Choose RaceHub?
             </h2>
             <p className="text-lg text-muted-foreground">
-              Everything you need to find, register, and prepare for your next running event.
+              Everything you need to find, register, and prepare for your next
+              running event.
             </p>
           </div>
           <div className="mx-auto grid max-w-5xl gap-6 md:grid-cols-3">
             {features.map(({ icon: Icon, title, description }) => (
-              <Card key={title} className="border-2 transition-shadow hover:shadow-lg">
+              <Card
+                key={title}
+                className="border-2 transition-shadow hover:shadow-lg"
+              >
                 <CardHeader className="space-y-4">
                   <div className="flex size-12 items-center justify-center rounded-lg bg-primary/10">
                     <Icon className="size-6 text-primary" />
                   </div>
                   <CardTitle className="text-xl">{title}</CardTitle>
-                  <CardDescription className="text-base">{description}</CardDescription>
+                  <CardDescription className="text-base">
+                    {description}
+                  </CardDescription>
                 </CardHeader>
               </Card>
             ))}
@@ -107,7 +115,8 @@ function HomePage() {
                     Ready to Start Running?
                   </h2>
                   <p className="text-lg text-muted-foreground">
-                    Create your free account today and get access to hundreds of races in your area.
+                    Create your free account today and get access to hundreds of
+                    races in your area.
                   </p>
                   <Button size="lg" asChild>
                     <Link to="/signup">Get Started Free</Link>

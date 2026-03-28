@@ -94,6 +94,10 @@ class Settings(BaseSettings):
     FIRST_SUPERUSER: EmailStr
     FIRST_SUPERUSER_PASSWORD: str
 
+    # Media uploads
+    MEDIA_UPLOAD_DIR: str = "uploads/media"
+    MEDIA_MAX_FILE_SIZE_MB: int = 15
+
     def _check_default_secret(self, var_name: str, value: str | None) -> None:
         if value == "changethis":
             message = (

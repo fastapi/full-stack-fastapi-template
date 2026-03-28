@@ -1,11 +1,7 @@
 import { Link } from "@tanstack/react-router"
 import { Menu } from "lucide-react"
 import { Button } from "@/components/ui/button"
-import {
-  Sheet,
-  SheetContent,
-  SheetTrigger,
-} from "@/components/ui/sheet"
+import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet"
 import { isLoggedIn } from "@/hooks/useAuth"
 
 const navLinks = [
@@ -22,11 +18,17 @@ export function PublicHeader() {
       <div className="container flex h-16 items-center justify-between">
         {/* Logo and Desktop Navigation */}
         <div className="flex items-center gap-8">
-          <Link to="/" className="flex items-center gap-2 font-bold text-xl hover:text-primary transition-colors">
+          <Link
+            to="/"
+            className="flex items-center gap-2 font-bold text-xl hover:text-primary transition-colors"
+          >
             <span>RaceHub</span>
           </Link>
-          
-          <nav className="hidden md:flex items-center gap-6" aria-label="Main navigation">
+
+          <nav
+            className="hidden md:flex items-center gap-6"
+            aria-label="Main navigation"
+          >
             {navLinks.map(({ to, label }) => (
               <Link
                 key={to}
@@ -67,7 +69,10 @@ export function PublicHeader() {
             </Button>
           </SheetTrigger>
           <SheetContent side="right" className="w-80">
-            <nav className="flex flex-col gap-6 mt-8" aria-label="Mobile navigation">
+            <nav
+              className="flex flex-col gap-6 mt-8"
+              aria-label="Mobile navigation"
+            >
               <div className="flex flex-col gap-4">
                 {navLinks.map(({ to, label }) => (
                   <Link

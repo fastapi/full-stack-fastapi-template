@@ -1,4 +1,4 @@
-import { Briefcase, Home, Settings, Users } from "lucide-react"
+import { Briefcase, Flag, Home, Settings, Users } from "lucide-react"
 
 import { SidebarAppearance } from "@/components/Common/Appearance"
 import { Logo } from "@/components/Common/Logo"
@@ -14,6 +14,7 @@ import { User } from "./User"
 
 const adminItems: Item[] = [
   { icon: Home, title: "Dashboard", path: "/admin/dashboard" },
+  { icon: Flag, title: "Races", path: "/admin/races" },
   { icon: Users, title: "Users", path: "/admin/users" },
   { icon: Briefcase, title: "Items", path: "/admin/items" },
   { icon: Settings, title: "Settings", path: "/admin/settings" },
