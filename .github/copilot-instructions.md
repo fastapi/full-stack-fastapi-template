@@ -1,6 +1,6 @@
 # FastAPI Full-Stack Project Instructions
 
-This workspace uses the [FastAPI Full-Stack Template](https://github.com/fastapi/full-stack-fastapi-template), a production-ready full-stack application with modern Python backend and React frontend.
+This workspace uses the [FastAPI Full-Stack Template](https://github.com/fastapi/full-stack-fastapi-template), a production-ready full-stack application with modern Python backend and React frontend, **enhanced with RBAC (Role-Based Access Control) and a separate Next.js runner site**.
 
 ## Technology Stack
 
@@ -11,9 +11,10 @@ This workspace uses the [FastAPI Full-Stack Template](https://github.com/fastapi
 - **Pydantic**: Data validation and settings management
 - **Alembic**: Database migrations
 - **JWT**: Token-based authentication
+- **RBAC**: Role-based access control with 4 predefined roles
 - **Pytest**: Testing framework
 
-### Frontend (TypeScript/React)
+### Frontend - Admin Portal (TypeScript/React)
 - **React**: UI framework
 - **TypeScript**: Type-safe JavaScript
 - **Vite**: Build tool and dev server
@@ -22,27 +23,102 @@ This workspace uses the [FastAPI Full-Stack Template](https://github.com/fastapi
 - **Tailwind CSS**: Utility-first CSS framework
 - **shadcn/ui**: Component library
 - **Playwright**: End-to-end testing
+- **Access**: `dashboard.domain.com` (admin and organizers only)
+
+### Frontend - Runner Site (TypeScript/Next.js)
+- **Next.js 15**: React framework with SSR/SSG for SEO
+- **TypeScript**: Type-safe JavaScript
+- **Tailwind CSS**: Utility-first CSS framework
+- **App Router**: Next.js 15 app directory
+- **Server Components**: For optimal performance
+- **Access**: `domain.com` (public + authenticated runners)
 
 ## Project Structure
 
 ### Backend (`/backend`)
-- `app/models.py` - SQLModel database models and Pydantic schemas
-- `app/crud.py` - CRUD operations (Create, Read, Update, Delete)
+- `app/models.py` - SQLModel database models and Pydantic schemas (includes Role and RBAC)
+- `app/crud.py` - CRUD operations including role management
 - `app/api/routes/` - API endpoint definitions
-- `app/api/deps.py` - FastAPI dependencies (auth, database sessions)
+  - `roles.py` - Role management endpoints (admin-only)
+  - `users.py` - User management with role assignment
+  - `items.py` - Example resource endpoints
+- `app/api/deps.py` - FastAPI dependencies (auth, database sessions, RBAC)
 - `app/core/config.py` - Settings via Pydantic BaseSettings
 - `app/core/security.py` - Password hashing and JWT token handling
-- `app/core/db.py` - Database engine and session management
+- `app/core/db.py` - Database engine, session management, and role initialization
 - `tests/` - Pytest test suite
 
-### Frontend (`/frontend`)
+### Frontend - Admin Portal (`/frontend`)
 - `src/routes/` - TanStack Router route definitions
 - `src/components/` - React components (organized by feature)
+  - `Admin/` - Admin-specific components
+  - `Items/` - Resource management
+  - `UserSettings/` - User profile management
 - `src/client/` - Auto-generated API client from OpenAPI spec
-- `src/hooks/` - Custom React hooks
+- `src/hooks/` - Custom React hooks (useAuth, etc.)
 - `tests/` - Playwright end-to-end tests
+- **Purpose**: Admin dashboard for system management
+
+### Frontend - Runner Site (`/runner-site`)
+- `app/` - Next.js 15 app directory
+  - `page.tsx` - Home page (public)
+  - `login/` - Authentication pages
+  - `dashboard/` - Runner dashboard (authenticated)
+- `lib/` - Utilities and configurations
+  - `api-client.ts` - API client with authentication
+  - `auth-context.tsx` - React context for authentication
+  - `config.ts` - Environment configuration
+- **Purpose**: Public-facing site for runners with SEO optimization
 
 ## Key Patterns and Conventions
+
+### RBAC (Role-Based Access Control)
+
+The system includes a comprehensive RBAC system with four predefined roles:
+
+1. **Admin** - Full system access, user and role management
+2. **Runner** - Register for races, manage own profile
+3. **Organizer** - Create and manage races
+4. **Volunteer** - Assist with race operations
+
+#### Using RBAC in Endpoints
+
+```python
+from app.api.deps import AdminUser, RunnerUser, require_role, require_any_role
+from fastapi import Depends
+
+# Method 1: Predefined dependencies
+@router.get("/admin-only")
+def admin_endpoint(current_user: AdminUser) -> Any:
+    """Only admins can access."""
+    return {"message": "Admin access"}
+
+# Method 2: Custom role requirements
+@router.get("/staff", dependencies=[Depends(require_any_role(["organizer", "volunteer"]))])
+def staff_endpoint() -> Any:
+    """Staff members can access."""
+    return {"message": "Staff access"}
+
+# Method 3: Manual checking
+from app import crud
+
+@router.post("/races")
+def create_race(current_user: CurrentUser, race_in: RaceCreate) -> Any:
+    if not crud.user_has_any_role(current_user, ["admin", "organizer"]):
+        raise HTTPException(status_code=403, detail="Insufficient permissions")
+    return race
+```
+
+**Note**: Users with `is_superuser=True` bypass all role checks.
+
+#### Role Management API
+
+- `GET /api/v1/roles/` - List all roles (admin-only)
+- `POST /api/v1/roles/` - Create role (admin-only)
+- `POST /api/v1/roles/{role_id}/assign/{user_id}` - Assign role to user
+- `DELETE /api/v1/roles/{role_id}/remove/{user_id}` - Remove role from user
+
+For complete RBAC documentation, see [RBAC.md](../RBAC.md).
 
 ### Backend Patterns
 

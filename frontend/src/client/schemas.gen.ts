@@ -251,6 +251,123 @@ export const PrivateUserCreateSchema = {
     title: 'PrivateUserCreate'
 } as const;
 
+export const RoleCreateSchema = {
+    properties: {
+        name: {
+            type: 'string',
+            maxLength: 50,
+            title: 'Name'
+        },
+        description: {
+            anyOf: [
+                {
+                    type: 'string',
+                    maxLength: 255
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Description'
+        }
+    },
+    type: 'object',
+    required: ['name'],
+    title: 'RoleCreate'
+} as const;
+
+export const RolePublicSchema = {
+    properties: {
+        name: {
+            type: 'string',
+            maxLength: 50,
+            title: 'Name'
+        },
+        description: {
+            anyOf: [
+                {
+                    type: 'string',
+                    maxLength: 255
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Description'
+        },
+        id: {
+            type: 'string',
+            format: 'uuid',
+            title: 'Id'
+        },
+        created_at: {
+            anyOf: [
+                {
+                    type: 'string',
+                    format: 'date-time'
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Created At'
+        }
+    },
+    type: 'object',
+    required: ['name', 'id'],
+    title: 'RolePublic'
+} as const;
+
+export const RoleUpdateSchema = {
+    properties: {
+        name: {
+            anyOf: [
+                {
+                    type: 'string',
+                    maxLength: 50
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Name'
+        },
+        description: {
+            anyOf: [
+                {
+                    type: 'string',
+                    maxLength: 255
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Description'
+        }
+    },
+    type: 'object',
+    title: 'RoleUpdate'
+} as const;
+
+export const RolesPublicSchema = {
+    properties: {
+        data: {
+            items: {
+                '$ref': '#/components/schemas/RolePublic'
+            },
+            type: 'array',
+            title: 'Data'
+        },
+        count: {
+            type: 'integer',
+            title: 'Count'
+        }
+    },
+    type: 'object',
+    required: ['data', 'count'],
+    title: 'RolesPublic'
+} as const;
+
 export const TokenSchema = {
     properties: {
         access_token: {
@@ -376,6 +493,14 @@ export const UserPublicSchema = {
                 }
             ],
             title: 'Created At'
+        },
+        roles: {
+            items: {
+                '$ref': '#/components/schemas/RolePublic'
+            },
+            type: 'array',
+            title: 'Roles',
+            default: []
         }
     },
     type: 'object',

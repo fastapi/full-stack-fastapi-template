@@ -52,6 +52,28 @@ export type PrivateUserCreate = {
     is_verified?: boolean;
 };
 
+export type RoleCreate = {
+    name: string;
+    description?: (string | null);
+};
+
+export type RolePublic = {
+    name: string;
+    description?: (string | null);
+    id: string;
+    created_at?: (string | null);
+};
+
+export type RolesPublic = {
+    data: Array<RolePublic>;
+    count: number;
+};
+
+export type RoleUpdate = {
+    name?: (string | null);
+    description?: (string | null);
+};
+
 export type Token = {
     access_token: string;
     token_type?: string;
@@ -77,6 +99,7 @@ export type UserPublic = {
     full_name?: (string | null);
     id: string;
     created_at?: (string | null);
+    roles?: Array<RolePublic>;
 };
 
 export type UserRegister = {
@@ -176,6 +199,52 @@ export type PrivateCreateUserData = {
 };
 
 export type PrivateCreateUserResponse = (UserPublic);
+
+export type RolesReadRolesData = {
+    limit?: number;
+    skip?: number;
+};
+
+export type RolesReadRolesResponse = (RolesPublic);
+
+export type RolesCreateRoleData = {
+    requestBody: RoleCreate;
+};
+
+export type RolesCreateRoleResponse = (RolePublic);
+
+export type RolesReadRoleData = {
+    roleId: string;
+};
+
+export type RolesReadRoleResponse = (RolePublic);
+
+export type RolesUpdateRoleData = {
+    requestBody: RoleUpdate;
+    roleId: string;
+};
+
+export type RolesUpdateRoleResponse = (RolePublic);
+
+export type RolesDeleteRoleData = {
+    roleId: string;
+};
+
+export type RolesDeleteRoleResponse = (Message);
+
+export type RolesAssignRoleToUserData = {
+    roleId: string;
+    userId: string;
+};
+
+export type RolesAssignRoleToUserResponse = (UserPublic);
+
+export type RolesRemoveRoleFromUserData = {
+    roleId: string;
+    userId: string;
+};
+
+export type RolesRemoveRoleFromUserResponse = (UserPublic);
 
 export type UsersReadUsersData = {
     limit?: number;

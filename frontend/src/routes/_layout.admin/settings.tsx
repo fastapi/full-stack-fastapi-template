@@ -12,12 +12,12 @@ const tabsConfig = [
   { value: "danger-zone", title: "Danger zone", component: DeleteAccount },
 ]
 
-export const Route = createFileRoute("/_layout/settings")({
+export const Route = createFileRoute("/_layout/admin/settings")({
   component: UserSettings,
   head: () => ({
     meta: [
       {
-        title: "Settings - FastAPI Template",
+        title: "Settings - Admin",
       },
     ],
   }),
@@ -36,7 +36,7 @@ function UserSettings() {
   return (
     <div className="flex flex-col gap-6">
       <div>
-        <h1 className="text-2xl font-bold tracking-tight">User Settings</h1>
+        <h2 className="text-2xl font-bold tracking-tight">User Settings</h2>
         <p className="text-muted-foreground">
           Manage your account settings and preferences
         </p>

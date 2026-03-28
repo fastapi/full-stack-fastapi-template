@@ -1,13 +1,66 @@
 import uuid
 from datetime import datetime, timezone
+from enum import Enum
 
 from pydantic import EmailStr
-from sqlalchemy import DateTime
+from sqlalchemy import Column, DateTime
 from sqlmodel import Field, Relationship, SQLModel
 
 
 def get_datetime_utc() -> datetime:
     return datetime.now(timezone.utc)
+
+
+# Enum for predefined roles
+class RoleEnum(str, Enum):
+    ADMIN = "admin"
+    RUNNER = "runner"
+    ORGANIZER = "organizer"
+    VOLUNTEER = "volunteer"
+
+
+# Link table for many-to-many relationship between User and Role
+class UserRoleLink(SQLModel, table=True):
+    user_id: uuid.UUID = Field(
+        foreign_key="user.id", primary_key=True, ondelete="CASCADE"
+    )
+    role_id: uuid.UUID = Field(
+        foreign_key="role.id", primary_key=True, ondelete="CASCADE"
+    )
+
+
+# Role model
+class RoleBase(SQLModel):
+    name: str = Field(unique=True, index=True, max_length=50)
+    description: str | None = Field(default=None, max_length=255)
+
+
+class RoleCreate(RoleBase):
+    pass
+
+
+class RoleUpdate(SQLModel):
+    name: str | None = Field(default=None, max_length=50)
+    description: str | None = Field(default=None, max_length=255)
+
+
+class Role(RoleBase, table=True):
+    id: uuid.UUID = Field(default_factory=uuid.uuid4, primary_key=True)
+    created_at: datetime | None = Field(
+        default_factory=get_datetime_utc,
+        sa_column=Column(DateTime(timezone=True)),
+    )
+    users: list["User"] = Relationship(back_populates="roles", link_model=UserRoleLink)
+
+
+class RolePublic(RoleBase):
+    id: uuid.UUID
+    created_at: datetime | None = None
+
+
+class RolesPublic(SQLModel):
+    data: list[RolePublic]
+    count: int
 
 
 # Shared properties
@@ -31,7 +84,7 @@ class UserRegister(SQLModel):
 
 # Properties to receive via API on update, all are optional
 class UserUpdate(UserBase):
-    email: EmailStr | None = Field(default=None, max_length=255)  # type: ignore
+    email: EmailStr | None = Field(default=None, max_length=255)
     password: str | None = Field(default=None, min_length=8, max_length=128)
 
 
@@ -51,15 +104,17 @@ class User(UserBase, table=True):
     hashed_password: str
     created_at: datetime | None = Field(
         default_factory=get_datetime_utc,
-        sa_type=DateTime(timezone=True),  # type: ignore
+        sa_column=Column(DateTime(timezone=True)),
     )
     items: list["Item"] = Relationship(back_populates="owner", cascade_delete=True)
+    roles: list[Role] = Relationship(back_populates="users", link_model=UserRoleLink)
 
 
 # Properties to return via API, id is always required
 class UserPublic(UserBase):
     id: uuid.UUID
     created_at: datetime | None = None
+    roles: list[RolePublic] = []
 
 
 class UsersPublic(SQLModel):
@@ -80,7 +135,7 @@ class ItemCreate(ItemBase):
 
 # Properties to receive on item update
 class ItemUpdate(ItemBase):
-    title: str | None = Field(default=None, min_length=1, max_length=255)  # type: ignore
+    title: str | None = Field(default=None, min_length=1, max_length=255)
 
 
 # Database model, database table inferred from class name
@@ -88,7 +143,7 @@ class Item(ItemBase, table=True):
     id: uuid.UUID = Field(default_factory=uuid.uuid4, primary_key=True)
     created_at: datetime | None = Field(
         default_factory=get_datetime_utc,
-        sa_type=DateTime(timezone=True),  # type: ignore
+        sa_column=Column(DateTime(timezone=True)),
     )
     owner_id: uuid.UUID = Field(
         foreign_key="user.id", nullable=False, ondelete="CASCADE"

@@ -2,12 +2,12 @@ import { createFileRoute } from "@tanstack/react-router"
 
 import useAuth from "@/hooks/useAuth"
 
-export const Route = createFileRoute("/_layout/")({
+export const Route = createFileRoute("/_layout/admin/dashboard")({
   component: Dashboard,
   head: () => ({
     meta: [
       {
-        title: "Dashboard - FastAPI Template",
+        title: "Dashboard - Admin",
       },
     ],
   }),
@@ -19,9 +19,9 @@ function Dashboard() {
   return (
     <div>
       <div>
-        <h1 className="text-2xl truncate max-w-sm">
+        <h2 className="text-2xl truncate max-w-sm">
           Hi, {currentUser?.full_name || currentUser?.email} 👋
-        </h1>
+        </h2>
         <p className="text-muted-foreground">
           Welcome back, nice to see you again!!!
         </p>

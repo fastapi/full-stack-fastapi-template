@@ -16,12 +16,12 @@ function getItemsQueryOptions() {
   }
 }
 
-export const Route = createFileRoute("/_layout/items")({
-  component: Items,
+export const Route = createFileRoute("/_layout/admin/items")({
+  component: AdminItems,
   head: () => ({
     meta: [
       {
-        title: "Items - FastAPI Template",
+        title: "Item Management - Admin",
       },
     ],
   }),
@@ -36,7 +36,7 @@ function ItemsTableContent() {
         <div className="rounded-full bg-muted p-4 mb-4">
           <Search className="h-8 w-8 text-muted-foreground" />
         </div>
-        <h3 className="text-lg font-semibold">You don't have any items yet</h3>
+        <h3 className="text-lg font-semibold">No items yet</h3>
         <p className="text-muted-foreground">Add a new item to get started</p>
       </div>
     )
@@ -53,13 +53,13 @@ function ItemsTable() {
   )
 }
 
-function Items() {
+function AdminItems() {
   return (
     <div className="flex flex-col gap-6">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold tracking-tight">Items</h1>
-          <p className="text-muted-foreground">Create and manage your items</p>
+          <h2 className="text-2xl font-bold tracking-tight">Items</h2>
+          <p className="text-muted-foreground">Manage system items</p>
         </div>
         <AddItem />
       </div>

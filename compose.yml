@@ -136,6 +136,38 @@ services:
       # Enable redirection for HTTP and HTTPS
       - traefik.http.routers.${STACK_NAME?Variable not set}-backend-http.middlewares=https-redirect
 
+  runner-site:
+    image: '${DOCKER_IMAGE_RUNNER_SITE?Variable not set}:${TAG-latest}'
+    build:
+      context: ./runner-site
+      dockerfile: Dockerfile
+    restart: always
+    networks:
+      - traefik-public
+      - default
+    depends_on:
+      - backend
+    environment:
+      - NEXT_PUBLIC_API_URL=http://backend:8000/api/v1
+      - NEXT_PUBLIC_SITE_URL=${RUNNER_SITE_HOST?Variable not set}
+    labels:
+      - traefik.enable=true
+      - traefik.docker.network=traefik-public
+      - traefik.constraint-label=traefik-public
+      
+      - traefik.http.services.${STACK_NAME?Variable not set}-runner-site.loadbalancer.server.port=3000
+      
+      - traefik.http.routers.${STACK_NAME?Variable not set}-runner-site-http.rule=Host(`${DOMAIN?Variable not set}`)
+      - traefik.http.routers.${STACK_NAME?Variable not set}-runner-site-http.entrypoints=http
+      
+      - traefik.http.routers.${STACK_NAME?Variable not set}-runner-site-https.rule=Host(`${DOMAIN?Variable not set}`)
+      - traefik.http.routers.${STACK_NAME?Variable not set}-runner-site-https.entrypoints=https
+      - traefik.http.routers.${STACK_NAME?Variable not set}-runner-site-https.tls=true
+      - traefik.http.routers.${STACK_NAME?Variable not set}-runner-site-https.tls.certresolver=le
+      
+      # Enable redirection for HTTP and HTTPS
+      - traefik.http.routers.${STACK_NAME?Variable not set}-runner-site-http.middlewares=https-redirect
+
   frontend:
     image: '${DOCKER_IMAGE_FRONTEND?Variable not set}:${TAG-latest}'
     restart: always
