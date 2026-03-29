@@ -18,9 +18,9 @@ services:
       dockerfile: Dockerfile
       args:
         VITE_API_URL: https://www.spekila.com
-        VITE_CLERK_PUBLISHABLE_KEY: ${VITE_CLERK_PUBLISHABLE_KEY}
-        VITE_STRIPE_PRO_PRICE_ID: ${VITE_STRIPE_PRO_PRICE_ID}
-        VITE_STRIPE_PUBLISHABLE_KEY: ${VITE_STRIPE_PUBLISHABLE_KEY}
+        VITE_CLERK_PUBLISHABLE_KEY: ${VITE_CLERK_PUBLISHABLE_KEY:-}
+        VITE_STRIPE_PRO_PRICE_ID: ${VITE_STRIPE_PRO_PRICE_ID:-}
+        VITE_STRIPE_PUBLISHABLE_KEY: ${VITE_STRIPE_PUBLISHABLE_KEY:-}
     restart: unless-stopped
 
   backend:
@@ -45,19 +45,27 @@ services:
       - ../kila-scraper/.env.prod
     volumes:
       - ../data:/data
+      - reports_storage:/app/storage/reports
     extra_hosts:
       - "host.docker.internal:host-gateway"
     labels:
       ofelia.enabled: "true"
       ofelia.job-exec.brand-search-daily.schedule: "0 0 2 * * *"
       ofelia.job-exec.brand-search-daily.command: "python -m app.jobs.daily_pipeline"
+      ofelia.job-exec.brand-search-weekly.schedule: "0 0 23 * * 0"
+      ofelia.job-exec.brand-search-weekly.command: "python -m app.jobs.weekly_pipeline"
+      ofelia.job-exec.brand-search-weekly-email.schedule: "0 0 8 * * 1"
+      ofelia.job-exec.brand-search-weekly-email.command: "python -m app.jobs.weekly_email_pipeline"
     restart: unless-stopped
 
   ofelia:
-    image: mcuadros/ofelia:latest
+    image: mcuadros/ofelia:v0.3.12
     depends_on:
       - scraper
     command: daemon --docker
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock:ro
     restart: unless-stopped
+
+volumes:
+  reports_storage:
