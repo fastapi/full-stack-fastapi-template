@@ -34,10 +34,11 @@ jobs:
       - name: Wait for SQL Server to be ready
         run: |
           for i in $(seq 1 30); do
-            docker compose exec db /opt/mssql-tools18/bin/sqlcmd -S localhost -U sa -P "${MSSQL_PASSWORD}" -Q "SELECT 1" -C > /dev/null 2>&1 && break
+            docker compose exec db /opt/mssql-tools18/bin/sqlcmd -S localhost -U sa -P "${MSSQL_PASSWORD}" -Q "SELECT 1" -C > /dev/null 2>&1 && exit 0
             echo "Waiting for SQL Server... ($i/30)"
             sleep 2
           done
+          echo "SQL Server did not become ready in time" && exit 1
       - name: Create database
         run: |
           docker compose exec db /opt/mssql-tools18/bin/sqlcmd -S localhost -U sa -P "${MSSQL_PASSWORD}" -Q "IF NOT EXISTS (SELECT name FROM sys.databases WHERE name = '${MSSQL_DB}') CREATE DATABASE [${MSSQL_DB}]" -C
