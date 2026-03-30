@@ -6,6 +6,7 @@ import { useForm } from "react-hook-form"
 import { z } from "zod"
 
 import {
+  type ApiError,
   type CompanyPublic,
   type CompanyRegistrationComplete,
   InvitesService,
@@ -427,7 +428,7 @@ function PjRegistration() {
     },
     onError: (err) => {
       setConfirmOpen(false)
-      handleError.call(showErrorToast, err)
+      handleError.call(showErrorToast, err as ApiError)
     },
   })
 
