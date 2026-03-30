@@ -1,5 +1,6 @@
 import { Briefcase, Building2, Home, Users } from "lucide-react"
 
+import { USER_MANAGER_ROLES, type UserRole } from "@/client"
 import { SidebarAppearance } from "@/components/Common/Appearance"
 import { Logo } from "@/components/Common/Logo"
 import {
@@ -21,7 +22,9 @@ const baseItems: Item[] = [
 export function AppSidebar() {
   const { user: currentUser } = useAuth()
 
-  const items = currentUser?.is_superuser
+  const userRole = currentUser?.role as UserRole | undefined
+  const isManager = userRole ? USER_MANAGER_ROLES.includes(userRole) : false
+  const items = isManager
     ? [...baseItems, { icon: Users, title: "Admin", path: "/admin" }]
     : baseItems
 

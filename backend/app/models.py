@@ -12,6 +12,31 @@ class CompanyStatus(str, Enum):
     completed = "completed"
 
 
+class UserRole(str, Enum):
+    comercial = "comercial"
+    juridico = "juridico"
+    financeiro = "financeiro"
+    rh = "rh"
+    pj = "pj"
+    super_admin = "super_admin"
+
+
+# Roles that are allowed to manage (create/edit/deactivate) users
+USER_MANAGER_ROLES = {
+    UserRole.comercial,
+    UserRole.juridico,
+    UserRole.financeiro,
+    UserRole.rh,
+    UserRole.super_admin,
+}
+
+
+class AuditAction(str, Enum):
+    created = "created"
+    updated = "updated"
+    deactivated = "deactivated"
+
+
 def get_datetime_utc() -> datetime:
     return datetime.now(timezone.utc)
 
@@ -22,11 +47,15 @@ class UserBase(SQLModel):
     is_active: bool = True
     is_superuser: bool = False
     full_name: str | None = Field(default=None, max_length=255)
+    role: UserRole = Field(default=UserRole.comercial)
 
 
 # Properties to receive via API on creation
-class UserCreate(UserBase):
-    password: str = Field(min_length=8, max_length=128)
+class UserCreate(SQLModel):
+    email: EmailStr = Field(max_length=255)
+    role: UserRole = Field(default=UserRole.comercial)
+    full_name: str | None = Field(default=None, max_length=255)
+    password: str | None = Field(default=None, min_length=8, max_length=128)
 
 
 class UserRegister(SQLModel):
@@ -36,8 +65,11 @@ class UserRegister(SQLModel):
 
 
 # Properties to receive via API on update, all are optional
-class UserUpdate(UserBase):
-    email: EmailStr | None = Field(default=None, max_length=255)  # type: ignore
+class UserUpdate(SQLModel):
+    email: EmailStr | None = Field(default=None, max_length=255)
+    full_name: str | None = Field(default=None, max_length=255)
+    role: UserRole | None = None
+    is_active: bool | None = None
     password: str | None = Field(default=None, min_length=8, max_length=128)
 
 
@@ -60,12 +92,21 @@ class User(UserBase, table=True):
         sa_type=DateTime(timezone=True),  # type: ignore
     )
     items: list["Item"] = Relationship(back_populates="owner", cascade_delete=True)
+    audit_logs_performed: list["AuditLog"] = Relationship(
+        back_populates="performed_by",
+        sa_relationship_kwargs={"foreign_keys": "[AuditLog.performed_by_id]"},
+    )
+    audit_logs_target: list["AuditLog"] = Relationship(
+        back_populates="target_user",
+        sa_relationship_kwargs={"foreign_keys": "[AuditLog.target_user_id]"},
+    )
 
 
 # Properties to return via API, id is always required
 class UserPublic(UserBase):
     id: uuid.UUID
     created_at: datetime | None = None
+    role: UserRole = UserRole.comercial
 
 
 class UsersPublic(SQLModel):
@@ -185,9 +226,7 @@ class CompanyCreate(SQLModel):
     bairro_representante_legal: str = Field(min_length=1, max_length=255)
     municipio_representante_legal: str = Field(min_length=1, max_length=255)
     uf_representante_legal: str = Field(min_length=1, max_length=2)
-    endereco_eletronico_representante_legal: str = Field(
-        min_length=1, max_length=255
-    )
+    endereco_eletronico_representante_legal: str = Field(min_length=1, max_length=255)
     telefones_representante_legal: str = Field(min_length=1, max_length=40)
     data_nascimento_representante_legal: date
     banco_cc_cnpj: str = Field(min_length=1, max_length=100)
@@ -282,9 +321,7 @@ class CompanyRegistrationComplete(SQLModel):
     bairro_representante_legal: str = Field(min_length=1, max_length=255)
     municipio_representante_legal: str = Field(min_length=1, max_length=255)
     uf_representante_legal: str = Field(min_length=1, max_length=2)
-    endereco_eletronico_representante_legal: str = Field(
-        min_length=1, max_length=255
-    )
+    endereco_eletronico_representante_legal: str = Field(min_length=1, max_length=255)
     telefones_representante_legal: str = Field(min_length=1, max_length=40)
     data_nascimento_representante_legal: date
     banco_cc_cnpj: str = Field(min_length=1, max_length=100)
@@ -330,3 +367,40 @@ class TokenPayload(SQLModel):
 class NewPassword(SQLModel):
     token: str
     new_password: str = Field(min_length=8, max_length=128)
+
+
+# Audit log database model
+class AuditLog(SQLModel, table=True):
+    id: uuid.UUID = Field(default_factory=uuid.uuid4, primary_key=True)
+    action: AuditAction
+    target_user_id: uuid.UUID = Field(foreign_key="user.id", nullable=False)
+    performed_by_id: uuid.UUID = Field(foreign_key="user.id", nullable=False)
+    changes: str = Field(default="", max_length=2000)
+    created_at: datetime | None = Field(
+        default_factory=get_datetime_utc,
+        sa_type=DateTime(timezone=True),  # type: ignore
+    )
+    target_user: User | None = Relationship(
+        back_populates="audit_logs_target",
+        sa_relationship_kwargs={"foreign_keys": "[AuditLog.target_user_id]"},
+    )
+    performed_by: User | None = Relationship(
+        back_populates="audit_logs_performed",
+        sa_relationship_kwargs={"foreign_keys": "[AuditLog.performed_by_id]"},
+    )
+
+
+class AuditLogPublic(SQLModel):
+    id: uuid.UUID
+    action: AuditAction
+    target_user_id: uuid.UUID
+    performed_by_id: uuid.UUID
+    changes: str
+    created_at: datetime | None = None
+    target_user_email: str | None = None
+    performed_by_email: str | None = None
+
+
+class AuditLogsPublic(SQLModel):
+    data: list[AuditLogPublic]
+    count: int

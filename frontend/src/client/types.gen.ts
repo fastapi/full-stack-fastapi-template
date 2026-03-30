@@ -214,12 +214,42 @@ export type UpdatePassword = {
     new_password: string;
 };
 
+export type UserRole = 'comercial' | 'juridico' | 'financeiro' | 'rh' | 'pj' | 'super_admin';
+
+export const USER_MANAGER_ROLES: UserRole[] = ['comercial', 'juridico', 'financeiro', 'rh', 'super_admin'];
+
+export const USER_ROLE_LABELS: Record<UserRole, string> = {
+    comercial: 'Comercial',
+    juridico: 'Jur\u00eddico',
+    financeiro: 'Financeiro',
+    rh: 'RH',
+    pj: 'PJ',
+    super_admin: 'Super Admin',
+};
+
+export type AuditAction = 'created' | 'updated' | 'deactivated';
+
+export type AuditLogPublic = {
+    id: string;
+    action: AuditAction;
+    target_user_id: string;
+    performed_by_id: string;
+    changes: string;
+    created_at?: (string | null);
+    target_user_email?: (string | null);
+    performed_by_email?: (string | null);
+};
+
+export type AuditLogsPublic = {
+    data: Array<AuditLogPublic>;
+    count: number;
+};
+
 export type UserCreate = {
     email: string;
-    is_active?: boolean;
-    is_superuser?: boolean;
+    role?: UserRole;
     full_name?: (string | null);
-    password: string;
+    password?: (string | null);
 };
 
 export type UserPublic = {
@@ -227,6 +257,7 @@ export type UserPublic = {
     is_active?: boolean;
     is_superuser?: boolean;
     full_name?: (string | null);
+    role?: UserRole;
     id: string;
     created_at?: (string | null);
 };
@@ -247,6 +278,7 @@ export type UserUpdate = {
     is_active?: boolean;
     is_superuser?: boolean;
     full_name?: (string | null);
+    role?: UserRole;
     password?: (string | null);
 };
 
@@ -394,6 +426,13 @@ export type UsersDeleteUserData = {
 };
 
 export type UsersDeleteUserResponse = (Message);
+
+export type UsersReadAuditLogsData = {
+    limit?: number;
+    skip?: number;
+};
+
+export type UsersReadAuditLogsResponse = (AuditLogsPublic);
 
 export type UtilsTestEmailData = {
     emailTo: string;
