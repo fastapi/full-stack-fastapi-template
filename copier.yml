@@ -46,13 +46,14 @@ emails_from_email:
   help: The email account to send emails from, you can set it later in .env
   default: info@example.com
 
-postgres_password:
+mssql_password:
   type: str
   help: |
-    'The password for the PostgreSQL database, stored in .env,
+    'The password for the SQL Server database, stored in .env,
     you can generate one with:
-    python -c "import secrets; print(secrets.token_urlsafe(32))"'
-  default: changethis
+    python -c "import secrets; print(secrets.token_urlsafe(32))"
+    Note: SQL Server requires a strong password (uppercase, lowercase, number, special char, min 8 chars)'
+  default: Changethis1!
 
 sentry_dsn:
   type: str

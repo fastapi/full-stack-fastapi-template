@@ -21,8 +21,24 @@ jobs:
           python-version: "3.10"
       - name: Install uv
         uses: astral-sh/setup-uv@v7
+      - name: Install ODBC Driver 18 for SQL Server
+        run: |
+          curl -fsSL https://packages.microsoft.com/keys/microsoft.asc | sudo gpg --dearmor -o /usr/share/keyrings/microsoft-prod.gpg
+          echo "deb [arch=amd64 signed-by=/usr/share/keyrings/microsoft-prod.gpg] https://packages.microsoft.com/ubuntu/$(lsb_release -rs)/prod $(lsb_release -cs) main" | sudo tee /etc/apt/sources.list.d/mssql-release.list
+          sudo apt-get update
+          sudo ACCEPT_EULA=Y apt-get install -y msodbcsql18 unixodbc-dev
       - run: docker compose down -v --remove-orphans
       - run: docker compose up -d db mailcatcher
+      - name: Wait for SQL Server to be ready
+        run: |
+          for i in $(seq 1 30); do
+            docker compose exec db /opt/mssql-tools18/bin/sqlcmd -S localhost -U sa -P "${MSSQL_PASSWORD}" -Q "SELECT 1" -C > /dev/null 2>&1 && break
+            echo "Waiting for SQL Server... ($i/30)"
+            sleep 2
+          done
+      - name: Create database
+        run: |
+          docker compose exec db /opt/mssql-tools18/bin/sqlcmd -S localhost -U sa -P "${MSSQL_PASSWORD}" -Q "IF NOT EXISTS (SELECT name FROM sys.databases WHERE name = '${MSSQL_DB}') CREATE DATABASE [${MSSQL_DB}]" -C
       - name: Migrate DB
         run: uv run bash scripts/prestart.sh
         working-directory: backend

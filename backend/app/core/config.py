@@ -7,7 +7,6 @@ from pydantic import (
     BeforeValidator,
     EmailStr,
     HttpUrl,
-    PostgresDsn,
     computed_field,
     model_validator,
 )
@@ -50,22 +49,21 @@ class Settings(BaseSettings):
 
     PROJECT_NAME: str
     SENTRY_DSN: HttpUrl | None = None
-    POSTGRES_SERVER: str
-    POSTGRES_PORT: int = 5432
-    POSTGRES_USER: str
-    POSTGRES_PASSWORD: str = ""
-    POSTGRES_DB: str = ""
+    MSSQL_SERVER: str
+    MSSQL_PORT: int = 1433
+    MSSQL_USER: str
+    MSSQL_PASSWORD: str = ""
+    MSSQL_DB: str = ""
+    MSSQL_DRIVER: str = "ODBC Driver 18 for SQL Server"
 
     @computed_field  # type: ignore[prop-decorator]
     @property
-    def SQLALCHEMY_DATABASE_URI(self) -> PostgresDsn:
-        return PostgresDsn.build(
-            scheme="postgresql+psycopg",
-            username=self.POSTGRES_USER,
-            password=self.POSTGRES_PASSWORD,
-            host=self.POSTGRES_SERVER,
-            port=self.POSTGRES_PORT,
-            path=self.POSTGRES_DB,
+    def SQLALCHEMY_DATABASE_URI(self) -> str:
+        driver = self.MSSQL_DRIVER.replace(" ", "+")
+        return (
+            f"mssql+pyodbc://{self.MSSQL_USER}:{self.MSSQL_PASSWORD}"
+            f"@{self.MSSQL_SERVER}:{self.MSSQL_PORT}/{self.MSSQL_DB}"
+            f"?driver={driver}&TrustServerCertificate=yes"
         )
 
     SMTP_TLS: bool = True
@@ -109,7 +107,7 @@ class Settings(BaseSettings):
     @model_validator(mode="after")
     def _enforce_non_default_secrets(self) -> Self:
         self._check_default_secret("SECRET_KEY", self.SECRET_KEY)
-        self._check_default_secret("POSTGRES_PASSWORD", self.POSTGRES_PASSWORD)
+        self._check_default_secret("MSSQL_PASSWORD", self.MSSQL_PASSWORD)
         self._check_default_secret(
             "FIRST_SUPERUSER_PASSWORD", self.FIRST_SUPERUSER_PASSWORD
         )
