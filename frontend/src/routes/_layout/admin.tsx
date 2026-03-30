@@ -2,12 +2,13 @@ import { useSuspenseQuery } from "@tanstack/react-query"
 import { createFileRoute, redirect } from "@tanstack/react-router"
 import { Suspense } from "react"
 
-import { type UserPublic, USER_MANAGER_ROLES, type UserRole, UsersService } from "@/client"
+import { type UserPublic, type UserRole, UsersService } from "@/client"
 import AddUser from "@/components/Admin/AddUser"
 import { columns, type UserTableData } from "@/components/Admin/columns"
 import { DataTable } from "@/components/Common/DataTable"
 import PendingUsers from "@/components/Pending/PendingUsers"
 import useAuth from "@/hooks/useAuth"
+import { USER_MANAGER_ROLES } from "@/lib/user-constants"
 
 function getUsersQueryOptions() {
   return {

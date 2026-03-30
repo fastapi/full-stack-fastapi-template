@@ -5,7 +5,7 @@ import { useState } from "react"
 import { useForm } from "react-hook-form"
 import { z } from "zod"
 
-import { type UserPublic, type UserRole, USER_ROLE_LABELS, UsersService } from "@/client"
+import { type UserPublic, type UserRole, UsersService } from "@/client"
 import { Button } from "@/components/ui/button"
 import { Checkbox } from "@/components/ui/checkbox"
 import {
@@ -36,14 +36,29 @@ import {
   SelectValue,
 } from "@/components/ui/select"
 import useCustomToast from "@/hooks/useCustomToast"
+import { USER_ROLE_LABELS } from "@/lib/user-constants"
 import { handleError } from "@/utils"
 
-const roleOptions: UserRole[] = ['comercial', 'juridico', 'financeiro', 'rh', 'pj', 'super_admin']
+const roleOptions: UserRole[] = [
+  "comercial",
+  "juridico",
+  "financeiro",
+  "rh",
+  "pj",
+  "super_admin",
+]
 
 const formSchema = z.object({
   email: z.email({ message: "Invalid email address" }),
   full_name: z.string().optional(),
-  role: z.enum(['comercial', 'juridico', 'financeiro', 'rh', 'pj', 'super_admin']),
+  role: z.enum([
+    "comercial",
+    "juridico",
+    "financeiro",
+    "rh",
+    "pj",
+    "super_admin",
+  ]),
   is_active: z.boolean().optional(),
 })
 
@@ -66,7 +81,7 @@ const EditUser = ({ user, onSuccess }: EditUserProps) => {
     defaultValues: {
       email: user.email,
       full_name: user.full_name ?? undefined,
-      role: (user.role ?? 'comercial') as UserRole,
+      role: (user.role ?? "comercial") as UserRole,
       is_active: user.is_active,
     },
   })
@@ -188,7 +203,6 @@ const EditUser = ({ user, onSuccess }: EditUserProps) => {
                   </FormItem>
                 )}
               />
-
             </div>
 
             <DialogFooter>

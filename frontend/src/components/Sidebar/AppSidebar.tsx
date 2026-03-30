@@ -1,6 +1,6 @@
 import { Briefcase, Building2, Home, Users } from "lucide-react"
 
-import { USER_MANAGER_ROLES, type UserRole } from "@/client"
+import type { UserRole } from "@/client"
 import { SidebarAppearance } from "@/components/Common/Appearance"
 import { Logo } from "@/components/Common/Logo"
 import {
@@ -10,6 +10,7 @@ import {
   SidebarHeader,
 } from "@/components/ui/sidebar"
 import useAuth from "@/hooks/useAuth"
+import { USER_MANAGER_ROLES } from "@/lib/user-constants"
 import { type Item, Main } from "./Main"
 import { User } from "./User"
 
