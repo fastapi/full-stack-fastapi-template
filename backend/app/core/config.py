@@ -1,6 +1,7 @@
 import secrets
 import warnings
 from typing import Annotated, Any, Literal
+from urllib.parse import quote_plus
 
 from pydantic import (
     AnyUrl,
@@ -61,7 +62,7 @@ class Settings(BaseSettings):
     def SQLALCHEMY_DATABASE_URI(self) -> str:
         driver = self.MSSQL_DRIVER.replace(" ", "+")
         return (
-            f"mssql+pyodbc://{self.MSSQL_USER}:{self.MSSQL_PASSWORD}"
+            f"mssql+pyodbc://{quote_plus(self.MSSQL_USER)}:{quote_plus(self.MSSQL_PASSWORD)}"
             f"@{self.MSSQL_SERVER}:{self.MSSQL_PORT}/{self.MSSQL_DB}"
             f"?driver={driver}&TrustServerCertificate=yes"
         )
