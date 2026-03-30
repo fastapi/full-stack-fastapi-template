@@ -12,6 +12,7 @@ import {
   PenLine,
   Settings,
   Shield,
+  ShieldAlert,
   Sparkles,
   Swords,
   TrendingUp,
@@ -113,16 +114,13 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
       path: "/app/insight/market-dynamic",
       requiredFeature: "insightAll",
     },
-    // TODO: Risk Intelligence hidden — functionality needs revisiting before re-enabling
-    // {
-    //   name: "Risk Intelligence",
-    //   icon: ShieldAlert,
-    //   path: "/app/insight/risk-intelligence",
-    //   beta: true,
-    //   requiredFeature: "insightAll",
-    // },
     { name: "Settings", icon: Settings, path: "/app/settings" },
-    ...(isSuperUser ? [{ name: "Blog Admin", icon: PenLine, path: "/app/admin/blog" }] : []),
+    ...(isSuperUser
+      ? [
+          { name: "Blog Admin", icon: PenLine, path: "/app/admin/blog" },
+          { name: "Risk Signals", icon: ShieldAlert, path: "/app/insight/risk-intelligence" },
+        ]
+      : []),
   ]
 
   const toggleMenu = (name: string) => {
