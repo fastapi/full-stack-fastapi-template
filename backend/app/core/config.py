@@ -95,9 +95,10 @@ class Settings(BaseSettings):
     FIRST_SUPERUSER_PASSWORD: str
 
     def _check_default_secret(self, var_name: str, value: str | None) -> None:
-        if value == "changethis":
+        default_secrets = ("changethis", "Changethis1!")
+        if value in default_secrets:
             message = (
-                f'The value of {var_name} is "changethis", '
+                f"The value of {var_name} is a default placeholder, "
                 "for security, please change it, at least for deployments."
             )
             if self.ENVIRONMENT == "local":
