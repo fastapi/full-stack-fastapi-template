@@ -102,6 +102,11 @@ jobs:
 
             cd /opt/geo
             docker compose -f kila/docker-compose.prod.yml up --build -d
+            # Run migrations explicitly so schema is always in sync before the scraper
+            # can run jobs. The backend prestart also does this, but running it here
+            # guarantees it completes before ofelia fires — even if a kila-models change
+            # was deployed without a backend restart.
+            docker compose -f kila/docker-compose.prod.yml exec -T backend alembic upgrade head
             # Restart ofelia so it re-reads the scraper's labels after any container rebuild.
             # Without this, a full rebuild replaces the scraper container and ofelia silently
             # stops firing the daily pipeline.
