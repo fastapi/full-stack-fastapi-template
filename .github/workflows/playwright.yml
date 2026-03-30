@@ -63,9 +63,9 @@ jobs:
       working-directory: backend
     - run: bun ci
       working-directory: frontend
-    - run: bash scripts/generate-client.sh
     - name: Generate .env for CI
       run: bash scripts/ci-generate-env.sh db
+    - run: bash scripts/generate-client.sh
     - run: docker compose build
     - run: docker compose down -v --remove-orphans
     - name: Run Playwright tests
