@@ -49,6 +49,8 @@ jobs:
             requirements**.txt
             pyproject.toml
             uv.lock
+      - name: Generate .env for CI
+        run: bash scripts/ci-generate-env.sh localhost
       - name: Install backend dependencies
         run: uv sync --all-packages
       - name: Install frontend dependencies

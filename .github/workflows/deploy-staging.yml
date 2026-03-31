@@ -23,7 +23,12 @@ jobs:
       SMTP_USER: ${{ secrets.SMTP_USER }}
       SMTP_PASSWORD: ${{ secrets.SMTP_PASSWORD }}
       EMAILS_FROM_EMAIL: ${{ secrets.EMAILS_FROM_EMAIL }}
-      POSTGRES_PASSWORD: ${{ secrets.POSTGRES_PASSWORD }}
+      MSSQL_PASSWORD: ${{ secrets.MSSQL_PASSWORD }}
+      MSSQL_SERVER: ${{ secrets.MSSQL_SERVER }}
+      MSSQL_PORT: ${{ secrets.MSSQL_PORT }}
+      MSSQL_DB: ${{ secrets.MSSQL_DB }}
+      MSSQL_USER: ${{ secrets.MSSQL_USER }}
+      MSSQL_DRIVER: ${{ secrets.MSSQL_DRIVER }}
       SENTRY_DSN: ${{ secrets.SENTRY_DSN }}
     steps:
       - name: Checkout

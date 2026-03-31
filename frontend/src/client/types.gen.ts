@@ -216,17 +216,6 @@ export type UpdatePassword = {
 
 export type UserRole = 'comercial' | 'juridico' | 'financeiro' | 'rh' | 'pj' | 'super_admin';
 
-export const USER_MANAGER_ROLES: UserRole[] = ['comercial', 'juridico', 'financeiro', 'rh', 'super_admin'];
-
-export const USER_ROLE_LABELS: Record<UserRole, string> = {
-    comercial: 'Comercial',
-    juridico: 'Jur\u00eddico',
-    financeiro: 'Financeiro',
-    rh: 'RH',
-    pj: 'PJ',
-    super_admin: 'Super Admin',
-};
-
 export type AuditAction = 'created' | 'updated' | 'deactivated';
 
 export type AuditLogPublic = {

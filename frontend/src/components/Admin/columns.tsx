@@ -1,8 +1,8 @@
 import type { ColumnDef } from "@tanstack/react-table"
 
 import type { UserPublic, UserRole } from "@/client"
-import { USER_ROLE_LABELS } from "@/client"
 import { Badge } from "@/components/ui/badge"
+import { USER_ROLE_LABELS } from "@/lib/user-constants"
 import { cn } from "@/lib/utils"
 import { UserActionsMenu } from "./UserActionsMenu"
 

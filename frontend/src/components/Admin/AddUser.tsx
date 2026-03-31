@@ -5,7 +5,7 @@ import { useState } from "react"
 import { useForm } from "react-hook-form"
 import { z } from "zod"
 
-import { type UserCreate, type UserRole, USER_ROLE_LABELS, UsersService } from "@/client"
+import { type UserCreate, type UserRole, UsersService } from "@/client"
 import { Button } from "@/components/ui/button"
 import {
   Dialog,
@@ -35,14 +35,29 @@ import {
   SelectValue,
 } from "@/components/ui/select"
 import useCustomToast from "@/hooks/useCustomToast"
+import { USER_ROLE_LABELS } from "@/lib/user-constants"
 import { handleError } from "@/utils"
 
-const roleOptions: UserRole[] = ['comercial', 'juridico', 'financeiro', 'rh', 'pj', 'super_admin']
+const roleOptions: UserRole[] = [
+  "comercial",
+  "juridico",
+  "financeiro",
+  "rh",
+  "pj",
+  "super_admin",
+]
 
 const formSchema = z.object({
   email: z.email({ message: "Invalid email address" }),
   full_name: z.string().optional(),
-  role: z.enum(['comercial', 'juridico', 'financeiro', 'rh', 'pj', 'super_admin']),
+  role: z.enum([
+    "comercial",
+    "juridico",
+    "financeiro",
+    "rh",
+    "pj",
+    "super_admin",
+  ]),
 })
 
 type FormData = z.infer<typeof formSchema>

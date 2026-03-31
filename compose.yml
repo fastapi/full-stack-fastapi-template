@@ -1,23 +1,21 @@
 services:
 
   db:
-    image: postgres:18
+    image: mcr.microsoft.com/mssql/server:2022-latest
     restart: always
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER} -d ${POSTGRES_DB}"]
+      test: /opt/mssql-tools18/bin/sqlcmd -S localhost -U sa -P "${MSSQL_PASSWORD}" -Q "SELECT 1" -C || exit 1
       interval: 10s
       retries: 5
       start_period: 30s
       timeout: 10s
     volumes:
-      - app-db-data:/var/lib/postgresql/data/pgdata
+      - app-db-data:/var/opt/mssql
     env_file:
       - .env
     environment:
-      - PGDATA=/var/lib/postgresql/data/pgdata
-      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD?Variable not set}
-      - POSTGRES_USER=${POSTGRES_USER?Variable not set}
-      - POSTGRES_DB=${POSTGRES_DB?Variable not set}
+      - ACCEPT_EULA=Y
+      - MSSQL_SA_PASSWORD=${MSSQL_PASSWORD?Variable not set}
 
   adminer:
     image: adminer
@@ -69,11 +67,12 @@ services:
       - SMTP_USER=${SMTP_USER}
       - SMTP_PASSWORD=${SMTP_PASSWORD}
       - EMAILS_FROM_EMAIL=${EMAILS_FROM_EMAIL}
-      - POSTGRES_SERVER=db
-      - POSTGRES_PORT=${POSTGRES_PORT}
-      - POSTGRES_DB=${POSTGRES_DB}
-      - POSTGRES_USER=${POSTGRES_USER?Variable not set}
-      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD?Variable not set}
+      - MSSQL_SERVER=db
+      - MSSQL_PORT=${MSSQL_PORT}
+      - MSSQL_DB=${MSSQL_DB}
+      - MSSQL_USER=${MSSQL_USER?Variable not set}
+      - MSSQL_PASSWORD=${MSSQL_PASSWORD?Variable not set}
+      - MSSQL_DRIVER=${MSSQL_DRIVER}
       - SENTRY_DSN=${SENTRY_DSN}
 
   backend:
@@ -102,11 +101,12 @@ services:
       - SMTP_USER=${SMTP_USER}
       - SMTP_PASSWORD=${SMTP_PASSWORD}
       - EMAILS_FROM_EMAIL=${EMAILS_FROM_EMAIL}
-      - POSTGRES_SERVER=db
-      - POSTGRES_PORT=${POSTGRES_PORT}
-      - POSTGRES_DB=${POSTGRES_DB}
-      - POSTGRES_USER=${POSTGRES_USER?Variable not set}
-      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD?Variable not set}
+      - MSSQL_SERVER=db
+      - MSSQL_PORT=${MSSQL_PORT}
+      - MSSQL_DB=${MSSQL_DB}
+      - MSSQL_USER=${MSSQL_USER?Variable not set}
+      - MSSQL_PASSWORD=${MSSQL_PASSWORD?Variable not set}
+      - MSSQL_DRIVER=${MSSQL_DRIVER}
       - SENTRY_DSN=${SENTRY_DSN}
 
     healthcheck:
