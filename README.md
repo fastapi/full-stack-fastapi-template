@@ -206,6 +206,18 @@ The input variables, with their default values (some auto generated) are:
 - `postgres_password`: (default: `"changethis"`) The password for the PostgreSQL database, stored in .env, you can generate one with the method above.
 - `sentry_dsn`: (default: "") The DSN for Sentry, if you are using it, you can set it later in .env.
 
+## Example Items CRUD (reference)
+
+The **Items** feature is a full vertical slice (API, models, UI with table and dialogs, generated client, tests) kept as a **reference for new CRUDs**.
+
+For product delivery, **the Items page is not shown in the app**: the sidebar has no Items entry, and `/items` **redirects to the dashboard**. The code stays in the tree for you to copy or read.
+
+Main entry points:
+
+- **Backend:** `backend/app/api/routes/items.py`, `Item` in `backend/app/models.py`, helpers in `backend/app/crud.py`, tests in `backend/tests/api/routes/test_items.py`.
+- **Frontend:** `frontend/src/routes/_layout/items.tsx`, components under `frontend/src/components/Items/`, `ItemsService` in `frontend/src/client/`.
+- **E2E:** `frontend/tests/items.spec.ts` covers the redirect for the hidden route.
+
 ## Backend Development
 
 Backend docs: [backend/README.md](./backend/README.md).

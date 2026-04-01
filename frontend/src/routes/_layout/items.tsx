@@ -1,5 +1,9 @@
+/**
+ * Items CRUD — reference for new CRUDs (see README “Example Items CRUD”).
+ * For delivery the UI is hidden: no sidebar link; `/items` redirects to the dashboard.
+ */
 import { useSuspenseQuery } from "@tanstack/react-query"
-import { createFileRoute } from "@tanstack/react-router"
+import { createFileRoute, redirect } from "@tanstack/react-router"
 import { Search } from "lucide-react"
 import { Suspense } from "react"
 
@@ -17,6 +21,9 @@ function getItemsQueryOptions() {
 }
 
 export const Route = createFileRoute("/_layout/items")({
+  beforeLoad: () => {
+    throw redirect({ to: "/" })
+  },
   component: Items,
   head: () => ({
     meta: [
