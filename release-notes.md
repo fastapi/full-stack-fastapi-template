@@ -4,6 +4,7 @@
 
 ### Refactors
 
+* 🔧 Add FastAPI VS Code extension to recommended extensions. PR [#2206](https://github.com/fastapi/full-stack-fastapi-template/pull/2206) by [@tiangolo](https://github.com/tiangolo).
 * ♻️ Update meta titles. PR [#2179](https://github.com/fastapi/full-stack-fastapi-template/pull/2179) by [@alejsdev](https://github.com/alejsdev).
 
 ### Upgrades
@@ -16,6 +17,17 @@
 
 ### Internal
 
+* ⬆ Bump dorny/paths-filter from 3 to 4. PR [#2230](https://github.com/fastapi/full-stack-fastapi-template/pull/2230) by [@dependabot[bot]](https://github.com/apps/dependabot).
+* ⬆ Bump pyjwt from 2.10.1 to 2.12.0. PR [#2231](https://github.com/fastapi/full-stack-fastapi-template/pull/2231) by [@dependabot[bot]](https://github.com/apps/dependabot).
+* ⬆ Bump @types/node from 25.3.2 to 25.5.0. PR [#2233](https://github.com/fastapi/full-stack-fastapi-template/pull/2233) by [@dependabot[bot]](https://github.com/apps/dependabot).
+* ⬆ Bump @tanstack/router-devtools from 1.159.10 to 1.166.7. PR [#2234](https://github.com/fastapi/full-stack-fastapi-template/pull/2234) by [@dependabot[bot]](https://github.com/apps/dependabot).
+* ⬆ Bump tailwindcss from 4.2.0 to 4.2.1. PR [#2226](https://github.com/fastapi/full-stack-fastapi-template/pull/2226) by [@dependabot[bot]](https://github.com/apps/dependabot).
+* ⬆ Bump actions/download-artifact from 7 to 8. PR [#2208](https://github.com/fastapi/full-stack-fastapi-template/pull/2208) by [@dependabot[bot]](https://github.com/apps/dependabot).
+* ⬆ Bump actions/upload-artifact from 6 to 7. PR [#2207](https://github.com/fastapi/full-stack-fastapi-template/pull/2207) by [@dependabot[bot]](https://github.com/apps/dependabot).
+* ⬆ Bump @tanstack/react-router from 1.157.3 to 1.163.3. PR [#2215](https://github.com/fastapi/full-stack-fastapi-template/pull/2215) by [@dependabot[bot]](https://github.com/apps/dependabot).
+* ⬆ Bump @tanstack/react-router-devtools from 1.159.10 to 1.163.3. PR [#2212](https://github.com/fastapi/full-stack-fastapi-template/pull/2212) by [@dependabot[bot]](https://github.com/apps/dependabot).
+* ⬆ Bump @tanstack/react-query from 5.90.20 to 5.90.21. PR [#2213](https://github.com/fastapi/full-stack-fastapi-template/pull/2213) by [@dependabot[bot]](https://github.com/apps/dependabot).
+* ⬆ Bump @types/node from 25.1.0 to 25.3.2. PR [#2214](https://github.com/fastapi/full-stack-fastapi-template/pull/2214) by [@dependabot[bot]](https://github.com/apps/dependabot).
 * ⬆ Bump tailwindcss from 4.1.18 to 4.2.0. PR [#2198](https://github.com/fastapi/full-stack-fastapi-template/pull/2198) by [@dependabot[bot]](https://github.com/apps/dependabot).
 * ⬆ Bump axios from 1.13.4 to 1.13.5. PR [#2199](https://github.com/fastapi/full-stack-fastapi-template/pull/2199) by [@dependabot[bot]](https://github.com/apps/dependabot).
 * ⬆ Bump @vitejs/plugin-react-swc from 4.2.2 to 4.2.3. PR [#2200](https://github.com/fastapi/full-stack-fastapi-template/pull/2200) by [@dependabot[bot]](https://github.com/apps/dependabot).
