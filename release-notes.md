@@ -17,6 +17,7 @@
 
 ### Internal
 
+* 👷 Add `ty` to precommit. PR [#2227](https://github.com/fastapi/full-stack-fastapi-template/pull/2227) by [@svlandeg](https://github.com/svlandeg).
 * ⬆ Bump dorny/paths-filter from 3 to 4. PR [#2230](https://github.com/fastapi/full-stack-fastapi-template/pull/2230) by [@dependabot[bot]](https://github.com/apps/dependabot).
 * ⬆ Bump pyjwt from 2.10.1 to 2.12.0. PR [#2231](https://github.com/fastapi/full-stack-fastapi-template/pull/2231) by [@dependabot[bot]](https://github.com/apps/dependabot).
 * ⬆ Bump @types/node from 25.3.2 to 25.5.0. PR [#2233](https://github.com/fastapi/full-stack-fastapi-template/pull/2233) by [@dependabot[bot]](https://github.com/apps/dependabot).
