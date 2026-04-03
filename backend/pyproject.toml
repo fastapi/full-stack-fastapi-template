@@ -25,6 +25,7 @@ dependencies = [
 dev = [
     "pytest<8.0.0,>=7.4.3",
     "mypy<2.0.0,>=1.8.0",
+    "ty>=0.0.25",
     "ruff<1.0.0,>=0.2.2",
     "prek>=0.2.24,<1.0.0",
     "coverage<8.0.0,>=7.4.3",
@@ -75,3 +76,6 @@ sort = "-Cover"
 
 [tool.coverage.html]
 show_contexts = true
+
+[tool.ty.terminal]
+error-on-warning = true
