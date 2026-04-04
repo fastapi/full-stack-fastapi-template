@@ -47,9 +47,23 @@ repos:
         language: unsupported
         pass_filenames: false
 
+      - id: local-ty
+        name: ty check
+        entry: uv run ty check backend/app
+        require_serial: true
+        language: unsupported
+        pass_filenames: false
+
       - id: generate-frontend-sdk
         name: Generate Frontend SDK
         entry: bash ./scripts/generate-client.sh
         pass_filenames: false
         language: unsupported
         files: ^backend/.*$|^scripts/generate-client\.sh$
+
+      - id: add-release-date
+        language: unsupported
+        name: add date to latest release header
+        entry: uv run python scripts/add_latest_release_date.py
+        files: ^release-notes\.md$
+        pass_filenames: false
