@@ -50,7 +50,7 @@ class Settings(BaseSettings):
 
     PROJECT_NAME: str
     SENTRY_DSN: HttpUrl | None = None
-    POSTGRES_SERVER: str
+    POSTGRES_HOST: str
     POSTGRES_PORT: int = 5432
     POSTGRES_USER: str
     POSTGRES_PASSWORD: str = ""
@@ -63,7 +63,7 @@ class Settings(BaseSettings):
             scheme="postgresql+psycopg",
             username=self.POSTGRES_USER,
             password=self.POSTGRES_PASSWORD,
-            host=self.POSTGRES_SERVER,
+            host=self.POSTGRES_HOST,
             port=self.POSTGRES_PORT,
             path=self.POSTGRES_DB,
         )
