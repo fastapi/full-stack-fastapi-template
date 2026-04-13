@@ -180,6 +180,53 @@ ruff-format..............................................................Passed
 biome check..............................................................Passed
 ```
 
+## Error Handling Best Practices for APIs
+
+When developing APIs, especially for production systems, it's important to handle errors in a consistent and structured way.
+
+### Example using FastAPI
+
+    from fastapi import HTTPException
+
+    def get_item(item_id: int):
+        if item_id != 1:
+            raise HTTPException(
+                status_code=404,
+                detail="Item not found"
+            )
+        return {"item": "valid"}
+
+### Structured Error Response
+
+Instead of returning plain text errors, structured JSON responses improve client-side handling:
+
+    {
+      "detail": {
+        "error": "Item not found",
+        "code": 404
+      }
+    }
+
+### Recommendations
+
+- Use appropriate HTTP status codes (e.g., 400, 404, 500)  
+- Return structured JSON error responses  
+- Avoid exposing internal implementation details  
+- Log errors for debugging and monitoring  
+
+### Optional: Confidence-Based Handling (Advanced)
+
+    {
+      "detail": {
+        "error": "Low confidence prediction",
+        "confidence": 0.62,
+        "action": "Require human review"
+      }
+    }
+
+This pattern is useful when integrating human-in-the-loop or safety-critical systems.
+
+
 ## URLs
 
 The production or staging URLs would use these same paths, but with your own domain.
