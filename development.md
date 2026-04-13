@@ -209,10 +209,10 @@ Instead of returning plain text errors, structured JSON responses improve client
 
 ### Recommendations
 
-- Use appropriate HTTP status codes (e.g., 400, 404, 500)  
-- Return structured JSON error responses  
-- Avoid exposing internal implementation details  
-- Log errors for debugging and monitoring  
+- Use appropriate HTTP status codes (e.g., 400, 404, 500)
+- Return structured JSON error responses
+- Avoid exposing internal implementation details
+- Log errors for debugging and monitoring
 
 ### Optional: Confidence-Based Handling (Advanced)
 
