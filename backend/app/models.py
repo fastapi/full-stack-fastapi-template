@@ -1,5 +1,6 @@
 import uuid
 from datetime import datetime, timezone
+from enum import Enum
 
 from pydantic import EmailStr
 from sqlalchemy import DateTime
@@ -54,6 +55,7 @@ class User(UserBase, table=True):
         sa_type=DateTime(timezone=True),  # type: ignore
     )
     items: list["Item"] = Relationship(back_populates="owner", cascade_delete=True)
+    notifications: list["Notification"] = Relationship(back_populates="user", cascade_delete=True)
 
 
 # Properties to return via API, id is always required
@@ -127,3 +129,65 @@ class TokenPayload(SQLModel):
 class NewPassword(SQLModel):
     token: str
     new_password: str = Field(min_length=8, max_length=128)
+
+
+class NotificationType(str, Enum):
+    INFO = "info"
+    SUCCESS = "success"
+    WARNING = "warning"
+    ERROR = "error"
+
+
+class NotificationBase(SQLModel):
+    title: str = Field(min_length=1, max_length=255)
+    message: str | None = Field(default=None, max_length=1000)
+    notification_type: NotificationType = Field(default=NotificationType.INFO)
+    is_read: bool = Field(default=False)
+    action_url: str | None = Field(default=None, max_length=500)
+
+
+class NotificationCreate(SQLModel):
+    title: str = Field(min_length=1, max_length=255)
+    message: str | None = Field(default=None, max_length=1000)
+    notification_type: NotificationType = Field(default=NotificationType.INFO)
+    action_url: str | None = Field(default=None, max_length=500)
+    user_id: uuid.UUID
+
+
+class NotificationUpdate(SQLModel):
+    title: str | None = Field(default=None, min_length=1, max_length=255)
+    message: str | None = Field(default=None, max_length=1000)
+    is_read: bool | None = None
+
+
+class NotificationMarkRead(SQLModel):
+    is_read: bool = True
+
+
+class Notification(NotificationBase, table=True):
+    id: uuid.UUID = Field(default_factory=uuid.uuid4, primary_key=True)
+    created_at: datetime | None = Field(
+        default_factory=get_datetime_utc,
+        sa_type=DateTime(timezone=True),
+    )
+    updated_at: datetime | None = Field(
+        default_factory=get_datetime_utc,
+        sa_type=DateTime(timezone=True),
+    )
+    user_id: uuid.UUID = Field(
+        foreign_key="user.id", nullable=False, ondelete="CASCADE"
+    )
+    user: User | None = Relationship(back_populates="notifications")
+
+
+class NotificationPublic(NotificationBase):
+    id: uuid.UUID
+    user_id: uuid.UUID
+    created_at: datetime | None = None
+    updated_at: datetime | None = None
+
+
+class NotificationsPublic(SQLModel):
+    data: list[NotificationPublic]
+    count: int
+    unread_count: int
