@@ -176,7 +176,9 @@ def export_users(session: SessionDep) -> StreamingResponse:
 
     output = io.StringIO()
     writer = csv.writer(output)
-    writer.writerow(["id", "email", "full_name", "is_active", "is_superuser", "created_at"])
+    writer.writerow(
+        ["id", "email", "full_name", "is_active", "is_superuser", "created_at"]
+    )
     for user in users:
         writer.writerow(
             [
@@ -193,7 +195,7 @@ def export_users(session: SessionDep) -> StreamingResponse:
     return StreamingResponse(
         iter([output.getvalue()]),
         media_type="text/csv",
-        headers={"Content-Disposition": "attachment; filename=\"users.csv\""},
+        headers={"Content-Disposition": 'attachment; filename="users.csv"'},
     )
 
 

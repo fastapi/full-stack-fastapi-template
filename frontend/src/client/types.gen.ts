@@ -212,6 +212,8 @@ export type UsersRegisterUserData = {
 
 export type UsersRegisterUserResponse = (UserPublic);
 
+export type UsersExportUsersResponse = (unknown);
+
 export type UsersReadUserByIdData = {
     userId: string;
 };
