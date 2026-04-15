@@ -63,7 +63,9 @@ class Settings(BaseSettings):
     @property
     def SQLALCHEMY_DATABASE_URI(self) -> str:
         if self.USE_SQLITE:
-            db_path = os.path.join(os.path.dirname(__file__), "..", "..", self.SQLITE_DATABASE)
+            db_path = os.path.join(
+                os.path.dirname(__file__), "..", "..", self.SQLITE_DATABASE
+            )
             return f"sqlite:///{os.path.abspath(db_path)}"
         return str(
             PostgresDsn.build(

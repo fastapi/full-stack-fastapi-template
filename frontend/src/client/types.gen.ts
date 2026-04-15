@@ -45,6 +45,40 @@ export type NewPassword = {
     new_password: string;
 };
 
+export type NotificationCreate = {
+    title: string;
+    message?: (string | null);
+    notification_type?: NotificationType;
+    action_url?: (string | null);
+    user_id: string;
+};
+
+export type NotificationPublic = {
+    title: string;
+    message?: (string | null);
+    notification_type?: NotificationType;
+    is_read?: boolean;
+    action_url?: (string | null);
+    id: string;
+    user_id: string;
+    created_at?: (string | null);
+    updated_at?: (string | null);
+};
+
+export type NotificationsPublic = {
+    data: Array<NotificationPublic>;
+    count: number;
+    unread_count: number;
+};
+
+export type NotificationType = 'info' | 'success' | 'warning' | 'error';
+
+export type NotificationUpdate = {
+    title?: (string | null);
+    message?: (string | null);
+    is_read?: (boolean | null);
+};
+
 export type PrivateUserCreate = {
     email: string;
     password: string;
@@ -170,6 +204,47 @@ export type LoginRecoverPasswordHtmlContentData = {
 };
 
 export type LoginRecoverPasswordHtmlContentResponse = (string);
+
+export type NotificationsReadNotificationsData = {
+    limit?: number;
+    skip?: number;
+    unreadOnly?: boolean;
+};
+
+export type NotificationsReadNotificationsResponse = (NotificationsPublic);
+
+export type NotificationsCreateNotificationData = {
+    requestBody: NotificationCreate;
+};
+
+export type NotificationsCreateNotificationResponse = (NotificationPublic);
+
+export type NotificationsReadNotificationData = {
+    id: string;
+};
+
+export type NotificationsReadNotificationResponse = (NotificationPublic);
+
+export type NotificationsUpdateNotificationData = {
+    id: string;
+    requestBody: NotificationUpdate;
+};
+
+export type NotificationsUpdateNotificationResponse = (NotificationPublic);
+
+export type NotificationsDeleteNotificationData = {
+    id: string;
+};
+
+export type NotificationsDeleteNotificationResponse = (Message);
+
+export type NotificationsMarkNotificationReadData = {
+    id: string;
+};
+
+export type NotificationsMarkNotificationReadResponse = (NotificationPublic);
+
+export type NotificationsMarkAllNotificationsReadResponse = (Message);
 
 export type PrivateCreateUserData = {
     requestBody: PrivateUserCreate;

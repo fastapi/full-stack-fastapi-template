@@ -1,12 +1,9 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
-import { Bell, Check, CheckCheck, Trash2, X } from "lucide-react"
+import { Bell, Check, CheckCheck, Trash2 } from "lucide-react"
 import { useEffect, useRef, useState } from "react"
 
 import type { NotificationPublic, NotificationsPublic } from "@/client"
-import {
-  NotificationsService,
-  type NotificationType,
-} from "@/client"
+import { NotificationsService, type NotificationType } from "@/client"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import {
@@ -106,7 +103,9 @@ function NotificationItem({
       <div className="flex-1 min-w-0">
         <div className="flex items-start justify-between gap-2">
           <div className="flex items-center gap-2">
-            <span className="text-lg">{getNotificationTypeIcon(notification.notification_type)}</span>
+            <span className="text-lg">
+              {getNotificationTypeIcon(notification.notification_type)}
+            </span>
             <h4
               className={cn(
                 "font-medium text-sm",
@@ -180,7 +179,8 @@ export function NotificationCenter() {
 
   const { data: notificationsData, isLoading } = useQuery<NotificationsPublic>({
     queryKey: ["notifications"],
-    queryFn: () => NotificationsService.readNotifications({ skip: 0, limit: 50 }),
+    queryFn: () =>
+      NotificationsService.readNotifications({ skip: 0, limit: 50 }),
     refetchInterval: 30000,
   })
 
@@ -204,8 +204,7 @@ export function NotificationCenter() {
   })
 
   const deleteMutation = useMutation({
-    mutationFn: (id: string) =>
-      NotificationsService.deleteNotification({ id }),
+    mutationFn: (id: string) => NotificationsService.deleteNotification({ id }),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["notifications"] })
       showSuccessToast("Notification deleted")
@@ -354,7 +353,8 @@ export function NotificationDropdown() {
 
   const { data: notificationsData, isLoading } = useQuery<NotificationsPublic>({
     queryKey: ["notifications"],
-    queryFn: () => NotificationsService.readNotifications({ skip: 0, limit: 10 }),
+    queryFn: () =>
+      NotificationsService.readNotifications({ skip: 0, limit: 10 }),
     refetchInterval: 30000,
   })
 
@@ -440,7 +440,9 @@ export function NotificationDropdown() {
               >
                 <div className="flex items-center justify-between w-full">
                   <span className="font-medium text-sm flex items-center gap-1">
-                    <span>{getNotificationTypeIcon(notification.notification_type)}</span>
+                    <span>
+                      {getNotificationTypeIcon(notification.notification_type)}
+                    </span>
                     {notification.title}
                   </span>
                   {!notification.is_read && (

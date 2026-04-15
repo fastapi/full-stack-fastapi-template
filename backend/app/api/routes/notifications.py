@@ -35,8 +35,10 @@ def read_notifications(
             count_statement = count_statement.where(Notification.is_read == False)
         count = session.exec(count_statement).one()
 
-        unread_count_statement = select(func.count()).select_from(Notification).where(
-            Notification.is_read == False
+        unread_count_statement = (
+            select(func.count())
+            .select_from(Notification)
+            .where(Notification.is_read == False)
         )
         unread_count = session.exec(unread_count_statement).one()
 
@@ -104,7 +106,10 @@ def read_notification(
 
 @router.post("/", response_model=NotificationPublic)
 async def create_notification(
-    *, session: SessionDep, current_user: CurrentUser, notification_in: NotificationCreate
+    *,
+    session: SessionDep,
+    current_user: CurrentUser,
+    notification_in: NotificationCreate,
 ) -> Any:
     """
     Create new notification.
@@ -113,7 +118,8 @@ async def create_notification(
     """
     if not current_user.is_superuser and notification_in.user_id != current_user.id:
         raise HTTPException(
-            status_code=403, detail="Not enough permissions to create notifications for other users"
+            status_code=403,
+            detail="Not enough permissions to create notifications for other users",
         )
 
     notification = Notification.model_validate(notification_in)

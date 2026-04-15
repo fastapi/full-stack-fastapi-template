@@ -1,6 +1,6 @@
-import sentry_sdk
 from contextlib import asynccontextmanager
 
+import sentry_sdk
 from fastapi import FastAPI
 from fastapi.routing import APIRoute
 from sqlmodel import Session
