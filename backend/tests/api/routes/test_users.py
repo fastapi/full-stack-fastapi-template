@@ -448,6 +448,43 @@ def test_delete_user_me(client: TestClient, db: Session) -> None:
     assert user_db is None
 
 
+def test_export_users_as_superuser(
+    client: TestClient, superuser_token_headers: dict[str, str], db: Session
+) -> None:
+    # Create a known user so there is at least one row in the export
+    username = random_email()
+    password = random_lower_string()
+    user_in = UserCreate(email=username, password=password)
+    crud.create_user(session=db, user_create=user_in)
+
+    r = client.get(
+        f"{settings.API_V1_STR}/users/export",
+        headers=superuser_token_headers,
+    )
+    assert r.status_code == 200
+    assert "text/csv" in r.headers["content-type"]
+    assert "attachment" in r.headers["content-disposition"]
+    assert "users.csv" in r.headers["content-disposition"]
+
+    lines = r.text.strip().splitlines()
+    assert lines[0] == "id,email,full_name,is_active,is_superuser,created_at"
+    assert len(lines) >= 2  # header + at least the user we created
+
+    # Verify the created user appears in the CSV
+    emails_in_csv = [line.split(",")[1] for line in lines[1:]]
+    assert username in emails_in_csv
+
+
+def test_export_users_forbidden_for_normal_user(
+    client: TestClient, normal_user_token_headers: dict[str, str]
+) -> None:
+    r = client.get(
+        f"{settings.API_V1_STR}/users/export",
+        headers=normal_user_token_headers,
+    )
+    assert r.status_code == 403
+
+
 def test_delete_user_me_as_superuser(
     client: TestClient, superuser_token_headers: dict[str, str]
 ) -> None:
