@@ -1,7 +1,10 @@
+import csv
+import io
 import uuid
 from typing import Any
 
 from fastapi import APIRouter, Depends, HTTPException
+from fastapi.responses import StreamingResponse
 from sqlmodel import col, delete, func, select
 
 from app import crud
@@ -157,6 +160,41 @@ def register_user(session: SessionDep, user_in: UserRegister) -> Any:
     user_create = UserCreate.model_validate(user_in)
     user = crud.create_user(session=session, user_create=user_create)
     return user
+
+
+@router.get(
+    "/export",
+    dependencies=[Depends(get_current_active_superuser)],
+    response_class=StreamingResponse,
+)
+def export_users(session: SessionDep) -> StreamingResponse:
+    """
+    Export all users as a downloadable CSV file. Superusers only.
+    """
+    statement = select(User).order_by(col(User.created_at).desc())
+    users = session.exec(statement).all()
+
+    output = io.StringIO()
+    writer = csv.writer(output)
+    writer.writerow(["id", "email", "full_name", "is_active", "is_superuser", "created_at"])
+    for user in users:
+        writer.writerow(
+            [
+                str(user.id),
+                user.email,
+                user.full_name or "",
+                user.is_active,
+                user.is_superuser,
+                user.created_at.isoformat() if user.created_at else "",
+            ]
+        )
+
+    output.seek(0)
+    return StreamingResponse(
+        iter([output.getvalue()]),
+        media_type="text/csv",
+        headers={"Content-Disposition": "attachment; filename=\"users.csv\""},
+    )
 
 
 @router.get("/{user_id}", response_model=UserPublic)
