@@ -5,3 +5,7 @@ members = ["backend"]
 dev = [
     "zizmor>=1.23.1",
 ]
+
+github-actions = [
+    "smokeshow >=0.5.0",
+]
