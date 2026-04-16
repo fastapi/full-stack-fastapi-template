@@ -1,7 +1,7 @@
 name: Latest Changes
 
 on:
-  pull_request_target:
+  pull_request_target: # zizmor: ignore[dangerous-triggers]
     branches:
       - master
     types:
@@ -16,11 +16,14 @@ on:
         required: false
         default: "false"
 
+permissions: {}
+
 jobs:
   latest-changes:
     runs-on: ubuntu-latest
     permissions:
       pull-requests: read
+    if: github.event_name == 'workflow_dispatch' || github.event.pull_request.merged == true
     steps:
       - name: Dump GitHub context
         env:
@@ -29,7 +32,8 @@ jobs:
       - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
         with:
           # To allow latest-changes to commit to the main branch
-          token: ${{ secrets.LATEST_CHANGES }}
+          token: ${{ secrets.LATEST_CHANGES }} # zizmor: ignore[secrets-outside-env]
+          persist-credentials: true # required by tiangolo/latest-changes
       - uses: tiangolo/latest-changes@c9d329cb147f0ddf4fb631214e3f838ff17ccbbd # 0.4.1
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
