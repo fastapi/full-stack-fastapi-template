@@ -1,2 +1,7 @@
 [tool.uv.workspace]
 members = ["backend"]
+
+[dependency-groups]
+dev = [
+    "zizmor>=1.23.1",
+]
