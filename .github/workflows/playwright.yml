@@ -15,6 +15,8 @@ on:
         required: false
         default: 'false'
 
+permissions: {}
+
 jobs:
   changes:
     runs-on: ubuntu-latest
@@ -23,6 +25,8 @@ jobs:
       changed: ${{ steps.filter.outputs.changed }}
     steps:
     - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+      with:
+        persist-credentials: false
     # For pull requests it's not necessary to checkout the code but for the main branch it is
     - uses: dorny/paths-filter@fbd0ab8f3e69293af611ebaee6363fc25e6d187d # v4.0.1
       id: filter
@@ -48,7 +52,9 @@ jobs:
       fail-fast: false
     steps:
     - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
-    - uses: oven-sh/setup-bun@v2
+      with:
+        persist-credentials: false
+    - uses: oven-sh/setup-bun@0c5077e51419868618aeaa5fe8019c62421857d6 # v2.2.0
     - uses: actions/setup-python@a309ff8b426b58ec0e2a45f0f869d46889d02405 # v6.2.0
       with:
         python-version: '3.10'
@@ -59,6 +65,8 @@ jobs:
         limit-access-to-actor: true
     - name: Install uv
       uses: astral-sh/setup-uv@37802adc94f370d6bfd71619e3f0bf239e1f3b78 # v7.6.0
+      with:
+        version: "0.11.4"
     - run: uv sync
       working-directory: backend
     - run: bun ci
@@ -87,7 +95,9 @@ jobs:
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
-    - uses: oven-sh/setup-bun@v2
+      with:
+        persist-credentials: false
+    - uses: oven-sh/setup-bun@0c5077e51419868618aeaa5fe8019c62421857d6 # v2.2.0
     - name: Install dependencies
       run: bun ci
     - name: Download blob reports from GitHub Actions Artifacts
