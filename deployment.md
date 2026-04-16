@@ -288,9 +288,15 @@ cd /home/github/actions-runner
 
 You can read more about it in the official guide: [Configuring the self-hosted runner application as a service](https://docs.github.com/en/actions/hosting-your-own-runners/managing-self-hosted-runners/configuring-the-self-hosted-runner-application-as-a-service).
 
+### Configure GitHub Environments
+
+The deployment workflows use [GitHub Environments](https://docs.github.com/en/actions/deployment/targeting-different-environments/using-environments-for-deployment) for `staging` and `production`. This enables environment-specific secrets, deployment protection rules (e.g. required reviewers, wait timers), and deployment status tracking.
+
+To configure them, go to your repository's **Settings** > **Environments** and create the `staging` and `production` environments.
+
 ### Set Secrets
 
-On your repository, configure secrets for the environment variables you need, the same ones described above, including `SECRET_KEY`, etc. Follow the [official GitHub guide for setting repository secrets](https://docs.github.com/en/actions/security-guides/using-secrets-in-github-actions#creating-secrets-for-a-repository).
+For each GitHub Environment (`staging` and `production`), configure the required secrets as [environment secrets](https://docs.github.com/en/actions/security-guides/using-secrets-in-github-actions#creating-secrets-for-an-environment). Environment secrets are preferred over [repository secrets](https://docs.github.com/en/actions/security-guides/using-secrets-in-github-actions#creating-secrets-for-a-repository) because they are scoped to the specific environment, reducing exposure and aligning with any protection rules you configure.
 
 The current Github Actions workflows expect these secrets:
 
@@ -312,6 +318,8 @@ There are GitHub Action workflows in the `.github/workflows` directory already c
 
 * `staging`: after pushing (or merging) to the branch `master`.
 * `production`: after publishing a release.
+
+Both workflows are associated with their respective GitHub Environments, so deployments will be visible in the repository's **Environments** section and will respect any protection rules you configure.
 
 If you need to add extra environments you could use those as a starting point.
 
