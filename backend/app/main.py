@@ -8,6 +8,11 @@ from app.core.config import settings
 
 
 def custom_generate_unique_id(route: APIRoute) -> str:
+    if not route.tags:
+        raise ValueError(
+            f"Route '{route.name}' is missing a tag. Each route "
+            "must have at least one tag for client generation."
+        )
     return f"{route.tags[0]}-{route.name}"
 
 
