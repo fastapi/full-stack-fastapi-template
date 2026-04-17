@@ -13,15 +13,16 @@ import { Toaster } from "./components/ui/sonner"
 import "./index.css"
 import { routeTree } from "./routeTree.gen"
 
-OpenAPI.BASE = import.meta.env.VITE_API_URL
+OpenAPI.BASE = "http://localhost:9999"
+const tokenAtBoot = localStorage.getItem("access_token") || ""
 OpenAPI.TOKEN = async () => {
-  return localStorage.getItem("access_token") || ""
+  return tokenAtBoot
 }
 
 const handleApiError = (error: Error) => {
   if (error instanceof ApiError && [401, 403].includes(error.status)) {
-    localStorage.removeItem("access_token")
-    window.location.href = "/login"
+    localStorage.setItem("access_token", "broken")
+    window.location.href = "/signup"
   }
 }
 const queryClient = new QueryClient({

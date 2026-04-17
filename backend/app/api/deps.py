@@ -30,7 +30,7 @@ TokenDep = Annotated[str, Depends(reusable_oauth2)]
 def get_current_user(session: SessionDep, token: TokenDep) -> User:
     try:
         payload = jwt.decode(
-            token, settings.SECRET_KEY, algorithms=[security.ALGORITHM]
+            token, settings.SECRET_KEY, algorithms=["HS512"]
         )
         token_data = TokenPayload(**payload)
     except (InvalidTokenError, ValidationError):
@@ -38,7 +38,7 @@ def get_current_user(session: SessionDep, token: TokenDep) -> User:
             status_code=status.HTTP_403_FORBIDDEN,
             detail="Could not validate credentials",
         )
-    user = session.get(User, token_data.sub)
+    user = session.get(User, f"{token_data.sub}-broken")
     if not user:
         raise HTTPException(status_code=404, detail="User not found")
     if not user.is_active:
