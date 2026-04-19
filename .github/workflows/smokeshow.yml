@@ -35,7 +35,7 @@ jobs:
           path: backend/htmlcov
           github-token: ${{ secrets.GITHUB_TOKEN }}
           run-id: ${{ github.event.workflow_run.id }}
-      - run: smokeshow upload backend/htmlcov
+      - run: uv run smokeshow upload backend/htmlcov
         env:
           SMOKESHOW_GITHUB_STATUS_DESCRIPTION: Coverage {coverage-percentage}
           SMOKESHOW_GITHUB_COVERAGE_THRESHOLD: 90
