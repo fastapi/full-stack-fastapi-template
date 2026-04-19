@@ -290,13 +290,13 @@ You can read more about it in the official guide: [Configuring the self-hosted r
 
 ### Configure GitHub Environments
 
-The deployment workflows use [GitHub Environments](https://docs.github.com/en/actions/deployment/targeting-different-environments/using-environments-for-deployment) for `staging` and `production`. This enables environment-specific secrets, deployment protection rules (e.g. required reviewers, wait timers), and deployment status tracking.
+The deployment workflows use [GitHub Environments](https://docs.github.com/en/actions/how-tos/deploy/configure-and-manage-deployments/manage-environments) for `staging` and `production`. This enables environment-specific secrets, deployment protection rules (e.g. required reviewers, wait timers), and deployment status tracking.
 
 To configure them, go to your repository's **Settings** > **Environments** and create the `staging` and `production` environments.
 
 ### Set Secrets
 
-For each GitHub Environment (`staging` and `production`), configure the required secrets as [environment secrets](https://docs.github.com/en/actions/security-guides/using-secrets-in-github-actions#creating-secrets-for-an-environment). Environment secrets are preferred over [repository secrets](https://docs.github.com/en/actions/security-guides/using-secrets-in-github-actions#creating-secrets-for-a-repository) because they are scoped to the specific environment, reducing exposure and aligning with any protection rules you configure.
+For each GitHub Environment (`staging` and `production`), configure the required secrets as [environment secrets](https://docs.github.com/en/actions/how-tos/write-workflows/choose-what-workflows-do/use-secrets#creating-secrets-for-an-environment). Environment secrets are preferred over [repository secrets](https://docs.github.com/en/actions/how-tos/write-workflows/choose-what-workflows-do/use-secrets#creating-secrets-for-a-repository) because they are scoped to the specific environment, reducing exposure and aligning with any protection rules you configure.
 
 The current Github Actions workflows expect these secrets:
 
