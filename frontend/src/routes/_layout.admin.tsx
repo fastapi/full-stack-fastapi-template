@@ -1,13 +1,28 @@
 import { createFileRoute, Outlet, redirect } from "@tanstack/react-router"
 import { UsersService } from "@/client"
+import { isLoggedIn } from "@/hooks/useAuth"
 
 export const Route = createFileRoute("/_layout/admin")({
   component: AdminLayout,
   beforeLoad: async () => {
-    const user = await UsersService.readUserMe()
-    if (!user.is_superuser) {
+    // Check if user is logged in first
+    if (!isLoggedIn()) {
       throw redirect({
-        to: "/",
+        to: "/login",
+      })
+    }
+
+    try {
+      const user = await UsersService.readUserMe()
+      if (!user.is_superuser) {
+        throw redirect({
+          to: "/",
+        })
+      }
+    } catch (error) {
+      // If API call fails (401/403), redirect to login
+      throw redirect({
+        to: "/login",
       })
     }
   },
