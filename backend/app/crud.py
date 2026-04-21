@@ -6,6 +6,7 @@ from sqlmodel import Session, col, func, select
 
 from app.core.security import get_password_hash, verify_password
 from app.models import (
+    InteractionTypeEnum,
     Item,
     ItemCreate,
     MediaAsset,
@@ -30,11 +31,18 @@ from app.models import (
     RaceResultUpdate,
     RaceSplitTime,
     RaceSplitTimeCreate,
+    RaceTag,
+    RaceTagCreate,
+    RaceTagLink,
     RaceUpdate,
     Role,
     RoleCreate,
     User,
     UserCreate,
+    UserProfile,
+    UserProfileCreate,
+    UserProfileUpdate,
+    UserRaceInteraction,
     UserUpdate,
 )
 
@@ -817,3 +825,170 @@ def get_registration_split_times(
         .order_by(col(RaceSplitTime.recorded_at))
     )
     return list(session.exec(statement).all())
+
+
+# =============================================================================
+# RaceTag CRUD operations
+# =============================================================================
+
+
+def get_tag_by_slug(*, session: Session, slug: str) -> RaceTag | None:
+    return session.exec(select(RaceTag).where(RaceTag.slug == slug)).first()
+
+
+def get_all_tags(*, session: Session) -> list[RaceTag]:
+    return list(session.exec(select(RaceTag).order_by(col(RaceTag.name))).all())
+
+
+def get_all_tags_count(*, session: Session) -> int:
+    return session.exec(select(func.count(RaceTag.id))).one()
+
+
+def get_or_create_tag(*, session: Session, tag_in: RaceTagCreate) -> RaceTag:
+    tag = get_tag_by_slug(session=session, slug=tag_in.slug)
+    if not tag:
+        tag = RaceTag.model_validate(tag_in)
+        session.add(tag)
+        session.commit()
+        session.refresh(tag)
+    return tag
+
+
+def get_race_tags(*, session: Session, race_id: uuid.UUID) -> list[RaceTag]:
+    linked_ids = select(RaceTagLink.tag_id).where(RaceTagLink.race_id == race_id)
+    statement = (
+        select(RaceTag)
+        .where(col(RaceTag.id).in_(linked_ids))
+        .order_by(col(RaceTag.name))
+    )
+    return list(session.exec(statement).all())
+
+
+def set_race_tags(
+    *, session: Session, race: Race, tag_ids: list[uuid.UUID]
+) -> Race:
+    """Replace the full tag set for a race."""
+    existing = session.exec(
+        select(RaceTagLink).where(RaceTagLink.race_id == race.id)
+    ).all()
+    for link in existing:
+        session.delete(link)
+    session.flush()
+
+    # Add new links
+    for tag_id in tag_ids:
+        session.add(RaceTagLink(race_id=race.id, tag_id=tag_id))
+    session.commit()
+    session.refresh(race)
+    return race
+
+
+# =============================================================================
+# UserProfile CRUD operations
+# =============================================================================
+
+
+def get_user_profile(*, session: Session, user_id: uuid.UUID) -> UserProfile | None:
+    return session.exec(
+        select(UserProfile).where(UserProfile.user_id == user_id)
+    ).first()
+
+
+def upsert_user_profile(
+    *, session: Session, user_id: uuid.UUID, profile_in: UserProfileCreate
+) -> UserProfile:
+    """Create or fully replace the profile for a user."""
+    profile = get_user_profile(session=session, user_id=user_id)
+    if profile:
+        profile_data = profile_in.model_dump(exclude_unset=True)
+        profile_data["updated_at"] = datetime.now(timezone.utc)
+        profile.sqlmodel_update(profile_data)
+    else:
+        profile = UserProfile.model_validate(profile_in, update={"user_id": user_id})
+    session.add(profile)
+    session.commit()
+    session.refresh(profile)
+    return profile
+
+
+def update_user_profile(
+    *, session: Session, db_profile: UserProfile, profile_in: UserProfileUpdate
+) -> UserProfile:
+    profile_data = profile_in.model_dump(exclude_unset=True)
+    profile_data["updated_at"] = datetime.now(timezone.utc)
+    db_profile.sqlmodel_update(profile_data)
+    session.add(db_profile)
+    session.commit()
+    session.refresh(db_profile)
+    return db_profile
+
+
+def delete_user_profile(*, session: Session, user_id: uuid.UUID) -> bool:
+    profile = get_user_profile(session=session, user_id=user_id)
+    if profile:
+        session.delete(profile)
+        session.commit()
+        return True
+    return False
+
+
+# =============================================================================
+# UserRaceInteraction CRUD operations
+# =============================================================================
+
+
+def record_interaction(
+    *,
+    session: Session,
+    user_id: uuid.UUID,
+    race_id: uuid.UUID,
+    action: InteractionTypeEnum,
+) -> UserRaceInteraction:
+    interaction = UserRaceInteraction(
+        user_id=user_id, race_id=race_id, action=action
+    )
+    session.add(interaction)
+    session.commit()
+    session.refresh(interaction)
+    return interaction
+
+
+def get_user_interaction(
+    *, session: Session, user_id: uuid.UUID, race_id: uuid.UUID, action: InteractionTypeEnum
+) -> UserRaceInteraction | None:
+    return session.exec(
+        select(UserRaceInteraction).where(
+            UserRaceInteraction.user_id == user_id,
+            UserRaceInteraction.race_id == race_id,
+            UserRaceInteraction.action == action,
+        )
+    ).first()
+
+
+def get_user_saved_races(*, session: Session, user_id: uuid.UUID) -> list[Race]:
+    """Return races the user has saved (most recent first)."""
+    saved_ids = (
+        select(UserRaceInteraction.race_id)
+        .where(
+            UserRaceInteraction.user_id == user_id,
+            UserRaceInteraction.action == InteractionTypeEnum.SAVED,
+        )
+    )
+    statement = (
+        select(Race)
+        .where(col(Race.id).in_(saved_ids))
+        .order_by(col(Race.event_start_date).desc())
+    )
+    return list(session.exec(statement).all())
+
+
+def get_interaction_counts(
+    *, session: Session, race_id: uuid.UUID
+) -> dict[str, int]:
+    """Return interaction counts per action type for a race."""
+    rows = session.exec(
+        select(UserRaceInteraction.action, func.count(UserRaceInteraction.id))
+        .where(UserRaceInteraction.race_id == race_id)
+        .group_by(UserRaceInteraction.action)
+    ).all()
+    return {action.value: count for action, count in rows}

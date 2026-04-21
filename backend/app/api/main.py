@@ -5,12 +5,14 @@ from app.api.routes import (
     login,
     media,
     private,
+    profiles,
     race_attributes,
     race_categories,
     race_registrations,
     race_results,
     races,
     roles,
+    tags,
     users,
     utils,
 )
@@ -30,6 +32,10 @@ api_router.include_router(race_categories.router)
 api_router.include_router(race_registrations.router)
 api_router.include_router(race_results.router)
 api_router.include_router(race_attributes.router)
+
+# Discovery & personalization routes
+api_router.include_router(tags.router)
+api_router.include_router(profiles.router)
 
 
 if settings.ENVIRONMENT == "local":

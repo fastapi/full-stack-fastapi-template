@@ -3,7 +3,7 @@
 import type { CancelablePromise } from './core/CancelablePromise';
 import { OpenAPI } from './core/OpenAPI';
 import { request as __request } from './core/request';
-import type { ItemsReadItemsData, ItemsReadItemsResponse, ItemsCreateItemData, ItemsCreateItemResponse, ItemsReadItemData, ItemsReadItemResponse, ItemsUpdateItemData, ItemsUpdateItemResponse, ItemsDeleteItemData, ItemsDeleteItemResponse, LoginLoginAccessTokenData, LoginLoginAccessTokenResponse, LoginTestTokenResponse, LoginRecoverPasswordData, LoginRecoverPasswordResponse, LoginResetPasswordData, LoginResetPasswordResponse, LoginRecoverPasswordHtmlContentData, LoginRecoverPasswordHtmlContentResponse, PrivateCreateUserData, PrivateCreateUserResponse, RaceAttributesReadRaceAttributesData, RaceAttributesReadRaceAttributesResponse, RaceAttributesCreateRaceAttributeData, RaceAttributesCreateRaceAttributeResponse, RaceAttributesReadRaceAttributeData, RaceAttributesReadRaceAttributeResponse, RaceAttributesUpdateRaceAttributeData, RaceAttributesUpdateRaceAttributeResponse, RaceAttributesDeleteRaceAttributeData, RaceAttributesDeleteRaceAttributeResponse, RaceCategoriesReadRaceCategoriesData, RaceCategoriesReadRaceCategoriesResponse, RaceCategoriesCreateRaceCategoryData, RaceCategoriesCreateRaceCategoryResponse, RaceCategoriesReadRaceCategoryData, RaceCategoriesReadRaceCategoryResponse, RaceCategoriesUpdateRaceCategoryData, RaceCategoriesUpdateRaceCategoryResponse, RaceCategoriesDeleteRaceCategoryData, RaceCategoriesDeleteRaceCategoryResponse, RaceRegistrationsReadRaceRegistrationsData, RaceRegistrationsReadRaceRegistrationsResponse, RaceRegistrationsCreateRaceRegistrationData, RaceRegistrationsCreateRaceRegistrationResponse, RaceRegistrationsReadMyRegistrationsData, RaceRegistrationsReadMyRegistrationsResponse, RaceRegistrationsReadRaceRegistrationData, RaceRegistrationsReadRaceRegistrationResponse, RaceRegistrationsUpdateRaceRegistrationData, RaceRegistrationsUpdateRaceRegistrationResponse, RaceRegistrationsDeleteRaceRegistrationData, RaceRegistrationsDeleteRaceRegistrationResponse, RaceResultsReadRaceResultsData, RaceResultsReadRaceResultsResponse, RaceResultsCreateRaceResultData, RaceResultsCreateRaceResultResponse, RaceResultsReadRaceResultData, RaceResultsReadRaceResultResponse, RaceResultsUpdateRaceResultData, RaceResultsUpdateRaceResultResponse, RaceResultsDeleteRaceResultData, RaceResultsDeleteRaceResultResponse, RaceResultsReadRaceResultByRegistrationData, RaceResultsReadRaceResultByRegistrationResponse, RacesReadRacesData, RacesReadRacesResponse, RacesCreateRaceData, RacesCreateRaceResponse, RacesReadRaceData, RacesReadRaceResponse, RacesUpdateRaceData, RacesUpdateRaceResponse, RacesDeleteRaceData, RacesDeleteRaceResponse, RacesReadMyOrganizedRacesData, RacesReadMyOrganizedRacesResponse, RolesReadRolesData, RolesReadRolesResponse, RolesCreateRoleData, RolesCreateRoleResponse, RolesReadRoleData, RolesReadRoleResponse, RolesUpdateRoleData, RolesUpdateRoleResponse, RolesDeleteRoleData, RolesDeleteRoleResponse, RolesAssignRoleToUserData, RolesAssignRoleToUserResponse, RolesRemoveRoleFromUserData, RolesRemoveRoleFromUserResponse, UsersReadUsersData, UsersReadUsersResponse, UsersCreateUserData, UsersCreateUserResponse, UsersReadUserMeResponse, UsersDeleteUserMeResponse, UsersUpdateUserMeData, UsersUpdateUserMeResponse, UsersUpdatePasswordMeData, UsersUpdatePasswordMeResponse, UsersRegisterUserData, UsersRegisterUserResponse, UsersReadUserByIdData, UsersReadUserByIdResponse, UsersUpdateUserData, UsersUpdateUserResponse, UsersDeleteUserData, UsersDeleteUserResponse, UtilsTestEmailData, UtilsTestEmailResponse, UtilsHealthCheckResponse } from './types.gen';
+import type { ItemsReadItemsData, ItemsReadItemsResponse, ItemsCreateItemData, ItemsCreateItemResponse, ItemsReadItemData, ItemsReadItemResponse, ItemsUpdateItemData, ItemsUpdateItemResponse, ItemsDeleteItemData, ItemsDeleteItemResponse, LoginLoginAccessTokenData, LoginLoginAccessTokenResponse, LoginTestTokenResponse, LoginRecoverPasswordData, LoginRecoverPasswordResponse, LoginResetPasswordData, LoginResetPasswordResponse, LoginRecoverPasswordHtmlContentData, LoginRecoverPasswordHtmlContentResponse, MediaReadMediaAssetsData, MediaReadMediaAssetsResponse, MediaUploadMediaAssetData, MediaUploadMediaAssetResponse, MediaReadMediaFileData, MediaReadMediaFileResponse, MediaUpdateMediaAssetData, MediaUpdateMediaAssetResponse, MediaDeleteMediaAssetData, MediaDeleteMediaAssetResponse, PrivateCreateUserData, PrivateCreateUserResponse, ProfilesGetMyProfileResponse, ProfilesUpsertMyProfileData, ProfilesUpsertMyProfileResponse, ProfilesDeleteMyProfileResponse, ProfilesUpdateMyProfileData, ProfilesUpdateMyProfileResponse, ProfilesGetMySavedRacesResponse, ProfilesSaveRaceData, ProfilesSaveRaceResponse, ProfilesUnsaveRaceData, ProfilesUnsaveRaceResponse, ProfilesTrackRaceViewData, ProfilesTrackRaceViewResponse, RaceAttributesReadRaceAttributesData, RaceAttributesReadRaceAttributesResponse, RaceAttributesCreateRaceAttributeData, RaceAttributesCreateRaceAttributeResponse, RaceAttributesReadRaceAttributeData, RaceAttributesReadRaceAttributeResponse, RaceAttributesUpdateRaceAttributeData, RaceAttributesUpdateRaceAttributeResponse, RaceAttributesDeleteRaceAttributeData, RaceAttributesDeleteRaceAttributeResponse, RaceCategoriesReadRaceCategoriesData, RaceCategoriesReadRaceCategoriesResponse, RaceCategoriesCreateRaceCategoryData, RaceCategoriesCreateRaceCategoryResponse, RaceCategoriesReadRaceCategoryData, RaceCategoriesReadRaceCategoryResponse, RaceCategoriesUpdateRaceCategoryData, RaceCategoriesUpdateRaceCategoryResponse, RaceCategoriesDeleteRaceCategoryData, RaceCategoriesDeleteRaceCategoryResponse, RaceRegistrationsReadRaceRegistrationsData, RaceRegistrationsReadRaceRegistrationsResponse, RaceRegistrationsCreateRaceRegistrationData, RaceRegistrationsCreateRaceRegistrationResponse, RaceRegistrationsReadMyRegistrationsData, RaceRegistrationsReadMyRegistrationsResponse, RaceRegistrationsReadRaceRegistrationData, RaceRegistrationsReadRaceRegistrationResponse, RaceRegistrationsUpdateRaceRegistrationData, RaceRegistrationsUpdateRaceRegistrationResponse, RaceRegistrationsDeleteRaceRegistrationData, RaceRegistrationsDeleteRaceRegistrationResponse, RaceResultsReadRaceResultsData, RaceResultsReadRaceResultsResponse, RaceResultsCreateRaceResultData, RaceResultsCreateRaceResultResponse, RaceResultsReadRaceResultData, RaceResultsReadRaceResultResponse, RaceResultsUpdateRaceResultData, RaceResultsUpdateRaceResultResponse, RaceResultsDeleteRaceResultData, RaceResultsDeleteRaceResultResponse, RaceResultsReadRaceResultByRegistrationData, RaceResultsReadRaceResultByRegistrationResponse, RacesReadRacesData, RacesReadRacesResponse, RacesCreateRaceData, RacesCreateRaceResponse, RacesReadRaceData, RacesReadRaceResponse, RacesUpdateRaceData, RacesUpdateRaceResponse, RacesDeleteRaceData, RacesDeleteRaceResponse, RacesReadMyOrganizedRacesData, RacesReadMyOrganizedRacesResponse, RolesReadRolesData, RolesReadRolesResponse, RolesCreateRoleData, RolesCreateRoleResponse, RolesReadRoleData, RolesReadRoleResponse, RolesUpdateRoleData, RolesUpdateRoleResponse, RolesDeleteRoleData, RolesDeleteRoleResponse, RolesAssignRoleToUserData, RolesAssignRoleToUserResponse, RolesRemoveRoleFromUserData, RolesRemoveRoleFromUserResponse, TagsListTagsResponse, TagsCreateTagData, TagsCreateTagResponse, TagsSetTagsForRaceData, TagsSetTagsForRaceResponse, UsersReadUsersData, UsersReadUsersResponse, UsersCreateUserData, UsersCreateUserResponse, UsersReadUserMeResponse, UsersDeleteUserMeResponse, UsersUpdateUserMeData, UsersUpdateUserMeResponse, UsersUpdatePasswordMeData, UsersUpdatePasswordMeResponse, UsersRegisterUserData, UsersRegisterUserResponse, UsersReadUserByIdData, UsersReadUserByIdResponse, UsersUpdateUserData, UsersUpdateUserResponse, UsersDeleteUserData, UsersDeleteUserResponse, UtilsTestEmailData, UtilsTestEmailResponse, UtilsHealthCheckResponse } from './types.gen';
 
 export class ItemsService {
     /**
@@ -213,6 +213,125 @@ export class LoginService {
     }
 }
 
+export class MediaService {
+    /**
+     * Read Media Assets
+     * List media assets for any content type.
+     * @param data The data for the request.
+     * @param data.contentType
+     * @param data.contentId
+     * @param data.kind
+     * @param data.isPublic
+     * @param data.skip
+     * @param data.limit
+     * @returns MediaAssetsPublic Successful Response
+     * @throws ApiError
+     */
+    public static readMediaAssets(data: MediaReadMediaAssetsData = {}): CancelablePromise<MediaReadMediaAssetsResponse> {
+        return __request(OpenAPI, {
+            method: 'GET',
+            url: '/api/v1/media/',
+            query: {
+                content_type: data.contentType,
+                content_id: data.contentId,
+                kind: data.kind,
+                is_public: data.isPublic,
+                skip: data.skip,
+                limit: data.limit
+            },
+            errors: {
+                422: 'Validation Error'
+            }
+        });
+    }
+    
+    /**
+     * Upload Media Asset
+     * Upload media for any content type (currently race-aware for permissions).
+     * @param data The data for the request.
+     * @param data.formData
+     * @returns MediaAssetPublic Successful Response
+     * @throws ApiError
+     */
+    public static uploadMediaAsset(data: MediaUploadMediaAssetData): CancelablePromise<MediaUploadMediaAssetResponse> {
+        return __request(OpenAPI, {
+            method: 'POST',
+            url: '/api/v1/media/upload',
+            formData: data.formData,
+            mediaType: 'multipart/form-data',
+            errors: {
+                422: 'Validation Error'
+            }
+        });
+    }
+    
+    /**
+     * Read Media File
+     * Serve a media file by media id.
+     * @param data The data for the request.
+     * @param data.mediaId
+     * @returns unknown Successful Response
+     * @throws ApiError
+     */
+    public static readMediaFile(data: MediaReadMediaFileData): CancelablePromise<MediaReadMediaFileResponse> {
+        return __request(OpenAPI, {
+            method: 'GET',
+            url: '/api/v1/media/{media_id}/file',
+            path: {
+                media_id: data.mediaId
+            },
+            errors: {
+                422: 'Validation Error'
+            }
+        });
+    }
+    
+    /**
+     * Update Media Asset
+     * Update media metadata.
+     * @param data The data for the request.
+     * @param data.mediaId
+     * @param data.requestBody
+     * @returns MediaAssetPublic Successful Response
+     * @throws ApiError
+     */
+    public static updateMediaAsset(data: MediaUpdateMediaAssetData): CancelablePromise<MediaUpdateMediaAssetResponse> {
+        return __request(OpenAPI, {
+            method: 'PUT',
+            url: '/api/v1/media/{media_id}',
+            path: {
+                media_id: data.mediaId
+            },
+            body: data.requestBody,
+            mediaType: 'application/json',
+            errors: {
+                422: 'Validation Error'
+            }
+        });
+    }
+    
+    /**
+     * Delete Media Asset
+     * Delete a media asset and its file.
+     * @param data The data for the request.
+     * @param data.mediaId
+     * @returns Message Successful Response
+     * @throws ApiError
+     */
+    public static deleteMediaAsset(data: MediaDeleteMediaAssetData): CancelablePromise<MediaDeleteMediaAssetResponse> {
+        return __request(OpenAPI, {
+            method: 'DELETE',
+            url: '/api/v1/media/{media_id}',
+            path: {
+                media_id: data.mediaId
+            },
+            errors: {
+                422: 'Validation Error'
+            }
+        });
+    }
+}
+
 export class PrivateService {
     /**
      * Create User
@@ -228,6 +347,150 @@ export class PrivateService {
             url: '/api/v1/private/users/',
             body: data.requestBody,
             mediaType: 'application/json',
+            errors: {
+                422: 'Validation Error'
+            }
+        });
+    }
+}
+
+export class ProfilesService {
+    /**
+     * Get My Profile
+     * Return the current user's running profile.
+     * @returns UserProfilePublic Successful Response
+     * @throws ApiError
+     */
+    public static getMyProfile(): CancelablePromise<ProfilesGetMyProfileResponse> {
+        return __request(OpenAPI, {
+            method: 'GET',
+            url: '/api/v1/users/me/profile'
+        });
+    }
+    
+    /**
+     * Upsert My Profile
+     * Create or replace the current user's running profile.
+     * @param data The data for the request.
+     * @param data.requestBody
+     * @returns UserProfilePublic Successful Response
+     * @throws ApiError
+     */
+    public static upsertMyProfile(data: ProfilesUpsertMyProfileData): CancelablePromise<ProfilesUpsertMyProfileResponse> {
+        return __request(OpenAPI, {
+            method: 'POST',
+            url: '/api/v1/users/me/profile',
+            body: data.requestBody,
+            mediaType: 'application/json',
+            errors: {
+                422: 'Validation Error'
+            }
+        });
+    }
+    
+    /**
+     * Delete My Profile
+     * Delete the current user's running profile and reset onboarding state.
+     * @returns unknown Successful Response
+     * @throws ApiError
+     */
+    public static deleteMyProfile(): CancelablePromise<ProfilesDeleteMyProfileResponse> {
+        return __request(OpenAPI, {
+            method: 'DELETE',
+            url: '/api/v1/users/me/profile'
+        });
+    }
+    
+    /**
+     * Update My Profile
+     * Partially update the current user's running profile.
+     * @param data The data for the request.
+     * @param data.requestBody
+     * @returns UserProfilePublic Successful Response
+     * @throws ApiError
+     */
+    public static updateMyProfile(data: ProfilesUpdateMyProfileData): CancelablePromise<ProfilesUpdateMyProfileResponse> {
+        return __request(OpenAPI, {
+            method: 'PATCH',
+            url: '/api/v1/users/me/profile',
+            body: data.requestBody,
+            mediaType: 'application/json',
+            errors: {
+                422: 'Validation Error'
+            }
+        });
+    }
+    
+    /**
+     * Get My Saved Races
+     * Return all races the current user has saved.
+     * @returns RacesPublic Successful Response
+     * @throws ApiError
+     */
+    public static getMySavedRaces(): CancelablePromise<ProfilesGetMySavedRacesResponse> {
+        return __request(OpenAPI, {
+            method: 'GET',
+            url: '/api/v1/users/me/saved-races'
+        });
+    }
+    
+    /**
+     * Save Race
+     * Save a race to the current user's wishlist.
+     * @param data The data for the request.
+     * @param data.raceId
+     * @returns UserRaceInteractionPublic Successful Response
+     * @throws ApiError
+     */
+    public static saveRace(data: ProfilesSaveRaceData): CancelablePromise<ProfilesSaveRaceResponse> {
+        return __request(OpenAPI, {
+            method: 'POST',
+            url: '/api/v1/races/{race_id}/save',
+            path: {
+                race_id: data.raceId
+            },
+            errors: {
+                422: 'Validation Error'
+            }
+        });
+    }
+    
+    /**
+     * Unsave Race
+     * Remove a race from the current user's wishlist.
+     * @param data The data for the request.
+     * @param data.raceId
+     * @returns unknown Successful Response
+     * @throws ApiError
+     */
+    public static unsaveRace(data: ProfilesUnsaveRaceData): CancelablePromise<ProfilesUnsaveRaceResponse> {
+        return __request(OpenAPI, {
+            method: 'DELETE',
+            url: '/api/v1/races/{race_id}/save',
+            path: {
+                race_id: data.raceId
+            },
+            errors: {
+                422: 'Validation Error'
+            }
+        });
+    }
+    
+    /**
+     * Track Race View
+     * Record that the current user viewed a race detail page.
+     * @param data The data for the request.
+     * @param data.raceId
+     * @returns UserRaceInteractionPublic Successful Response
+     * @throws ApiError
+     */
+    public static trackRaceView(data: ProfilesTrackRaceViewData): CancelablePromise<ProfilesTrackRaceViewResponse> {
+        return __request(OpenAPI, {
+            method: 'POST',
+            url: '/api/v1/races/{race_id}/view',
+            path: {
+                race_id: data.raceId
+            },
             errors: {
                 422: 'Validation Error'
             }
@@ -1042,6 +1305,65 @@ export class RolesService {
                 role_id: data.roleId,
                 user_id: data.userId
             },
+            errors: {
+                422: 'Validation Error'
+            }
+        });
+    }
+}
+
+export class TagsService {
+    /**
+     * List Tags
+     * List all available race tags. Public endpoint.
+     * @returns TagsPublic Successful Response
+     * @throws ApiError
+     */
+    public static listTags(): CancelablePromise<TagsListTagsResponse> {
+        return __request(OpenAPI, {
+            method: 'GET',
+            url: '/api/v1/tags/'
+        });
+    }
+    
+    /**
+     * Create Tag
+     * Create a new tag. Admin only.
+     * @param data The data for the request.
+     * @param data.requestBody
+     * @returns TagPublic Successful Response
+     * @throws ApiError
+     */
+    public static createTag(data: TagsCreateTagData): CancelablePromise<TagsCreateTagResponse> {
+        return __request(OpenAPI, {
+            method: 'POST',
+            url: '/api/v1/tags/',
+            body: data.requestBody,
+            mediaType: 'application/json',
+            errors: {
+                422: 'Validation Error'
+            }
+        });
+    }
+    
+    /**
+     * Set Tags For Race
+     * Replace the full tag list on a race. Organizer or admin only.
+     * @param data The data for the request.
+     * @param data.raceId
+     * @param data.requestBody
+     * @returns TagPublic Successful Response
+     * @throws ApiError
+     */
+    public static setTagsForRace(data: TagsSetTagsForRaceData): CancelablePromise<TagsSetTagsForRaceResponse> {
+        return __request(OpenAPI, {
+            method: 'POST',
+            url: '/api/v1/tags/{race_id}/tags',
+            path: {
+                race_id: data.raceId
+            },
+            body: data.requestBody,
+            mediaType: 'application/json',
             errors: {
                 422: 'Validation Error'
             }

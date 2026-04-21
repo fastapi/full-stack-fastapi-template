@@ -63,6 +63,77 @@ export const Body_login_login_access_tokenSchema = {
     title: 'Body_login-login_access_token'
 } as const;
 
+export const Body_media_upload_media_assetSchema = {
+    properties: {
+        file: {
+            type: 'string',
+            format: 'binary',
+            title: 'File'
+        },
+        content_type: {
+            type: 'string',
+            title: 'Content Type'
+        },
+        content_id: {
+            type: 'string',
+            format: 'uuid',
+            title: 'Content Id'
+        },
+        kind: {
+            type: 'string',
+            title: 'Kind',
+            default: 'gallery'
+        },
+        alt_text: {
+            anyOf: [
+                {
+                    type: 'string'
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Alt Text'
+        },
+        display_order: {
+            type: 'integer',
+            title: 'Display Order',
+            default: 0
+        },
+        is_primary: {
+            type: 'boolean',
+            title: 'Is Primary',
+            default: false
+        },
+        is_public: {
+            type: 'boolean',
+            title: 'Is Public',
+            default: true
+        }
+    },
+    type: 'object',
+    required: ['file', 'content_type', 'content_id'],
+    title: 'Body_media-upload_media_asset'
+} as const;
+
+export const DifficultyEnumSchema = {
+    type: 'string',
+    enum: ['easy', 'moderate', 'hard', 'extreme'],
+    title: 'DifficultyEnum'
+} as const;
+
+export const DistancePrefEnumSchema = {
+    type: 'string',
+    enum: ['short', 'mid', 'long', 'ultra'],
+    title: 'DistancePrefEnum'
+} as const;
+
+export const FitnessEnumSchema = {
+    type: 'string',
+    enum: ['beginner', 'intermediate', 'advanced', 'elite'],
+    title: 'FitnessEnum'
+} as const;
+
 export const HTTPValidationErrorSchema = {
     properties: {
         detail: {
@@ -75,6 +146,12 @@ export const HTTPValidationErrorSchema = {
     },
     type: 'object',
     title: 'HTTPValidationError'
+} as const;
+
+export const InteractionTypeEnumSchema = {
+    type: 'string',
+    enum: ['viewed', 'saved', 'unsaved', 'registered', 'shared'],
+    title: 'InteractionTypeEnum'
 } as const;
 
 export const ItemCreateSchema = {
@@ -200,6 +277,187 @@ export const ItemsPublicSchema = {
     type: 'object',
     required: ['data', 'count'],
     title: 'ItemsPublic'
+} as const;
+
+export const MediaAssetPublicSchema = {
+    properties: {
+        content_type: {
+            type: 'string',
+            maxLength: 100,
+            title: 'Content Type'
+        },
+        content_id: {
+            type: 'string',
+            format: 'uuid',
+            title: 'Content Id'
+        },
+        kind: {
+            type: 'string',
+            maxLength: 50,
+            title: 'Kind',
+            default: 'gallery'
+        },
+        alt_text: {
+            anyOf: [
+                {
+                    type: 'string',
+                    maxLength: 255
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Alt Text'
+        },
+        display_order: {
+            type: 'integer',
+            title: 'Display Order',
+            default: 0
+        },
+        is_primary: {
+            type: 'boolean',
+            title: 'Is Primary',
+            default: false
+        },
+        is_public: {
+            type: 'boolean',
+            title: 'Is Public',
+            default: true
+        },
+        id: {
+            type: 'string',
+            format: 'uuid',
+            title: 'Id'
+        },
+        original_filename: {
+            type: 'string',
+            title: 'Original Filename'
+        },
+        file_name: {
+            type: 'string',
+            title: 'File Name'
+        },
+        file_url: {
+            type: 'string',
+            title: 'File Url'
+        },
+        mime_type: {
+            type: 'string',
+            title: 'Mime Type'
+        },
+        size_bytes: {
+            type: 'integer',
+            title: 'Size Bytes'
+        },
+        uploaded_by_id: {
+            anyOf: [
+                {
+                    type: 'string',
+                    format: 'uuid'
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Uploaded By Id'
+        },
+        created_at: {
+            type: 'string',
+            format: 'date-time',
+            title: 'Created At'
+        },
+        updated_at: {
+            type: 'string',
+            format: 'date-time',
+            title: 'Updated At'
+        }
+    },
+    type: 'object',
+    required: ['content_type', 'content_id', 'id', 'original_filename', 'file_name', 'file_url', 'mime_type', 'size_bytes', 'created_at', 'updated_at'],
+    title: 'MediaAssetPublic'
+} as const;
+
+export const MediaAssetUpdateSchema = {
+    properties: {
+        kind: {
+            anyOf: [
+                {
+                    type: 'string',
+                    maxLength: 50
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Kind'
+        },
+        alt_text: {
+            anyOf: [
+                {
+                    type: 'string',
+                    maxLength: 255
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Alt Text'
+        },
+        display_order: {
+            anyOf: [
+                {
+                    type: 'integer'
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Display Order'
+        },
+        is_primary: {
+            anyOf: [
+                {
+                    type: 'boolean'
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Is Primary'
+        },
+        is_public: {
+            anyOf: [
+                {
+                    type: 'boolean'
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Is Public'
+        }
+    },
+    type: 'object',
+    title: 'MediaAssetUpdate'
+} as const;
+
+export const MediaAssetsPublicSchema = {
+    properties: {
+        data: {
+            items: {
+                '$ref': '#/components/schemas/MediaAssetPublic'
+            },
+            type: 'array',
+            title: 'Data'
+        },
+        count: {
+            type: 'integer',
+            title: 'Count'
+        }
+    },
+    type: 'object',
+    required: ['data', 'count'],
+    title: 'MediaAssetsPublic'
 } as const;
 
 export const MessageSchema = {
@@ -1513,6 +1771,93 @@ export const RaceCreateSchema = {
                 }
             ],
             title: 'Race Metadata'
+        },
+        latitude: {
+            anyOf: [
+                {
+                    type: 'number',
+                    maximum: 90,
+                    minimum: -90
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Latitude'
+        },
+        longitude: {
+            anyOf: [
+                {
+                    type: 'number',
+                    maximum: 180,
+                    minimum: -180
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Longitude'
+        },
+        terrain_type: {
+            anyOf: [
+                {
+                    '$ref': '#/components/schemas/TerrainEnum'
+                },
+                {
+                    type: 'null'
+                }
+            ]
+        },
+        difficulty_level: {
+            anyOf: [
+                {
+                    '$ref': '#/components/schemas/DifficultyEnum'
+                },
+                {
+                    type: 'null'
+                }
+            ]
+        },
+        elevation_gain_m: {
+            anyOf: [
+                {
+                    type: 'integer',
+                    minimum: 0
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Elevation Gain M'
+        },
+        is_certified: {
+            type: 'boolean',
+            title: 'Is Certified',
+            default: false
+        },
+        gpx_file_url: {
+            anyOf: [
+                {
+                    type: 'string',
+                    maxLength: 1000
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Gpx File Url'
+        },
+        website_url: {
+            anyOf: [
+                {
+                    type: 'string',
+                    maxLength: 1000
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Website Url'
         }
     },
     type: 'object',
@@ -1654,6 +1999,93 @@ export const RacePublicSchema = {
                 }
             ],
             title: 'Race Metadata'
+        },
+        latitude: {
+            anyOf: [
+                {
+                    type: 'number',
+                    maximum: 90,
+                    minimum: -90
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Latitude'
+        },
+        longitude: {
+            anyOf: [
+                {
+                    type: 'number',
+                    maximum: 180,
+                    minimum: -180
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Longitude'
+        },
+        terrain_type: {
+            anyOf: [
+                {
+                    '$ref': '#/components/schemas/TerrainEnum'
+                },
+                {
+                    type: 'null'
+                }
+            ]
+        },
+        difficulty_level: {
+            anyOf: [
+                {
+                    '$ref': '#/components/schemas/DifficultyEnum'
+                },
+                {
+                    type: 'null'
+                }
+            ]
+        },
+        elevation_gain_m: {
+            anyOf: [
+                {
+                    type: 'integer',
+                    minimum: 0
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Elevation Gain M'
+        },
+        is_certified: {
+            type: 'boolean',
+            title: 'Is Certified',
+            default: false
+        },
+        gpx_file_url: {
+            anyOf: [
+                {
+                    type: 'string',
+                    maxLength: 1000
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Gpx File Url'
+        },
+        website_url: {
+            anyOf: [
+                {
+                    type: 'string',
+                    maxLength: 1000
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Website Url'
         },
         id: {
             type: 'string',
@@ -1816,6 +2248,93 @@ export const RacePublicWithDetailsSchema = {
             ],
             title: 'Race Metadata'
         },
+        latitude: {
+            anyOf: [
+                {
+                    type: 'number',
+                    maximum: 90,
+                    minimum: -90
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Latitude'
+        },
+        longitude: {
+            anyOf: [
+                {
+                    type: 'number',
+                    maximum: 180,
+                    minimum: -180
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Longitude'
+        },
+        terrain_type: {
+            anyOf: [
+                {
+                    '$ref': '#/components/schemas/TerrainEnum'
+                },
+                {
+                    type: 'null'
+                }
+            ]
+        },
+        difficulty_level: {
+            anyOf: [
+                {
+                    '$ref': '#/components/schemas/DifficultyEnum'
+                },
+                {
+                    type: 'null'
+                }
+            ]
+        },
+        elevation_gain_m: {
+            anyOf: [
+                {
+                    type: 'integer',
+                    minimum: 0
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Elevation Gain M'
+        },
+        is_certified: {
+            type: 'boolean',
+            title: 'Is Certified',
+            default: false
+        },
+        gpx_file_url: {
+            anyOf: [
+                {
+                    type: 'string',
+                    maxLength: 1000
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Gpx File Url'
+        },
+        website_url: {
+            anyOf: [
+                {
+                    type: 'string',
+                    maxLength: 1000
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Website Url'
+        },
         id: {
             type: 'string',
             format: 'uuid',
@@ -1842,6 +2361,14 @@ export const RacePublicWithDetailsSchema = {
             },
             type: 'array',
             title: 'Categories',
+            default: []
+        },
+        tags: {
+            items: {
+                '$ref': '#/components/schemas/TagPublic'
+            },
+            type: 'array',
+            title: 'Tags',
             default: []
         },
         registration_count: {
@@ -2701,6 +3228,24 @@ export const RaceStatusEnumSchema = {
     title: 'RaceStatusEnum'
 } as const;
 
+export const RaceTagCreateSchema = {
+    properties: {
+        name: {
+            type: 'string',
+            maxLength: 50,
+            title: 'Name'
+        },
+        slug: {
+            type: 'string',
+            maxLength: 50,
+            title: 'Slug'
+        }
+    },
+    type: 'object',
+    required: ['name', 'slug'],
+    title: 'RaceTagCreate'
+} as const;
+
 export const RaceUpdateSchema = {
     properties: {
         name: {
@@ -2872,6 +3417,107 @@ export const RaceUpdateSchema = {
                 }
             ],
             title: 'Race Metadata'
+        },
+        latitude: {
+            anyOf: [
+                {
+                    type: 'number'
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Latitude'
+        },
+        longitude: {
+            anyOf: [
+                {
+                    type: 'number'
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Longitude'
+        },
+        terrain_type: {
+            anyOf: [
+                {
+                    '$ref': '#/components/schemas/TerrainEnum'
+                },
+                {
+                    type: 'null'
+                }
+            ]
+        },
+        difficulty_level: {
+            anyOf: [
+                {
+                    '$ref': '#/components/schemas/DifficultyEnum'
+                },
+                {
+                    type: 'null'
+                }
+            ]
+        },
+        elevation_gain_m: {
+            anyOf: [
+                {
+                    type: 'integer'
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Elevation Gain M'
+        },
+        is_certified: {
+            anyOf: [
+                {
+                    type: 'boolean'
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Is Certified'
+        },
+        gpx_file_url: {
+            anyOf: [
+                {
+                    type: 'string'
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Gpx File Url'
+        },
+        website_url: {
+            anyOf: [
+                {
+                    type: 'string'
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Website Url'
+        },
+        tag_ids: {
+            anyOf: [
+                {
+                    items: {
+                        type: 'string',
+                        format: 'uuid'
+                    },
+                    type: 'array'
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Tag Ids'
         }
     },
     type: 'object',
@@ -3026,6 +3672,54 @@ export const RolesPublicSchema = {
     title: 'RolesPublic'
 } as const;
 
+export const TagPublicSchema = {
+    properties: {
+        name: {
+            type: 'string',
+            maxLength: 50,
+            title: 'Name'
+        },
+        slug: {
+            type: 'string',
+            maxLength: 50,
+            title: 'Slug'
+        },
+        id: {
+            type: 'string',
+            format: 'uuid',
+            title: 'Id'
+        }
+    },
+    type: 'object',
+    required: ['name', 'slug', 'id'],
+    title: 'TagPublic'
+} as const;
+
+export const TagsPublicSchema = {
+    properties: {
+        data: {
+            items: {
+                '$ref': '#/components/schemas/TagPublic'
+            },
+            type: 'array',
+            title: 'Data'
+        },
+        count: {
+            type: 'integer',
+            title: 'Count'
+        }
+    },
+    type: 'object',
+    required: ['data', 'count'],
+    title: 'TagsPublic'
+} as const;
+
+export const TerrainEnumSchema = {
+    type: 'string',
+    enum: ['road', 'trail', 'track', 'mixed'],
+    title: 'TerrainEnum'
+} as const;
+
 export const TokenSchema = {
     properties: {
         access_token: {
@@ -3105,6 +3799,372 @@ export const UserCreateSchema = {
     title: 'UserCreate'
 } as const;
 
+export const UserProfileCreateSchema = {
+    properties: {
+        fitness_level: {
+            anyOf: [
+                {
+                    '$ref': '#/components/schemas/FitnessEnum'
+                },
+                {
+                    type: 'null'
+                }
+            ]
+        },
+        distance_preference: {
+            anyOf: [
+                {
+                    '$ref': '#/components/schemas/DistancePrefEnum'
+                },
+                {
+                    type: 'null'
+                }
+            ]
+        },
+        terrain_preference: {
+            anyOf: [
+                {
+                    '$ref': '#/components/schemas/TerrainEnum'
+                },
+                {
+                    type: 'null'
+                }
+            ]
+        },
+        home_latitude: {
+            anyOf: [
+                {
+                    type: 'number',
+                    maximum: 90,
+                    minimum: -90
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Home Latitude'
+        },
+        home_longitude: {
+            anyOf: [
+                {
+                    type: 'number',
+                    maximum: 180,
+                    minimum: -180
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Home Longitude'
+        },
+        home_city: {
+            anyOf: [
+                {
+                    type: 'string',
+                    maxLength: 100
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Home City'
+        },
+        weekly_mileage_km: {
+            anyOf: [
+                {
+                    type: 'number',
+                    minimum: 0
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Weekly Mileage Km'
+        },
+        goal_race_date: {
+            anyOf: [
+                {
+                    type: 'string',
+                    format: 'date'
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Goal Race Date'
+        },
+        bio: {
+            anyOf: [
+                {
+                    type: 'string'
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Bio'
+        },
+        is_onboarded: {
+            type: 'boolean',
+            title: 'Is Onboarded',
+            default: false
+        }
+    },
+    type: 'object',
+    title: 'UserProfileCreate'
+} as const;
+
+export const UserProfilePublicSchema = {
+    properties: {
+        fitness_level: {
+            anyOf: [
+                {
+                    '$ref': '#/components/schemas/FitnessEnum'
+                },
+                {
+                    type: 'null'
+                }
+            ]
+        },
+        distance_preference: {
+            anyOf: [
+                {
+                    '$ref': '#/components/schemas/DistancePrefEnum'
+                },
+                {
+                    type: 'null'
+                }
+            ]
+        },
+        terrain_preference: {
+            anyOf: [
+                {
+                    '$ref': '#/components/schemas/TerrainEnum'
+                },
+                {
+                    type: 'null'
+                }
+            ]
+        },
+        home_latitude: {
+            anyOf: [
+                {
+                    type: 'number',
+                    maximum: 90,
+                    minimum: -90
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Home Latitude'
+        },
+        home_longitude: {
+            anyOf: [
+                {
+                    type: 'number',
+                    maximum: 180,
+                    minimum: -180
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Home Longitude'
+        },
+        home_city: {
+            anyOf: [
+                {
+                    type: 'string',
+                    maxLength: 100
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Home City'
+        },
+        weekly_mileage_km: {
+            anyOf: [
+                {
+                    type: 'number',
+                    minimum: 0
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Weekly Mileage Km'
+        },
+        goal_race_date: {
+            anyOf: [
+                {
+                    type: 'string',
+                    format: 'date'
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Goal Race Date'
+        },
+        bio: {
+            anyOf: [
+                {
+                    type: 'string'
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Bio'
+        },
+        is_onboarded: {
+            type: 'boolean',
+            title: 'Is Onboarded',
+            default: false
+        },
+        id: {
+            type: 'string',
+            format: 'uuid',
+            title: 'Id'
+        },
+        user_id: {
+            type: 'string',
+            format: 'uuid',
+            title: 'User Id'
+        },
+        created_at: {
+            type: 'string',
+            format: 'date-time',
+            title: 'Created At'
+        },
+        updated_at: {
+            type: 'string',
+            format: 'date-time',
+            title: 'Updated At'
+        }
+    },
+    type: 'object',
+    required: ['id', 'user_id', 'created_at', 'updated_at'],
+    title: 'UserProfilePublic'
+} as const;
+
+export const UserProfileUpdateSchema = {
+    properties: {
+        fitness_level: {
+            anyOf: [
+                {
+                    '$ref': '#/components/schemas/FitnessEnum'
+                },
+                {
+                    type: 'null'
+                }
+            ]
+        },
+        distance_preference: {
+            anyOf: [
+                {
+                    '$ref': '#/components/schemas/DistancePrefEnum'
+                },
+                {
+                    type: 'null'
+                }
+            ]
+        },
+        terrain_preference: {
+            anyOf: [
+                {
+                    '$ref': '#/components/schemas/TerrainEnum'
+                },
+                {
+                    type: 'null'
+                }
+            ]
+        },
+        home_latitude: {
+            anyOf: [
+                {
+                    type: 'number'
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Home Latitude'
+        },
+        home_longitude: {
+            anyOf: [
+                {
+                    type: 'number'
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Home Longitude'
+        },
+        home_city: {
+            anyOf: [
+                {
+                    type: 'string'
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Home City'
+        },
+        weekly_mileage_km: {
+            anyOf: [
+                {
+                    type: 'number'
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Weekly Mileage Km'
+        },
+        goal_race_date: {
+            anyOf: [
+                {
+                    type: 'string',
+                    format: 'date'
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Goal Race Date'
+        },
+        bio: {
+            anyOf: [
+                {
+                    type: 'string'
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Bio'
+        },
+        is_onboarded: {
+            anyOf: [
+                {
+                    type: 'boolean'
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Is Onboarded'
+        }
+    },
+    type: 'object',
+    title: 'UserProfileUpdate'
+} as const;
+
 export const UserPublicSchema = {
     properties: {
         email: {
@@ -3164,6 +4224,37 @@ export const UserPublicSchema = {
     type: 'object',
     required: ['email', 'id'],
     title: 'UserPublic'
+} as const;
+
+export const UserRaceInteractionPublicSchema = {
+    properties: {
+        id: {
+            type: 'string',
+            format: 'uuid',
+            title: 'Id'
+        },
+        user_id: {
+            type: 'string',
+            format: 'uuid',
+            title: 'User Id'
+        },
+        race_id: {
+            type: 'string',
+            format: 'uuid',
+            title: 'Race Id'
+        },
+        action: {
+            '$ref': '#/components/schemas/InteractionTypeEnum'
+        },
+        created_at: {
+            type: 'string',
+            format: 'date-time',
+            title: 'Created At'
+        }
+    },
+    type: 'object',
+    required: ['id', 'user_id', 'race_id', 'action', 'created_at'],
+    title: 'UserRaceInteractionPublic'
 } as const;
 
 export const UserRegisterSchema = {

@@ -1,5 +1,5 @@
 import uuid
-from datetime import datetime, timezone
+from datetime import date, datetime, timezone
 from enum import Enum
 from typing import Any, Optional
 
@@ -65,6 +65,42 @@ class AttributeTypeEnum(str, Enum):
     BOOLEAN = "boolean"
     EMAIL = "email"
     PHONE = "phone"
+
+
+class TerrainEnum(str, Enum):
+    ROAD = "road"
+    TRAIL = "trail"
+    TRACK = "track"
+    MIXED = "mixed"
+
+
+class DifficultyEnum(str, Enum):
+    EASY = "easy"
+    MODERATE = "moderate"
+    HARD = "hard"
+    EXTREME = "extreme"
+
+
+class FitnessEnum(str, Enum):
+    BEGINNER = "beginner"
+    INTERMEDIATE = "intermediate"
+    ADVANCED = "advanced"
+    ELITE = "elite"
+
+
+class DistancePrefEnum(str, Enum):
+    SHORT = "short"   # 5K and under
+    MID = "mid"       # 10K–half marathon
+    LONG = "long"     # full marathon
+    ULTRA = "ultra"   # 50K+
+
+
+class InteractionTypeEnum(str, Enum):
+    VIEWED = "viewed"
+    SAVED = "saved"
+    UNSAVED = "unsaved"
+    REGISTERED = "registered"
+    SHARED = "shared"
 
 
 # Link table for many-to-many relationship between User and Role
@@ -162,6 +198,10 @@ class User(UserBase, table=True):
     )
     race_registrations: list["RaceRegistration"] = Relationship(
         back_populates="runner", cascade_delete=True
+    )
+    profile: Optional["UserProfile"] = Relationship(
+        back_populates="user",
+        sa_relationship_kwargs={"uselist": False},
     )
 
 
@@ -291,6 +331,41 @@ class MediaAssetsPublic(SQLModel):
 # =============================================================================
 
 
+# Junction table for many-to-many Race ↔ RaceTag
+class RaceTagLink(SQLModel, table=True):
+    race_id: uuid.UUID = Field(
+        foreign_key="race.id", primary_key=True, ondelete="CASCADE"
+    )
+    tag_id: uuid.UUID = Field(
+        foreign_key="racetag.id", primary_key=True, ondelete="CASCADE"
+    )
+
+
+class RaceTagBase(SQLModel):
+    name: str = Field(max_length=50, unique=True, index=True)
+    slug: str = Field(max_length=50, unique=True, index=True)
+
+
+class RaceTagCreate(RaceTagBase):
+    pass
+
+
+class RaceTag(RaceTagBase, table=True):
+    id: uuid.UUID = Field(default_factory=uuid.uuid4, primary_key=True)
+    races: list["Race"] = Relationship(
+        back_populates="tags", link_model=RaceTagLink
+    )
+
+
+class TagPublic(RaceTagBase):
+    id: uuid.UUID
+
+
+class TagsPublic(SQLModel):
+    data: list[TagPublic]
+    count: int
+
+
 # Race - Main race event
 class RaceBase(SQLModel):
     name: str = Field(min_length=1, max_length=255, index=True)
@@ -327,6 +402,18 @@ class RaceBase(SQLModel):
     # Flexible metadata stored as JSON
     race_metadata: dict[str, Any] | None = Field(default=None, sa_column=Column(JSON))
 
+    # Geographic coordinates
+    latitude: float | None = Field(default=None, ge=-90, le=90)
+    longitude: float | None = Field(default=None, ge=-180, le=180)
+
+    # Course characteristics
+    terrain_type: TerrainEnum | None = Field(default=None)
+    difficulty_level: DifficultyEnum | None = Field(default=None)
+    elevation_gain_m: int | None = Field(default=None, ge=0)
+    is_certified: bool = Field(default=False)
+    gpx_file_url: str | None = Field(default=None, max_length=1000)
+    website_url: str | None = Field(default=None, max_length=1000)
+
 
 class RaceCreate(RaceBase):
     pass
@@ -348,6 +435,15 @@ class RaceUpdate(SQLModel):
     base_price: float | None = None
     currency: str | None = None
     race_metadata: dict[str, Any] | None = None
+    latitude: float | None = None
+    longitude: float | None = None
+    terrain_type: TerrainEnum | None = None
+    difficulty_level: DifficultyEnum | None = None
+    elevation_gain_m: int | None = None
+    is_certified: bool | None = None
+    gpx_file_url: str | None = None
+    website_url: str | None = None
+    tag_ids: list[uuid.UUID] | None = None
 
 
 class Race(RaceBase, table=True):
@@ -376,6 +472,9 @@ class Race(RaceBase, table=True):
     checkpoints: list["RaceCheckpoint"] = Relationship(
         back_populates="race", cascade_delete=True
     )
+    tags: list[RaceTag] = Relationship(
+        back_populates="races", link_model=RaceTagLink
+    )
 
 
 class RacePublic(RaceBase):
@@ -387,6 +486,7 @@ class RacePublic(RaceBase):
 
 class RacePublicWithDetails(RacePublic):
     categories: list["RaceCategoryPublic"] = []
+    tags: list[TagPublic] = []
     registration_count: int = 0
 
 
@@ -802,6 +902,223 @@ class RaceSplitTimesPublic(SQLModel):
 
 # =============================================================================
 # End of Race Models
+# =============================================================================
+
+
+# =============================================================================
+# UserProfile - Runner preferences and personalization data
+# =============================================================================
+
+
+class UserProfileBase(SQLModel):
+    fitness_level: FitnessEnum | None = None
+    distance_preference: DistancePrefEnum | None = None
+    terrain_preference: TerrainEnum | None = None
+    home_latitude: float | None = Field(default=None, ge=-90, le=90)
+    home_longitude: float | None = Field(default=None, ge=-180, le=180)
+    home_city: str | None = Field(default=None, max_length=100)
+    weekly_mileage_km: float | None = Field(default=None, ge=0)
+    goal_race_date: date | None = None
+    bio: str | None = Field(default=None, sa_column=Column(Text))
+    is_onboarded: bool = Field(default=False)
+
+
+class UserProfileCreate(UserProfileBase):
+    pass
+
+
+class UserProfileUpdate(SQLModel):
+    fitness_level: FitnessEnum | None = None
+    distance_preference: DistancePrefEnum | None = None
+    terrain_preference: TerrainEnum | None = None
+    home_latitude: float | None = None
+    home_longitude: float | None = None
+    home_city: str | None = None
+    weekly_mileage_km: float | None = None
+    goal_race_date: date | None = None
+    bio: str | None = None
+    is_onboarded: bool | None = None
+
+
+class UserProfile(UserProfileBase, table=True):
+    id: uuid.UUID = Field(default_factory=uuid.uuid4, primary_key=True)
+    user_id: uuid.UUID = Field(
+        foreign_key="user.id", unique=True, ondelete="CASCADE", index=True
+    )
+    created_at: datetime = Field(
+        default_factory=get_datetime_utc, sa_column=Column(DateTime(timezone=True))
+    )
+    updated_at: datetime = Field(
+        default_factory=get_datetime_utc, sa_column=Column(DateTime(timezone=True))
+    )
+
+    user: User = Relationship(back_populates="profile")
+
+
+class UserProfilePublic(UserProfileBase):
+    id: uuid.UUID
+    user_id: uuid.UUID
+    created_at: datetime
+    updated_at: datetime
+
+
+# =============================================================================
+# UserRaceInteraction - Tracks views, saves, and shares for recommendations
+# =============================================================================
+
+
+class UserRaceInteraction(SQLModel, table=True):
+    id: uuid.UUID = Field(default_factory=uuid.uuid4, primary_key=True)
+    user_id: uuid.UUID = Field(
+        foreign_key="user.id", ondelete="CASCADE", index=True
+    )
+    race_id: uuid.UUID = Field(
+        foreign_key="race.id", ondelete="CASCADE", index=True
+    )
+    action: InteractionTypeEnum
+    created_at: datetime = Field(
+        default_factory=get_datetime_utc, sa_column=Column(DateTime(timezone=True))
+    )
+
+
+class UserRaceInteractionPublic(SQLModel):
+    id: uuid.UUID
+    user_id: uuid.UUID
+    race_id: uuid.UUID
+    action: InteractionTypeEnum
+    created_at: datetime
+
+
+# =============================================================================
+# Vietnam Administrative Master Data
+# =============================================================================
+
+
+class AdministrativeRegion(SQLModel, table=True):
+    __tablename__ = "administrative_regions"
+
+    id: int = Field(primary_key=True)
+    name: str = Field(max_length=255)
+    name_en: str = Field(max_length=255)
+    code_name: str | None = Field(default=None, max_length=255)
+    code_name_en: str | None = Field(default=None, max_length=255)
+
+
+class AdministrativeRegionPublic(SQLModel):
+    id: int
+    name: str
+    name_en: str
+    code_name: str | None = None
+    code_name_en: str | None = None
+
+
+class AdministrativeUnit(SQLModel, table=True):
+    __tablename__ = "administrative_units"
+
+    id: int = Field(primary_key=True)
+    full_name: str | None = Field(default=None, max_length=255)
+    full_name_en: str | None = Field(default=None, max_length=255)
+    short_name: str | None = Field(default=None, max_length=255)
+    short_name_en: str | None = Field(default=None, max_length=255)
+    code_name: str | None = Field(default=None, max_length=255)
+    code_name_en: str | None = Field(default=None, max_length=255)
+
+    provinces: list["Province"] = Relationship(back_populates="administrative_unit")
+    wards: list["Ward"] = Relationship(back_populates="administrative_unit")
+
+
+class AdministrativeUnitPublic(SQLModel):
+    id: int
+    full_name: str | None = None
+    full_name_en: str | None = None
+    short_name: str | None = None
+    short_name_en: str | None = None
+    code_name: str | None = None
+    code_name_en: str | None = None
+
+
+class Province(SQLModel, table=True):
+    __tablename__ = "provinces"
+
+    code: str = Field(primary_key=True, max_length=20)
+    name: str = Field(max_length=255)
+    name_en: str | None = Field(default=None, max_length=255)
+    full_name: str = Field(max_length=255)
+    full_name_en: str | None = Field(default=None, max_length=255)
+    code_name: str | None = Field(default=None, max_length=255)
+    administrative_unit_id: int | None = Field(
+        default=None, foreign_key="administrative_units.id", index=True
+    )
+
+    administrative_unit: AdministrativeUnit | None = Relationship(
+        back_populates="provinces"
+    )
+    wards: list["Ward"] = Relationship(back_populates="province")
+
+
+class ProvincePublic(SQLModel):
+    code: str
+    name: str
+    name_en: str | None = None
+    full_name: str
+    full_name_en: str | None = None
+    code_name: str | None = None
+    administrative_unit_id: int | None = None
+
+
+class ProvincePublicWithDetails(ProvincePublic):
+    administrative_unit: AdministrativeUnitPublic | None = None
+
+
+class ProvincesPublic(SQLModel):
+    data: list[ProvincePublic]
+    count: int
+
+
+class Ward(SQLModel, table=True):
+    __tablename__ = "wards"
+
+    code: str = Field(primary_key=True, max_length=20)
+    name: str = Field(max_length=255)
+    name_en: str | None = Field(default=None, max_length=255)
+    full_name: str | None = Field(default=None, max_length=255)
+    full_name_en: str | None = Field(default=None, max_length=255)
+    code_name: str | None = Field(default=None, max_length=255)
+    province_code: str | None = Field(
+        default=None, foreign_key="provinces.code", index=True
+    )
+    administrative_unit_id: int | None = Field(
+        default=None, foreign_key="administrative_units.id", index=True
+    )
+
+    province: Province | None = Relationship(back_populates="wards")
+    administrative_unit: AdministrativeUnit | None = Relationship(
+        back_populates="wards"
+    )
+
+
+class WardPublic(SQLModel):
+    code: str
+    name: str
+    name_en: str | None = None
+    full_name: str | None = None
+    full_name_en: str | None = None
+    code_name: str | None = None
+    province_code: str | None = None
+    administrative_unit_id: int | None = None
+
+
+class WardPublicWithDetails(WardPublic):
+    administrative_unit: AdministrativeUnitPublic | None = None
+
+
+class WardsPublic(SQLModel):
+    data: list[WardPublic]
+    count: int
+
+
+# =============================================================================
+# End of Vietnam Administrative Master Data
 # =============================================================================
 
 

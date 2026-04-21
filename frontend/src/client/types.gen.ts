@@ -11,9 +11,28 @@ export type Body_login_login_access_token = {
     client_secret?: (string | null);
 };
 
+export type Body_media_upload_media_asset = {
+    file: (Blob | File);
+    content_type: string;
+    content_id: string;
+    kind?: string;
+    alt_text?: (string | null);
+    display_order?: number;
+    is_primary?: boolean;
+    is_public?: boolean;
+};
+
+export type DifficultyEnum = 'easy' | 'moderate' | 'hard' | 'extreme';
+
+export type DistancePrefEnum = 'short' | 'mid' | 'long' | 'ultra';
+
+export type FitnessEnum = 'beginner' | 'intermediate' | 'advanced' | 'elite';
+
 export type HTTPValidationError = {
     detail?: Array<ValidationError>;
 };
+
+export type InteractionTypeEnum = 'viewed' | 'saved' | 'unsaved' | 'registered' | 'shared';
 
 export type ItemCreate = {
     title: string;
@@ -36,6 +55,38 @@ export type ItemsPublic = {
 export type ItemUpdate = {
     title?: (string | null);
     description?: (string | null);
+};
+
+export type MediaAssetPublic = {
+    content_type: string;
+    content_id: string;
+    kind?: string;
+    alt_text?: (string | null);
+    display_order?: number;
+    is_primary?: boolean;
+    is_public?: boolean;
+    id: string;
+    original_filename: string;
+    file_name: string;
+    file_url: string;
+    mime_type: string;
+    size_bytes: number;
+    uploaded_by_id?: (string | null);
+    created_at: string;
+    updated_at: string;
+};
+
+export type MediaAssetsPublic = {
+    data: Array<MediaAssetPublic>;
+    count: number;
+};
+
+export type MediaAssetUpdate = {
+    kind?: (string | null);
+    alt_text?: (string | null);
+    display_order?: (number | null);
+    is_primary?: (boolean | null);
+    is_public?: (boolean | null);
 };
 
 export type Message = {
@@ -218,6 +269,14 @@ export type RaceCreate = {
     race_metadata?: ({
     [key: string]: unknown;
 } | null);
+    latitude?: (number | null);
+    longitude?: (number | null);
+    terrain_type?: (TerrainEnum | null);
+    difficulty_level?: (DifficultyEnum | null);
+    elevation_gain_m?: (number | null);
+    is_certified?: boolean;
+    gpx_file_url?: (string | null);
+    website_url?: (string | null);
 };
 
 export type RacePublic = {
@@ -238,6 +297,14 @@ export type RacePublic = {
     race_metadata?: ({
     [key: string]: unknown;
 } | null);
+    latitude?: (number | null);
+    longitude?: (number | null);
+    terrain_type?: (TerrainEnum | null);
+    difficulty_level?: (DifficultyEnum | null);
+    elevation_gain_m?: (number | null);
+    is_certified?: boolean;
+    gpx_file_url?: (string | null);
+    website_url?: (string | null);
     id: string;
     created_at: string;
     updated_at: string;
@@ -262,11 +329,20 @@ export type RacePublicWithDetails = {
     race_metadata?: ({
     [key: string]: unknown;
 } | null);
+    latitude?: (number | null);
+    longitude?: (number | null);
+    terrain_type?: (TerrainEnum | null);
+    difficulty_level?: (DifficultyEnum | null);
+    elevation_gain_m?: (number | null);
+    is_certified?: boolean;
+    gpx_file_url?: (string | null);
+    website_url?: (string | null);
     id: string;
     created_at: string;
     updated_at: string;
     organizer_id: string;
     categories?: Array<RaceCategoryPublic>;
+    tags?: Array<TagPublic>;
     registration_count?: number;
 };
 
@@ -398,6 +474,11 @@ export type RacesPublic = {
 
 export type RaceStatusEnum = 'draft' | 'published' | 'registration_open' | 'registration_closed' | 'completed' | 'cancelled';
 
+export type RaceTagCreate = {
+    name: string;
+    slug: string;
+};
+
 export type RaceUpdate = {
     name?: (string | null);
     description?: (string | null);
@@ -416,6 +497,15 @@ export type RaceUpdate = {
     race_metadata?: ({
     [key: string]: unknown;
 } | null);
+    latitude?: (number | null);
+    longitude?: (number | null);
+    terrain_type?: (TerrainEnum | null);
+    difficulty_level?: (DifficultyEnum | null);
+    elevation_gain_m?: (number | null);
+    is_certified?: (boolean | null);
+    gpx_file_url?: (string | null);
+    website_url?: (string | null);
+    tag_ids?: (Array<(string)> | null);
 };
 
 export type RegistrationStatusEnum = 'pending' | 'confirmed' | 'cancelled' | 'waitlist';
@@ -444,6 +534,19 @@ export type RoleUpdate = {
     description?: (string | null);
 };
 
+export type TagPublic = {
+    name: string;
+    slug: string;
+    id: string;
+};
+
+export type TagsPublic = {
+    data: Array<TagPublic>;
+    count: number;
+};
+
+export type TerrainEnum = 'road' | 'trail' | 'track' | 'mixed';
+
 export type Token = {
     access_token: string;
     token_type?: string;
@@ -462,6 +565,49 @@ export type UserCreate = {
     password: string;
 };
 
+export type UserProfileCreate = {
+    fitness_level?: (FitnessEnum | null);
+    distance_preference?: (DistancePrefEnum | null);
+    terrain_preference?: (TerrainEnum | null);
+    home_latitude?: (number | null);
+    home_longitude?: (number | null);
+    home_city?: (string | null);
+    weekly_mileage_km?: (number | null);
+    goal_race_date?: (string | null);
+    bio?: (string | null);
+    is_onboarded?: boolean;
+};
+
+export type UserProfilePublic = {
+    fitness_level?: (FitnessEnum | null);
+    distance_preference?: (DistancePrefEnum | null);
+    terrain_preference?: (TerrainEnum | null);
+    home_latitude?: (number | null);
+    home_longitude?: (number | null);
+    home_city?: (string | null);
+    weekly_mileage_km?: (number | null);
+    goal_race_date?: (string | null);
+    bio?: (string | null);
+    is_onboarded?: boolean;
+    id: string;
+    user_id: string;
+    created_at: string;
+    updated_at: string;
+};
+
+export type UserProfileUpdate = {
+    fitness_level?: (FitnessEnum | null);
+    distance_preference?: (DistancePrefEnum | null);
+    terrain_preference?: (TerrainEnum | null);
+    home_latitude?: (number | null);
+    home_longitude?: (number | null);
+    home_city?: (string | null);
+    weekly_mileage_km?: (number | null);
+    goal_race_date?: (string | null);
+    bio?: (string | null);
+    is_onboarded?: (boolean | null);
+};
+
 export type UserPublic = {
     email: string;
     is_active?: boolean;
@@ -470,6 +616,14 @@ export type UserPublic = {
     id: string;
     created_at?: (string | null);
     roles?: Array<RolePublic>;
+};
+
+export type UserRaceInteractionPublic = {
+    id: string;
+    user_id: string;
+    race_id: string;
+    action: InteractionTypeEnum;
+    created_at: string;
 };
 
 export type UserRegister = {
@@ -564,11 +718,83 @@ export type LoginRecoverPasswordHtmlContentData = {
 
 export type LoginRecoverPasswordHtmlContentResponse = (string);
 
+export type MediaReadMediaAssetsData = {
+    contentId?: (string | null);
+    contentType?: (string | null);
+    isPublic?: boolean;
+    kind?: (string | null);
+    limit?: number;
+    skip?: number;
+};
+
+export type MediaReadMediaAssetsResponse = (MediaAssetsPublic);
+
+export type MediaUploadMediaAssetData = {
+    formData: Body_media_upload_media_asset;
+};
+
+export type MediaUploadMediaAssetResponse = (MediaAssetPublic);
+
+export type MediaReadMediaFileData = {
+    mediaId: string;
+};
+
+export type MediaReadMediaFileResponse = (unknown);
+
+export type MediaUpdateMediaAssetData = {
+    mediaId: string;
+    requestBody: MediaAssetUpdate;
+};
+
+export type MediaUpdateMediaAssetResponse = (MediaAssetPublic);
+
+export type MediaDeleteMediaAssetData = {
+    mediaId: string;
+};
+
+export type MediaDeleteMediaAssetResponse = (Message);
+
 export type PrivateCreateUserData = {
     requestBody: PrivateUserCreate;
 };
 
 export type PrivateCreateUserResponse = (UserPublic);
+
+export type ProfilesGetMyProfileResponse = (UserProfilePublic);
+
+export type ProfilesUpsertMyProfileData = {
+    requestBody: UserProfileCreate;
+};
+
+export type ProfilesUpsertMyProfileResponse = (UserProfilePublic);
+
+export type ProfilesDeleteMyProfileResponse = (unknown);
+
+export type ProfilesUpdateMyProfileData = {
+    requestBody: UserProfileUpdate;
+};
+
+export type ProfilesUpdateMyProfileResponse = (UserProfilePublic);
+
+export type ProfilesGetMySavedRacesResponse = (RacesPublic);
+
+export type ProfilesSaveRaceData = {
+    raceId: string;
+};
+
+export type ProfilesSaveRaceResponse = (UserRaceInteractionPublic);
+
+export type ProfilesUnsaveRaceData = {
+    raceId: string;
+};
+
+export type ProfilesUnsaveRaceResponse = (unknown);
+
+export type ProfilesTrackRaceViewData = {
+    raceId: string;
+};
+
+export type ProfilesTrackRaceViewResponse = (UserRaceInteractionPublic);
 
 export type RaceAttributesReadRaceAttributesData = {
     isPublic?: (boolean | null);
@@ -800,6 +1026,21 @@ export type RolesRemoveRoleFromUserData = {
 };
 
 export type RolesRemoveRoleFromUserResponse = (UserPublic);
+
+export type TagsListTagsResponse = (TagsPublic);
+
+export type TagsCreateTagData = {
+    requestBody: RaceTagCreate;
+};
+
+export type TagsCreateTagResponse = (TagPublic);
+
+export type TagsSetTagsForRaceData = {
+    raceId: string;
+    requestBody: Array<(string)>;
+};
+
+export type TagsSetTagsForRaceResponse = (Array<TagPublic>);
 
 export type UsersReadUsersData = {
     limit?: number;
