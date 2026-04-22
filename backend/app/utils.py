@@ -1,4 +1,5 @@
 import logging
+import math
 from dataclasses import dataclass
 from datetime import datetime, timedelta, timezone
 from pathlib import Path
@@ -121,3 +122,38 @@ def verify_password_reset_token(token: str) -> str | None:
         return str(decoded_token["sub"])
     except InvalidTokenError:
         return None
+
+
+# =============================================================================
+# Geo utilities
+# =============================================================================
+
+_EARTH_RADIUS_KM = 6371.0
+
+
+def haversine_distance_km(
+    lat1: float, lon1: float, lat2: float, lon2: float
+) -> float:
+    """Return great-circle distance in kilometres between two WGS-84 points."""
+    phi1, phi2 = math.radians(lat1), math.radians(lat2)
+    dphi = math.radians(lat2 - lat1)
+    dlambda = math.radians(lon2 - lon1)
+    a = math.sin(dphi / 2) ** 2 + math.cos(phi1) * math.cos(phi2) * math.sin(dlambda / 2) ** 2
+    return _EARTH_RADIUS_KM * 2 * math.asin(math.sqrt(a))
+
+
+def haversine_sql_expr(lat: float, lon: float) -> str:
+    """
+    Return a PostgreSQL SQL fragment that evaluates to the great-circle distance
+    (in km) from a fixed point (lat, lon) to the race.latitude / race.longitude columns.
+    Safe to embed in a WHERE or ORDER BY clause via sqlalchemy text().
+    """
+    return (
+        f"({_EARTH_RADIUS_KM} * acos("
+        f"  least(1.0,"
+        f"    sin(radians({lat})) * sin(radians(race.latitude))"
+        f"    + cos(radians({lat})) * cos(radians(race.latitude))"
+        f"      * cos(radians(race.longitude) - radians({lon}))"
+        f"  )"
+        f"))"
+    )

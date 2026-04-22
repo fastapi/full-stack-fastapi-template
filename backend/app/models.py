@@ -490,8 +490,17 @@ class RacePublicWithDetails(RacePublic):
     registration_count: int = 0
 
 
+class RacePublicWithDistance(RacePublic):
+    distance_km: float
+
+
 class RacesPublic(SQLModel):
     data: list[RacePublic]
+    count: int
+
+
+class RacesPublicWithDistance(SQLModel):
+    data: list[RacePublicWithDistance]
     count: int
 
 

@@ -1,11 +1,14 @@
 import uuid
-from datetime import datetime, timezone
+from datetime import datetime, timedelta, timezone
 from typing import Any
 
-from sqlmodel import Session, col, func, select
+from sqlalchemy import or_
+from sqlmodel import Session, col, func, select, text
 
 from app.core.security import get_password_hash, verify_password
 from app.models import (
+    DifficultyEnum,
+    DistancePrefEnum,
     InteractionTypeEnum,
     Item,
     ItemCreate,
@@ -31,12 +34,14 @@ from app.models import (
     RaceResultUpdate,
     RaceSplitTime,
     RaceSplitTimeCreate,
+    RaceStatusEnum,
     RaceTag,
     RaceTagCreate,
     RaceTagLink,
     RaceUpdate,
     Role,
     RoleCreate,
+    TerrainEnum,
     User,
     UserCreate,
     UserProfile,
@@ -224,11 +229,14 @@ def get_races_count(*, session: Session, organizer_id: uuid.UUID | None = None) 
 def update_race(*, session: Session, db_race: Race, race_in: RaceUpdate) -> Race:
     """Update a race."""
     race_data = race_in.model_dump(exclude_unset=True)
+    tag_ids = race_data.pop("tag_ids", None)
     race_data["updated_at"] = datetime.now(timezone.utc)
     db_race.sqlmodel_update(race_data)
     session.add(db_race)
     session.commit()
     session.refresh(db_race)
+    if tag_ids is not None:
+        set_race_tags(session=session, race=db_race, tag_ids=tag_ids)
     return db_race
 
 
@@ -992,3 +1000,307 @@ def get_interaction_counts(
         .group_by(UserRaceInteraction.action)
     ).all()
     return {action.value: count for action, count in rows}
+
+
+# =============================================================================
+# Search & Discovery CRUD operations
+# =============================================================================
+
+
+def search_races(
+    *,
+    session: Session,
+    q: str | None = None,
+    lat: float | None = None,
+    lon: float | None = None,
+    radius_km: float | None = None,
+    distance_min_km: float | None = None,
+    distance_max_km: float | None = None,
+    terrain: TerrainEnum | None = None,
+    difficulty: DifficultyEnum | None = None,
+    date_from: datetime | None = None,
+    date_to: datetime | None = None,
+    tag_slugs: list[str] | None = None,
+    status: RaceStatusEnum | None = None,
+    sort: str = "date",
+    skip: int = 0,
+    limit: int = 20,
+) -> list[Race]:
+    """Full-featured search with FTS, geo, and filters."""
+    from app.utils import haversine_sql_expr
+
+    statement = select(Race)
+
+    # Full-text search via tsvector
+    if q:
+        statement = statement.where(
+            text("race.search_vector @@ plainto_tsquery('english', :q)").bindparams(q=q)
+        )
+
+    # Geo radius filter
+    if lat is not None and lon is not None and radius_km is not None:
+        dist_expr = haversine_sql_expr(lat, lon)
+        statement = statement.where(
+            text(f"{dist_expr} <= :radius_km").bindparams(radius_km=radius_km)
+        )
+
+    # Category distance filter — race must have at least one category in range
+    if distance_min_km is not None or distance_max_km is not None:
+        cat_stmt = select(RaceCategory.race_id).where(RaceCategory.race_id == Race.id)
+        if distance_min_km is not None:
+            cat_stmt = cat_stmt.where(RaceCategory.distance_km >= distance_min_km)
+        if distance_max_km is not None:
+            cat_stmt = cat_stmt.where(RaceCategory.distance_km <= distance_max_km)
+        statement = statement.where(col(Race.id).in_(cat_stmt))
+
+    # Terrain & difficulty
+    if terrain is not None:
+        statement = statement.where(Race.terrain_type == terrain)
+    if difficulty is not None:
+        statement = statement.where(Race.difficulty_level == difficulty)
+
+    # Date range
+    if date_from is not None:
+        statement = statement.where(col(Race.event_start_date) >= date_from)
+    if date_to is not None:
+        statement = statement.where(col(Race.event_start_date) <= date_to)
+
+    # Tag filter — race must have ALL specified tags
+    if tag_slugs:
+        for slug in tag_slugs:
+            tag_sub = (
+                select(RaceTagLink.race_id)
+                .join(RaceTag, RaceTagLink.tag_id == RaceTag.id)
+                .where(RaceTag.slug == slug)
+            )
+            statement = statement.where(col(Race.id).in_(tag_sub))
+
+    # Status
+    if status is not None:
+        statement = statement.where(Race.status == status)
+
+    # Sorting
+    if sort == "popularity":
+        pop_sub = (
+            select(
+                UserRaceInteraction.race_id,
+                func.count(UserRaceInteraction.id).label("interaction_count"),
+            )
+            .group_by(UserRaceInteraction.race_id)
+            .subquery()
+        )
+        statement = (
+            statement.outerjoin(pop_sub, Race.id == pop_sub.c.race_id)
+            .order_by(col(pop_sub.c.interaction_count).desc().nulls_last())
+        )
+    elif sort == "distance" and lat is not None and lon is not None:
+        dist_expr = haversine_sql_expr(lat, lon)
+        statement = statement.order_by(text(dist_expr))
+    else:
+        statement = statement.order_by(col(Race.event_start_date).asc())
+
+    statement = statement.offset(skip).limit(limit)
+    return list(session.exec(statement).all())
+
+
+def search_races_count(
+    *,
+    session: Session,
+    q: str | None = None,
+    lat: float | None = None,
+    lon: float | None = None,
+    radius_km: float | None = None,
+    distance_min_km: float | None = None,
+    distance_max_km: float | None = None,
+    terrain: TerrainEnum | None = None,
+    difficulty: DifficultyEnum | None = None,
+    date_from: datetime | None = None,
+    date_to: datetime | None = None,
+    tag_slugs: list[str] | None = None,
+    status: RaceStatusEnum | None = None,
+) -> int:
+    """Count matching races for search (mirrors search_races filters)."""
+    from app.utils import haversine_sql_expr
+
+    statement = select(func.count(Race.id))
+
+    if q:
+        statement = statement.where(
+            text("race.search_vector @@ plainto_tsquery('english', :q)").bindparams(q=q)
+        )
+    if lat is not None and lon is not None and radius_km is not None:
+        dist_expr = haversine_sql_expr(lat, lon)
+        statement = statement.where(
+            text(f"{dist_expr} <= :radius_km").bindparams(radius_km=radius_km)
+        )
+    if distance_min_km is not None or distance_max_km is not None:
+        cat_stmt = select(RaceCategory.race_id).where(RaceCategory.race_id == Race.id)
+        if distance_min_km is not None:
+            cat_stmt = cat_stmt.where(RaceCategory.distance_km >= distance_min_km)
+        if distance_max_km is not None:
+            cat_stmt = cat_stmt.where(RaceCategory.distance_km <= distance_max_km)
+        statement = statement.where(col(Race.id).in_(cat_stmt))
+    if terrain is not None:
+        statement = statement.where(Race.terrain_type == terrain)
+    if difficulty is not None:
+        statement = statement.where(Race.difficulty_level == difficulty)
+    if date_from is not None:
+        statement = statement.where(col(Race.event_start_date) >= date_from)
+    if date_to is not None:
+        statement = statement.where(col(Race.event_start_date) <= date_to)
+    if tag_slugs:
+        for slug in tag_slugs:
+            tag_sub = (
+                select(RaceTagLink.race_id)
+                .join(RaceTag, RaceTagLink.tag_id == RaceTag.id)
+                .where(RaceTag.slug == slug)
+            )
+            statement = statement.where(col(Race.id).in_(tag_sub))
+    if status is not None:
+        statement = statement.where(Race.status == status)
+
+    return session.exec(statement).one()
+
+
+def get_nearby_races(
+    *,
+    session: Session,
+    lat: float,
+    lon: float,
+    radius_km: float = 100.0,
+    limit: int = 20,
+) -> list[tuple[Race, float]]:
+    """Return (race, distance_km) tuples sorted by distance ascending."""
+    from app.utils import haversine_distance_km, haversine_sql_expr
+
+    dist_expr = haversine_sql_expr(lat, lon)
+    statement = (
+        select(Race)
+        .where(Race.latitude.isnot(None))  # type: ignore[union-attr]
+        .where(Race.longitude.isnot(None))  # type: ignore[union-attr]
+        .where(text(f"{dist_expr} <= :radius_km").bindparams(radius_km=radius_km))
+        .order_by(text(dist_expr))
+        .limit(limit)
+    )
+    races = list(session.exec(statement).all())
+    return [
+        (race, haversine_distance_km(lat, lon, race.latitude, race.longitude))  # type: ignore[arg-type]
+        for race in races
+    ]
+
+
+def get_trending_races(
+    *,
+    session: Session,
+    days: int = 7,
+    limit: int = 10,
+) -> list[Race]:
+    """Return races ranked by interaction count in the last N days."""
+    cutoff = datetime.now(timezone.utc) - timedelta(days=days)
+    pop_sub = (
+        select(
+            UserRaceInteraction.race_id,
+            func.count(UserRaceInteraction.id).label("cnt"),
+        )
+        .where(col(UserRaceInteraction.created_at) >= cutoff)
+        .group_by(UserRaceInteraction.race_id)
+        .subquery()
+    )
+    statement = (
+        select(Race)
+        .outerjoin(pop_sub, Race.id == pop_sub.c.race_id)
+        .order_by(col(pop_sub.c.cnt).desc().nulls_last())
+        .limit(limit)
+    )
+    return list(session.exec(statement).all())
+
+
+def get_similar_races(
+    *,
+    session: Session,
+    race: Race,
+    limit: int = 6,
+) -> list[Race]:
+    """Return races similar to the given race by terrain, difficulty, and region."""
+    statement = select(Race).where(Race.id != race.id)
+
+    filters = []
+    if race.terrain_type is not None:
+        filters.append(Race.terrain_type == race.terrain_type)
+    if race.difficulty_level is not None:
+        filters.append(Race.difficulty_level == race.difficulty_level)
+    if race.country:
+        filters.append(Race.country == race.country)
+
+    if filters:
+        statement = statement.where(or_(*filters))
+
+    statement = statement.order_by(col(Race.event_start_date).asc()).limit(limit)
+    return list(session.exec(statement).all())
+
+
+def get_recommended_races(
+    *,
+    session: Session,
+    user_id: uuid.UUID,
+    limit: int = 10,
+) -> list[Race]:
+    """
+    Return personalized race recommendations.
+    Falls back to trending if user has no profile or sparse preferences.
+    """
+    profile = get_user_profile(session=session, user_id=user_id)
+
+    if profile is None:
+        return get_trending_races(session=session, limit=limit)
+
+    statement = select(Race)
+    filters = []
+
+    if profile.terrain_preference is not None:
+        filters.append(Race.terrain_type == profile.terrain_preference)
+
+    if profile.distance_preference is not None:
+        dist_ranges: dict[str, tuple[float, float]] = {
+            DistancePrefEnum.SHORT.value: (0, 10),
+            DistancePrefEnum.MID.value: (10, 30),
+            DistancePrefEnum.LONG.value: (30, 60),
+            DistancePrefEnum.ULTRA.value: (60, 9999),
+        }
+        range_key = profile.distance_preference.value if hasattr(profile.distance_preference, "value") else str(profile.distance_preference)
+        if range_key in dist_ranges:
+            lo, hi = dist_ranges[range_key]
+            cat_sub = (
+                select(RaceCategory.race_id)
+                .where(RaceCategory.distance_km >= lo, RaceCategory.distance_km <= hi)
+            )
+            filters.append(col(Race.id).in_(cat_sub))
+
+    if filters:
+        statement = statement.where(or_(*filters))
+
+    # Exclude already-saved races
+    saved_ids = (
+        select(UserRaceInteraction.race_id)
+        .where(
+            UserRaceInteraction.user_id == user_id,
+            UserRaceInteraction.action == InteractionTypeEnum.SAVED,
+        )
+    )
+    statement = statement.where(col(Race.id).notin_(saved_ids))
+
+    statement = statement.order_by(col(Race.event_start_date).asc()).limit(limit)
+    results = list(session.exec(statement).all())
+
+    # Pad with trending if not enough results
+    if len(results) < limit:
+        existing_ids = {r.id for r in results}
+        trending = get_trending_races(session=session, limit=limit)
+        for r in trending:
+            if r.id not in existing_ids:
+                results.append(r)
+                existing_ids.add(r.id)
+            if len(results) >= limit:
+                break
+
+    return results

@@ -1,63 +1,112 @@
-import { createFileRoute, Link } from "@tanstack/react-router"
-import { Calendar, MapPin, Users } from "lucide-react"
-import { Badge } from "@/components/ui/badge"
-import { Button } from "@/components/ui/button"
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardFooter,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card"
+import { createFileRoute } from "@tanstack/react-router"
+import { Loader2 } from "lucide-react"
+import { useCallback, useDeferredValue } from "react"
+import { FilterBar, type RaceFilters } from "@/components/Races/FilterBar"
+import { RaceCard } from "@/components/Races/RaceCard"
+import { SearchBar } from "@/components/Races/SearchBar"
+import { SortControls, type SortOption } from "@/components/Races/SortControls"
+import { useRaceSearch } from "@/hooks/useRaceSearch"
+import type { DifficultyEnum, TerrainEnum } from "@/client"
+
+interface RaceSearch {
+  q?: string
+  terrain?: string
+  difficulty?: string
+  distanceMin?: string
+  distanceMax?: string
+  sort?: "date" | "popularity"
+  page?: number
+}
+
+function validateSearch(search: Record<string, unknown>): RaceSearch {
+  return {
+    q: typeof search.q === "string" ? search.q : "",
+    terrain: typeof search.terrain === "string" ? search.terrain : "",
+    difficulty: typeof search.difficulty === "string" ? search.difficulty : "",
+    distanceMin: typeof search.distanceMin === "string" ? search.distanceMin : "",
+    distanceMax: typeof search.distanceMax === "string" ? search.distanceMax : "",
+    sort:
+      search.sort === "date" || search.sort === "popularity"
+        ? search.sort
+        : "date",
+    page: typeof search.page === "number" ? search.page : 0,
+  }
+}
 
 export const Route = createFileRoute("/_public/races")({
+  validateSearch,
   component: RacesPage,
   head: () => ({
     meta: [
       {
         title: "Browse Races - RaceHub",
         description:
-          "Find and register for upcoming running races near you. Filter by distance, date, and location.",
+          "Find and register for upcoming running races near you. Filter by distance, date, terrain, and difficulty.",
       },
     ],
   }),
 })
 
-// Placeholder data - will be replaced with API data
-const upcomingRaces = [
-  {
-    id: "1",
-    name: "Spring Marathon 2026",
-    date: "April 15, 2026",
-    location: "Central Park, New York",
-    distance: "Marathon",
-    participants: 2500,
-    description:
-      "Join us for the annual Spring Marathon through beautiful Central Park.",
-  },
-  {
-    id: "2",
-    name: "City 10K Challenge",
-    date: "May 8, 2026",
-    location: "Downtown, San Francisco",
-    distance: "10K",
-    participants: 1200,
-    description: "A fast and flat 10K course through the heart of the city.",
-  },
-  {
-    id: "3",
-    name: "Trail Half Marathon",
-    date: "June 20, 2026",
-    location: "Mountain View Trail, Colorado",
-    distance: "Half Marathon",
-    participants: 800,
-    description:
-      "Experience stunning mountain views on this challenging trail race.",
-  },
-]
+const PAGE_SIZE = 18
 
 function RacesPage() {
+  const search = Route.useSearch()
+  const navigate = Route.useNavigate()
+
+  const deferredQ = useDeferredValue(search.q)
+
+  const { data, isLoading, isFetching } = useRaceSearch({
+    q: deferredQ || undefined,
+    terrain: (search.terrain as TerrainEnum) || undefined,
+    difficulty: (search.difficulty as DifficultyEnum) || undefined,
+    distanceMin: search.distanceMin || undefined,
+    distanceMax: search.distanceMax || undefined,
+    sort: search.sort,
+    skip: (search.page ?? 0) * PAGE_SIZE,
+    limit: PAGE_SIZE,
+  })
+
+  const races = data?.data ?? []
+  const totalCount = data?.count ?? 0
+  const totalPages = Math.ceil(totalCount / PAGE_SIZE)
+  const currentPage = search.page ?? 0
+
+  const setSearch = useCallback(
+    (patch: Partial<typeof search>) => {
+      navigate({ search: (prev) => ({ ...prev, ...patch, page: 0 }) })
+    },
+    [navigate],
+  )
+
+  const handleQueryChange = useCallback(
+    (q: string) => setSearch({ q }),
+    [setSearch],
+  )
+
+  const handleFilterChange = useCallback(
+    (filters: RaceFilters) => {
+      setSearch({
+        terrain: filters.terrain,
+        difficulty: filters.difficulty,
+        distanceMin: filters.distanceMin,
+        distanceMax: filters.distanceMax,
+      })
+    },
+    [setSearch],
+  )
+
+  const handleSortChange = useCallback(
+    (sort: SortOption) => setSearch({ sort }),
+    [setSearch],
+  )
+
+  const filters: RaceFilters = {
+    terrain: (search.terrain as TerrainEnum) || "",
+    difficulty: (search.difficulty as DifficultyEnum) || "",
+    distanceMin: search.distanceMin || "",
+    distanceMax: search.distanceMax || "",
+  }
+
   return (
     <div className="w-full py-8 md:py-12">
       <div className="container">
@@ -73,56 +122,74 @@ function RacesPage() {
             </p>
           </div>
 
-          {/* Filters - Placeholder */}
-          <div className="rounded-lg border bg-muted/50 p-4">
-            <p className="text-sm text-muted-foreground">
-              Filters coming soon: Distance, Date, Location
-            </p>
+          {/* Search + Controls */}
+          <div className="space-y-3 rounded-lg border bg-muted/30 p-4">
+            <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
+              <SearchBar
+                value={search.q ?? ""}
+                onChange={handleQueryChange}
+              />
+              <SortControls value={search.sort ?? "date"} onChange={handleSortChange} />
+            </div>
+            <FilterBar filters={filters} onChange={handleFilterChange} />
+          </div>
+
+          {/* Results count */}
+          <div className="flex items-center justify-between text-sm text-muted-foreground">
+            <span>
+              {isLoading
+                ? "Searching..."
+                : `${totalCount} race${totalCount !== 1 ? "s" : ""} found`}
+            </span>
+            {isFetching && !isLoading && (
+              <Loader2 className="size-4 animate-spin" />
+            )}
           </div>
 
           {/* Races Grid */}
-          <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
-            {upcomingRaces.map((race) => (
-              <Card
-                key={race.id}
-                className="flex flex-col transition-shadow hover:shadow-lg"
-              >
-                <CardHeader className="space-y-3">
-                  <div className="flex items-center justify-between">
-                    <Badge variant="outline">{race.distance}</Badge>
-                  </div>
-                  <CardTitle className="text-xl">{race.name}</CardTitle>
-                  <CardDescription>{race.description}</CardDescription>
-                </CardHeader>
-                <CardContent className="flex-1 space-y-3">
-                  <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                    <Calendar className="size-4 shrink-0" />
-                    <span>{race.date}</span>
-                  </div>
-                  <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                    <MapPin className="size-4 shrink-0" />
-                    <span>{race.location}</span>
-                  </div>
-                  <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                    <Users className="size-4 shrink-0" />
-                    <span>{race.participants} registered</span>
-                  </div>
-                </CardContent>
-                <CardFooter>
-                  <Button className="w-full" asChild>
-                    <Link to="/login">Register Now</Link>
-                  </Button>
-                </CardFooter>
-              </Card>
-            ))}
-          </div>
-
-          {/* Empty State */}
-          {upcomingRaces.length === 0 && (
+          {isLoading ? (
+            <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+              {Array.from({ length: 6 }).map((_, i) => (
+                <div
+                  key={i}
+                  className="h-64 rounded-lg border bg-muted/50 animate-pulse"
+                />
+              ))}
+            </div>
+          ) : races.length > 0 ? (
+            <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+              {races.map((race) => (
+                <RaceCard key={race.id} race={race} />
+              ))}
+            </div>
+          ) : (
             <div className="py-12 text-center">
               <p className="text-lg text-muted-foreground">
-                No races found. Check back soon!
+                No races found matching your filters. Try adjusting your search.
               </p>
+            </div>
+          )}
+
+          {/* Pagination */}
+          {totalPages > 1 && (
+            <div className="flex items-center justify-center gap-2 pt-4">
+              <button
+                className="rounded border px-3 py-1.5 text-sm disabled:opacity-40"
+                disabled={currentPage === 0}
+                onClick={() => navigate({ search: (prev) => ({ ...prev, page: currentPage - 1 }) })}
+              >
+                Previous
+              </button>
+              <span className="text-sm text-muted-foreground">
+                Page {currentPage + 1} of {totalPages}
+              </span>
+              <button
+                className="rounded border px-3 py-1.5 text-sm disabled:opacity-40"
+                disabled={currentPage >= totalPages - 1}
+                onClick={() => navigate({ search: (prev) => ({ ...prev, page: currentPage + 1 }) })}
+              >
+                Next
+              </button>
             </div>
           )}
         </div>
