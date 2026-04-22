@@ -9,6 +9,7 @@ Create Date: 2026-04-21 00:00:00.000000
 from alembic import op
 import sqlalchemy as sa
 import sqlmodel.sql.sqltypes
+from sqlalchemy.dialects.postgresql import ENUM as PgEnum
 
 # revision identifiers, used by Alembic.
 revision = "a1b2c3d4e5f6"
@@ -17,55 +18,52 @@ branch_labels = None
 depends_on = None
 
 
-def upgrade() -> None:
-    # ------------------------------------------------------------------
-    # New enum types
-    # ------------------------------------------------------------------
-    terrainenum = sa.Enum("road", "trail", "track", "mixed", name="terrainenum")
-    difficultyenum = sa.Enum(
-        "easy", "moderate", "hard", "extreme", name="difficultyenum"
-    )
-    fitnessenum = sa.Enum(
-        "beginner", "intermediate", "advanced", "elite", name="fitnessenum"
-    )
-    distanceprefenum = sa.Enum(
-        "short", "mid", "long", "ultra", name="distanceprefenum"
-    )
-    interactiontypeenum = sa.Enum(
-        "viewed", "saved", "unsaved", "registered", "shared",
-        name="interactiontypeenum",
+def _create_enum_if_not_exists(name: str, *values: str) -> None:
+    """Create a PostgreSQL enum type if it doesn't already exist."""
+    vals = ", ".join(f"'{v}'" for v in values)
+    op.execute(
+        f"""
+        DO $$
+        BEGIN
+            IF NOT EXISTS (SELECT 1 FROM pg_type WHERE typname = '{name}') THEN
+                CREATE TYPE {name} AS ENUM ({vals});
+            END IF;
+        END
+        $$;
+        """
     )
 
-    terrainenum.create(op.get_bind(), checkfirst=True)
-    difficultyenum.create(op.get_bind(), checkfirst=True)
-    fitnessenum.create(op.get_bind(), checkfirst=True)
-    distanceprefenum.create(op.get_bind(), checkfirst=True)
-    interactiontypeenum.create(op.get_bind(), checkfirst=True)
+
+# Column-level type objects with create_type=False so SQLAlchemy never tries
+# to emit CREATE TYPE statements automatically.
+_terrain = PgEnum("road", "trail", "track", "mixed", name="terrainenum", create_type=False)
+_difficulty = PgEnum("easy", "moderate", "hard", "extreme", name="difficultyenum", create_type=False)
+_fitness = PgEnum("beginner", "intermediate", "advanced", "elite", name="fitnessenum", create_type=False)
+_distpref = PgEnum("short", "mid", "long", "ultra", name="distanceprefenum", create_type=False)
+_interaction = PgEnum(
+    "viewed", "saved", "unsaved", "registered", "shared",
+    name="interactiontypeenum", create_type=False,
+)
+
+
+def upgrade() -> None:
+    # ------------------------------------------------------------------
+    # Create enum types idempotently via DO block
+    # ------------------------------------------------------------------
+    _create_enum_if_not_exists("terrainenum", "road", "trail", "track", "mixed")
+    _create_enum_if_not_exists("difficultyenum", "easy", "moderate", "hard", "extreme")
+    _create_enum_if_not_exists("fitnessenum", "beginner", "intermediate", "advanced", "elite")
+    _create_enum_if_not_exists("distanceprefenum", "short", "mid", "long", "ultra")
+    _create_enum_if_not_exists("interactiontypeenum", "viewed", "saved", "unsaved", "registered", "shared")
 
     # ------------------------------------------------------------------
     # race table — add geo and course-characteristic columns
     # ------------------------------------------------------------------
     op.add_column("race", sa.Column("latitude", sa.Float(), nullable=True))
     op.add_column("race", sa.Column("longitude", sa.Float(), nullable=True))
-    op.add_column(
-        "race",
-        sa.Column(
-            "terrain_type",
-            sa.Enum("road", "trail", "track", "mixed", name="terrainenum"),
-            nullable=True,
-        ),
-    )
-    op.add_column(
-        "race",
-        sa.Column(
-            "difficulty_level",
-            sa.Enum("easy", "moderate", "hard", "extreme", name="difficultyenum"),
-            nullable=True,
-        ),
-    )
-    op.add_column(
-        "race", sa.Column("elevation_gain_m", sa.Integer(), nullable=True)
-    )
+    op.add_column("race", sa.Column("terrain_type", _terrain, nullable=True))
+    op.add_column("race", sa.Column("difficulty_level", _difficulty, nullable=True))
+    op.add_column("race", sa.Column("elevation_gain_m", sa.Integer(), nullable=True))
     op.add_column(
         "race",
         sa.Column(
@@ -126,23 +124,9 @@ def upgrade() -> None:
         "userprofile",
         sa.Column("id", sa.Uuid(), nullable=False),
         sa.Column("user_id", sa.Uuid(), nullable=False),
-        sa.Column(
-            "fitness_level",
-            sa.Enum(
-                "beginner", "intermediate", "advanced", "elite", name="fitnessenum"
-            ),
-            nullable=True,
-        ),
-        sa.Column(
-            "distance_preference",
-            sa.Enum("short", "mid", "long", "ultra", name="distanceprefenum"),
-            nullable=True,
-        ),
-        sa.Column(
-            "terrain_preference",
-            sa.Enum("road", "trail", "track", "mixed", name="terrainenum"),
-            nullable=True,
-        ),
+        sa.Column("fitness_level", _fitness, nullable=True),
+        sa.Column("distance_preference", _distpref, nullable=True),
+        sa.Column("terrain_preference", _terrain, nullable=True),
         sa.Column("home_latitude", sa.Float(), nullable=True),
         sa.Column("home_longitude", sa.Float(), nullable=True),
         sa.Column(
@@ -185,14 +169,7 @@ def upgrade() -> None:
         sa.Column("id", sa.Uuid(), nullable=False),
         sa.Column("user_id", sa.Uuid(), nullable=False),
         sa.Column("race_id", sa.Uuid(), nullable=False),
-        sa.Column(
-            "action",
-            sa.Enum(
-                "viewed", "saved", "unsaved", "registered", "shared",
-                name="interactiontypeenum",
-            ),
-            nullable=False,
-        ),
+        sa.Column("action", _interaction, nullable=False),
         sa.Column(
             "created_at",
             sa.DateTime(timezone=True),
