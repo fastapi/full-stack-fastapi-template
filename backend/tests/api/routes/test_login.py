@@ -1,9 +1,11 @@
 from unittest.mock import patch
 
 from fastapi.testclient import TestClient
+import jwt
 from pwdlib.hashers.bcrypt import BcryptHasher
 from sqlmodel import Session
 
+from app.core import security
 from app.core.config import settings
 from app.core.security import get_password_hash, verify_password
 from app.crud import create_user
@@ -114,6 +116,27 @@ def test_reset_password_invalid_token(
     client: TestClient, superuser_token_headers: dict[str, str]
 ) -> None:
     data = {"new_password": "changethis", "token": "invalid"}
+    r = client.post(
+        f"{settings.API_V1_STR}/reset-password/",
+        headers=superuser_token_headers,
+        json=data,
+    )
+    response = r.json()
+
+    assert "detail" in response
+    assert r.status_code == 400
+    assert response["detail"] == "Invalid token"
+
+
+def test_reset_password_token_without_subject_claim(
+    client: TestClient, superuser_token_headers: dict[str, str]
+) -> None:
+    token_without_sub = jwt.encode(
+        {"nbf": 0, "exp": 4102444800},
+        settings.SECRET_KEY,
+        algorithm=security.ALGORITHM,
+    )
+    data = {"new_password": "changethis", "token": token_without_sub}
     r = client.post(
         f"{settings.API_V1_STR}/reset-password/",
         headers=superuser_token_headers,
