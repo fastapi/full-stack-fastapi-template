@@ -17,6 +17,7 @@
 
 ### Internal
 
+* 🔒 Pin GitHub actions by commit SHA. PR [#2246](https://github.com/fastapi/full-stack-fastapi-template/pull/2246) by [@YuriiMotov](https://github.com/YuriiMotov).
 * 🔨 Add pre-commit hook to ensure latest release header has date. PR [#2205](https://github.com/fastapi/full-stack-fastapi-template/pull/2205) by [@YuriiMotov](https://github.com/YuriiMotov).
 * 👷 Add `ty` to precommit. PR [#2227](https://github.com/fastapi/full-stack-fastapi-template/pull/2227) by [@svlandeg](https://github.com/svlandeg).
 * ⬆ Bump dorny/paths-filter from 3 to 4. PR [#2230](https://github.com/fastapi/full-stack-fastapi-template/pull/2230) by [@dependabot[bot]](https://github.com/apps/dependabot).
