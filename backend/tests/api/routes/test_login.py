@@ -1,7 +1,7 @@
 from unittest.mock import patch
 
-from fastapi.testclient import TestClient
 import jwt
+from fastapi.testclient import TestClient
 from pwdlib.hashers.bcrypt import BcryptHasher
 from sqlmodel import Session
 
