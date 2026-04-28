@@ -36,9 +36,7 @@ async def update_user(
     return db_user
 
 
-async def get_user_by_email(
-    *, session: AsyncSession, email: str
-) -> User | None:
+async def get_user_by_email(*, session: AsyncSession, email: str) -> User | None:
     statement = select(User).where(User.email == email)
     result = await session.execute(statement)
     return result.scalars().first()

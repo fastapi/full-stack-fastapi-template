@@ -1,7 +1,7 @@
 """initialize models
 
 Revision ID: cd5b3c3d1cd2
-Revises: 
+Revises:
 Create Date: 2026-04-28 01:24:30.407103
 
 """

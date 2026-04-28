@@ -50,7 +50,9 @@ async def read_items(
 
 
 @router.get("/{id}", response_model=ItemPublic)
-async def read_item(session: SessionDep, current_user: CurrentUser, id: uuid.UUID) -> Any:
+async def read_item(
+    session: SessionDep, current_user: CurrentUser, id: uuid.UUID
+) -> Any:
     """
     Get item by ID.
     """
