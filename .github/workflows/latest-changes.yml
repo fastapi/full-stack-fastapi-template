@@ -21,6 +21,7 @@ permissions: {}
 jobs:
   latest-changes:
     runs-on: ubuntu-latest
+    timeout-minutes: 5
     permissions:
       pull-requests: read
     if: github.event_name == 'workflow_dispatch' || github.event.pull_request.merged == true

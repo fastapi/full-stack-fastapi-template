@@ -20,6 +20,7 @@ jobs:
   issue-manager:
     if: github.repository_owner == 'fastapi'
     runs-on: ubuntu-latest
+    timeout-minutes: 5
     permissions:
       issues: write
       pull-requests: write

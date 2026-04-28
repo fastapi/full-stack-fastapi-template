@@ -15,6 +15,7 @@ env:
 jobs:
   pre-commit:
     runs-on: ubuntu-latest
+    timeout-minutes: 5
     steps:
       - name: Dump GitHub context
         env:
@@ -92,6 +93,7 @@ jobs:
     needs:
       - pre-commit
     runs-on: ubuntu-latest
+    timeout-minutes: 5
     steps:
       - name: Dump GitHub context
         env:
