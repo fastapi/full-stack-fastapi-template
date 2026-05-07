@@ -77,9 +77,8 @@ projects:
             repo: https://github.com/Ho1yShif/full-stack-fastapi-template
             branch: master
             autoDeploy: true
-            rootDir: frontend
-            buildCommand: curl -fsSL https://bun.sh/install | bash && export PATH=$HOME/.bun/bin:$PATH && bun install --frozen-lockfile && bun run build
-            staticPublishPath: ./dist
+            buildCommand: bun install --frozen-lockfile && bun run --filter frontend build
+            staticPublishPath: frontend/dist
             routes:
               - type: rewrite
                 source: /*
