@@ -6,7 +6,7 @@
 
 ## Deploy to Render
 
-[![Deploy to Render](https://render.com/images/deploy-to-render-button.svg)](https://render.com/deploy?repo=https://github.com/Ho1yShif/full-stack-fastapi-template)
+[![Deploy to Render](https://render.com/images/deploy-to-render-button.svg)](https://render.com/deploy?repo=https://github.com/fastapi/full-stack-fastapi-template)
 
 One click provisions the full stack on [Render](https://render.com) using the [`render.yaml`](./render.yaml) Blueprint at the repo root: a Dockerized FastAPI web service, a Vite/Bun static site for the frontend, a managed Postgres database, and a shared `fastapi-env` environment-variable group that both services pull from.
 
