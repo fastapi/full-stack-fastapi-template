@@ -4,6 +4,12 @@
 <a href="https://github.com/fastapi/full-stack-fastapi-template/actions?query=workflow%3A%22Test+Backend%22" target="_blank"><img src="https://github.com/fastapi/full-stack-fastapi-template/workflows/Test%20Backend/badge.svg" alt="Test Backend"></a>
 <a href="https://coverage-badge.samuelcolvin.workers.dev/redirect/fastapi/full-stack-fastapi-template" target="_blank"><img src="https://coverage-badge.samuelcolvin.workers.dev/fastapi/full-stack-fastapi-template.svg" alt="Coverage"></a>
 
+## Deploy to Render
+
+[![Deploy to Render](https://render.com/images/deploy-to-render-button.svg)](https://render.com/deploy?repo=https://github.com/Ho1yShif/full-stack-fastapi-template)
+
+One click provisions the full stack on [Render](https://render.com) using the [`render.yaml`](./render.yaml) Blueprint at the repo root: a Dockerized FastAPI web service, a Vite/Bun static site for the frontend, and a managed Postgres database. After clicking, fill in the env vars marked `sync: false` in the Dashboard (`FIRST_SUPERUSER`, `FIRST_SUPERUSER_PASSWORD`, `VITE_API_URL`, etc.).
+
 ## Technology Stack and Features
 
 - ⚡ [**FastAPI**](https://fastapi.tiangolo.com) for the Python backend API.

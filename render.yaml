@@ -1,89 +1,93 @@
-databases:
-  - name: fastapi-db
-    databaseName: app
-    plan: free
+projects:
+  - name: full-stack-fastapi-template
+    environments:
+      - name: production
+        services:
+          - type: web
+            name: fastapi-backend
+            runtime: docker
+            plan: free
+            repo: https://github.com/Ho1yShif/full-stack-fastapi-template
+            branch: master
+            autoDeploy: true
+            dockerfilePath: ./backend/Dockerfile
+            dockerContext: .
+            dockerCommand: bash scripts/prestart.sh && fastapi run --workers 4 --host 0.0.0.0 --port $PORT app/main.py
+            healthCheckPath: /api/v1/utils/health-check/
+            envVars:
+              - key: POSTGRES_SERVER
+                fromDatabase:
+                  name: fastapi-db
+                  property: host
+              - key: POSTGRES_PORT
+                fromDatabase:
+                  name: fastapi-db
+                  property: port
+              - key: POSTGRES_USER
+                fromDatabase:
+                  name: fastapi-db
+                  property: user
+              - key: POSTGRES_PASSWORD
+                fromDatabase:
+                  name: fastapi-db
+                  property: password
+              - key: POSTGRES_DB
+                fromDatabase:
+                  name: fastapi-db
+                  property: database
+              - key: ENVIRONMENT
+                value: production
+              - key: PROJECT_NAME
+                value: "Full Stack FastAPI"
+              - key: STACK_NAME
+                value: fastapi-project
+              - key: SMTP_TLS
+                value: "true"
+              - key: SMTP_SSL
+                value: "false"
+              - key: SMTP_PORT
+                value: "587"
+              - key: SECRET_KEY
+                generateValue: true
+              - key: FIRST_SUPERUSER
+                sync: false
+              - key: FIRST_SUPERUSER_PASSWORD
+                sync: false
+              - key: DOMAIN
+                sync: false
+              - key: FRONTEND_HOST
+                sync: false
+              - key: BACKEND_CORS_ORIGINS
+                sync: false
+              - key: SMTP_HOST
+                sync: false
+              - key: SMTP_USER
+                sync: false
+              - key: SMTP_PASSWORD
+                sync: false
+              - key: EMAILS_FROM_EMAIL
+                sync: false
+              - key: SENTRY_DSN
+                sync: false
 
-services:
-  - type: web
-    name: fastapi-backend
-    runtime: docker
-    plan: free
-    repo: https://github.com/Ho1yShif/full-stack-fastapi-template
-    branch: master
-    autoDeploy: true
-    dockerfilePath: ./backend/Dockerfile
-    dockerContext: .
-    dockerCommand: bash scripts/prestart.sh && fastapi run --workers 4 --host 0.0.0.0 --port $PORT app/main.py
-    healthCheckPath: /api/v1/utils/health-check/
-    envVars:
-      - key: POSTGRES_SERVER
-        fromDatabase:
-          name: fastapi-db
-          property: host
-      - key: POSTGRES_PORT
-        fromDatabase:
-          name: fastapi-db
-          property: port
-      - key: POSTGRES_USER
-        fromDatabase:
-          name: fastapi-db
-          property: user
-      - key: POSTGRES_PASSWORD
-        fromDatabase:
-          name: fastapi-db
-          property: password
-      - key: POSTGRES_DB
-        fromDatabase:
-          name: fastapi-db
-          property: database
-      - key: ENVIRONMENT
-        value: production
-      - key: PROJECT_NAME
-        value: "Full Stack FastAPI"
-      - key: STACK_NAME
-        value: fastapi-project
-      - key: SMTP_TLS
-        value: "true"
-      - key: SMTP_SSL
-        value: "false"
-      - key: SMTP_PORT
-        value: "587"
-      - key: SECRET_KEY
-        generateValue: true
-      - key: FIRST_SUPERUSER
-        sync: false
-      - key: FIRST_SUPERUSER_PASSWORD
-        sync: false
-      - key: DOMAIN
-        sync: false
-      - key: FRONTEND_HOST
-        sync: false
-      - key: BACKEND_CORS_ORIGINS
-        sync: false
-      - key: SMTP_HOST
-        sync: false
-      - key: SMTP_USER
-        sync: false
-      - key: SMTP_PASSWORD
-        sync: false
-      - key: EMAILS_FROM_EMAIL
-        sync: false
-      - key: SENTRY_DSN
-        sync: false
+          - type: web
+            name: fastapi-frontend
+            runtime: static
+            repo: https://github.com/Ho1yShif/full-stack-fastapi-template
+            branch: master
+            autoDeploy: true
+            rootDir: frontend
+            buildCommand: curl -fsSL https://bun.sh/install | bash && export PATH=$HOME/.bun/bin:$PATH && bun install --frozen-lockfile && bun run build
+            staticPublishPath: ./dist
+            routes:
+              - type: rewrite
+                source: /*
+                destination: /index.html
+            envVars:
+              - key: VITE_API_URL
+                sync: false
 
-  - type: web
-    name: fastapi-frontend
-    runtime: static
-    repo: https://github.com/Ho1yShif/full-stack-fastapi-template
-    branch: master
-    autoDeploy: true
-    rootDir: frontend
-    buildCommand: curl -fsSL https://bun.sh/install | bash && export PATH=$HOME/.bun/bin:$PATH && bun install --frozen-lockfile && bun run build
-    staticPublishPath: ./dist
-    routes:
-      - type: rewrite
-        source: /*
-        destination: /index.html
-    envVars:
-      - key: VITE_API_URL
-        sync: false
+        databases:
+          - name: fastapi-db
+            databaseName: app
+            plan: free
