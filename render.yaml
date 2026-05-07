@@ -6,13 +6,14 @@ projects:
           - type: web
             name: fastapi-backend
             runtime: docker
-            plan: free
+            plan: starter
             repo: https://github.com/Ho1yShif/full-stack-fastapi-template
             branch: master
             autoDeploy: true
             dockerfilePath: ./backend/Dockerfile
             dockerContext: .
-            dockerCommand: bash scripts/prestart.sh && fastapi run --workers 4 --host 0.0.0.0 --port $PORT app/main.py
+            dockerCommand: fastapi run --workers 4 --host 0.0.0.0 --port $PORT app/main.py
+            preDeployCommand: bash scripts/prestart.sh
             healthCheckPath: /api/v1/utils/health-check/
             envVars:
               - key: POSTGRES_SERVER
