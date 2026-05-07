@@ -20,6 +20,8 @@ One click provisions the full stack on [Render](https://render.com) using the [`
 
    `SECRET_KEY`, all `POSTGRES_*` vars, `ENVIRONMENT`, `PROJECT_NAME`, `STACK_NAME`, and the `SMTP_TLS/SSL/PORT` defaults are all set automatically — no action needed.
 
+   > **Note:** the `POSTGRES_*` vars are wired directly to the `fastapi-backend` service via `fromDatabase` references (Render's env groups don't support database links), so they won't show up on the `fastapi-env` group page. You'll find them under `fastapi-backend` → Environment in the Dashboard, alongside the inherited group vars. They all end up in the same `os.environ` at runtime — the split is purely a Dashboard organizational thing.
+
 2. **Wait for both services to finish deploying** so they're assigned `.onrender.com` URLs.
 
 3. **Go back to the `fastapi-env` env group and fill in the cross-service URLs** (these can only be set after the first deploy, since they depend on the assigned hostnames). All three live in the env group, but they're consumed by different services:
