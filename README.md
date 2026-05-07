@@ -22,10 +22,10 @@ One click provisions the full stack on [Render](https://render.com) using the [`
 
 2. **Wait for both services to finish deploying** so they're assigned `.onrender.com` URLs.
 
-3. **Go back to the `fastapi-env` env group and fill in the cross-service URLs** (these can only be set after the first deploy, since they depend on the assigned hostnames):
-   - `VITE_API_URL` → the backend URL, e.g. `https://fastapi-backend-XXXX.onrender.com`
-   - `FRONTEND_HOST` → the frontend URL, e.g. `https://fastapi-frontend-XXXX.onrender.com`
-   - `BACKEND_CORS_ORIGINS` → comma-separated list of allowed origins; usually just the frontend URL (you can leave this empty — `FRONTEND_HOST` is automatically appended to the backend's CORS allowlist)
+3. **Go back to the `fastapi-env` env group and fill in the cross-service URLs** (these can only be set after the first deploy, since they depend on the assigned hostnames). All three live in the env group, but they're consumed by different services:
+   - `VITE_API_URL` → set to the **backend** URL, e.g. `https://fastapi-backend-XXXX.onrender.com`. *Read by the **frontend** service at build time — baked into the bundle.*
+   - `FRONTEND_HOST` → set to the **frontend** URL, e.g. `https://fastapi-frontend-XXXX.onrender.com`. *Read by the **backend** service at runtime — auto-appended to the CORS allowlist.*
+   - `BACKEND_CORS_ORIGINS` → comma-separated list of additional allowed origins (you can usually leave this empty since `FRONTEND_HOST` already covers the frontend). *Read by the **backend** service at runtime.*
 
 4. **Trigger a manual rebuild of the frontend** (Dashboard → `fastapi-frontend` → Manual Deploy → Clear build cache & deploy). `VITE_API_URL` is baked into the bundle at build time, so an existing build won't pick up the new value until rebuilt.
 
