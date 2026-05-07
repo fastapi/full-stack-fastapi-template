@@ -1,3 +1,43 @@
+envVarGroups:
+  - name: fastapi-env
+    envVars:
+      - key: ENVIRONMENT
+        value: production
+      - key: PROJECT_NAME
+        value: "Full Stack FastAPI"
+      - key: STACK_NAME
+        value: fastapi-project
+      - key: SMTP_TLS
+        value: "true"
+      - key: SMTP_SSL
+        value: "false"
+      - key: SMTP_PORT
+        value: "587"
+      - key: SECRET_KEY
+        generateValue: true
+      - key: FIRST_SUPERUSER
+        sync: false
+      - key: FIRST_SUPERUSER_PASSWORD
+        sync: false
+      - key: DOMAIN
+        sync: false
+      - key: FRONTEND_HOST
+        sync: false
+      - key: BACKEND_CORS_ORIGINS
+        sync: false
+      - key: SMTP_HOST
+        sync: false
+      - key: SMTP_USER
+        sync: false
+      - key: SMTP_PASSWORD
+        sync: false
+      - key: EMAILS_FROM_EMAIL
+        sync: false
+      - key: SENTRY_DSN
+        sync: false
+      - key: VITE_API_URL
+        sync: false
+
 projects:
   - name: full-stack-fastapi-template
     environments:
@@ -15,6 +55,7 @@ projects:
             dockerCommand: bash scripts/start.sh
             healthCheckPath: /api/v1/utils/health-check/
             envVars:
+              - fromGroup: fastapi-env
               - key: POSTGRES_SERVER
                 fromDatabase:
                   name: fastapi-db
@@ -35,40 +76,6 @@ projects:
                 fromDatabase:
                   name: fastapi-db
                   property: database
-              - key: ENVIRONMENT
-                value: production
-              - key: PROJECT_NAME
-                value: "Full Stack FastAPI"
-              - key: STACK_NAME
-                value: fastapi-project
-              - key: SMTP_TLS
-                value: "true"
-              - key: SMTP_SSL
-                value: "false"
-              - key: SMTP_PORT
-                value: "587"
-              - key: SECRET_KEY
-                generateValue: true
-              - key: FIRST_SUPERUSER
-                sync: false
-              - key: FIRST_SUPERUSER_PASSWORD
-                sync: false
-              - key: DOMAIN
-                sync: false
-              - key: FRONTEND_HOST
-                sync: false
-              - key: BACKEND_CORS_ORIGINS
-                sync: false
-              - key: SMTP_HOST
-                sync: false
-              - key: SMTP_USER
-                sync: false
-              - key: SMTP_PASSWORD
-                sync: false
-              - key: EMAILS_FROM_EMAIL
-                sync: false
-              - key: SENTRY_DSN
-                sync: false
 
           - type: web
             name: fastapi-frontend
@@ -83,8 +90,7 @@ projects:
                 source: /*
                 destination: /index.html
             envVars:
-              - key: VITE_API_URL
-                sync: false
+              - fromGroup: fastapi-env
 
         databases:
           - name: fastapi-db

@@ -8,7 +8,26 @@
 
 [![Deploy to Render](https://render.com/images/deploy-to-render-button.svg)](https://render.com/deploy?repo=https://github.com/Ho1yShif/full-stack-fastapi-template)
 
-One click provisions the full stack on [Render](https://render.com) using the [`render.yaml`](./render.yaml) Blueprint at the repo root: a Dockerized FastAPI web service, a Vite/Bun static site for the frontend, and a managed Postgres database. After clicking, fill in the env vars marked `sync: false` in the Dashboard (`FIRST_SUPERUSER`, `FIRST_SUPERUSER_PASSWORD`, `VITE_API_URL`, etc.).
+One click provisions the full stack on [Render](https://render.com) using the [`render.yaml`](./render.yaml) Blueprint at the repo root: a Dockerized FastAPI web service, a Vite/Bun static site for the frontend, a managed Postgres database, and a shared `fastapi-env` environment-variable group that both services pull from.
+
+### Setup after clicking the button
+
+1. **Fill in the placeholder values in the `fastapi-env` env group** (Dashboard → Env Groups → `fastapi-env`):
+   - `FIRST_SUPERUSER` — admin email, e.g. `admin@yourdomain.com`
+   - `FIRST_SUPERUSER_PASSWORD` — generate one with `python -c "import secrets; print(secrets.token_urlsafe(32))"`
+   - `DOMAIN` — your custom domain, or any placeholder if you'll use the `.onrender.com` URLs
+   - Optional: `SMTP_HOST` / `SMTP_USER` / `SMTP_PASSWORD` / `EMAILS_FROM_EMAIL` (if you want password-reset emails) and `SENTRY_DSN` (if using Sentry)
+
+   `SECRET_KEY`, all `POSTGRES_*` vars, `ENVIRONMENT`, `PROJECT_NAME`, `STACK_NAME`, and the `SMTP_TLS/SSL/PORT` defaults are all set automatically — no action needed.
+
+2. **Wait for both services to finish deploying** so they're assigned `.onrender.com` URLs.
+
+3. **Go back to the `fastapi-env` env group and fill in the cross-service URLs** (these can only be set after the first deploy, since they depend on the assigned hostnames):
+   - `VITE_API_URL` → the backend URL, e.g. `https://fastapi-backend-XXXX.onrender.com`
+   - `FRONTEND_HOST` → the frontend URL, e.g. `https://fastapi-frontend-XXXX.onrender.com`
+   - `BACKEND_CORS_ORIGINS` → comma-separated list of allowed origins; usually just the frontend URL (you can leave this empty — `FRONTEND_HOST` is automatically appended to the backend's CORS allowlist)
+
+4. **Trigger a manual rebuild of the frontend** (Dashboard → `fastapi-frontend` → Manual Deploy → Clear build cache & deploy). `VITE_API_URL` is baked into the bundle at build time, so an existing build won't pick up the new value until rebuilt.
 
 ## Technology Stack and Features
 
