@@ -25,7 +25,9 @@ async function findEmail({
   request: APIRequestContext
   filter?: (email: MailpitEmail) => boolean
 }) {
-  const response = await request.get(`${process.env.MAILPIT_HOST}/api/v1/messages`)
+  const response = await request.get(
+    `${process.env.MAILPIT_HOST}/api/v1/messages`,
+  )
 
   const data: MailpitMessagesResponse = await response.json()
   let emails = data.messages || []

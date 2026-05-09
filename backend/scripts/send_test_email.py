@@ -10,6 +10,7 @@ Options:
   --subject optional subject
   --body   optional plain text body
 """
+
 from __future__ import annotations
 
 import argparse
@@ -30,7 +31,7 @@ def parse_dotenv(path: Path) -> dict[str, str]:
         if "=" not in line:
             continue
         k, v = line.split("=", 1)
-        v = v.strip().strip('\"').strip("'")
+        v = v.strip().strip('"').strip("'")
         data[k.strip()] = v
     return data
 
@@ -95,10 +96,16 @@ def main() -> None:
     smtp_user = cfg.get("SMTP_USER") or None
     smtp_password = cfg.get("SMTP_PASSWORD") or None
 
-    sender = cfg.get("EMAILS_FROM_EMAIL") or cfg.get("FIRST_SUPERUSER") or "noreply@example.com"
+    sender = (
+        cfg.get("EMAILS_FROM_EMAIL")
+        or cfg.get("FIRST_SUPERUSER")
+        or "noreply@example.com"
+    )
     recipient = args.to or cfg.get("FIRST_SUPERUSER") or sender
 
-    print(f"Sending test email to {recipient} via {smtp_host}:{smtp_port} (tls={smtp_tls} ssl={smtp_ssl})")
+    print(
+        f"Sending test email to {recipient} via {smtp_host}:{smtp_port} (tls={smtp_tls} ssl={smtp_ssl})"
+    )
     try:
         send(
             smtp_host=smtp_host,
