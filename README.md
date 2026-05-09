@@ -4,6 +4,33 @@
 <a href="https://github.com/fastapi/full-stack-fastapi-template/actions?query=workflow%3A%22Test+Backend%22" target="_blank"><img src="https://github.com/fastapi/full-stack-fastapi-template/workflows/Test%20Backend/badge.svg" alt="Test Backend"></a>
 <a href="https://coverage-badge.samuelcolvin.workers.dev/redirect/fastapi/full-stack-fastapi-template" target="_blank"><img src="https://coverage-badge.samuelcolvin.workers.dev/fastapi/full-stack-fastapi-template.svg" alt="Coverage"></a>
 
+## Deploy to Render
+
+[![Deploy to Render](https://render.com/images/deploy-to-render-button.svg)](https://render.com/deploy?repo=https://github.com/render-examples/full-stack-fastapi-template)
+
+One click provisions the full stack on [Render](https://render.com) using the [`render.yaml`](./render.yaml) Blueprint at the repo root: a Dockerized FastAPI web service, a Vite/Bun static site for the frontend, a managed Postgres database, and a shared `fastapi-env` environment-variable group that both services pull from.
+
+### Setup after clicking the button
+
+1. **Fill in the placeholder values in the `fastapi-env` env group** (Dashboard → Env Groups → `fastapi-env`):
+   - `FIRST_SUPERUSER` — admin email, e.g. `admin@yourdomain.com`
+   - `FIRST_SUPERUSER_PASSWORD` — generate one with `python -c "import secrets; print(secrets.token_urlsafe(32))"`
+   - `DOMAIN` — your custom domain, or any placeholder if you'll use the `.onrender.com` URLs
+   - Optional: `SMTP_HOST` / `SMTP_USER` / `SMTP_PASSWORD` / `EMAILS_FROM_EMAIL` (if you want password-reset emails) and `SENTRY_DSN` (if using Sentry)
+
+   `SECRET_KEY`, all `POSTGRES_*` vars, `ENVIRONMENT`, `PROJECT_NAME`, `STACK_NAME`, and the `SMTP_TLS/SSL/PORT` defaults are all set automatically — no action needed.
+
+   > **Note:** the `POSTGRES_*` vars are wired directly to the `fastapi-backend` service via `fromDatabase` references (Render's env groups don't support database links), so they won't show up on the `fastapi-env` group page. You'll find them under `fastapi-backend` → Environment in the Dashboard, alongside the inherited group vars. They all end up in the same `os.environ` at runtime — the split is purely a Dashboard organizational thing.
+
+2. **Wait for both services to finish deploying** so they're assigned `.onrender.com` URLs.
+
+3. **Go back to the `fastapi-env` env group and fill in the cross-service URLs** (these can only be set after the first deploy, since they depend on the assigned hostnames). All three live in the env group, but they're consumed by different services:
+   - `VITE_API_URL` → set to the **backend** URL, e.g. `https://fastapi-backend-XXXX.onrender.com`. *Read by the **frontend** service at build time — baked into the bundle.*
+   - `FRONTEND_HOST` → set to the **frontend** URL, e.g. `https://fastapi-frontend-XXXX.onrender.com`. *Read by the **backend** service at runtime — auto-appended to the CORS allowlist.*
+   - `BACKEND_CORS_ORIGINS` → comma-separated list of additional allowed origins (you can usually leave this empty since `FRONTEND_HOST` already covers the frontend). *Read by the **backend** service at runtime.*
+
+4. **Trigger a manual rebuild of the frontend** (Dashboard → `fastapi-frontend` → Manual Deploy → Clear build cache & deploy). `VITE_API_URL` is baked into the bundle at build time, so an existing build won't pick up the new value until rebuilt.
+
 ## Technology Stack and Features
 
 - [**FastAPI**](https://fastapi.tiangolo.com) for the Python backend API.
