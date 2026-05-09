@@ -40,7 +40,7 @@ strict = true
 exclude = ["venv", ".venv", "alembic"]
 
 [tool.ruff]
-target-version = "py312" # Upgrade from py310
+target-version = "py310" # Keep compatibility with CI Python 3.10
 line-length = 88
 
 [tool.ruff.lint]
