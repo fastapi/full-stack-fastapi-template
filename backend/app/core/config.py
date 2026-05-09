@@ -1,6 +1,7 @@
 import secrets
 import warnings
-from typing import Annotated, Any, Literal, Self
+from typing import Annotated, Any, Literal
+from typing_extensions import Self
 
 from pydantic import (
     AnyUrl,
