@@ -17,13 +17,12 @@ import os
 import smtplib
 from email.message import EmailMessage
 from pathlib import Path
-from typing import Dict
 
 
-def parse_dotenv(path: Path) -> Dict[str, str]:
+def parse_dotenv(path: Path) -> dict[str, str]:
     if not path.exists():
         return {}
-    data: Dict[str, str] = {}
+    data: dict[str, str] = {}
     for line in path.read_text().splitlines():
         line = line.strip()
         if not line or line.startswith("#"):
@@ -36,7 +35,7 @@ def parse_dotenv(path: Path) -> Dict[str, str]:
     return data
 
 
-def load_settings() -> Dict[str, str]:
+def load_settings() -> dict[str, str]:
     env = dict(os.environ)
     # look for repo root .env (two parents up: backend/scripts -> backend -> repo)
     script_dir = Path(__file__).resolve().parent
@@ -115,7 +114,7 @@ def main() -> None:
         )
     except Exception as e:
         print("Failed to send email:", e)
-        raise SystemExit(1)
+        raise SystemExit(1) from e
     print("Email sent — check Mailpit UI at http://localhost:8025")
 
 
