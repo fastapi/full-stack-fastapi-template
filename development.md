@@ -34,9 +34,9 @@ To check the logs of a specific service, add the name of the service, e.g.:
 docker compose logs backend
 ```
 
-## Mailcatcher
+## Mailpit
 
-Mailcatcher is a simple SMTP server that catches all emails sent by the backend during local development. Instead of sending real emails, they are captured and displayed in a web interface.
+Mailpit is a simple SMTP server that catches all emails sent by the backend during local development. Instead of sending real emails, they are captured and displayed in a web interface.
 
 This is useful for:
 
@@ -44,7 +44,7 @@ This is useful for:
 * Verifying email content and formatting
 * Debugging email-related functionality without sending real emails
 
-The backend is automatically configured to use Mailcatcher when running with Docker Compose locally (SMTP on port 1025). All captured emails can be viewed at <http://localhost:1080>.
+The backend is automatically configured to use Mailpit when running with Docker Compose locally (SMTP on port 1025). All captured emails can be viewed at <http://localhost:8025>.
 
 ## Local Development
 
@@ -200,7 +200,7 @@ Adminer: <http://localhost:8080>
 
 Traefik UI: <http://localhost:8090>
 
-MailCatcher: <http://localhost:1080>
+Mailpit: <http://localhost:8025>
 
 ### Development URLs with `localhost.tiangolo.com` Configured
 
@@ -218,4 +218,4 @@ Adminer: <http://localhost.tiangolo.com:8080>
 
 Traefik UI: <http://localhost.tiangolo.com:8090>
 
-MailCatcher: <http://localhost.tiangolo.com:1080>
+Mailpit: <http://localhost.tiangolo.com:8025>

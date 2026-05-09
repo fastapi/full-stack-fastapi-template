@@ -82,15 +82,15 @@ services:
     volumes:
       - ./backend/htmlcov:/app/backend/htmlcov
     environment:
-      SMTP_HOST: "mailcatcher"
+      SMTP_HOST: "mailpit"
       SMTP_PORT: "1025"
       SMTP_TLS: "false"
       EMAILS_FROM_EMAIL: "noreply@example.com"
 
-  mailcatcher:
-    image: schickling/mailcatcher
+  mailpit:
+    image: axllent/mailpit
     ports:
-      - "1080:1080"
+      - "8025:8025"
       - "1025:1025"
 
   frontend:
@@ -114,12 +114,12 @@ services:
     ipc: host
     depends_on:
       - backend
-      - mailcatcher
+      - mailpit
     env_file:
       - .env
     environment:
       - VITE_API_URL=http://backend:8000
-      - MAILCATCHER_HOST=http://mailcatcher:1080
+      - MAILPIT_HOST=http://mailpit:8025
       # For the reports when run locally
       - PLAYWRIGHT_HTML_HOST=0.0.0.0
       - CI=${CI}
