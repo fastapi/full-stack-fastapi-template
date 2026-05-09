@@ -1,0 +1,19 @@
+version: '3'
+
+tasks:
+dev:
+desc: Start the full development stack
+cmds: - docker compose up -d
+
+stop:
+desc: Stop all services
+cmds: - docker compose down
+
+lint:
+desc: Run ultra-fast linting and formatting
+cmds: - cd backend && uv run ruff check . --fix - cd backend && uv run ruff format .
+
+gate:
+desc: Run all quality gates (Lint + Tests)
+deps: [lint]
+cmds: - cd backend && uv run pytest
