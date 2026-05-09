@@ -1,121 +1,121 @@
 name: Playwright Tests
 
 on:
-  push:
-    branches:
-    - master
-  pull_request:
-    types:
-    - opened
-    - synchronize
-  workflow_dispatch:
-    inputs:
-      debug_enabled:
-        description: 'Run the build with tmate debugging enabled (https://github.com/marketplace/actions/debugging-with-tmate)'
-        required: false
-        default: 'false'
+   push:
+      branches:
+         - master
+   pull_request:
+      types:
+         - opened
+         - synchronize
+   workflow_dispatch:
+      inputs:
+         debug_enabled:
+            description: "Run the build with tmate debugging enabled (https://github.com/marketplace/actions/debugging-with-tmate)"
+            required: false
+            default: "false"
 
 jobs:
-  changes:
-    runs-on: ubuntu-latest
-    # Set job outputs to values from filter step
-    outputs:
-      changed: ${{ steps.filter.outputs.changed }}
-    steps:
-    - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
-    # For pull requests it's not necessary to checkout the code but for the main branch it is
-    - uses: dorny/paths-filter@fbd0ab8f3e69293af611ebaee6363fc25e6d187d # v4.0.1
-      id: filter
-      with:
-        filters: |
-          changed:
-            - backend/**
-            - frontend/**
-            - .env
-            - compose*.yml
-            - .github/workflows/playwright.yml
+   changes:
+      runs-on: ubuntu-latest
+      # Set job outputs to values from filter step
+      outputs:
+         changed: ${{ steps.filter.outputs.changed }}
+      steps:
+         - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+         # For pull requests it's not necessary to checkout the code but for the main branch it is
+         - uses: dorny/paths-filter@fbd0ab8f3e69293af611ebaee6363fc25e6d187d # v4.0.1
+           id: filter
+           with:
+              filters: |
+                 changed:
+                   - backend/**
+                   - frontend/**
+                   - .env
+                   - compose*.yml
+                   - .github/workflows/playwright.yml
 
-  test-playwright:
-    needs:
-      - changes
-    if: ${{ needs.changes.outputs.changed == 'true' }}
-    timeout-minutes: 60
-    runs-on: ubuntu-latest
-    strategy:
-      matrix:
-        shardIndex: [1, 2, 3, 4]
-        shardTotal: [4]
-      fail-fast: false
-    steps:
-    - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
-    - uses: oven-sh/setup-bun@v2
-    - uses: actions/setup-python@a309ff8b426b58ec0e2a45f0f869d46889d02405 # v6.2.0
-      with:
-        python-version: '3.12'
-    - name: Setup tmate session
-      uses: mxschmitt/action-tmate@c0afd6f790e3a5564914980036ebf83216678101 # v3.23
-      if: ${{ github.event_name == 'workflow_dispatch' && github.event.inputs.debug_enabled == 'true' }}
-      with:
-        limit-access-to-actor: true
-    - name: Install uv
-      uses: astral-sh/setup-uv@37802adc94f370d6bfd71619e3f0bf239e1f3b78 # v7.6.0
-    - run: uv sync
-      working-directory: backend
-    - run: bun ci
-      working-directory: frontend
-    - run: bash scripts/generate-client.sh
-    - run: docker compose build
-    - run: docker compose down -v --remove-orphans
-    - name: Run Playwright tests
-      run: docker compose run --rm playwright bunx playwright test --fail-on-flaky-tests --trace=retain-on-failure --shard=${{ matrix.shardIndex }}/${{ matrix.shardTotal }}
-    - run: docker compose down -v --remove-orphans
-    - name: Upload blob report to GitHub Actions Artifacts
-      if: ${{ !cancelled() }}
-      uses: actions/upload-artifact@bbbca2ddaa5d8feaa63e36b76fdaad77386f024f # v7.0.0
-      with:
-        name: blob-report-${{ matrix.shardIndex }}
-        path: frontend/blob-report
-        include-hidden-files: true
-        retention-days: 1
+   test-playwright:
+      needs:
+         - changes
+      if: ${{ needs.changes.outputs.changed == 'true' }}
+      timeout-minutes: 60
+      runs-on: ubuntu-latest
+      strategy:
+         matrix:
+            shardIndex: [1, 2, 3, 4]
+            shardTotal: [4]
+         fail-fast: false
+      steps:
+         - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+         - uses: oven-sh/setup-bun@v2
+         - uses: actions/setup-python@a309ff8b426b58ec0e2a45f0f869d46889d02405 # v6.2.0
+           with:
+              python-version: "3.12"
+         - name: Setup tmate session
+           uses: mxschmitt/action-tmate@c0afd6f790e3a5564914980036ebf83216678101 # v3.23
+           if: ${{ github.event_name == 'workflow_dispatch' && github.event.inputs.debug_enabled == 'true' }}
+           with:
+              limit-access-to-actor: true
+         - name: Install uv
+           uses: astral-sh/setup-uv@37802adc94f370d6bfd71619e3f0bf239e1f3b78 # v7.6.0
+         - run: uv sync
+           working-directory: backend
+         - run: bun ci
+           working-directory: frontend
+         - run: bash scripts/generate-client.sh
+         - run: docker compose build
+         - run: docker compose down -v --remove-orphans
+         - name: Run Playwright tests
+           run: docker compose run --rm playwright bunx playwright test --fail-on-flaky-tests --trace=retain-on-failure --shard=${{ matrix.shardIndex }}/${{ matrix.shardTotal }}
+         - run: docker compose down -v --remove-orphans
+         - name: Upload blob report to GitHub Actions Artifacts
+           if: ${{ !cancelled() }}
+           uses: actions/upload-artifact@bbbca2ddaa5d8feaa63e36b76fdaad77386f024f # v7.0.0
+           with:
+              name: blob-report-${{ matrix.shardIndex }}
+              path: frontend/blob-report
+              include-hidden-files: true
+              retention-days: 1
 
-  merge-playwright-reports:
-    needs:
-      - test-playwright
-      - changes
-    # Merge reports after playwright-tests, even if some shards have failed
-    if: ${{ !cancelled() && needs.changes.outputs.changed == 'true' }}
-    runs-on: ubuntu-latest
-    steps:
-    - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
-    - uses: oven-sh/setup-bun@v2
-    - name: Install dependencies
-      run: bun ci
-    - name: Download blob reports from GitHub Actions Artifacts
-      uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8.0.1
-      with:
-        path: frontend/all-blob-reports
-        pattern: blob-report-*
-        merge-multiple: true
-    - name: Merge into HTML Report
-      run: bunx playwright merge-reports --reporter html ./all-blob-reports
-      working-directory: frontend
-    - name: Upload HTML report
-      uses: actions/upload-artifact@bbbca2ddaa5d8feaa63e36b76fdaad77386f024f # v7.0.0
-      with:
-        name: html-report--attempt-${{ github.run_attempt }}
-        path: frontend/playwright-report
-        retention-days: 30
-        include-hidden-files: true
+   merge-playwright-reports:
+      needs:
+         - test-playwright
+         - changes
+      # Merge reports after playwright-tests, even if some shards have failed
+      if: ${{ !cancelled() && needs.changes.outputs.changed == 'true' }}
+      runs-on: ubuntu-latest
+      steps:
+         - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+         - uses: oven-sh/setup-bun@v2
+         - name: Install dependencies
+           run: bun ci
+         - name: Download blob reports from GitHub Actions Artifacts
+           uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8.0.1
+           with:
+              path: frontend/all-blob-reports
+              pattern: blob-report-*
+              merge-multiple: true
+         - name: Merge into HTML Report
+           run: bunx playwright merge-reports --reporter html ./all-blob-reports
+           working-directory: frontend
+         - name: Upload HTML report
+           uses: actions/upload-artifact@bbbca2ddaa5d8feaa63e36b76fdaad77386f024f # v7.0.0
+           with:
+              name: html-report--attempt-${{ github.run_attempt }}
+              path: frontend/playwright-report
+              retention-days: 30
+              include-hidden-files: true
 
-  # https://github.com/marketplace/actions/alls-green#why
-  alls-green-playwright:  # This job does nothing and is only used for the branch protection
-    if: always()
-    needs:
-      - test-playwright
-    runs-on: ubuntu-latest
-    steps:
-      - name: Decide whether the needed jobs succeeded or failed
-        uses: re-actors/alls-green@05ac9388f0aebcb5727afa17fcccfecd6f8ec5fe # v1.2.2
-        with:
-          jobs: ${{ toJSON(needs) }}
-          allowed-skips: test-playwright
+   # https://github.com/marketplace/actions/alls-green#why
+   alls-green-playwright: # This job does nothing and is only used for the branch protection
+      if: always()
+      needs:
+         - test-playwright
+      runs-on: ubuntu-latest
+      steps:
+         - name: Decide whether the needed jobs succeeded or failed
+           uses: re-actors/alls-green@05ac9388f0aebcb5727afa17fcccfecd6f8ec5fe # v1.2.2
+           with:
+              jobs: ${{ toJSON(needs) }}
+              allowed-skips: test-playwright
