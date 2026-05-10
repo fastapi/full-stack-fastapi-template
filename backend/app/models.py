@@ -5,7 +5,18 @@ from typing import Any, Optional
 
 from pydantic import EmailStr
 from sqlalchemy import JSON, Column, DateTime, Text
+from sqlalchemy import types as sa_types
 from sqlmodel import Field, Relationship, SQLModel
+from sqlmodel.sql.sqltypes import AutoString
+
+try:
+    from pgvector.sqlalchemy import Vector as _Vector
+
+    _EMBEDDING_COLUMN_TYPE: sa_types.TypeEngine = _Vector(1536)  # type: ignore[assignment]
+except ImportError:
+    # pgvector not installed yet; use Text as placeholder so the app starts.
+    # The actual column type is defined in the manual migration.
+    _EMBEDDING_COLUMN_TYPE = Text()
 
 
 def get_datetime_utc() -> datetime:
@@ -391,8 +402,11 @@ class RaceBase(SQLModel):
         default=None, sa_column=Column(DateTime(timezone=True))
     )
 
-    # Status
-    status: RaceStatusEnum = Field(default=RaceStatusEnum.DRAFT)
+    # Status — use AutoString so SQLAlchemy stores the enum .value ("draft"), not .name ("DRAFT")
+    status: RaceStatusEnum = Field(
+        default=RaceStatusEnum.DRAFT,
+        sa_column=Column(AutoString(), nullable=False),
+    )
     is_active: bool = True
 
     # Default pricing (can be overridden per category)
@@ -406,9 +420,15 @@ class RaceBase(SQLModel):
     latitude: float | None = Field(default=None, ge=-90, le=90)
     longitude: float | None = Field(default=None, ge=-180, le=180)
 
-    # Course characteristics
-    terrain_type: TerrainEnum | None = Field(default=None)
-    difficulty_level: DifficultyEnum | None = Field(default=None)
+    # Course characteristics — AutoString stores .value ("trail"), not .name ("TRAIL")
+    terrain_type: TerrainEnum | None = Field(
+        default=None,
+        sa_column=Column(AutoString(), nullable=True),
+    )
+    difficulty_level: DifficultyEnum | None = Field(
+        default=None,
+        sa_column=Column(AutoString(), nullable=True),
+    )
     elevation_gain_m: int | None = Field(default=None, ge=0)
     is_certified: bool = Field(default=False)
     gpx_file_url: str | None = Field(default=None, max_length=1000)
@@ -458,6 +478,12 @@ class Race(RaceBase, table=True):
     # Foreign keys
     organizer_id: uuid.UUID = Field(foreign_key="user.id", nullable=False)
 
+    # Embedding vector for semantic search (1536-dim, text-embedding-3-small)
+    embedding: list[float] | None = Field(
+        default=None,
+        sa_column=Column(_EMBEDDING_COLUMN_TYPE, nullable=True),
+    )
+
     # Relationships
     organizer: User = Relationship(back_populates="organized_races")
     categories: list["RaceCategory"] = Relationship(
@@ -494,6 +520,15 @@ class RacePublicWithDistance(RacePublic):
     distance_km: float
 
 
+class RacePublicWithExplanation(RacePublic):
+    ai_explanation: str | None = None
+
+
+class RacesPublicWithExplanation(SQLModel):
+    data: list[RacePublicWithExplanation]
+    count: int
+
+
 class RacesPublic(SQLModel):
     data: list[RacePublic]
     count: int
@@ -511,7 +546,9 @@ class RaceCategoryBase(SQLModel):
     distance_unit: str = Field(default="km", max_length=10)
 
     # Category-specific start and end times
-    start_time: datetime = Field(sa_column=Column(DateTime(timezone=True)))
+    start_time: datetime | None = Field(
+        default=None, sa_column=Column(DateTime(timezone=True))
+    )
     end_time: datetime | None = Field(
         default=None, sa_column=Column(DateTime(timezone=True))
     )
@@ -622,11 +659,15 @@ class RaceRegistrationBase(SQLModel):
     tshirt_size: str | None = Field(default=None, max_length=10)
     special_requirements: str | None = Field(default=None, max_length=500)
 
-    # Payment & status
+    # Payment & status — AutoString stores enum .value ("pending"), not .name ("PENDING")
     registration_status: RegistrationStatusEnum = Field(
-        default=RegistrationStatusEnum.PENDING
+        default=RegistrationStatusEnum.PENDING,
+        sa_column=Column(AutoString(), nullable=False),
     )
-    payment_status: PaymentStatusEnum = Field(default=PaymentStatusEnum.UNPAID)
+    payment_status: PaymentStatusEnum = Field(
+        default=PaymentStatusEnum.UNPAID,
+        sa_column=Column(AutoString(), nullable=False),
+    )
     amount_paid: float | None = Field(default=None, ge=0)
     payment_reference: str | None = Field(default=None, max_length=255)
 
@@ -711,7 +752,10 @@ class RaceResultBase(SQLModel):
     category_position: int | None = Field(default=None, ge=1)
     gender_position: int | None = Field(default=None, ge=1)
 
-    status: ResultStatusEnum = Field(default=ResultStatusEnum.FINISHED)
+    status: ResultStatusEnum = Field(
+        default=ResultStatusEnum.FINISHED,
+        sa_column=Column(AutoString(), nullable=False),
+    )
 
     # Calculated fields
     pace_per_km_seconds: float | None = None
@@ -920,9 +964,9 @@ class RaceSplitTimesPublic(SQLModel):
 
 
 class UserProfileBase(SQLModel):
-    fitness_level: FitnessEnum | None = None
-    distance_preference: DistancePrefEnum | None = None
-    terrain_preference: TerrainEnum | None = None
+    fitness_level: FitnessEnum | None = Field(default=None, sa_column=Column(AutoString(), nullable=True))
+    distance_preference: DistancePrefEnum | None = Field(default=None, sa_column=Column(AutoString(), nullable=True))
+    terrain_preference: TerrainEnum | None = Field(default=None, sa_column=Column(AutoString(), nullable=True))
     home_latitude: float | None = Field(default=None, ge=-90, le=90)
     home_longitude: float | None = Field(default=None, ge=-180, le=180)
     home_city: str | None = Field(default=None, max_length=100)
@@ -984,7 +1028,7 @@ class UserRaceInteraction(SQLModel, table=True):
     race_id: uuid.UUID = Field(
         foreign_key="race.id", ondelete="CASCADE", index=True
     )
-    action: InteractionTypeEnum
+    action: InteractionTypeEnum = Field(sa_column=Column(AutoString(), nullable=False))
     created_at: datetime = Field(
         default_factory=get_datetime_utc, sa_column=Column(DateTime(timezone=True))
     )

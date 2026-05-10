@@ -11,11 +11,20 @@ router = APIRouter(prefix="/tags", tags=["tags"])
 
 
 @router.get("/", response_model=TagsPublic)
-def list_tags(session: SessionDep) -> Any:
-    """List all available race tags. Public endpoint."""
+async def list_tags(session: SessionDep) -> Any:
+    """List all available race tags. Public endpoint. Cached 10 minutes."""
+    from app.services.cache import cache_get, cache_set
+
+    cache_key = "tags:all"
+    cached = await cache_get(cache_key)
+    if cached is not None:
+        return cached
+
     tags = crud.get_all_tags(session=session)
     count = crud.get_all_tags_count(session=session)
-    return TagsPublic(data=[TagPublic.model_validate(t) for t in tags], count=count)
+    result = TagsPublic(data=[TagPublic.model_validate(t) for t in tags], count=count)
+    await cache_set(cache_key, result.model_dump(), ttl=600)  # 10 min TTL
+    return result
 
 
 @router.post("/", response_model=TagPublic)

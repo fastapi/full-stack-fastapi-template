@@ -1,5 +1,5 @@
 import { createFileRoute, Link } from "@tanstack/react-router"
-import { ArrowRight, Calendar, MapPin, Trophy } from "lucide-react"
+import { ArrowRight, Calendar, MapPin, Trophy, ChevronRight } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import {
   Card,
@@ -8,15 +8,18 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card"
+import { RaceCard } from "@/components/Races/RaceCard"
+import { useRaceSearch } from "@/hooks/useRaceSearch"
+import { isLoggedIn } from "@/hooks/useAuth"
 
 export const Route = createFileRoute("/_public/")({
   component: HomePage,
   head: () => ({
     meta: [
       {
-        title: "RaceHub - Find and Register for Running Races",
+        title: "VNRunner - Find and Register for Running Races",
         description:
-          "Discover running races near you. Register online, track your progress, and join a community of runners.",
+          "Discover Vietnamese running races. Register online, track your progress, and join a community of runners.",
       },
     ],
   }),
@@ -43,7 +46,85 @@ const features = [
   },
 ]
 
+function HorizontalRail({
+  title,
+  link,
+  races,
+  isLoading,
+}: {
+  title: string
+  link?: string
+  races: { id: string; [key: string]: unknown }[]
+  isLoading: boolean
+}) {
+  return (
+    <section className="space-y-4">
+      <div className="flex items-center justify-between">
+        <h2 className="text-xl font-semibold">{title}</h2>
+        {link && (
+          <Link
+            to="/races"
+            className="flex items-center gap-1 text-sm text-primary hover:underline"
+          >
+            View all <ChevronRight className="size-4" />
+          </Link>
+        )}
+      </div>
+      {isLoading ? (
+        <div className="flex gap-4 overflow-x-auto pb-2">
+          {Array.from({ length: 3 }).map((_, i) => (
+            <div
+              key={i}
+              className="h-56 w-72 shrink-0 rounded-lg border bg-muted/50 animate-pulse"
+            />
+          ))}
+        </div>
+      ) : races.length === 0 ? (
+        <p className="text-sm text-muted-foreground py-4">No races to show right now.</p>
+      ) : (
+        <div className="flex gap-4 overflow-x-auto pb-2 snap-x">
+          {races.map((race) => (
+            <div key={race.id} className="w-72 shrink-0 snap-start">
+              <RaceCard race={race as Parameters<typeof RaceCard>[0]["race"]} />
+            </div>
+          ))}
+        </div>
+      )}
+    </section>
+  )
+}
+
+function PersonalizedSections() {
+  const { data: trendingData, isLoading: trendingLoading } = useRaceSearch({
+    sort: "popularity",
+    limit: 6,
+  })
+  const { data: upcomingData, isLoading: upcomingLoading } = useRaceSearch({
+    sort: "date",
+    limit: 6,
+  })
+
+  return (
+    <div className="space-y-10">
+      <HorizontalRail
+        title="Trending Races"
+        link="/races?sort=popularity"
+        races={trendingData?.data ?? []}
+        isLoading={trendingLoading}
+      />
+      <HorizontalRail
+        title="Upcoming Races"
+        link="/races?sort=date"
+        races={upcomingData?.data ?? []}
+        isLoading={upcomingLoading}
+      />
+    </div>
+  )
+}
+
 function HomePage() {
+  const loggedIn = isLoggedIn()
+
   return (
     <>
       {/* Hero Section */}
@@ -51,11 +132,11 @@ function HomePage() {
         <div className="container">
           <div className="mx-auto max-w-3xl text-center space-y-8">
             <h1 className="text-4xl font-bold tracking-tight md:text-5xl lg:text-6xl">
-              Find Your Next Race
+              Find Your Next Vietnamese Race
             </h1>
             <p className="text-lg text-muted-foreground md:text-xl">
-              Discover and register for running races near you. Join thousands
-              of runners achieving their goals.
+              Discover trail runs, road races and ultras across Vietnam. Join
+              thousands of runners achieving their goals.
             </p>
             <div className="flex flex-col gap-4 sm:flex-row sm:justify-center">
               <Button size="lg" asChild>
@@ -63,10 +144,21 @@ function HomePage() {
                   Browse Races <ArrowRight className="ml-2 size-4" />
                 </Link>
               </Button>
-              <Button size="lg" variant="outline" asChild>
-                <Link to="/signup">Create Account</Link>
-              </Button>
+              {!loggedIn && (
+                <Button size="lg" variant="outline" asChild>
+                  <Link to="/signup">Create Account</Link>
+                </Button>
+              )}
             </div>
+          </div>
+        </div>
+      </section>
+
+      {/* Race rails */}
+      <section className="w-full py-12 md:py-16">
+        <div className="container">
+          <div className="mx-auto max-w-7xl">
+            <PersonalizedSections />
           </div>
         </div>
       </section>
@@ -76,11 +168,11 @@ function HomePage() {
         <div className="container">
           <div className="mx-auto max-w-2xl text-center space-y-4 mb-12">
             <h2 className="text-3xl font-bold tracking-tight md:text-4xl">
-              Why Choose RaceHub?
+              Why Choose VNRunner?
             </h2>
             <p className="text-lg text-muted-foreground">
               Everything you need to find, register, and prepare for your next
-              running event.
+              running event in Vietnam.
             </p>
           </div>
           <div className="mx-auto grid max-w-5xl gap-6 md:grid-cols-3">
@@ -104,29 +196,31 @@ function HomePage() {
         </div>
       </section>
 
-      {/* CTA Section */}
-      <section className="w-full py-16 md:py-24">
-        <div className="container">
-          <div className="mx-auto max-w-4xl">
-            <Card className="border-2 bg-muted/50">
-              <CardContent className="p-8 text-center md:p-12">
-                <div className="mx-auto max-w-2xl space-y-6">
-                  <h2 className="text-2xl font-bold tracking-tight md:text-3xl">
-                    Ready to Start Running?
-                  </h2>
-                  <p className="text-lg text-muted-foreground">
-                    Create your free account today and get access to hundreds of
-                    races in your area.
-                  </p>
-                  <Button size="lg" asChild>
-                    <Link to="/signup">Get Started Free</Link>
-                  </Button>
-                </div>
-              </CardContent>
-            </Card>
+      {/* CTA Section (unauthenticated only) */}
+      {!loggedIn && (
+        <section className="w-full py-16 md:py-24">
+          <div className="container">
+            <div className="mx-auto max-w-4xl">
+              <Card className="border-2 bg-muted/50">
+                <CardContent className="p-8 text-center md:p-12">
+                  <div className="mx-auto max-w-2xl space-y-6">
+                    <h2 className="text-2xl font-bold tracking-tight md:text-3xl">
+                      Ready to Start Running?
+                    </h2>
+                    <p className="text-lg text-muted-foreground">
+                      Create your free account today and get personalised race
+                      recommendations.
+                    </p>
+                    <Button size="lg" asChild>
+                      <Link to="/signup">Get Started Free</Link>
+                    </Button>
+                  </div>
+                </CardContent>
+              </Card>
+            </div>
           </div>
-        </div>
-      </section>
+        </section>
+      )}
     </>
   )
 }

@@ -98,6 +98,15 @@ class Settings(BaseSettings):
     MEDIA_UPLOAD_DIR: str = "uploads/media"
     MEDIA_MAX_FILE_SIZE_MB: int = 15
 
+    # AI / embeddings
+    ANTHROPIC_API_KEY: str | None = None
+    OPENAI_API_KEY: str | None = None
+    EMBEDDING_MODEL: str = "text-embedding-3-small"
+    EMBEDDING_DIMENSIONS: int = 1536
+
+    # Redis
+    REDIS_URL: str = "redis://localhost:6379"
+
     def _check_default_secret(self, var_name: str, value: str | None) -> None:
         if value == "changethis":
             message = (

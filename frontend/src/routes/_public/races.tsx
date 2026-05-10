@@ -1,12 +1,14 @@
 import { createFileRoute } from "@tanstack/react-router"
-import { Loader2 } from "lucide-react"
-import { useCallback, useDeferredValue } from "react"
+import { Loader2, LayoutGrid, Map } from "lucide-react"
+import { useCallback, useDeferredValue, useState } from "react"
 import { FilterBar, type RaceFilters } from "@/components/Races/FilterBar"
 import { RaceCard } from "@/components/Races/RaceCard"
+import { RacesMapView } from "@/components/Races/RacesMapView"
 import { SearchBar } from "@/components/Races/SearchBar"
 import { SortControls, type SortOption } from "@/components/Races/SortControls"
 import { useRaceSearch } from "@/hooks/useRaceSearch"
 import type { DifficultyEnum, TerrainEnum } from "@/client"
+import { cn } from "@/lib/utils"
 
 interface RaceSearch {
   q?: string
@@ -70,6 +72,7 @@ function RacesPage() {
   const totalCount = data?.count ?? 0
   const totalPages = Math.ceil(totalCount / PAGE_SIZE)
   const currentPage = search.page ?? 0
+  const [viewMode, setViewMode] = useState<"grid" | "map">("grid")
 
   const setSearch = useCallback(
     (patch: Partial<typeof search>) => {
@@ -134,19 +137,35 @@ function RacesPage() {
             <FilterBar filters={filters} onChange={handleFilterChange} />
           </div>
 
-          {/* Results count */}
+          {/* Results count + view toggle */}
           <div className="flex items-center justify-between text-sm text-muted-foreground">
             <span>
               {isLoading
                 ? "Searching..."
                 : `${totalCount} race${totalCount !== 1 ? "s" : ""} found`}
             </span>
-            {isFetching && !isLoading && (
-              <Loader2 className="size-4 animate-spin" />
-            )}
+            <div className="flex items-center gap-2">
+              {isFetching && !isLoading && <Loader2 className="size-4 animate-spin" />}
+              <div className="flex rounded-md border overflow-hidden">
+                <button
+                  onClick={() => setViewMode("grid")}
+                  className={cn("px-2 py-1", viewMode === "grid" ? "bg-muted text-foreground" : "hover:bg-muted/50")}
+                  title="Grid view"
+                >
+                  <LayoutGrid className="size-4" />
+                </button>
+                <button
+                  onClick={() => setViewMode("map")}
+                  className={cn("px-2 py-1 border-l", viewMode === "map" ? "bg-muted text-foreground" : "hover:bg-muted/50")}
+                  title="Map view"
+                >
+                  <Map className="size-4" />
+                </button>
+              </div>
+            </div>
           </div>
 
-          {/* Races Grid */}
+          {/* Races Grid / Map */}
           {isLoading ? (
             <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
               {Array.from({ length: 6 }).map((_, i) => (
@@ -156,6 +175,8 @@ function RacesPage() {
                 />
               ))}
             </div>
+          ) : viewMode === "map" ? (
+            <RacesMapView races={races} />
           ) : races.length > 0 ? (
             <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
               {races.map((race) => (

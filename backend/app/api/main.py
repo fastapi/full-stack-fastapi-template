@@ -16,6 +16,7 @@ from app.api.routes import (
     users,
     utils,
 )
+from app.api.routes.races import admin_router as races_admin_router
 from app.core.config import settings
 
 api_router = APIRouter()
@@ -36,6 +37,9 @@ api_router.include_router(race_attributes.router)
 # Discovery & personalization routes
 api_router.include_router(tags.router)
 api_router.include_router(profiles.router)
+
+# Admin utilities
+api_router.include_router(races_admin_router)
 
 
 if settings.ENVIRONMENT == "local":

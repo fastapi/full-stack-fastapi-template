@@ -19,11 +19,17 @@ dependencies = [
     "sentry-sdk[fastapi]>=2.0.0,<3.0.0",
     "pyjwt<3.0.0,>=2.8.0",
     "pwdlib[argon2,bcrypt]>=0.3.0",
+    "anthropic>=0.40.0",
+    "openai>=1.0.0",
+    "pgvector>=0.3.0",
+    "redis[hiredis]>=5.0.0",
+    "arq>=0.26.0",
 ]
 
 [dependency-groups]
 dev = [
     "pytest<8.0.0,>=7.4.3",
+    "pytest-asyncio>=0.23.0",
     "mypy<2.0.0,>=1.8.0",
     "ruff<1.0.0,>=0.2.2",
     "prek>=0.2.24,<1.0.0",
@@ -64,6 +70,9 @@ ignore = [
 [tool.ruff.lint.pyupgrade]
 # Preserve types, even if a file imports `from __future__ import annotations`.
 keep-runtime-typing = true
+
+[tool.pytest.ini_options]
+asyncio_mode = "auto"
 
 [tool.coverage.run]
 source = ["app"]

@@ -1,5 +1,5 @@
 import { Link } from "@tanstack/react-router"
-import { Calendar, MapPin, Mountain, TrendingUp } from "lucide-react"
+import { Calendar, MapPin, Mountain, TrendingUp, Sparkles } from "lucide-react"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import {
@@ -10,10 +10,16 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card"
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip"
 import type { RacePublic } from "@/client"
 
 interface RaceCardProps {
-  race: RacePublic
+  race: RacePublic & { ai_explanation?: string | null }
   distanceKm?: number
 }
 
@@ -32,6 +38,7 @@ const difficultyColors: Record<string, string> = {
 }
 
 export function RaceCard({ race, distanceKm }: RaceCardProps) {
+  const aiExplanation = "ai_explanation" in race ? race.ai_explanation : null
   const eventDate = race.event_start_date
     ? new Date(race.event_start_date).toLocaleDateString("en-US", {
         year: "numeric",
@@ -58,6 +65,20 @@ export function RaceCard({ race, distanceKm }: RaceCardProps) {
           )}
           {race.is_certified && (
             <Badge variant="secondary">Certified</Badge>
+          )}
+          {aiExplanation && (
+            <TooltipProvider>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <span className="inline-flex items-center gap-1 rounded-full bg-purple-100 px-2 py-0.5 text-xs font-medium text-purple-700 cursor-help">
+                    <Sparkles className="size-3" /> AI Pick
+                  </span>
+                </TooltipTrigger>
+                <TooltipContent className="max-w-xs">
+                  <p className="text-sm">{aiExplanation}</p>
+                </TooltipContent>
+              </Tooltip>
+            </TooltipProvider>
           )}
         </div>
         <CardTitle className="text-xl leading-tight">{race.name}</CardTitle>

@@ -250,6 +250,26 @@ def delete_race(*, session: Session, race_id: uuid.UUID) -> bool:
     return False
 
 
+def update_race_embedding(
+    *, session: Session, race_id: uuid.UUID, embedding: list[float]
+) -> None:
+    """Persist a pre-computed embedding vector on a race row."""
+    race = session.get(Race, race_id)
+    if race:
+        race.embedding = embedding
+        session.add(race)
+        session.commit()
+
+
+def get_races_without_embedding(
+    *, session: Session, limit: int = 100
+) -> list[Race]:
+    """Return races that have no embedding yet (for batch reindexing)."""
+    return list(
+        session.exec(select(Race).where(Race.embedding == None).limit(limit)).all()  # noqa: E711
+    )
+
+
 # =============================================================================
 # MediaAsset CRUD operations
 # =============================================================================
@@ -1160,6 +1180,54 @@ def search_races_count(
         statement = statement.where(Race.status == status)
 
     return session.exec(statement).one()
+
+
+def get_races_by_ids(
+    *, session: Session, race_ids: list[uuid.UUID]
+) -> list[Race]:
+    """Fetch races by a list of IDs, preserving order."""
+    if not race_ids:
+        return []
+    rows = list(session.exec(select(Race).where(col(Race.id).in_(race_ids))).all())
+    id_to_race = {r.id: r for r in rows}
+    return [id_to_race[rid] for rid in race_ids if rid in id_to_race]
+
+
+def semantic_search_races(
+    *,
+    session: Session,
+    query_embedding: list[float],
+    limit: int = 40,
+) -> list[tuple[uuid.UUID, int]]:
+    """Return (race_id, rank) pairs ordered by cosine similarity to query_embedding.
+
+    Uses pgvector <=> (cosine distance) operator. Returns a ranked list of IDs
+    suitable for RRF fusion with FTS results.
+    """
+    embedding_literal = "[" + ",".join(str(v) for v in query_embedding) + "]"
+    sql = text(
+        f"SELECT id, ROW_NUMBER() OVER (ORDER BY embedding <=> '{embedding_literal}'::vector) AS rank "
+        "FROM race WHERE embedding IS NOT NULL "
+        f"LIMIT {limit}"
+    )
+    rows = session.execute(sql).fetchall()
+    return [(row[0], int(row[1])) for row in rows]
+
+
+def rrf_merge_race_ids(
+    fts_ids: list[uuid.UUID],
+    vec_ids: list[tuple[uuid.UUID, int]],
+    k: int = 60,
+    limit: int = 20,
+) -> list[uuid.UUID]:
+    """Reciprocal Rank Fusion of FTS and vector search results."""
+    scores: dict[uuid.UUID, float] = {}
+    for rank, race_id in enumerate(fts_ids, start=1):
+        scores[race_id] = scores.get(race_id, 0.0) + 1.0 / (k + rank)
+    for race_id, rank in vec_ids:
+        scores[race_id] = scores.get(race_id, 0.0) + 1.0 / (k + rank)
+    sorted_ids = sorted(scores.keys(), key=lambda rid: scores[rid], reverse=True)
+    return sorted_ids[:limit]
 
 
 def get_nearby_races(
