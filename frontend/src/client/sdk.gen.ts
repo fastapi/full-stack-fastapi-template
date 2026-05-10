@@ -3,7 +3,7 @@
 import type { CancelablePromise } from './core/CancelablePromise';
 import { OpenAPI } from './core/OpenAPI';
 import { request as __request } from './core/request';
-import type { ApiKeysListApiKeysResponse, ApiKeysCreateApiKeyData, ApiKeysCreateApiKeyResponse, ApiKeysDeleteApiKeyData, ApiKeysDeleteApiKeyResponse, FilesUploadFileEndpointData, FilesUploadFileEndpointResponse, FilesListFilesData, FilesListFilesResponse, FilesUpdateFileJobStatusEndpointData, FilesUpdateFileJobStatusEndpointResponse, FilesGetFileStatusData, FilesGetFileStatusResponse, FilesGetFileJobData, FilesGetFileJobResponse, FilesDownloadTableExcelFileData, FilesDownloadTableExcelFileResponse, FilesDownloadNewVersionExcelData, FilesDownloadNewVersionExcelResponse, FilesGetFilesBatchStatusData, FilesGetFilesBatchStatusResponse, FilesGetFileResultUrlData, FilesGetFileResultUrlResponse, ItemsReadItemsData, ItemsReadItemsResponse, ItemsCreateItemEndpointData, ItemsCreateItemEndpointResponse, ItemsReadItemData, ItemsReadItemResponse, ItemsUpdateItemEndpointData, ItemsUpdateItemEndpointResponse, ItemsDeleteItemData, ItemsDeleteItemResponse, LoginLoginAccessTokenData, LoginLoginAccessTokenResponse, LoginTestTokenResponse, LoginRecoverPasswordData, LoginRecoverPasswordResponse, LoginResetPasswordData, LoginResetPasswordResponse, LoginRecoverPasswordHtmlContentData, LoginRecoverPasswordHtmlContentResponse, StoragesGetMyStorageStatResponse, TopupGetTopupPackagesResponse, TopupCreateTopupPaymentData, TopupCreateTopupPaymentResponse, TopupTopupReturnResponse, UsersReadUsersData, UsersReadUsersResponse, UsersCreateUserEndpointData, UsersCreateUserEndpointResponse, UsersReadUserMeResponse, UsersDeleteUserMeResponse, UsersUpdateUserMeData, UsersUpdateUserMeResponse, UsersUpdatePasswordMeData, UsersUpdatePasswordMeResponse, UsersRegisterUserData, UsersRegisterUserResponse, UsersReadUserByIdData, UsersReadUserByIdResponse, UsersUpdateUserEndpointData, UsersUpdateUserEndpointResponse, UsersDeleteUserData, UsersDeleteUserResponse, UtilsTestEmailData, UtilsTestEmailResponse, UtilsHealthCheckResponse, UtilsClearAllFilesResponse } from './types.gen';
+import type { ApiKeysListApiKeysResponse, ApiKeysCreateApiKeyData, ApiKeysCreateApiKeyResponse, ApiKeysDeleteApiKeyData, ApiKeysDeleteApiKeyResponse, FilesUploadFileEndpointData, FilesUploadFileEndpointResponse, FilesListFilesData, FilesListFilesResponse, FilesUpdateFileJobStatusEndpointData, FilesUpdateFileJobStatusEndpointResponse, FilesGetFileStatusData, FilesGetFileStatusResponse, FilesGetFileJobData, FilesGetFileJobResponse, FilesDownloadTableExcelFileData, FilesDownloadTableExcelFileResponse, FilesDownloadNewVersionExcelData, FilesDownloadNewVersionExcelResponse, FilesGetFilesBatchStatusData, FilesGetFilesBatchStatusResponse, FilesGetFileResultUrlData, FilesGetFileResultUrlResponse, ItemsReadItemsData, ItemsReadItemsResponse, ItemsCreateItemEndpointData, ItemsCreateItemEndpointResponse, ItemsReadItemData, ItemsReadItemResponse, ItemsUpdateItemEndpointData, ItemsUpdateItemEndpointResponse, ItemsDeleteItemData, ItemsDeleteItemResponse, LoginLoginAccessTokenData, LoginLoginAccessTokenResponse, LoginTestTokenResponse, LoginRecoverPasswordData, LoginRecoverPasswordResponse, LoginResetPasswordData, LoginResetPasswordResponse, LoginRecoverPasswordHtmlContentData, LoginRecoverPasswordHtmlContentResponse, StoragesGetMyStorageStatResponse, TopupGetTopupPackagesResponse, TopupCreatePaymentData, TopupCreatePaymentResponse, TopupTopupReturnResponse, TopupGetMyBalanceResponse, TopupGetMyTransactionsData, TopupGetMyTransactionsResponse, TopupTopupIpnResponse, UsersReadUsersData, UsersReadUsersResponse, UsersCreateUserEndpointData, UsersCreateUserEndpointResponse, UsersReadUserMeResponse, UsersDeleteUserMeResponse, UsersUpdateUserMeData, UsersUpdateUserMeResponse, UsersUpdatePasswordMeData, UsersUpdatePasswordMeResponse, UsersRegisterUserData, UsersRegisterUserResponse, UsersReadUserByIdData, UsersReadUserByIdResponse, UsersUpdateUserEndpointData, UsersUpdateUserEndpointResponse, UsersDeleteUserData, UsersDeleteUserResponse, UtilsTestEmailData, UtilsTestEmailResponse, UtilsHealthCheckResponse, UtilsClearAllFilesResponse } from './types.gen';
 
 export class ApiKeysService {
     /**
@@ -501,16 +501,15 @@ export class TopupService {
     }
     
     /**
-     * Create Topup Payment
-     * Generate a VNPAY payment URL for the selected top-up package.
-     * The client should redirect the user (or display a QR code) using
-     * the returned ``payment_url``.
+     * Create Payment
+     * Generate a VNPAY payment URL for the selected top-up amount.
+     * The client should redirect the user (or display a QR) using the returned URL.
      * @param data The data for the request.
      * @param data.requestBody
      * @returns CreatePaymentResponse Successful Response
      * @throws ApiError
      */
-    public static createTopupPayment(data: TopupCreateTopupPaymentData): CancelablePromise<TopupCreateTopupPaymentResponse> {
+    public static createPayment(data: TopupCreatePaymentData): CancelablePromise<TopupCreatePaymentResponse> {
         return __request(OpenAPI, {
             method: 'POST',
             url: '/api/v1/topup/create-payment',
@@ -524,16 +523,65 @@ export class TopupService {
     
     /**
      * Topup Return
-     * VNPAY ReturnURL handler – VNPAY redirects the customer's browser here
-     * after payment.  In production you would verify the signature, update
-     * the user balance, and redirect to the front-end result page.
-     * @returns unknown Successful Response
+     * VNPAY ReturnURL handler — VNPAY redirects the customer's browser here
+     * after payment.  Updates the user's balance accordingly.
+     * @returns PaymentReturnResponse Successful Response
      * @throws ApiError
      */
     public static topupReturn(): CancelablePromise<TopupTopupReturnResponse> {
         return __request(OpenAPI, {
             method: 'GET',
             url: '/api/v1/topup/return'
+        });
+    }
+    
+    /**
+     * Get My Balance
+     * Return the current balance for the authenticated user.
+     * @returns UserBalancePublic Successful Response
+     * @throws ApiError
+     */
+    public static getMyBalance(): CancelablePromise<TopupGetMyBalanceResponse> {
+        return __request(OpenAPI, {
+            method: 'GET',
+            url: '/api/v1/topup/balance'
+        });
+    }
+    
+    /**
+     * Get My Transactions
+     * Return paginated transaction history for the authenticated user.
+     * @param data The data for the request.
+     * @param data.skip
+     * @param data.limit
+     * @returns TopupTransactionPublic Successful Response
+     * @throws ApiError
+     */
+    public static getMyTransactions(data: TopupGetMyTransactionsData = {}): CancelablePromise<TopupGetMyTransactionsResponse> {
+        return __request(OpenAPI, {
+            method: 'GET',
+            url: '/api/v1/topup/transactions',
+            query: {
+                skip: data.skip,
+                limit: data.limit
+            },
+            errors: {
+                422: 'Validation Error'
+            }
+        });
+    }
+    
+    /**
+     * Topup Ipn
+     * VNPAY IPN URL handler — VNPAY calls this server-to-server after payment.
+     * Must respond with JSON {"RspCode": "...", "Message": "..."} within 5 seconds.
+     * @returns unknown Successful Response
+     * @throws ApiError
+     */
+    public static topupIpn(): CancelablePromise<TopupTopupIpnResponse> {
+        return __request(OpenAPI, {
+            method: 'GET',
+            url: '/api/v1/topup/ipn'
         });
     }
 }

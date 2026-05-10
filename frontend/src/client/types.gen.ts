@@ -30,6 +30,9 @@ export type Body_login_login_access_token = {
 };
 
 export type CreatePaymentRequest = {
+    /**
+     * Top-up amount in VND
+     */
     amount: number;
 };
 
@@ -114,6 +117,13 @@ export type NewPassword = {
     new_password: string;
 };
 
+export type PaymentReturnResponse = {
+    status: string;
+    txn_ref: string;
+    message: string;
+    code?: (string | null);
+};
+
 export type Token = {
     access_token: string;
     token_type?: string;
@@ -129,9 +139,30 @@ export type TopupPackagesResponse = {
     packages: Array<TopupPackage>;
 };
 
+export type TopupStatus = 'pending' | 'success' | 'failed';
+
+export type TopupTransactionPublic = {
+    id: string;
+    user_id: string;
+    txn_ref: (string | null);
+    amount: number;
+    type: TopupType;
+    status: TopupStatus;
+    note: (string | null);
+    created_at: string;
+};
+
+export type TopupType = 'credit' | 'debit';
+
 export type UpdatePassword = {
     current_password: string;
     new_password: string;
+};
+
+export type UserBalancePublic = {
+    user_id: string;
+    balance: number;
+    updated_at: string;
 };
 
 export type UserCreate = {
@@ -163,15 +194,15 @@ export type UsersPublic = {
 };
 
 export type UserStorageStatPublic = {
-    id: string;
-    user_id: string;
-    file_count: number;
-    total_size: number;
-    total_cost: number;
-    updated_at: string;
+    id?: (string | null);
+    user_id: (string | null);
+    file_count?: (number | null);
+    total_size?: (number | null);
+    total_cost?: (number | null);
+    updated_at?: (string | null);
     total_transactions?: (number | null);
     total_pages?: (number | null);
-    balance: number;
+    balance?: number;
 };
 
 export type UserUpdate = {
@@ -330,13 +361,24 @@ export type StoragesGetMyStorageStatResponse = (UserStorageStatPublic);
 
 export type TopupGetTopupPackagesResponse = (TopupPackagesResponse);
 
-export type TopupCreateTopupPaymentData = {
+export type TopupCreatePaymentData = {
     requestBody: CreatePaymentRequest;
 };
 
-export type TopupCreateTopupPaymentResponse = (CreatePaymentResponse);
+export type TopupCreatePaymentResponse = (CreatePaymentResponse);
 
-export type TopupTopupReturnResponse = (unknown);
+export type TopupTopupReturnResponse = (PaymentReturnResponse);
+
+export type TopupGetMyBalanceResponse = (UserBalancePublic);
+
+export type TopupGetMyTransactionsData = {
+    limit?: number;
+    skip?: number;
+};
+
+export type TopupGetMyTransactionsResponse = (Array<TopupTransactionPublic>);
+
+export type TopupTopupIpnResponse = (unknown);
 
 export type UsersReadUsersData = {
     limit?: number;

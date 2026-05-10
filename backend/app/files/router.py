@@ -23,7 +23,7 @@ from app.files.schemas import (
 )
 from app.files.service import (
     download_file,
-    download_file_with_account_code,
+    download_file_with_accounting_code,
 )
 from app.ocrs.service import get_ocr_job_status, get_ocr_job_status_1, post_ocr_jobs
 
@@ -187,7 +187,7 @@ def download_new_version_excel(file_id: uuid.UUID, session: SessionDep, user: Cu
     if not file_job or file_job.state != "done":
         raise HTTPException(status_code=400, detail="OCR job is not done yet")
     try:
-        ex_bytes, content_disposition = download_file_with_account_code(session=session, file=file, user=user)
+        ex_bytes, content_disposition = download_file_with_accounting_code(session=session, file=file, user=user)
     except ValueError as e:
         raise HTTPException(status_code=400, detail=str(e))
 

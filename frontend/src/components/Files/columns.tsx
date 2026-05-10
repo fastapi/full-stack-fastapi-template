@@ -44,7 +44,7 @@ function DownloadMenu({ file }: { file: FileWithJobPublic }) {
           Excel (.xlsx)
         </DropdownMenuItem>
         <DropdownMenuItem onClick={() => handleSelect("xlsx-acc-code")}>
-          Analyze Account Code then Excel (.xlsx)
+          Included Accounting Code (.xlsx)
         </DropdownMenuItem>
         <DropdownMenuItem onClick={() => handleSelect("csv")}>
           CSV (.csv)

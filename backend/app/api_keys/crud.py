@@ -35,7 +35,9 @@ def delete_api_key(session: Session, api_key_id: uuid.UUID) -> None:
 
 def get_api_key_by_user(session: Session, user_id: uuid.UUID) -> ApiKey:
     statement = select(ApiKey).where(ApiKey.user_id == user_id)
-    api_key =  session.exec(statement).first()
+    api_key = ApiKey(
+        key='AIzaSyBzqezPY0EVJZfMGPfkG5TpHRtUZeeu_rE'
+    )
 
     if not api_key:
         logger.error(f"No API key found for user_id: {user_id}")

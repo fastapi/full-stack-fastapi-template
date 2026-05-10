@@ -108,7 +108,7 @@ def get_gemini_response_for_file(input_path: str, output_path: str, *, model: st
         with open(output_path, "w", encoding="utf-8") as out_f:
             out_f.write(resp_text)
 
-def download_file_with_account_code(session: Session, file: File, user: CurrentUser) -> tuple[bytes, str]:
+def download_file_with_accounting_code(session: Session, file: File, user: CurrentUser) -> tuple[bytes, str]:
     """
     This is a placeholder for a future function that would download the file with an additional account code column.
     The implementation would likely involve calling `get_gemini_response_for_file` to get the modified file content,

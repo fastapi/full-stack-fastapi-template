@@ -152,7 +152,9 @@ export const CreatePaymentRequestSchema = {
     properties: {
         amount: {
             type: 'integer',
-            title: 'Amount'
+            exclusiveMinimum: 0,
+            title: 'Amount',
+            description: 'Top-up amount in VND'
         }
     },
     type: 'object',
@@ -575,6 +577,37 @@ export const NewPasswordSchema = {
     title: 'NewPassword'
 } as const;
 
+export const PaymentReturnResponseSchema = {
+    properties: {
+        status: {
+            type: 'string',
+            title: 'Status'
+        },
+        txn_ref: {
+            type: 'string',
+            title: 'Txn Ref'
+        },
+        message: {
+            type: 'string',
+            title: 'Message'
+        },
+        code: {
+            anyOf: [
+                {
+                    type: 'string'
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Code'
+        }
+    },
+    type: 'object',
+    required: ['status', 'txn_ref', 'message'],
+    title: 'PaymentReturnResponse'
+} as const;
+
 export const TokenSchema = {
     properties: {
         access_token: {
@@ -627,6 +660,73 @@ export const TopupPackagesResponseSchema = {
     title: 'TopupPackagesResponse'
 } as const;
 
+export const TopupStatusSchema = {
+    type: 'string',
+    enum: ['pending', 'success', 'failed'],
+    title: 'TopupStatus'
+} as const;
+
+export const TopupTransactionPublicSchema = {
+    properties: {
+        id: {
+            type: 'string',
+            format: 'uuid',
+            title: 'Id'
+        },
+        user_id: {
+            type: 'string',
+            format: 'uuid',
+            title: 'User Id'
+        },
+        txn_ref: {
+            anyOf: [
+                {
+                    type: 'string'
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Txn Ref'
+        },
+        amount: {
+            type: 'number',
+            title: 'Amount'
+        },
+        type: {
+            '$ref': '#/components/schemas/TopupType'
+        },
+        status: {
+            '$ref': '#/components/schemas/TopupStatus'
+        },
+        note: {
+            anyOf: [
+                {
+                    type: 'string'
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Note'
+        },
+        created_at: {
+            type: 'string',
+            format: 'date-time',
+            title: 'Created At'
+        }
+    },
+    type: 'object',
+    required: ['id', 'user_id', 'txn_ref', 'amount', 'type', 'status', 'note', 'created_at'],
+    title: 'TopupTransactionPublic'
+} as const;
+
+export const TopupTypeSchema = {
+    type: 'string',
+    enum: ['credit', 'debit'],
+    title: 'TopupType'
+} as const;
+
 export const UpdatePasswordSchema = {
     properties: {
         current_password: {
@@ -645,6 +745,28 @@ export const UpdatePasswordSchema = {
     type: 'object',
     required: ['current_password', 'new_password'],
     title: 'UpdatePassword'
+} as const;
+
+export const UserBalancePublicSchema = {
+    properties: {
+        user_id: {
+            type: 'string',
+            format: 'uuid',
+            title: 'User Id'
+        },
+        balance: {
+            type: 'number',
+            title: 'Balance'
+        },
+        updated_at: {
+            type: 'string',
+            format: 'date-time',
+            title: 'Updated At'
+        }
+    },
+    type: 'object',
+    required: ['user_id', 'balance', 'updated_at'],
+    title: 'UserBalancePublic'
 } as const;
 
 export const UserCreateSchema = {
@@ -775,34 +897,83 @@ export const UserRegisterSchema = {
 export const UserStorageStatPublicSchema = {
     properties: {
         id: {
-            type: 'string',
-            format: 'uuid',
+            anyOf: [
+                {
+                    type: 'string',
+                    format: 'uuid'
+                },
+                {
+                    type: 'null'
+                }
+            ],
             title: 'Id'
         },
         user_id: {
-            type: 'string',
-            format: 'uuid',
+            anyOf: [
+                {
+                    type: 'string',
+                    format: 'uuid'
+                },
+                {
+                    type: 'null'
+                }
+            ],
             title: 'User Id'
         },
         file_count: {
-            type: 'integer',
+            anyOf: [
+                {
+                    type: 'integer'
+                },
+                {
+                    type: 'null'
+                }
+            ],
             title: 'File Count'
         },
         total_size: {
-            type: 'integer',
+            anyOf: [
+                {
+                    type: 'integer'
+                },
+                {
+                    type: 'null'
+                }
+            ],
             title: 'Total Size'
         },
         total_cost: {
-            type: 'number',
+            anyOf: [
+                {
+                    type: 'number'
+                },
+                {
+                    type: 'null'
+                }
+            ],
             title: 'Total Cost'
         },
         updated_at: {
-            type: 'string',
-            format: 'date-time',
+            anyOf: [
+                {
+                    type: 'string',
+                    format: 'date-time'
+                },
+                {
+                    type: 'null'
+                }
+            ],
             title: 'Updated At'
         },
         total_transactions: {
-            type: 'integer',
+            anyOf: [
+                {
+                    type: 'integer'
+                },
+                {
+                    type: 'null'
+                }
+            ],
             title: 'Total Transactions'
         },
         total_pages: {
@@ -815,10 +986,15 @@ export const UserStorageStatPublicSchema = {
                 }
             ],
             title: 'Total Pages'
+        },
+        balance: {
+            type: 'number',
+            title: 'Balance',
+            default: 0
         }
     },
     type: 'object',
-    required: ['id', 'user_id', 'file_count', 'total_size', 'total_cost', 'updated_at', 'total_transactions'],
+    required: ['user_id'],
     title: 'UserStorageStatPublic'
 } as const;
 
