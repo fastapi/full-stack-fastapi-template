@@ -7,8 +7,12 @@ from sqlmodel import Session, select
 from app import crud
 from app.core.config import settings
 from app.core.security import verify_password
-from app.models import User, UserCreate
-from tests.utils.user import create_random_user
+from app.models import User, UserCreate, UserRole
+from tests.utils.user import (
+    create_random_user,
+    create_user_with_role,
+    user_authentication_headers,
+)
 from tests.utils.utils import random_email, random_lower_string
 
 
@@ -519,3 +523,36 @@ def test_delete_user_without_privileges(
     )
     assert r.status_code == 403
     assert r.json()["detail"] == "The user doesn't have enough privileges"
+
+
+def test_manager_can_retrieve_users(client: TestClient, db: Session) -> None:
+    manager, password = create_user_with_role(db=db, role=UserRole.manager)
+    headers = user_authentication_headers(
+        client=client, email=manager.email, password=password
+    )
+
+    r = client.get(f"{settings.API_V1_STR}/users/", headers=headers)
+
+    assert r.status_code == 200
+    assert "data" in r.json()
+
+
+def test_member_cannot_retrieve_users(
+    client: TestClient, normal_user_token_headers: dict[str, str]
+) -> None:
+    r = client.get(f"{settings.API_V1_STR}/users/", headers=normal_user_token_headers)
+
+    assert r.status_code == 403
+    assert r.json()["detail"] == "The user doesn't have enough privileges"
+
+
+def test_manager_cannot_create_user(client: TestClient, db: Session) -> None:
+    manager, password = create_user_with_role(db=db, role=UserRole.manager)
+    headers = user_authentication_headers(
+        client=client, email=manager.email, password=password
+    )
+    data = {"email": random_email(), "password": random_lower_string()}
+
+    r = client.post(f"{settings.API_V1_STR}/users/", headers=headers, json=data)
+
+    assert r.status_code == 403

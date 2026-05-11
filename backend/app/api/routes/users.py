@@ -8,7 +8,9 @@ from app import crud
 from app.api.deps import (
     CurrentUser,
     SessionDep,
+    current_role,
     get_current_active_superuser,
+    require_roles,
 )
 from app.core.config import settings
 from app.core.security import get_password_hash, verify_password
@@ -20,6 +22,7 @@ from app.models import (
     UserCreate,
     UserPublic,
     UserRegister,
+    UserRole,
     UsersPublic,
     UserUpdate,
     UserUpdateMe,
@@ -31,7 +34,7 @@ router = APIRouter(prefix="/users", tags=["users"])
 
 @router.get(
     "/",
-    dependencies=[Depends(get_current_active_superuser)],
+    dependencies=[Depends(require_roles(UserRole.admin, UserRole.manager))],
     response_model=UsersPublic,
 )
 def read_users(session: SessionDep, skip: int = 0, limit: int = 100) -> Any:
@@ -169,7 +172,7 @@ def read_user_by_id(
     user = session.get(User, user_id)
     if user == current_user:
         return user
-    if not current_user.is_superuser:
+    if current_role(current_user) not in {UserRole.admin, UserRole.manager}:
         raise HTTPException(
             status_code=403,
             detail="The user doesn't have enough privileges",

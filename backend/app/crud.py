@@ -4,12 +4,18 @@ from typing import Any
 from sqlmodel import Session, select
 
 from app.core.security import get_password_hash, verify_password
-from app.models import Item, ItemCreate, User, UserCreate, UserUpdate
+from app.models import Item, ItemCreate, User, UserCreate, UserRole, UserUpdate
 
 
 def create_user(*, session: Session, user_create: UserCreate) -> User:
+    role = UserRole.admin if user_create.is_superuser else user_create.role
     db_obj = User.model_validate(
-        user_create, update={"hashed_password": get_password_hash(user_create.password)}
+        user_create,
+        update={
+            "hashed_password": get_password_hash(user_create.password),
+            "role": role,
+            "is_superuser": role == UserRole.admin,
+        },
     )
     session.add(db_obj)
     session.commit()
@@ -24,6 +30,10 @@ def update_user(*, session: Session, db_user: User, user_in: UserUpdate) -> Any:
         password = user_data["password"]
         hashed_password = get_password_hash(password)
         extra_data["hashed_password"] = hashed_password
+    if user_data.get("role") == UserRole.admin:
+        extra_data["is_superuser"] = True
+    elif user_data.get("role") in {UserRole.manager, UserRole.member}:
+        extra_data["is_superuser"] = False
     db_user.sqlmodel_update(user_data, update=extra_data)
     session.add(db_user)
     session.commit()
