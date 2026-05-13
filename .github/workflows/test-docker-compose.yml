@@ -20,7 +20,7 @@ jobs:
       - run: docker compose down -v --remove-orphans
       - run: docker compose up -d --wait backend frontend adminer
       - name: Test backend is up
-        run: curl http://localhost:8000/api/v1/utils/health-check-fail
+        run: curl --fail http://localhost:8000/api/v1/utils/health-check-fail
       - name: Test frontend is up
-        run: curl http://localhost:5173/fail
+        run: curl --fail http://localhost:5173/fail
       - run: docker compose down -v --remove-orphans
