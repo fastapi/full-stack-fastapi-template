@@ -12,7 +12,7 @@ jobs:
     name: Add to project
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/add-to-project@244f685bbc3b7adfa8466e08b698b5577571133e # v1.0.2
+      - uses: actions/add-to-project@1f2db0f17f4dca7786abfab9ca41e2bdcca1e27a # v2.0.0
         with:
           project-url: https://github.com/orgs/fastapi/projects/2
           github-token: ${{ secrets.PROJECTS_TOKEN }}
