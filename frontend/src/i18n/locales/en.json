@@ -1,0 +1,188 @@
+{
+  "common": {
+    "loading": "Loading...",
+    "error": "Error",
+    "success": "Success",
+    "cancel": "Cancel",
+    "save": "Save",
+    "saving": "Saving...",
+    "delete": "Delete",
+    "edit": "Edit",
+    "create": "Create",
+    "search": "Search",
+    "filter": "Filter",
+    "sort": "Sort",
+    "back": "Back",
+    "next": "Next",
+    "previous": "Previous",
+    "viewAll": "View all",
+    "learnMore": "Learn more",
+    "register": "Register",
+    "login": "Login",
+    "logout": "Logout",
+    "close": "Close",
+    "apply": "Apply",
+    "reset": "Reset",
+    "clear": "Clear"
+  },
+  "nav": {
+    "home": "Home",
+    "races": "Races",
+    "about": "About",
+    "contact": "Contact",
+    "dashboard": "Dashboard",
+    "profile": "Profile",
+    "settings": "Settings"
+  },
+  "home": {
+    "hero": {
+      "title": "Discover Your Next Running Challenge",
+      "subtitle": "Find and register for running races across Vietnam. From 5Ks to ultramarathons, road races to trail runs.",
+      "cta": "Browse Races",
+      "searchPlaceholder": "Search races..."
+    },
+    "features": {
+      "title": "Why Choose VNRunner",
+      "discover": {
+        "title": "Discover Races",
+        "description": "Browse upcoming races in your area and find the perfect event for your goals."
+      },
+      "easyRegistration": {
+        "title": "Easy Registration",
+        "description": "Register online in minutes with our simple and secure registration process."
+      },
+      "trackProgress": {
+        "title": "Track Progress",
+        "description": "View your race history, track your PRs, and celebrate your achievements."
+      }
+    },
+    "trending": "Trending Races",
+    "upcoming": "Upcoming Races",
+    "noRaces": "No races to show right now."
+  },
+  "races": {
+    "title": "Upcoming Races in Vietnam",
+    "subtitle": "Browse and register for upcoming running races across Vietnam. Find the perfect event that matches your goals and fitness level - from road races to trail runs, 5Ks to ultramarathons.",
+    "backToAll": "← Back to all races",
+    "searchPlaceholder": "Search by race name, location...",
+    "filters": {
+      "title": "Filters",
+      "terrain": "Terrain",
+      "difficulty": "Difficulty",
+      "distance": "Distance",
+      "location": "Location",
+      "date": "Date",
+      "price": "Price",
+      "province": "Province",
+      "all": "All"
+    },
+    "sort": {
+      "byDate": "By Date",
+      "byDistance": "By Distance",
+      "byPopularity": "By Popularity"
+    },
+    "terrain": {
+      "road": "Road",
+      "trail": "Trail",
+      "track": "Track",
+      "mixed": "Mixed"
+    },
+    "difficulty": {
+      "easy": "Easy",
+      "moderate": "Moderate",
+      "hard": "Hard",
+      "extreme": "Extreme"
+    },
+    "status": {
+      "draft": "Draft",
+      "published": "Published",
+      "registration_open": "Registration Open",
+      "registration_closed": "Registration Closed",
+      "completed": "Completed",
+      "cancelled": "Cancelled"
+    },
+    "detail": {
+      "overview": "Overview",
+      "location": "Location",
+      "date": "Date",
+      "terrain": "Terrain",
+      "difficulty": "Difficulty",
+      "elevation": "Elevation Gain",
+      "website": "Official Website",
+      "categories": "Race Categories",
+      "category": "Category",
+      "distance": "Distance",
+      "price": "Price",
+      "cutoffTime": "Cutoff Time",
+      "courseMap": "Course Map",
+      "tags": "Tags",
+      "similarRaces": "Similar Races",
+      "registrationClosed": "Registration Closed",
+      "registerNow": "Register Now"
+    },
+    "card": {
+      "certified": "Certified",
+      "aiPick": "AI Pick",
+      "slotsLeft": "{{count}} slots left",
+      "from": "From"
+    },
+    "noResults": "No races found matching your criteria.",
+    "viewMode": {
+      "grid": "Grid View",
+      "map": "Map View"
+    }
+  },
+  "about": {
+    "title": "About VNRunner",
+    "subtitle": "VNRunner is your go-to platform for discovering and registering for running races across Vietnam. We connect runners with race organizers to create memorable racing experiences.",
+    "mission": {
+      "title": "Our Mission",
+      "subtitle": "Making race discovery and registration simple for everyone",
+      "description": "We believe running brings people together. Our platform makes it easy to find races that match your goals, register securely online, and track your running journey. Whether you're training for your first 5K or your tenth marathon, VNRunner helps you find the perfect event."
+    },
+    "forRunners": {
+      "title": "For Runners",
+      "features": [
+        "Browse races by distance, location, and date",
+        "Register online with secure payment processing",
+        "Track your race history and personal records",
+        "Receive race updates and important information"
+      ]
+    },
+    "forOrganizers": {
+      "title": "For Race Organizers",
+      "features": [
+        "Create and manage races with our intuitive dashboard",
+        "Process registrations and participant management",
+        "Access real-time registration data and reports",
+        "Communicate with participants before and after the race"
+      ]
+    },
+    "faq": {
+      "q1": "What is VNRunner?",
+      "a1": "VNRunner is Vietnam's premier platform for discovering and registering for running races. We connect runners with race organizers to create memorable racing experiences across Vietnam.",
+      "q2": "How do I register for a race?",
+      "a2": "Browse our race listings, select your preferred event, and complete the online registration form. Payment is processed securely through our platform. You'll receive confirmation and race details via email.",
+      "q3": "Can race organizers use VNRunner?",
+      "a3": "Yes! Race organizers can create and manage races through our intuitive dashboard, process registrations, access participant data, and communicate with runners before and after events.",
+      "q4": "What types of races are available?",
+      "a4": "VNRunner features a variety of races including road races, trail runs, marathons, half marathons, ultramarathons, 5K, 10K events, and more across Vietnam."
+    }
+  },
+  "footer": {
+    "tagline": "Your premier running race platform in Vietnam",
+    "copyright": "© {{year}} VNRunner. All rights reserved.",
+    "links": {
+      "about": "About Us",
+      "contact": "Contact",
+      "privacy": "Privacy Policy",
+      "terms": "Terms of Service",
+      "help": "Help Center"
+    }
+  },
+  "language": {
+    "select": "Select Language",
+    "english": "English",
+    "vietnamese": "Tiếng Việt"
+  }
+}

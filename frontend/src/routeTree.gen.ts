@@ -13,24 +13,27 @@ import { Route as SignupRouteImport } from './routes/signup'
 import { Route as ResetPasswordRouteImport } from './routes/reset-password'
 import { Route as RecoverPasswordRouteImport } from './routes/recover-password'
 import { Route as LoginRouteImport } from './routes/login'
-import { Route as PublicRouteImport } from './routes/_public'
 import { Route as LayoutRouteImport } from './routes/_layout'
-import { Route as PublicIndexRouteImport } from './routes/_public/index'
-import { Route as PublicAboutRouteImport } from './routes/_public/about'
+import { Route as LangRouteImport } from './routes/$lang'
+import { Route as IndexRouteImport } from './routes/index'
 import { Route as LayoutSavedRouteImport } from './routes/_layout.saved'
 import { Route as LayoutOnboardingRouteImport } from './routes/_layout.onboarding'
 import { Route as LayoutHistoryRouteImport } from './routes/_layout.history'
 import { Route as LayoutAdminRouteImport } from './routes/_layout.admin'
-import { Route as PublicRacesIndexRouteImport } from './routes/_public/races/index'
+import { Route as LangPublicRouteImport } from './routes/$lang._public'
 import { Route as LayoutAdminIndexRouteImport } from './routes/_layout.admin/index'
-import { Route as PublicRacesRaceIdRouteImport } from './routes/_public/races/$raceId'
+import { Route as LangPublicIndexRouteImport } from './routes/$lang._public/index'
 import { Route as LayoutAdminUsersRouteImport } from './routes/_layout.admin/users'
+import { Route as LayoutAdminTagsRouteImport } from './routes/_layout.admin/tags'
 import { Route as LayoutAdminSettingsRouteImport } from './routes/_layout.admin/settings'
 import { Route as LayoutAdminRacesRouteImport } from './routes/_layout.admin/races'
 import { Route as LayoutAdminItemsRouteImport } from './routes/_layout.admin/items'
 import { Route as LayoutAdminDashboardRouteImport } from './routes/_layout.admin/dashboard'
+import { Route as LangPublicAboutRouteImport } from './routes/$lang._public/about'
 import { Route as LayoutAdminRacesIndexRouteImport } from './routes/_layout.admin/races.index'
+import { Route as LangPublicRacesIndexRouteImport } from './routes/$lang._public/races/index'
 import { Route as LayoutAdminRacesNewRouteImport } from './routes/_layout.admin/races.new'
+import { Route as LangPublicRacesRaceIdRouteImport } from './routes/$lang._public/races/$raceId'
 import { Route as LayoutAdminRacesRaceIdEditRouteImport } from './routes/_layout.admin/races.$raceId.edit'
 
 const SignupRoute = SignupRouteImport.update({
@@ -53,23 +56,19 @@ const LoginRoute = LoginRouteImport.update({
   path: '/login',
   getParentRoute: () => rootRouteImport,
 } as any)
-const PublicRoute = PublicRouteImport.update({
-  id: '/_public',
-  getParentRoute: () => rootRouteImport,
-} as any)
 const LayoutRoute = LayoutRouteImport.update({
   id: '/_layout',
   getParentRoute: () => rootRouteImport,
 } as any)
-const PublicIndexRoute = PublicIndexRouteImport.update({
+const LangRoute = LangRouteImport.update({
+  id: '/$lang',
+  path: '/$lang',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
-  getParentRoute: () => PublicRoute,
-} as any)
-const PublicAboutRoute = PublicAboutRouteImport.update({
-  id: '/about',
-  path: '/about',
-  getParentRoute: () => PublicRoute,
+  getParentRoute: () => rootRouteImport,
 } as any)
 const LayoutSavedRoute = LayoutSavedRouteImport.update({
   id: '/saved',
@@ -91,24 +90,28 @@ const LayoutAdminRoute = LayoutAdminRouteImport.update({
   path: '/admin',
   getParentRoute: () => LayoutRoute,
 } as any)
-const PublicRacesIndexRoute = PublicRacesIndexRouteImport.update({
-  id: '/races/',
-  path: '/races/',
-  getParentRoute: () => PublicRoute,
+const LangPublicRoute = LangPublicRouteImport.update({
+  id: '/_public',
+  getParentRoute: () => LangRoute,
 } as any)
 const LayoutAdminIndexRoute = LayoutAdminIndexRouteImport.update({
   id: '/',
   path: '/',
   getParentRoute: () => LayoutAdminRoute,
 } as any)
-const PublicRacesRaceIdRoute = PublicRacesRaceIdRouteImport.update({
-  id: '/races/$raceId',
-  path: '/races/$raceId',
-  getParentRoute: () => PublicRoute,
+const LangPublicIndexRoute = LangPublicIndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => LangPublicRoute,
 } as any)
 const LayoutAdminUsersRoute = LayoutAdminUsersRouteImport.update({
   id: '/users',
   path: '/users',
+  getParentRoute: () => LayoutAdminRoute,
+} as any)
+const LayoutAdminTagsRoute = LayoutAdminTagsRouteImport.update({
+  id: '/tags',
+  path: '/tags',
   getParentRoute: () => LayoutAdminRoute,
 } as any)
 const LayoutAdminSettingsRoute = LayoutAdminSettingsRouteImport.update({
@@ -131,15 +134,30 @@ const LayoutAdminDashboardRoute = LayoutAdminDashboardRouteImport.update({
   path: '/dashboard',
   getParentRoute: () => LayoutAdminRoute,
 } as any)
+const LangPublicAboutRoute = LangPublicAboutRouteImport.update({
+  id: '/about',
+  path: '/about',
+  getParentRoute: () => LangPublicRoute,
+} as any)
 const LayoutAdminRacesIndexRoute = LayoutAdminRacesIndexRouteImport.update({
   id: '/',
   path: '/',
   getParentRoute: () => LayoutAdminRacesRoute,
 } as any)
+const LangPublicRacesIndexRoute = LangPublicRacesIndexRouteImport.update({
+  id: '/races/',
+  path: '/races/',
+  getParentRoute: () => LangPublicRoute,
+} as any)
 const LayoutAdminRacesNewRoute = LayoutAdminRacesNewRouteImport.update({
   id: '/new',
   path: '/new',
   getParentRoute: () => LayoutAdminRacesRoute,
+} as any)
+const LangPublicRacesRaceIdRoute = LangPublicRacesRaceIdRouteImport.update({
+  id: '/races/$raceId',
+  path: '/races/$raceId',
+  getParentRoute: () => LangPublicRoute,
 } as any)
 const LayoutAdminRacesRaceIdEditRoute =
   LayoutAdminRacesRaceIdEditRouteImport.update({
@@ -149,7 +167,8 @@ const LayoutAdminRacesRaceIdEditRoute =
   } as any)
 
 export interface FileRoutesByFullPath {
-  '/': typeof PublicIndexRoute
+  '/': typeof IndexRoute
+  '/$lang': typeof LangPublicRouteWithChildren
   '/login': typeof LoginRoute
   '/recover-password': typeof RecoverPasswordRoute
   '/reset-password': typeof ResetPasswordRoute
@@ -158,21 +177,24 @@ export interface FileRoutesByFullPath {
   '/history': typeof LayoutHistoryRoute
   '/onboarding': typeof LayoutOnboardingRoute
   '/saved': typeof LayoutSavedRoute
-  '/about': typeof PublicAboutRoute
+  '/$lang/about': typeof LangPublicAboutRoute
   '/admin/dashboard': typeof LayoutAdminDashboardRoute
   '/admin/items': typeof LayoutAdminItemsRoute
   '/admin/races': typeof LayoutAdminRacesRouteWithChildren
   '/admin/settings': typeof LayoutAdminSettingsRoute
+  '/admin/tags': typeof LayoutAdminTagsRoute
   '/admin/users': typeof LayoutAdminUsersRoute
-  '/races/$raceId': typeof PublicRacesRaceIdRoute
+  '/$lang/': typeof LangPublicIndexRoute
   '/admin/': typeof LayoutAdminIndexRoute
-  '/races/': typeof PublicRacesIndexRoute
+  '/$lang/races/$raceId': typeof LangPublicRacesRaceIdRoute
   '/admin/races/new': typeof LayoutAdminRacesNewRoute
+  '/$lang/races/': typeof LangPublicRacesIndexRoute
   '/admin/races/': typeof LayoutAdminRacesIndexRoute
   '/admin/races/$raceId/edit': typeof LayoutAdminRacesRaceIdEditRoute
 }
 export interface FileRoutesByTo {
-  '/': typeof PublicIndexRoute
+  '/': typeof IndexRoute
+  '/$lang': typeof LangPublicIndexRoute
   '/login': typeof LoginRoute
   '/recover-password': typeof RecoverPasswordRoute
   '/reset-password': typeof ResetPasswordRoute
@@ -180,41 +202,45 @@ export interface FileRoutesByTo {
   '/history': typeof LayoutHistoryRoute
   '/onboarding': typeof LayoutOnboardingRoute
   '/saved': typeof LayoutSavedRoute
-  '/about': typeof PublicAboutRoute
+  '/$lang/about': typeof LangPublicAboutRoute
   '/admin/dashboard': typeof LayoutAdminDashboardRoute
   '/admin/items': typeof LayoutAdminItemsRoute
   '/admin/settings': typeof LayoutAdminSettingsRoute
+  '/admin/tags': typeof LayoutAdminTagsRoute
   '/admin/users': typeof LayoutAdminUsersRoute
-  '/races/$raceId': typeof PublicRacesRaceIdRoute
   '/admin': typeof LayoutAdminIndexRoute
-  '/races': typeof PublicRacesIndexRoute
+  '/$lang/races/$raceId': typeof LangPublicRacesRaceIdRoute
   '/admin/races/new': typeof LayoutAdminRacesNewRoute
+  '/$lang/races': typeof LangPublicRacesIndexRoute
   '/admin/races': typeof LayoutAdminRacesIndexRoute
   '/admin/races/$raceId/edit': typeof LayoutAdminRacesRaceIdEditRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
+  '/': typeof IndexRoute
+  '/$lang': typeof LangRouteWithChildren
   '/_layout': typeof LayoutRouteWithChildren
-  '/_public': typeof PublicRouteWithChildren
   '/login': typeof LoginRoute
   '/recover-password': typeof RecoverPasswordRoute
   '/reset-password': typeof ResetPasswordRoute
   '/signup': typeof SignupRoute
+  '/$lang/_public': typeof LangPublicRouteWithChildren
   '/_layout/admin': typeof LayoutAdminRouteWithChildren
   '/_layout/history': typeof LayoutHistoryRoute
   '/_layout/onboarding': typeof LayoutOnboardingRoute
   '/_layout/saved': typeof LayoutSavedRoute
-  '/_public/about': typeof PublicAboutRoute
-  '/_public/': typeof PublicIndexRoute
+  '/$lang/_public/about': typeof LangPublicAboutRoute
   '/_layout/admin/dashboard': typeof LayoutAdminDashboardRoute
   '/_layout/admin/items': typeof LayoutAdminItemsRoute
   '/_layout/admin/races': typeof LayoutAdminRacesRouteWithChildren
   '/_layout/admin/settings': typeof LayoutAdminSettingsRoute
+  '/_layout/admin/tags': typeof LayoutAdminTagsRoute
   '/_layout/admin/users': typeof LayoutAdminUsersRoute
-  '/_public/races/$raceId': typeof PublicRacesRaceIdRoute
+  '/$lang/_public/': typeof LangPublicIndexRoute
   '/_layout/admin/': typeof LayoutAdminIndexRoute
-  '/_public/races/': typeof PublicRacesIndexRoute
+  '/$lang/_public/races/$raceId': typeof LangPublicRacesRaceIdRoute
   '/_layout/admin/races/new': typeof LayoutAdminRacesNewRoute
+  '/$lang/_public/races/': typeof LangPublicRacesIndexRoute
   '/_layout/admin/races/': typeof LayoutAdminRacesIndexRoute
   '/_layout/admin/races/$raceId/edit': typeof LayoutAdminRacesRaceIdEditRoute
 }
@@ -222,6 +248,7 @@ export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
     | '/'
+    | '/$lang'
     | '/login'
     | '/recover-password'
     | '/reset-password'
@@ -230,21 +257,24 @@ export interface FileRouteTypes {
     | '/history'
     | '/onboarding'
     | '/saved'
-    | '/about'
+    | '/$lang/about'
     | '/admin/dashboard'
     | '/admin/items'
     | '/admin/races'
     | '/admin/settings'
+    | '/admin/tags'
     | '/admin/users'
-    | '/races/$raceId'
+    | '/$lang/'
     | '/admin/'
-    | '/races/'
+    | '/$lang/races/$raceId'
     | '/admin/races/new'
+    | '/$lang/races/'
     | '/admin/races/'
     | '/admin/races/$raceId/edit'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
+    | '/$lang'
     | '/login'
     | '/recover-password'
     | '/reset-password'
@@ -252,47 +282,52 @@ export interface FileRouteTypes {
     | '/history'
     | '/onboarding'
     | '/saved'
-    | '/about'
+    | '/$lang/about'
     | '/admin/dashboard'
     | '/admin/items'
     | '/admin/settings'
+    | '/admin/tags'
     | '/admin/users'
-    | '/races/$raceId'
     | '/admin'
-    | '/races'
+    | '/$lang/races/$raceId'
     | '/admin/races/new'
+    | '/$lang/races'
     | '/admin/races'
     | '/admin/races/$raceId/edit'
   id:
     | '__root__'
+    | '/'
+    | '/$lang'
     | '/_layout'
-    | '/_public'
     | '/login'
     | '/recover-password'
     | '/reset-password'
     | '/signup'
+    | '/$lang/_public'
     | '/_layout/admin'
     | '/_layout/history'
     | '/_layout/onboarding'
     | '/_layout/saved'
-    | '/_public/about'
-    | '/_public/'
+    | '/$lang/_public/about'
     | '/_layout/admin/dashboard'
     | '/_layout/admin/items'
     | '/_layout/admin/races'
     | '/_layout/admin/settings'
+    | '/_layout/admin/tags'
     | '/_layout/admin/users'
-    | '/_public/races/$raceId'
+    | '/$lang/_public/'
     | '/_layout/admin/'
-    | '/_public/races/'
+    | '/$lang/_public/races/$raceId'
     | '/_layout/admin/races/new'
+    | '/$lang/_public/races/'
     | '/_layout/admin/races/'
     | '/_layout/admin/races/$raceId/edit'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
+  IndexRoute: typeof IndexRoute
+  LangRoute: typeof LangRouteWithChildren
   LayoutRoute: typeof LayoutRouteWithChildren
-  PublicRoute: typeof PublicRouteWithChildren
   LoginRoute: typeof LoginRoute
   RecoverPasswordRoute: typeof RecoverPasswordRoute
   ResetPasswordRoute: typeof ResetPasswordRoute
@@ -329,13 +364,6 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof LoginRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/_public': {
-      id: '/_public'
-      path: ''
-      fullPath: '/'
-      preLoaderRoute: typeof PublicRouteImport
-      parentRoute: typeof rootRouteImport
-    }
     '/_layout': {
       id: '/_layout'
       path: ''
@@ -343,19 +371,19 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof LayoutRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/_public/': {
-      id: '/_public/'
+    '/$lang': {
+      id: '/$lang'
+      path: '/$lang'
+      fullPath: '/$lang'
+      preLoaderRoute: typeof LangRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/': {
+      id: '/'
       path: '/'
       fullPath: '/'
-      preLoaderRoute: typeof PublicIndexRouteImport
-      parentRoute: typeof PublicRoute
-    }
-    '/_public/about': {
-      id: '/_public/about'
-      path: '/about'
-      fullPath: '/about'
-      preLoaderRoute: typeof PublicAboutRouteImport
-      parentRoute: typeof PublicRoute
+      preLoaderRoute: typeof IndexRouteImport
+      parentRoute: typeof rootRouteImport
     }
     '/_layout/saved': {
       id: '/_layout/saved'
@@ -385,12 +413,12 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof LayoutAdminRouteImport
       parentRoute: typeof LayoutRoute
     }
-    '/_public/races/': {
-      id: '/_public/races/'
-      path: '/races'
-      fullPath: '/races/'
-      preLoaderRoute: typeof PublicRacesIndexRouteImport
-      parentRoute: typeof PublicRoute
+    '/$lang/_public': {
+      id: '/$lang/_public'
+      path: ''
+      fullPath: '/$lang'
+      preLoaderRoute: typeof LangPublicRouteImport
+      parentRoute: typeof LangRoute
     }
     '/_layout/admin/': {
       id: '/_layout/admin/'
@@ -399,18 +427,25 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof LayoutAdminIndexRouteImport
       parentRoute: typeof LayoutAdminRoute
     }
-    '/_public/races/$raceId': {
-      id: '/_public/races/$raceId'
-      path: '/races/$raceId'
-      fullPath: '/races/$raceId'
-      preLoaderRoute: typeof PublicRacesRaceIdRouteImport
-      parentRoute: typeof PublicRoute
+    '/$lang/_public/': {
+      id: '/$lang/_public/'
+      path: '/'
+      fullPath: '/$lang/'
+      preLoaderRoute: typeof LangPublicIndexRouteImport
+      parentRoute: typeof LangPublicRoute
     }
     '/_layout/admin/users': {
       id: '/_layout/admin/users'
       path: '/users'
       fullPath: '/admin/users'
       preLoaderRoute: typeof LayoutAdminUsersRouteImport
+      parentRoute: typeof LayoutAdminRoute
+    }
+    '/_layout/admin/tags': {
+      id: '/_layout/admin/tags'
+      path: '/tags'
+      fullPath: '/admin/tags'
+      preLoaderRoute: typeof LayoutAdminTagsRouteImport
       parentRoute: typeof LayoutAdminRoute
     }
     '/_layout/admin/settings': {
@@ -441,6 +476,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof LayoutAdminDashboardRouteImport
       parentRoute: typeof LayoutAdminRoute
     }
+    '/$lang/_public/about': {
+      id: '/$lang/_public/about'
+      path: '/about'
+      fullPath: '/$lang/about'
+      preLoaderRoute: typeof LangPublicAboutRouteImport
+      parentRoute: typeof LangPublicRoute
+    }
     '/_layout/admin/races/': {
       id: '/_layout/admin/races/'
       path: '/'
@@ -448,12 +490,26 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof LayoutAdminRacesIndexRouteImport
       parentRoute: typeof LayoutAdminRacesRoute
     }
+    '/$lang/_public/races/': {
+      id: '/$lang/_public/races/'
+      path: '/races'
+      fullPath: '/$lang/races/'
+      preLoaderRoute: typeof LangPublicRacesIndexRouteImport
+      parentRoute: typeof LangPublicRoute
+    }
     '/_layout/admin/races/new': {
       id: '/_layout/admin/races/new'
       path: '/new'
       fullPath: '/admin/races/new'
       preLoaderRoute: typeof LayoutAdminRacesNewRouteImport
       parentRoute: typeof LayoutAdminRacesRoute
+    }
+    '/$lang/_public/races/$raceId': {
+      id: '/$lang/_public/races/$raceId'
+      path: '/races/$raceId'
+      fullPath: '/$lang/races/$raceId'
+      preLoaderRoute: typeof LangPublicRacesRaceIdRouteImport
+      parentRoute: typeof LangPublicRoute
     }
     '/_layout/admin/races/$raceId/edit': {
       id: '/_layout/admin/races/$raceId/edit'
@@ -464,6 +520,34 @@ declare module '@tanstack/react-router' {
     }
   }
 }
+
+interface LangPublicRouteChildren {
+  LangPublicAboutRoute: typeof LangPublicAboutRoute
+  LangPublicIndexRoute: typeof LangPublicIndexRoute
+  LangPublicRacesRaceIdRoute: typeof LangPublicRacesRaceIdRoute
+  LangPublicRacesIndexRoute: typeof LangPublicRacesIndexRoute
+}
+
+const LangPublicRouteChildren: LangPublicRouteChildren = {
+  LangPublicAboutRoute: LangPublicAboutRoute,
+  LangPublicIndexRoute: LangPublicIndexRoute,
+  LangPublicRacesRaceIdRoute: LangPublicRacesRaceIdRoute,
+  LangPublicRacesIndexRoute: LangPublicRacesIndexRoute,
+}
+
+const LangPublicRouteWithChildren = LangPublicRoute._addFileChildren(
+  LangPublicRouteChildren,
+)
+
+interface LangRouteChildren {
+  LangPublicRoute: typeof LangPublicRouteWithChildren
+}
+
+const LangRouteChildren: LangRouteChildren = {
+  LangPublicRoute: LangPublicRouteWithChildren,
+}
+
+const LangRouteWithChildren = LangRoute._addFileChildren(LangRouteChildren)
 
 interface LayoutAdminRacesRouteChildren {
   LayoutAdminRacesNewRoute: typeof LayoutAdminRacesNewRoute
@@ -485,6 +569,7 @@ interface LayoutAdminRouteChildren {
   LayoutAdminItemsRoute: typeof LayoutAdminItemsRoute
   LayoutAdminRacesRoute: typeof LayoutAdminRacesRouteWithChildren
   LayoutAdminSettingsRoute: typeof LayoutAdminSettingsRoute
+  LayoutAdminTagsRoute: typeof LayoutAdminTagsRoute
   LayoutAdminUsersRoute: typeof LayoutAdminUsersRoute
   LayoutAdminIndexRoute: typeof LayoutAdminIndexRoute
 }
@@ -494,6 +579,7 @@ const LayoutAdminRouteChildren: LayoutAdminRouteChildren = {
   LayoutAdminItemsRoute: LayoutAdminItemsRoute,
   LayoutAdminRacesRoute: LayoutAdminRacesRouteWithChildren,
   LayoutAdminSettingsRoute: LayoutAdminSettingsRoute,
+  LayoutAdminTagsRoute: LayoutAdminTagsRoute,
   LayoutAdminUsersRoute: LayoutAdminUsersRoute,
   LayoutAdminIndexRoute: LayoutAdminIndexRoute,
 }
@@ -519,26 +605,10 @@ const LayoutRouteChildren: LayoutRouteChildren = {
 const LayoutRouteWithChildren =
   LayoutRoute._addFileChildren(LayoutRouteChildren)
 
-interface PublicRouteChildren {
-  PublicAboutRoute: typeof PublicAboutRoute
-  PublicIndexRoute: typeof PublicIndexRoute
-  PublicRacesRaceIdRoute: typeof PublicRacesRaceIdRoute
-  PublicRacesIndexRoute: typeof PublicRacesIndexRoute
-}
-
-const PublicRouteChildren: PublicRouteChildren = {
-  PublicAboutRoute: PublicAboutRoute,
-  PublicIndexRoute: PublicIndexRoute,
-  PublicRacesRaceIdRoute: PublicRacesRaceIdRoute,
-  PublicRacesIndexRoute: PublicRacesIndexRoute,
-}
-
-const PublicRouteWithChildren =
-  PublicRoute._addFileChildren(PublicRouteChildren)
-
 const rootRouteChildren: RootRouteChildren = {
+  IndexRoute: IndexRoute,
+  LangRoute: LangRouteWithChildren,
   LayoutRoute: LayoutRouteWithChildren,
-  PublicRoute: PublicRouteWithChildren,
   LoginRoute: LoginRoute,
   RecoverPasswordRoute: RecoverPasswordRoute,
   ResetPasswordRoute: ResetPasswordRoute,

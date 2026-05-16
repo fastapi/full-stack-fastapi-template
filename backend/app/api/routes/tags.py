@@ -5,7 +5,7 @@ from fastapi import APIRouter, HTTPException
 
 from app import crud
 from app.api.deps import CurrentUser, SessionDep
-from app.models import RaceTagCreate, TagPublic, TagsPublic
+from app.models import RaceTagCreate, TagPublic, TagsPublic, TagTranslationUpdate
 
 router = APIRouter(prefix="/tags", tags=["tags"])
 
@@ -57,3 +57,61 @@ def set_tags_for_race(
         raise HTTPException(status_code=403, detail="Not enough permissions")
     race = crud.set_race_tags(session=session, race=race, tag_ids=tag_ids)
     return [TagPublic.model_validate(t) for t in race.tags]
+
+
+@router.put("/{tag_id}/translations", response_model=TagPublic)
+def update_tag_translations(
+    *,
+    session: SessionDep,
+    current_user: CurrentUser,
+    tag_id: uuid.UUID,
+    translation: TagTranslationUpdate,
+) -> Any:
+    """
+    Update translations for a tag.
+    Admin only.
+    """
+    from app.i18n import is_language_supported, set_translation
+    
+    if not current_user.is_superuser:
+        raise HTTPException(status_code=403, detail="Admin access required")
+    
+    # Get the tag
+    tag = crud.get_tag(session=session, tag_id=tag_id)
+    if not tag:
+        raise HTTPException(status_code=404, detail="Tag not found")
+    
+    # Validate language
+    if not is_language_supported(translation.language):
+        raise HTTPException(
+            status_code=400,
+            detail=f"Language '{translation.language}' is not supported"
+        )
+    
+    # Update translations
+    if translation.name:
+        set_translation(tag, "name", translation.name, translation.language)
+    
+    session.add(tag)
+    session.commit()
+    session.refresh(tag)
+    
+    return TagPublic.model_validate(tag)
+
+
+@router.get("/{tag_id}/translations", response_model=dict[str, Any])
+def get_tag_translations(
+    *,
+    session: SessionDep,
+    tag_id: uuid.UUID,
+) -> Any:
+    """
+    Get all translations for a tag.
+    Public endpoint - anyone can view translations.
+    """
+    tag = crud.get_tag(session=session, tag_id=tag_id)
+    if not tag:
+        raise HTTPException(status_code=404, detail="Tag not found")
+    
+    return tag.translations or {}
+

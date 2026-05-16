@@ -355,6 +355,7 @@ class RaceTagLink(SQLModel, table=True):
 class RaceTagBase(SQLModel):
     name: str = Field(max_length=50, unique=True, index=True)
     slug: str = Field(max_length=50, unique=True, index=True)
+    translations: dict[str, Any] | None = Field(default=None, sa_column=Column(JSON))
 
 
 class RaceTagCreate(RaceTagBase):
@@ -440,6 +441,10 @@ class RaceBase(SQLModel):
     is_certified: bool = Field(default=False)
     gpx_file_url: str | None = Field(default=None, max_length=1000)
     website_url: str | None = Field(default=None, max_length=1000)
+    
+    # Multi-language support
+    default_language: str = Field(default="vi", max_length=10)
+    translations: dict[str, Any] | None = Field(default=None, sa_column=Column(JSON))
 
 
 class RaceCreate(RaceBase):
@@ -561,6 +566,34 @@ class RacesPublicWithDistance(SQLModel):
     count: int
 
 
+# Translation models
+class TranslationContent(SQLModel):
+    """Single language translation content"""
+    name: str | None = None
+    description: str | None = None
+
+
+class RaceTranslationUpdate(SQLModel):
+    """Update translations for a race"""
+    language: str = Field(min_length=2, max_length=10)
+    name: str | None = Field(default=None, max_length=255)
+    description: str | None = Field(default=None, max_length=2000)
+    location: str | None = Field(default=None, max_length=255)
+
+
+class CategoryTranslationUpdate(SQLModel):
+    """Update translations for a race category"""
+    language: str = Field(min_length=2, max_length=10)
+    name: str | None = Field(default=None, max_length=100)
+    description: str | None = None
+
+
+class TagTranslationUpdate(SQLModel):
+    """Update translations for a tag"""
+    language: str = Field(min_length=2, max_length=10)
+    name: str | None = Field(default=None, max_length=50)
+
+
 # RaceCategory - Distance/Type variations
 class RaceCategoryBase(SQLModel):
     name: str = Field(max_length=100)
@@ -605,6 +638,9 @@ class RaceCategoryBase(SQLModel):
     description: str | None = Field(default=None, max_length=500)
     display_order: int = Field(default=0)
     is_active: bool = True
+    
+    # Multi-language support
+    translations: dict[str, Any] | None = Field(default=None, sa_column=Column(JSON))
 
 
 class RaceCategoryCreate(RaceCategoryBase):

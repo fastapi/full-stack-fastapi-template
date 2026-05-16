@@ -7,6 +7,7 @@ import { z } from "zod"
 import { type RacePublic, type RaceUpdate, RacesService, ProvincesService } from "@/client"
 import MediaGalleryManager from "@/components/Media/MediaGalleryManager"
 import RaceCategoryManager from "@/components/Races/RaceCategoryManager"
+import { RaceTranslationManager } from "@/components/Admin/RaceTranslationManager"
 import { Button } from "@/components/ui/button"
 import { RichTextEditor } from "@/components/ui/rich-text-editor"
 import {
@@ -398,6 +399,8 @@ const EditRace = ({ race }: EditRaceProps) => {
         title="Race Categories"
         description="Manage distance categories for this race (e.g., 5K, 10K, Half Marathon, Full Marathon)."
       />
+
+      <RaceTranslationManager raceId={race.id} race={race} />
 
       <MediaGalleryManager
         contentType="race"

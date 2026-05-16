@@ -310,6 +310,44 @@ export const Body_media_upload_media_assetSchema = {
     title: 'Body_media-upload_media_asset'
 } as const;
 
+export const CategoryTranslationUpdateSchema = {
+    properties: {
+        language: {
+            type: 'string',
+            maxLength: 10,
+            minLength: 2,
+            title: 'Language'
+        },
+        name: {
+            anyOf: [
+                {
+                    type: 'string',
+                    maxLength: 100
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Name'
+        },
+        description: {
+            anyOf: [
+                {
+                    type: 'string'
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Description'
+        }
+    },
+    type: 'object',
+    required: ['language'],
+    title: 'CategoryTranslationUpdate',
+    description: 'Update translations for a race category'
+} as const;
+
 export const DescriptionSuggestionSchema = {
     properties: {
         description: {
@@ -1360,6 +1398,18 @@ export const RaceCategoryCreateSchema = {
             title: 'Is Active',
             default: true
         },
+        translations: {
+            anyOf: [
+                {
+                    additionalProperties: true,
+                    type: 'object'
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Translations'
+        },
         race_id: {
             type: 'string',
             format: 'uuid',
@@ -1554,6 +1604,18 @@ export const RaceCategoryPublicSchema = {
             type: 'boolean',
             title: 'Is Active',
             default: true
+        },
+        translations: {
+            anyOf: [
+                {
+                    additionalProperties: true,
+                    type: 'object'
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Translations'
         },
         id: {
             type: 'string',
@@ -1764,6 +1826,18 @@ export const RaceCategoryPublicWithDetailsSchema = {
             type: 'boolean',
             title: 'Is Active',
             default: true
+        },
+        translations: {
+            anyOf: [
+                {
+                    additionalProperties: true,
+                    type: 'object'
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Translations'
         },
         id: {
             type: 'string',
@@ -2314,6 +2388,24 @@ export const RaceCreateSchema = {
                 }
             ],
             title: 'Website Url'
+        },
+        default_language: {
+            type: 'string',
+            maxLength: 10,
+            title: 'Default Language',
+            default: 'vi'
+        },
+        translations: {
+            anyOf: [
+                {
+                    additionalProperties: true,
+                    type: 'object'
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Translations'
         }
     },
     type: 'object',
@@ -2614,6 +2706,24 @@ export const RacePublicSchema = {
                 }
             ],
             title: 'Website Url'
+        },
+        default_language: {
+            type: 'string',
+            maxLength: 10,
+            title: 'Default Language',
+            default: 'vi'
+        },
+        translations: {
+            anyOf: [
+                {
+                    additionalProperties: true,
+                    type: 'object'
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Translations'
         },
         id: {
             type: 'string',
@@ -2922,6 +3032,24 @@ export const RacePublicWithDetailsSchema = {
                 }
             ],
             title: 'Website Url'
+        },
+        default_language: {
+            type: 'string',
+            maxLength: 10,
+            title: 'Default Language',
+            default: 'vi'
+        },
+        translations: {
+            anyOf: [
+                {
+                    additionalProperties: true,
+                    type: 'object'
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Translations'
         },
         id: {
             type: 'string',
@@ -3272,6 +3400,24 @@ export const RacePublicWithDistanceSchema = {
             ],
             title: 'Website Url'
         },
+        default_language: {
+            type: 'string',
+            maxLength: 10,
+            title: 'Default Language',
+            default: 'vi'
+        },
+        translations: {
+            anyOf: [
+                {
+                    additionalProperties: true,
+                    type: 'object'
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Translations'
+        },
         id: {
             type: 'string',
             format: 'uuid',
@@ -3583,6 +3729,24 @@ export const RacePublicWithExplanationSchema = {
                 }
             ],
             title: 'Website Url'
+        },
+        default_language: {
+            type: 'string',
+            maxLength: 10,
+            title: 'Default Language',
+            default: 'vi'
+        },
+        translations: {
+            anyOf: [
+                {
+                    additionalProperties: true,
+                    type: 'object'
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Translations'
         },
         id: {
             type: 'string',
@@ -4478,11 +4642,74 @@ export const RaceTagCreateSchema = {
             type: 'string',
             maxLength: 50,
             title: 'Slug'
+        },
+        translations: {
+            anyOf: [
+                {
+                    additionalProperties: true,
+                    type: 'object'
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Translations'
         }
     },
     type: 'object',
     required: ['name', 'slug'],
     title: 'RaceTagCreate'
+} as const;
+
+export const RaceTranslationUpdateSchema = {
+    properties: {
+        language: {
+            type: 'string',
+            maxLength: 10,
+            minLength: 2,
+            title: 'Language'
+        },
+        name: {
+            anyOf: [
+                {
+                    type: 'string',
+                    maxLength: 255
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Name'
+        },
+        description: {
+            anyOf: [
+                {
+                    type: 'string',
+                    maxLength: 2000
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Description'
+        },
+        location: {
+            anyOf: [
+                {
+                    type: 'string',
+                    maxLength: 255
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Location'
+        }
+    },
+    type: 'object',
+    required: ['language'],
+    title: 'RaceTranslationUpdate',
+    description: 'Update translations for a race'
 } as const;
 
 export const RaceUpdateSchema = {
@@ -5016,6 +5243,18 @@ export const TagPublicSchema = {
             maxLength: 50,
             title: 'Slug'
         },
+        translations: {
+            anyOf: [
+                {
+                    additionalProperties: true,
+                    type: 'object'
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Translations'
+        },
         id: {
             type: 'string',
             format: 'uuid',
@@ -5040,6 +5279,33 @@ export const TagSuggestionSchema = {
     type: 'object',
     required: ['tags'],
     title: 'TagSuggestion'
+} as const;
+
+export const TagTranslationUpdateSchema = {
+    properties: {
+        language: {
+            type: 'string',
+            maxLength: 10,
+            minLength: 2,
+            title: 'Language'
+        },
+        name: {
+            anyOf: [
+                {
+                    type: 'string',
+                    maxLength: 50
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Name'
+        }
+    },
+    type: 'object',
+    required: ['language'],
+    title: 'TagTranslationUpdate',
+    description: 'Update translations for a tag'
 } as const;
 
 export const TagsPublicSchema = {

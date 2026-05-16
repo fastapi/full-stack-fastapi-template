@@ -6,6 +6,7 @@ from fastapi import APIRouter, HTTPException
 from app import crud
 from app.api.deps import CurrentUser, SessionDep
 from app.models import (
+    CategoryTranslationUpdate,
     Message,
     RaceCategoriesPublic,
     RaceCategoryCreate,
@@ -176,3 +177,72 @@ def delete_race_category(
 
     crud.delete_race_category(session=session, category_id=category_id)
     return Message(message="Race category deleted successfully")
+
+
+@router.put("/{category_id}/translations", response_model=RaceCategoryPublic)
+def update_category_translations(
+    *,
+    session: SessionDep,
+    current_user: CurrentUser,
+    category_id: uuid.UUID,
+    translation: CategoryTranslationUpdate,
+) -> Any:
+    """
+    Update translations for a race category.
+    Only race organizer or admin can update translations.
+    """
+    from app.i18n import is_language_supported, set_translation
+    
+    # Get the category
+    category = crud.get_race_category(session=session, category_id=category_id)
+    if not category:
+        raise HTTPException(status_code=404, detail="Race category not found")
+    
+    # Get the race to check permissions
+    race = crud.get_race(session=session, race_id=category.race_id)
+    if not race:
+        raise HTTPException(status_code=404, detail="Race not found")
+    
+    # Check permissions - only organizer or admin
+    if race.organizer_id != current_user.id and not current_user.is_superuser:
+        raise HTTPException(
+            status_code=403,
+            detail="Only race organizer or admin can update translations"
+        )
+    
+    # Validate language
+    if not is_language_supported(translation.language):
+        raise HTTPException(
+            status_code=400,
+            detail=f"Language '{translation.language}' is not supported"
+        )
+    
+    # Update translations
+    if translation.name:
+        set_translation(category, "name", translation.name, translation.language)
+    if translation.description:
+        set_translation(category, "description", translation.description, translation.language)
+    
+    session.add(category)
+    session.commit()
+    session.refresh(category)
+    
+    return category
+
+
+@router.get("/{category_id}/translations", response_model=dict[str, Any])
+def get_category_translations(
+    *,
+    session: SessionDep,
+    category_id: uuid.UUID,
+) -> Any:
+    """
+    Get all translations for a race category.
+    Public endpoint - anyone can view translations.
+    """
+    category = crud.get_race_category(session=session, category_id=category_id)
+    if not category:
+        raise HTTPException(status_code=404, detail="Race category not found")
+    
+    return category.translations or {}
+

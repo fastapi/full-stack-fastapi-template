@@ -1,0 +1,188 @@
+{
+  "common": {
+    "loading": "Đang tải...",
+    "error": "Lỗi",
+    "success": "Thành công",
+    "cancel": "Hủy",
+    "save": "Lưu",
+    "saving": "Đang lưu...",
+    "delete": "Xóa",
+    "edit": "Sửa",
+    "create": "Tạo",
+    "search": "Tìm kiếm",
+    "filter": "Lọc",
+    "sort": "Sắp xếp",
+    "back": "Quay lại",
+    "next": "Tiếp",
+    "previous": "Trước",
+    "viewAll": "Xem tất cả",
+    "learnMore": "Tìm hiểu thêm",
+    "register": "Đăng ký",
+    "login": "Đăng nhập",
+    "logout": "Đăng xuất",
+    "close": "Đóng",
+    "apply": "Áp dụng",
+    "reset": "Đặt lại",
+    "clear": "Xóa"
+  },
+  "nav": {
+    "home": "Trang chủ",
+    "races": "Giải chạy",
+    "about": "Giới thiệu",
+    "contact": "Liên hệ",
+    "dashboard": "Bảng điều khiển",
+    "profile": "Hồ sơ",
+    "settings": "Cài đặt"
+  },
+  "home": {
+    "hero": {
+      "title": "Khám Phá Thử Thách Chạy Tiếp Theo Của Bạn",
+      "subtitle": "Tìm và đăng ký giải chạy trên khắp Việt Nam. Từ 5K đến siêu marathon, đường trường đến trail.",
+      "cta": "Xem giải chạy",
+      "searchPlaceholder": "Tìm kiếm giải chạy..."
+    },
+    "features": {
+      "title": "Tại Sao Chọn VNRunner",
+      "discover": {
+        "title": "Khám Phá Giải Chạy",
+        "description": "Duyệt các giải chạy sắp tới trong khu vực của bạn và tìm sự kiện hoàn hảo cho mục tiêu của bạn."
+      },
+      "easyRegistration": {
+        "title": "Đăng Ký Dễ Dàng",
+        "description": "Đăng ký trực tuyến trong vài phút với quy trình đăng ký đơn giản và an toàn của chúng tôi."
+      },
+      "trackProgress": {
+        "title": "Theo Dõi Tiến Độ",
+        "description": "Xem lịch sử giải chạy, theo dõi kỷ lục cá nhân và ăn mừng thành tích của bạn."
+      }
+    },
+    "trending": "Giải Chạy Nổi Bật",
+    "upcoming": "Giải Chạy Sắp Tới",
+    "noRaces": "Chưa có giải chạy nào để hiển thị."
+  },
+  "races": {
+    "title": "Giải Chạy Sắp Tới Tại Việt Nam",
+    "subtitle": "Duyệt và đăng ký các giải chạy sắp tới trên khắp Việt Nam. Tìm sự kiện hoàn hảo phù hợp với mục tiêu và thể lực của bạn - từ đường trường đến trail, 5K đến siêu marathon.",
+    "backToAll": "← Quay lại tất cả giải chạy",
+    "searchPlaceholder": "Tìm theo tên giải, địa điểm...",
+    "filters": {
+      "title": "Bộ lọc",
+      "terrain": "Địa hình",
+      "difficulty": "Độ khó",
+      "distance": "Khoảng cách",
+      "location": "Địa điểm",
+      "date": "Ngày",
+      "price": "Giá",
+      "province": "Tỉnh/Thành",
+      "all": "Tất cả"
+    },
+    "sort": {
+      "byDate": "Theo ngày",
+      "byDistance": "Theo khoảng cách",
+      "byPopularity": "Theo độ phổ biến"
+    },
+    "terrain": {
+      "road": "Đường trường",
+      "trail": "Đường mòn",
+      "track": "Đường chạy",
+      "mixed": "Hỗn hợp"
+    },
+    "difficulty": {
+      "easy": "Dễ",
+      "moderate": "Trung bình",
+      "hard": "Khó",
+      "extreme": "Cực khó"
+    },
+    "status": {
+      "draft": "Bản nháp",
+      "published": "Đã công bố",
+      "registration_open": "Đang mở đăng ký",
+      "registration_closed": "Đã đóng đăng ký",
+      "completed": "Đã hoàn thành",
+      "cancelled": "Đã hủy"
+    },
+    "detail": {
+      "overview": "Tổng quan",
+      "location": "Địa điểm",
+      "date": "Ngày",
+      "terrain": "Địa hình",
+      "difficulty": "Độ khó",
+      "elevation": "Độ tăng cao",
+      "website": "Website chính thức",
+      "categories": "Hạng mục giải chạy",
+      "category": "Hạng mục",
+      "distance": "Khoảng cách",
+      "price": "Giá",
+      "cutoffTime": "Thời gian giới hạn",
+      "courseMap": "Bản đồ đường chạy",
+      "tags": "Thẻ",
+      "similarRaces": "Giải chạy tương tự",
+      "registrationClosed": "Đã đóng đăng ký",
+      "registerNow": "Đăng ký ngay"
+    },
+    "card": {
+      "certified": "Được chứng nhận",
+      "aiPick": "AI gợi ý",
+      "slotsLeft": "Còn {{count}} chỗ",
+      "from": "Từ"
+    },
+    "noResults": "Không tìm thấy giải chạy phù hợp với tiêu chí của bạn.",
+    "viewMode": {
+      "grid": "Hiển thị lưới",
+      "map": "Hiển thị bản đồ"
+    }
+  },
+  "about": {
+    "title": "Giới Thiệu VNRunner",
+    "subtitle": "VNRunner là nền tảng hàng đầu để khám phá và đăng ký giải chạy trên khắp Việt Nam. Chúng tôi kết nối vận động viên với ban tổ chức để tạo ra trải nghiệm chạy đáng nhớ.",
+    "mission": {
+      "title": "Sứ Mệnh Của Chúng Tôi",
+      "subtitle": "Làm cho việc khám phá và đăng ký giải chạy trở nên đơn giản cho mọi người",
+      "description": "Chúng tôi tin rằng chạy bộ gắn kết mọi người. Nền tảng của chúng tôi giúp bạn dễ dàng tìm thấy các giải chạy phù hợp với mục tiêu của mình, đăng ký trực tuyến an toàn và theo dõi hành trình chạy của bạn. Cho dù bạn đang tập luyện cho giải 5K đầu tiên hay marathon thứ mười, VNRunner giúp bạn tìm thấy sự kiện hoàn hảo."
+    },
+    "forRunners": {
+      "title": "Dành Cho Vận Động Viên",
+      "features": [
+        "Duyệt giải chạy theo khoảng cách, địa điểm và ngày",
+        "Đăng ký trực tuyến với quy trình thanh toán an toàn",
+        "Theo dõi lịch sử giải chạy và kỷ lục cá nhân",
+        "Nhận cập nhật giải chạy và thông tin quan trọng"
+      ]
+    },
+    "forOrganizers": {
+      "title": "Dành Cho Ban Tổ Chức",
+      "features": [
+        "Tạo và quản lý giải chạy với bảng điều khiển trực quan",
+        "Xử lý đăng ký và quản lý người tham gia",
+        "Truy cập dữ liệu đăng ký và báo cáo thời gian thực",
+        "Liên lạc với người tham gia trước và sau giải chạy"
+      ]
+    },
+    "faq": {
+      "q1": "VNRunner là gì?",
+      "a1": "VNRunner là nền tảng hàng đầu của Việt Nam để khám phá và đăng ký giải chạy. Chúng tôi kết nối vận động viên với ban tổ chức để tạo ra trải nghiệm chạy đáng nhớ trên khắp Việt Nam.",
+      "q2": "Làm thế nào để đăng ký giải chạy?",
+      "a2": "Duyệt danh sách giải chạy của chúng tôi, chọn sự kiện bạn muốn và hoàn thành biểu mẫu đăng ký trực tuyến. Thanh toán được xử lý an toàn thông qua nền tảng của chúng tôi. Bạn sẽ nhận được xác nhận và chi tiết giải chạy qua email.",
+      "q3": "Ban tổ chức có thể sử dụng VNRunner không?",
+      "a3": "Có! Ban tổ chức có thể tạo và quản lý giải chạy thông qua bảng điều khiển trực quan của chúng tôi, xử lý đăng ký, truy cập dữ liệu người tham gia và giao tiếp với vận động viên trước và sau sự kiện.",
+      "q4": "Có những loại giải chạy nào?",
+      "a4": "VNRunner có nhiều loại giải chạy bao gồm đường trường, đường mòn, marathon, half marathon, siêu marathon, giải 5K, 10K và nhiều hơn nữa trên khắp Việt Nam."
+    }
+  },
+  "footer": {
+    "tagline": "Nền tảng giải chạy hàng đầu của bạn tại Việt Nam",
+    "copyright": "© {{year}} VNRunner. Tất cả quyền được bảo lưu.",
+    "links": {
+      "about": "Giới thiệu",
+      "contact": "Liên hệ",
+      "privacy": "Chính sách bảo mật",
+      "terms": "Điều khoản dịch vụ",
+      "help": "Trung tâm trợ giúp"
+    }
+  },
+  "language": {
+    "select": "Chọn ngôn ngữ",
+    "english": "English",
+    "vietnamese": "Tiếng Việt"
+  }
+}

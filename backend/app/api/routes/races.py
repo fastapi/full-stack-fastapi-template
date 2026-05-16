@@ -23,6 +23,7 @@ from app.models import (
     RacesPublicWithDistance,
     RacesPublicWithExplanation,
     RaceStatusEnum,
+    RaceTranslationUpdate,
     RaceUpdate,
     TerrainEnum,
 )
@@ -32,17 +33,13 @@ logger = logging.getLogger(__name__)
 router = APIRouter(prefix="/races", tags=["races"])
 
 
-def _invalidate_race_caches() -> None:
-    """Synchronously schedule cache invalidation for race-related keys."""
-    import asyncio
+async def _invalidate_race_caches() -> None:
+    """Invalidate cache for race-related keys."""
     from app.services.cache import cache_delete_pattern
 
-    async def _run() -> None:
-        await cache_delete_pattern("trending:*")
-        await cache_delete_pattern("search:*")
-        await cache_delete_pattern("tags:*")
-
-    asyncio.create_task(_run())
+    await cache_delete_pattern("trending:*")
+    await cache_delete_pattern("search:*")
+    await cache_delete_pattern("tags:*")
 
 
 def _schedule_embedding(race_id: uuid.UUID) -> None:
@@ -520,6 +517,74 @@ async def ask_race_question(
 
     answer = await answer_race_question(race=race, question=body.question)
     return RaceAnswer(answer=answer)
+
+
+@router.put("/{race_id}/translations", response_model=RacePublic)
+def update_race_translations(
+    *,
+    session: SessionDep,
+    current_user: CurrentUser,
+    race_id: uuid.UUID,
+    translation: RaceTranslationUpdate,
+    background_tasks: BackgroundTasks,
+) -> Any:
+    """
+    Update translations for a race.
+    Only race organizer or admin can update translations.
+    """
+    from app.i18n import is_language_supported, set_translation
+    
+    # Get the race
+    race = crud.get_race(session=session, race_id=race_id)
+    if not race:
+        raise HTTPException(status_code=404, detail="Race not found")
+    
+    # Check permissions - only organizer or admin
+    if race.organizer_id != current_user.id and not current_user.is_superuser:
+        raise HTTPException(
+            status_code=403,
+            detail="Only race organizer or admin can update translations"
+        )
+    
+    # Validate language
+    if not is_language_supported(translation.language):
+        raise HTTPException(
+            status_code=400,
+            detail=f"Language '{translation.language}' is not supported"
+        )
+    
+    # Update translations
+    if translation.name:
+        set_translation(race, "name", translation.name, translation.language)
+    if translation.description:
+        set_translation(race, "description", translation.description, translation.language)
+    if translation.location:
+        set_translation(race, "location", translation.location, translation.language)
+    
+    session.add(race)
+    session.commit()
+    session.refresh(race)
+    
+    background_tasks.add_task(_invalidate_race_caches)
+    
+    return race
+
+
+@router.get("/{race_id}/translations", response_model=dict[str, Any])
+def get_race_translations(
+    *,
+    session: SessionDep,
+    race_id: uuid.UUID,
+) -> Any:
+    """
+    Get all translations for a race.
+    Public endpoint - anyone can view translations.
+    """
+    race = crud.get_race(session=session, race_id=race_id)
+    if not race:
+        raise HTTPException(status_code=404, detail="Race not found")
+    
+    return race.translations or {}
 
 
 # ---------------------------------------------------------------------------

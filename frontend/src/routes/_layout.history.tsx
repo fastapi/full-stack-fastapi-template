@@ -1,6 +1,7 @@
-import { createFileRoute } from "@tanstack/react-router"
+import { createFileRoute, useParams } from "@tanstack/react-router"
 import { useQuery } from "@tanstack/react-query"
 import { useState } from "react"
+import { useTranslation } from "react-i18next"
 import { RaceRegistrationsService } from "@/client"
 import type { RaceRegistrationPublic } from "@/client"
 import { Badge } from "@/components/ui/badge"
@@ -76,6 +77,9 @@ function RegistrationRow({ reg }: { reg: RaceRegistrationPublic }) {
 
 function RaceHistoryPage() {
   const [tab, setTab] = useState<"upcoming" | "past">("upcoming")
+  const params = useParams({ strict: false }) as Record<string, any>
+  const { i18n } = useTranslation()
+  const lang = params?.lang || i18n.language || "vi"
 
   const { data, isLoading } = useQuery({
     queryKey: ["myRegistrations"],
@@ -148,7 +152,7 @@ function RaceHistoryPage() {
           <Clock className="mx-auto size-10 text-muted-foreground/50" />
           <p className="text-muted-foreground">No {tab} registrations.</p>
           {tab === "upcoming" && (
-            <Link to="/races" className="text-sm text-primary hover:underline">
+            <Link to="/$lang/races" params={{ lang }} className="text-sm text-primary hover:underline">
               Browse upcoming races →
             </Link>
           )}

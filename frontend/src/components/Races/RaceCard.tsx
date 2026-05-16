@@ -1,4 +1,4 @@
-import { Link } from "@tanstack/react-router"
+import { Link, useNavigate, useParams } from "@tanstack/react-router"
 import { Calendar, MapPin, Mountain, TrendingUp, Sparkles } from "lucide-react"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
@@ -38,6 +38,10 @@ const difficultyColors: Record<string, string> = {
 }
 
 export function RaceCard({ race, distanceKm }: RaceCardProps) {
+  const navigate = useNavigate()
+  const params = useParams({ strict: false }) as Record<string, any>
+  const lang = params?.lang || "vi"
+  
   const aiExplanation = "ai_explanation" in race ? race.ai_explanation : null
   const eventDate = race.event_start_date
     ? new Date(race.event_start_date).toLocaleDateString("en-US", {
@@ -59,7 +63,7 @@ export function RaceCard({ race, distanceKm }: RaceCardProps) {
   const descriptionText = race.description ? stripHtml(race.description) : ""
 
   return (
-    <Link to="/races/$raceId" params={{ raceId: race.id }} className="block">
+    <Link to="/$lang/races/$raceId" params={{ lang, raceId: race.id }} className="block">
       <Card className="flex flex-col transition-shadow hover:shadow-lg cursor-pointer h-full">
       <CardHeader className="space-y-3">
         <div className="flex flex-wrap items-center gap-2">
@@ -125,8 +129,15 @@ export function RaceCard({ race, distanceKm }: RaceCardProps) {
       </CardContent>
 
       <CardFooter>
-        <Button className="w-full" onClick={(e) => e.preventDefault()} asChild>
-          <Link to="/login">Register Now</Link>
+        <Button 
+          className="w-full" 
+          onClick={(e) => {
+            e.preventDefault()
+            e.stopPropagation()
+            navigate({ to: "/login" })
+          }}
+        >
+          Register Now
         </Button>
       </CardFooter>
       </Card>

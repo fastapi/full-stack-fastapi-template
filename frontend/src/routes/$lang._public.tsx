@@ -2,7 +2,7 @@ import { createFileRoute, Outlet } from "@tanstack/react-router"
 import { PublicFooter } from "@/components/Public/PublicFooter"
 import { PublicHeader } from "@/components/Public/PublicHeader"
 
-export const Route = createFileRoute("/_public")({
+export const Route = createFileRoute("/$lang/_public")({
   component: PublicLayout,
 })
 
@@ -17,5 +17,3 @@ function PublicLayout() {
     </div>
   )
 }
-
-export default PublicLayout

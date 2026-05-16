@@ -1,5 +1,6 @@
-import { createFileRoute, Link } from "@tanstack/react-router"
+import { createFileRoute, Link, useParams } from "@tanstack/react-router"
 import { ArrowRight, Calendar, MapPin, Trophy, ChevronRight } from "lucide-react"
+import { useTranslation } from "react-i18next"
 import { Button } from "@/components/ui/button"
 import {
   Card,
@@ -15,7 +16,7 @@ import { generateMetaTags, generateOrganizationSchema, StructuredData } from "@/
 
 const baseUrl = import.meta.env.VITE_FRONTEND_URL || "https://vnrunner.com"
 
-export const Route = createFileRoute("/_public/")({
+export const Route = createFileRoute("/$lang/_public/")({
   component: HomePage,
   head: () => ({
     meta: generateMetaTags({
@@ -29,37 +30,18 @@ export const Route = createFileRoute("/_public/")({
   }),
 })
 
-const features = [
-  {
-    icon: Calendar,
-    title: "Discover Races",
-    description:
-      "Browse upcoming races in your area and find the perfect event for your goals.",
-  },
-  {
-    icon: MapPin,
-    title: "Easy Registration",
-    description:
-      "Register online in minutes with our simple and secure registration process.",
-  },
-  {
-    icon: Trophy,
-    title: "Track Progress",
-    description:
-      "View your race history, track your PRs, and celebrate your achievements.",
-  },
-]
-
 function HorizontalRail({
   title,
   link,
   races,
   isLoading,
+  t,
 }: {
   title: string
   link?: string
   races: { id: string; [key: string]: unknown }[]
   isLoading: boolean
+  t: (key: string) => string
 }) {
   return (
     <section className="space-y-4">
@@ -70,7 +52,7 @@ function HorizontalRail({
             to="/races"
             className="flex items-center gap-1 text-sm text-primary hover:underline"
           >
-            View all <ChevronRight className="size-4" />
+            {t("common.viewAll")} <ChevronRight className="size-4" />
           </Link>
         )}
       </div>
@@ -84,7 +66,7 @@ function HorizontalRail({
           ))}
         </div>
       ) : races.length === 0 ? (
-        <p className="text-sm text-muted-foreground py-4">No races to show right now.</p>
+        <p className="text-sm text-muted-foreground py-4">{t("home.noRaces")}</p>
       ) : (
         <div className="flex gap-4 overflow-x-auto pb-2 snap-x">
           {races.map((race) => (
@@ -99,6 +81,10 @@ function HorizontalRail({
 }
 
 function PersonalizedSections() {
+  const { t, i18n } = useTranslation()
+  const { lang } = Route.useParams()
+  const currentLang = lang || i18n.language || "vi"
+  
   const { data: trendingData, isLoading: trendingLoading } = useRaceSearch({
     sort: "popularity",
     limit: 6,
@@ -111,16 +97,18 @@ function PersonalizedSections() {
   return (
     <div className="space-y-10">
       <HorizontalRail
-        title="Trending Races"
-        link="/races?sort=popularity"
+        title={t("home.trending")}
+        link={`/${currentLang}/races?sort=popularity`}
         races={trendingData?.data ?? []}
         isLoading={trendingLoading}
+        t={t}
       />
       <HorizontalRail
-        title="Upcoming Races"
-        link="/races?sort=date"
+        title={t("home.upcoming")}
+        link={`/${currentLang}/races?sort=date`}
         races={upcomingData?.data ?? []}
         isLoading={upcomingLoading}
+        t={t}
       />
     </div>
   )
@@ -128,6 +116,27 @@ function PersonalizedSections() {
 
 function HomePage() {
   const loggedIn = isLoggedIn()
+  const { t, i18n } = useTranslation()
+  const { lang } = Route.useParams()
+  const currentLang = lang || i18n.language || "vi"
+
+  const features = [
+    {
+      icon: Calendar,
+      title: t("home.features.discover.title"),
+      description: t("home.features.discover.description"),
+    },
+    {
+      icon: MapPin,
+      title: t("home.features.easyRegistration.title"),
+      description: t("home.features.easyRegistration.description"),
+    },
+    {
+      icon: Trophy,
+      title: t("home.features.trackProgress.title"),
+      description: t("home.features.trackProgress.description"),
+    },
+  ]
 
   const organizationSchema = generateOrganizationSchema({
     name: "VNRunner",
@@ -152,21 +161,20 @@ function HomePage() {
         <div className="container">
           <div className="mx-auto max-w-3xl text-center space-y-8">
             <h1 className="text-4xl font-bold tracking-tight md:text-5xl lg:text-6xl">
-              Find Your Next Vietnamese Race
+              {t("home.hero.title")}
             </h1>
             <p className="text-lg text-muted-foreground md:text-xl">
-              Discover trail runs, road races and ultras across Vietnam. Join
-              thousands of runners achieving their goals.
+              {t("home.hero.subtitle")}
             </p>
             <div className="flex flex-col gap-4 sm:flex-row sm:justify-center">
               <Button size="lg" asChild>
-                <Link to="/races">
-                  Browse Races <ArrowRight className="ml-2 size-4" />
+                <Link to={`/${currentLang}/races`}>
+                  {t("home.hero.cta")} <ArrowRight className="ml-2 size-4" />
                 </Link>
               </Button>
               {!loggedIn && (
                 <Button size="lg" variant="outline" asChild>
-                  <Link to="/signup">Create Account</Link>
+                  <Link to="/signup">{t("common.register")}</Link>
                 </Button>
               )}
             </div>
@@ -188,12 +196,8 @@ function HomePage() {
         <div className="container">
           <div className="mx-auto max-w-2xl text-center space-y-4 mb-12">
             <h2 className="text-3xl font-bold tracking-tight md:text-4xl">
-              Why Choose VNRunner?
+              {t("home.features.title")}
             </h2>
-            <p className="text-lg text-muted-foreground">
-              Everything you need to find, register, and prepare for your next
-              running event in Vietnam.
-            </p>
           </div>
           <div className="mx-auto grid max-w-5xl gap-6 md:grid-cols-3">
             {features.map(({ icon: Icon, title, description }) => (

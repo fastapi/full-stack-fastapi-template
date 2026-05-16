@@ -10,7 +10,7 @@ import { generateMetaTags, generateFAQSchema, StructuredData } from "@/lib/seo"
 
 const baseUrl = import.meta.env.VITE_FRONTEND_URL || "https://vnrunner.com"
 
-export const Route = createFileRoute("/_public/about")({
+export const Route = createFileRoute("/$lang/_public/about")({
   component: AboutPage,
   head: () => ({
     meta: generateMetaTags({

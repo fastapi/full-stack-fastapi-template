@@ -40,7 +40,7 @@ function validateSearch(search: Record<string, unknown>): RaceSearch {
   }
 }
 
-export const Route = createFileRoute("/_public/races/")({
+export const Route = createFileRoute("/$lang/_public/races/")({
   validateSearch,
   component: RacesPage,
   head: () => ({

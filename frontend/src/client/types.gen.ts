@@ -52,6 +52,15 @@ export type Body_media_upload_media_asset = {
     is_public?: boolean;
 };
 
+/**
+ * Update translations for a race category
+ */
+export type CategoryTranslationUpdate = {
+    language: string;
+    name?: (string | null);
+    description?: (string | null);
+};
+
 export type DescriptionSuggestion = {
     description: string;
 };
@@ -237,6 +246,9 @@ export type RaceCategoryCreate = {
     description?: (string | null);
     display_order?: number;
     is_active?: boolean;
+    translations?: ({
+    [key: string]: unknown;
+} | null);
     race_id: string;
 };
 
@@ -259,6 +271,9 @@ export type RaceCategoryPublic = {
     description?: (string | null);
     display_order?: number;
     is_active?: boolean;
+    translations?: ({
+    [key: string]: unknown;
+} | null);
     id: string;
     race_id: string;
     created_at: string;
@@ -284,6 +299,9 @@ export type RaceCategoryPublicWithDetails = {
     description?: (string | null);
     display_order?: number;
     is_active?: boolean;
+    translations?: ({
+    [key: string]: unknown;
+} | null);
     id: string;
     race_id: string;
     created_at: string;
@@ -346,6 +364,10 @@ export type RaceCreate = {
     is_certified?: boolean;
     gpx_file_url?: (string | null);
     website_url?: (string | null);
+    default_language?: string;
+    translations?: ({
+    [key: string]: unknown;
+} | null);
 };
 
 export type RaceNameInput = {
@@ -383,6 +405,10 @@ export type RacePublic = {
     is_certified?: boolean;
     gpx_file_url?: (string | null);
     website_url?: (string | null);
+    default_language?: string;
+    translations?: ({
+    [key: string]: unknown;
+} | null);
     id: string;
     created_at: string;
     updated_at: string;
@@ -420,6 +446,10 @@ export type RacePublicWithDetails = {
     is_certified?: boolean;
     gpx_file_url?: (string | null);
     website_url?: (string | null);
+    default_language?: string;
+    translations?: ({
+    [key: string]: unknown;
+} | null);
     id: string;
     created_at: string;
     updated_at: string;
@@ -462,6 +492,10 @@ export type RacePublicWithDistance = {
     is_certified?: boolean;
     gpx_file_url?: (string | null);
     website_url?: (string | null);
+    default_language?: string;
+    translations?: ({
+    [key: string]: unknown;
+} | null);
     id: string;
     created_at: string;
     updated_at: string;
@@ -500,6 +534,10 @@ export type RacePublicWithExplanation = {
     is_certified?: boolean;
     gpx_file_url?: (string | null);
     website_url?: (string | null);
+    default_language?: string;
+    translations?: ({
+    [key: string]: unknown;
+} | null);
     id: string;
     created_at: string;
     updated_at: string;
@@ -648,6 +686,19 @@ export type RaceStatusEnum = 'draft' | 'published' | 'registration_open' | 'regi
 export type RaceTagCreate = {
     name: string;
     slug: string;
+    translations?: ({
+    [key: string]: unknown;
+} | null);
+};
+
+/**
+ * Update translations for a race
+ */
+export type RaceTranslationUpdate = {
+    language: string;
+    name?: (string | null);
+    description?: (string | null);
+    location?: (string | null);
 };
 
 export type RaceUpdate = {
@@ -713,6 +764,9 @@ export type RoleUpdate = {
 export type TagPublic = {
     name: string;
     slug: string;
+    translations?: ({
+    [key: string]: unknown;
+} | null);
     id: string;
 };
 
@@ -723,6 +777,14 @@ export type TagsPublic = {
 
 export type TagSuggestion = {
     tags: Array<(string)>;
+};
+
+/**
+ * Update translations for a tag
+ */
+export type TagTranslationUpdate = {
+    language: string;
+    name?: (string | null);
 };
 
 export type TerrainEnum = 'road' | 'trail' | 'track' | 'mixed';
@@ -1106,6 +1168,21 @@ export type RaceCategoriesDeleteRaceCategoryData = {
 
 export type RaceCategoriesDeleteRaceCategoryResponse = (Message);
 
+export type RaceCategoriesUpdateCategoryTranslationsData = {
+    categoryId: string;
+    requestBody: CategoryTranslationUpdate;
+};
+
+export type RaceCategoriesUpdateCategoryTranslationsResponse = (RaceCategoryPublic);
+
+export type RaceCategoriesGetCategoryTranslationsData = {
+    categoryId: string;
+};
+
+export type RaceCategoriesGetCategoryTranslationsResponse = ({
+    [key: string]: unknown;
+});
+
 export type RaceRegistrationsReadRaceRegistrationsData = {
     categoryId?: (string | null);
     limit?: number;
@@ -1311,6 +1388,21 @@ export type RacesAskRaceQuestionData = {
 
 export type RacesAskRaceQuestionResponse = (RaceAnswer);
 
+export type RacesUpdateRaceTranslationsData = {
+    raceId: string;
+    requestBody: RaceTranslationUpdate;
+};
+
+export type RacesUpdateRaceTranslationsResponse = (RacePublic);
+
+export type RacesGetRaceTranslationsData = {
+    raceId: string;
+};
+
+export type RacesGetRaceTranslationsResponse = ({
+    [key: string]: unknown;
+});
+
 export type RolesReadRolesData = {
     limit?: number;
     skip?: number;
@@ -1371,6 +1463,21 @@ export type TagsSetTagsForRaceData = {
 };
 
 export type TagsSetTagsForRaceResponse = (Array<TagPublic>);
+
+export type TagsUpdateTagTranslationsData = {
+    requestBody: TagTranslationUpdate;
+    tagId: string;
+};
+
+export type TagsUpdateTagTranslationsResponse = (TagPublic);
+
+export type TagsGetTagTranslationsData = {
+    tagId: string;
+};
+
+export type TagsGetTagTranslationsResponse = ({
+    [key: string]: unknown;
+});
 
 export type UsersReadUsersData = {
     limit?: number;

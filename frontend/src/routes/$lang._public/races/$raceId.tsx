@@ -21,7 +21,7 @@ import {
 
 const baseUrl = import.meta.env.VITE_FRONTEND_URL || "https://vnrunner.com"
 
-export const Route = createFileRoute("/_public/races/$raceId")({
+export const Route = createFileRoute("/$lang/_public/races/$raceId")({
   component: RaceDetailPage,
   loader: async ({ params }) => {
     try {
