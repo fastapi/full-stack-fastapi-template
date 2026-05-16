@@ -6,6 +6,7 @@ from app.api.routes import (
     media,
     private,
     profiles,
+    provinces,
     race_attributes,
     race_categories,
     race_registrations,
@@ -37,6 +38,7 @@ api_router.include_router(race_attributes.router)
 # Discovery & personalization routes
 api_router.include_router(tags.router)
 api_router.include_router(profiles.router)
+api_router.include_router(provinces.router)
 
 # Admin utilities
 api_router.include_router(races_admin_router)

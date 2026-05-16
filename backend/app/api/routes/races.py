@@ -87,6 +87,8 @@ async def search_races(
     date_to: datetime | None = None,
     tag_slugs: list[str] | None = Query(default=None),
     status: RaceStatusEnum | None = None,
+    province_code: str | None = Query(default=None, description="Filter by province code"),
+    ward_code: str | None = Query(default=None, description="Filter by ward code"),
     sort: str = Query(default="date", pattern="^(date|distance|popularity)$"),
     skip: int = Query(default=0, ge=0),
     limit: int = Query(default=20, ge=1, le=100),
@@ -122,6 +124,8 @@ async def search_races(
         date_to=date_to,
         tag_slugs=tag_slugs,
         status=status,
+        province_code=province_code,
+        ward_code=ward_code,
         sort=sort,
         skip=0,
         limit=limit * 2,
@@ -159,6 +163,8 @@ async def search_races(
             date_to=date_to,
             tag_slugs=tag_slugs,
             status=status,
+            province_code=province_code,
+            ward_code=ward_code,
         )
 
     return RacesPublic(data=[RacePublic.model_validate(r) for r in races], count=count)
@@ -287,6 +293,42 @@ def read_races(
     count = crud.get_races_count(session=session, organizer_id=organizer_id)
     races_public = [RacePublic.model_validate(race) for race in races]
     return RacesPublic(data=races_public, count=count)
+
+
+# AI Assistant endpoint
+class RaceNameInput(SQLModel):
+    name: str
+
+
+class AIRaceSuggestion(SQLModel):
+    description: str | None = None
+    location: str | None = None
+    terrain_type: str | None = None
+    difficulty_level: str | None = None
+    elevation_gain_m: str | None = None
+
+
+@router.post("/ai-assist", response_model=AIRaceSuggestion)
+async def generate_race_details(
+    *,
+    current_user: CurrentUser,
+    race_name_input: RaceNameInput,
+) -> Any:
+    """
+    Use AI to generate race details from a race name.
+    Requires authentication.
+    """
+    from app.services.ai import generate_race_from_name
+    from app.core.config import settings
+
+    if not settings.OPENAI_API_KEY:
+        raise HTTPException(
+            status_code=503,
+            detail="AI assistance is not configured. Please set OPENAI_API_KEY.",
+        )
+
+    details = await generate_race_from_name(race_name_input.name)
+    return AIRaceSuggestion(**details)
 
 
 @router.post("/", response_model=RacePublic)

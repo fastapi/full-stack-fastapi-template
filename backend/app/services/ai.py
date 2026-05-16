@@ -227,3 +227,46 @@ async def answer_race_question(race: "Race", question: str) -> str:
     )
     block = response.content[0]
     return block.text if hasattr(block, "text") else ""
+
+
+async def generate_race_from_name(race_name: str) -> dict[str, str]:
+    """
+    Generate race details from just a race name using OpenAI.
+    Returns a dictionary with suggested race fields.
+    """
+    import json
+
+    system_prompt = (
+        "You are an expert on Vietnamese running races and marathons. "
+        "Given a race name, generate realistic and detailed information about what this race might be. "
+        "Research real Vietnamese locations, terrains, and typical race characteristics. "
+        "Return ONLY a JSON object with these fields (all strings): "
+        "description, location, terrain_type (road/trail/track/mixed), "
+        "difficulty_level (easy/moderate/hard/extreme), elevation_gain_m (number as string). "
+        "Be specific and realistic for Vietnam. No extra text, only valid JSON."
+    )
+
+    try:
+        response = await _openai().chat.completions.create(
+            model="gpt-4o-mini",
+            messages=[
+                {"role": "system", "content": system_prompt},
+                {"role": "user", "content": f"Race name: {race_name}"}
+            ],
+            temperature=0.7,
+            max_tokens=500,
+        )
+        
+        content = response.choices[0].message.content
+        if not content:
+            return {}
+        
+        # Parse the JSON response
+        data = json.loads(content)
+        return data
+    except json.JSONDecodeError:
+        logger.warning("generate_race_from_name: failed to parse JSON response")
+        return {}
+    except Exception as e:
+        logger.error("generate_race_from_name: error generating race details: %s", e)
+        return {}

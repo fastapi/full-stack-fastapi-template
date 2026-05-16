@@ -15,6 +15,7 @@ from app.models import (
     MediaAsset,
     MediaAssetCreate,
     MediaAssetUpdate,
+    Province,
     Race,
     RaceAttribute,
     RaceAttributeCreate,
@@ -49,6 +50,7 @@ from app.models import (
     UserProfileUpdate,
     UserRaceInteraction,
     UserUpdate,
+    Ward,
 )
 
 
@@ -191,7 +193,25 @@ def create_race(
     *, session: Session, race_in: RaceCreate, organizer_id: uuid.UUID
 ) -> Race:
     """Create a new race."""
-    db_race = Race.model_validate(race_in, update={"organizer_id": organizer_id})
+    race_data = race_in.model_dump()
+    
+    # Populate province_name if province_code is provided
+    if race_data.get("province_code"):
+        province = session.get(Province, race_data["province_code"])
+        if province:
+            race_data["province_name"] = province.name
+    
+    # Populate ward_name if ward_code is provided
+    if race_data.get("ward_code"):
+        ward = session.get(Ward, race_data["ward_code"])
+        if ward:
+            race_data["ward_name"] = ward.name
+    
+    # Set country_code for Vietnam races
+    if race_data.get("country") == "Vietnam" or not race_data.get("country_code"):
+        race_data["country_code"] = "VN"
+    
+    db_race = Race.model_validate(race_data, update={"organizer_id": organizer_id})
     session.add(db_race)
     session.commit()
     session.refresh(db_race)
@@ -230,6 +250,32 @@ def update_race(*, session: Session, db_race: Race, race_in: RaceUpdate) -> Race
     """Update a race."""
     race_data = race_in.model_dump(exclude_unset=True)
     tag_ids = race_data.pop("tag_ids", None)
+    
+    # Populate province_name if province_code is being updated
+    if "province_code" in race_data and race_data["province_code"]:
+        province = session.get(Province, race_data["province_code"])
+        if province:
+            race_data["province_name"] = province.name
+    elif "province_code" in race_data and race_data["province_code"] is None:
+        # Clear province_name if province_code is being cleared
+        race_data["province_name"] = None
+    
+    # Populate ward_name if ward_code is being updated
+    if "ward_code" in race_data and race_data["ward_code"]:
+        ward = session.get(Ward, race_data["ward_code"])
+        if ward:
+            race_data["ward_name"] = ward.name
+    elif "ward_code" in race_data and race_data["ward_code"] is None:
+        # Clear ward_name if ward_code is being cleared
+        race_data["ward_name"] = None
+    
+    # Update country_code if country is being updated to Vietnam
+    if "country" in race_data:
+        if race_data["country"] == "Vietnam":
+            race_data["country_code"] = "VN"
+        elif race_data["country"] is None:
+            race_data["country_code"] = None
+    
     race_data["updated_at"] = datetime.now(timezone.utc)
     db_race.sqlmodel_update(race_data)
     session.add(db_race)
@@ -1042,6 +1088,8 @@ def search_races(
     date_to: datetime | None = None,
     tag_slugs: list[str] | None = None,
     status: RaceStatusEnum | None = None,
+    province_code: str | None = None,
+    ward_code: str | None = None,
     sort: str = "date",
     skip: int = 0,
     limit: int = 20,
@@ -1099,6 +1147,12 @@ def search_races(
     if status is not None:
         statement = statement.where(Race.status == status)
 
+    # Location filters (Vietnamese administrative data)
+    if province_code is not None:
+        statement = statement.where(Race.province_code == province_code)
+    if ward_code is not None:
+        statement = statement.where(Race.ward_code == ward_code)
+
     # Sorting
     if sort == "popularity":
         pop_sub = (
@@ -1138,6 +1192,8 @@ def search_races_count(
     date_to: datetime | None = None,
     tag_slugs: list[str] | None = None,
     status: RaceStatusEnum | None = None,
+    province_code: str | None = None,
+    ward_code: str | None = None,
 ) -> int:
     """Count matching races for search (mirrors search_races filters)."""
     from app.utils import haversine_sql_expr
@@ -1178,6 +1234,10 @@ def search_races_count(
             statement = statement.where(col(Race.id).in_(tag_sub))
     if status is not None:
         statement = statement.where(Race.status == status)
+    if province_code is not None:
+        statement = statement.where(Race.province_code == province_code)
+    if ward_code is not None:
+        statement = statement.where(Race.ward_code == ward_code)
 
     return session.exec(statement).one()
 

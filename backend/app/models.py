@@ -392,7 +392,14 @@ class RaceBase(SQLModel):
     location: str = Field(max_length=255)
     city: str | None = Field(default=None, max_length=100)
     state: str | None = Field(default=None, max_length=100)
-    country: str = Field(default="USA", max_length=100)
+    country: str = Field(default="Vietnam", max_length=100)
+    
+    # Vietnamese administrative location (new structured fields)
+    province_code: str | None = Field(default=None, max_length=20)
+    ward_code: str | None = Field(default=None, max_length=20)
+    country_code: str | None = Field(default=None, max_length=10)
+    province_name: str | None = Field(default=None, max_length=100)
+    ward_name: str | None = Field(default=None, max_length=100)
 
     # Overall registration (can be overridden per category)
     registration_start: datetime | None = Field(
@@ -448,6 +455,11 @@ class RaceUpdate(SQLModel):
     city: str | None = None
     state: str | None = None
     country: str | None = None
+    province_code: str | None = None
+    ward_code: str | None = None
+    country_code: str | None = None
+    province_name: str | None = None
+    ward_name: str | None = None
     registration_start: datetime | None = None
     registration_end: datetime | None = None
     status: RaceStatusEnum | None = None
@@ -477,6 +489,12 @@ class Race(RaceBase, table=True):
 
     # Foreign keys
     organizer_id: uuid.UUID = Field(foreign_key="user.id", nullable=False)
+    province_code: str | None = Field(
+        default=None, foreign_key="provinces.code", max_length=20
+    )
+    ward_code: str | None = Field(
+        default=None, foreign_key="wards.code", max_length=20
+    )
 
     # Embedding vector for semantic search (1536-dim, text-embedding-3-small)
     embedding: list[float] | None = Field(
@@ -486,6 +504,8 @@ class Race(RaceBase, table=True):
 
     # Relationships
     organizer: User = Relationship(back_populates="organized_races")
+    province: Optional["Province"] = Relationship()
+    ward: Optional["Ward"] = Relationship()
     categories: list["RaceCategory"] = Relationship(
         back_populates="race", cascade_delete=True
     )
@@ -514,6 +534,8 @@ class RacePublicWithDetails(RacePublic):
     categories: list["RaceCategoryPublic"] = []
     tags: list[TagPublic] = []
     registration_count: int = 0
+    province: "ProvincePublic | None" = None
+    ward: "WardPublic | None" = None
 
 
 class RacePublicWithDistance(RacePublic):

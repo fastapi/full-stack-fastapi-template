@@ -9,6 +9,7 @@ export interface RaceSearchParams {
   difficulty?: DifficultyEnum | ""
   distanceMin?: string
   distanceMax?: string
+  provinceCode?: string
   sort?: "date" | "popularity"
   skip?: number
   limit?: number
@@ -26,6 +27,7 @@ function buildQuery(params: RaceSearchParams): Record<string, string | number> {
   if (params.difficulty) q.difficulty = params.difficulty
   if (params.distanceMin) q.distance_min_km = Number(params.distanceMin)
   if (params.distanceMax) q.distance_max_km = Number(params.distanceMax)
+  if (params.provinceCode) q.province_code = params.provinceCode
   if (params.sort) q.sort = params.sort
   if (params.skip != null) q.skip = params.skip
   if (params.limit != null) q.limit = params.limit

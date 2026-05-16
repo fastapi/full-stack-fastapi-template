@@ -16,6 +16,7 @@ interface RaceSearch {
   difficulty?: string
   distanceMin?: string
   distanceMax?: string
+  provinceCode?: string
   sort?: "date" | "popularity"
   page?: number
 }
@@ -27,6 +28,7 @@ function validateSearch(search: Record<string, unknown>): RaceSearch {
     difficulty: typeof search.difficulty === "string" ? search.difficulty : "",
     distanceMin: typeof search.distanceMin === "string" ? search.distanceMin : "",
     distanceMax: typeof search.distanceMax === "string" ? search.distanceMax : "",
+    provinceCode: typeof search.provinceCode === "string" ? search.provinceCode : "",
     sort:
       search.sort === "date" || search.sort === "popularity"
         ? search.sort
@@ -63,6 +65,7 @@ function RacesPage() {
     difficulty: (search.difficulty as DifficultyEnum) || undefined,
     distanceMin: search.distanceMin || undefined,
     distanceMax: search.distanceMax || undefined,
+    provinceCode: search.provinceCode || undefined,
     sort: search.sort,
     skip: (search.page ?? 0) * PAGE_SIZE,
     limit: PAGE_SIZE,
@@ -93,6 +96,7 @@ function RacesPage() {
         difficulty: filters.difficulty,
         distanceMin: filters.distanceMin,
         distanceMax: filters.distanceMax,
+        provinceCode: filters.provinceCode,
       })
     },
     [setSearch],
@@ -108,6 +112,7 @@ function RacesPage() {
     difficulty: (search.difficulty as DifficultyEnum) || "",
     distanceMin: search.distanceMin || "",
     distanceMax: search.distanceMax || "",
+    provinceCode: search.provinceCode || "",
   }
 
   return (

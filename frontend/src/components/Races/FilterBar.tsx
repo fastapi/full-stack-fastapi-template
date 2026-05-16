@@ -1,4 +1,5 @@
 import { Filter } from "lucide-react"
+import { useQuery } from "@tanstack/react-query"
 import { Button } from "@/components/ui/button"
 import {
   Select,
@@ -8,12 +9,14 @@ import {
   SelectValue,
 } from "@/components/ui/select"
 import type { DifficultyEnum, TerrainEnum } from "@/client"
+import { ProvincesService } from "@/client"
 
 export interface RaceFilters {
   terrain: TerrainEnum | ""
   difficulty: DifficultyEnum | ""
   distanceMin: string
   distanceMax: string
+  provinceCode: string
 }
 
 interface FilterBarProps {
@@ -44,16 +47,23 @@ const DISTANCE_PRESETS = [
 ]
 
 export function FilterBar({ filters, onChange }: FilterBarProps) {
+  // Fetch provinces
+  const { data: provincesData } = useQuery({
+    queryKey: ["provinces"],
+    queryFn: () => ProvincesService.readProvinces({ limit: 100 }),
+  })
+
   const hasFilters =
     filters.terrain !== "" ||
     filters.difficulty !== "" ||
     filters.distanceMin !== "" ||
-    filters.distanceMax !== ""
+    filters.distanceMax !== "" ||
+    filters.provinceCode !== ""
 
   const update = (patch: Partial<RaceFilters>) => onChange({ ...filters, ...patch })
 
   const reset = () =>
-    onChange({ terrain: "", difficulty: "", distanceMin: "", distanceMax: "" })
+    onChange({ terrain: "", difficulty: "", distanceMin: "", distanceMax: "", provinceCode: "" })
 
   return (
     <div className="flex flex-wrap items-center gap-3">
@@ -90,6 +100,23 @@ export function FilterBar({ filters, onChange }: FilterBarProps) {
           {DIFFICULTY_OPTIONS.map((o) => (
             <SelectItem key={o.value} value={o.value}>
               {o.label}
+            </SelectItem>
+          ))}
+        </SelectContent>
+      </Select>
+
+      <Select
+        value={filters.provinceCode || "all"}
+        onValueChange={(v) => update({ provinceCode: v === "all" ? "" : v })}
+      >
+        <SelectTrigger className="w-48">
+          <SelectValue placeholder="Location" />
+        </SelectTrigger>
+        <SelectContent>
+          <SelectItem value="all">All locations</SelectItem>
+          {provincesData?.data?.map((province) => (
+            <SelectItem key={province.code} value={province.code}>
+              {province.name}
             </SelectItem>
           ))}
         </SelectContent>

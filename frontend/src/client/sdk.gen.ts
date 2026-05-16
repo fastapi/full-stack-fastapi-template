@@ -3,7 +3,31 @@
 import type { CancelablePromise } from './core/CancelablePromise';
 import { OpenAPI } from './core/OpenAPI';
 import { request as __request } from './core/request';
-import type { ItemsReadItemsData, ItemsReadItemsResponse, ItemsCreateItemData, ItemsCreateItemResponse, ItemsReadItemData, ItemsReadItemResponse, ItemsUpdateItemData, ItemsUpdateItemResponse, ItemsDeleteItemData, ItemsDeleteItemResponse, LoginLoginAccessTokenData, LoginLoginAccessTokenResponse, LoginTestTokenResponse, LoginRecoverPasswordData, LoginRecoverPasswordResponse, LoginResetPasswordData, LoginResetPasswordResponse, LoginRecoverPasswordHtmlContentData, LoginRecoverPasswordHtmlContentResponse, MediaReadMediaAssetsData, MediaReadMediaAssetsResponse, MediaUploadMediaAssetData, MediaUploadMediaAssetResponse, MediaReadMediaFileData, MediaReadMediaFileResponse, MediaUpdateMediaAssetData, MediaUpdateMediaAssetResponse, MediaDeleteMediaAssetData, MediaDeleteMediaAssetResponse, PrivateCreateUserData, PrivateCreateUserResponse, ProfilesGetMyProfileResponse, ProfilesUpsertMyProfileData, ProfilesUpsertMyProfileResponse, ProfilesDeleteMyProfileResponse, ProfilesUpdateMyProfileData, ProfilesUpdateMyProfileResponse, ProfilesGetMySavedRacesResponse, ProfilesSaveRaceData, ProfilesSaveRaceResponse, ProfilesUnsaveRaceData, ProfilesUnsaveRaceResponse, ProfilesTrackRaceViewData, ProfilesTrackRaceViewResponse, RaceAttributesReadRaceAttributesData, RaceAttributesReadRaceAttributesResponse, RaceAttributesCreateRaceAttributeData, RaceAttributesCreateRaceAttributeResponse, RaceAttributesReadRaceAttributeData, RaceAttributesReadRaceAttributeResponse, RaceAttributesUpdateRaceAttributeData, RaceAttributesUpdateRaceAttributeResponse, RaceAttributesDeleteRaceAttributeData, RaceAttributesDeleteRaceAttributeResponse, RaceCategoriesReadRaceCategoriesData, RaceCategoriesReadRaceCategoriesResponse, RaceCategoriesCreateRaceCategoryData, RaceCategoriesCreateRaceCategoryResponse, RaceCategoriesReadRaceCategoryData, RaceCategoriesReadRaceCategoryResponse, RaceCategoriesUpdateRaceCategoryData, RaceCategoriesUpdateRaceCategoryResponse, RaceCategoriesDeleteRaceCategoryData, RaceCategoriesDeleteRaceCategoryResponse, RaceRegistrationsReadRaceRegistrationsData, RaceRegistrationsReadRaceRegistrationsResponse, RaceRegistrationsCreateRaceRegistrationData, RaceRegistrationsCreateRaceRegistrationResponse, RaceRegistrationsReadMyRegistrationsData, RaceRegistrationsReadMyRegistrationsResponse, RaceRegistrationsReadRaceRegistrationData, RaceRegistrationsReadRaceRegistrationResponse, RaceRegistrationsUpdateRaceRegistrationData, RaceRegistrationsUpdateRaceRegistrationResponse, RaceRegistrationsDeleteRaceRegistrationData, RaceRegistrationsDeleteRaceRegistrationResponse, RaceResultsReadRaceResultsData, RaceResultsReadRaceResultsResponse, RaceResultsCreateRaceResultData, RaceResultsCreateRaceResultResponse, RaceResultsReadRaceResultData, RaceResultsReadRaceResultResponse, RaceResultsUpdateRaceResultData, RaceResultsUpdateRaceResultResponse, RaceResultsDeleteRaceResultData, RaceResultsDeleteRaceResultResponse, RaceResultsReadRaceResultByRegistrationData, RaceResultsReadRaceResultByRegistrationResponse, RacesReadRacesData, RacesReadRacesResponse, RacesCreateRaceData, RacesCreateRaceResponse, RacesReadRaceData, RacesReadRaceResponse, RacesUpdateRaceData, RacesUpdateRaceResponse, RacesDeleteRaceData, RacesDeleteRaceResponse, RacesReadMyOrganizedRacesData, RacesReadMyOrganizedRacesResponse, RolesReadRolesData, RolesReadRolesResponse, RolesCreateRoleData, RolesCreateRoleResponse, RolesReadRoleData, RolesReadRoleResponse, RolesUpdateRoleData, RolesUpdateRoleResponse, RolesDeleteRoleData, RolesDeleteRoleResponse, RolesAssignRoleToUserData, RolesAssignRoleToUserResponse, RolesRemoveRoleFromUserData, RolesRemoveRoleFromUserResponse, TagsListTagsResponse, TagsCreateTagData, TagsCreateTagResponse, TagsSetTagsForRaceData, TagsSetTagsForRaceResponse, UsersReadUsersData, UsersReadUsersResponse, UsersCreateUserData, UsersCreateUserResponse, UsersReadUserMeResponse, UsersDeleteUserMeResponse, UsersUpdateUserMeData, UsersUpdateUserMeResponse, UsersUpdatePasswordMeData, UsersUpdatePasswordMeResponse, UsersRegisterUserData, UsersRegisterUserResponse, UsersReadUserByIdData, UsersReadUserByIdResponse, UsersUpdateUserData, UsersUpdateUserResponse, UsersDeleteUserData, UsersDeleteUserResponse, UtilsTestEmailData, UtilsTestEmailResponse, UtilsHealthCheckResponse } from './types.gen';
+import type { AdminReindexRaceEmbeddingsData, AdminReindexRaceEmbeddingsResponse, ItemsReadItemsData, ItemsReadItemsResponse, ItemsCreateItemData, ItemsCreateItemResponse, ItemsReadItemData, ItemsReadItemResponse, ItemsUpdateItemData, ItemsUpdateItemResponse, ItemsDeleteItemData, ItemsDeleteItemResponse, LoginLoginAccessTokenData, LoginLoginAccessTokenResponse, LoginTestTokenResponse, LoginRecoverPasswordData, LoginRecoverPasswordResponse, LoginResetPasswordData, LoginResetPasswordResponse, LoginRecoverPasswordHtmlContentData, LoginRecoverPasswordHtmlContentResponse, MediaReadMediaAssetsData, MediaReadMediaAssetsResponse, MediaUploadMediaAssetData, MediaUploadMediaAssetResponse, MediaReadMediaFileData, MediaReadMediaFileResponse, MediaUpdateMediaAssetData, MediaUpdateMediaAssetResponse, MediaDeleteMediaAssetData, MediaDeleteMediaAssetResponse, PrivateCreateUserData, PrivateCreateUserResponse, ProfilesGetMyProfileResponse, ProfilesUpsertMyProfileData, ProfilesUpsertMyProfileResponse, ProfilesDeleteMyProfileResponse, ProfilesUpdateMyProfileData, ProfilesUpdateMyProfileResponse, ProfilesGetMySavedRacesResponse, ProfilesSaveRaceData, ProfilesSaveRaceResponse, ProfilesUnsaveRaceData, ProfilesUnsaveRaceResponse, ProfilesTrackRaceViewData, ProfilesTrackRaceViewResponse, ProvincesReadAdministrativeRegionsResponse, ProvincesReadAdministrativeUnitsResponse, ProvincesReadProvincesData, ProvincesReadProvincesResponse, ProvincesReadProvinceData, ProvincesReadProvinceResponse, ProvincesReadWardsByProvinceData, ProvincesReadWardsByProvinceResponse, ProvincesReadWardData, ProvincesReadWardResponse, RaceAttributesReadRaceAttributesData, RaceAttributesReadRaceAttributesResponse, RaceAttributesCreateRaceAttributeData, RaceAttributesCreateRaceAttributeResponse, RaceAttributesReadRaceAttributeData, RaceAttributesReadRaceAttributeResponse, RaceAttributesUpdateRaceAttributeData, RaceAttributesUpdateRaceAttributeResponse, RaceAttributesDeleteRaceAttributeData, RaceAttributesDeleteRaceAttributeResponse, RaceCategoriesReadRaceCategoriesData, RaceCategoriesReadRaceCategoriesResponse, RaceCategoriesCreateRaceCategoryData, RaceCategoriesCreateRaceCategoryResponse, RaceCategoriesReadRaceCategoryData, RaceCategoriesReadRaceCategoryResponse, RaceCategoriesUpdateRaceCategoryData, RaceCategoriesUpdateRaceCategoryResponse, RaceCategoriesDeleteRaceCategoryData, RaceCategoriesDeleteRaceCategoryResponse, RaceRegistrationsReadRaceRegistrationsData, RaceRegistrationsReadRaceRegistrationsResponse, RaceRegistrationsCreateRaceRegistrationData, RaceRegistrationsCreateRaceRegistrationResponse, RaceRegistrationsReadMyRegistrationsData, RaceRegistrationsReadMyRegistrationsResponse, RaceRegistrationsReadRaceRegistrationData, RaceRegistrationsReadRaceRegistrationResponse, RaceRegistrationsUpdateRaceRegistrationData, RaceRegistrationsUpdateRaceRegistrationResponse, RaceRegistrationsDeleteRaceRegistrationData, RaceRegistrationsDeleteRaceRegistrationResponse, RaceResultsReadRaceResultsData, RaceResultsReadRaceResultsResponse, RaceResultsCreateRaceResultData, RaceResultsCreateRaceResultResponse, RaceResultsReadRaceResultData, RaceResultsReadRaceResultResponse, RaceResultsUpdateRaceResultData, RaceResultsUpdateRaceResultResponse, RaceResultsDeleteRaceResultData, RaceResultsDeleteRaceResultResponse, RaceResultsReadRaceResultByRegistrationData, RaceResultsReadRaceResultByRegistrationResponse, RacesSearchRacesData, RacesSearchRacesResponse, RacesGetNearbyRacesData, RacesGetNearbyRacesResponse, RacesGetTrendingRacesData, RacesGetTrendingRacesResponse, RacesGetRecommendedRacesData, RacesGetRecommendedRacesResponse, RacesReadMyOrganizedRacesData, RacesReadMyOrganizedRacesResponse, RacesReadRacesData, RacesReadRacesResponse, RacesCreateRaceData, RacesCreateRaceResponse, RacesGenerateRaceDetailsData, RacesGenerateRaceDetailsResponse, RacesReadRaceData, RacesReadRaceResponse, RacesUpdateRaceData, RacesUpdateRaceResponse, RacesDeleteRaceData, RacesDeleteRaceResponse, RacesGetSimilarRacesData, RacesGetSimilarRacesResponse, RacesAutoTagRaceData, RacesAutoTagRaceResponse, RacesEnhanceRaceDescriptionData, RacesEnhanceRaceDescriptionResponse, RacesAskRaceQuestionData, RacesAskRaceQuestionResponse, RolesReadRolesData, RolesReadRolesResponse, RolesCreateRoleData, RolesCreateRoleResponse, RolesReadRoleData, RolesReadRoleResponse, RolesUpdateRoleData, RolesUpdateRoleResponse, RolesDeleteRoleData, RolesDeleteRoleResponse, RolesAssignRoleToUserData, RolesAssignRoleToUserResponse, RolesRemoveRoleFromUserData, RolesRemoveRoleFromUserResponse, TagsListTagsResponse, TagsCreateTagData, TagsCreateTagResponse, TagsSetTagsForRaceData, TagsSetTagsForRaceResponse, UsersReadUsersData, UsersReadUsersResponse, UsersCreateUserData, UsersCreateUserResponse, UsersReadUserMeResponse, UsersDeleteUserMeResponse, UsersUpdateUserMeData, UsersUpdateUserMeResponse, UsersUpdatePasswordMeData, UsersUpdatePasswordMeResponse, UsersRegisterUserData, UsersRegisterUserResponse, UsersReadUserByIdData, UsersReadUserByIdResponse, UsersUpdateUserData, UsersUpdateUserResponse, UsersDeleteUserData, UsersDeleteUserResponse, UtilsTestEmailData, UtilsTestEmailResponse, UtilsHealthCheckResponse } from './types.gen';
+
+export class AdminService {
+    /**
+     * Reindex Race Embeddings
+     * Queue embedding generation for all races that lack an embedding.
+     * Admin only.
+     * @param data The data for the request.
+     * @param data.batchSize
+     * @returns Message Successful Response
+     * @throws ApiError
+     */
+    public static reindexRaceEmbeddings(data: AdminReindexRaceEmbeddingsData = {}): CancelablePromise<AdminReindexRaceEmbeddingsResponse> {
+        return __request(OpenAPI, {
+            method: 'POST',
+            url: '/api/v1/admin/races/reindex',
+            query: {
+                batch_size: data.batchSize
+            },
+            errors: {
+                422: 'Validation Error'
+            }
+        });
+    }
+}
 
 export class ItemsService {
     /**
@@ -490,6 +514,126 @@ export class ProfilesService {
             url: '/api/v1/races/{race_id}/view',
             path: {
                 race_id: data.raceId
+            },
+            errors: {
+                422: 'Validation Error'
+            }
+        });
+    }
+}
+
+export class ProvincesService {
+    /**
+     * Read Administrative Regions
+     * Get all administrative regions.
+     * @returns AdministrativeRegionPublic Successful Response
+     * @throws ApiError
+     */
+    public static readAdministrativeRegions(): CancelablePromise<ProvincesReadAdministrativeRegionsResponse> {
+        return __request(OpenAPI, {
+            method: 'GET',
+            url: '/api/v1/provinces/regions'
+        });
+    }
+    
+    /**
+     * Read Administrative Units
+     * Get all administrative units.
+     * @returns AdministrativeUnitPublic Successful Response
+     * @throws ApiError
+     */
+    public static readAdministrativeUnits(): CancelablePromise<ProvincesReadAdministrativeUnitsResponse> {
+        return __request(OpenAPI, {
+            method: 'GET',
+            url: '/api/v1/provinces/units'
+        });
+    }
+    
+    /**
+     * Read Provinces
+     * Get all provinces with pagination.
+     * @param data The data for the request.
+     * @param data.skip
+     * @param data.limit
+     * @returns ProvincesPublic Successful Response
+     * @throws ApiError
+     */
+    public static readProvinces(data: ProvincesReadProvincesData = {}): CancelablePromise<ProvincesReadProvincesResponse> {
+        return __request(OpenAPI, {
+            method: 'GET',
+            url: '/api/v1/provinces/',
+            query: {
+                skip: data.skip,
+                limit: data.limit
+            },
+            errors: {
+                422: 'Validation Error'
+            }
+        });
+    }
+    
+    /**
+     * Read Province
+     * Get a specific province by code with administrative unit details.
+     * @param data The data for the request.
+     * @param data.provinceCode
+     * @returns ProvincePublicWithDetails Successful Response
+     * @throws ApiError
+     */
+    public static readProvince(data: ProvincesReadProvinceData): CancelablePromise<ProvincesReadProvinceResponse> {
+        return __request(OpenAPI, {
+            method: 'GET',
+            url: '/api/v1/provinces/{province_code}',
+            path: {
+                province_code: data.provinceCode
+            },
+            errors: {
+                422: 'Validation Error'
+            }
+        });
+    }
+    
+    /**
+     * Read Wards By Province
+     * Get all wards for a specific province.
+     * @param data The data for the request.
+     * @param data.provinceCode
+     * @param data.skip
+     * @param data.limit
+     * @returns WardsPublic Successful Response
+     * @throws ApiError
+     */
+    public static readWardsByProvince(data: ProvincesReadWardsByProvinceData): CancelablePromise<ProvincesReadWardsByProvinceResponse> {
+        return __request(OpenAPI, {
+            method: 'GET',
+            url: '/api/v1/provinces/{province_code}/wards',
+            path: {
+                province_code: data.provinceCode
+            },
+            query: {
+                skip: data.skip,
+                limit: data.limit
+            },
+            errors: {
+                422: 'Validation Error'
+            }
+        });
+    }
+    
+    /**
+     * Read Ward
+     * Get a specific ward by code with details.
+     * @param data The data for the request.
+     * @param data.wardCode
+     * @returns WardPublicWithDetails Successful Response
+     * @throws ApiError
+     */
+    public static readWard(data: ProvincesReadWardData): CancelablePromise<ProvincesReadWardResponse> {
+        return __request(OpenAPI, {
+            method: 'GET',
+            url: '/api/v1/provinces/wards/{ward_code}',
+            path: {
+                ward_code: data.wardCode
             },
             errors: {
                 422: 'Validation Error'
@@ -1016,6 +1160,154 @@ export class RaceResultsService {
 
 export class RacesService {
     /**
+     * Search Races
+     * Search races with full-text + semantic vector search (RRF fusion), geo, and filters.
+     * @param data The data for the request.
+     * @param data.q Full-text search query
+     * @param data.lat
+     * @param data.lon
+     * @param data.radiusKm
+     * @param data.distanceMinKm
+     * @param data.distanceMaxKm
+     * @param data.terrain
+     * @param data.difficulty
+     * @param data.dateFrom
+     * @param data.dateTo
+     * @param data.tagSlugs
+     * @param data.status
+     * @param data.provinceCode Filter by province code
+     * @param data.wardCode Filter by ward code
+     * @param data.sort
+     * @param data.skip
+     * @param data.limit
+     * @returns RacesPublic Successful Response
+     * @throws ApiError
+     */
+    public static searchRaces(data: RacesSearchRacesData = {}): CancelablePromise<RacesSearchRacesResponse> {
+        return __request(OpenAPI, {
+            method: 'GET',
+            url: '/api/v1/races/search',
+            query: {
+                q: data.q,
+                lat: data.lat,
+                lon: data.lon,
+                radius_km: data.radiusKm,
+                distance_min_km: data.distanceMinKm,
+                distance_max_km: data.distanceMaxKm,
+                terrain: data.terrain,
+                difficulty: data.difficulty,
+                date_from: data.dateFrom,
+                date_to: data.dateTo,
+                tag_slugs: data.tagSlugs,
+                status: data.status,
+                province_code: data.provinceCode,
+                ward_code: data.wardCode,
+                sort: data.sort,
+                skip: data.skip,
+                limit: data.limit
+            },
+            errors: {
+                422: 'Validation Error'
+            }
+        });
+    }
+    
+    /**
+     * Get Nearby Races
+     * Return races within radius_km of the given coordinates, sorted by distance.
+     * @param data The data for the request.
+     * @param data.lat
+     * @param data.lon
+     * @param data.radiusKm
+     * @param data.limit
+     * @returns RacesPublicWithDistance Successful Response
+     * @throws ApiError
+     */
+    public static getNearbyRaces(data: RacesGetNearbyRacesData): CancelablePromise<RacesGetNearbyRacesResponse> {
+        return __request(OpenAPI, {
+            method: 'GET',
+            url: '/api/v1/races/nearby',
+            query: {
+                lat: data.lat,
+                lon: data.lon,
+                radius_km: data.radiusKm,
+                limit: data.limit
+            },
+            errors: {
+                422: 'Validation Error'
+            }
+        });
+    }
+    
+    /**
+     * Get Trending Races
+     * Return trending races based on interaction count over the last N days.
+     * @param data The data for the request.
+     * @param data.days
+     * @param data.limit
+     * @returns RacesPublic Successful Response
+     * @throws ApiError
+     */
+    public static getTrendingRaces(data: RacesGetTrendingRacesData = {}): CancelablePromise<RacesGetTrendingRacesResponse> {
+        return __request(OpenAPI, {
+            method: 'GET',
+            url: '/api/v1/races/trending',
+            query: {
+                days: data.days,
+                limit: data.limit
+            },
+            errors: {
+                422: 'Validation Error'
+            }
+        });
+    }
+    
+    /**
+     * Get Recommended Races
+     * Return personalized race recommendations with AI-generated explanations.
+     * @param data The data for the request.
+     * @param data.limit
+     * @returns RacesPublicWithExplanation Successful Response
+     * @throws ApiError
+     */
+    public static getRecommendedRaces(data: RacesGetRecommendedRacesData = {}): CancelablePromise<RacesGetRecommendedRacesResponse> {
+        return __request(OpenAPI, {
+            method: 'GET',
+            url: '/api/v1/races/recommended',
+            query: {
+                limit: data.limit
+            },
+            errors: {
+                422: 'Validation Error'
+            }
+        });
+    }
+    
+    /**
+     * Read My Organized Races
+     * Retrieve races organized by the current user.
+     * Requires organizer or admin role.
+     * @param data The data for the request.
+     * @param data.skip
+     * @param data.limit
+     * @returns RacesPublic Successful Response
+     * @throws ApiError
+     */
+    public static readMyOrganizedRaces(data: RacesReadMyOrganizedRacesData = {}): CancelablePromise<RacesReadMyOrganizedRacesResponse> {
+        return __request(OpenAPI, {
+            method: 'GET',
+            url: '/api/v1/races/my/organized',
+            query: {
+                skip: data.skip,
+                limit: data.limit
+            },
+            errors: {
+                422: 'Validation Error'
+            }
+        });
+    }
+    
+    /**
      * Read Races
      * Retrieve races. Public endpoint - anyone can view races.
      * Optionally filter by organizer_id.
@@ -1054,6 +1346,27 @@ export class RacesService {
         return __request(OpenAPI, {
             method: 'POST',
             url: '/api/v1/races/',
+            body: data.requestBody,
+            mediaType: 'application/json',
+            errors: {
+                422: 'Validation Error'
+            }
+        });
+    }
+    
+    /**
+     * Generate Race Details
+     * Use AI to generate race details from a race name.
+     * Requires authentication.
+     * @param data The data for the request.
+     * @param data.requestBody
+     * @returns AIRaceSuggestion Successful Response
+     * @throws ApiError
+     */
+    public static generateRaceDetails(data: RacesGenerateRaceDetailsData): CancelablePromise<RacesGenerateRaceDetailsResponse> {
+        return __request(OpenAPI, {
+            method: 'POST',
+            url: '/api/v1/races/ai-assist',
             body: data.requestBody,
             mediaType: 'application/json',
             errors: {
@@ -1131,23 +1444,90 @@ export class RacesService {
     }
     
     /**
-     * Read My Organized Races
-     * Retrieve races organized by the current user.
-     * Requires organizer or admin role.
+     * Get Similar Races
+     * Return races similar to the given race.
      * @param data The data for the request.
-     * @param data.skip
+     * @param data.raceId
      * @param data.limit
      * @returns RacesPublic Successful Response
      * @throws ApiError
      */
-    public static readMyOrganizedRaces(data: RacesReadMyOrganizedRacesData = {}): CancelablePromise<RacesReadMyOrganizedRacesResponse> {
+    public static getSimilarRaces(data: RacesGetSimilarRacesData): CancelablePromise<RacesGetSimilarRacesResponse> {
         return __request(OpenAPI, {
             method: 'GET',
-            url: '/api/v1/races/my/organized',
+            url: '/api/v1/races/{race_id}/similar',
+            path: {
+                race_id: data.raceId
+            },
             query: {
-                skip: data.skip,
                 limit: data.limit
             },
+            errors: {
+                422: 'Validation Error'
+            }
+        });
+    }
+    
+    /**
+     * Auto Tag Race
+     * Suggest tags for a race using AI (does not save — returns suggestions only).
+     * @param data The data for the request.
+     * @param data.raceId
+     * @returns TagSuggestion Successful Response
+     * @throws ApiError
+     */
+    public static autoTagRace(data: RacesAutoTagRaceData): CancelablePromise<RacesAutoTagRaceResponse> {
+        return __request(OpenAPI, {
+            method: 'POST',
+            url: '/api/v1/races/{race_id}/auto-tag',
+            path: {
+                race_id: data.raceId
+            },
+            errors: {
+                422: 'Validation Error'
+            }
+        });
+    }
+    
+    /**
+     * Enhance Race Description
+     * Suggest an improved description using AI (does not save — returns suggestion only).
+     * @param data The data for the request.
+     * @param data.raceId
+     * @returns DescriptionSuggestion Successful Response
+     * @throws ApiError
+     */
+    public static enhanceRaceDescription(data: RacesEnhanceRaceDescriptionData): CancelablePromise<RacesEnhanceRaceDescriptionResponse> {
+        return __request(OpenAPI, {
+            method: 'POST',
+            url: '/api/v1/races/{race_id}/enhance-description',
+            path: {
+                race_id: data.raceId
+            },
+            errors: {
+                422: 'Validation Error'
+            }
+        });
+    }
+    
+    /**
+     * Ask Race Question
+     * Answer a question about a specific race using AI. Rate limited to 10 req/min per IP.
+     * @param data The data for the request.
+     * @param data.raceId
+     * @param data.requestBody
+     * @returns RaceAnswer Successful Response
+     * @throws ApiError
+     */
+    public static askRaceQuestion(data: RacesAskRaceQuestionData): CancelablePromise<RacesAskRaceQuestionResponse> {
+        return __request(OpenAPI, {
+            method: 'POST',
+            url: '/api/v1/races/{race_id}/ask',
+            path: {
+                race_id: data.raceId
+            },
+            body: data.requestBody,
+            mediaType: 'application/json',
             errors: {
                 422: 'Validation Error'
             }
@@ -1315,7 +1695,7 @@ export class RolesService {
 export class TagsService {
     /**
      * List Tags
-     * List all available race tags. Public endpoint.
+     * List all available race tags. Public endpoint. Cached 10 minutes.
      * @returns TagsPublic Successful Response
      * @throws ApiError
      */

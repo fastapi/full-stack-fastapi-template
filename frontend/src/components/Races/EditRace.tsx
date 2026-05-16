@@ -1,11 +1,12 @@
 import { zodResolver } from "@hookform/resolvers/zod"
-import { useMutation, useQueryClient } from "@tanstack/react-query"
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
 import { useNavigate } from "@tanstack/react-router"
 import { useForm } from "react-hook-form"
 import { z } from "zod"
 
-import { type RacePublic, type RaceUpdate, RacesService } from "@/client"
+import { type RacePublic, type RaceUpdate, RacesService, ProvincesService } from "@/client"
 import MediaGalleryManager from "@/components/Media/MediaGalleryManager"
+import RaceCategoryManager from "@/components/Races/RaceCategoryManager"
 import { Button } from "@/components/ui/button"
 import {
   Form,
@@ -34,9 +35,9 @@ const formSchema = z.object({
   event_start_date: z.string().optional(),
   event_end_date: z.string().optional(),
   location: z.string().optional(),
-  city: z.string().optional(),
-  state: z.string().optional(),
   country: z.string().optional(),
+  province_code: z.string().optional(),
+  ward_code: z.string().optional(),
   registration_start: z.string().optional(),
   registration_end: z.string().optional(),
   base_price: z.coerce.number().min(0).optional(),
@@ -65,14 +66,36 @@ const EditRace = ({ race }: EditRaceProps) => {
       event_start_date: race.event_start_date ? new Date(race.event_start_date).toISOString().slice(0, 16) : "",
       event_end_date: race.event_end_date ? new Date(race.event_end_date).toISOString().slice(0, 16) : "",
       location: race.location || "",
-      city: race.city || "",
-      state: race.state || "",
-      country: race.country || "USA",
+      country: race.country || "Vietnam",
+      province_code: race.province_code || "",
+      ward_code: race.ward_code || "",
       registration_start: race.registration_start ? new Date(race.registration_start).toISOString().slice(0, 16) : "",
       registration_end: race.registration_end ? new Date(race.registration_end).toISOString().slice(0, 16) : "",
       base_price: race.base_price || undefined,
-      currency: race.currency || "USD",
+      currency: race.currency || "VND",
       status: race.status,
+    },
+  })
+
+  const selectedProvinceCode = form.watch("province_code")
+
+  // Fetch provinces
+  const { data: provincesData } = useQuery({
+    queryKey: ["provinces"],
+    queryFn: () => ProvincesService.readProvinces({ limit: 100 }),
+  })
+
+  // Fetch wards for selected province
+  const { data: wardsData } = useQuery({
+    queryKey: ["wards", selectedProvinceCode],
+    queryFn: async () => {
+      if (!selectedProvinceCode) {
+        return { data: [], count: 0 }
+      }
+      return ProvincesService.readWardsByProvince({
+        provinceCode: selectedProvinceCode,
+        limit: 500,
+      })
     },
   })
 
@@ -90,7 +113,17 @@ const EditRace = ({ race }: EditRaceProps) => {
   })
 
   const onSubmit = (data: FormData) => {
-    mutation.mutate(data as RaceUpdate)
+    // Transform empty datetime strings to undefined for proper validation
+    const cleanedData = {
+      ...data,
+      event_start_date: data.event_start_date || undefined,
+      event_end_date: data.event_end_date || undefined,
+      registration_start: data.registration_start || undefined,
+      registration_end: data.registration_end || undefined,
+      province_code: data.province_code || undefined,
+      ward_code: data.ward_code || undefined,
+    }
+    mutation.mutate(cleanedData as RaceUpdate)
   }
 
   return (
@@ -178,41 +211,73 @@ const EditRace = ({ race }: EditRaceProps) => {
 
               <FormField
                 control={form.control}
-                name="city"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>City</FormLabel>
-                    <FormControl>
-                      <Input placeholder="Boston" {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-
-              <FormField
-                control={form.control}
-                name="state"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>State</FormLabel>
-                    <FormControl>
-                      <Input placeholder="Massachusetts" {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-
-              <FormField
-                control={form.control}
                 name="country"
                 render={({ field }) => (
                   <FormItem>
                     <FormLabel>Country</FormLabel>
                     <FormControl>
-                      <Input placeholder="USA" {...field} />
+                      <Input placeholder="Vietnam" {...field} />
                     </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              <FormField
+                control={form.control}
+                name="province_code"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Province/City (Optional)</FormLabel>
+                    <Select
+                      onValueChange={(value) => {
+                        field.onChange(value)
+                        form.setValue("ward_code", "") // Reset ward when province changes
+                      }}
+                      value={field.value || undefined}
+                    >
+                      <FormControl>
+                        <SelectTrigger>
+                          <SelectValue placeholder="Select province" />
+                        </SelectTrigger>
+                      </FormControl>
+                      <SelectContent>
+                        {provincesData?.data?.map((province) => (
+                          <SelectItem key={province.code} value={province.code}>
+                            {province.name}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              <FormField
+                control={form.control}
+                name="ward_code"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>District/Ward (Optional)</FormLabel>
+                    <Select
+                      onValueChange={field.onChange}
+                      value={field.value || undefined}
+                      disabled={!selectedProvinceCode}
+                    >
+                      <FormControl>
+                        <SelectTrigger>
+                          <SelectValue placeholder={selectedProvinceCode ? "Select district/ward" : "Select province first"} />
+                        </SelectTrigger>
+                      </FormControl>
+                      <SelectContent>
+                        {wardsData?.data?.map((ward) => (
+                          <SelectItem key={ward.code} value={ward.code}>
+                            {ward.name}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
                     <FormMessage />
                   </FormItem>
                 )}
@@ -327,6 +392,12 @@ const EditRace = ({ race }: EditRaceProps) => {
           </div>
         </form>
       </Form>
+
+      <RaceCategoryManager
+        raceId={race.id}
+        title="Race Categories"
+        description="Manage distance categories for this race (e.g., 5K, 10K, Half Marathon, Full Marathon)."
+      />
 
       <MediaGalleryManager
         contentType="race"
