@@ -83,7 +83,7 @@ function RaceHistoryPage() {
   })
 
   const regs = data?.data ?? []
-  const now = new Date()
+  // const now = new Date() // Future use for filtering by date
 
   const upcoming = regs.filter(
     (r) => r.registration_status !== "cancelled"

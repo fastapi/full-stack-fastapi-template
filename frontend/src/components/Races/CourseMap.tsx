@@ -10,7 +10,7 @@ interface CourseMapProps {
 export function CourseMap({ latitude, longitude, name, className }: CourseMapProps) {
   // Use OpenStreetMap tile embed via iframe — no additional library needed.
   // Zoomed to show the race location pin area.
-  const zoom = 13
+  // const zoom = 13 // Future use for dynamic zoom levels
   const bbox = 0.05
 
   const embedUrl =

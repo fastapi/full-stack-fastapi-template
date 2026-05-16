@@ -9,6 +9,9 @@ import { SortControls, type SortOption } from "@/components/Races/SortControls"
 import { useRaceSearch } from "@/hooks/useRaceSearch"
 import type { DifficultyEnum, TerrainEnum } from "@/client"
 import { cn } from "@/lib/utils"
+import { generateMetaTags, generateBreadcrumbSchema, StructuredData } from "@/lib/seo"
+
+const baseUrl = import.meta.env.VITE_FRONTEND_URL || "https://vnrunner.com"
 
 interface RaceSearch {
   q?: string
@@ -37,17 +40,17 @@ function validateSearch(search: Record<string, unknown>): RaceSearch {
   }
 }
 
-export const Route = createFileRoute("/_public/races")({
+export const Route = createFileRoute("/_public/races/")({
   validateSearch,
   component: RacesPage,
   head: () => ({
-    meta: [
-      {
-        title: "Browse Races - RaceHub",
-        description:
-          "Find and register for upcoming running races near you. Filter by distance, date, terrain, and difficulty.",
-      },
-    ],
+    meta: generateMetaTags({
+      title: "Browse Running Races in Vietnam | VNRunner",
+      description:
+        "Find and register for upcoming running races in Vietnam. Filter by distance, location, terrain (road, trail), and difficulty. Discover marathons, ultras, 5K, 10K, and half marathons across Vietnam. Secure online registration.",
+      keywords: "Vietnam races, running events Vietnam, trail running, road races, marathon registration, ultra marathon Vietnam, 5K Vietnam, 10K Vietnam, half marathon Vietnam",
+      canonicalUrl: `${baseUrl}/races`,
+    }),
   }),
 })
 
@@ -76,6 +79,11 @@ function RacesPage() {
   const totalPages = Math.ceil(totalCount / PAGE_SIZE)
   const currentPage = search.page ?? 0
   const [viewMode, setViewMode] = useState<"grid" | "map">("grid")
+
+  const breadcrumbSchema = generateBreadcrumbSchema([
+    { name: "Home", url: baseUrl },
+    { name: "Races", url: `${baseUrl}/races` },
+  ])
 
   const setSearch = useCallback(
     (patch: Partial<typeof search>) => {
@@ -117,18 +125,19 @@ function RacesPage() {
 
   return (
     <div className="w-full py-8 md:py-12">
+      <StructuredData data={breadcrumbSchema} />
       <div className="container">
         <div className="mx-auto max-w-7xl space-y-8">
           {/* Header */}
-          <div className="space-y-4">
+          <header className="space-y-4">
             <h1 className="text-3xl font-bold tracking-tight md:text-4xl">
-              Upcoming Races
+              Upcoming Races in Vietnam
             </h1>
             <p className="text-lg text-muted-foreground max-w-2xl">
-              Browse and register for upcoming races. Find the perfect event
-              that matches your goals and fitness level.
+              Browse and register for upcoming running races across Vietnam. Find the perfect event
+              that matches your goals and fitness level - from road races to trail runs, 5Ks to ultramarathons.
             </p>
-          </div>
+          </header>
 
           {/* Search + Controls */}
           <div className="space-y-3 rounded-lg border bg-muted/30 p-4">

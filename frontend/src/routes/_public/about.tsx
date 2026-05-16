@@ -6,36 +6,60 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card"
+import { generateMetaTags, generateFAQSchema, StructuredData } from "@/lib/seo"
+
+const baseUrl = import.meta.env.VITE_FRONTEND_URL || "https://vnrunner.com"
 
 export const Route = createFileRoute("/_public/about")({
   component: AboutPage,
   head: () => ({
-    meta: [
-      {
-        title: "About Us - RaceHub",
-        description:
-          "Learn more about RaceHub and our mission to connect runners with races.",
-      },
-    ],
+    meta: generateMetaTags({
+      title: "About VNRunner - Vietnam's Premier Running Race Platform",
+      description:
+        "Learn about VNRunner's mission to connect Vietnamese runners with races. Discover our platform features for runners and race organizers. Join thousands of runners finding their perfect race.",
+      keywords: "about VNRunner, running platform Vietnam, race registration platform, Vietnamese running community",
+      canonicalUrl: `${baseUrl}/about`,
+    }),
   }),
 })
 
 function AboutPage() {
+  const faqSchema = generateFAQSchema([
+    {
+      question: "What is VNRunner?",
+      answer: "VNRunner is Vietnam's premier platform for discovering and registering for running races. We connect runners with race organizers to create memorable racing experiences across Vietnam.",
+    },
+    {
+      question: "How do I register for a race?",
+      answer: "Browse our race listings, select your preferred event, and complete the online registration form. Payment is processed securely through our platform. You'll receive confirmation and race details via email.",
+    },
+    {
+      question: "Can race organizers use VNRunner?",
+      answer: "Yes! Race organizers can create and manage races through our intuitive dashboard, process registrations, access participant data, and communicate with runners before and after events.",
+    },
+    {
+      question: "What types of races are available?",
+      answer: "VNRunner features a variety of races including road races, trail runs, marathons, half marathons, ultramarathons, 5K, 10K events, and more across Vietnam.",
+    },
+  ])
+
   return (
     <div className="w-full py-8 md:py-12">
+      <StructuredData data={faqSchema} />
       <div className="container">
-        <div className="mx-auto max-w-4xl space-y-8">
+        <article className="mx-auto max-w-4xl space-y-8" itemScope itemType="https://schema.org/AboutPage">
+          <meta itemProp="name" content="About VNRunner" />
           {/* Header */}
-          <div className="space-y-4">
-            <h1 className="text-3xl font-bold tracking-tight md:text-4xl">
-              About RaceHub
+          <header className="space-y-4">
+            <h1 className="text-3xl font-bold tracking-tight md:text-4xl" itemProp="headline">
+              About VNRunner
             </h1>
-            <p className="text-lg text-muted-foreground leading-relaxed">
-              RaceHub is your go-to platform for discovering and registering for
-              running races. We connect runners with race organizers to create
+            <p className="text-lg text-muted-foreground leading-relaxed" itemProp="description">
+              VNRunner is your go-to platform for discovering and registering for
+              running races across Vietnam. We connect runners with race organizers to create
               memorable racing experiences.
             </p>
-          </div>
+          </header>
 
           {/* Mission Card */}
           <Card className="border-2">
@@ -116,7 +140,7 @@ function AboutPage() {
               </CardContent>
             </Card>
           </div>
-        </div>
+        </article>
       </div>
     </div>
   )

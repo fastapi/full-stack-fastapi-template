@@ -1,0 +1,23 @@
+# robots.txt for VNRunner
+# Allow all search engines to index the site
+
+User-agent: *
+Allow: /
+
+# Sitemap location
+Sitemap: https://vnrunner.com/sitemap.xml
+
+# Crawl-delay for politeness (optional)
+# Crawl-delay: 1
+
+# Disallow admin and auth pages
+Disallow: /admin/
+Disallow: /login
+Disallow: /signup
+Disallow: /recover-password
+Disallow: /reset-password
+
+# Allow public pages
+Allow: /
+Allow: /races
+Allow: /about

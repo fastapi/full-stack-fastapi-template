@@ -10,12 +10,61 @@ import { cn } from "@/lib/utils"
 import { CourseMap } from "@/components/Races/CourseMap"
 import { RaceAssistant } from "@/components/Races/RaceAssistant"
 import { MapPin, Calendar, Mountain, Globe, Award } from "lucide-react"
+import { 
+  generateMetaTags, 
+  generateEventSchema, 
+  generateBreadcrumbSchema, 
+  StructuredData,
+  stripHtml,
+  truncateText 
+} from "@/lib/seo"
+
+const baseUrl = import.meta.env.VITE_FRONTEND_URL || "https://vnrunner.com"
 
 export const Route = createFileRoute("/_public/races/$raceId")({
   component: RaceDetailPage,
-  head: ({ params }) => ({
-    meta: [{ title: `Race Details - VNRunner` }],
-  }),
+  loader: async ({ params }) => {
+    try {
+      const race = await RacesService.readRace({ raceId: params.raceId })
+      return { race }
+    } catch {
+      return { race: null }
+    }
+  },
+  head: ({ loaderData }) => {
+    const race = loaderData?.race
+    if (!race) {
+      return {
+        meta: generateMetaTags({
+          title: "Race Not Found - VNRunner",
+          description: "The race you're looking for could not be found.",
+        }),
+      }
+    }
+
+    const location = [race.city, race.state, race.country].filter(Boolean).join(", ") || race.location
+    const description = race.description 
+      ? truncateText(stripHtml(race.description), 160)
+      : `Join ${race.name} on ${new Date(race.event_start_date).toLocaleDateString()}. ${location}. Register online now.`
+    
+    const eventDate = new Date(race.event_start_date).toLocaleDateString("en-US", {
+      year: "numeric",
+      month: "long",
+      day: "numeric",
+    })
+
+    return {
+      meta: generateMetaTags({
+        title: `${race.name} - ${eventDate} | VNRunner`,
+        description,
+        keywords: `${race.name}, Vietnam running race, ${location}, ${race.terrain_type || ""} running, ${race.difficulty_level || ""} race, race registration`,
+        canonicalUrl: `${baseUrl}/races/${race.id}`,
+        ogType: "event",
+        publishedTime: race.created_at,
+        modifiedTime: race.updated_at,
+      }),
+    }
+  },
 })
 
 const TERRAIN_LABELS: Record<string, string> = {
@@ -82,11 +131,59 @@ function RaceDetailPage() {
   if (!race) return <div className="container py-12 text-center text-muted-foreground">Race not found.</div>
 
   const registrationOpen = race.status === "registration_open"
+  const location = [race.city, race.state, race.country].filter(Boolean).join(", ") || race.location
+
+  // Generate structured data for SEO
+  const breadcrumbSchema = generateBreadcrumbSchema([
+    { name: "Home", url: baseUrl },
+    { name: "Races", url: `${baseUrl}/races` },
+    { name: race.name, url: `${baseUrl}/races/${race.id}` },
+  ])
+
+  const eventSchema = generateEventSchema({
+    name: race.name,
+    description: race.description ? stripHtml(race.description) : `${race.name} running event in ${location}`,
+    startDate: race.event_start_date,
+    endDate: race.event_end_date || undefined,
+    location: {
+      name: location,
+      address: {
+        addressLocality: race.city || undefined,
+        addressRegion: race.state || race.province_name || undefined,
+        addressCountry: race.country || "Vietnam",
+      },
+      geo: race.latitude && race.longitude
+        ? { latitude: race.latitude, longitude: race.longitude }
+        : undefined,
+    },
+    organizer: {
+      name: "VNRunner",
+      url: baseUrl,
+    },
+    offers: race.categories?.map((cat) => ({
+      price: cat.price || race.base_price || 0,
+      priceCurrency: race.currency || "VND",
+      availability: registrationOpen ? "InStock" : "SoldOut",
+      url: race.website_url || `${baseUrl}/races/${race.id}`,
+      validFrom: race.registration_start || undefined,
+    })) || (race.base_price ? [{
+      price: race.base_price,
+      priceCurrency: race.currency || "VND",
+      availability: registrationOpen ? "InStock" : "SoldOut",
+      url: race.website_url || `${baseUrl}/races/${race.id}`,
+      validFrom: race.registration_start || undefined,
+    }] : undefined),
+  })
 
   return (
     <div className="w-full py-8 md:py-12">
+      <StructuredData data={breadcrumbSchema} />
+      <StructuredData data={eventSchema} />
       <div className="container">
-        <div className="mx-auto max-w-4xl space-y-10">
+        <article className="mx-auto max-w-4xl space-y-10" itemScope itemType="https://schema.org/SportsEvent">
+          <meta itemProp="name" content={race.name} />
+          <meta itemProp="startDate" content={race.event_start_date} />
+          {race.event_end_date && <meta itemProp="endDate" content={race.event_end_date} />}
           {/* Hero */}
           <div className="space-y-4">
             <div className="flex flex-wrap gap-2">
@@ -106,7 +203,10 @@ function RaceDetailPage() {
             <h1 className="text-3xl font-bold tracking-tight md:text-4xl">{race.name}</h1>
 
             {race.description && (
-              <p className="text-lg text-muted-foreground leading-relaxed">{race.description}</p>
+              <div
+                className="prose prose-sm max-w-none text-muted-foreground leading-relaxed [&_h2]:text-xl [&_h2]:font-bold [&_h2]:mt-4 [&_h2]:mb-2 [&_p]:leading-relaxed [&_ul]:list-disc [&_ul]:ml-6 [&_ol]:list-decimal [&_ol]:ml-6 [&_li]:my-1 [&_a]:text-primary [&_a]:underline [&_strong]:font-bold [&_em]:italic"
+                dangerouslySetInnerHTML={{ __html: race.description }}
+              />
             )}
           </div>
 
@@ -253,7 +353,7 @@ function RaceDetailPage() {
               ← Back to all races
             </Link>
           </div>
-        </div>
+        </article>
       </div>
 
       {/* Floating AI assistant */}

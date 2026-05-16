@@ -48,9 +48,19 @@ export function RaceCard({ race, distanceKm }: RaceCardProps) {
     : null
 
   const location = [race.city, race.state, race.country].filter(Boolean).join(", ")
+  
+  // Strip HTML tags from description for card preview
+  const stripHtml = (html: string) => {
+    const tmp = document.createElement("DIV")
+    tmp.innerHTML = html
+    return tmp.textContent || tmp.innerText || ""
+  }
+  
+  const descriptionText = race.description ? stripHtml(race.description) : ""
 
   return (
-    <Card className="flex flex-col transition-shadow hover:shadow-lg">
+    <Link to="/races/$raceId" params={{ raceId: race.id }} className="block">
+      <Card className="flex flex-col transition-shadow hover:shadow-lg cursor-pointer h-full">
       <CardHeader className="space-y-3">
         <div className="flex flex-wrap items-center gap-2">
           {race.terrain_type && (
@@ -82,8 +92,8 @@ export function RaceCard({ race, distanceKm }: RaceCardProps) {
           )}
         </div>
         <CardTitle className="text-xl leading-tight">{race.name}</CardTitle>
-        {race.description && (
-          <CardDescription className="line-clamp-2">{race.description}</CardDescription>
+        {descriptionText && (
+          <CardDescription className="line-clamp-2">{descriptionText}</CardDescription>
         )}
       </CardHeader>
 
@@ -115,10 +125,11 @@ export function RaceCard({ race, distanceKm }: RaceCardProps) {
       </CardContent>
 
       <CardFooter>
-        <Button className="w-full" asChild>
+        <Button className="w-full" onClick={(e) => e.preventDefault()} asChild>
           <Link to="/login">Register Now</Link>
         </Button>
       </CardFooter>
-    </Card>
+      </Card>
+    </Link>
   )
 }

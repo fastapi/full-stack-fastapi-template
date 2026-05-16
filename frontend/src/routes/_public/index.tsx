@@ -11,17 +11,21 @@ import {
 import { RaceCard } from "@/components/Races/RaceCard"
 import { useRaceSearch } from "@/hooks/useRaceSearch"
 import { isLoggedIn } from "@/hooks/useAuth"
+import { generateMetaTags, generateOrganizationSchema, StructuredData } from "@/lib/seo"
+
+const baseUrl = import.meta.env.VITE_FRONTEND_URL || "https://vnrunner.com"
 
 export const Route = createFileRoute("/_public/")({
   component: HomePage,
   head: () => ({
-    meta: [
-      {
-        title: "VNRunner - Find and Register for Running Races",
-        description:
-          "Discover Vietnamese running races. Register online, track your progress, and join a community of runners.",
-      },
-    ],
+    meta: generateMetaTags({
+      title: "VNRunner - Discover Vietnamese Running Races & Trail Runs | Register Online",
+      description:
+        "Find and register for running races across Vietnam. Discover trail runs, road races, marathons, and ultras. Join thousands of Vietnamese runners achieving their goals. Free online registration.",
+      keywords: "Vietnam running races, trail running Vietnam, marathon Vietnam, ultra running, race registration, Vietnamese runners, running events Vietnam, 5K 10K races Vietnam",
+      canonicalUrl: baseUrl,
+      ogType: "website",
+    }),
   }),
 })
 
@@ -125,10 +129,26 @@ function PersonalizedSections() {
 function HomePage() {
   const loggedIn = isLoggedIn()
 
+  const organizationSchema = generateOrganizationSchema({
+    name: "VNRunner",
+    url: baseUrl,
+    logo: `${baseUrl}/assets/images/favicon.png`,
+    description: "Vietnam's premier platform for discovering and registering for running races, trail runs, and marathons.",
+    sameAs: [
+      // Add social media URLs when available
+      // "https://facebook.com/vnrunner",
+      // "https://instagram.com/vnrunner",
+    ],
+  })
+
   return (
     <>
+      <StructuredData data={organizationSchema} />
+      
       {/* Hero Section */}
-      <section className="w-full py-16 md:py-24 lg:py-32">
+      <section className="w-full py-16 md:py-24 lg:py-32" itemScope itemType="https://schema.org/WebSite">
+        <meta itemProp="url" content={baseUrl} />
+        <meta itemProp="name" content="VNRunner" />
         <div className="container">
           <div className="mx-auto max-w-3xl text-center space-y-8">
             <h1 className="text-4xl font-bold tracking-tight md:text-5xl lg:text-6xl">

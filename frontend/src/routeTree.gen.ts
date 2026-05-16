@@ -16,14 +16,14 @@ import { Route as LoginRouteImport } from './routes/login'
 import { Route as PublicRouteImport } from './routes/_public'
 import { Route as LayoutRouteImport } from './routes/_layout'
 import { Route as PublicIndexRouteImport } from './routes/_public/index'
-import { Route as PublicRacesRouteImport } from './routes/_public/races'
 import { Route as PublicAboutRouteImport } from './routes/_public/about'
 import { Route as LayoutSavedRouteImport } from './routes/_layout.saved'
 import { Route as LayoutOnboardingRouteImport } from './routes/_layout.onboarding'
 import { Route as LayoutHistoryRouteImport } from './routes/_layout.history'
 import { Route as LayoutAdminRouteImport } from './routes/_layout.admin'
+import { Route as PublicRacesIndexRouteImport } from './routes/_public/races/index'
 import { Route as LayoutAdminIndexRouteImport } from './routes/_layout.admin/index'
-import { Route as PublicRacesRaceIdRouteImport } from './routes/_public/races.$raceId'
+import { Route as PublicRacesRaceIdRouteImport } from './routes/_public/races/$raceId'
 import { Route as LayoutAdminUsersRouteImport } from './routes/_layout.admin/users'
 import { Route as LayoutAdminSettingsRouteImport } from './routes/_layout.admin/settings'
 import { Route as LayoutAdminRacesRouteImport } from './routes/_layout.admin/races'
@@ -66,11 +66,6 @@ const PublicIndexRoute = PublicIndexRouteImport.update({
   path: '/',
   getParentRoute: () => PublicRoute,
 } as any)
-const PublicRacesRoute = PublicRacesRouteImport.update({
-  id: '/races',
-  path: '/races',
-  getParentRoute: () => PublicRoute,
-} as any)
 const PublicAboutRoute = PublicAboutRouteImport.update({
   id: '/about',
   path: '/about',
@@ -96,15 +91,20 @@ const LayoutAdminRoute = LayoutAdminRouteImport.update({
   path: '/admin',
   getParentRoute: () => LayoutRoute,
 } as any)
+const PublicRacesIndexRoute = PublicRacesIndexRouteImport.update({
+  id: '/races/',
+  path: '/races/',
+  getParentRoute: () => PublicRoute,
+} as any)
 const LayoutAdminIndexRoute = LayoutAdminIndexRouteImport.update({
   id: '/',
   path: '/',
   getParentRoute: () => LayoutAdminRoute,
 } as any)
 const PublicRacesRaceIdRoute = PublicRacesRaceIdRouteImport.update({
-  id: '/$raceId',
-  path: '/$raceId',
-  getParentRoute: () => PublicRacesRoute,
+  id: '/races/$raceId',
+  path: '/races/$raceId',
+  getParentRoute: () => PublicRoute,
 } as any)
 const LayoutAdminUsersRoute = LayoutAdminUsersRouteImport.update({
   id: '/users',
@@ -159,7 +159,6 @@ export interface FileRoutesByFullPath {
   '/onboarding': typeof LayoutOnboardingRoute
   '/saved': typeof LayoutSavedRoute
   '/about': typeof PublicAboutRoute
-  '/races': typeof PublicRacesRouteWithChildren
   '/admin/dashboard': typeof LayoutAdminDashboardRoute
   '/admin/items': typeof LayoutAdminItemsRoute
   '/admin/races': typeof LayoutAdminRacesRouteWithChildren
@@ -167,6 +166,7 @@ export interface FileRoutesByFullPath {
   '/admin/users': typeof LayoutAdminUsersRoute
   '/races/$raceId': typeof PublicRacesRaceIdRoute
   '/admin/': typeof LayoutAdminIndexRoute
+  '/races/': typeof PublicRacesIndexRoute
   '/admin/races/new': typeof LayoutAdminRacesNewRoute
   '/admin/races/': typeof LayoutAdminRacesIndexRoute
   '/admin/races/$raceId/edit': typeof LayoutAdminRacesRaceIdEditRoute
@@ -181,13 +181,13 @@ export interface FileRoutesByTo {
   '/onboarding': typeof LayoutOnboardingRoute
   '/saved': typeof LayoutSavedRoute
   '/about': typeof PublicAboutRoute
-  '/races': typeof PublicRacesRouteWithChildren
   '/admin/dashboard': typeof LayoutAdminDashboardRoute
   '/admin/items': typeof LayoutAdminItemsRoute
   '/admin/settings': typeof LayoutAdminSettingsRoute
   '/admin/users': typeof LayoutAdminUsersRoute
   '/races/$raceId': typeof PublicRacesRaceIdRoute
   '/admin': typeof LayoutAdminIndexRoute
+  '/races': typeof PublicRacesIndexRoute
   '/admin/races/new': typeof LayoutAdminRacesNewRoute
   '/admin/races': typeof LayoutAdminRacesIndexRoute
   '/admin/races/$raceId/edit': typeof LayoutAdminRacesRaceIdEditRoute
@@ -205,7 +205,6 @@ export interface FileRoutesById {
   '/_layout/onboarding': typeof LayoutOnboardingRoute
   '/_layout/saved': typeof LayoutSavedRoute
   '/_public/about': typeof PublicAboutRoute
-  '/_public/races': typeof PublicRacesRouteWithChildren
   '/_public/': typeof PublicIndexRoute
   '/_layout/admin/dashboard': typeof LayoutAdminDashboardRoute
   '/_layout/admin/items': typeof LayoutAdminItemsRoute
@@ -214,6 +213,7 @@ export interface FileRoutesById {
   '/_layout/admin/users': typeof LayoutAdminUsersRoute
   '/_public/races/$raceId': typeof PublicRacesRaceIdRoute
   '/_layout/admin/': typeof LayoutAdminIndexRoute
+  '/_public/races/': typeof PublicRacesIndexRoute
   '/_layout/admin/races/new': typeof LayoutAdminRacesNewRoute
   '/_layout/admin/races/': typeof LayoutAdminRacesIndexRoute
   '/_layout/admin/races/$raceId/edit': typeof LayoutAdminRacesRaceIdEditRoute
@@ -231,7 +231,6 @@ export interface FileRouteTypes {
     | '/onboarding'
     | '/saved'
     | '/about'
-    | '/races'
     | '/admin/dashboard'
     | '/admin/items'
     | '/admin/races'
@@ -239,6 +238,7 @@ export interface FileRouteTypes {
     | '/admin/users'
     | '/races/$raceId'
     | '/admin/'
+    | '/races/'
     | '/admin/races/new'
     | '/admin/races/'
     | '/admin/races/$raceId/edit'
@@ -253,13 +253,13 @@ export interface FileRouteTypes {
     | '/onboarding'
     | '/saved'
     | '/about'
-    | '/races'
     | '/admin/dashboard'
     | '/admin/items'
     | '/admin/settings'
     | '/admin/users'
     | '/races/$raceId'
     | '/admin'
+    | '/races'
     | '/admin/races/new'
     | '/admin/races'
     | '/admin/races/$raceId/edit'
@@ -276,7 +276,6 @@ export interface FileRouteTypes {
     | '/_layout/onboarding'
     | '/_layout/saved'
     | '/_public/about'
-    | '/_public/races'
     | '/_public/'
     | '/_layout/admin/dashboard'
     | '/_layout/admin/items'
@@ -285,6 +284,7 @@ export interface FileRouteTypes {
     | '/_layout/admin/users'
     | '/_public/races/$raceId'
     | '/_layout/admin/'
+    | '/_public/races/'
     | '/_layout/admin/races/new'
     | '/_layout/admin/races/'
     | '/_layout/admin/races/$raceId/edit'
@@ -350,13 +350,6 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof PublicIndexRouteImport
       parentRoute: typeof PublicRoute
     }
-    '/_public/races': {
-      id: '/_public/races'
-      path: '/races'
-      fullPath: '/races'
-      preLoaderRoute: typeof PublicRacesRouteImport
-      parentRoute: typeof PublicRoute
-    }
     '/_public/about': {
       id: '/_public/about'
       path: '/about'
@@ -392,6 +385,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof LayoutAdminRouteImport
       parentRoute: typeof LayoutRoute
     }
+    '/_public/races/': {
+      id: '/_public/races/'
+      path: '/races'
+      fullPath: '/races/'
+      preLoaderRoute: typeof PublicRacesIndexRouteImport
+      parentRoute: typeof PublicRoute
+    }
     '/_layout/admin/': {
       id: '/_layout/admin/'
       path: '/'
@@ -401,10 +401,10 @@ declare module '@tanstack/react-router' {
     }
     '/_public/races/$raceId': {
       id: '/_public/races/$raceId'
-      path: '/$raceId'
+      path: '/races/$raceId'
       fullPath: '/races/$raceId'
       preLoaderRoute: typeof PublicRacesRaceIdRouteImport
-      parentRoute: typeof PublicRacesRoute
+      parentRoute: typeof PublicRoute
     }
     '/_layout/admin/users': {
       id: '/_layout/admin/users'
@@ -519,28 +519,18 @@ const LayoutRouteChildren: LayoutRouteChildren = {
 const LayoutRouteWithChildren =
   LayoutRoute._addFileChildren(LayoutRouteChildren)
 
-interface PublicRacesRouteChildren {
-  PublicRacesRaceIdRoute: typeof PublicRacesRaceIdRoute
-}
-
-const PublicRacesRouteChildren: PublicRacesRouteChildren = {
-  PublicRacesRaceIdRoute: PublicRacesRaceIdRoute,
-}
-
-const PublicRacesRouteWithChildren = PublicRacesRoute._addFileChildren(
-  PublicRacesRouteChildren,
-)
-
 interface PublicRouteChildren {
   PublicAboutRoute: typeof PublicAboutRoute
-  PublicRacesRoute: typeof PublicRacesRouteWithChildren
   PublicIndexRoute: typeof PublicIndexRoute
+  PublicRacesRaceIdRoute: typeof PublicRacesRaceIdRoute
+  PublicRacesIndexRoute: typeof PublicRacesIndexRoute
 }
 
 const PublicRouteChildren: PublicRouteChildren = {
   PublicAboutRoute: PublicAboutRoute,
-  PublicRacesRoute: PublicRacesRouteWithChildren,
   PublicIndexRoute: PublicIndexRoute,
+  PublicRacesRaceIdRoute: PublicRacesRaceIdRoute,
+  PublicRacesIndexRoute: PublicRacesIndexRoute,
 }
 
 const PublicRouteWithChildren =
