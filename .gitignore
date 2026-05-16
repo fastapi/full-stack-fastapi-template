@@ -7,3 +7,4 @@ node_modules/
 /playwright/.cache/
 frontend/.tanstack/
 backend/uploads/media/
+.DS_Store

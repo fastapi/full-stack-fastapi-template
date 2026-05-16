@@ -8,6 +8,7 @@ import { type RacePublic, type RaceUpdate, RacesService, ProvincesService } from
 import MediaGalleryManager from "@/components/Media/MediaGalleryManager"
 import RaceCategoryManager from "@/components/Races/RaceCategoryManager"
 import { Button } from "@/components/ui/button"
+import { RichTextEditor } from "@/components/ui/rich-text-editor"
 import {
   Form,
   FormControl,
@@ -17,7 +18,6 @@ import {
   FormMessage,
 } from "@/components/ui/form"
 import { Input } from "@/components/ui/input"
-import { Textarea } from "@/components/ui/textarea"
 import {
   Select,
   SelectContent,
@@ -156,10 +156,10 @@ const EditRace = ({ race }: EditRaceProps) => {
                   <FormItem className="md:col-span-2">
                     <FormLabel>Description</FormLabel>
                     <FormControl>
-                      <Textarea
+                      <RichTextEditor
                         placeholder="Describe the race event..."
-                        className="min-h-[100px]"
-                        {...field}
+                        value={field.value}
+                        onChange={field.onChange}
                       />
                     </FormControl>
                     <FormMessage />
