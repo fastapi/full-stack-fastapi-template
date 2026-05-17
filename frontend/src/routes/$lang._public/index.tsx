@@ -1,4 +1,4 @@
-import { createFileRoute, Link, useParams } from "@tanstack/react-router"
+import { createFileRoute, Link } from "@tanstack/react-router"
 import { ArrowRight, Calendar, MapPin, Trophy, ChevronRight } from "lucide-react"
 import { useTranslation } from "react-i18next"
 import { Button } from "@/components/ui/button"
@@ -36,12 +36,14 @@ function HorizontalRail({
   races,
   isLoading,
   t,
+  currentLang,
 }: {
   title: string
   link?: string
   races: { id: string; [key: string]: unknown }[]
   isLoading: boolean
   t: (key: string) => string
+  currentLang: string
 }) {
   return (
     <section className="space-y-4">
@@ -49,7 +51,8 @@ function HorizontalRail({
         <h2 className="text-xl font-semibold">{title}</h2>
         {link && (
           <Link
-            to="/races"
+            to="/$lang/races"
+            params={{ lang: currentLang }}
             className="flex items-center gap-1 text-sm text-primary hover:underline"
           >
             {t("common.viewAll")} <ChevronRight className="size-4" />
@@ -102,6 +105,7 @@ function PersonalizedSections() {
         races={trendingData?.data ?? []}
         isLoading={trendingLoading}
         t={t}
+        currentLang={currentLang}
       />
       <HorizontalRail
         title={t("home.upcoming")}
@@ -109,6 +113,7 @@ function PersonalizedSections() {
         races={upcomingData?.data ?? []}
         isLoading={upcomingLoading}
         t={t}
+        currentLang={currentLang}
       />
     </div>
   )
@@ -168,7 +173,7 @@ function HomePage() {
             </p>
             <div className="flex flex-col gap-4 sm:flex-row sm:justify-center">
               <Button size="lg" asChild>
-                <Link to={`/${currentLang}/races`}>
+                <Link to="/$lang/races" params={{ lang: currentLang }}>
                   {t("home.hero.cta")} <ArrowRight className="ml-2 size-4" />
                 </Link>
               </Button>
