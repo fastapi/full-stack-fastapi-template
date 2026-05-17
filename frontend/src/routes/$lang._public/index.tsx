@@ -1,15 +1,12 @@
 import { createFileRoute, Link } from "@tanstack/react-router"
-import { ArrowRight, Calendar, MapPin, Trophy, ChevronRight } from "lucide-react"
+import { ArrowRight, Sparkles } from "lucide-react"
 import { useTranslation } from "react-i18next"
+import { useState } from "react"
 import { Button } from "@/components/ui/button"
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card"
+import { Input } from "@/components/ui/input"
+import { Badge } from "@/components/ui/badge"
 import { RaceCard } from "@/components/Races/RaceCard"
+import { PublicFooter } from "@/components/Public/PublicFooter"
 import { useRaceSearch } from "@/hooks/useRaceSearch"
 import { isLoggedIn } from "@/hooks/useAuth"
 import { generateMetaTags, generateOrganizationSchema, StructuredData } from "@/lib/seo"
@@ -30,222 +27,222 @@ export const Route = createFileRoute("/$lang/_public/")({
   }),
 })
 
-function HorizontalRail({
-  title,
-  link,
-  races,
-  isLoading,
-  t,
-  currentLang,
-}: {
-  title: string
-  link?: string
-  races: { id: string; [key: string]: unknown }[]
-  isLoading: boolean
-  t: (key: string) => string
-  currentLang: string
-}) {
-  return (
-    <section className="space-y-4">
-      <div className="flex items-center justify-between">
-        <h2 className="text-xl font-semibold">{title}</h2>
-        {link && (
-          <Link
-            to="/$lang/races"
-            params={{ lang: currentLang }}
-            className="flex items-center gap-1 text-sm text-primary hover:underline"
-          >
-            {t("common.viewAll")} <ChevronRight className="size-4" />
-          </Link>
-        )}
-      </div>
-      {isLoading ? (
-        <div className="flex gap-4 overflow-x-auto pb-2">
-          {Array.from({ length: 3 }).map((_, i) => (
-            <div
-              key={i}
-              className="h-56 w-72 shrink-0 rounded-lg border bg-muted/50 animate-pulse"
-            />
-          ))}
-        </div>
-      ) : races.length === 0 ? (
-        <p className="text-sm text-muted-foreground py-4">{t("home.noRaces")}</p>
-      ) : (
-        <div className="flex gap-4 overflow-x-auto pb-2 snap-x">
-          {races.map((race) => (
-            <div key={race.id} className="w-72 shrink-0 snap-start">
-              <RaceCard race={race as Parameters<typeof RaceCard>[0]["race"]} />
-            </div>
-          ))}
-        </div>
-      )}
-    </section>
-  )
-}
-
-function PersonalizedSections() {
-  const { t, i18n } = useTranslation()
+function HomePage() {
+  const loggedIn = isLoggedIn()
+  const { i18n } = useTranslation()
   const { lang } = Route.useParams()
   const currentLang = lang || i18n.language || "vi"
-  
-  const { data: trendingData, isLoading: trendingLoading } = useRaceSearch({
+  const [searchQuery, setSearchQuery] = useState("")
+
+  // Fetch hand-picked races
+  const { data: handPickedData, isLoading } = useRaceSearch({
     sort: "popularity",
     limit: 6,
   })
-  const { data: upcomingData, isLoading: upcomingLoading } = useRaceSearch({
-    sort: "date",
-    limit: 6,
-  })
-
-  return (
-    <div className="space-y-10">
-      <HorizontalRail
-        title={t("home.trending")}
-        link={`/${currentLang}/races?sort=popularity`}
-        races={trendingData?.data ?? []}
-        isLoading={trendingLoading}
-        t={t}
-        currentLang={currentLang}
-      />
-      <HorizontalRail
-        title={t("home.upcoming")}
-        link={`/${currentLang}/races?sort=date`}
-        races={upcomingData?.data ?? []}
-        isLoading={upcomingLoading}
-        t={t}
-        currentLang={currentLang}
-      />
-    </div>
-  )
-}
-
-function HomePage() {
-  const loggedIn = isLoggedIn()
-  const { t, i18n } = useTranslation()
-  const { lang } = Route.useParams()
-  const currentLang = lang || i18n.language || "vi"
-
-  const features = [
-    {
-      icon: Calendar,
-      title: t("home.features.discover.title"),
-      description: t("home.features.discover.description"),
-    },
-    {
-      icon: MapPin,
-      title: t("home.features.easyRegistration.title"),
-      description: t("home.features.easyRegistration.description"),
-    },
-    {
-      icon: Trophy,
-      title: t("home.features.trackProgress.title"),
-      description: t("home.features.trackProgress.description"),
-    },
-  ]
+  const handPickedRaces = handPickedData?.data ?? []
+  const totalRaces = handPickedData?.count ?? 11248
 
   const organizationSchema = generateOrganizationSchema({
     name: "VNRunner",
     url: baseUrl,
     logo: `${baseUrl}/assets/images/favicon.png`,
     description: "Vietnam's premier platform for discovering and registering for running races, trail runs, and marathons.",
-    sameAs: [
-      // Add social media URLs when available
-      // "https://facebook.com/vnrunner",
-      // "https://instagram.com/vnrunner",
-    ],
+    sameAs: [],
   })
+
+  const quickFilters = [
+    "search half marathons in October",
+    "flat fast 10K near me",
+    "cool weather marathons",
+    "find ultras under 50K",
+  ]
+
+  const handleSearch = () => {
+    // Navigate to races page with search query
+    if (searchQuery.trim()) {
+      window.location.href = `/${currentLang}/races?q=${encodeURIComponent(searchQuery)}`
+    }
+  }
 
   return (
     <>
       <StructuredData data={organizationSchema} />
       
-      {/* Hero Section */}
-      <section className="w-full py-16 md:py-24 lg:py-32" itemScope itemType="https://schema.org/WebSite">
+      {/* Hero Section - Bold Typography with AI Search */}
+      <section className="w-full py-16 md:py-20 lg:py-24" itemScope itemType="https://schema.org/WebSite">
         <meta itemProp="url" content={baseUrl} />
         <meta itemProp="name" content="VNRunner" />
-        <div className="container">
-          <div className="mx-auto max-w-3xl text-center space-y-8">
-            <h1 className="text-4xl font-bold tracking-tight md:text-5xl lg:text-6xl">
-              {t("home.hero.title")}
+        <div className="container max-w-[1100px]">
+          <div className="mx-auto text-center space-y-5">
+            {/* Small header text with icon */}
+            <div className="flex items-center justify-center gap-2 text-xs tracking-[0.14em] uppercase text-[#74716A] font-mono">
+              <Sparkles className="size-3.5" />
+              <span>THE AI RACE FINDER · {totalRaces.toLocaleString()} RACES INDEXED</span>
+            </div>
+            
+            {/* Large bold heading - Anton-style */}
+            <h1 className="text-6xl md:text-8xl lg:text-[168px] font-black tracking-[-0.01em] leading-[0.9] uppercase">
+              Find your
+              <br />
+              <span className="text-[#FF5A1F]">next</span> start
+              <br />
+              line.
             </h1>
-            <p className="text-lg text-muted-foreground md:text-xl">
-              {t("home.hero.subtitle")}
+            
+            {/* Subtitle */}
+            <p className="text-lg md:text-xl text-[#74716A] max-w-[620px] mx-auto leading-7">
+              Describe what you want — terrain, weather, distance, vibe — and we'll find the races that fit.
             </p>
-            <div className="flex flex-col gap-4 sm:flex-row sm:justify-center">
-              <Button size="lg" asChild>
-                <Link to="/$lang/races" params={{ lang: currentLang }}>
-                  {t("home.hero.cta")} <ArrowRight className="ml-2 size-4" />
-                </Link>
-              </Button>
-              {!loggedIn && (
-                <Button size="lg" variant="outline" asChild>
-                  <Link to="/signup">{t("common.register")}</Link>
-                </Button>
-              )}
+            
+            {/* AI Search Bar */}
+            <div className="max-w-[820px] mx-auto space-y-4 pt-5">
+              <div className="relative bg-white border-2 border-[#E6E1D7] rounded-[28px] shadow-[0px_6px_12px_rgba(15,14,12,0.06),0px_1px_1px_rgba(15,14,12,0.04)] p-2.5">
+                <div className="flex items-center gap-3 px-4">
+                  <Sparkles className="size-3.5 text-[#74716A] flex-shrink-0" />
+                  <Input
+                    type="text"
+                    placeholder='Ask anything — "half marathon in October, cool weather, scenic"'
+                    className="flex-1 h-11 px-1 border-0 text-base focus-visible:ring-0 focus-visible:ring-offset-0 shadow-none"
+                    value={searchQuery}
+                    onChange={(e) => setSearchQuery(e.target.value)}
+                    onKeyDown={(e) => e.key === "Enter" && handleSearch()}
+                  />
+                  <Button
+                    onClick={handleSearch}
+                    className="rounded-full h-11 px-5 font-bold text-sm bg-[#FF5A1F] hover:bg-[#FF5A1F]/90"
+                  >
+                    Find races <ArrowRight className="ml-2 size-4" />
+                  </Button>
+                </div>
+              </div>
+              
+              {/* Quick filters */}
+              <div className="flex flex-wrap items-center justify-center gap-2">
+                <span className="text-xs text-[#74716A] font-mono tracking-widest uppercase">Try:</span>
+                {quickFilters.map((filter) => (
+                  <Badge
+                    key={filter}
+                    variant="outline"
+                    className="cursor-pointer hover:bg-muted/50 transition-colors rounded-full px-3 py-1.5 border-[#E6E1D7] text-xs font-bold"
+                    onClick={() => setSearchQuery(filter)}
+                  >
+                    {filter}
+                  </Badge>
+                ))}
+              </div>
             </div>
           </div>
         </div>
       </section>
 
-      {/* Race rails */}
-      <section className="w-full py-12 md:py-16">
-        <div className="container">
-          <div className="mx-auto max-w-7xl">
-            <PersonalizedSections />
-          </div>
-        </div>
-      </section>
-
-      {/* Features Section */}
-      <section className="w-full bg-muted/50 py-16 md:py-24">
-        <div className="container">
-          <div className="mx-auto max-w-2xl text-center space-y-4 mb-12">
-            <h2 className="text-3xl font-bold tracking-tight md:text-4xl">
-              {t("home.features.title")}
-            </h2>
-          </div>
-          <div className="mx-auto grid max-w-5xl gap-6 md:grid-cols-3">
-            {features.map(({ icon: Icon, title, description }) => (
-              <Card
-                key={title}
-                className="border-2 transition-shadow hover:shadow-lg"
+      {/* Hand-Picked Races Section */}
+      <section className="w-full py-16 md:py-20 lg:py-24">
+        <div className="container max-w-[1400px]">
+          <div className="space-y-7">
+            {/* Section header with border */}
+            <div className="flex items-end justify-between pb-7 border-b-2 border-[#0F0E0C]">
+              <div className="space-y-2">
+                <div className="flex items-center gap-2 text-xs tracking-[0.14em] uppercase text-[#74716A] font-mono">
+                  <Sparkles className="size-3.5" />
+                  <span>RECOMMENDED FOR YOU</span>
+                </div>
+                <h2 className="text-4xl md:text-5xl lg:text-[56px] font-black tracking-tight leading-[0.92] uppercase">
+                  Hand-picked races.
+                </h2>
+              </div>
+              <Link
+                to="/$lang/races"
+                params={{ lang: currentLang }}
+                className="text-sm font-bold hover:text-primary transition-colors flex items-center gap-2 border border-[#E6E1D7] rounded-full px-5 py-2.5"
               >
-                <CardHeader className="space-y-4">
-                  <div className="flex size-12 items-center justify-center rounded-lg bg-primary/10">
-                    <Icon className="size-6 text-primary" />
-                  </div>
-                  <CardTitle className="text-xl">{title}</CardTitle>
-                  <CardDescription className="text-base">
-                    {description}
-                  </CardDescription>
-                </CardHeader>
-              </Card>
-            ))}
+                See all <ArrowRight className="size-4" />
+              </Link>
+            </div>
+            
+            {/* Races Grid */}
+            {isLoading ? (
+              <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
+                {Array.from({ length: 6 }).map((_, i) => (
+                  <div
+                    key={i}
+                    className="h-[331px] rounded-[22px] border border-[#E6E1D7] bg-card/50 animate-pulse"
+                  />
+                ))}
+              </div>
+            ) : handPickedRaces.length > 0 ? (
+              <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
+                {handPickedRaces.map((race) => (
+                  <RaceCard key={race.id} race={race} />
+                ))}
+              </div>
+            ) : (
+              <p className="text-center text-muted-foreground py-12">
+                No races available at the moment.
+              </p>
+            )}
           </div>
         </div>
       </section>
 
-      {/* CTA Section (unauthenticated only) */}
-      {!loggedIn && (
-        <section className="w-full py-16 md:py-24">
-          <div className="container">
-            <div className="mx-auto max-w-4xl">
-              <Card className="border-2 bg-muted/50">
-                <CardContent className="p-8 text-center md:p-12">
-                  <div className="mx-auto max-w-2xl space-y-6">
-                    <h2 className="text-2xl font-bold tracking-tight md:text-3xl">
-                      Ready to Start Running?
-                    </h2>
-                    <p className="text-lg text-muted-foreground">
-                      Create your free account today and get personalised race
-                      recommendations.
-                    </p>
-                    <Button size="lg" asChild>
-                      <Link to="/signup">Get Started Free</Link>
-                    </Button>
-                  </div>
-                </CardContent>
-              </Card>
+      {/* CTA Section - Orange Background */}
+      {loggedIn && (
+        <section className="w-full py-16 md:py-20 bg-[#FF5A1F] relative overflow-hidden">
+          {/* Decorative elements */}
+          <div className="absolute inset-0 opacity-10">
+            <div className="absolute top-0 right-0 w-96 h-96 bg-white rounded-full blur-3xl" />
+            <div className="absolute bottom-0 left-0 w-96 h-96 bg-white rounded-full blur-3xl" />
+          </div>
+          
+          <div className="container max-w-[1328px] relative">
+            <div className="grid lg:grid-cols-[1.4fr_1fr] gap-12 items-center">
+              {/* Left side - Copy */}
+              <div className="space-y-3">
+                <p className="text-xs tracking-[0.14em] uppercase text-white/70 font-mono">
+                  FREE FOREVER · NO CREDIT CARD
+                </p>
+                <h2 className="text-5xl md:text-6xl lg:text-[80px] font-black tracking-tight leading-[0.95] uppercase text-white">
+                  Save races.
+                  <br />
+                  Get smarter
+                  <br />
+                  recommendations.
+                </h2>
+                <p className="text-base leading-6 text-white/90 max-w-[680px]">
+                  Sign up to save races, build a season calendar, get personalized AI picks, and never miss a registration window.
+                </p>
+              </div>
+                
+              {/* Right side - Form */}
+              <div className="bg-white rounded-[22px] p-6 space-y-2.5">
+                <p className="text-xs tracking-[0.14em] uppercase text-[#74716A] font-mono">
+                  Start in 30 seconds
+                </p>
+                
+                <Input
+                  type="email"
+                  placeholder="your@email.com"
+                  className="h-12 rounded-full border-[#E6E1D7] text-sm"
+                />
+                
+                <Button className="w-full h-11 rounded-full bg-[#0F0E0C] hover:bg-[#0F0E0C]/90 text-white font-bold text-sm">
+                  Create free account <ArrowRight className="ml-2 size-4" />
+                </Button>
+                
+                <div className="flex items-center gap-2 py-1">
+                  <div className="flex-1 h-px bg-[#E6E1D7]" />
+                  <span className="text-xs text-[#74716A]">OR</span>
+                  <div className="flex-1 h-px bg-[#E6E1D7]" />
+                </div>
+                
+                <div className="grid grid-cols-2 gap-2 pt-1">
+                  <Button variant="outline" className="h-[34px] rounded-full border-[#E6E1D7] text-xs font-bold">
+                    Apple
+                  </Button>
+                  <Button variant="outline" className="h-[34px] rounded-full border-[#E6E1D7] text-xs font-bold">
+                    Google
+                  </Button>
+                </div>
+              </div>
             </div>
           </div>
         </section>
@@ -253,5 +250,3 @@ function HomePage() {
     </>
   )
 }
-
-export default HomePage

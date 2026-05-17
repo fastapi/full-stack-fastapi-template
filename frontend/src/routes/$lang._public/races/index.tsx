@@ -124,24 +124,24 @@ function RacesPage() {
   }
 
   return (
-    <div className="w-full py-8 md:py-12">
+    <div className="w-full py-12 md:py-16 lg:py-20">
       <StructuredData data={breadcrumbSchema} />
       <div className="container">
-        <div className="mx-auto max-w-7xl space-y-8">
+        <div className="mx-auto max-w-7xl space-y-10">
           {/* Header */}
-          <header className="space-y-4">
-            <h1 className="text-3xl font-bold tracking-tight md:text-4xl">
+          <header className="space-y-4 max-w-3xl">
+            <h1 className="text-4xl md:text-5xl font-bold tracking-tight">
               Upcoming Races in Vietnam
             </h1>
-            <p className="text-lg text-muted-foreground max-w-2xl">
+            <p className="text-lg md:text-xl text-muted-foreground leading-relaxed">
               Browse and register for upcoming running races across Vietnam. Find the perfect event
               that matches your goals and fitness level - from road races to trail runs, 5Ks to ultramarathons.
             </p>
           </header>
 
           {/* Search + Controls */}
-          <div className="space-y-3 rounded-lg border bg-muted/30 p-4">
-            <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
+          <div className="space-y-4 rounded-2xl border border-border/50 bg-card/30 backdrop-blur-sm p-6">
+            <div className="flex flex-col gap-4 sm:flex-row sm:items-center">
               <SearchBar
                 value={search.q ?? ""}
                 onChange={handleQueryChange}
@@ -152,25 +152,35 @@ function RacesPage() {
           </div>
 
           {/* Results count + view toggle */}
-          <div className="flex items-center justify-between text-sm text-muted-foreground">
-            <span>
+          <div className="flex items-center justify-between text-sm">
+            <span className="font-medium">
               {isLoading
                 ? "Searching..."
                 : `${totalCount} race${totalCount !== 1 ? "s" : ""} found`}
             </span>
-            <div className="flex items-center gap-2">
-              {isFetching && !isLoading && <Loader2 className="size-4 animate-spin" />}
-              <div className="flex rounded-md border overflow-hidden">
+            <div className="flex items-center gap-3">
+              {isFetching && !isLoading && <Loader2 className="size-4 animate-spin text-primary" />}
+              <div className="flex rounded-lg border border-border/50 overflow-hidden bg-card/50">
                 <button
                   onClick={() => setViewMode("grid")}
-                  className={cn("px-2 py-1", viewMode === "grid" ? "bg-muted text-foreground" : "hover:bg-muted/50")}
+                  className={cn(
+                    "px-3 py-2 transition-colors",
+                    viewMode === "grid" 
+                      ? "bg-primary text-primary-foreground" 
+                      : "hover:bg-muted/50"
+                  )}
                   title="Grid view"
                 >
                   <LayoutGrid className="size-4" />
                 </button>
                 <button
                   onClick={() => setViewMode("map")}
-                  className={cn("px-2 py-1 border-l", viewMode === "map" ? "bg-muted text-foreground" : "hover:bg-muted/50")}
+                  className={cn(
+                    "px-3 py-2 border-l transition-colors",
+                    viewMode === "map" 
+                      ? "bg-primary text-primary-foreground" 
+                      : "hover:bg-muted/50"
+                  )}
                   title="Map view"
                 >
                   <Map className="size-4" />
@@ -185,7 +195,7 @@ function RacesPage() {
               {Array.from({ length: 6 }).map((_, i) => (
                 <div
                   key={i}
-                  className="h-64 rounded-lg border bg-muted/50 animate-pulse"
+                  className="h-80 rounded-2xl border border-border/50 bg-card/50 animate-pulse"
                 />
               ))}
             </div>
@@ -198,8 +208,8 @@ function RacesPage() {
               ))}
             </div>
           ) : (
-            <div className="py-12 text-center">
-              <p className="text-lg text-muted-foreground">
+            <div className="py-20 text-center">
+              <p className="text-lg text-muted-foreground max-w-md mx-auto">
                 No races found matching your filters. Try adjusting your search.
               </p>
             </div>
@@ -207,19 +217,19 @@ function RacesPage() {
 
           {/* Pagination */}
           {totalPages > 1 && (
-            <div className="flex items-center justify-center gap-2 pt-4">
+            <div className="flex items-center justify-center gap-3 pt-8">
               <button
-                className="rounded border px-3 py-1.5 text-sm disabled:opacity-40"
+                className="rounded-lg border border-border/50 bg-card/50 px-4 py-2 text-sm font-medium transition-colors hover:bg-card disabled:opacity-40 disabled:hover:bg-card/50"
                 disabled={currentPage === 0}
                 onClick={() => navigate({ search: (prev) => ({ ...prev, page: currentPage - 1 }) })}
               >
                 Previous
               </button>
-              <span className="text-sm text-muted-foreground">
+              <span className="text-sm font-medium px-2">
                 Page {currentPage + 1} of {totalPages}
               </span>
               <button
-                className="rounded border px-3 py-1.5 text-sm disabled:opacity-40"
+                className="rounded-lg border border-border/50 bg-card/50 px-4 py-2 text-sm font-medium transition-colors hover:bg-card disabled:opacity-40 disabled:hover:bg-card/50"
                 disabled={currentPage >= totalPages - 1}
                 onClick={() => navigate({ search: (prev) => ({ ...prev, page: currentPage + 1 }) })}
               >

@@ -1,26 +1,9 @@
-import { Link, useNavigate, useParams } from "@tanstack/react-router"
-import { Calendar, MapPin, Mountain, TrendingUp, Sparkles } from "lucide-react"
-import { Badge } from "@/components/ui/badge"
-import { Button } from "@/components/ui/button"
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardFooter,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card"
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipProvider,
-  TooltipTrigger,
-} from "@/components/ui/tooltip"
+import { Link, useParams } from "@tanstack/react-router"
+import { Bookmark, Plus } from "lucide-react"
 import type { RacePublic } from "@/client"
 
 interface RaceCardProps {
   race: RacePublic & { ai_explanation?: string | null }
-  distanceKm?: number
 }
 
 const terrainLabels: Record<string, string> = {
@@ -30,117 +13,100 @@ const terrainLabels: Record<string, string> = {
   mixed: "Mixed",
 }
 
-const difficultyColors: Record<string, string> = {
-  easy: "bg-green-100 text-green-800",
-  moderate: "bg-yellow-100 text-yellow-800",
-  hard: "bg-orange-100 text-orange-800",
-  extreme: "bg-red-100 text-red-800",
+const difficultyLabels: Record<string, string> = {
+  easy: "Easy",
+  moderate: "Moderate",
+  hard: "Hard",
+  extreme: "Extreme",
 }
 
-export function RaceCard({ race, distanceKm }: RaceCardProps) {
-  const navigate = useNavigate()
+export function RaceCard({ race }: RaceCardProps) {
   const params = useParams({ strict: false }) as Record<string, any>
   const lang = params?.lang || "vi"
   
   const aiExplanation = "ai_explanation" in race ? race.ai_explanation : null
+  
+  // Format date to short format like "SEP 21"
   const eventDate = race.event_start_date
     ? new Date(race.event_start_date).toLocaleDateString("en-US", {
-        year: "numeric",
-        month: "long",
+        month: "short",
         day: "numeric",
-      })
+      }).toUpperCase()
     : null
 
-  const location = [race.city, race.state, race.country].filter(Boolean).join(", ")
+  const location = [race.city, race.state].filter(Boolean).join(", ").toUpperCase()
   
-  // Strip HTML tags from description for card preview
-  const stripHtml = (html: string) => {
-    const tmp = document.createElement("DIV")
-    tmp.innerHTML = html
-    return tmp.textContent || tmp.innerText || ""
-  }
+  // Get race distance from metadata or default
+  const raceDistance = typeof race.race_metadata?.distance === 'string' 
+    ? race.race_metadata.distance 
+    : "13.1mi"
   
-  const descriptionText = race.description ? stripHtml(race.description) : ""
+  // Build feature highlights
+  const features = []
+  if (race.terrain_type) features.push(terrainLabels[race.terrain_type]?.toLowerCase())
+  if (race.difficulty_level) features.push(difficultyLabels[race.difficulty_level]?.toLowerCase())
+  if (aiExplanation) features.push("your top match")
+  const featureText = features.slice(0, 3).join(" + ") || "Scenic + rolling"
+
+  // Participant count badge (mock for now, could come from race_metadata)
+  const participantCount = typeof race.race_metadata?.participant_count === 'number'
+    ? race.race_metadata.participant_count
+    : 97
 
   return (
-    <Link to="/$lang/races/$raceId" params={{ lang, raceId: race.id }} className="block">
-      <Card className="flex flex-col transition-shadow hover:shadow-lg cursor-pointer h-full">
-      <CardHeader className="space-y-3">
-        <div className="flex flex-wrap items-center gap-2">
-          {race.terrain_type && (
-            <Badge variant="outline">{terrainLabels[race.terrain_type] ?? race.terrain_type}</Badge>
-          )}
-          {race.difficulty_level && (
-            <span
-              className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium ${difficultyColors[race.difficulty_level] ?? ""}`}
-            >
-              {race.difficulty_level}
-            </span>
-          )}
-          {race.is_certified && (
-            <Badge variant="secondary">Certified</Badge>
-          )}
-          {aiExplanation && (
-            <TooltipProvider>
-              <Tooltip>
-                <TooltipTrigger asChild>
-                  <span className="inline-flex items-center gap-1 rounded-full bg-purple-100 px-2 py-0.5 text-xs font-medium text-purple-700 cursor-help">
-                    <Sparkles className="size-3" /> AI Pick
-                  </span>
-                </TooltipTrigger>
-                <TooltipContent className="max-w-xs">
-                  <p className="text-sm">{aiExplanation}</p>
-                </TooltipContent>
-              </Tooltip>
-            </TooltipProvider>
-          )}
+    <Link to="/$lang/races/$raceId" params={{ lang, raceId: race.id }} className="block group">
+      <div className="overflow-hidden rounded-[22px] bg-white border border-[#E6E1D7] transition-all duration-200 hover:shadow-lg hover:border-[#0F0E0C]/20">
+        {/* Image/Header Area */}
+        <div className="relative h-[200px] bg-gradient-to-br from-[#5D3A2E] to-[#3D2520] overflow-hidden">
+          {/* Bookmark Icon - Top Left */}
+          <button
+            onClick={(e) => {
+              e.preventDefault()
+              e.stopPropagation()
+              // TODO: Implement bookmark functionality
+            }}
+            className="absolute top-4 left-4 w-10 h-10 rounded-full bg-white flex items-center justify-center hover:bg-white/90 transition-colors z-10"
+          >
+            <Bookmark className="size-5 text-[#0F0E0C]" />
+          </button>
+
+          {/* Participant Badge - Top Right */}
+          <div className="absolute top-4 right-4 bg-[#FF5A1F] text-white rounded-full px-3 py-1.5 text-sm font-bold flex items-center gap-1">
+            <Plus className="size-3.5" />
+            <span>{participantCount}</span>
+          </div>
+
+          {/* Location Label - Bottom Left */}
+          <div className="absolute bottom-4 left-4 text-white text-xs tracking-[0.14em] font-mono uppercase">
+            {location || race.location.toUpperCase()}
+          </div>
         </div>
-        <CardTitle className="text-xl leading-tight">{race.name}</CardTitle>
-        {descriptionText && (
-          <CardDescription className="line-clamp-2">{descriptionText}</CardDescription>
-        )}
-      </CardHeader>
 
-      <CardContent className="flex-1 space-y-2">
-        {eventDate && (
-          <div className="flex items-center gap-2 text-sm text-muted-foreground">
-            <Calendar className="size-4 shrink-0" />
-            <span>{eventDate}</span>
+        {/* Content Area */}
+        <div className="p-5 space-y-3">
+          {/* Location and Date Row */}
+          <div className="flex items-center justify-between text-xs text-[#74716A] uppercase tracking-wide">
+            <span>{[race.city, race.state].filter(Boolean).join(", ") || race.location}</span>
+            <span className="font-bold">{eventDate}</span>
           </div>
-        )}
-        {location && (
-          <div className="flex items-center gap-2 text-sm text-muted-foreground">
-            <MapPin className="size-4 shrink-0" />
-            <span>{location}</span>
-          </div>
-        )}
-        {distanceKm !== undefined && (
-          <div className="flex items-center gap-2 text-sm text-muted-foreground">
-            <TrendingUp className="size-4 shrink-0" />
-            <span>{distanceKm.toFixed(1)} km away</span>
-          </div>
-        )}
-        {race.elevation_gain_m != null && (
-          <div className="flex items-center gap-2 text-sm text-muted-foreground">
-            <Mountain className="size-4 shrink-0" />
-            <span>{race.elevation_gain_m}m elevation gain</span>
-          </div>
-        )}
-      </CardContent>
 
-      <CardFooter>
-        <Button 
-          className="w-full" 
-          onClick={(e) => {
-            e.preventDefault()
-            e.stopPropagation()
-            navigate({ to: "/login" })
-          }}
-        >
-          Register Now
-        </Button>
-      </CardFooter>
-      </Card>
+          {/* Race Name and Distance Row */}
+          <div className="flex items-baseline justify-between gap-4">
+            <h3 className="text-2xl font-black leading-tight flex-1 group-hover:text-[#FF5A1F] transition-colors">
+              {race.name}
+            </h3>
+            <span className="text-2xl font-black whitespace-nowrap">
+              {raceDistance}
+            </span>
+          </div>
+
+          {/* Features Tag */}
+          <div className="flex items-start gap-1.5 text-[#FF5A1F] text-sm">
+            <Plus className="size-4 mt-0.5 flex-shrink-0" />
+            <span className="leading-snug">{featureText}</span>
+          </div>
+        </div>
+      </div>
     </Link>
   )
 }

@@ -44,17 +44,17 @@ function AboutPage() {
   ])
 
   return (
-    <div className="w-full py-8 md:py-12">
+    <div className="w-full py-12 md:py-16 lg:py-20">
       <StructuredData data={faqSchema} />
       <div className="container">
-        <article className="mx-auto max-w-4xl space-y-8" itemScope itemType="https://schema.org/AboutPage">
+        <article className="mx-auto max-w-4xl space-y-12" itemScope itemType="https://schema.org/AboutPage">
           <meta itemProp="name" content="About VNRunner" />
           {/* Header */}
-          <header className="space-y-4">
-            <h1 className="text-3xl font-bold tracking-tight md:text-4xl" itemProp="headline">
+          <header className="space-y-6 text-center">
+            <h1 className="text-4xl md:text-5xl font-bold tracking-tight" itemProp="headline">
               About VNRunner
             </h1>
-            <p className="text-lg text-muted-foreground leading-relaxed" itemProp="description">
+            <p className="text-xl md:text-2xl text-muted-foreground leading-relaxed max-w-3xl mx-auto" itemProp="description">
               VNRunner is your go-to platform for discovering and registering for
               running races across Vietnam. We connect runners with race organizers to create
               memorable racing experiences.
@@ -62,77 +62,77 @@ function AboutPage() {
           </header>
 
           {/* Mission Card */}
-          <Card className="border-2">
-            <CardHeader className="space-y-2">
-              <CardTitle className="text-2xl">Our Mission</CardTitle>
-              <CardDescription className="text-base">
+          <Card className="border border-primary/20 bg-gradient-to-br from-card to-card/50 backdrop-blur rounded-2xl">
+            <CardHeader className="space-y-3 p-8">
+              <CardTitle className="text-3xl font-bold">Our Mission</CardTitle>
+              <CardDescription className="text-lg">
                 Making race discovery and registration simple for everyone
               </CardDescription>
             </CardHeader>
-            <CardContent>
-              <p className="text-muted-foreground leading-relaxed">
+            <CardContent className="px-8 pb-8">
+              <p className="text-muted-foreground leading-relaxed text-lg">
                 We believe running brings people together. Our platform makes it
                 easy to find races that match your goals, register securely
                 online, and track your running journey. Whether you're training
-                for your first 5K or your tenth marathon, RaceHub helps you find
+                for your first 5K or your tenth marathon, VNRunner helps you find
                 the perfect event.
               </p>
             </CardContent>
           </Card>
 
           {/* Features Grid */}
-          <div className="grid gap-6 md:grid-cols-2">
-            <Card className="border-2">
-              <CardHeader>
-                <CardTitle className="text-xl">For Runners</CardTitle>
+          <div className="grid gap-8 md:grid-cols-2">
+            <Card className="border border-border/50 bg-card/50 backdrop-blur-sm rounded-2xl transition-all hover:border-primary/30 hover:shadow-lg hover:shadow-primary/5">
+              <CardHeader className="p-8">
+                <CardTitle className="text-2xl font-semibold">For Runners</CardTitle>
               </CardHeader>
-              <CardContent>
-                <ul className="space-y-3 text-muted-foreground">
+              <CardContent className="px-8 pb-8">
+                <ul className="space-y-4 text-muted-foreground">
                   <li className="flex gap-3">
-                    <span className="mt-1 text-primary">•</span>
-                    <span>Browse races by distance, location, and date</span>
+                    <span className="mt-1 text-primary font-bold">•</span>
+                    <span className="leading-relaxed">Browse races by distance, location, and date</span>
                   </li>
                   <li className="flex gap-3">
-                    <span className="mt-1 text-primary">•</span>
-                    <span>Register online with secure payment processing</span>
+                    <span className="mt-1 text-primary font-bold">•</span>
+                    <span className="leading-relaxed">Register online with secure payment processing</span>
                   </li>
                   <li className="flex gap-3">
-                    <span className="mt-1 text-primary">•</span>
-                    <span>Track your race history and personal records</span>
+                    <span className="mt-1 text-primary font-bold">•</span>
+                    <span className="leading-relaxed">Track your race history and personal records</span>
                   </li>
                   <li className="flex gap-3">
-                    <span className="mt-1 text-primary">•</span>
-                    <span>Receive race updates and important information</span>
+                    <span className="mt-1 text-primary font-bold">•</span>
+                    <span className="leading-relaxed">Receive race updates and important information</span>
                   </li>
                 </ul>
               </CardContent>
             </Card>
 
-            <Card className="border-2">
-              <CardHeader>
-                <CardTitle className="text-xl">For Race Organizers</CardTitle>
+            <Card className="border border-border/50 bg-card/50 backdrop-blur-sm rounded-2xl transition-all hover:border-primary/30 hover:shadow-lg hover:shadow-primary/5">
+              <CardHeader className="p-8">
+                <CardTitle className="text-2xl font-semibold">For Race Organizers</CardTitle>
               </CardHeader>
-              <CardContent>
-                <ul className="space-y-3 text-muted-foreground">
+              <CardContent className="px-8 pb-8">
+                <ul className="space-y-4 text-muted-foreground">
                   <li className="flex gap-3">
-                    <span className="mt-1 text-primary">•</span>
-                    <span>
+                    <span className="mt-1 text-primary font-bold">•</span>
+                    <span className="leading-relaxed">
                       Create and manage races with our intuitive dashboard
                     </span>
                   </li>
                   <li className="flex gap-3">
-                    <span className="mt-1 text-primary">•</span>
-                    <span>
+                    <span className="mt-1 text-primary font-bold">•</span>
+                    <span className="leading-relaxed">
                       Process registrations and participant management
                     </span>
                   </li>
                   <li className="flex gap-3">
-                    <span className="mt-1 text-primary">•</span>
-                    <span>Access real-time registration data and reports</span>
+                    <span className="mt-1 text-primary font-bold">•</span>
+                    <span className="leading-relaxed">Access real-time registration data and reports</span>
                   </li>
                   <li className="flex gap-3">
-                    <span className="mt-1 text-primary">•</span>
-                    <span>
+                    <span className="mt-1 text-primary font-bold">•</span>
+                    <span className="leading-relaxed">
                       Communicate with participants before and after the race
                     </span>
                   </li>

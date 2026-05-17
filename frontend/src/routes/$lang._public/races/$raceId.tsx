@@ -75,10 +75,10 @@ const TERRAIN_LABELS: Record<string, string> = {
 }
 
 const DIFFICULTY_COLORS: Record<string, string> = {
-  easy: "bg-green-100 text-green-800",
-  moderate: "bg-yellow-100 text-yellow-800",
-  hard: "bg-orange-100 text-orange-800",
-  extreme: "bg-red-100 text-red-800",
+  easy: "bg-emerald-500/10 text-emerald-500 border-emerald-500/20",
+  moderate: "bg-amber-500/10 text-amber-500 border-amber-500/20",
+  hard: "bg-orange-500/10 text-orange-500 border-orange-500/20",
+  extreme: "bg-red-500/10 text-red-500 border-red-500/20",
 }
 
 function formatDate(dateStr: string) {
@@ -91,9 +91,9 @@ function formatDate(dateStr: string) {
 
 function InfoRow({ icon, label, value }: { icon: React.ReactNode; label: string; value: string }) {
   return (
-    <div className="flex items-center gap-3 py-2">
+    <div className="flex items-center gap-4 py-3">
       <span className="text-muted-foreground">{icon}</span>
-      <span className="text-sm text-muted-foreground w-28 shrink-0">{label}</span>
+      <span className="text-sm text-muted-foreground w-32 shrink-0">{label}</span>
       <span className="text-sm font-medium">{value}</span>
     </div>
   )
@@ -176,75 +176,75 @@ function RaceDetailPage() {
   })
 
   return (
-    <div className="w-full py-8 md:py-12">
+    <div className="w-full py-12 md:py-16 lg:py-20">
       <StructuredData data={breadcrumbSchema} />
       <StructuredData data={eventSchema} />
       <div className="container">
-        <article className="mx-auto max-w-4xl space-y-10" itemScope itemType="https://schema.org/SportsEvent">
+        <article className="mx-auto max-w-5xl space-y-12" itemScope itemType="https://schema.org/SportsEvent">
           <meta itemProp="name" content={race.name} />
           <meta itemProp="startDate" content={race.event_start_date} />
           {race.event_end_date && <meta itemProp="endDate" content={race.event_end_date} />}
           {/* Hero */}
-          <div className="space-y-4">
+          <div className="space-y-6">
             <div className="flex flex-wrap gap-2">
               {race.terrain_type && (
-                <Badge variant="secondary">{TERRAIN_LABELS[race.terrain_type] ?? race.terrain_type}</Badge>
+                <Badge variant="secondary" className="rounded-full">{TERRAIN_LABELS[race.terrain_type] ?? race.terrain_type}</Badge>
               )}
               {race.difficulty_level && (
-                <span className={cn("inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium", DIFFICULTY_COLORS[race.difficulty_level] ?? "bg-gray-100 text-gray-800")}>
+                <span className={cn("inline-flex items-center rounded-full border px-3 py-1 text-xs font-medium", DIFFICULTY_COLORS[race.difficulty_level] ?? "bg-gray-100 text-gray-800")}>
                   {race.difficulty_level.charAt(0).toUpperCase() + race.difficulty_level.slice(1)}
                 </span>
               )}
               {race.is_certified && (
-                <Badge className="gap-1"><Award className="size-3" /> Certified</Badge>
+                <Badge className="gap-1.5 rounded-full"><Award className="size-3.5" /> Certified</Badge>
               )}
             </div>
 
-            <h1 className="text-3xl font-bold tracking-tight md:text-4xl">{race.name}</h1>
+            <h1 className="text-4xl md:text-5xl font-bold tracking-tight leading-tight">{race.name}</h1>
 
             {race.description && (
               <div
-                className="prose prose-sm max-w-none text-muted-foreground leading-relaxed [&_h2]:text-xl [&_h2]:font-bold [&_h2]:mt-4 [&_h2]:mb-2 [&_p]:leading-relaxed [&_ul]:list-disc [&_ul]:ml-6 [&_ol]:list-decimal [&_ol]:ml-6 [&_li]:my-1 [&_a]:text-primary [&_a]:underline [&_strong]:font-bold [&_em]:italic"
+                className="prose prose-lg max-w-none text-muted-foreground leading-relaxed [&_h2]:text-2xl [&_h2]:font-bold [&_h2]:mt-6 [&_h2]:mb-3 [&_h2]:text-foreground [&_p]:leading-relaxed [&_p]:mb-4 [&_ul]:list-disc [&_ul]:ml-6 [&_ul]:my-4 [&_ol]:list-decimal [&_ol]:ml-6 [&_ol]:my-4 [&_li]:my-2 [&_a]:text-primary [&_a]:underline [&_a]:transition-colors [&_a:hover]:text-primary/80 [&_strong]:font-semibold [&_strong]:text-foreground [&_em]:italic"
                 dangerouslySetInnerHTML={{ __html: race.description }}
               />
             )}
           </div>
 
           {/* Key info */}
-          <div className="rounded-lg border bg-muted/20 p-4 divide-y">
+          <div className="rounded-2xl border border-border/50 bg-card/50 backdrop-blur-sm p-8 divide-y divide-border/50">
             <InfoRow
-              icon={<Calendar className="size-4" />}
+              icon={<Calendar className="size-5" />}
               label="Race date"
               value={formatDate(race.event_start_date)}
             />
             {race.event_end_date && (
               <InfoRow
-                icon={<Calendar className="size-4" />}
+                icon={<Calendar className="size-5" />}
                 label="End date"
                 value={formatDate(race.event_end_date)}
               />
             )}
             <InfoRow
-              icon={<MapPin className="size-4" />}
+              icon={<MapPin className="size-5" />}
               label="Location"
               value={[race.city, race.state, race.country].filter(Boolean).join(", ") || race.location}
             />
             {race.elevation_gain_m && (
               <InfoRow
-                icon={<Mountain className="size-4" />}
+                icon={<Mountain className="size-5" />}
                 label="Elevation gain"
                 value={`${race.elevation_gain_m.toLocaleString()} m`}
               />
             )}
             {race.website_url && (
-              <div className="flex items-center gap-3 py-2">
-                <Globe className="size-4 text-muted-foreground" />
-                <span className="text-sm text-muted-foreground w-28 shrink-0">Website</span>
+              <div className="flex items-center gap-4 py-3">
+                <Globe className="size-5 text-muted-foreground" />
+                <span className="text-sm text-muted-foreground w-32 shrink-0">Website</span>
                 <a
                   href={race.website_url}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="text-sm font-medium text-primary hover:underline"
+                  className="text-sm font-medium text-primary hover:text-primary/80 transition-colors"
                 >
                   Official site
                 </a>
