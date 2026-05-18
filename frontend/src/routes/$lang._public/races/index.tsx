@@ -242,5 +242,3 @@ function RacesPage() {
     </div>
   )
 }
-
-export default RacesPage
