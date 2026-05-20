@@ -11,7 +11,7 @@ This solution runs **without Docker** against a local Postgres install. Due to i
 - Python 3.12
 - [uv](https://docs.astral.sh/uv/) for dependency management
 - PostgreSQL 18 running on `localhost:5432`
-- Node.js 20+ and npm (for the frontend)
+- Node.js 22 and npm (for the frontend)
 
 ### Backend Setup
 
