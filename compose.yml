@@ -69,11 +69,7 @@ services:
       - SMTP_USER=${SMTP_USER}
       - SMTP_PASSWORD=${SMTP_PASSWORD}
       - EMAILS_FROM_EMAIL=${EMAILS_FROM_EMAIL}
-      - POSTGRES_SERVER=db
-      - POSTGRES_PORT=${POSTGRES_PORT}
-      - POSTGRES_DB=${POSTGRES_DB}
-      - POSTGRES_USER=${POSTGRES_USER?Variable not set}
-      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD?Variable not set}
+      - DATABASE_URL=postgresql+psycopg://${POSTGRES_USER?Variable not set}:${POSTGRES_PASSWORD?Variable not set}@db:${POSTGRES_PORT}/${POSTGRES_DB}
       - SENTRY_DSN=${SENTRY_DSN}
 
   backend:
@@ -102,11 +98,7 @@ services:
       - SMTP_USER=${SMTP_USER}
       - SMTP_PASSWORD=${SMTP_PASSWORD}
       - EMAILS_FROM_EMAIL=${EMAILS_FROM_EMAIL}
-      - POSTGRES_SERVER=db
-      - POSTGRES_PORT=${POSTGRES_PORT}
-      - POSTGRES_DB=${POSTGRES_DB}
-      - POSTGRES_USER=${POSTGRES_USER?Variable not set}
-      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD?Variable not set}
+      - DATABASE_URL=postgresql+psycopg://${POSTGRES_USER?Variable not set}:${POSTGRES_PASSWORD?Variable not set}@db:${POSTGRES_PORT}/${POSTGRES_DB}
       - SENTRY_DSN=${SENTRY_DSN}
 
     healthcheck:
