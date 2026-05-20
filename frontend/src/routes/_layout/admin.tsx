@@ -2,7 +2,7 @@ import { useSuspenseQuery } from "@tanstack/react-query";
 import { createFileRoute, redirect } from "@tanstack/react-router";
 import { Suspense } from "react";
 
-import { can } from "@/lib/auth/permissions";
+import { can, ADMIN_AREA_ROLES } from "@/lib/auth/permissions";
 
 import { type UserPublic, UsersService } from "@/client";
 import AddUser from "@/components/Admin/AddUser";
@@ -23,7 +23,7 @@ export const Route = createFileRoute("/_layout/admin")({
   beforeLoad: async () => {
     const user = await UsersService.readUserMe();
 
-    if (!user.role || !["admin", "manager"].includes(user.role)) {
+    if (!user.role || !ADMIN_AREA_ROLES.includes(user.role)) {
       throw redirect({ to: "/forbidden" });
     }
   },

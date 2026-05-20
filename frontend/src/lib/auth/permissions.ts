@@ -30,3 +30,5 @@ export const can = (
   if (!user?.role) return false;
   return POLICY[action].includes(user.role as UserRole);
 };
+
+export const ADMIN_AREA_ROLES: UserRole[] = [UserRole.ADMIN, UserRole.MANAGER];

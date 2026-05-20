@@ -5,11 +5,13 @@ import { Activity, Users, UserCheck } from "lucide-react";
 
 import { MetricsService, UsersService } from "@/client";
 
+import { ADMIN_AREA_ROLES } from "@/lib/auth/permissions";
+
 export const Route = createFileRoute("/_layout/metrics")({
   component: MetricsPage,
   beforeLoad: async () => {
     const user = await UsersService.readUserMe();
-    if (!user.role || !["admin", "manager"].includes(user.role)) {
+    if (!user.role || !ADMIN_AREA_ROLES.includes(user.role)) {
       throw redirect({ to: "/forbidden" });
     }
   },

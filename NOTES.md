@@ -29,8 +29,6 @@ These are decisions I'd make the same way again, but they deserve explicit menti
 
 - **`GET /users/{user_id}` keeps inline conditional logic.** Its rule ("own profile always allowed, others admin-only") depends on a path parameter, which dependency-based checks can't see cleanly. The check lives in the route body. A policy layer would normalize this; see above.
 
-- **Permission module duplicates role names between backend and frontend.** `UserRole` is declared in both `backend/app/models.py` and `frontend/src/lib/auth/permissions.ts`. The frontend's `Action`-to-roles `POLICY` table also independently mirrors the backend's `require_role(...)` calls. This is a deliberate duplication: a single source of truth would require either generating the frontend module from OpenAPI metadata or a shared package, both of which are heavier than the problem warrants for a 3-role matrix. The trade-off is a code review checklist: when a role or rule changes, two files must be updated.
-
 - **Route guards (`beforeLoad`) re-fetch `/users/me`.** Each protected route makes its own call to `/users/me` rather than reading from a shared cache. React Query would normally dedupe this, but `beforeLoad` runs outside the React tree. The cost is a few extra GET requests on navigation; the alternative (a shared cached client) was more plumbing than the time budget allowed.
 
 ## What I'd Do With More Time
