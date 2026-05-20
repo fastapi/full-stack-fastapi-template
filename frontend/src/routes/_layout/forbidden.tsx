@@ -1,13 +1,13 @@
-import { Button } from "@/components/ui/button";
-import { createFileRoute, Link } from "@tanstack/react-router";
-import { ShieldAlert } from "lucide-react";
+import { createFileRoute, Link } from "@tanstack/react-router"
+import { ShieldAlert } from "lucide-react"
+import { Button } from "@/components/ui/button"
 
 export const Route = createFileRoute("/_layout/forbidden")({
   component: Forbidden,
   head: () => ({
     meta: [{ title: "Access Denied - FastAPI Template" }],
   }),
-});
+})
 
 function Forbidden() {
   return (
@@ -22,5 +22,5 @@ function Forbidden() {
         <Link to="/">Back to Dashboard</Link>
       </Button>
     </div>
-  );
+  )
 }

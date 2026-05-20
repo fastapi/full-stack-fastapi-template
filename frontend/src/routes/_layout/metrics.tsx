@@ -1,30 +1,29 @@
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { useQuery } from "@tanstack/react-query";
-import { createFileRoute, redirect } from "@tanstack/react-router";
-import { Activity, Users, UserCheck } from "lucide-react";
+import { useQuery } from "@tanstack/react-query"
+import { createFileRoute, redirect } from "@tanstack/react-router"
+import { Activity, UserCheck, Users } from "lucide-react"
+import { MetricsService, UsersService } from "@/client"
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 
-import { MetricsService, UsersService } from "@/client";
-
-import { ADMIN_AREA_ROLES } from "@/lib/auth/permissions";
+import { ADMIN_AREA_ROLES } from "@/lib/auth/permissions"
 
 export const Route = createFileRoute("/_layout/metrics")({
   component: MetricsPage,
   beforeLoad: async () => {
-    const user = await UsersService.readUserMe();
+    const user = await UsersService.readUserMe()
     if (!user.role || !ADMIN_AREA_ROLES.includes(user.role)) {
-      throw redirect({ to: "/forbidden" });
+      throw redirect({ to: "/forbidden" })
     }
   },
   head: () => ({
     meta: [{ title: "Metrics - FastAPI Template" }],
   }),
-});
+})
 
 function MetricsPage() {
   const { data, isLoading, isError } = useQuery({
     queryKey: ["metrics"],
     queryFn: MetricsService.readMetrics,
-  });
+  })
 
   return (
     <div className="flex flex-col gap-6 p-6">
@@ -63,7 +62,7 @@ function MetricsPage() {
         </div>
       )}
     </div>
-  );
+  )
 }
 
 function MetricCard({
@@ -71,9 +70,9 @@ function MetricCard({
   value,
   icon,
 }: {
-  label: string;
-  value: number;
-  icon: React.ReactNode;
+  label: string
+  value: number
+  icon: React.ReactNode
 }) {
   return (
     <Card>
@@ -87,5 +86,5 @@ function MetricCard({
         <p className="text-3xl font-semibold">{value}</p>
       </CardContent>
     </Card>
-  );
+  )
 }

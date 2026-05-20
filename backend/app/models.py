@@ -1,14 +1,15 @@
 import uuid
 from datetime import datetime, timezone
-
 from enum import Enum
+
 from pydantic import EmailStr
-from sqlalchemy import DateTime,  String
+from sqlalchemy import DateTime, String
 from sqlmodel import Field, Relationship, SQLModel
 
 
 def get_datetime_utc() -> datetime:
     return datetime.now(timezone.utc)
+
 
 # User roles for RBAC.
 class UserRole(str, Enum):
@@ -135,6 +136,7 @@ class TokenPayload(SQLModel):
 class NewPassword(SQLModel):
     token: str
     new_password: str = Field(min_length=8, max_length=128)
+
 
 class MetricsPublic(SQLModel):
     total_users: int

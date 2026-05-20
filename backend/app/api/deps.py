@@ -56,6 +56,7 @@ def get_current_active_superuser(current_user: CurrentUser) -> User:
         )
     return current_user
 
+
 def require_role(*allowed_roles: UserRole):
     def role_checker(current_user: CurrentUser) -> User:
         if current_user.role not in allowed_roles:

@@ -20,10 +20,10 @@ from app.models import (
     UserCreate,
     UserPublic,
     UserRegister,
+    UserRole,
     UsersPublic,
     UserUpdate,
     UserUpdateMe,
-    UserRole,
 )
 from app.utils import generate_new_account_email, send_email
 
@@ -136,9 +136,7 @@ def delete_user_me(session: SessionDep, current_user: CurrentUser) -> Any:
     Delete own user. Accessible manager and member.
     """
     if current_user.role == UserRole.ADMIN:
-        raise HTTPException(
-            status_code=403, detail="Admins cannot delete themselves"
-        )
+        raise HTTPException(status_code=403, detail="Admins cannot delete themselves")
     session.delete(current_user)
     session.commit()
     return Message(message="User deleted successfully")
@@ -223,12 +221,9 @@ def delete_user(
     if not user:
         raise HTTPException(status_code=404, detail="User not found")
     if user == current_user:
-        raise HTTPException(
-            status_code=403, detail="Admins cannot delete themselves"
-        )
+        raise HTTPException(status_code=403, detail="Admins cannot delete themselves")
     statement = delete(Item).where(col(Item.owner_id) == user_id)
     session.exec(statement)
     session.delete(user)
     session.commit()
     return Message(message="User deleted successfully")
-

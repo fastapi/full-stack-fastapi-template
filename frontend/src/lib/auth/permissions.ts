@@ -1,19 +1,19 @@
-import { UserPublic } from "@/client";
+import type { UserPublic } from "@/client"
 
 export const UserRole = {
   ADMIN: "admin",
   MANAGER: "manager",
   MEMBER: "member",
-} as const;
+} as const
 
-export type UserRole = (typeof UserRole)[keyof typeof UserRole];
+export type UserRole = (typeof UserRole)[keyof typeof UserRole]
 
 export type Action =
   | "listUsers"
   | "createUser"
   | "viewMetrics"
   | "updateAnyUser"
-  | "deleteAnyUser";
+  | "deleteAnyUser"
 
 const POLICY: Record<Action, UserRole[]> = {
   listUsers: [UserRole.ADMIN, UserRole.MANAGER],
@@ -21,14 +21,14 @@ const POLICY: Record<Action, UserRole[]> = {
   viewMetrics: [UserRole.ADMIN, UserRole.MANAGER],
   updateAnyUser: [UserRole.ADMIN],
   deleteAnyUser: [UserRole.ADMIN],
-};
+}
 
 export const can = (
   user: UserPublic | null | undefined,
   action: Action,
 ): boolean => {
-  if (!user?.role) return false;
-  return POLICY[action].includes(user.role as UserRole);
-};
+  if (!user?.role) return false
+  return POLICY[action].includes(user.role as UserRole)
+}
 
-export const ADMIN_AREA_ROLES: UserRole[] = [UserRole.ADMIN, UserRole.MANAGER];
+export const ADMIN_AREA_ROLES: UserRole[] = [UserRole.ADMIN, UserRole.MANAGER]

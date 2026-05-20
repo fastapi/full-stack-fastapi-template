@@ -1,21 +1,21 @@
-import type { ColumnDef } from "@tanstack/react-table";
+import type { ColumnDef } from "@tanstack/react-table"
 
-import type { UserPublic } from "@/client";
-import { Badge } from "@/components/ui/badge";
-import { can } from "@/lib/auth/permissions";
-import { cn } from "@/lib/utils";
-import { UserActionsMenu } from "./UserActionsMenu";
+import type { UserPublic } from "@/client"
+import { Badge } from "@/components/ui/badge"
+import { can } from "@/lib/auth/permissions"
+import { cn } from "@/lib/utils"
+import { UserActionsMenu } from "./UserActionsMenu"
 
 export type UserTableData = UserPublic & {
-  isCurrentUser: boolean;
-};
+  isCurrentUser: boolean
+}
 
 const baseColumns: ColumnDef<UserTableData>[] = [
   {
     accessorKey: "full_name",
     header: "Full Name",
     cell: ({ row }) => {
-      const fullName = row.original.full_name;
+      const fullName = row.original.full_name
       return (
         <div className="flex items-center gap-2">
           <span
@@ -29,7 +29,7 @@ const baseColumns: ColumnDef<UserTableData>[] = [
             </Badge>
           )}
         </div>
-      );
+      )
     },
   },
   {
@@ -43,12 +43,12 @@ const baseColumns: ColumnDef<UserTableData>[] = [
     accessorKey: "role",
     header: "Role",
     cell: ({ row }) => {
-      const role = row.original.role ?? "member";
+      const role = row.original.role ?? "member"
       return (
         <Badge variant={role === "admin" ? "default" : "secondary"}>
           {role.charAt(0).toUpperCase() + role.slice(1)}
         </Badge>
-      );
+      )
     },
   },
   {
@@ -68,7 +68,7 @@ const baseColumns: ColumnDef<UserTableData>[] = [
       </div>
     ),
   },
-];
+]
 
 const actionsColumn: ColumnDef<UserTableData> = {
   id: "actions",
@@ -78,13 +78,13 @@ const actionsColumn: ColumnDef<UserTableData> = {
       <UserActionsMenu user={row.original} />
     </div>
   ),
-};
+}
 
 export function getColumns(
   currentUser: UserPublic | null | undefined,
 ): ColumnDef<UserTableData>[] {
   const canManageUsers =
-    can(currentUser, "updateAnyUser") || can(currentUser, "deleteAnyUser");
+    can(currentUser, "updateAnyUser") || can(currentUser, "deleteAnyUser")
 
-  return canManageUsers ? [...baseColumns, actionsColumn] : baseColumns;
+  return canManageUsers ? [...baseColumns, actionsColumn] : baseColumns
 }
