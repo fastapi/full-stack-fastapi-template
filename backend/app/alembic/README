@@ -1,1 +1,1 @@
-Generic single-database configuration.
+Generic single-database configuration with an async dbapi.
