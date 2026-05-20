@@ -40,6 +40,12 @@ export type Message = {
     message: string;
 };
 
+export type MetricsPublic = {
+    total_users: number;
+    active_users: number;
+    total_items: number;
+};
+
 export type NewPassword = {
     token: string;
     new_password: string;
@@ -66,6 +72,7 @@ export type UserCreate = {
     email: string;
     is_active?: boolean;
     is_superuser?: boolean;
+    role?: UserRole;
     full_name?: (string | null);
     password: string;
 };
@@ -74,6 +81,7 @@ export type UserPublic = {
     email: string;
     is_active?: boolean;
     is_superuser?: boolean;
+    role?: UserRole;
     full_name?: (string | null);
     id: string;
     created_at?: (string | null);
@@ -85,6 +93,8 @@ export type UserRegister = {
     full_name?: (string | null);
 };
 
+export type UserRole = 'admin' | 'manager' | 'member';
+
 export type UsersPublic = {
     data: Array<UserPublic>;
     count: number;
@@ -94,6 +104,7 @@ export type UserUpdate = {
     email?: (string | null);
     is_active?: boolean;
     is_superuser?: boolean;
+    role?: UserRole;
     full_name?: (string | null);
     password?: (string | null);
 };
@@ -170,6 +181,8 @@ export type LoginRecoverPasswordHtmlContentData = {
 };
 
 export type LoginRecoverPasswordHtmlContentResponse = (string);
+
+export type MetricsReadMetricsResponse = (MetricsPublic);
 
 export type PrivateCreateUserData = {
     requestBody: PrivateUserCreate;

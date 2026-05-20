@@ -165,10 +165,10 @@ services:
 
       # Enable redirection for HTTP and HTTPS
       - traefik.http.routers.${STACK_NAME?Variable not set}-frontend-http.middlewares=https-redirect
+
 volumes:
   app-db-data:
 
 networks:
   traefik-public:
-    # Allow setting it to false for testing
-    external: true
+    external: false

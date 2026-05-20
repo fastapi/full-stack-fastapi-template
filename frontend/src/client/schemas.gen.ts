@@ -208,6 +208,26 @@ export const MessageSchema = {
     title: 'Message'
 } as const;
 
+export const MetricsPublicSchema = {
+    properties: {
+        total_users: {
+            type: 'integer',
+            title: 'Total Users'
+        },
+        active_users: {
+            type: 'integer',
+            title: 'Active Users'
+        },
+        total_items: {
+            type: 'integer',
+            title: 'Total Items'
+        }
+    },
+    type: 'object',
+    required: ['total_users', 'active_users', 'total_items'],
+    title: 'MetricsPublic'
+} as const;
+
 export const NewPasswordSchema = {
     properties: {
         token: {
@@ -306,6 +326,10 @@ export const UserCreateSchema = {
             title: 'Is Superuser',
             default: false
         },
+        role: {
+            '$ref': '#/components/schemas/UserRole',
+            default: 'member'
+        },
         full_name: {
             anyOf: [
                 {
@@ -347,6 +371,10 @@ export const UserPublicSchema = {
             type: 'boolean',
             title: 'Is Superuser',
             default: false
+        },
+        role: {
+            '$ref': '#/components/schemas/UserRole',
+            default: 'member'
         },
         full_name: {
             anyOf: [
@@ -415,6 +443,12 @@ export const UserRegisterSchema = {
     title: 'UserRegister'
 } as const;
 
+export const UserRoleSchema = {
+    type: 'string',
+    enum: ['admin', 'manager', 'member'],
+    title: 'UserRole'
+} as const;
+
 export const UserUpdateSchema = {
     properties: {
         email: {
@@ -439,6 +473,10 @@ export const UserUpdateSchema = {
             type: 'boolean',
             title: 'Is Superuser',
             default: false
+        },
+        role: {
+            '$ref': '#/components/schemas/UserRole',
+            default: 'member'
         },
         full_name: {
             anyOf: [

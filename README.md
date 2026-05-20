@@ -1,3 +1,126 @@
+# Role-Based Access Control (RBAC) Implementation
+
+This fork extends the original [Full Stack FastAPI Template](#full-stack-fastapi-template) with role-based access control. The original template README follows below.
+
+## Quick Start
+
+This solution runs **without Docker** against a local Postgres install. Due to insufficient free disk space on my machine, I spent ≈ 1 hour bringing the backend up natively (Postgres + uv + alembic + initial data seed) instead of using `docker compose`. The instructions below reflect this setup; the original Docker-based workflow from the upstream template still works if you have the disk space for it.
+
+### Prerequisites
+
+- Python 3.12
+- [uv](https://docs.astral.sh/uv/) for dependency management
+- PostgreSQL 18 running on `localhost:5432`
+- Node.js 20+ and npm (for the frontend)
+
+### Backend Setup
+
+1. Create a database named `app` in your local Postgres:
+
+```sql
+   CREATE DATABASE app;
+```
+
+2. Copy `.env` into the backend folder so the app finds its config:
+
+```bash
+   cd backend
+   cp ../.env .
+```
+
+Defaults in `.env` are tuned for local development. The Postgres password is `changethis`; adjust if your local Postgres uses a different one.
+
+3. Install dependencies and apply migrations:
+
+```bash
+   uv sync
+   uv run alembic upgrade head
+```
+
+4. Seed test users (one per role):
+
+```bash
+   uv run python -m app.initial_data
+```
+
+This creates three users in the `local` environment:
+
+| Email               | Password   | Role    |
+| ------------------- | ---------- | ------- |
+| admin@example.com   | changethis | admin   |
+| manager@example.com | changethis | manager |
+| member@example.com  | changethis | member  |
+
+5. Run the backend:
+
+```bash
+   uv run fastapi run --reload app/main.py
+```
+
+API and Swagger UI are at <http://localhost:8000/docs>.
+
+### Frontend Setup
+
+In a second terminal:
+
+```bash
+cd frontend
+npm install
+npm run dev
+```
+
+The app opens at <http://localhost:5173>. Log in with any of the three seeded users above to see how the UI adapts to each role.
+
+> If you change the backend's OpenAPI schema (new endpoints, new fields), regenerate the typed client:
+>
+> ```bash
+> cd frontend
+> Invoke-WebRequest -Uri "http://localhost:8000/api/v1/openapi.json" -OutFile "openapi.json"  # PowerShell
+> # or: curl http://localhost:8000/api/v1/openapi.json -o openapi.json                        # bash
+> npm run generate-client
+> ```
+
+### Running Tests
+
+```bash
+cd backend
+uv run pytest
+```
+
+RBAC-specific tests live in `backend/app/tests/api/routes/test_rbac.py`.
+
+> **Note:** the test suite shares the development database and wipes user tables on teardown. After running tests, re-run `uv run python -m app.initial_data` to restore the three seed users.
+
+## Permission Matrix
+
+| Action                | admin | manager | member |
+| --------------------- | :---: | :-----: | :----: |
+| List all users        |   ✓   |    ✓    |   ✗    |
+| Create user           |   ✓   |    ✗    |   ✗    |
+| View metrics          |   ✓   |    ✓    |   ✗    |
+| View own profile      |   ✓   |    ✓    |   ✓    |
+| Update own profile    |   ✓   |    ✓    |   ✓    |
+| View any user profile |   ✓   |    ✗    |   ✗    |
+| Update any user       |   ✓   |    ✗    |   ✗    |
+| Delete any user       |   ✓   |    ✗    |   ✗    |
+| Delete own account    |   ✗   |    ✓    |   ✓    |
+
+Admins cannot delete their own account to prevent locking out of the system.
+
+## Authorization Approach
+
+**Backend — where checks live.** Authorization is implemented as a FastAPI dependency factory, `require_role(*allowed_roles)`, defined in `backend/app/api/deps.py`. The factory returns a sub-dependency that consumes the already-authenticated `CurrentUser` and raises `HTTPException(403)` if the user's role is not in the allowed set. Each protected endpoint declares its policy in the route decorator, e.g. `dependencies=[Depends(require_role(UserRole.ADMIN, UserRole.MANAGER))]`. This keeps the policy declaration next to the route, makes it grep-able, and lets FastAPI handle the wiring.
+
+**Backend — how roles are stored.** Roles are a string-based Python `Enum` (`UserRole` in `backend/app/models.py`) persisted as a plain `VARCHAR` column on the `user` table. Storing as a string (rather than a Postgres ENUM type) keeps migrations simple — adding a new role requires no schema change, only Python and frontend updates. Pydantic validates incoming values against the enum at the API boundary.
+
+**Frontend — how capabilities are exposed.** The `/users/me` endpoint returns the full user object including `role` (it's part of `UserBase`, so it ships in every `UserPublic` response automatically). The frontend reads this on login via `useAuth` and caches it in React Query. A single permission module at `frontend/src/lib/auth/permissions.ts` defines the policy as a `Record<Action, UserRole[]>` and exposes one helper, `can(user, action)`. Every UI decision — sidebar items, action buttons, table columns — flows through `can()`, so the entire frontend policy lives in one file. Adding a new role or action is a one-line change in that record.
+
+**Frontend — defense in depth.** UI hiding alone isn't enough; users can still type unauthorized URLs. Three layers protect against this: (1) `beforeLoad` guards on protected routes (`/admin`, `/metrics`) call `/users/me` and redirect to `/forbidden` if the role doesn't fit; (2) a global React Query error handler in `main.tsx` catches any 403 returned from the API and redirects to `/forbidden` automatically — useful when backend policy is stricter than the frontend expects, or evolves over time; (3) the backend itself is the source of truth and rejects any unauthorized request regardless of how the request was made. Frontend checks exist for UX only.
+
+**Conditional logic.** A small number of endpoints have access rules that depend on the _target_ of the action (e.g. `GET /users/{user_id}` — your own profile is always visible, others are admin-only). For these, the check lives inline in the route body rather than in a dependency, since dependencies can't see path parameters cleanly. This is a deliberate trade-off; see `NOTES.md`.
+
+---
+
 # Full Stack FastAPI Template
 
 <a href="https://github.com/fastapi/full-stack-fastapi-template/actions?query=workflow%3A%22Test+Docker+Compose%22" target="_blank"><img src="https://github.com/fastapi/full-stack-fastapi-template/workflows/Test%20Docker%20Compose/badge.svg" alt="Test Docker Compose"></a>

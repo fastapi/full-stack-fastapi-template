@@ -1,20 +1,21 @@
-import type { ColumnDef } from "@tanstack/react-table"
+import type { ColumnDef } from "@tanstack/react-table";
 
-import type { UserPublic } from "@/client"
-import { Badge } from "@/components/ui/badge"
-import { cn } from "@/lib/utils"
-import { UserActionsMenu } from "./UserActionsMenu"
+import type { UserPublic } from "@/client";
+import { Badge } from "@/components/ui/badge";
+import { can } from "@/lib/auth/permissions";
+import { cn } from "@/lib/utils";
+import { UserActionsMenu } from "./UserActionsMenu";
 
 export type UserTableData = UserPublic & {
-  isCurrentUser: boolean
-}
+  isCurrentUser: boolean;
+};
 
-export const columns: ColumnDef<UserTableData>[] = [
+const baseColumns: ColumnDef<UserTableData>[] = [
   {
     accessorKey: "full_name",
     header: "Full Name",
     cell: ({ row }) => {
-      const fullName = row.original.full_name
+      const fullName = row.original.full_name;
       return (
         <div className="flex items-center gap-2">
           <span
@@ -28,7 +29,7 @@ export const columns: ColumnDef<UserTableData>[] = [
             </Badge>
           )}
         </div>
-      )
+      );
     },
   },
   {
@@ -39,13 +40,16 @@ export const columns: ColumnDef<UserTableData>[] = [
     ),
   },
   {
-    accessorKey: "is_superuser",
+    accessorKey: "role",
     header: "Role",
-    cell: ({ row }) => (
-      <Badge variant={row.original.is_superuser ? "default" : "secondary"}>
-        {row.original.is_superuser ? "Superuser" : "User"}
-      </Badge>
-    ),
+    cell: ({ row }) => {
+      const role = row.original.role ?? "member";
+      return (
+        <Badge variant={role === "admin" ? "default" : "secondary"}>
+          {role.charAt(0).toUpperCase() + role.slice(1)}
+        </Badge>
+      );
+    },
   },
   {
     accessorKey: "is_active",
@@ -64,13 +68,23 @@ export const columns: ColumnDef<UserTableData>[] = [
       </div>
     ),
   },
-  {
-    id: "actions",
-    header: () => <span className="sr-only">Actions</span>,
-    cell: ({ row }) => (
-      <div className="flex justify-end">
-        <UserActionsMenu user={row.original} />
-      </div>
-    ),
-  },
-]
+];
+
+const actionsColumn: ColumnDef<UserTableData> = {
+  id: "actions",
+  header: () => <span className="sr-only">Actions</span>,
+  cell: ({ row }) => (
+    <div className="flex justify-end">
+      <UserActionsMenu user={row.original} />
+    </div>
+  ),
+};
+
+export function getColumns(
+  currentUser: UserPublic | null | undefined,
+): ColumnDef<UserTableData>[] {
+  const canManageUsers =
+    can(currentUser, "updateAnyUser") || can(currentUser, "deleteAnyUser");
+
+  return canManageUsers ? [...baseColumns, actionsColumn] : baseColumns;
+}

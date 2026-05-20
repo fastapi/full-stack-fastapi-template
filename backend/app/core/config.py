@@ -93,6 +93,10 @@ class Settings(BaseSettings):
     EMAIL_TEST_USER: EmailStr = "test@example.com"
     FIRST_SUPERUSER: EmailStr
     FIRST_SUPERUSER_PASSWORD: str
+    TEST_MANAGER_EMAIL: EmailStr = "manager@example.com"
+    TEST_MANAGER_PASSWORD: str = "changethis"
+    TEST_MEMBER_EMAIL: EmailStr = "member@example.com"
+    TEST_MEMBER_PASSWORD: str = "changethis"
 
     def _check_default_secret(self, var_name: str, value: str | None) -> None:
         if value == "changethis":

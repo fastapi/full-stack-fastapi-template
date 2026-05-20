@@ -1,13 +1,20 @@
 import uuid
 from datetime import datetime, timezone
 
+from enum import Enum
 from pydantic import EmailStr
-from sqlalchemy import DateTime
+from sqlalchemy import DateTime,  String
 from sqlmodel import Field, Relationship, SQLModel
 
 
 def get_datetime_utc() -> datetime:
     return datetime.now(timezone.utc)
+
+# User roles for RBAC.
+class UserRole(str, Enum):
+    ADMIN = "admin"
+    MANAGER = "manager"
+    MEMBER = "member"
 
 
 # Shared properties
@@ -15,6 +22,7 @@ class UserBase(SQLModel):
     email: EmailStr = Field(unique=True, index=True, max_length=255)
     is_active: bool = True
     is_superuser: bool = False
+    role: UserRole = Field(default=UserRole.MEMBER, sa_type=String(length=32))
     full_name: str | None = Field(default=None, max_length=255)
 
 
@@ -127,3 +135,8 @@ class TokenPayload(SQLModel):
 class NewPassword(SQLModel):
     token: str
     new_password: str = Field(min_length=8, max_length=128)
+
+class MetricsPublic(SQLModel):
+    total_users: int
+    active_users: int
+    total_items: int

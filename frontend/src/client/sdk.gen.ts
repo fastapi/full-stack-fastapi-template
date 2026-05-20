@@ -3,7 +3,7 @@
 import type { CancelablePromise } from './core/CancelablePromise';
 import { OpenAPI } from './core/OpenAPI';
 import { request as __request } from './core/request';
-import type { ItemsReadItemsData, ItemsReadItemsResponse, ItemsCreateItemData, ItemsCreateItemResponse, ItemsReadItemData, ItemsReadItemResponse, ItemsUpdateItemData, ItemsUpdateItemResponse, ItemsDeleteItemData, ItemsDeleteItemResponse, LoginLoginAccessTokenData, LoginLoginAccessTokenResponse, LoginTestTokenResponse, LoginRecoverPasswordData, LoginRecoverPasswordResponse, LoginResetPasswordData, LoginResetPasswordResponse, LoginRecoverPasswordHtmlContentData, LoginRecoverPasswordHtmlContentResponse, PrivateCreateUserData, PrivateCreateUserResponse, UsersReadUsersData, UsersReadUsersResponse, UsersCreateUserData, UsersCreateUserResponse, UsersReadUserMeResponse, UsersDeleteUserMeResponse, UsersUpdateUserMeData, UsersUpdateUserMeResponse, UsersUpdatePasswordMeData, UsersUpdatePasswordMeResponse, UsersRegisterUserData, UsersRegisterUserResponse, UsersReadUserByIdData, UsersReadUserByIdResponse, UsersUpdateUserData, UsersUpdateUserResponse, UsersDeleteUserData, UsersDeleteUserResponse, UtilsTestEmailData, UtilsTestEmailResponse, UtilsHealthCheckResponse } from './types.gen';
+import type { ItemsReadItemsData, ItemsReadItemsResponse, ItemsCreateItemData, ItemsCreateItemResponse, ItemsReadItemData, ItemsReadItemResponse, ItemsUpdateItemData, ItemsUpdateItemResponse, ItemsDeleteItemData, ItemsDeleteItemResponse, LoginLoginAccessTokenData, LoginLoginAccessTokenResponse, LoginTestTokenResponse, LoginRecoverPasswordData, LoginRecoverPasswordResponse, LoginResetPasswordData, LoginResetPasswordResponse, LoginRecoverPasswordHtmlContentData, LoginRecoverPasswordHtmlContentResponse, MetricsReadMetricsResponse, PrivateCreateUserData, PrivateCreateUserResponse, UsersReadUsersData, UsersReadUsersResponse, UsersCreateUserData, UsersCreateUserResponse, UsersReadUserMeResponse, UsersDeleteUserMeResponse, UsersUpdateUserMeData, UsersUpdateUserMeResponse, UsersUpdatePasswordMeData, UsersUpdatePasswordMeResponse, UsersRegisterUserData, UsersRegisterUserResponse, UsersReadUserByIdData, UsersReadUserByIdResponse, UsersUpdateUserData, UsersUpdateUserResponse, UsersDeleteUserData, UsersDeleteUserResponse, UtilsTestEmailData, UtilsTestEmailResponse, UtilsHealthCheckResponse } from './types.gen';
 
 export class ItemsService {
     /**
@@ -213,6 +213,21 @@ export class LoginService {
     }
 }
 
+export class MetricsService {
+    /**
+     * Read Metrics
+     * Return basic app metrics. Accessible by admins and managers.
+     * @returns MetricsPublic Successful Response
+     * @throws ApiError
+     */
+    public static readMetrics(): CancelablePromise<MetricsReadMetricsResponse> {
+        return __request(OpenAPI, {
+            method: 'GET',
+            url: '/api/v1/metrics/'
+        });
+    }
+}
+
 export class PrivateService {
     /**
      * Create User
@@ -238,7 +253,7 @@ export class PrivateService {
 export class UsersService {
     /**
      * Read Users
-     * Retrieve users.
+     * Retrieve users. Accessible by admins and managers.
      * @param data The data for the request.
      * @param data.skip
      * @param data.limit
@@ -261,7 +276,7 @@ export class UsersService {
     
     /**
      * Create User
-     * Create new user.
+     * Create new user. Accessible by admins.
      * @param data The data for the request.
      * @param data.requestBody
      * @returns UserPublic Successful Response
@@ -281,7 +296,7 @@ export class UsersService {
     
     /**
      * Read User Me
-     * Get current user.
+     * Get current user. Accessible for all roles.
      * @returns UserPublic Successful Response
      * @throws ApiError
      */
@@ -294,7 +309,7 @@ export class UsersService {
     
     /**
      * Delete User Me
-     * Delete own user.
+     * Delete own user. Accessible manager and member.
      * @returns Message Successful Response
      * @throws ApiError
      */
@@ -307,7 +322,7 @@ export class UsersService {
     
     /**
      * Update User Me
-     * Update own user.
+     * Update own user. Accessible for all roles.
      * @param data The data for the request.
      * @param data.requestBody
      * @returns UserPublic Successful Response
@@ -327,7 +342,7 @@ export class UsersService {
     
     /**
      * Update Password Me
-     * Update own password.
+     * Update own password. Accessible for all roles.
      * @param data The data for the request.
      * @param data.requestBody
      * @returns Message Successful Response
