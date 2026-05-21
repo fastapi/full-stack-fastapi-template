@@ -1,0 +1,56 @@
+name: cdk-bootstrap
+
+on:
+  workflow_dispatch:
+    inputs:
+      environment:
+        description: dev | staging | prod
+        required: true
+        type: choice
+        options: [dev, staging, prod]
+      app_name:
+        description: Application name (unique per account)
+        required: true
+      deployment_target:
+        description: apprunner | ecs-fargate
+        required: true
+        type: choice
+        options: [apprunner, ecs-fargate]
+
+permissions:
+  id-token: write
+  contents: read
+
+jobs:
+  bootstrap:
+    runs-on: ubuntu-latest
+    environment: ${{ inputs.environment }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: ${{ secrets.AWS_BOOTSTRAP_ROLE_ARN }}
+          aws-region: ${{ vars.AWS_REGION || 'us-east-1' }}
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+
+      - name: Install CDK deps
+        working-directory: .cicd/cdk
+        run: npm ci
+
+      - name: CDK synth App Runner stack
+        if: inputs.deployment_target == 'apprunner'
+        working-directory: .cicd/cdk
+        run: |
+          npx cdk synth BootstrapAppRunner \
+            -c appName=${{ inputs.app_name }} \
+            -c environment=${{ inputs.environment }} \
+            -c region=${{ vars.AWS_REGION || 'us-east-1' }}
+
+      - name: CDK deploy (user runs locally or via approved pipeline)
+        run: |
+          echo "Bootstrap stack synthesized. Run \`cdk deploy\` with bootstrap role in approved window."
+          echo "After deploy, write handles to SSM /cicd/${{ inputs.app_name }}/${{ inputs.environment }}/handles"

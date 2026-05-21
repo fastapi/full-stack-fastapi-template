@@ -1,0 +1,93 @@
+name: deploy-ecs
+
+on:
+  workflow_dispatch:
+    inputs:
+      environment:
+        required: true
+        type: choice
+        options: [dev, staging, prod]
+      image_digest:
+        description: Immutable ECR digest (sha256:...)
+        required: true
+      release_id:
+        required: true
+
+permissions:
+  id-token: write
+  contents: read
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    environment: ${{ inputs.environment }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: ${{ secrets.AWS_DEPLOY_ROLE_ARN }}
+          aws-region: ${{ vars.AWS_REGION || 'us-east-1' }}
+
+      - name: Capture current task definition (rollback baseline)
+        id: baseline
+        run: |
+          FAMILY="${{ vars.ECS_TASK_FAMILY }}"
+          PREV=$(aws ecs describe-services --cluster "${{ vars.ECS_CLUSTER }}" --services "${{ vars.ECS_SERVICE }}" \
+            --query 'services[0].taskDefinition' --output text)
+          echo "previous_task_def=${PREV}" >> "$GITHUB_OUTPUT"
+
+      - name: Register task definition with immutable digest
+        id: register
+        run: |
+          IMAGE="${{ vars.ECR_REPOSITORY_URI }}@${{ inputs.image_digest }}"
+          aws ecs describe-task-definition --task-definition "${{ vars.ECS_TASK_FAMILY }}" > task.json
+          python - <<'PY'
+          import json
+          td = json.load(open("task.json"))["taskDefinition"]
+          td["containerDefinitions"][0]["image"] = "${{ vars.ECR_REPOSITORY_URI }}@${{ inputs.image_digest }}"
+          for k in ("taskDefinitionArn","revision","status","requiresAttributes","compatibilities","registeredAt","registeredBy"):
+              td.pop(k, None)
+          json.dump(td, open("new-task.json","w"))
+          PY
+          NEW_ARN=$(aws ecs register-task-definition --cli-input-json file://new-task.json \
+            --query 'taskDefinition.taskDefinitionArn' --output text)
+          echo "task_def_arn=${NEW_ARN}" >> "$GITHUB_OUTPUT"
+
+      - name: Update ECS service
+        run: |
+          aws ecs update-service \
+            --cluster "${{ vars.ECS_CLUSTER }}" \
+            --service "${{ vars.ECS_SERVICE }}" \
+            --task-definition "${{ steps.register.outputs.task_def_arn }}" \
+            --force-new-deployment
+
+      - name: Wait for service stable
+        run: |
+          aws ecs wait services-stable \
+            --cluster "${{ vars.ECS_CLUSTER }}" \
+            --services "${{ vars.ECS_SERVICE }}"
+
+      - name: Verify target group health
+        run: |
+          aws elbv2 describe-target-health --target-group-arn "${{ vars.ALB_TARGET_GROUP_ARN }}" \
+            --query 'TargetHealthDescriptions[?TargetHealth.State!=`healthy`]' --output text | grep -q . && exit 1 || true
+
+      - name: Rollback on failure
+        if: failure()
+        run: |
+          echo "Rolling back to ${{ steps.baseline.outputs.previous_task_def }}"
+          aws ecs update-service \
+            --cluster "${{ vars.ECS_CLUSTER }}" \
+            --service "${{ vars.ECS_SERVICE }}" \
+            --task-definition "${{ steps.baseline.outputs.previous_task_def }}"
+
+      - name: Cost estimate
+        run: |
+          echo "## Cost estimate (ECS Fargate)" >> "$GITHUB_STEP_SUMMARY"
+          EST=".cicd/scripts/estimate.py"
+          if [ -f "$EST" ]; then
+            python "$EST" --target ecs-fargate >> "$GITHUB_STEP_SUMMARY"
+          else
+            echo "Estimated monthly: ~\$80–\$200 (Fargate + ALB + NAT)" >> "$GITHUB_STEP_SUMMARY"
+          fi

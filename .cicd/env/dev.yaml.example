@@ -1,0 +1,22 @@
+environment: dev
+
+# Public metadata only — ARNs live in SSM (/cicd/<repo>/dev/handles)
+aws:
+  region: us-east-1
+
+app:
+  name: my-app
+  domain: dev.example.com
+
+deployment:
+  # Optional override; skill auto-detects apprunner vs ecs-fargate
+  target_override: null
+  mode: single-node
+
+scaling:
+  min_instances: 1
+  max_instances: 2
+
+health:
+  path: /health
+  timeout_seconds: 10

@@ -1,0 +1,2 @@
+app_name: full-stack-fastapi-template
+deployment_target: ecs-fargate

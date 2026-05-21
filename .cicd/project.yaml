@@ -1,0 +1,66 @@
+version: 2
+generated_by: aws-cicd-v2
+
+repository:
+  owner: wuben154-maker
+  name: full-stack-fastapi-template
+  default_branch: master
+  url: https://github.com/wuben154-maker/full-stack-fastapi-template
+
+project:
+  app_name: full-stack-fastapi-template
+  layout: frontend-backend-split
+  package_manager: uv
+
+deployment:
+  detected_target: ecs-fargate
+  target_override: null
+  mode_default: single-node
+  min_instances: 1
+  max_instances: 2
+
+database:
+  enabled: true
+  engine: postgresql
+  migration_tool: alembic
+  migrate_command: alembic upgrade head
+  precheck_command: uv run python app/backend_pre_start.py
+  bootstrap_command: uv run python app/initial_data.py
+  secret_name: full-stack-fastapi-template-dev/database
+  notes: |
+    Provision RDS PostgreSQL (or dev Postgres) and store credentials in AWS Secrets Manager.
+    ECS task env should map secret fields to POSTGRES_SERVER, POSTGRES_PORT, POSTGRES_USER,
+    POSTGRES_PASSWORD, and POSTGRES_DB. Run migrations before or during backend deploy.
+
+services:
+  backend:
+    enabled: true
+    path: backend
+    dockerfile: backend/Dockerfile
+    build_context: .
+    container_port: 8000
+    health_path: /api/v1/utils/health-check/
+    commands:
+      install: pip install uv && uv sync --frozen --package app
+      lint: uv run ruff check app scripts && uv run ruff format app scripts --check
+      typecheck: uv run mypy app
+      test: cd .. && docker compose up -d db && cd backend && uv run bash scripts/prestart.sh && uv run bash scripts/tests-start.sh "CI" && cd .. && docker compose down -v --remove-orphans
+      build: docker build -f Dockerfile -t full-stack-fastapi-template-backend:ci ..
+
+  frontend:
+    enabled: true
+    path: frontend
+    dockerfile: frontend/Dockerfile
+    build_context: .
+    container_port: 80
+    health_path: /
+    commands:
+      install: npm install -g bun && bun install
+      lint: bun run lint
+      typecheck: bun run build
+      test: echo "Playwright covered by .github/workflows/playwright.yml"
+      build: docker build -f Dockerfile -t full-stack-fastapi-template-frontend:ci .. --build-arg VITE_API_URL=http://localhost:8000
+
+handles:
+  ssm_prefix: /cicd/wuben154-maker-full-stack-fastapi-template
+  # Full handles JSON stored in SSM per env — never commit ARNs here

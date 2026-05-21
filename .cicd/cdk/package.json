@@ -1,0 +1,17 @@
+{
+  "name": "cicd-bootstrap-cdk",
+  "version": "1.0.0",
+  "private": true,
+  "scripts": {
+    "build": "tsc",
+    "synth": "cdk synth"
+  },
+  "dependencies": {
+    "aws-cdk-lib": "2.170.0",
+    "constructs": "10.4.2"
+  },
+  "devDependencies": {
+    "typescript": "5.6.3",
+    "@types/node": "20.17.6"
+  }
+}

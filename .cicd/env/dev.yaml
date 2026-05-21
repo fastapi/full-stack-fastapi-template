@@ -1,0 +1,34 @@
+environment: dev
+
+# Public metadata only — ARNs and passwords live in SSM / Secrets Manager
+aws:
+  region: us-east-1
+  # account_id: fill after `aws sts get-caller-identity`
+
+app:
+  name: full-stack-fastapi-template
+  domain: null
+
+deployment:
+  target_override: ecs-fargate
+  mode: single-node
+
+scaling:
+  min_instances: 1
+  max_instances: 2
+
+health:
+  path: /api/v1/utils/health-check/
+  timeout_seconds: 10
+
+ecr:
+  backend_repository: full-stack-fastapi-template-dev-backend
+  frontend_repository: full-stack-fastapi-template-dev-frontend
+
+secrets:
+  database: full-stack-fastapi-template-dev/database
+  app: full-stack-fastapi-template-dev/app
+
+logging:
+  cloudwatch:
+    enabled: true

@@ -1,0 +1,20 @@
+environment: prod
+
+aws:
+  region: us-east-1
+
+app:
+  name: my-app
+  domain: example.com
+
+deployment:
+  target_override: null
+  mode: distributed
+
+scaling:
+  min_instances: 2
+  max_instances: 10
+
+health:
+  path: /health
+  timeout_seconds: 10

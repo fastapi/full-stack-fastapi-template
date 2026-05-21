@@ -1,0 +1,111 @@
+name: ci
+
+on:
+  pull_request:
+  push:
+    branches: [main, master]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  security-events: write
+
+jobs:
+  detect:
+    runs-on: ubuntu-latest
+    outputs:
+      matrix: ${{ steps.detect.outputs.matrix }}
+      has_services: ${{ steps.detect.outputs.has_services }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.x"
+      - name: Install YAML parser
+        run: python -m pip install --disable-pip-version-check pyyaml
+      - id: detect
+        shell: bash
+        run: |
+          test -f .cicd/project.yaml
+          python - <<'PY' >> "$GITHUB_OUTPUT"
+          import json
+          import yaml
+
+          with open(".cicd/project.yaml", encoding="utf-8") as handle:
+              data = yaml.safe_load(handle) or {}
+
+          services = []
+          for name, svc in (data.get("services") or {}).items():
+              if svc and svc.get("enabled") is True:
+                  services.append({"name": name})
+
+          print(f"matrix={json.dumps({'include': services})}")
+          print(f"has_services={str(bool(services)).lower()}")
+          PY
+
+  checks:
+    needs: detect
+    if: ${{ needs.detect.outputs.has_services == 'true' }}
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix: ${{ fromJson(needs.detect.outputs.matrix) }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.x"
+      - name: Install YAML parser
+        run: python -m pip install --disable-pip-version-check pyyaml
+      - name: Run service checks
+        shell: bash
+        env:
+          SERVICE_NAME: ${{ matrix.name }}
+        run: |
+          python - <<'PY'
+          import os
+          import pathlib
+          import subprocess
+          import sys
+          import yaml
+
+          service_name = os.environ["SERVICE_NAME"]
+          with open(".cicd/project.yaml", encoding="utf-8") as handle:
+              data = yaml.safe_load(handle) or {}
+
+          svc = (data.get("services") or {}).get(service_name) or {}
+          service_path = pathlib.Path(svc.get("path") or ".")
+          commands = svc.get("commands") or {}
+          ordered_checks = ["install", "lint", "typecheck", "test", "build"]
+          summary = [f"## CI summary for `{service_name}`", ""]
+
+          if not service_path.exists():
+              raise SystemExit(f"Configured path does not exist for {service_name}: {service_path}")
+
+          for check_name in ordered_checks:
+              command = commands.get(check_name)
+              if not command or str(command).startswith("TODO"):
+                  reason = "missing command in .cicd/project.yaml"
+                  summary.append(f"- {check_name}: skipped ({reason})")
+                  continue
+
+              summary.append(f"- {check_name}: running `{command}`")
+              result = subprocess.run(command, shell=True, cwd=service_path)
+              if result.returncode != 0:
+                  summary.append(f"- {check_name}: failed with exit code {result.returncode}")
+                  pathlib.Path(os.environ["GITHUB_STEP_SUMMARY"]).write_text("\n".join(summary) + "\n", encoding="utf-8")
+                  sys.exit(result.returncode)
+              summary.append(f"- {check_name}: passed")
+
+          pathlib.Path(os.environ["GITHUB_STEP_SUMMARY"]).write_text("\n".join(summary) + "\n", encoding="utf-8")
+          PY
+
+  no-services:
+    needs: detect
+    if: ${{ needs.detect.outputs.has_services != 'true' }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: Block empty CI configuration
+        run: |
+          echo "No enabled services were found in .cicd/project.yaml" >> "$GITHUB_STEP_SUMMARY"
+          exit 1

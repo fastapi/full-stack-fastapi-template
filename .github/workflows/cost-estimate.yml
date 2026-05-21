@@ -1,0 +1,44 @@
+name: cost-estimate
+
+on:
+  workflow_call:
+    inputs:
+      deployment_target:
+        required: true
+        type: string
+      vcpu:
+        required: false
+        type: string
+        default: "1"
+      memory_gb:
+        required: false
+        type: string
+        default: "2"
+
+jobs:
+  estimate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.x"
+      - name: Write cost estimate to job summary
+        run: |
+          PREV="${COST_ESTIMATE_PREVIOUS:-0}"
+          EST=".cicd/scripts/estimate.py"
+          if [ ! -f "$EST" ]; then EST="templates/lib/estimate.py"; fi
+          python "$EST" \
+            --target "${{ inputs.deployment_target }}" \
+            --cpu "${{ inputs.vcpu }}" \
+            --memory "${{ inputs.memory_gb }}" >> "$GITHUB_STEP_SUMMARY"
+          CUR=$(python "$EST" --target "${{ inputs.deployment_target }}" 2>/dev/null | grep -oP '\$\K[0-9.]+' | head -1 || echo "0")
+          if [ -n "$PREV" ] && [ "$PREV" != "0" ]; then
+            python - <<PY
+          prev=float("${PREV}"); cur=float("${CUR}" or 0)
+          color="green" if cur <= prev else "yellow"
+          print(f"Trend: {'cheaper' if cur <= prev else 'more expensive'} than last deploy ({prev} -> {cur})")
+          PY
+          fi
+        env:
+          COST_ESTIMATE_PREVIOUS: ${{ vars.COST_ESTIMATE_PREVIOUS }}

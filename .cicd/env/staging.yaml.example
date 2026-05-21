@@ -1,0 +1,20 @@
+environment: staging
+
+aws:
+  region: us-east-1
+
+app:
+  name: my-app
+  domain: staging.example.com
+
+deployment:
+  target_override: null
+  mode: single-node
+
+scaling:
+  min_instances: 1
+  max_instances: 3
+
+health:
+  path: /health
+  timeout_seconds: 10
