@@ -4,7 +4,7 @@ from datetime import datetime, timedelta, timezone
 from pathlib import Path
 from typing import Any
 
-import emails  # type: ignore
+import emails  # type: ignore[import-untyped]
 import jwt
 from jinja2 import Template
 from jwt.exceptions import InvalidTokenError
