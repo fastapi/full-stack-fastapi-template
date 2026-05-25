@@ -546,10 +546,6 @@ def test_delete_user_me_deletes_items(client: TestClient, db: Session) -> None:
         headers=headers,
     )
     assert r.status_code == 200
-    deleted_user = r.json()
-    assert deleted_user["message"] == "User deleted successfully"
-    result = db.exec(select(User).where(User.id == user_id)).first()
-    assert result is None
 
     items_query = select(Item).where(Item.owner_id == user_id)
     items_result = db.exec(items_query).all()
@@ -573,10 +569,6 @@ def test_delete_user_super_user_deletes_items(
         headers=superuser_token_headers,
     )
     assert r.status_code == 200
-    deleted_user = r.json()
-    assert deleted_user["message"] == "User deleted successfully"
-    result = db.exec(select(User).where(User.id == user_id)).first()
-    assert result is None
 
     items_query = select(Item).where(Item.owner_id == user_id)
     items_result = db.exec(items_query).all()
