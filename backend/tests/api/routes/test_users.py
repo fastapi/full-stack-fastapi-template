@@ -8,7 +8,7 @@ from app import crud
 from app.core.config import settings
 from app.core.security import verify_password
 from app.models import Item, User, UserCreate
-from tests.utils.item import create_random_item_for_user
+from tests.utils.item import create_random_item
 from tests.utils.user import create_random_user
 from tests.utils.utils import random_email, random_lower_string
 
@@ -529,8 +529,8 @@ def test_delete_user_me_deletes_items(client: TestClient, db: Session) -> None:
     user = crud.create_user(session=db, user_create=user_in)
     user_id = user.id
 
-    create_random_item_for_user(db, user_id)
-    create_random_item_for_user(db, user_id)
+    create_random_item(db, user_id)
+    create_random_item(db, user_id)
 
     items_query = select(Item).where(Item.owner_id == user_id)
     items_result = db.exec(items_query).all()
@@ -565,8 +565,8 @@ def test_delete_user_super_user_deletes_items(
     user = crud.create_user(session=db, user_create=user_in)
     user_id = user.id
 
-    create_random_item_for_user(db, user_id)
-    create_random_item_for_user(db, user_id)
+    create_random_item(db, user_id)
+    create_random_item(db, user_id)
 
     items_query = select(Item).where(Item.owner_id == user_id)
     items_result = db.exec(items_query).all()
