@@ -13,6 +13,9 @@ For small, straightforward changes, you can go directly to a Pull Request withou
 - Fixing lint warnings or type errors
 - Minor code improvements (e.g., removing unused code)
 
+Note that PRs from non-team members are not allowed to modify `pyproject.toml` or `uv.lock`, to prevent supply chain risk.
+If you would like to add a new dependency, create a new [Discussion](https://github.com/fastapi/full-stack-fastapi-template/discussions) to explain why.
+
 ## Developing
 
 For detailed instructions on setting up your development environment, running the stack, linting, pre-commit hooks, and more, see the [Development Guide](development.md).

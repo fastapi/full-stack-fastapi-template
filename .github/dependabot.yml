@@ -5,6 +5,8 @@ updates:
     directory: /
     schedule:
       interval: daily
+    cooldown:
+      default-days: 7
     commit-message:
       prefix: ⬆
     labels: [dependencies, internal]
@@ -13,6 +15,8 @@ updates:
     directory: /
     schedule:
       interval: weekly
+    cooldown:
+      default-days: 7
     commit-message:
       prefix: ⬆
     labels: [dependencies, internal]
@@ -21,6 +25,8 @@ updates:
     directory: /
     schedule:
       interval: weekly
+    cooldown:
+      default-days: 7
     commit-message:
       prefix: ⬆
     labels: [dependencies, internal]
@@ -33,6 +39,8 @@ updates:
       - /frontend
     schedule:
       interval: weekly
+    cooldown:
+      default-days: 7
     commit-message:
       prefix: ⬆
     labels: [dependencies, internal]
@@ -41,6 +49,17 @@ updates:
     directory: /
     schedule:
       interval: weekly
+    cooldown:
+      default-days: 7
+    commit-message:
+      prefix: ⬆
+    labels: [dependencies, internal]
+  - package-ecosystem: "pre-commit"
+    directory: "/"
+    schedule:
+      interval: "daily"
+    cooldown:
+      default-days: 7
     commit-message:
       prefix: ⬆
     labels: [dependencies, internal]

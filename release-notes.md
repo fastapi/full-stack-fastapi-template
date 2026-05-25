@@ -13,10 +13,19 @@
 
 ### Docs
 
+* 📝 Update security policy. PR [#2297](https://github.com/fastapi/full-stack-fastapi-template/pull/2297) by [@tiangolo](https://github.com/tiangolo).
 * 📝 Add `CONTRIBUTING.md`. PR [#2159](https://github.com/fastapi/full-stack-fastapi-template/pull/2159) by [@alejsdev](https://github.com/alejsdev).
 
 ### Internal
 
+* 🔥 Remove config files now in central GitHub repo. PR [#2300](https://github.com/fastapi/full-stack-fastapi-template/pull/2300) by [@tiangolo](https://github.com/tiangolo).
+* ⬆ Bump actions/add-to-project from 1.0.2 to 2.0.0. PR [#2273](https://github.com/fastapi/full-stack-fastapi-template/pull/2273) by [@dependabot[bot]](https://github.com/apps/dependabot).
+* ⬆ Bump python-multipart from 0.0.21 to 0.0.27. PR [#2277](https://github.com/fastapi/full-stack-fastapi-template/pull/2277) by [@dependabot[bot]](https://github.com/apps/dependabot).
+* ⬆ Bump idna from 3.11 to 3.15. PR [#2294](https://github.com/fastapi/full-stack-fastapi-template/pull/2294) by [@dependabot[bot]](https://github.com/apps/dependabot).
+* 🔒️ Only allow team members to modify dependencies. PR [#2292](https://github.com/fastapi/full-stack-fastapi-template/pull/2292) by [@svlandeg](https://github.com/svlandeg).
+* ⬆ Bump urllib3 from 2.6.3 to 2.7.0. PR [#2282](https://github.com/fastapi/full-stack-fastapi-template/pull/2282) by [@dependabot[bot]](https://github.com/apps/dependabot).
+* 🔒️ Add zizmor and fix audit findings. PR [#2260](https://github.com/fastapi/full-stack-fastapi-template/pull/2260) by [@YuriiMotov](https://github.com/YuriiMotov).
+* 🔒 Pin GitHub actions by commit SHA. PR [#2246](https://github.com/fastapi/full-stack-fastapi-template/pull/2246) by [@YuriiMotov](https://github.com/YuriiMotov).
 * 🔨 Add pre-commit hook to ensure latest release header has date. PR [#2205](https://github.com/fastapi/full-stack-fastapi-template/pull/2205) by [@YuriiMotov](https://github.com/YuriiMotov).
 * 👷 Add `ty` to precommit. PR [#2227](https://github.com/fastapi/full-stack-fastapi-template/pull/2227) by [@svlandeg](https://github.com/svlandeg).
 * ⬆ Bump dorny/paths-filter from 3 to 4. PR [#2230](https://github.com/fastapi/full-stack-fastapi-template/pull/2230) by [@dependabot[bot]](https://github.com/apps/dependabot).
