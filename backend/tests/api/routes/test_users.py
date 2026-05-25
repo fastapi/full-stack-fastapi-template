@@ -7,7 +7,8 @@ from sqlmodel import Session, select
 from app import crud
 from app.core.config import settings
 from app.core.security import verify_password
-from app.models import User, UserCreate
+from app.models import Item, User, UserCreate
+from tests.utils.item import create_random_item
 from tests.utils.user import create_random_user
 from tests.utils.utils import random_email, random_lower_string
 
@@ -519,3 +520,64 @@ def test_delete_user_without_privileges(
     )
     assert r.status_code == 403
     assert r.json()["detail"] == "The user doesn't have enough privileges"
+
+
+def test_delete_user_me_deletes_items(client: TestClient, db: Session) -> None:
+    username = random_email()
+    password = random_lower_string()
+    user_in = UserCreate(email=username, password=password)
+    user = crud.create_user(session=db, user_create=user_in)
+    user_id = user.id
+
+    create_random_item(db)
+    create_random_item(db)
+
+    login_data = {
+        "username": username,
+        "password": password,
+    }
+    r = client.post(f"{settings.API_V1_STR}/login/access-token", data=login_data)
+    tokens = r.json()
+    a_token = tokens["access_token"]
+    headers = {"Authorization": f"Bearer {a_token}"}
+
+    r = client.delete(
+        f"{settings.API_V1_STR}/users/me",
+        headers=headers,
+    )
+    assert r.status_code == 200
+    deleted_user = r.json()
+    assert deleted_user["message"] == "User deleted successfully"
+    result = db.exec(select(User).where(User.id == user_id)).first()
+    assert result is None
+
+    items_query = select(Item).where(Item.owner_id == user_id)
+    items_result = db.exec(items_query).all()
+    assert len(items_result) == 0
+
+
+def test_delete_user_super_user_deletes_items(
+    client: TestClient, superuser_token_headers: dict[str, str], db: Session
+) -> None:
+    username = random_email()
+    password = random_lower_string()
+    user_in = UserCreate(email=username, password=password)
+    user = crud.create_user(session=db, user_create=user_in)
+    user_id = user.id
+
+    create_random_item(db)
+    create_random_item(db)
+
+    r = client.delete(
+        f"{settings.API_V1_STR}/users/{user_id}",
+        headers=superuser_token_headers,
+    )
+    assert r.status_code == 200
+    deleted_user = r.json()
+    assert deleted_user["message"] == "User deleted successfully"
+    result = db.exec(select(User).where(User.id == user_id)).first()
+    assert result is None
+
+    items_query = select(Item).where(Item.owner_id == user_id)
+    items_result = db.exec(items_query).all()
+    assert len(items_result) == 0
