@@ -111,7 +111,7 @@ def recover_password_html_content(email: str, session: SessionDep) -> Any:
     if not user:
         raise HTTPException(
             status_code=404,
-            detail="The user with this username does not exist in the system.",
+            detail="User does not exist.",
         )
     password_reset_token = generate_password_reset_token(email=email)
     email_data = generate_reset_password_email(
