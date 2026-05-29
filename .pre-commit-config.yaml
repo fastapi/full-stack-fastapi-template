@@ -22,7 +22,6 @@ repos:
     hooks:
       - id: typos
         args: [--force-exclude]
-
   - repo: local
     hooks:
       - id: local-biome-check
