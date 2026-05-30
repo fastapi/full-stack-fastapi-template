@@ -210,6 +210,13 @@ The input variables, with their default values (some auto generated) are:
 
 Backend docs: [backend/README.md](./backend/README.md).
 
+### Run Backend
+
+- cd backend
+- uv sync
+- .venv\Scripts\Activate.ps1
+- python -m uvicorn app.main:app --reload --host 127.0.0.1 --port 8000
+
 ## Frontend Development
 
 Frontend docs: [frontend/README.md](./frontend/README.md).
