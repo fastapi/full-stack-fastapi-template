@@ -1,66 +1,59 @@
 # Proposal 1
+
 ## Project Title
-CiteSync: Academic Knowledge and Citation Management API
+TradSync: Intelligent Job Management and Regulatory Compliance API for Trade Services
 
 ## Introduction
-Graduate students and researchers often struggle with organizing complex literature references and adhering to strict academic formatting rules, such as the APA 7th edition. The objective of this project is to develop a centralized knowledge management system that stores academic metadata, parses reading notes, and automatically generates properly formatted bibliographies. The expected benefit is a significant reduction in manual formatting errors and a highly streamlined workflow for academic writing and research tracking.
+Small-to-medium trade enterprises (plumbing, electrical, and carpentry businesses) in New Zealand face heavy administrative burdens complying with strict Health & Safety regulations and Building Code standards while managing daily workflows. The problem addressed is the high operational friction and legal risk associated with manual job tracking, onsite hazard assessments, and regulatory compliance logging. The objective of this project is to develop a centralized job management API that structures field notes, manages client service records, and automatically flags compliance/safety risks against statutory checklists before a job is signed off. The expected benefit is a significant reduction in administrative overhead for tradies, improved onsite safety tracking, and automated, legally sound documentation for council auditing.
 
 ## Technologies and Tools Used
 The project will be built using the FastAPI full-stack template:
-
-- **Backend**: Python and FastAPI to process metadata and handle the formatting logic.
-
-- **Frontend**: React for a clean UI where users can input literature details and tag notes.
-
-- **Database**: PostgreSQL to map complex many-to-many relationships between authors, publications, and user notes.
-
-- **Formatting Engine**: Python libraries (such as citeproc-py) integrated with the API to dynamically render citations in standard academic formats.
+* **Backend:** Python and FastAPI to build asynchronous endpoints handling incoming job telemetry, materials logging, and automated compliance-checking algorithms.
+* **Frontend:** React to build a responsive, scannable field-technician dashboard and an administrative command center for tracking active work sites.
+* **Database:** PostgreSQL to map complex relational data models, including many-to-many relationships between jobs, field technicians, materials, hazard reports, and statutory compliance clauses.
+* **Validation & Security:** Pydantic and SQLModel for rigid input sanitization (ensuring onsite safety data is complete), combined with OAuth2/JWT for role-based access control (separating Apprentices, Certified Tradesmen, and Auditors).
 
 ## Final Outcome
-The deliverable will be a full-stack web application featuring a robust literature repository. Users will be able to input, search, and categorize academic papers. The system will feature an export module that compiles selected references into a dynamically generated, perfectly formatted bibliography, meeting the strict requirements of modern academic research.
+The final deliverable will be a deployed full-stack job management prototype tailored for trade industries. Field workers can log job details, track billable hours, and complete interactive, rule-based site safe/compliance checklists. The system features an automated report exporter that compiles immutable job histories and compliance logs into structured summaries. This serves as a highly relevant portfolio piece for the booming construction-technology (ConTech) and regulatory-technology (RegTech) sectors.
+
+---
 
 # Proposal 2
+
 ## Project Title
-FinLaw: Automated Financial Compliance Document Workflow System
+FinLaw: Automated Financial Compliance Workflow and Regulatory Audit System
 
 ## Introduction
-The financial sector requires rigorous adherence to legal and regulatory compliance, which often involves the manual review of extensive documentation. The problem being addressed is the inefficiency and high risk of human error associated with manual compliance checks. The objective of this project is to develop an automated workflow system that manages, tracks, and flags financial documents for legal compliance review. The expected benefit is a significant reduction in administrative overhead, improved accuracy in identifying compliance risks, and a streamlined auditing process for financial institutions.
+The financial sector requires rigorous adherence to volatile anti-money laundering (AML) laws and legal compliance frameworks, which currently involves highly inefficient, manual reviews of extensive documentation. This project addresses the operational bottleneck and high human-error risks associated with manual legal compliance checks. The objective is to engineer an automated, state-machine driven document workflow system that tracks, flags, and audits financial documents against predefined compliance rules. The expected impact is a drastic reduction in administrative overhead, institutional legal risks, and a bulletproof, software-driven auditing trail for financial institutions.
 
 ## Technologies and Tools Used
-This project will be built upon the provided FastAPI full-stack template.
-
-- **Backend**: Python and FastAPI for high-performance, asynchronous API endpoints.
-
-- **Frontend**: React (integrated within the template) to build an interactive administrative dashboard.
-
-- **Database**: PostgreSQL for robust, relational data storage of document metadata and compliance logs, replacing lightweight solutions like SQLite3 for production readiness.
-
-- **ORM & Data Validation**: SQLModel/SQLAlchemy and Pydantic for strict data typing and database interactions.
-
-- **Containerization**: Docker and Docker Compose for consistent deployment and environment management.
+This project will be built upon the provided FastAPI full-stack template:
+* **Backend:** Python and FastAPI leveraging asynchronous endpoints to simulate concurrent document ingestion and high-performance parsing.
+* **Frontend:** React to build an interactive administrative dashboard featuring an interactive Kanban workflow and compliance risk matrices.
+* **Database:** PostgreSQL utilizing transactional isolation levels to guarantee the integrity of document metadata and immutable compliance logs, replacing lightweight solutions like SQLite3 for production-grade reliability.
+* **ORM & Data Validation:** SQLModel/SQLAlchemy and Pydantic for rigid data-typing, schema enforcement, and input sanitization against legal data fields.
+* **Containerization:** Docker and Docker Compose for consistent deployment pipelines and isolated environment management.
 
 ## Final Outcome
-The final deliverable will be a deployed full-stack web application featuring a user-friendly dashboard. The system will allow users to upload document records, track their compliance status through a Kanban-style workflow, and generate automated compliance reports. It will successfully meet the project objectives by providing a centralized, secure, and efficient platform for managing financial legal documentation workflows.
+The final deliverable will be a deployed full-stack compliance web application. The system will allow compliance officers to upload financial document records, transition them through a strict, rule-based Kanban workflow, and automatically generate structured, tamper-proof compliance audit reports. This system bridges the gap between legal rigor and software engineering, making it a highly relevant prototype for modern RegTech (Regulatory Technology) ecosystems.
+
+---
 
 # Proposal 3
+
 ## Project Title
-ForeXchange: Full-Stack Real-Time Currency Conversion and Remittance Dashboard
+ForeXchange: High-Availability Real-Time Remittance and Compliance Telemetry Dashboard
 
 ## Introduction
-While basic money exchange applications handle simple conversions, real-world remittance requires scalable architecture, real-time rate tracking, and secure transaction management. This project addresses the lack of accessible, full-stack solutions for tracking cross-border currency exchanges efficiently. The objective is to engineer a robust currency exchange platform that handles user authentication, live rate simulations, and secure transaction histories. The expected impact is providing users with a transparent, fast, and reliable tool for managing foreign exchange operations and remittance planning.
+While basic currency applications handle simple static conversions, commercial cross-border remittance demands highly scalable architectures, real-time telemetry (rate tracking), and rigid compliance checks to prevent financial crime. This project addresses the lack of transparent, secure, and production-ready architectures for monitoring international money exchanges. The objective is to engineer a robust, database-driven foreign exchange platform that seamlessly handles concurrent user sessions, live rate simulations, automated fee compliance calculations, and immutable transaction histories. 
 
 ## Technologies and Tools Used
-The solution will leverage the modern Python web ecosystem via the FastAPI template.
-
-- **Core Backend**: Python 3 and FastAPI to handle RESTful API requests and complex currency conversion logic.
-
-- **Frontend**: React for a responsive, single-page application (SPA) interface.
-
-- **Database Management**: PostgreSQL to handle transactional data securely, migrating away from flat-file or local databases to a true client-server architecture.
-
-- **Authentication**: OAuth2 with password flow and JWT tokens (built into the FastAPI template) for secure user session management.
-
-- **Deployment**: Dockerized microservices orchestrated with Traefik for reverse proxy and load balancing.
+The solution will leverage the modern Python web ecosystem via the FastAPI template:
+* **Core Backend:** Python 3 and FastAPI utilizing background tasks to process algorithmic currency conversion and transactional compliance checking.
+* **Frontend:** React for a responsive, state-managed single-page application (SPA) tracking live market fluctuations.
+* **Database Management:** PostgreSQL with strict relational constraints to secure ledger data, migrating local SQLite3 prototypes to an enterprise client-server model.
+* **Authentication & Security:** OAuth2 with Password Flow and JWT tokens integrated natively into the FastAPI pipeline to enforce secure, role-based user sessions (e.g., Customer vs. Compliance Auditor).
+* **Deployment:** Dockerized microservices orchestrated with Traefik for automated reverse proxy, SSL termination, and load balancing.
 
 ## Final Outcome
-The expected outcome is a fully functional web-based prototype of a currency exchange platform. It will include a secure login system, an interactive dashboard displaying currency trends, and a module for executing and recording simulated money exchange transactions. This will meet the user requirements for a secure, database-driven financial application built on modern software engineering principles.
+The expected outcome is a fully functional, containerized prototype of an enterprise money exchange platform. It will feature a secure multi-tier login system, an interactive dashboard visualizing live simulated currency trends, and an immutable ledger module that records and flags simulated cross-border remittance transactions. The architecture demonstrates modern software principles required in both FinTech and telemetry-driven industrial software engineering.
