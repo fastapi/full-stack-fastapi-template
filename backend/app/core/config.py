@@ -55,12 +55,15 @@ class Settings(BaseSettings):
     POSTGRES_USER: str
     POSTGRES_PASSWORD: str = ""
     POSTGRES_DB: str = ""
+    SUPABASE_DATABASE_URL: str | None = None
 
     @computed_field  # type: ignore[prop-decorator]
     @property
     def SQLALCHEMY_DATABASE_URI(self) -> PostgresDsn:
+        if self.SUPABASE_DATABASE_URL:
+            return self.SUPABASE_DATABASE_URL
         return PostgresDsn.build(
-            scheme="postgresql+psycopg",
+            scheme="postgresql+psycopg2",
             username=self.POSTGRES_USER,
             password=self.POSTGRES_PASSWORD,
             host=self.POSTGRES_SERVER,
@@ -68,6 +71,7 @@ class Settings(BaseSettings):
             path=self.POSTGRES_DB,
         )
 
+    # Mail settings
     SMTP_TLS: bool = True
     SMTP_SSL: bool = False
     SMTP_PORT: int = 587
@@ -89,6 +93,11 @@ class Settings(BaseSettings):
     @property
     def emails_enabled(self) -> bool:
         return bool(self.SMTP_HOST and self.EMAILS_FROM_EMAIL)
+    
+    @computed_field  # type: ignore[prop-decorator]
+    @property
+    def supabase_enabled(self) -> bool:
+        return bool(self.SUPABASE_URL and self.SUPABASE_KEY)
 
     EMAIL_TEST_USER: EmailStr = "test@example.com"
     FIRST_SUPERUSER: EmailStr
