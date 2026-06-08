@@ -1,4 +1,5 @@
 # Release Notes
+The fastapi template has new versions that are recently introduced into the repo which I call version v1.1.0
 
 ## Latest Changes
 
