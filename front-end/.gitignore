@@ -1,0 +1,10 @@
+/node_modules
+/.next
+/out
+/build
+next-env.d.ts
+*.tsbuildinfo
+.DS_Store
+.design-ref
+bun.lockb
+npm-debug.log*
