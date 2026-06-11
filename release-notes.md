@@ -19,6 +19,7 @@
 
 ### Internal
 
+* ⬆ Bump requests from 2.32.5 to 2.33.0. PR [#2245](https://github.com/fastapi/full-stack-fastapi-template/pull/2245) by [@dependabot[bot]](https://github.com/apps/dependabot).
 * ⬆ Bump python-dotenv from 1.2.1 to 1.2.2. PR [#2265](https://github.com/fastapi/full-stack-fastapi-template/pull/2265) by [@dependabot[bot]](https://github.com/apps/dependabot).
 * ⬆ Bump starlette from 0.46.2 to 1.0.1. PR [#2322](https://github.com/fastapi/full-stack-fastapi-template/pull/2322) by [@dependabot[bot]](https://github.com/apps/dependabot).
 * ⬆ Bump the github-actions group across 1 directory with 6 updates. PR [#2326](https://github.com/fastapi/full-stack-fastapi-template/pull/2326) by [@dependabot[bot]](https://github.com/apps/dependabot).
