@@ -162,6 +162,22 @@ a { color: inherit; text-decoration: none; }
   border-color: var(--cyan);
   box-shadow: 0 0 0 3px var(--cyan-dim);
 }
+.auth-input {
+  font-family: var(--font-mono);
+  font-size: 13.5px;
+  padding: 9px 12px;
+  border-radius: var(--r);
+  border: 1px solid var(--line-bold);
+  background: var(--surface-2);
+  color: var(--fg);
+  outline: none;
+  min-width: 240px;
+  transition: border-color 0.18s ease, box-shadow 0.18s ease;
+}
+.auth-input:focus {
+  border-color: var(--cyan);
+  box-shadow: 0 0 0 3px var(--cyan-dim);
+}
 .field-error {
   font-family: var(--font-mono);
   font-size: 12px;

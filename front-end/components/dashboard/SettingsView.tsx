@@ -1,16 +1,18 @@
 "use client";
 
-import { useState } from "react";
-import { Check, Copy, FileCheck2, FileSpreadsheet, FileText, RefreshCw } from "lucide-react";
+import { useEffect, useState } from "react";
+import { Check, FileCheck2, FileSpreadsheet, FileText, Plus, Trash2 } from "lucide-react";
 import { useTranslations } from "next-intl";
 import Toggle from "@/components/ui/Toggle";
+import { apiMessage } from "@/lib/api";
+import { ApiKeysService, type ApiKeyPublic } from "@/lib/client";
+import { formatDate } from "@/lib/files";
 
 type OptKey = "autoTables" | "mergePages" | "headers" | "ocr" | "notify";
 
-const API_KEY = "txk_live_9f4Ad2QyR7sB1nMzKp83XwLcVeH0tGqJ";
-
 export default function SettingsView() {
   const t = useTranslations("settings");
+  const tc = useTranslations("common");
   const [opts, setOpts] = useState<Record<OptKey, boolean>>({
     autoTables: true,
     mergePages: true,
@@ -19,13 +21,53 @@ export default function SettingsView() {
     notify: true,
   });
   const [fmt, setFmt] = useState<"xlsx" | "csv">("xlsx");
-  const [copied, setCopied] = useState(false);
   const flip = (k: OptKey) => setOpts((p) => ({ ...p, [k]: !p[k] }));
 
-  const copy = () => {
-    navigator.clipboard?.writeText(API_KEY).catch(() => {});
-    setCopied(true);
-    setTimeout(() => setCopied(false), 1600);
+  const [keys, setKeys] = useState<ApiKeyPublic[]>([]);
+  const [keysLoading, setKeysLoading] = useState(true);
+  const [keyName, setKeyName] = useState("");
+  const [keyValue, setKeyValue] = useState("");
+  const [savingKey, setSavingKey] = useState(false);
+  const [keyError, setKeyError] = useState<string | null>(null);
+
+  useEffect(() => {
+    let active = true;
+    ApiKeysService.listApiKeys()
+      .then((res) => active && setKeys(res.data))
+      .catch((err) => active && setKeyError(apiMessage(err)))
+      .finally(() => active && setKeysLoading(false));
+    return () => {
+      active = false;
+    };
+  }, []);
+
+  const addKey = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!keyValue.trim()) return;
+    setSavingKey(true);
+    setKeyError(null);
+    try {
+      const created = await ApiKeysService.createApiKey({
+        requestBody: { name: keyName.trim() || null, key: keyValue.trim() },
+      });
+      setKeys((p) => [...p, created]);
+      setKeyName("");
+      setKeyValue("");
+    } catch (err) {
+      setKeyError(apiMessage(err));
+    } finally {
+      setSavingKey(false);
+    }
+  };
+
+  const deleteKey = async (id: string) => {
+    setKeyError(null);
+    try {
+      await ApiKeysService.deleteApiKey({ apiKeyId: id });
+      setKeys((p) => p.filter((k) => k.id !== id));
+    } catch (err) {
+      setKeyError(apiMessage(err));
+    }
   };
 
   const toggles: { key: OptKey; t: string; d: string }[] = [
@@ -94,28 +136,71 @@ export default function SettingsView() {
           <h3>{t("apiTitle")}</h3>
           <p>{t("apiSub")}</p>
         </div>
-        <div className="api-row">
-          <div className="api-field">
-            <div className="api-key">
-              <FileCheck2 size={15} style={{ color: "var(--cyan)", flex: "none" }} />
-              <span className="k">{API_KEY}</span>
+
+        {keyError && (
+          <div className="set-row">
+            <div className="field-error" style={{ width: "100%" }}>
+              {keyError}
             </div>
-            <button className={`btn btn-ghost copy-btn ${copied ? "copied" : ""}`} onClick={copy}>
-              {copied ? (
-                <>
-                  <Check size={15} /> {t("copied")}
-                </>
-              ) : (
-                <>
-                  <Copy size={15} /> {t("copy")}
-                </>
-              )}
-            </button>
-            <button className="btn btn-ghost" title={t("regenerate")} aria-label={t("regenerate")}>
-              <RefreshCw size={15} />
+          </div>
+        )}
+
+        {keysLoading && (
+          <div className="set-row">
+            <div className="label">
+              <div className="d">{tc("loading")}</div>
+            </div>
+          </div>
+        )}
+        {!keysLoading && keys.length === 0 && (
+          <div className="set-row">
+            <div className="label">
+              <div className="d">{t("noKeys")}</div>
+            </div>
+          </div>
+        )}
+        {keys.map((k) => (
+          <div className="set-row" key={k.id}>
+            <div className="label">
+              <div className="t" style={{ display: "flex", alignItems: "center", gap: 8 }}>
+                <FileCheck2 size={15} style={{ color: "var(--cyan)" }} />
+                {k.name || t("unnamedKey")}
+              </div>
+              <div className="d">{formatDate(k.created_at)}</div>
+            </div>
+            <button
+              className="btn btn-ghost"
+              title={t("deleteKey")}
+              aria-label={t("deleteKey")}
+              onClick={() => void deleteKey(k.id)}
+            >
+              <Trash2 size={15} />
             </button>
           </div>
-        </div>
+        ))}
+
+        <form className="set-row" onSubmit={addKey} style={{ gap: 10, flexWrap: "wrap" }}>
+          <input
+            className="auth-input"
+            placeholder={t("keyNamePlaceholder")}
+            value={keyName}
+            onChange={(e) => setKeyName(e.target.value)}
+            aria-label={t("keyNamePlaceholder")}
+            style={{ minWidth: 160, flex: "0 1 180px" }}
+          />
+          <input
+            className="auth-input"
+            placeholder={t("keyValuePlaceholder")}
+            value={keyValue}
+            onChange={(e) => setKeyValue(e.target.value)}
+            required
+            aria-label={t("keyValuePlaceholder")}
+            style={{ flex: "1 1 240px" }}
+          />
+          <button className="btn btn-primary" type="submit" disabled={savingKey}>
+            <Plus size={15} /> {t("addKey")}
+          </button>
+        </form>
       </div>
     </div>
   );

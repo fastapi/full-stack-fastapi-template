@@ -4,6 +4,6 @@ import MembersView from "@/components/dashboard/MembersView";
 
 export default async function MembersPage({ params: { locale } }: { params: { locale: string } }) {
   setRequestLocale(locale);
-  await requireRole(["company"], locale);
+  await requireRole(["admin"], locale);
   return <MembersView />;
 }

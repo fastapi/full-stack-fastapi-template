@@ -11,8 +11,6 @@ const FEED_ICO: Record<DocStatus, ReactNode> = {
   fail: <AlertTriangle size={16} />,
 };
 
-const REL_TIME = ["2m ago", "18m ago", "1h ago", "3h ago", "5h ago"];
-
 export interface ActivityFeedProps {
   items: DocRow[];
 }
@@ -22,18 +20,23 @@ export default function ActivityFeed({ items }: ActivityFeedProps) {
   const metaFor = (status: DocStatus) =>
     status === "done" ? t("feedDone") : status === "proc" ? t("feedProc") : t("feedFail");
 
+  if (items.length === 0) {
+    return <div className="fq-empty">{t("feedEmpty")}</div>;
+  }
+
   return (
     <div className="feed">
-      {items.map((d, i) => (
+      {items.map((d) => (
         <div className="feed-item" key={d.id}>
           <span className={`feed-ico ${d.status}`}>{FEED_ICO[d.status]}</span>
           <div className="feed-main">
             <div className="fn">{d.name}</div>
             <div className="meta">
-              {metaFor(d.status)} · {t("pages", { count: d.pages })}
+              {metaFor(d.status)}
+              {d.pages > 0 && <> · {t("pages", { count: d.pages })}</>}
             </div>
           </div>
-          <span className="feed-time">{REL_TIME[i] ?? ""}</span>
+          <span className="feed-time">{d.date}</span>
         </div>
       ))}
     </div>

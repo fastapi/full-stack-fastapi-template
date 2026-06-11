@@ -10,7 +10,7 @@ import {
   YAxis,
 } from "recharts";
 import { useTranslations } from "next-intl";
-import { VOLUME } from "@/lib/data";
+import type { VolumePoint } from "@/lib/data";
 
 const FAILED = "oklch(0.68 0.17 25)";
 
@@ -43,15 +43,16 @@ function ChartTooltip({ active, payload, label, labels }: TipProps) {
 }
 
 export interface ParseChartProps {
+  data: VolumePoint[];
   accent?: string;
 }
 
-export default function ParseChart({ accent = "#2FCB91" }: ParseChartProps) {
+export default function ParseChart({ data, accent = "#2FCB91" }: ParseChartProps) {
   const t = useTranslations("overview");
   const labels = { parsed: t("legendParsed"), failed: t("legendFailed") };
   return (
     <ResponsiveContainer width="100%" height={262}>
-      <AreaChart data={VOLUME} margin={{ top: 8, right: 6, left: -18, bottom: 0 }}>
+      <AreaChart data={data} margin={{ top: 8, right: 6, left: -18, bottom: 0 }}>
         <defs>
           <linearGradient id="gParsed" x1="0" y1="0" x2="0" y2="1">
             <stop offset="0%" stopColor={accent} stopOpacity={0.35} />

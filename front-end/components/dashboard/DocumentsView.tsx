@@ -1,20 +1,71 @@
 "use client";
 
-import { useState } from "react";
-import { Calendar, Download, Eye, FileText, Image as ImageIcon, Search, Trash2 } from "lucide-react";
+import { useCallback, useEffect, useState } from "react";
+import { Download, Eye, FileText, Image as ImageIcon, RefreshCw, Search } from "lucide-react";
 import { useTranslations } from "next-intl";
 import Pill from "@/components/ui/Pill";
-import { DOCS, type DocRow, type DocStatus } from "@/lib/data";
+import { apiMessage } from "@/lib/api";
+import { FilesService } from "@/lib/client";
+import { downloadExport, toDocRow } from "@/lib/files";
+import type { DocRow, DocStatus } from "@/lib/data";
 
 type StatusFilter = "all" | DocStatus;
-type RangeFilter = "7d" | "30d" | "all";
 
 export default function DocumentsView() {
   const t = useTranslations("documents");
+  const tc = useTranslations("common");
   const [query, setQuery] = useState("");
   const [status, setStatus] = useState<StatusFilter>("all");
-  const [range, setRange] = useState<RangeFilter>("30d");
-  const [docs, setDocs] = useState<DocRow[]>(DOCS);
+  const [docs, setDocs] = useState<DocRow[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [refreshing, setRefreshing] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [busyId, setBusyId] = useState<string | null>(null);
+
+  const load = useCallback(async () => {
+    setError(null);
+    try {
+      const files = await FilesService.listFiles({ limit: 100 });
+      setDocs(files.map(toDocRow));
+    } catch (err) {
+      setError(apiMessage(err));
+    } finally {
+      setLoading(false);
+      setRefreshing(false);
+    }
+  }, []);
+
+  useEffect(() => {
+    void load();
+  }, [load]);
+
+  const refresh = () => {
+    setRefreshing(true);
+    void load();
+  };
+
+  const download = async (d: DocRow) => {
+    setBusyId(d.id);
+    try {
+      await downloadExport(d.id, d.name, "xlsx");
+    } catch (err) {
+      setError(apiMessage(err));
+    } finally {
+      setBusyId(null);
+    }
+  };
+
+  const viewResult = async (d: DocRow) => {
+    setBusyId(d.id);
+    try {
+      const res = (await FilesService.getFileResultUrl({ fileId: d.id })) as { result?: string };
+      if (typeof res?.result === "string") window.open(res.result, "_blank", "noopener");
+    } catch (err) {
+      setError(apiMessage(err));
+    } finally {
+      setBusyId(null);
+    }
+  };
 
   const filtered = docs.filter((d) => {
     const mq = query.trim().toLowerCase();
@@ -23,18 +74,11 @@ export default function DocumentsView() {
     return okQ && okS;
   });
 
-  const remove = (id: string) => setDocs((p) => p.filter((d) => d.id !== id));
-
   const statusOptions: [StatusFilter, string][] = [
     ["all", t("filterAll")],
     ["done", t("filterDone")],
     ["proc", t("filterProc")],
     ["fail", t("filterFail")],
-  ];
-  const rangeOptions: [RangeFilter, string][] = [
-    ["7d", t("range7d")],
-    ["30d", t("range30d")],
-    ["all", t("rangeAll")],
   ];
 
   return (
@@ -57,19 +101,15 @@ export default function DocumentsView() {
           ))}
         </div>
         <div className="seg">
-          {rangeOptions.map(([k, l]) => (
-            <button key={k} className={range === k ? "on" : ""} onClick={() => setRange(k)}>
-              {k === "all" ? (
-                <span style={{ display: "inline-flex", alignItems: "center", gap: 6 }}>
-                  <Calendar size={12} /> {l}
-                </span>
-              ) : (
-                l
-              )}
-            </button>
-          ))}
+          <button onClick={refresh} disabled={refreshing} aria-label={t("refresh")}>
+            <span style={{ display: "inline-flex", alignItems: "center", gap: 6 }}>
+              <RefreshCw size={12} className={refreshing ? "spin" : ""} /> {t("refresh")}
+            </span>
+          </button>
         </div>
       </div>
+
+      {error && <div className="field-error">{error}</div>}
 
       <div className="table-wrap">
         <table className="tbl">
@@ -84,7 +124,12 @@ export default function DocumentsView() {
             </tr>
           </thead>
           <tbody>
-            {filtered.length === 0 && (
+            {loading && (
+              <tr className="empty-row">
+                <td colSpan={6}>{tc("loading")}</td>
+              </tr>
+            )}
+            {!loading && filtered.length === 0 && (
               <tr className="empty-row">
                 <td colSpan={6}>{t("empty")}</td>
               </tr>
@@ -99,20 +144,21 @@ export default function DocumentsView() {
                     <span>
                       <div className="nm">{d.name}</div>
                       <div className="sz">
-                        {d.size} · {d.pages} {d.pages > 1 ? "pages" : "page"}
+                        {d.size}
+                        {d.pages > 0 && <> · {d.pages} {d.pages > 1 ? "pages" : "page"}</>}
                       </div>
                     </span>
                   </div>
                 </td>
-                <td className="mono-cell">{d.id}</td>
+                <td className="mono-cell">{d.id.slice(0, 8)}</td>
                 <td className="mono-cell">{d.type === "pdf" ? t("typePdf") : t("typeImage")}</td>
                 <td className="mono-cell">{d.date}</td>
                 <td>
-                  {d.status === "proc" ? (
+                  {d.status === "proc" && d.progress != null ? (
                     <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
                       <Pill status="proc" />
                       <div className="mini-prog">
-                        <i style={{ width: `${d.progress ?? 30}%` }} />
+                        <i style={{ width: `${d.progress}%` }} />
                       </div>
                     </div>
                   ) : (
@@ -121,14 +167,22 @@ export default function DocumentsView() {
                 </td>
                 <td>
                   <div className="row-actions" style={{ justifyContent: "flex-end" }}>
-                    <button className="dl" title={t("download")} aria-label={t("download")} disabled={d.status !== "done"}>
+                    <button
+                      className="dl"
+                      title={t("download")}
+                      aria-label={t("download")}
+                      disabled={d.status !== "done" || busyId === d.id}
+                      onClick={() => void download(d)}
+                    >
                       <Download size={15} />
                     </button>
-                    <button title={t("view")} aria-label={t("view")}>
+                    <button
+                      title={t("view")}
+                      aria-label={t("view")}
+                      disabled={d.status !== "done" || busyId === d.id}
+                      onClick={() => void viewResult(d)}
+                    >
                       <Eye size={15} />
-                    </button>
-                    <button className="del" title={t("delete")} aria-label={t("delete")} onClick={() => remove(d.id)}>
-                      <Trash2 size={15} />
                     </button>
                   </div>
                 </td>
@@ -138,7 +192,6 @@ export default function DocumentsView() {
         </table>
         <div className="table-foot">
           <span>{t("showing", { shown: filtered.length, total: docs.length })}</span>
-          <span>{t("storage")}</span>
         </div>
       </div>
     </div>

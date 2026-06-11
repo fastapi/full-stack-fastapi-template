@@ -1,96 +1,176 @@
 "use client";
 
-import { Download } from "lucide-react";
-import { useTranslations } from "next-intl";
+import { useEffect, useState } from "react";
+import { ArrowDownRight, ArrowUpRight, RefreshCw, Wallet } from "lucide-react";
+import { useFormatter, useTranslations } from "next-intl";
+import { apiMessage } from "@/lib/api";
+import {
+  TopupService,
+  type TopupPackage,
+  type TopupTransactionPublic,
+  type UserBalancePublic,
+} from "@/lib/client";
+import { formatDate } from "@/lib/files";
+import type { DocStatus } from "@/lib/data";
 
-const INVOICES = [
-  { id: "INV-2026-06", date: "2026-06-01", amount: "$240.00" },
-  { id: "INV-2026-05", date: "2026-05-01", amount: "$240.00" },
-  { id: "INV-2026-04", date: "2026-04-01", amount: "$240.00" },
-  { id: "INV-2026-03", date: "2026-03-01", amount: "$180.00" },
-];
-
-const USAGE_PCT = 62;
+const STATUS_PILL: Record<TopupTransactionPublic["status"], DocStatus> = {
+  success: "done",
+  pending: "proc",
+  failed: "fail",
+};
 
 export default function BillingView() {
   const t = useTranslations("billing");
+  const tc = useTranslations("common");
+  const format = useFormatter();
+
+  const [balance, setBalance] = useState<UserBalancePublic | null>(null);
+  const [packages, setPackages] = useState<TopupPackage[]>([]);
+  const [transactions, setTransactions] = useState<TopupTransactionPublic[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [payingId, setPayingId] = useState<string | null>(null);
+  const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    let active = true;
+    Promise.all([
+      TopupService.getMyBalance(),
+      TopupService.getTopupPackages(),
+      TopupService.getMyTransactions({ limit: 20 }),
+    ])
+      .then(([bal, pkgs, txns]) => {
+        if (!active) return;
+        setBalance(bal);
+        setPackages(pkgs.packages);
+        setTransactions(txns);
+      })
+      .catch((err) => active && setError(apiMessage(err)))
+      .finally(() => active && setLoading(false));
+    return () => {
+      active = false;
+    };
+  }, []);
+
+  const vnd = (amount: number) =>
+    format.number(amount, { style: "currency", currency: "VND", maximumFractionDigits: 0 });
+
+  const topup = async (pkg: TopupPackage) => {
+    setPayingId(pkg.id);
+    setError(null);
+    try {
+      const res = await TopupService.createPayment({ requestBody: { amount: pkg.amount } });
+      window.location.href = res.payment_url;
+    } catch (err) {
+      setError(apiMessage(err));
+      setPayingId(null);
+    }
+  };
 
   return (
     <div className="settings-wrap">
+      {error && <div className="field-error">{error}</div>}
+
       <div className="set-panel">
         <div className="sp-head">
-          <h3>{t("planTitle")}</h3>
-          <p>{t("planSub")}</p>
+          <h3>{t("balanceTitle")}</h3>
+          <p>{t("balanceSub")}</p>
         </div>
         <div className="set-row">
           <div className="label">
-            <div className="t" style={{ fontFamily: "var(--font-mono)", color: "var(--cyan)" }}>
-              {t("planName")}
+            <div className="t" style={{ fontFamily: "var(--font-mono)", color: "var(--cyan)", fontSize: 22 }}>
+              {loading ? tc("loading") : balance ? vnd(balance.balance) : "—"}
             </div>
-            <div className="d">{t("planAllowance")}</div>
+            <div className="d">
+              {balance ? t("balanceUpdated", { date: formatDate(balance.updated_at) }) : ""}
+            </div>
           </div>
-          <button className="btn btn-ghost">{t("managePlan")}</button>
+          <Wallet size={22} style={{ color: "var(--fg-dim)" }} />
         </div>
       </div>
 
       <div className="set-panel">
         <div className="sp-head">
-          <h3>{t("usageTitle")}</h3>
-          <p>{t("usageSub")}</p>
+          <h3>{t("topupTitle")}</h3>
+          <p>{t("topupSub")}</p>
         </div>
-        <div style={{ padding: "18px 22px" }}>
-          <div
-            style={{
-              display: "flex",
-              justifyContent: "space-between",
-              fontFamily: "var(--font-mono)",
-              fontSize: 12,
-              color: "var(--fg-dim)",
-              marginBottom: 10,
-            }}
-          >
-            <span>{t("usageLabel")}</span>
-            <span>{t("usageValue")}</span>
+        {packages.map((pkg) => (
+          <div className="set-row" key={pkg.id}>
+            <div className="label">
+              <div className="t" style={{ fontFamily: "var(--font-mono)" }}>
+                {vnd(pkg.amount)}
+              </div>
+              <div className="d">{pkg.label}</div>
+            </div>
+            <button
+              className="btn btn-primary"
+              onClick={() => void topup(pkg)}
+              disabled={payingId !== null}
+            >
+              {payingId === pkg.id ? (
+                <>
+                  <RefreshCw size={15} className="spin" /> {t("redirecting")}
+                </>
+              ) : (
+                t("payWithVnpay")
+              )}
+            </button>
           </div>
-          <div className="fq-bar" style={{ height: 8 }}>
-            <i style={{ width: `${USAGE_PCT}%`, background: "var(--cyan)" }} />
+        ))}
+        {!loading && packages.length === 0 && (
+          <div className="set-row">
+            <div className="label">
+              <div className="d">{t("noPackages")}</div>
+            </div>
           </div>
-        </div>
+        )}
       </div>
 
       <div className="set-panel">
         <div className="sp-head">
-          <h3>{t("invoicesTitle")}</h3>
-          <p>{t("invoicesSub")}</p>
+          <h3>{t("transactionsTitle")}</h3>
+          <p>{t("transactionsSub")}</p>
         </div>
         <table className="tbl">
           <thead>
             <tr>
-              <th>{t("colInvoice")}</th>
+              <th>{t("colRef")}</th>
               <th>{t("colDate")}</th>
+              <th>{t("colType")}</th>
               <th>{t("colAmount")}</th>
               <th>{t("colStatus")}</th>
-              <th style={{ textAlign: "right" }}>{t("download")}</th>
             </tr>
           </thead>
           <tbody>
-            {INVOICES.map((inv) => (
-              <tr key={inv.id}>
-                <td className="mono-cell">{inv.id}</td>
-                <td className="mono-cell">{inv.date}</td>
-                <td className="mono-cell">{inv.amount}</td>
-                <td>
-                  <span className="pill done">
-                    <span className="dot" />
-                    {t("paid")}
+            {loading && (
+              <tr className="empty-row">
+                <td colSpan={5}>{tc("loading")}</td>
+              </tr>
+            )}
+            {!loading && transactions.length === 0 && (
+              <tr className="empty-row">
+                <td colSpan={5}>{t("noTransactions")}</td>
+              </tr>
+            )}
+            {transactions.map((txn) => (
+              <tr key={txn.id}>
+                <td className="mono-cell">{txn.txn_ref ?? txn.id.slice(0, 8)}</td>
+                <td className="mono-cell">{formatDate(txn.created_at)}</td>
+                <td className="mono-cell">
+                  <span style={{ display: "inline-flex", alignItems: "center", gap: 6 }}>
+                    {txn.type === "credit" ? (
+                      <ArrowUpRight size={13} style={{ color: "var(--ok)" }} />
+                    ) : (
+                      <ArrowDownRight size={13} style={{ color: "var(--fg-dim)" }} />
+                    )}
+                    {txn.type === "credit" ? t("typeCredit") : t("typeDebit")}
                   </span>
                 </td>
+                <td className="mono-cell">{vnd(txn.amount)}</td>
                 <td>
-                  <div className="row-actions" style={{ justifyContent: "flex-end" }}>
-                    <button className="dl" aria-label={t("download")} title={t("download")}>
-                      <Download size={15} />
-                    </button>
-                  </div>
+                  <span className={`pill ${STATUS_PILL[txn.status]}`}>
+                    <span className="dot" />
+                    {t(`status_${txn.status}`)}
+                  </span>
                 </td>
               </tr>
             ))}

@@ -1,7 +1,9 @@
 import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
+import { API_BASE, TOKEN_COOKIE } from "@/lib/api";
+import type { UserPublic } from "@/lib/client";
 
-export type UserRole = "user" | "company" | "admin";
+export type UserRole = "user" | "admin";
 
 export interface AuthUser {
   id: string;
@@ -10,59 +12,57 @@ export interface AuthUser {
   role: UserRole;
   initials: string;
   plan: string;
-  companyId?: string;
-  companyName?: string;
 }
 
-export const ROLE_COOKIE = "tabula_role";
-
-export const roles: UserRole[] = ["user", "company", "admin"];
+export const roles: UserRole[] = ["user", "admin"];
 
 export function isRole(value: string | undefined): value is UserRole {
   return !!value && (roles as string[]).includes(value);
 }
 
-/** Mock profiles — one per role. Swap for a real session lookup later. */
-const MOCK_USERS: Record<UserRole, AuthUser> = {
-  user: {
-    id: "u_mara",
-    name: "Mara Vance",
-    email: "mara@tabula.io",
-    role: "user",
-    initials: "MV",
-    plan: "Pro · 10k pages",
-  },
-  company: {
-    id: "u_devon",
-    name: "Devon Park",
-    email: "devon@northwind.co",
-    role: "company",
-    initials: "DP",
-    plan: "Team · 100k pages",
-    companyId: "co_northwind",
-    companyName: "Northwind Co.",
-  },
-  admin: {
-    id: "u_root",
-    name: "Sasha Reed",
-    email: "sasha@tabula.io",
-    role: "admin",
-    initials: "SR",
-    plan: "Platform Admin",
-  },
-};
-
-/** Reads the mock role cookie and returns the session, or null if not signed in. */
-export async function getSession(): Promise<AuthUser | null> {
-  const cookieStore = await cookies();
-  const raw = cookieStore.get(ROLE_COOKIE)?.value;
-  if (!isRole(raw)) return null;
-  return MOCK_USERS[raw];
+function initialsOf(name: string): string {
+  return (
+    name
+      .split(/\s+/)
+      .filter(Boolean)
+      .slice(0, 2)
+      .map((part) => part[0]!.toUpperCase())
+      .join("") || "?"
+  );
 }
 
-/** Looks up a mock user by email (used by the login form's mock credential check). */
-export function findUserByEmail(email: string): AuthUser | undefined {
-  return Object.values(MOCK_USERS).find((u) => u.email.toLowerCase() === email.toLowerCase());
+/** Maps the backend user onto the shape the shells/views render. */
+export function toAuthUser(user: UserPublic): AuthUser {
+  const name = user.full_name?.trim() || user.email.split("@")[0];
+  return {
+    id: user.id,
+    name,
+    email: user.email,
+    role: user.is_superuser ? "admin" : "user",
+    initials: initialsOf(name),
+    plan: user.is_superuser ? "Platform Admin" : "Pay as you go",
+  };
+}
+
+/**
+ * Resolves the session from the auth cookie by asking the API for the current
+ * user. Returns null when signed out or the token is no longer valid.
+ */
+export async function getSession(): Promise<AuthUser | null> {
+  const cookieStore = await cookies();
+  const token = cookieStore.get(TOKEN_COOKIE)?.value;
+  if (!token) return null;
+
+  try {
+    const res = await fetch(`${API_BASE}/api/v1/users/me`, {
+      headers: { Authorization: `Bearer ${token}` },
+      cache: "no-store",
+    });
+    if (!res.ok) return null;
+    return toAuthUser((await res.json()) as UserPublic);
+  } catch {
+    return null;
+  }
 }
 
 /**

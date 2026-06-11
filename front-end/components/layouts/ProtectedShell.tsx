@@ -2,7 +2,6 @@ import type { ReactNode } from "react";
 import { redirect } from "next/navigation";
 import { getSession } from "@/lib/auth";
 import UserShell from "@/components/layouts/UserShell";
-import CompanyShell from "@/components/layouts/CompanyShell";
 import AdminShell from "@/components/layouts/AdminShell";
 
 /**
@@ -21,9 +20,6 @@ export default async function ProtectedShell({
 
   if (session.role === "admin") {
     return <AdminShell user={session}>{children}</AdminShell>;
-  }
-  if (session.role === "company") {
-    return <CompanyShell user={session}>{children}</CompanyShell>;
   }
   return <UserShell user={session}>{children}</UserShell>;
 }

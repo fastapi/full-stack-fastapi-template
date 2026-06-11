@@ -3,18 +3,26 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { Download, FilePlus2, FileText, RefreshCw, Sparkles, UploadCloud, X } from "lucide-react";
 import { useTranslations } from "next-intl";
+import { apiMessage } from "@/lib/api";
+import { FilesService } from "@/lib/client";
+import { downloadExport, jobProgress, jobStatus } from "@/lib/files";
 
-type FileStatus = "queued" | "parsing" | "done";
+type FileStatus = "queued" | "uploading" | "parsing" | "done" | "error";
 
 interface QueuedFile {
   uid: number;
+  file: File;
   name: string;
   size: string;
   isImg: boolean;
   url: string | null;
   progress: number;
   status: FileStatus;
+  fileId?: string;
+  error?: string;
 }
+
+const POLL_INTERVAL_MS = 2500;
 
 let uidSeq = 0;
 
@@ -26,6 +34,15 @@ export default function UploadView() {
   const inputRef = useRef<HTMLInputElement>(null);
   const filesRef = useRef<QueuedFile[]>(files);
   filesRef.current = files;
+  const mountedRef = useRef(true);
+
+  useEffect(() => {
+    mountedRef.current = true;
+    return () => {
+      mountedRef.current = false;
+      filesRef.current.forEach((f) => f.url && URL.revokeObjectURL(f.url));
+    };
+  }, []);
 
   const addFiles = useCallback((fileList: FileList) => {
     const arr = Array.from(fileList).filter(
@@ -35,6 +52,7 @@ export default function UploadView() {
       const isImg = /image/i.test(f.type) || /\.(png|jpe?g|tiff?)$/i.test(f.name);
       return {
         uid: ++uidSeq,
+        file: f,
         name: f.name,
         size: (f.size / 1024 / 1024).toFixed(2) + " MB",
         isImg,
@@ -57,36 +75,63 @@ export default function UploadView() {
     setParsing(false);
   };
 
-  const parseAll = () => {
-    if (!files.length || parsing) return;
-    setParsing(true);
-    setFiles((p) => p.map((f) => ({ ...f, status: "parsing", progress: 0 })));
-    const id = setInterval(() => {
-      let allDone = true;
-      setFiles((p) =>
-        p.map((f) => {
-          if (f.progress >= 100) return { ...f, status: "done" };
-          allDone = false;
-          const next = Math.min(100, f.progress + Math.random() * 16 + 6);
-          return { ...f, progress: next, status: next >= 100 ? "done" : "parsing" };
-        }),
-      );
-      if (allDone) {
-        clearInterval(id);
-        setParsing(false);
-      }
-    }, 280);
-  };
+  const patch = (uid: number, updates: Partial<QueuedFile>) =>
+    setFiles((p) => p.map((f) => (f.uid === uid ? { ...f, ...updates } : f)));
 
-  useEffect(
-    () => () => {
-      filesRef.current.forEach((f) => f.url && URL.revokeObjectURL(f.url));
-    },
-    [],
-  );
+  /** Polls the batch status endpoint until every uploaded file finishes or fails. */
+  const pollJobs = useCallback(async () => {
+    for (;;) {
+      await new Promise((r) => setTimeout(r, POLL_INTERVAL_MS));
+      if (!mountedRef.current) return;
+
+      const pending = filesRef.current.filter((f) => f.status === "parsing" && f.fileId);
+      if (pending.length === 0) return;
+
+      try {
+        const jobs = await FilesService.getFilesBatchStatus({
+          requestBody: { file_ids: pending.map((f) => f.fileId!) },
+        });
+        if (!mountedRef.current) return;
+        setFiles((p) =>
+          p.map((f) => {
+            const job = jobs.find((j) => j.file_id === f.fileId);
+            if (!job || f.status !== "parsing") return f;
+            const status = jobStatus(job);
+            if (status === "done") return { ...f, status: "done", progress: 100 };
+            if (status === "fail") return { ...f, status: "error", error: job.err_msg ?? undefined };
+            return { ...f, progress: jobProgress(job) ?? Math.min(95, f.progress + 5) };
+          }),
+        );
+      } catch {
+        // transient polling error — keep trying on the next tick
+      }
+    }
+  }, []);
+
+  const parseAll = async () => {
+    const queued = filesRef.current.filter((f) => f.status === "queued");
+    if (!queued.length || parsing) return;
+    setParsing(true);
+
+    await Promise.all(
+      queued.map(async (f) => {
+        patch(f.uid, { status: "uploading", progress: 0 });
+        try {
+          const uploaded = await FilesService.uploadFileEndpoint({ formData: { file: f.file } });
+          patch(f.uid, { status: "parsing", fileId: uploaded.id, progress: 5 });
+        } catch (err) {
+          patch(f.uid, { status: "error", error: apiMessage(err) });
+        }
+      }),
+    );
+
+    await pollJobs();
+    if (mountedRef.current) setParsing(false);
+  };
 
   const queued = files.length;
   const done = files.filter((f) => f.status === "done").length;
+  const parsable = files.filter((f) => f.status === "queued").length;
 
   return (
     <div className="upload-layout">
@@ -183,6 +228,12 @@ export default function UploadView() {
                 <div className="s">
                   {f.status === "done" ? (
                     <span style={{ color: "var(--ok)" }}>{t("ready")}</span>
+                  ) : f.status === "error" ? (
+                    <span style={{ color: "var(--bad)" }}>
+                      {f.error ?? t("failed")}
+                    </span>
+                  ) : f.status === "uploading" ? (
+                    t("uploading")
                   ) : f.status === "parsing" ? (
                     t("parsingPct", { pct: Math.round(f.progress) })
                   ) : (
@@ -200,15 +251,20 @@ export default function UploadView() {
                   </div>
                 )}
               </div>
-              {f.status === "done" ? (
-                <button className="fq-x" title={t("download")} style={{ color: "var(--cyan)" }}>
+              {f.status === "done" && f.fileId ? (
+                <button
+                  className="fq-x"
+                  title={t("download")}
+                  style={{ color: "var(--cyan)" }}
+                  onClick={() => void downloadExport(f.fileId!, f.name, "xlsx").catch(() => {})}
+                >
                   <Download size={15} />
                 </button>
-              ) : (
+              ) : f.status === "queued" || f.status === "error" ? (
                 <button className="fq-x" title={t("remove")} onClick={() => removeFile(f.uid)}>
                   <X size={15} />
                 </button>
-              )}
+              ) : null}
             </div>
           ))}
         </div>
@@ -216,14 +272,14 @@ export default function UploadView() {
           <button className="btn btn-ghost" onClick={() => inputRef.current?.click()}>
             <FilePlus2 size={15} /> {t("add")}
           </button>
-          <button className="btn btn-primary" onClick={parseAll} disabled={!queued || parsing}>
+          <button className="btn btn-primary" onClick={() => void parseAll()} disabled={!parsable || parsing}>
             {parsing ? (
               <>
                 <RefreshCw size={15} className="spin" /> {t("parsing")}
               </>
             ) : (
               <>
-                <Sparkles size={15} /> {t("parse", { count: queued || "" })}
+                <Sparkles size={15} /> {t("parse", { count: parsable || "" })}
               </>
             )}
           </button>

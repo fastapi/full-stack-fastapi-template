@@ -10,14 +10,14 @@ export default function LoginForm() {
   const locale = useLocale();
   const searchParams = useSearchParams();
   const [isPending, startTransition] = useTransition();
-  const hasError = searchParams.get("error") === "invalid";
+  const error = searchParams.get("error");
 
   return (
     <form
       className="auth-form"
       action={(formData) => startTransition(() => void login(locale, formData))}
     >
-      {hasError && <div className="field-error">{t("error")}</div>}
+      {error && <div className="field-error">{error === "unreachable" ? t("errorUnreachable") : t("error")}</div>}
 
       <div className="field">
         <label htmlFor="login-email">{t("email")}</label>
@@ -41,12 +41,6 @@ export default function LoginForm() {
           autoComplete="current-password"
           placeholder={t("passwordPlaceholder")}
         />
-      </div>
-
-      <div className="auth-demo-hint">
-        {t("demoHintLabel")}
-        <br />
-        <b>mara@tabula.io</b> · <b>devon@northwind.co</b> · <b>sasha@tabula.io</b>
       </div>
 
       <button type="submit" className="btn btn-primary" disabled={isPending}>

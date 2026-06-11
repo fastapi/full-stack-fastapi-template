@@ -1,9 +1,10 @@
 "use client";
 
 import type { ReactNode } from "react";
-import { FileCheck2, FileSpreadsheet, HardDrive, TrendingDown, TrendingUp, XCircle } from "lucide-react";
+import { FileCheck2, FileSpreadsheet, HardDrive, Wallet } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { useCount } from "@/components/dashboard/hooks";
+import type { UserStorageStatPublic } from "@/lib/client";
 
 interface StatDef {
   ico: ReactNode;
@@ -11,17 +12,8 @@ interface StatDef {
   val: number;
   decimals?: number;
   suffix?: string;
-  capKey: "cardDocuments" | "cardExports" | "cardFailed" | "cardStorage";
-  delta: string;
-  up: boolean;
+  capKey: "cardDocuments" | "cardPages" | "cardStorage" | "cardBalance";
 }
-
-const STATS: StatDef[] = [
-  { ico: <FileCheck2 size={18} />, tone: "", val: 10248, capKey: "cardDocuments", delta: "+12.4%", up: true },
-  { ico: <FileSpreadsheet size={18} />, tone: "ok", val: 9961, capKey: "cardExports", delta: "+11.8%", up: true },
-  { ico: <XCircle size={18} />, tone: "bad", val: 287, capKey: "cardFailed", delta: "-3.1%", up: false },
-  { ico: <HardDrive size={18} />, tone: "am", val: 248, suffix: " MB", capKey: "cardStorage", delta: "+6.2%", up: true },
-];
 
 function StatCard({ def }: { def: StatDef }) {
   const t = useTranslations("overview");
@@ -30,10 +22,6 @@ function StatCard({ def }: { def: StatDef }) {
     <div className="stat-card">
       <div className="row1">
         <span className={`sc-ico ${def.tone}`}>{def.ico}</span>
-        <span className={`delta ${def.up ? "up" : "down"}`}>
-          {def.up ? <TrendingUp size={12} /> : <TrendingDown size={12} />}
-          {def.delta}
-        </span>
       </div>
       <div className="val">
         {num}
@@ -44,10 +32,28 @@ function StatCard({ def }: { def: StatDef }) {
   );
 }
 
-export default function StatCards() {
+export interface StatCardsProps {
+  stat: UserStorageStatPublic | null;
+}
+
+export default function StatCards({ stat }: StatCardsProps) {
+  const stats: StatDef[] = [
+    { ico: <FileCheck2 size={18} />, tone: "", val: stat?.file_count ?? 0, capKey: "cardDocuments" },
+    { ico: <FileSpreadsheet size={18} />, tone: "ok", val: stat?.total_pages ?? 0, capKey: "cardPages" },
+    {
+      ico: <HardDrive size={18} />,
+      tone: "am",
+      val: (stat?.total_size ?? 0) / 1024 / 1024,
+      decimals: 1,
+      suffix: " MB",
+      capKey: "cardStorage",
+    },
+    { ico: <Wallet size={18} />, tone: "", val: stat?.balance ?? 0, suffix: " ₫", capKey: "cardBalance" },
+  ];
+
   return (
     <div className="stat-grid">
-      {STATS.map((def) => (
+      {stats.map((def) => (
         <StatCard key={def.capKey} def={def} />
       ))}
     </div>
