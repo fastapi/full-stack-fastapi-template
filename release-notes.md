@@ -19,6 +19,7 @@
 
 ### Internal
 
+* ⬆ Bump axios from 1.13.5 to 1.16.0 in /frontend. PR [#2323](https://github.com/fastapi/full-stack-fastapi-template/pull/2323) by [@dependabot[bot]](https://github.com/apps/dependabot).
 * ⬆ Bump lxml from 6.0.2 to 6.1.0. PR [#2266](https://github.com/fastapi/full-stack-fastapi-template/pull/2266) by [@dependabot[bot]](https://github.com/apps/dependabot).
 * ⬆ Bump mako from 1.3.10 to 1.3.12. PR [#2278](https://github.com/fastapi/full-stack-fastapi-template/pull/2278) by [@dependabot[bot]](https://github.com/apps/dependabot).
 * ⬆ Bump pygments from 2.19.2 to 2.20.0. PR [#2248](https://github.com/fastapi/full-stack-fastapi-template/pull/2248) by [@dependabot[bot]](https://github.com/apps/dependabot).
