@@ -6,6 +6,6 @@ set -x
 cd backend
 uv run python -c "import app.main; import json; print(json.dumps(app.main.app.openapi()))" > ../openapi.json
 cd ..
-mv openapi.json frontend/
-bun run --filter frontend generate-client
-bun run lint
+mv openapi.json front-end/
+bun run --filter './front-end' generate-client
+bun run --filter './front-end' lint

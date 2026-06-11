@@ -1,9 +1,9 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { FileSpreadsheet } from "lucide-react";
+import { ArrowUpRight, FileSpreadsheet } from "lucide-react";
 import { useTranslations } from "next-intl";
-import RoleSwitcher from "@/components/ui/RoleSwitcher";
+import { Link } from "@/lib/navigation";
 
 function useScrolled(threshold = 12) {
   const [scrolled, setScrolled] = useState(false);
@@ -33,7 +33,9 @@ export default function Nav() {
         <a href="#stats">{t("accuracy")}</a>
       </div>
       <div className="lp-nav-cta">
-        <RoleSwitcher />
+        <Link href="/login" className="btn btn-ghost">
+          {t("launch")} <ArrowUpRight size={15} />
+        </Link>
       </div>
     </nav>
   );

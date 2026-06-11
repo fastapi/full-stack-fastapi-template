@@ -6,6 +6,7 @@ import { useTranslations } from "next-intl";
 import { Link, usePathname } from "@/lib/navigation";
 import ThemeToggle from "@/components/ui/ThemeToggle";
 import LocaleSwitcher from "@/components/ui/LocaleSwitcher";
+import LogoutButton from "@/components/ui/LogoutButton";
 import Badge from "@/components/ui/Badge";
 import type { AuthUser } from "@/lib/auth";
 
@@ -135,6 +136,7 @@ export default function SidebarShell({
             <Badge tone={roleBadgeTone}>{tShell(roleBadgeKey)}</Badge>
             <span className="topbar-avatar">{user.initials}</span>
           </div>
+          <LogoutButton />
         </header>
         <div className="content">{children}</div>
       </div>

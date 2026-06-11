@@ -52,20 +52,27 @@ const MOCK_USERS: Record<UserRole, AuthUser> = {
   },
 };
 
-/** Reads the mock role cookie (defaults to "user") and returns the session. */
-export async function getSession(): Promise<AuthUser> {
+/** Reads the mock role cookie and returns the session, or null if not signed in. */
+export async function getSession(): Promise<AuthUser | null> {
   const cookieStore = await cookies();
   const raw = cookieStore.get(ROLE_COOKIE)?.value;
-  const role: UserRole = isRole(raw) ? raw : "user";
-  return MOCK_USERS[role];
+  if (!isRole(raw)) return null;
+  return MOCK_USERS[raw];
+}
+
+/** Looks up a mock user by email (used by the login form's mock credential check). */
+export function findUserByEmail(email: string): AuthUser | undefined {
+  return Object.values(MOCK_USERS).find((u) => u.email.toLowerCase() === email.toLowerCase());
 }
 
 /**
  * Guards a role-specific page: returns the session if the current role is
- * allowed, otherwise redirects to that role's dashboard.
+ * allowed, redirects to /login if signed out, or to that role's dashboard
+ * if signed in with a different role.
  */
 export async function requireRole(allowed: UserRole[], locale: string): Promise<AuthUser> {
   const session = await getSession();
+  if (!session) redirect(`/${locale}/login`);
   if (!allowed.includes(session.role)) redirect(`/${locale}/dashboard`);
   return session;
 }

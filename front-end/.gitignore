@@ -8,3 +8,4 @@ next-env.d.ts
 .design-ref
 bun.lockb
 npm-debug.log*
+openapi.json

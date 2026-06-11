@@ -7,7 +7,8 @@
     "build": "next build",
     "start": "next start",
     "lint": "next lint",
-    "typecheck": "tsc --noEmit"
+    "typecheck": "tsc --noEmit",
+    "generate-client": "openapi-ts"
   },
   "dependencies": {
     "next": "14.2.15",
@@ -19,7 +20,8 @@
     "recharts": "^2.12.7",
     "framer-motion": "^11.3.8",
     "clsx": "^2.1.1",
-    "tailwind-merge": "^2.4.0"
+    "tailwind-merge": "^2.4.0",
+    "axios": "1.13.5"
   },
   "devDependencies": {
     "typescript": "^5.5.4",
@@ -28,6 +30,7 @@
     "@types/react-dom": "^18.3.0",
     "tailwindcss": "^3.4.7",
     "postcss": "^8.4.40",
-    "autoprefixer": "^10.4.19"
+    "autoprefixer": "^10.4.19",
+    "@hey-api/openapi-ts": "0.73.0"
   }
 }

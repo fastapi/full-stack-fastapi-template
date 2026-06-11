@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import { ArrowRight, CheckCircle2, FileSpreadsheet, FileText, Play, Sparkles } from "lucide-react";
 import { useTranslations } from "next-intl";
-import { LaunchButton } from "@/components/ui/RoleSwitcher";
+import { Link } from "@/lib/navigation";
 
 function Typewriter() {
   const t = useTranslations("landing.hero");
@@ -115,12 +115,12 @@ export default function Hero() {
           })}
         </p>
         <div className="hero-cta">
-          <LaunchButton variant="primary">
+          <Link href="/signup" className="btn btn-primary">
             {t("startFree")} <ArrowRight size={16} />
-          </LaunchButton>
-          <LaunchButton variant="ghost">
+          </Link>
+          <Link href="/login" className="btn btn-ghost">
             <Play size={15} /> {t("seeDemo")}
-          </LaunchButton>
+          </Link>
         </div>
         <div className="hero-proof">
           <span>

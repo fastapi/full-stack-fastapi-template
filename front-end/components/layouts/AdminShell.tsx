@@ -6,6 +6,7 @@ import { useTranslations } from "next-intl";
 import { Link, usePathname } from "@/lib/navigation";
 import ThemeToggle from "@/components/ui/ThemeToggle";
 import LocaleSwitcher from "@/components/ui/LocaleSwitcher";
+import LogoutButton from "@/components/ui/LogoutButton";
 import Badge from "@/components/ui/Badge";
 import type { AuthUser } from "@/lib/auth";
 
@@ -62,6 +63,7 @@ export default function AdminShell({ user, children }: { user: AuthUser; childre
           <Badge tone="bad">{tShell("roleAdmin")}</Badge>
           <span className="topbar-avatar">{user.initials}</span>
         </div>
+        <LogoutButton />
         <button
           className="icon-btn admin-burger"
           onClick={() => setOpen((o) => !o)}

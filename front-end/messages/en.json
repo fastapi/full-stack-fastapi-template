@@ -16,6 +16,40 @@
     "name": "TABULA",
     "tagline": "Turn Documents into Data"
   },
+  "auth": {
+    "back": "Back to site",
+    "login": {
+      "title": "Welcome back",
+      "subtitle": "Sign in to your TABULA workspace.",
+      "email": "Email",
+      "password": "Password",
+      "emailPlaceholder": "you@company.com",
+      "passwordPlaceholder": "••••••••",
+      "submit": "Sign in",
+      "error": "We couldn't find an account with that email.",
+      "demoHintLabel": "Demo accounts (any password):",
+      "noAccount": "Don't have an account?",
+      "signupLink": "Sign up"
+    },
+    "signup": {
+      "title": "Create your account",
+      "subtitle": "Start parsing documents in minutes.",
+      "name": "Name",
+      "email": "Email",
+      "password": "Password",
+      "namePlaceholder": "Ada Lovelace",
+      "emailPlaceholder": "you@company.com",
+      "passwordPlaceholder": "••••••••",
+      "role": "Account type",
+      "roleUser": "Individual user",
+      "roleUserDesc": "Personal workspace",
+      "roleCompany": "Company team",
+      "roleCompanyDesc": "Shared with your org",
+      "submit": "Create account",
+      "haveAccount": "Already have an account?",
+      "loginLink": "Sign in"
+    }
+  },
   "landing": {
     "nav": {
       "how": "How it works",

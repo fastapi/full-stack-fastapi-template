@@ -16,6 +16,40 @@
     "name": "TABULA",
     "tagline": "Biến Tài Liệu Thành Dữ Liệu"
   },
+  "auth": {
+    "back": "Về trang chính",
+    "login": {
+      "title": "Chào mừng trở lại",
+      "subtitle": "Đăng nhập vào không gian làm việc TABULA của bạn.",
+      "email": "Email",
+      "password": "Mật khẩu",
+      "emailPlaceholder": "ban@congty.com",
+      "passwordPlaceholder": "••••••••",
+      "submit": "Đăng nhập",
+      "error": "Không tìm thấy tài khoản với email này.",
+      "demoHintLabel": "Tài khoản demo (mật khẩu bất kỳ):",
+      "noAccount": "Chưa có tài khoản?",
+      "signupLink": "Đăng ký"
+    },
+    "signup": {
+      "title": "Tạo tài khoản của bạn",
+      "subtitle": "Bắt đầu xử lý tài liệu chỉ trong vài phút.",
+      "name": "Tên",
+      "email": "Email",
+      "password": "Mật khẩu",
+      "namePlaceholder": "Nguyễn Văn A",
+      "emailPlaceholder": "ban@congty.com",
+      "passwordPlaceholder": "••••••••",
+      "role": "Loại tài khoản",
+      "roleUser": "Cá nhân",
+      "roleUserDesc": "Không gian làm việc cá nhân",
+      "roleCompany": "Đội nhóm công ty",
+      "roleCompanyDesc": "Chia sẻ với tổ chức của bạn",
+      "submit": "Tạo tài khoản",
+      "haveAccount": "Đã có tài khoản?",
+      "loginLink": "Đăng nhập"
+    }
+  },
   "landing": {
     "nav": {
       "how": "Cách hoạt động",
