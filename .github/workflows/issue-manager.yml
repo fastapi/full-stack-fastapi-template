@@ -9,19 +9,21 @@ on:
   issues:
     types:
       - labeled
-  pull_request_target:
+  pull_request_target: # zizmor: ignore[dangerous-triggers]
     types:
       - labeled
   workflow_dispatch:
 
-permissions:
-  issues: write
-  pull-requests: write
+permissions: {}
 
 jobs:
   issue-manager:
     if: github.repository_owner == 'fastapi'
     runs-on: ubuntu-latest
+    timeout-minutes: 5
+    permissions:
+      issues: write
+      pull-requests: write
     steps:
       - name: Dump GitHub context
         env:
