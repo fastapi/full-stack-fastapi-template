@@ -285,11 +285,18 @@
     "colStatus": "Status",
     "colCreated": "Created",
     "roleAdmin": "Admin",
+    "roleCompany": "Company",
     "roleUser": "User",
     "active": "Active",
     "inactive": "Inactive",
     "empty": "No users found.",
-    "footCount": "{count} users"
+    "footCount": "{count} users",
+    "fieldName": "Full name",
+    "fieldEmail": "Email",
+    "fieldPassword": "Password",
+    "fieldType": "Account type",
+    "addUser": "Add user",
+    "created": "User created."
   },
   "members": {
     "colMember": "Member",

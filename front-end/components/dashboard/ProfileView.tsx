@@ -124,7 +124,9 @@ export default function ProfileView({ user }: ProfileViewProps) {
             </div>
           </div>
           <div className="t" style={{ fontFamily: "var(--font-mono)", fontSize: 13.5 }}>
-            {tShell(user.role === "admin" ? "roleAdmin" : "roleUser")}
+            {tShell(
+              user.role === "admin" ? "roleAdmin" : user.role === "company" ? "roleCompany" : "roleUser"
+            )}
           </div>
         </div>
         <div className="set-row">

@@ -171,6 +171,7 @@ export type UserCreate = {
     full_name?: (string | null);
     is_active?: boolean;
     is_superuser?: boolean;
+    user_type?: UserType;
 };
 
 export type UserPublic = {
@@ -178,6 +179,7 @@ export type UserPublic = {
     email: string;
     is_active?: boolean;
     is_superuser?: boolean;
+    user_type?: UserType;
     full_name?: (string | null);
     created_at?: (string | null);
 };
@@ -205,12 +207,15 @@ export type UserStorageStatPublic = {
     balance?: number;
 };
 
+export type UserType = 'normal' | 'company' | 'admin';
+
 export type UserUpdate = {
     email?: (string | null);
     password?: (string | null);
     full_name?: (string | null);
     is_active?: (boolean | null);
     is_superuser?: (boolean | null);
+    user_type?: (UserType | null);
 };
 
 export type UserUpdateMe = {

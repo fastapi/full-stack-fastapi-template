@@ -3,8 +3,14 @@
 import { useEffect, useState } from "react";
 import { useTranslations } from "next-intl";
 import { apiMessage } from "@/lib/api";
-import { UsersService, type UserPublic } from "@/lib/client";
+import { UsersService, type UserPublic, type UserType } from "@/lib/client";
 import { formatDate } from "@/lib/files";
+
+const USER_TYPES: { value: UserType; labelKey: "roleUser" | "roleCompany" | "roleAdmin" }[] = [
+  { value: "normal", labelKey: "roleUser" },
+  { value: "company", labelKey: "roleCompany" },
+  { value: "admin", labelKey: "roleAdmin" },
+];
 
 const GRADIENTS = [
   "linear-gradient(135deg,oklch(0.82 0.14 205),oklch(0.82 0.14 75))",
@@ -31,6 +37,39 @@ export default function UsersView() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
+  const [newName, setNewName] = useState("");
+  const [newEmail, setNewEmail] = useState("");
+  const [newPassword, setNewPassword] = useState("");
+  const [newType, setNewType] = useState<UserType>("company");
+  const [creating, setCreating] = useState(false);
+  const [createMsg, setCreateMsg] = useState<{ ok: boolean; text: string } | null>(null);
+
+  const createUser = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setCreating(true);
+    setCreateMsg(null);
+    try {
+      const user = await UsersService.createUserEndpoint({
+        requestBody: {
+          email: newEmail.trim(),
+          password: newPassword,
+          full_name: newName.trim() || null,
+          user_type: newType,
+        },
+      });
+      setUsers((prev) => [user, ...prev]);
+      setCount((c) => c + 1);
+      setNewName("");
+      setNewEmail("");
+      setNewPassword("");
+      setCreateMsg({ ok: true, text: t("created") });
+    } catch (err) {
+      setCreateMsg({ ok: false, text: apiMessage(err) });
+    } finally {
+      setCreating(false);
+    }
+  };
+
   useEffect(() => {
     let active = true;
     UsersService.readUsers({ limit: 100 })
@@ -48,6 +87,55 @@ export default function UsersView() {
 
   return (
     <div className="table-wrap">
+      <form className="users-create" onSubmit={createUser}>
+        <input
+          className="auth-input"
+          value={newName}
+          onChange={(e) => setNewName(e.target.value)}
+          placeholder={t("fieldName")}
+          aria-label={t("fieldName")}
+        />
+        <input
+          className="auth-input"
+          type="email"
+          required
+          value={newEmail}
+          onChange={(e) => setNewEmail(e.target.value)}
+          placeholder={t("fieldEmail")}
+          aria-label={t("fieldEmail")}
+        />
+        <input
+          className="auth-input"
+          type="password"
+          required
+          minLength={8}
+          autoComplete="new-password"
+          value={newPassword}
+          onChange={(e) => setNewPassword(e.target.value)}
+          placeholder={t("fieldPassword")}
+          aria-label={t("fieldPassword")}
+        />
+        <select
+          className="auth-input"
+          value={newType}
+          onChange={(e) => setNewType(e.target.value as UserType)}
+          aria-label={t("fieldType")}
+        >
+          {USER_TYPES.map((opt) => (
+            <option key={opt.value} value={opt.value}>
+              {t(opt.labelKey)}
+            </option>
+          ))}
+        </select>
+        <button className="btn btn-primary" type="submit" disabled={creating}>
+          {creating ? tc("loading") : t("addUser")}
+        </button>
+        {createMsg && (
+          <div className="field-error" style={createMsg.ok ? { color: "var(--ok)" } : undefined}>
+            {createMsg.text}
+          </div>
+        )}
+      </form>
       {error && <div className="field-error">{error}</div>}
       <table className="tbl">
         <thead>
@@ -82,7 +170,13 @@ export default function UsersView() {
                   </span>
                 </div>
               </td>
-              <td className="mono-cell">{u.is_superuser ? t("roleAdmin") : t("roleUser")}</td>
+              <td className="mono-cell">
+                {u.user_type === "admin" || u.is_superuser
+                  ? t("roleAdmin")
+                  : u.user_type === "company"
+                    ? t("roleCompany")
+                    : t("roleUser")}
+              </td>
               <td>
                 <span className={`pill ${u.is_active ? "done" : "fail"}`}>
                   <span className="dot" />

@@ -3,13 +3,20 @@ from app.utils import get_datetime_utc
 import uuid
 from datetime import datetime
 from pydantic import EmailStr
-from sqlalchemy import DateTime
+from sqlalchemy import DateTime, String
 from sqlmodel import Field, SQLModel
+
+from app.users.constants import UserType
 
 class UserBase(SQLModel):
     email: EmailStr = Field(unique=True, index=True, max_length=255)
     is_active: bool = True
     is_superuser: bool = False
+    user_type: UserType = Field(
+        default=UserType.NORMAL,
+        sa_type=String(20),  # type: ignore[call-arg]
+        index=True,
+    )
     full_name: str | None = Field(default=None, max_length=255)
 
 

@@ -4,6 +4,8 @@ from datetime import datetime
 from pydantic import EmailStr
 from sqlmodel import Field, SQLModel
 
+from app.users.constants import UserType
+
 
 # Properties to receive via API on creation
 class UserCreate(SQLModel):
@@ -12,6 +14,7 @@ class UserCreate(SQLModel):
     full_name: str | None = Field(default=None, max_length=255)
     is_active: bool = True
     is_superuser: bool = False
+    user_type: UserType = UserType.NORMAL
 
 
 class UserRegister(SQLModel):
@@ -27,6 +30,7 @@ class UserUpdate(SQLModel):
     full_name: str | None = Field(default=None, max_length=255)
     is_active: bool | None = None
     is_superuser: bool | None = None
+    user_type: UserType | None = None
 
 
 class UserUpdateMe(SQLModel):
@@ -45,6 +49,7 @@ class UserPublic(SQLModel):
     email: EmailStr
     is_active: bool = True
     is_superuser: bool = False
+    user_type: UserType = UserType.NORMAL
     full_name: str | None = None
     created_at: datetime | None = None
 

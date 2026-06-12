@@ -285,11 +285,18 @@
     "colStatus": "Trạng thái",
     "colCreated": "Ngày tạo",
     "roleAdmin": "Quản trị",
+    "roleCompany": "Công ty",
     "roleUser": "Người dùng",
     "active": "Hoạt động",
     "inactive": "Vô hiệu",
     "empty": "Không tìm thấy người dùng.",
-    "footCount": "{count} người dùng"
+    "footCount": "{count} người dùng",
+    "fieldName": "Họ tên",
+    "fieldEmail": "Email",
+    "fieldPassword": "Mật khẩu",
+    "fieldType": "Loại tài khoản",
+    "addUser": "Thêm người dùng",
+    "created": "Đã tạo người dùng."
   },
   "members": {
     "colMember": "Thành viên",

@@ -804,6 +804,10 @@ export const UserCreateSchema = {
             type: 'boolean',
             title: 'Is Superuser',
             default: false
+        },
+        user_type: {
+            '$ref': '#/components/schemas/UserType',
+            default: 'normal'
         }
     },
     type: 'object',
@@ -832,6 +836,10 @@ export const UserPublicSchema = {
             type: 'boolean',
             title: 'Is Superuser',
             default: false
+        },
+        user_type: {
+            '$ref': '#/components/schemas/UserType',
+            default: 'normal'
         },
         full_name: {
             anyOf: [
@@ -998,6 +1006,12 @@ export const UserStorageStatPublicSchema = {
     title: 'UserStorageStatPublic'
 } as const;
 
+export const UserTypeSchema = {
+    type: 'string',
+    enum: ['normal', 'company', 'admin'],
+    title: 'UserType'
+} as const;
+
 export const UserUpdateSchema = {
     properties: {
         email: {
@@ -1059,6 +1073,16 @@ export const UserUpdateSchema = {
                 }
             ],
             title: 'Is Superuser'
+        },
+        user_type: {
+            anyOf: [
+                {
+                    '$ref': '#/components/schemas/UserType'
+                },
+                {
+                    type: 'null'
+                }
+            ]
         }
     },
     type: 'object',
