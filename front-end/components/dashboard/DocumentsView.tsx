@@ -1,7 +1,7 @@
 "use client";
 
-import { useCallback, useEffect, useState } from "react";
-import { Download, Eye, FileText, Image as ImageIcon, RefreshCw, Search } from "lucide-react";
+import { useCallback, useEffect, useRef, useState } from "react";
+import { ChevronDown, Download, Eye, FileText, Image as ImageIcon, RefreshCw, Search } from "lucide-react";
 import { useTranslations } from "next-intl";
 import Pill from "@/components/ui/Pill";
 import PreviewModal from "@/components/dashboard/PreviewModal";
@@ -11,6 +11,15 @@ import { downloadExport, toDocRow } from "@/lib/files";
 import type { DocRow, DocStatus } from "@/lib/data";
 
 type StatusFilter = "all" | DocStatus;
+
+type DownloadFormat = "xlsx" | "csv" | "json" | "html";
+
+const DOWNLOAD_FORMATS: { type: DownloadFormat; label: string }[] = [
+  { type: "xlsx", label: "Excel (.xlsx)" },
+  { type: "csv", label: "CSV (.csv)" },
+  { type: "json", label: "JSON (.json)" },
+  { type: "html", label: "HTML (.html)" },
+];
 
 interface PreviewState {
   name: string;
@@ -31,7 +40,9 @@ export default function DocumentsView() {
   const [refreshing, setRefreshing] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [busyId, setBusyId] = useState<string | null>(null);
+  const [menuId, setMenuId] = useState<string | null>(null);
   const [preview, setPreview] = useState<PreviewState | null>(null);
+  const menuRef = useRef<HTMLDivElement | null>(null);
 
   const load = useCallback(async () => {
     setError(null);
@@ -50,15 +61,26 @@ export default function DocumentsView() {
     void load();
   }, [load]);
 
+  // Close the download format menu when clicking anywhere outside it.
+  useEffect(() => {
+    if (!menuId) return;
+    const onClick = (e: MouseEvent) => {
+      if (menuRef.current && !menuRef.current.contains(e.target as Node)) setMenuId(null);
+    };
+    document.addEventListener("mousedown", onClick);
+    return () => document.removeEventListener("mousedown", onClick);
+  }, [menuId]);
+
   const refresh = () => {
     setRefreshing(true);
     void load();
   };
 
-  const download = async (d: DocRow) => {
+  const download = async (d: DocRow, type: DownloadFormat) => {
+    setMenuId(null);
     setBusyId(d.id);
     try {
-      await downloadExport(d.id, d.name, "xlsx");
+      await downloadExport(d.id, d.name, type);
     } catch (err) {
       setError(apiMessage(err));
     } finally {
@@ -188,15 +210,34 @@ export default function DocumentsView() {
                 </td>
                 <td>
                   <div className="row-actions" style={{ justifyContent: "flex-end" }}>
-                    <button
-                      className="dl"
-                      title={t("download")}
-                      aria-label={t("download")}
-                      disabled={d.status !== "done" || busyId === d.id}
-                      onClick={() => void download(d)}
-                    >
-                      <Download size={15} />
-                    </button>
+                    <div className="dl-wrap" ref={menuId === d.id ? menuRef : undefined}>
+                      <button
+                        className="dl"
+                        title={t("download")}
+                        aria-label={t("download")}
+                        aria-haspopup="menu"
+                        aria-expanded={menuId === d.id}
+                        disabled={d.status !== "done" || busyId === d.id}
+                        onClick={() => setMenuId((id) => (id === d.id ? null : d.id))}
+                      >
+                        <Download size={15} />
+                        <ChevronDown size={11} />
+                      </button>
+                      {menuId === d.id && (
+                        <div className="dl-menu" role="menu">
+                          {DOWNLOAD_FORMATS.map((f) => (
+                            <button
+                              key={f.type}
+                              role="menuitem"
+                              title={t("downloadAs", { format: f.label })}
+                              onClick={() => void download(d, f.type)}
+                            >
+                              {f.label}
+                            </button>
+                          ))}
+                        </div>
+                      )}
+                    </div>
                     <button
                       title={t("view")}
                       aria-label={t("view")}
