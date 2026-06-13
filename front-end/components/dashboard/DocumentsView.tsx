@@ -4,12 +4,22 @@ import { useCallback, useEffect, useState } from "react";
 import { Download, Eye, FileText, Image as ImageIcon, RefreshCw, Search } from "lucide-react";
 import { useTranslations } from "next-intl";
 import Pill from "@/components/ui/Pill";
+import PreviewModal from "@/components/dashboard/PreviewModal";
 import { apiMessage } from "@/lib/api";
 import { FilesService } from "@/lib/client";
 import { downloadExport, toDocRow } from "@/lib/files";
 import type { DocRow, DocStatus } from "@/lib/data";
 
 type StatusFilter = "all" | DocStatus;
+
+interface PreviewState {
+  name: string;
+  columns: string[];
+  rows: Record<string, unknown>[];
+  markdownUrl: string | null;
+  loading: boolean;
+  error: string | null;
+}
 
 export default function DocumentsView() {
   const t = useTranslations("documents");
@@ -21,6 +31,7 @@ export default function DocumentsView() {
   const [refreshing, setRefreshing] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [busyId, setBusyId] = useState<string | null>(null);
+  const [preview, setPreview] = useState<PreviewState | null>(null);
 
   const load = useCallback(async () => {
     setError(null);
@@ -57,11 +68,19 @@ export default function DocumentsView() {
 
   const viewResult = async (d: DocRow) => {
     setBusyId(d.id);
+    setPreview({ name: d.name, columns: [], rows: [], markdownUrl: null, loading: true, error: null });
     try {
-      const res = (await FilesService.getFileResultUrl({ fileId: d.id })) as { result?: string };
-      if (typeof res?.result === "string") window.open(res.result, "_blank", "noopener");
+      const res = await FilesService.previewFileResult({ fileId: d.id });
+      setPreview({
+        name: res.filename || d.name,
+        columns: res.columns,
+        rows: res.rows,
+        markdownUrl: res.markdown_url ?? null,
+        loading: false,
+        error: null,
+      });
     } catch (err) {
-      setError(apiMessage(err));
+      setPreview((p) => (p ? { ...p, loading: false, error: apiMessage(err) } : p));
     } finally {
       setBusyId(null);
     }
@@ -194,6 +213,18 @@ export default function DocumentsView() {
           <span>{t("showing", { shown: filtered.length, total: docs.length })}</span>
         </div>
       </div>
+
+      {preview && (
+        <PreviewModal
+          title={preview.name}
+          columns={preview.columns}
+          rows={preview.rows}
+          markdownUrl={preview.markdownUrl}
+          loading={preview.loading}
+          error={preview.error}
+          onClose={() => setPreview(null)}
+        />
+      )}
     </div>
   );
 }

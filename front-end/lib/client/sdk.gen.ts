@@ -3,7 +3,7 @@
 import type { CancelablePromise } from './core/CancelablePromise';
 import { OpenAPI } from './core/OpenAPI';
 import { request as __request } from './core/request';
-import type { ApiKeysListApiKeysResponse, ApiKeysCreateApiKeyData, ApiKeysCreateApiKeyResponse, ApiKeysDeleteApiKeyData, ApiKeysDeleteApiKeyResponse, FilesUploadFileEndpointData, FilesUploadFileEndpointResponse, FilesListFilesData, FilesListFilesResponse, FilesUpdateFileJobStatusEndpointData, FilesUpdateFileJobStatusEndpointResponse, FilesGetFileStatusData, FilesGetFileStatusResponse, FilesGetFileJobData, FilesGetFileJobResponse, FilesDownloadTableExcelFileData, FilesDownloadTableExcelFileResponse, FilesDownloadNewVersionExcelData, FilesDownloadNewVersionExcelResponse, FilesGetFilesBatchStatusData, FilesGetFilesBatchStatusResponse, FilesGetFileResultUrlData, FilesGetFileResultUrlResponse, ItemsReadItemsData, ItemsReadItemsResponse, ItemsCreateItemEndpointData, ItemsCreateItemEndpointResponse, ItemsReadItemData, ItemsReadItemResponse, ItemsUpdateItemEndpointData, ItemsUpdateItemEndpointResponse, ItemsDeleteItemData, ItemsDeleteItemResponse, LoginLoginAccessTokenData, LoginLoginAccessTokenResponse, LoginTestTokenResponse, LoginRecoverPasswordData, LoginRecoverPasswordResponse, LoginResetPasswordData, LoginResetPasswordResponse, LoginRecoverPasswordHtmlContentData, LoginRecoverPasswordHtmlContentResponse, StoragesGetMyStorageStatResponse, TopupGetTopupPackagesResponse, TopupCreatePaymentData, TopupCreatePaymentResponse, TopupTopupReturnResponse, TopupGetMyBalanceResponse, TopupGetMyTransactionsData, TopupGetMyTransactionsResponse, TopupTopupIpnResponse, UsersReadUsersData, UsersReadUsersResponse, UsersCreateUserEndpointData, UsersCreateUserEndpointResponse, UsersReadUserMeResponse, UsersDeleteUserMeResponse, UsersUpdateUserMeData, UsersUpdateUserMeResponse, UsersUpdatePasswordMeData, UsersUpdatePasswordMeResponse, UsersRegisterUserData, UsersRegisterUserResponse, UsersReadUserByIdData, UsersReadUserByIdResponse, UsersUpdateUserEndpointData, UsersUpdateUserEndpointResponse, UsersDeleteUserData, UsersDeleteUserResponse, UtilsTestEmailData, UtilsTestEmailResponse, UtilsHealthCheckResponse, UtilsClearAllFilesResponse } from './types.gen';
+import type { ApiKeysListApiKeysResponse, ApiKeysCreateApiKeyData, ApiKeysCreateApiKeyResponse, ApiKeysDeleteApiKeyData, ApiKeysDeleteApiKeyResponse, FilesListOcrModelsResponse, FilesUploadFileEndpointData, FilesUploadFileEndpointResponse, FilesListFilesData, FilesListFilesResponse, FilesUpdateFileJobStatusEndpointData, FilesUpdateFileJobStatusEndpointResponse, FilesGetFileStatusData, FilesGetFileStatusResponse, FilesGetFileJobData, FilesGetFileJobResponse, FilesDownloadTableExcelFileData, FilesDownloadTableExcelFileResponse, FilesDownloadNewVersionExcelData, FilesDownloadNewVersionExcelResponse, FilesGetFilesBatchStatusData, FilesGetFilesBatchStatusResponse, FilesPreviewFileResultData, FilesPreviewFileResultResponse, ItemsReadItemsData, ItemsReadItemsResponse, ItemsCreateItemEndpointData, ItemsCreateItemEndpointResponse, ItemsReadItemData, ItemsReadItemResponse, ItemsUpdateItemEndpointData, ItemsUpdateItemEndpointResponse, ItemsDeleteItemData, ItemsDeleteItemResponse, LoginLoginAccessTokenData, LoginLoginAccessTokenResponse, LoginTestTokenResponse, LoginRecoverPasswordData, LoginRecoverPasswordResponse, LoginResetPasswordData, LoginResetPasswordResponse, LoginRecoverPasswordHtmlContentData, LoginRecoverPasswordHtmlContentResponse, StoragesGetMyStorageStatResponse, TopupGetTopupPackagesResponse, TopupCreatePaymentData, TopupCreatePaymentResponse, TopupTopupReturnResponse, TopupGetMyBalanceResponse, TopupGetMyTransactionsData, TopupGetMyTransactionsResponse, TopupTopupIpnResponse, UsersReadUsersData, UsersReadUsersResponse, UsersCreateUserEndpointData, UsersCreateUserEndpointResponse, UsersReadUserMeResponse, UsersDeleteUserMeResponse, UsersUpdateUserMeData, UsersUpdateUserMeResponse, UsersUpdatePasswordMeData, UsersUpdatePasswordMeResponse, UsersRegisterUserData, UsersRegisterUserResponse, UsersReadUserByIdData, UsersReadUserByIdResponse, UsersUpdateUserEndpointData, UsersUpdateUserEndpointResponse, UsersDeleteUserData, UsersDeleteUserResponse, UtilsTestEmailData, UtilsTestEmailResponse, UtilsHealthCheckResponse, UtilsClearAllFilesResponse } from './types.gen';
 
 export class ApiKeysService {
     /**
@@ -62,8 +62,24 @@ export class ApiKeysService {
 
 export class FilesService {
     /**
+     * List Ocr Models
+     * List the OCR models a user can choose from when parsing a document.
+     * @returns string Successful Response
+     * @throws ApiError
+     */
+    public static listOcrModels(): CancelablePromise<FilesListOcrModelsResponse> {
+        return __request(OpenAPI, {
+            method: 'GET',
+            url: '/api/v1/files/models'
+        });
+    }
+    
+    /**
      * Upload File Endpoint
      * Upload a file to R2/S3 storage.
+     *
+     * `model` selects which PaddleOCR model parses the document. When omitted,
+     * the configured default (settings.OCR_MODEL) is used.
      * @param data The data for the request.
      * @param data.formData
      * @returns FilePublic Successful Response
@@ -242,17 +258,19 @@ export class FilesService {
     }
     
     /**
-     * Get File Result Url
-     * Get the presigned URL for the OCR result JSON file in R2 for a given file ID.
+     * Preview File Result
+     * Fetch the parsed OCR result for a file from its stored ``json_url`` and
+     * return the extracted table as JSON (``columns`` + ``rows``), ready to render
+     * in the front end. This is the same table data the download endpoint exports.
      * @param data The data for the request.
      * @param data.fileId
-     * @returns unknown Successful Response
+     * @returns FilePreviewResponse Successful Response
      * @throws ApiError
      */
-    public static getFileResultUrl(data: FilesGetFileResultUrlData): CancelablePromise<FilesGetFileResultUrlResponse> {
+    public static previewFileResult(data: FilesPreviewFileResultData): CancelablePromise<FilesPreviewFileResultResponse> {
         return __request(OpenAPI, {
             method: 'GET',
-            url: '/api/v1/files/{file_id}/result_url',
+            url: '/api/v1/files/{file_id}/preview',
             path: {
                 file_id: data.fileId
             },

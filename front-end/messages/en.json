@@ -10,7 +10,8 @@
     "menu": "Menu",
     "back": "Back to site",
     "notifications": "Notifications",
-    "search": "Search"
+    "search": "Search",
+    "close": "Close"
   },
   "brand": {
     "name": "TABULA",
@@ -227,7 +228,12 @@
     "empty": "No documents match your filters.",
     "showing": "Showing {shown} of {total} documents",
     "download": "Download Excel",
-    "view": "View result"
+    "view": "View result",
+    "previewTitle": "Parsed result",
+    "previewPage": "Page {n}",
+    "previewEmpty": "No text could be extracted from this document.",
+    "previewNoData": "Result data is not available for this document yet.",
+    "previewOpenRaw": "Open raw markdown"
   },
   "upload": {
     "dropTitle": "Drag & drop documents here",
@@ -249,7 +255,10 @@
     "parse": "Parse {count}",
     "parsing": "Parsing…",
     "download": "Download",
-    "remove": "Remove"
+    "remove": "Remove",
+    "model": "Parsing model",
+    "badgeNew": "New",
+    "badgeOffline": "Offline soon"
   },
   "settings": {
     "parsingTitle": "Parsing",

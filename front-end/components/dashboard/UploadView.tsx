@@ -1,10 +1,11 @@
 "use client";
 
 import { useCallback, useEffect, useRef, useState } from "react";
-import { Download, FilePlus2, FileText, RefreshCw, Sparkles, UploadCloud, X } from "lucide-react";
+import { Download, FileText, RefreshCw, Sparkles, UploadCloud, X } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { apiMessage } from "@/lib/api";
 import { FilesService } from "@/lib/client";
+import { DEFAULT_OCR_MODEL, OCR_MODELS } from "@/constants/ocr";
 import { downloadExport, jobProgress, jobStatus } from "@/lib/files";
 
 type FileStatus = "queued" | "uploading" | "parsing" | "done" | "error";
@@ -31,6 +32,7 @@ export default function UploadView() {
   const [dragging, setDragging] = useState(false);
   const [files, setFiles] = useState<QueuedFile[]>([]);
   const [parsing, setParsing] = useState(false);
+  const [model, setModel] = useState<string>(DEFAULT_OCR_MODEL);
   const inputRef = useRef<HTMLInputElement>(null);
   const filesRef = useRef<QueuedFile[]>(files);
   filesRef.current = files;
@@ -117,7 +119,7 @@ export default function UploadView() {
       queued.map(async (f) => {
         patch(f.uid, { status: "uploading", progress: 0 });
         try {
-          const uploaded = await FilesService.uploadFileEndpoint({ formData: { file: f.file } });
+          const uploaded = await FilesService.uploadFileEndpoint({ formData: { file: f.file, model } });
           patch(f.uid, { status: "parsing", fileId: uploaded.id, progress: 5 });
         } catch (err) {
           patch(f.uid, { status: "error", error: apiMessage(err) });
@@ -205,6 +207,42 @@ export default function UploadView() {
             </button>
           )}
         </div>
+
+        <div className="fq-controls">
+          <div className="fq-model">
+            <label htmlFor="ocr-model">{t("model")}</label>
+            <select
+              id="ocr-model"
+              value={model}
+              onChange={(e) => setModel(e.target.value)}
+              disabled={parsing}
+              aria-label={t("model")}
+            >
+              {OCR_MODELS.map((m) => (
+                <option key={m.value} value={m.value}>
+                  {m.label}
+                  {m.badge === "new"
+                    ? ` · ${t("badgeNew")}`
+                    : m.badge === "offline"
+                      ? ` · ${t("badgeOffline")}`
+                      : ""}
+                </option>
+              ))}
+            </select>
+          </div>
+          <button className="btn btn-primary" onClick={() => void parseAll()} disabled={!parsable || parsing}>
+            {parsing ? (
+              <>
+                <RefreshCw size={15} className="spin" /> {t("parsing")}
+              </>
+            ) : (
+              <>
+                <Sparkles size={15} /> {t("parse", { count: parsable || "" })}
+              </>
+            )}
+          </button>
+        </div>
+
         <div className="fq-list">
           {queued === 0 && (
             <div className="fq-empty">
@@ -267,22 +305,6 @@ export default function UploadView() {
               ) : null}
             </div>
           ))}
-        </div>
-        <div className="fq-foot">
-          <button className="btn btn-ghost" onClick={() => inputRef.current?.click()}>
-            <FilePlus2 size={15} /> {t("add")}
-          </button>
-          <button className="btn btn-primary" onClick={() => void parseAll()} disabled={!parsable || parsing}>
-            {parsing ? (
-              <>
-                <RefreshCw size={15} className="spin" /> {t("parsing")}
-              </>
-            ) : (
-              <>
-                <Sparkles size={15} /> {t("parse", { count: parsable || "" })}
-              </>
-            )}
-          </button>
         </div>
       </div>
     </div>

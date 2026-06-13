@@ -1,6 +1,6 @@
 import uuid
 
-from fastapi import APIRouter, HTTPException, Response, UploadFile
+from fastapi import APIRouter, Form, HTTPException, Response, UploadFile
 from sqlalchemy import desc
 from sqlmodel import select
 
@@ -17,6 +17,7 @@ from app.files.models import File, FileJob
 from app.files.schemas import (
     FileCreate,
     FileJobPublic,
+    FilePreviewResponse,
     FilePublic,
     FilesStatusRequest,
     FileWithJobPublic,
@@ -24,20 +25,41 @@ from app.files.schemas import (
 from app.files.service import (
     download_file,
     download_file_with_accounting_code,
+    get_preview_data
 )
-from app.ocrs.service import get_ocr_job_status, get_ocr_job_status_1, post_ocr_jobs
+from app.ocrs.constants import OcrJobStatus, OcrModel
+from app.ocrs.service import (
+    fetch_ocr_table_pages,
+    get_ocr_job_status,
+    post_ocr_jobs,
+)
 
 router = APIRouter(prefix="/files", tags=["files"])
+
+@router.get("/models", response_model=list[str])
+def list_ocr_models():
+    """List the OCR models a user can choose from when parsing a document."""
+    return sorted(OcrModel.ALL)
 
 @router.post("/", response_model=FilePublic)
 def upload_file_endpoint(
     session: SessionDep,
     user: CurrentUser,
-    file: UploadFile # noqa: B008,
+    file: UploadFile,  # noqa: B008
+    model: str | None = Form(default=None),
 ):
     """
     Upload a file to R2/S3 storage.
+
+    `model` selects which PaddleOCR model parses the document. When omitted,
+    the configured default (settings.OCR_MODEL) is used.
     """
+    if model is not None and model not in OcrModel.ALL:
+        raise HTTPException(
+            status_code=422,
+            detail=f"Unsupported model '{model}'. Allowed: {sorted(OcrModel.ALL)}",
+        )
+
     file_bytes = file.file.read()
     file_name = file.filename or "upload"
     file_type = file.content_type or "application/octet-stream"
@@ -60,7 +82,7 @@ def upload_file_endpoint(
             raise HTTPException(status_code=500, detail="Failed to upload file to R2")
 
         logger.info(f"File {file_result.id} uploaded to R2 successfully, URL: {r2_result['PresignedURL']}")
-        post_ocr_jobs(session=session, file=file_result, file_url=r2_result["PresignedURL"])
+        post_ocr_jobs(session=session, file=file_result, file_url=r2_result["PresignedURL"], model=model)
 
         return file_result
     except Exception as exc:
@@ -132,6 +154,15 @@ def list_files(session: SessionDep, user: CurrentUser, skip: int = 0, limit: int
     result: list[FileWithJobPublic] = []
     for f in files:
         file_job = get_file_job_by_file_id(session=session, file_id=f.id)
+
+        # Refresh any still-processing job by polling the OCR API via its job_id.
+        if file_job and file_job.state in (OcrJobStatus.PENDING, OcrJobStatus.RUNNING):
+            try:
+                get_ocr_job_status(file=f, session=session, user=user)
+                file_job = get_file_job_by_file_id(session=session, file_id=f.id)
+            except Exception as exc:
+                logger.error(f"Error refreshing OCR status for file {f.id}: {exc}")
+
         job_public: FileJobPublic | None = FileJobPublic.model_validate(file_job) if file_job else None
         result.append(FileWithJobPublic.model_validate(f, update={"job": job_public}))
 
@@ -226,19 +257,36 @@ def get_files_batch_status(
 
     return file_jobs
 
-@router.get("/{file_id}/result_url")
-def get_file_result_url(file_id: uuid.UUID, session: SessionDep, user: CurrentUser):
+@router.get("/{file_id}/preview", response_model=FilePreviewResponse)
+def preview_file_result(file_id: uuid.UUID, session: SessionDep, user: CurrentUser):
     """
-    Get the presigned URL for the OCR result JSON file in R2 for a given file ID.
+    Fetch the parsed OCR result for a file from its stored ``json_url`` and
+    return the extracted table as JSON (``columns`` + ``rows``), ready to render
+    in the front end. This is the same table data the download endpoint exports.
     """
     file = session.get(File, file_id)
     if not file:
         raise HTTPException(status_code=404, detail="File not found")
     if file.user_id != user.id:
         raise HTTPException(status_code=403, detail="Not authorized to access this file")
-    file_job = get_file_job_by_file_id(session=session, file_id=file_id)
-    if not file_job or file_job.state != "done":
-        raise HTTPException(status_code=400, detail="OCR job is not done yet")
 
-    result = get_ocr_job_status_1(file=file, session=session, user=user)
-    return {"result": result}
+    file_job = get_file_job_by_file_id(session=session, file_id=file_id)
+    if not file_job or file_job.state != OcrJobStatus.DONE:
+        raise HTTPException(status_code=400, detail="OCR job is not done yet")
+    if not file_job.json_url:
+        raise HTTPException(status_code=400, detail="No result data available for this file")
+
+    try:
+        columns, rows = get_preview_data(file_job)
+    except Exception as exc:
+        logger.error("Failed to fetch OCR preview for file %s: %s", file_id, exc)
+        raise HTTPException(status_code=502, detail="Failed to load result data") from exc
+
+    return FilePreviewResponse(
+        file_id=file.id,
+        filename=file.filename,
+        columns=columns,
+        rows=rows,
+        row_count=len(rows),
+        markdown_url=file_job.markdown_url,
+    )

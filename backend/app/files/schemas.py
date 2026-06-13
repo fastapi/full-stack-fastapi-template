@@ -1,5 +1,6 @@
 import uuid
 from datetime import datetime
+from typing import Any
 
 from sqlmodel import Field, SQLModel
 
@@ -57,3 +58,22 @@ class FileJobPublic(SQLModel):
 class FileWithJobPublic(FilePublic):
     """FilePublic enriched with its associated FileJob (if any)."""
     job: FileJobPublic | None = None
+
+
+# ---------------------------------------------------------------------------
+# Result preview schemas
+# ---------------------------------------------------------------------------
+
+class FilePreviewResponse(SQLModel):
+    """Parsed OCR result table for a file, ready to render in the front end.
+
+    ``columns`` is the ordered list of column headers and ``rows`` is the table
+    content as a list of ``{column: value}`` records — the same data the JSON
+    download exports, returned inline for previewing.
+    """
+    file_id: uuid.UUID
+    filename: str
+    columns: list[str]
+    rows: list[dict[str, Any]]
+    row_count: int
+    markdown_url: str | None = None

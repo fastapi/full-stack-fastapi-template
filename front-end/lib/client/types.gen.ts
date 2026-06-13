@@ -18,6 +18,7 @@ export type ApiKeysList = {
 
 export type Body_files_upload_file_endpoint = {
     file: (Blob | File);
+    model?: (string | null);
 };
 
 export type Body_login_login_access_token = {
@@ -53,6 +54,24 @@ export type FileJobPublic = {
     markdown_url?: (string | null);
     err_msg?: (string | null);
     created_at?: (string | null);
+};
+
+/**
+ * Parsed OCR result table for a file, ready to render in the front end.
+ *
+ * ``columns`` is the ordered list of column headers and ``rows`` is the table
+ * content as a list of ``{column: value}`` records — the same data the JSON
+ * download exports, returned inline for previewing.
+ */
+export type FilePreviewResponse = {
+    file_id: string;
+    filename: string;
+    columns: Array<(string)>;
+    rows: Array<{
+        [key: string]: unknown;
+    }>;
+    row_count: number;
+    markdown_url?: (string | null);
 };
 
 export type FilePublic = {
@@ -247,6 +266,8 @@ export type ApiKeysDeleteApiKeyData = {
 
 export type ApiKeysDeleteApiKeyResponse = (unknown);
 
+export type FilesListOcrModelsResponse = (Array<(string)>);
+
 export type FilesUploadFileEndpointData = {
     formData: Body_files_upload_file_endpoint;
 };
@@ -298,11 +319,11 @@ export type FilesGetFilesBatchStatusData = {
 
 export type FilesGetFilesBatchStatusResponse = (Array<FileJobPublic>);
 
-export type FilesGetFileResultUrlData = {
+export type FilesPreviewFileResultData = {
     fileId: string;
 };
 
-export type FilesGetFileResultUrlResponse = (unknown);
+export type FilesPreviewFileResultResponse = (FilePreviewResponse);
 
 export type ItemsReadItemsData = {
     limit?: number;

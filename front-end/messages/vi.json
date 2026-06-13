@@ -10,7 +10,8 @@
     "menu": "Menu",
     "back": "Về trang chính",
     "notifications": "Thông báo",
-    "search": "Tìm kiếm"
+    "search": "Tìm kiếm",
+    "close": "Đóng"
   },
   "brand": {
     "name": "TABULA",
@@ -227,7 +228,12 @@
     "empty": "Không có tài liệu nào khớp bộ lọc.",
     "showing": "Hiển thị {shown} trên {total} tài liệu",
     "download": "Tải Excel",
-    "view": "Xem kết quả"
+    "view": "Xem kết quả",
+    "previewTitle": "Kết quả phân tích",
+    "previewPage": "Trang {n}",
+    "previewEmpty": "Không trích xuất được văn bản nào từ tài liệu này.",
+    "previewNoData": "Dữ liệu kết quả của tài liệu này chưa sẵn sàng.",
+    "previewOpenRaw": "Mở markdown gốc"
   },
   "upload": {
     "dropTitle": "Kéo & thả tài liệu vào đây",
@@ -249,7 +255,10 @@
     "parse": "Phân tích {count}",
     "parsing": "Đang phân tích…",
     "download": "Tải về",
-    "remove": "Gỡ bỏ"
+    "remove": "Gỡ bỏ",
+    "model": "Mô hình phân tích",
+    "badgeNew": "Mới",
+    "badgeOffline": "Sắp offline"
   },
   "settings": {
     "parsingTitle": "Phân tích",

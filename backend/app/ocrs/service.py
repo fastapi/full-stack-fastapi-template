@@ -1,4 +1,6 @@
+import json
 import logging
+from typing import Any
 
 import requests
 from sqlmodel import Session
@@ -31,7 +33,9 @@ optional_payload = {
     "useChartRecognition": False,
 }
 
-def post_ocr_jobs(session: Session, file: File, file_url: str) -> tuple[bool, str | None]:
+def post_ocr_jobs(
+    session: Session, file: File, file_url: str, model: str | None = None
+) -> tuple[bool, str | None]:
     """
     Submit an OCR job for the given file URL and create a FileJob record.
     Only posts the job — polling is handled separately.
@@ -39,7 +43,7 @@ def post_ocr_jobs(session: Session, file: File, file_url: str) -> tuple[bool, st
 
     payload = {
         "fileUrl": file_url,
-        "model": settings.OCR_MODEL,
+        "model": model or settings.OCR_MODEL,
         "optionalPayload": optional_payload,
     }
 
@@ -126,20 +130,76 @@ def get_ocr_job_status(file: File, session: SessionDep, user: CurrentUser) -> st
     return state
 
 
-def get_ocr_job_status_1(file: File, session: SessionDep, user: CurrentUser) -> OcrJobResponse | None:
+def fetch_ocr_table_pages(json_url: str) -> list[str]:
     """
-    Poll the OCR API for job results. Returns a typed OcrJobResponse.
+    Fetch the parsed OCR result from its data URL (``json_url``) and return the
+    extracted table(s) for each page as HTML — the same table data the download
+    endpoint turns into a spreadsheet (see ``app.files.utils``).
+
+    The result file is JSON Lines — one JSON record per page. Tables live under
+    ``result.layoutParsingResults[*].prunedResult.parsing_res_list`` as blocks
+    whose ``block_label`` is ``"table"`` and whose ``block_content`` is HTML.
     """
-    file_job: FileJob | None = get_file_job_by_file_id(session=session, file_id=file.id)
-    if not file_job:
-        logger.error("File %s has no FileJob record", file.id)
-        raise Exception("No FileJob record for this file")
+    raw = get_bytes_from_file_url(json_url).decode("utf-8")
+    pages: list[str] = []
+    for record in _parse_result_records(raw):
+        html = _extract_tables(record)
+        if html.strip():
+            pages.append(html)
+    return pages
 
-    req_headers = {"Authorization": f"bearer {settings.OCR_API_TOKEN}"}
-    raw = requests.get(f"{settings.OCR_JOB_URL}/{file_job.job_id}", headers=req_headers)
-    assert raw.status_code in (200, 404), f"OCR API returned unexpected status code {raw.status_code}"
 
-    return OcrJobResponse.model_validate(raw.json())
+def _parse_result_records(raw: str) -> list[Any]:
+    """Parse the result payload as a single JSON value or as JSON Lines."""
+    text = raw.strip()
+    if not text:
+        return []
+    try:
+        parsed = json.loads(text)
+        return parsed if isinstance(parsed, list) else [parsed]
+    except json.JSONDecodeError:
+        pass
+
+    records: list[Any] = []
+    for line in text.splitlines():
+        line = line.strip()
+        if not line:
+            continue
+        try:
+            records.append(json.loads(line))
+        except json.JSONDecodeError:
+            logger.warning("Skipping malformed OCR result line")
+    return records
+
+
+def _extract_tables(record: Any) -> str:
+    """Pull the table block(s) out of one page record as HTML.
+
+    Mirrors the table lookup in ``app.files.utils.extract_tables_from_ocr``: each
+    record wraps its payload under ``result``, whose ``layoutParsingResults`` hold
+    ``prunedResult.parsing_res_list`` blocks; table blocks carry their HTML in
+    ``block_content``.
+    """
+    if not isinstance(record, dict):
+        return ""
+    if isinstance(record.get("result"), dict):
+        record = record["result"]
+    results = record.get("layoutParsingResults") or record.get("ocrResults") or [record]
+    if not isinstance(results, list):
+        results = [results]
+
+    tables: list[str] = []
+    for item in results:
+        if not isinstance(item, dict):
+            continue
+        pruned = item.get("prunedResult") if isinstance(item.get("prunedResult"), dict) else {}
+        for block in pruned.get("parsing_res_list", []):
+            if not isinstance(block, dict) or block.get("block_label") != "table":
+                continue
+            content = block.get("block_content")
+            if isinstance(content, str) and content.strip():
+                tables.append(content)
+    return "\n".join(tables)
 
 
 def upload_ocr_job_result(user: CurrentUser, file: File, result: OcrJobResponse, session: SessionDep):

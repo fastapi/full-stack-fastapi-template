@@ -1,5 +1,7 @@
 import io
+import json
 from io import StringIO
+from typing import Any
 
 import pandas as pd
 from google import genai
@@ -9,7 +11,7 @@ from sqlmodel import Session
 from app.api_keys.crud import get_api_key_by_user
 from app.files.crud import get_file_job_by_file_id
 from app.files.dependencies import CurrentUser
-from app.files.models import File
+from app.files.models import File, FileJob
 from app.files.strategies import DOWNLOAD_STRATEGIES
 from app.files.utils import get_df_from_result_json
 
@@ -49,6 +51,28 @@ def download_file(session: Session, file: File, type: str = "xlsx") -> tuple[byt
     data_bytes, content_disposition = strategy.convert(df, safe_name)
 
     return (data_bytes, content_disposition)
+
+def get_preview_data(file_job: FileJob) -> tuple[list[str], list[dict[str, Any]]]:
+    """Build the OCR result table for previewing.
+
+    Fetches the parsed OCR result from the job's ``json_url`` and returns it as a
+    ``(columns, rows)`` tuple: ``columns`` is the ordered list of headers and
+    ``rows`` is the table content as JSON-serialisable ``{column: value}``
+    records (``NaN`` values are normalised to ``None``). This is the same table
+    the JSON download exports, returned inline rather than as a file.
+    """
+    df: DataFrame | None = get_df_from_result_json(file_job.json_url)
+    if df is None:
+        return [], []
+
+    # Drop the internal page-tracking column used only for debugging exports.
+    df = df.drop(columns=["__page__"], errors="ignore")
+
+    columns = [str(col) for col in df.columns]
+    # to_json normalises NaN/NaT to null and keeps unicode intact.
+    rows = json.loads(df.to_json(orient="records", force_ascii=False) or "[]")
+
+    return columns, rows
 
 
 def get_gemini_response_for_file(input_path: str, output_path: str, *, model: str | None = None) -> None:

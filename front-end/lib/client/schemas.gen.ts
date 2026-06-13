@@ -84,6 +84,17 @@ export const Body_files_upload_file_endpointSchema = {
             type: 'string',
             format: 'binary',
             title: 'File'
+        },
+        model: {
+            anyOf: [
+                {
+                    type: 'string'
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Model'
         }
     },
     type: 'object',
@@ -273,6 +284,58 @@ export const FileJobPublicSchema = {
     type: 'object',
     required: ['id', 'job_id', 'file_id', 'state'],
     title: 'FileJobPublic'
+} as const;
+
+export const FilePreviewResponseSchema = {
+    properties: {
+        file_id: {
+            type: 'string',
+            format: 'uuid',
+            title: 'File Id'
+        },
+        filename: {
+            type: 'string',
+            title: 'Filename'
+        },
+        columns: {
+            items: {
+                type: 'string'
+            },
+            type: 'array',
+            title: 'Columns'
+        },
+        rows: {
+            items: {
+                additionalProperties: true,
+                type: 'object'
+            },
+            type: 'array',
+            title: 'Rows'
+        },
+        row_count: {
+            type: 'integer',
+            title: 'Row Count'
+        },
+        markdown_url: {
+            anyOf: [
+                {
+                    type: 'string'
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Markdown Url'
+        }
+    },
+    type: 'object',
+    required: ['file_id', 'filename', 'columns', 'rows', 'row_count'],
+    title: 'FilePreviewResponse',
+    description: `Parsed OCR result table for a file, ready to render in the front end.
+
+\`\`columns\`\` is the ordered list of column headers and \`\`rows\`\` is the table
+content as a list of \`\`{column: value}\`\` records — the same data the JSON
+download exports, returned inline for previewing.`
 } as const;
 
 export const FilePublicSchema = {
