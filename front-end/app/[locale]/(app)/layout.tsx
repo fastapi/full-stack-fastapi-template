@@ -10,5 +10,6 @@ export default async function AppLayout({
   params: { locale: string };
 }) {
   setRequestLocale(locale);
+  console.log('run app layout')
   return <ProtectedShell locale={locale}>{children}</ProtectedShell>;
 }

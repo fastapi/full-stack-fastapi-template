@@ -5,12 +5,7 @@ import { useTranslations } from "next-intl";
 import { apiMessage } from "@/lib/api";
 import { UsersService, type UserPublic, type UserType } from "@/lib/client";
 import { formatDate } from "@/lib/files";
-
-const USER_TYPES: { value: UserType; labelKey: "roleUser" | "roleCompany" | "roleAdmin" }[] = [
-  { value: "normal", labelKey: "roleUser" },
-  { value: "company", labelKey: "roleCompany" },
-  { value: "admin", labelKey: "roleAdmin" },
-];
+import { USER_TYPES } from "@/constants";
 
 const GRADIENTS = [
   "linear-gradient(135deg,oklch(0.82 0.14 205),oklch(0.82 0.14 75))",
@@ -37,6 +32,7 @@ export default function UsersView() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
+  console.log('adduser',t("addUser"))
   const [newName, setNewName] = useState("");
   const [newEmail, setNewEmail] = useState("");
   const [newPassword, setNewPassword] = useState("");
