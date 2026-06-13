@@ -213,6 +213,17 @@ export const FileJobPublicSchema = {
             type: 'string',
             title: 'State'
         },
+        model: {
+            anyOf: [
+                {
+                    type: 'string'
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Model'
+        },
         total_pages: {
             anyOf: [
                 {

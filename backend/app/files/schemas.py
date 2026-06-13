@@ -35,6 +35,7 @@ class FileJobCreate(SQLModel):
     job_id: str = Field(max_length=255)
     file_id: uuid.UUID
     state: str = Field(max_length=50)
+    model: str | None = Field(default=None, max_length=100)
     total_pages: int | None = None
     extracted_pages: int | None = None
     json_url: str | None = Field(default=None, max_length=4000)
@@ -47,6 +48,7 @@ class FileJobPublic(SQLModel):
     job_id: str
     file_id: uuid.UUID
     state: str
+    model: str | None = None
     total_pages: int | None = None
     extracted_pages: int | None = None
     json_url: str | None = None

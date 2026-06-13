@@ -16,10 +16,33 @@ interface PreviewModalProps {
   onClose: () => void;
 }
 
+// Add comma thousands separators to a numeric string while keeping the dot
+// decimal and any sign. Operates on the string so large integers (e.g. IDs)
+// don't lose precision through Number().
+function groupNumberString(numeric: string): string {
+  const match = /^(-?)(\d+)(\.\d+)?$/.exec(numeric);
+  if (!match) return numeric;
+  const [, sign, intPart, decPart = ""] = match;
+  const grouped = intPart.replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+  return `${sign}${grouped}${decPart}`;
+}
+
 function formatCell(value: unknown): string {
   if (value === null || value === undefined) return "";
+  if (typeof value === "number") {
+    return Number.isFinite(value)
+      ? groupNumberString(String(value))
+      : String(value);
+  }
   if (typeof value === "object") return JSON.stringify(value);
-  return String(value);
+
+  const str = String(value);
+  // If the text is a number only, render it with comma/dot grouping.
+  const trimmed = str.trim();
+  if (/^-?\d+(\.\d+)?$/.test(trimmed)) {
+    return groupNumberString(trimmed);
+  }
+  return str;
 }
 
 export default function PreviewModal({

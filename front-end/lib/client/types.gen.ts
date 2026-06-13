@@ -48,6 +48,7 @@ export type FileJobPublic = {
     job_id: string;
     file_id: string;
     state: string;
+    model?: (string | null);
     total_pages?: (number | null);
     extracted_pages?: (number | null);
     json_url?: (string | null);

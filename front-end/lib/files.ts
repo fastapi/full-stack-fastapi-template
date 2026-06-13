@@ -46,6 +46,7 @@ export function toDocRow(f: FileWithJobPublic): DocRow {
     status: jobStatus(f.job),
     pages: f.job?.total_pages ?? 0,
     progress: jobProgress(f.job),
+    model: f.job?.model ?? null,
   };
 }
 

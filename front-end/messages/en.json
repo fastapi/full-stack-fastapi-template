@@ -220,6 +220,7 @@
     "colFilename": "Filename",
     "colJobId": "Job ID",
     "colType": "Type",
+    "colModel": "Model",
     "colUploaded": "Uploaded",
     "colStatus": "Status",
     "colActions": "Actions",

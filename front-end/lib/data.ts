@@ -10,6 +10,7 @@ export interface DocRow {
   status: DocStatus;
   pages: number;
   progress?: number;
+  model?: string | null;
 }
 
 /** Mock parse jobs — file names/ids are data, not translatable UI strings. */

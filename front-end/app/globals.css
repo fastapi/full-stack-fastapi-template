@@ -962,6 +962,7 @@ a { color: inherit; text-decoration: none; }
   background: var(--surface); border: 1px solid var(--line);
   border-radius: var(--r-lg); box-shadow: var(--shadow); overflow: hidden;
 }
+.preview-modal { max-width: 1200px; max-height: 92vh; }
 .modal-head {
   display: flex; align-items: flex-start; justify-content: space-between; gap: 14px;
   padding: 16px 20px; border-bottom: 1px solid var(--line);

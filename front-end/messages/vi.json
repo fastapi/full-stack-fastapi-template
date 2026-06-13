@@ -220,6 +220,7 @@
     "colFilename": "Tên tệp",
     "colJobId": "Mã công việc",
     "colType": "Loại",
+    "colModel": "Mô hình",
     "colUploaded": "Đã tải lên",
     "colStatus": "Trạng thái",
     "colActions": "Thao tác",

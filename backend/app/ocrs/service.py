@@ -41,9 +41,10 @@ def post_ocr_jobs(
     Only posts the job — polling is handled separately.
     """
 
+    selected_model = model or settings.OCR_MODEL
     payload = {
         "fileUrl": file_url,
-        "model": model or settings.OCR_MODEL,
+        "model": selected_model,
         "optionalPayload": optional_payload,
     }
 
@@ -58,6 +59,7 @@ def post_ocr_jobs(
             file_job_in=FileJobCreate(
                 file_id=file.id,
                 state=OcrJobStatus.FAILED,
+                model=selected_model,
                 err_msg=submit_response.msg,
                 ),
         )
@@ -74,6 +76,7 @@ def post_ocr_jobs(
             job_id=job_id,
             file_id=file.id,
             state=OcrJobStatus.RUNNING,
+            model=selected_model,
         ),
     )
 

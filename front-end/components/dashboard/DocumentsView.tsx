@@ -137,6 +137,7 @@ export default function DocumentsView() {
               <th>{t("colFilename")}</th>
               <th>{t("colJobId")}</th>
               <th>{t("colType")}</th>
+              <th>{t("colModel")}</th>
               <th>{t("colUploaded")}</th>
               <th>{t("colStatus")}</th>
               <th style={{ textAlign: "right" }}>{t("colActions")}</th>
@@ -145,12 +146,12 @@ export default function DocumentsView() {
           <tbody>
             {loading && (
               <tr className="empty-row">
-                <td colSpan={6}>{tc("loading")}</td>
+                <td colSpan={7}>{tc("loading")}</td>
               </tr>
             )}
             {!loading && filtered.length === 0 && (
               <tr className="empty-row">
-                <td colSpan={6}>{t("empty")}</td>
+                <td colSpan={7}>{t("empty")}</td>
               </tr>
             )}
             {filtered.map((d) => (
@@ -171,6 +172,7 @@ export default function DocumentsView() {
                 </td>
                 <td className="mono-cell">{d.id.slice(0, 8)}</td>
                 <td className="mono-cell">{d.type === "pdf" ? t("typePdf") : t("typeImage")}</td>
+                <td className="mono-cell">{d.model ?? "—"}</td>
                 <td className="mono-cell">{d.date}</td>
                 <td>
                   {d.status === "proc" && d.progress != null ? (

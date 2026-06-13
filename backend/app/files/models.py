@@ -32,6 +32,7 @@ class FileJob(SQLModel, table=True):
     job_id: str = Field(max_length=255, index=True)
     file_id: uuid.UUID = Field(foreign_key="files.id", nullable=False, ondelete="CASCADE")
     state: str = Field(default=OcrJobStatus.PENDING, max_length=50)
+    model: str | None = Field(default=None, max_length=100)
     total_pages: int | None = None
     extracted_pages: int | None = None
     start_time: datetime | None = Field(default=None, sa_type=DateTime(timezone=True))  # ty:ignore[invalid-argument-type]
