@@ -19,6 +19,7 @@
 
 ### Internal
 
+* Bump form-data from 4.0.5 to 4.0.6 in /frontend. PR [#2337](https://github.com/fastapi/full-stack-fastapi-template/pull/2337) by [@dependabot[bot]](https://github.com/apps/dependabot).
 * ⬆ Bump starlette from 1.0.1 to 1.3.1. PR [#2338](https://github.com/fastapi/full-stack-fastapi-template/pull/2338) by [@dependabot[bot]](https://github.com/apps/dependabot).
 * ⬆ Bump the python-packages group across 1 directory with 16 updates. PR [#2340](https://github.com/fastapi/full-stack-fastapi-template/pull/2340) by [@dependabot[bot]](https://github.com/apps/dependabot).
 * ⬆ Bump the github-actions group with 2 updates. PR [#2332](https://github.com/fastapi/full-stack-fastapi-template/pull/2332) by [@dependabot[bot]](https://github.com/apps/dependabot).
