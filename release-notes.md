@@ -19,6 +19,8 @@
 
 ### Internal
 
+* ⬆ Bump the python-packages group across 1 directory with 16 updates. PR [#2340](https://github.com/fastapi/full-stack-fastapi-template/pull/2340) by [@dependabot[bot]](https://github.com/apps/dependabot).
+* ⬆ Bump the github-actions group with 2 updates. PR [#2332](https://github.com/fastapi/full-stack-fastapi-template/pull/2332) by [@dependabot[bot]](https://github.com/apps/dependabot).
 * ⬆ Bump pyjwt from 2.12.0 to 2.13.0. PR [#2336](https://github.com/fastapi/full-stack-fastapi-template/pull/2336) by [@dependabot[bot]](https://github.com/apps/dependabot).
 * ⬆ Bump pytest from 7.4.4 to 9.0.3. PR [#2330](https://github.com/fastapi/full-stack-fastapi-template/pull/2330) by [@dependabot[bot]](https://github.com/apps/dependabot).
 * ⬆ Bump axios from 1.13.5 to 1.16.0 in /frontend. PR [#2323](https://github.com/fastapi/full-stack-fastapi-template/pull/2323) by [@dependabot[bot]](https://github.com/apps/dependabot).
