@@ -3,7 +3,7 @@ members = ["backend"]
 
 [dependency-groups]
 dev = [
-    "zizmor>=1.23.1",
+    "zizmor>=1.25.2",
 ]
 
 github-actions = [
