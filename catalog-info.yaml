@@ -1,0 +1,10 @@
+apiVersion: backstage.io/v1alpha1
+kind: Component
+metadata:
+  name: full-stack-fastapi-template
+  annotations:
+    github.com/project-slug: Manojk-11/full-stack-fastapi-template
+spec:
+  type: other
+  lifecycle: unknown
+  owner: Backstage Users
