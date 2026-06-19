@@ -13,13 +13,20 @@ github-actions = [
 [tool.typos.files]
 extend-exclude = [
     "img/",
-    "release-notes.md",
     "uv.lock",
     "bun.lock",
     "backend/coverage/",
     "backend/htmlcov/",
     "frontend/dist/",
     "frontend/public/assets/images/",
+]
+
+[tool.typos.default]
+extend-ignore-re = [
+    # GitHub usernames in @mentions
+    "@[a-zA-Z0-9](?:-?[a-zA-Z0-9])*",
+    # Name of the package in the PR title
+    "Bump certifi ",
 ]
 
 [tool.typos.default.extend-identifiers]
