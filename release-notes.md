@@ -19,6 +19,7 @@
 
 ### Internal
 
+* ⬆️ Update issue-manager to 0.7.0. PR [#2347](https://github.com/fastapi/full-stack-fastapi-template/pull/2347) by [@tiangolo](https://github.com/tiangolo).
 * 🔒️ Update zizmor workflow security checks. PR [#2345](https://github.com/fastapi/full-stack-fastapi-template/pull/2345) by [@tiangolo](https://github.com/tiangolo).
 * 👷 Add pre-commit hook to catch typos. PR [#2317](https://github.com/fastapi/full-stack-fastapi-template/pull/2317) by [@YuriiMotov](https://github.com/YuriiMotov).
 * Bump form-data from 4.0.5 to 4.0.6 in /frontend. PR [#2337](https://github.com/fastapi/full-stack-fastapi-template/pull/2337) by [@dependabot[bot]](https://github.com/apps/dependabot).
