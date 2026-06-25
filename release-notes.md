@@ -19,6 +19,7 @@
 
 ### Internal
 
+* 🔧 Sort keys in pyproject.toml. PR [#2350](https://github.com/fastapi/full-stack-fastapi-template/pull/2350) by [@tiangolo](https://github.com/tiangolo).
 * 👷 Simplify pull request workflow triggers. PR [#2349](https://github.com/fastapi/full-stack-fastapi-template/pull/2349) by [@tiangolo](https://github.com/tiangolo).
 * 👷 Update issue-manager to 0.7.1. PR [#2348](https://github.com/fastapi/full-stack-fastapi-template/pull/2348) by [@tiangolo](https://github.com/tiangolo).
 * ⬆️ Update issue-manager to 0.7.0. PR [#2347](https://github.com/fastapi/full-stack-fastapi-template/pull/2347) by [@tiangolo](https://github.com/tiangolo).
