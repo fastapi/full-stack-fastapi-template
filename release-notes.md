@@ -14,6 +14,7 @@
 
 ### Upgrades
 
+* ⬆️ Upgrade FastAPI version. PR [#2357](https://github.com/fastapi/full-stack-fastapi-template/pull/2357) by [@tiangolo](https://github.com/tiangolo).
 * ⬆️ Upgrade Python to 3.14. PR [#2352](https://github.com/fastapi/full-stack-fastapi-template/pull/2352) by [@tiangolo](https://github.com/tiangolo).
 * ⬆️ Upgrade Sentry and FastAPI. PR [#2181](https://github.com/fastapi/full-stack-fastapi-template/pull/2181) by [@patrick91](https://github.com/patrick91).
 
