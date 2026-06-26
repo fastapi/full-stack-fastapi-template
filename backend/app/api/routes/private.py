@@ -1,8 +1,7 @@
-from typing import Any
-
-from fastapi import APIRouter
+from fastapi import APIRouter, HTTPException, status
 from pydantic import BaseModel
 
+from app import crud
 from app.api.deps import SessionDep
 from app.core.security import get_password_hash
 from app.models import (
@@ -20,11 +19,17 @@ class PrivateUserCreate(BaseModel):
     is_verified: bool = False
 
 
-@router.post("/users/", response_model=UserPublic)
-def create_user(user_in: PrivateUserCreate, session: SessionDep) -> Any:
+@router.post("/users/", response_model=UserPublic, status_code=status.HTTP_201_CREATED)
+def create_user(*, user_in: PrivateUserCreate, session: SessionDep) -> User:
     """
     Create a new user.
     """
+    user = crud.get_user_by_email(session=session, email=user_in.email)
+    if user:
+        raise HTTPException(
+            status_code=400,
+            detail="The user with this email already exists in the system.",
+        )
 
     user = User(
         email=user_in.email,
