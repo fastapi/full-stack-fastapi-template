@@ -92,8 +92,8 @@ export type UsersPublic = {
 
 export type UserUpdate = {
     email?: (string | null);
-    is_active?: boolean;
-    is_superuser?: boolean;
+    is_active?: (boolean | null);
+    is_superuser?: (boolean | null);
     full_name?: (string | null);
     password?: (string | null);
 };
