@@ -2,6 +2,10 @@
 
 ## Latest Changes
 
+### Features
+
+* ♻️ Add library-skills for FastAPI and SQLModel. PR [#2354](https://github.com/fastapi/full-stack-fastapi-template/pull/2354) by [@tiangolo](https://github.com/tiangolo).
+
 ### Refactors
 
 * 🔧 Add FastAPI VS Code extension to recommended extensions. PR [#2206](https://github.com/fastapi/full-stack-fastapi-template/pull/2206) by [@tiangolo](https://github.com/tiangolo).
