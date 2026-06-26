@@ -4,6 +4,7 @@
 
 ### Features
 
+* 🔧 Use FastAPI entrypoint. PR [#2360](https://github.com/fastapi/full-stack-fastapi-template/pull/2360) by [@tiangolo](https://github.com/tiangolo).
 * ♻️ Add library-skills for FastAPI and SQLModel. PR [#2354](https://github.com/fastapi/full-stack-fastapi-template/pull/2354) by [@tiangolo](https://github.com/tiangolo).
 
 ### Refactors
