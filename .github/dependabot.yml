@@ -4,7 +4,7 @@ updates:
   - package-ecosystem: github-actions
     directory: /
     schedule:
-      interval: weekly
+      interval: "monthly"
     cooldown:
       default-days: 7
     commit-message:
@@ -21,7 +21,7 @@ updates:
   - package-ecosystem: uv
     directory: /
     schedule:
-      interval: weekly
+      interval: "monthly"
     cooldown:
       default-days: 7
     commit-message:
@@ -35,7 +35,7 @@ updates:
   - package-ecosystem: bun
     directory: /
     schedule:
-      interval: weekly
+      interval: "monthly"
     cooldown:
       default-days: 7
     commit-message:
@@ -53,7 +53,7 @@ updates:
       - /backend
       - /frontend
     schedule:
-      interval: weekly
+      interval: "monthly"
     cooldown:
       default-days: 7
     commit-message:
@@ -66,7 +66,7 @@ updates:
   - package-ecosystem: docker-compose
     directory: /
     schedule:
-      interval: weekly
+      interval: "monthly"
     cooldown:
       default-days: 7
     commit-message:
