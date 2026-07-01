@@ -5,6 +5,16 @@ import { logInUser, signUpNewUser } from "./utils/user"
 
 test.use({ storageState: { cookies: [], origins: [] } })
 
+const frontendHost = process.env.PLAYWRIGHT_BASE_URL || "http://localhost:8000"
+
+function toFrontendUrl(url: string): string {
+  const parsedUrl = new URL(url)
+  const frontendUrl = new URL(frontendHost)
+  parsedUrl.protocol = frontendUrl.protocol
+  parsedUrl.host = frontendUrl.host
+  return parsedUrl.toString()
+}
+
 test("Password Recovery title is visible", async ({ page }) => {
   await page.goto("/recover-password")
 
@@ -58,8 +68,7 @@ test("User can reset password successfully using the link", async ({
 
   let url = await page.getAttribute(selector, "href")
 
-  // TODO: update var instead of doing a replace
-  url = url!.replace("http://localhost/", "http://localhost:5173/")
+  url = toFrontendUrl(url!)
 
   // Set the new password and confirm it
   await page.goto(url)
@@ -111,7 +120,7 @@ test("Weak new password validation", async ({ page, request }) => {
 
   const selector = 'a[href*="/reset-password?token="]'
   let url = await page.getAttribute(selector, "href")
-  url = url!.replace("http://localhost/", "http://localhost:5173/")
+  url = toFrontendUrl(url!)
 
   // Set a weak new password
   await page.goto(url)
