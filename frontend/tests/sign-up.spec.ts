@@ -2,8 +2,6 @@ import { expect, type Page, test } from "@playwright/test"
 
 import { randomEmail, randomPassword } from "./utils/random"
 
-test.skip(true, "auth unused in Agentique")
-
 test.use({ storageState: { cookies: [], origins: [] } })
 
 const fillForm = async (

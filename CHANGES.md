@@ -4,6 +4,135 @@ Changes made on top of `fastapi/full-stack-fastapi-template`. Upstream files are
 
 ---
 
+## 2026-07-02 — article likes with profile page
+
+Adds boolean article likes (fire icon + count, visible to everyone), a "Popular"
+sort, and a `/profile` page (renamed from Settings) with a Liked tab. Reuses the
+template's dormant email/password JWT auth as-is — the global `_layout.tsx`
+guard stays disabled, the feed stays public, auth is enforced per-endpoint
+(`likes.py`) and per-page (`/profile`) only.
+
+**New files (no conflict risk):**
+- `backend/app/api/routes/likes.py` — `PUT`/`DELETE /articles/{id}/like`,
+  `GET /me/liked-articles`, all auth-required and idempotent via
+  `ArticleLike`'s composite `(user_id, article_id)` primary key.
+- `backend/app/api/deps_agentique.py` — `CurrentUserOptional`: decodes the
+  Bearer token when present, returns `None` on any failure (missing header,
+  invalid/expired token, unknown user) instead of raising, so the public
+  `/articles` endpoints never 401 on an anonymous or stale token.
+- `backend/app/alembic/versions/d4e5f6a7b8c9_add_article_like_table.py` — new
+  `article_like` table.
+- `backend/tests/api/routes/test_likes.py`, `backend/tests/utils/article.py`.
+- `frontend/src/components/Articles/LikeButton.tsx` — `Flame` icon + count
+  (always rendered, `0` included); logged-out click navigates to
+  `/login?redirect=<current>`; logged-in click is an optimistic TanStack Query
+  mutation that patches both the `["articles", ...]` and `["liked-articles"]`
+  caches and invalidates both on settle.
+- `frontend/src/components/Articles/ArticleRow.tsx` — the article row markup
+  extracted out of `ArticlesList.tsx` so the Liked tab can reuse it.
+- `frontend/src/routes/_layout/profile.tsx` — tabs Liked (default) / My
+  profile / Password / Danger zone; the last three reuse the existing
+  `components/UserSettings/*` components; `beforeLoad` redirects to
+  `/login?redirect=/profile` when logged out.
+
+**Touched, ours (Agentique-owned files, low/no conflict risk):**
+- `backend/app/models_agentique.py` — new `ArticleLike` table;
+  `ArticlePublic` gains `like_count: int = 0` and `liked_by_me: bool = False`.
+- `backend/app/api/routes/articles.py` — `read_articles`/`search_articles`
+  now LEFT JOIN a `(article_id, count(*))` aggregate subquery over
+  `article_like` for `like_count`, and a per-user liked-id lookup for
+  `liked_by_me`; new `sort=likes-desc` (ties break on `score desc`). Counts
+  are computed at query time, not denormalized, per the plan. Note:
+  `session.exec()` silently collapses a `select(Article, <expr>).add_columns()`
+  built on top of an existing `select(Article)` statement back down to bare
+  `Article` scalars, dropping the extra column — worked around by building
+  the two-column `select()` directly and reusing filter conditions across a
+  separate count statement, and by using `session.exec()` only where it's
+  confirmed to return real `Row` tuples for a from-scratch two-column select.
+- `frontend/src/components/Articles/ArticlesList.tsx` — renders `ArticleRow`
+  instead of the inline `<li>` markup.
+- `frontend/src/components/Sidebar/Filters.tsx` — sort filter gains "Popular"
+  (`likes-desc`).
+
+**Touched, upstream (low conflict risk unless noted):**
+- `backend/app/api/main.py` — `+1` line mounting `likes.router`.
+- `backend/app/api/routes/likes.py`'s `read_liked_articles` originally
+  returned `ArticlePublic.model_validate(a)` without setting `like_count`/
+  `liked_by_me` at all (both silently defaulted to `0`/`False`) — caught by
+  the frontend e2e test for the Liked tab, not by a backend unit test, since
+  no backend test asserted those two fields on that specific endpoint before
+  this feature added one. Fixed in the same commit as the endpoint itself,
+  so no separate upstream-drift entry.
+- `backend/tests/conftest.py` — the session-scoped `db` fixture's teardown
+  now deletes `article_like` rows before deleting users (the new FK would
+  otherwise block `DELETE FROM "user"`).
+- `backend/tests/api/routes/test_login.py`, `test_users.py` — removed the
+  `pytestmark = pytest.mark.skip(reason="auth unused in Agentique")` module
+  skip (our own skip, added 2026-06-27ish, trivially revertable) now that
+  auth is a real user path again. `test_login.py::test_recovery_password`
+  additionally now patches `settings.EMAILS_FROM_EMAIL` (not just
+  `SMTP_HOST`/`SMTP_USER`) — `emails_enabled` requires both, and this fork's
+  CI-synthesized `.env` (see 2026-07-01 entry) never sets
+  `EMAILS_FROM_EMAIL` the way the upstream template's example `.env` used to
+  before it was deleted (2026-06-28 entry), so the previously-skipped test
+  would otherwise fail its `assert settings.emails_enabled` the first time
+  it actually ran. `test_items.py`/`test_private.py`/`crud/test_user.py`
+  skips are left in place, per the feature spec.
+- `backend/pyproject.toml` — `[tool.coverage.report] omit` list: dropped
+  `login.py`, `users.py`, `crud.py`, `core/security.py`, `utils.py`,
+  `api/deps.py` now that un-skipping the auth tests actually exercises them
+  (aggregate coverage is 92%, still above the `--fail-under=90` gate).
+  `items.py`/`private.py`/`routes/utils.py`/`seed_articles.py`/
+  `initial_data.py` stay omitted (still unused by the test suite).
+- `frontend/src/routes/_layout/settings.tsx` — reduced to a `beforeLoad`
+  redirect to `/profile` (kept, per fork discipline; never delete upstream
+  files).
+- `frontend/src/routes/login.tsx` — gains a `redirect` search param
+  (`z.string().optional()`, required-optional rather than `.catch("")` so
+  existing `<RouterLink to="/login">` call sites with no search still
+  type-check) and reads it via `Route.useSearch()`.
+- `frontend/src/hooks/useAuth.ts` — `loginMutation` accepts an optional
+  `redirectTo` and navigates there (`navigate({ href: redirectTo })`, the
+  raw-string escape hatch for a route the router can't type-check) instead
+  of always `"/"` on success.
+- `frontend/src/components/Sidebar/User.tsx` — renders a "Log in" link when
+  logged out (previously rendered nothing); the dropdown menu item now reads
+  "Profile" and links to `/profile` instead of "User Settings" → `/settings`.
+- `frontend/src/routeTree.gen.ts`, `frontend/src/client/{schemas,sdk,types}.gen.ts`
+  — regenerated (new `/profile` route; new `LikesService` +
+  `like_count`/`liked_by_me` on `ArticlePublic`). No conflict risk, safe to
+  regenerate per `CLAUDE.md`.
+- `frontend/tests/user-settings.spec.ts` — paths updated from `/settings` to
+  `/profile`; removed its `test.skip`; the standalone "My profile tab is
+  active by default" test is now "My profile tab can be selected" (explicitly
+  clicks the tab first) since Liked, not My profile, is the new default tab —
+  covered separately in `likes.spec.ts`. The "invalid email shows error" test
+  now blurs the email field with `press("Tab")` instead of
+  `page.locator("body").click()`, which left the field focused and the
+  validation message never appeared — a pre-existing gap in this
+  never-previously-run upstream test, unrelated to this feature. The two
+  theme-toggle tests no longer assume a light starting theme (this fork's
+  `ThemeProvider` defaults to dark, unlike upstream) and wait for the
+  `useEffect`-applied theme class to settle before reading it.
+- `frontend/tests/login.spec.ts`, `frontend/tests/sign-up.spec.ts` — removed
+  `test.skip`. `login.spec.ts`'s "Logged-out user cannot access protected
+  routes" now matches `/\/login/` instead of the exact `/login` string, since
+  `/settings` → `/profile` → `/login?redirect=%2Fprofile` now carries a query
+  string.
+- `frontend/tests/utils/user.ts` — `logInUser`'s post-login assertion
+  ("Welcome back, nice to see you again!") referenced text from the upstream
+  Dashboard component, which the 2026-06-28 entry already replaced with
+  `ArticlesList` on this fork; switched to asserting the sidebar user-menu is
+  visible instead.
+- New Playwright spec `frontend/tests/likes.spec.ts` — covers the fire
+  button, the anonymous→login redirect, the optimistic toggle, Popular sort,
+  and the Profile page's Liked tab; serialized
+  (`test.describe.configure({ mode: "serial" })`) since several tests mutate
+  like counts on the same shared seeded "first row" article and would race
+  under parallel workers.
+
+---
+
 ## 2026-07-02 — mypy/ty fixes (pre-commit's type-checker hooks)
 
 - `backend/app/models_agentique.py`, `backend/app/api/routes/articles.py` — Added

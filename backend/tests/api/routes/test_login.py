@@ -1,6 +1,5 @@
 from unittest.mock import patch
 
-import pytest
 from fastapi.testclient import TestClient
 from pwdlib.hashers.bcrypt import BcryptHasher
 from sqlmodel import Session
@@ -12,8 +11,6 @@ from app.models import User, UserCreate
 from app.utils import generate_password_reset_token
 from tests.utils.user import user_authentication_headers
 from tests.utils.utils import random_email, random_lower_string
-
-pytestmark = pytest.mark.skip(reason="auth unused in Agentique")
 
 
 def test_get_access_token(client: TestClient) -> None:
@@ -55,6 +52,7 @@ def test_recovery_password(
     with (
         patch("app.core.config.settings.SMTP_HOST", "smtp.example.com"),
         patch("app.core.config.settings.SMTP_USER", "admin@example.com"),
+        patch("app.core.config.settings.EMAILS_FROM_EMAIL", "admin@example.com"),
     ):
         email = "test@example.com"
         r = client.post(

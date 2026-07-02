@@ -38,17 +38,25 @@ const useAuth = () => {
     },
   })
 
-  const login = async (data: AccessToken) => {
+  const login = async ({
+    redirectTo,
+    ...data
+  }: AccessToken & { redirectTo?: string }) => {
     const response = await LoginService.loginAccessToken({
       formData: data,
     })
     localStorage.setItem("access_token", response.access_token)
+    return redirectTo
   }
 
   const loginMutation = useMutation({
     mutationFn: login,
-    onSuccess: () => {
-      navigate({ to: "/" })
+    onSuccess: (redirectTo) => {
+      if (redirectTo) {
+        navigate({ href: redirectTo })
+      } else {
+        navigate({ to: "/" })
+      }
     },
     onError: handleError.bind(showErrorToast),
   })

@@ -3,7 +3,7 @@
 import type { CancelablePromise } from './core/CancelablePromise';
 import { OpenAPI } from './core/OpenAPI';
 import { request as __request } from './core/request';
-import type { ArticlesReadArticlesData, ArticlesReadArticlesResponse, ArticlesSearchArticlesData, ArticlesSearchArticlesResponse, ArticlesArticleStatsResponse, ItemsReadItemsData, ItemsReadItemsResponse, ItemsCreateItemData, ItemsCreateItemResponse, ItemsReadItemData, ItemsReadItemResponse, ItemsUpdateItemData, ItemsUpdateItemResponse, ItemsDeleteItemData, ItemsDeleteItemResponse, LoginLoginAccessTokenData, LoginLoginAccessTokenResponse, LoginTestTokenResponse, LoginRecoverPasswordData, LoginRecoverPasswordResponse, LoginResetPasswordData, LoginResetPasswordResponse, LoginRecoverPasswordHtmlContentData, LoginRecoverPasswordHtmlContentResponse, NewsletterSubscribeData, NewsletterSubscribeResponse2, PrivateCreateUserData, PrivateCreateUserResponse, UsersReadUsersData, UsersReadUsersResponse, UsersCreateUserData, UsersCreateUserResponse, UsersReadUserMeResponse, UsersDeleteUserMeResponse, UsersUpdateUserMeData, UsersUpdateUserMeResponse, UsersUpdatePasswordMeData, UsersUpdatePasswordMeResponse, UsersRegisterUserData, UsersRegisterUserResponse, UsersReadUserByIdData, UsersReadUserByIdResponse, UsersUpdateUserData, UsersUpdateUserResponse, UsersDeleteUserData, UsersDeleteUserResponse, UtilsTestEmailData, UtilsTestEmailResponse, UtilsHealthCheckResponse } from './types.gen';
+import type { ArticlesReadArticlesData, ArticlesReadArticlesResponse, ArticlesSearchArticlesData, ArticlesSearchArticlesResponse, ArticlesArticleStatsResponse, ItemsReadItemsData, ItemsReadItemsResponse, ItemsCreateItemData, ItemsCreateItemResponse, ItemsReadItemData, ItemsReadItemResponse, ItemsUpdateItemData, ItemsUpdateItemResponse, ItemsDeleteItemData, ItemsDeleteItemResponse, LikesLikeArticleData, LikesLikeArticleResponse, LikesUnlikeArticleData, LikesUnlikeArticleResponse, LikesReadLikedArticlesResponse, LoginLoginAccessTokenData, LoginLoginAccessTokenResponse, LoginTestTokenResponse, LoginRecoverPasswordData, LoginRecoverPasswordResponse, LoginResetPasswordData, LoginResetPasswordResponse, LoginRecoverPasswordHtmlContentData, LoginRecoverPasswordHtmlContentResponse, NewsletterSubscribeData, NewsletterSubscribeResponse2, PrivateCreateUserData, PrivateCreateUserResponse, UsersReadUsersData, UsersReadUsersResponse, UsersCreateUserData, UsersCreateUserResponse, UsersReadUserMeResponse, UsersDeleteUserMeResponse, UsersUpdateUserMeData, UsersUpdateUserMeResponse, UsersUpdatePasswordMeData, UsersUpdatePasswordMeResponse, UsersRegisterUserData, UsersRegisterUserResponse, UsersReadUserByIdData, UsersReadUserByIdResponse, UsersUpdateUserData, UsersUpdateUserResponse, UsersDeleteUserData, UsersDeleteUserResponse, UtilsTestEmailData, UtilsTestEmailResponse, UtilsHealthCheckResponse } from './types.gen';
 
 export class ArticlesService {
     /**
@@ -178,6 +178,60 @@ export class ItemsService {
             errors: {
                 422: 'Validation Error'
             }
+        });
+    }
+}
+
+export class LikesService {
+    /**
+     * Like Article
+     * @param data The data for the request.
+     * @param data.articleId
+     * @returns unknown Successful Response
+     * @throws ApiError
+     */
+    public static likeArticle(data: LikesLikeArticleData): CancelablePromise<LikesLikeArticleResponse> {
+        return __request(OpenAPI, {
+            method: 'PUT',
+            url: '/api/v1/articles/{article_id}/like',
+            path: {
+                article_id: data.articleId
+            },
+            errors: {
+                422: 'Validation Error'
+            }
+        });
+    }
+    
+    /**
+     * Unlike Article
+     * @param data The data for the request.
+     * @param data.articleId
+     * @returns unknown Successful Response
+     * @throws ApiError
+     */
+    public static unlikeArticle(data: LikesUnlikeArticleData): CancelablePromise<LikesUnlikeArticleResponse> {
+        return __request(OpenAPI, {
+            method: 'DELETE',
+            url: '/api/v1/articles/{article_id}/like',
+            path: {
+                article_id: data.articleId
+            },
+            errors: {
+                422: 'Validation Error'
+            }
+        });
+    }
+    
+    /**
+     * Read Liked Articles
+     * @returns ArticlesPublic Successful Response
+     * @throws ApiError
+     */
+    public static readLikedArticles(): CancelablePromise<LikesReadLikedArticlesResponse> {
+        return __request(OpenAPI, {
+            method: 'GET',
+            url: '/api/v1/me/liked-articles'
         });
     }
 }

@@ -92,6 +92,16 @@ export const ArticlePublicSchema = {
                 }
             ],
             title: 'Created At'
+        },
+        like_count: {
+            type: 'integer',
+            title: 'Like Count',
+            default: 0
+        },
+        liked_by_me: {
+            type: 'boolean',
+            title: 'Liked By Me',
+            default: false
         }
     },
     type: 'object',

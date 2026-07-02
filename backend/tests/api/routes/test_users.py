@@ -1,7 +1,6 @@
 import uuid
 from unittest.mock import patch
 
-import pytest
 from fastapi.testclient import TestClient
 from sqlmodel import Session, select
 
@@ -11,8 +10,6 @@ from app.core.security import verify_password
 from app.models import User, UserCreate
 from tests.utils.user import create_random_user
 from tests.utils.utils import random_email, random_lower_string
-
-pytestmark = pytest.mark.skip(reason="auth unused in Agentique")
 
 
 def test_get_users_superuser_me(

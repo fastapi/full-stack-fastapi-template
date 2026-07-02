@@ -32,8 +32,13 @@ const formSchema = z.object({
 
 type FormData = z.infer<typeof formSchema>
 
+const searchSchema = z.object({
+  redirect: z.string().optional(),
+})
+
 export const Route = createFileRoute("/login")({
   component: Login,
+  validateSearch: searchSchema,
   beforeLoad: async () => {
     if (isLoggedIn()) {
       throw redirect({
@@ -52,6 +57,7 @@ export const Route = createFileRoute("/login")({
 
 function Login() {
   const { loginMutation } = useAuth()
+  const { redirect: redirectTo } = Route.useSearch()
   const form = useForm<FormData>({
     resolver: zodResolver(formSchema),
     mode: "onBlur",
@@ -64,7 +70,7 @@ function Login() {
 
   const onSubmit = (data: FormData) => {
     if (loginMutation.isPending) return
-    loginMutation.mutate(data)
+    loginMutation.mutate({ ...data, redirectTo })
   }
 
   return (

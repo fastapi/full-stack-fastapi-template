@@ -1,3 +1,4 @@
+import uuid
 from datetime import UTC, datetime, timedelta
 
 import pytest
@@ -8,7 +9,11 @@ from sqlmodel import Session, select
 
 from app.api.routes import articles
 from app.core.config import settings
+from app.core.security import create_access_token
 from app.models_agentique import Article
+from tests.utils.article import create_random_article
+from tests.utils.user import authentication_token_from_email
+from tests.utils.utils import random_email
 
 ARTICLES_URL = f"{settings.API_V1_STR}/articles"
 
@@ -122,3 +127,98 @@ def test_article_stats(client: TestClient) -> None:
     data = r.json()
     assert data["total"] >= 50
     datetime.fromisoformat(data["lastUpdated"])
+
+
+def test_read_articles_anonymous_has_like_count_and_liked_by_me(
+    client: TestClient,
+) -> None:
+    r = client.get(f"{ARTICLES_URL}/", params={"limit": 50})
+    data = r.json()["data"]
+    assert len(data) > 0
+    for article in data:
+        assert article["like_count"] >= 0
+        assert article["liked_by_me"] is False
+
+
+def test_read_articles_liked_by_me_true_only_for_liked(
+    client: TestClient, db: Session, normal_user_token_headers: dict[str, str]
+) -> None:
+    now = datetime.now(UTC)
+    liked = create_random_article(db, score=9, published_at=now)
+    unliked = create_random_article(db, score=9, published_at=now)
+
+    r = client.put(f"{ARTICLES_URL}/{liked.id}/like", headers=normal_user_token_headers)
+    assert r.status_code == 200
+
+    r = client.get(
+        f"{ARTICLES_URL}/", params={"limit": 50}, headers=normal_user_token_headers
+    )
+    data = {a["id"]: a for a in r.json()["data"]}
+    assert data[liked.id]["liked_by_me"] is True
+    assert data[liked.id]["like_count"] == 1
+    assert data[unliked.id]["liked_by_me"] is False
+    assert data[unliked.id]["like_count"] == 0
+
+
+def test_read_articles_garbage_token_treated_as_anonymous(client: TestClient) -> None:
+    r = client.get(
+        f"{ARTICLES_URL}/",
+        params={"limit": 5},
+        headers={"Authorization": "Bearer not-a-real-token"},
+    )
+    assert r.status_code == 200
+    for article in r.json()["data"]:
+        assert article["liked_by_me"] is False
+
+
+def test_read_articles_valid_token_unknown_user_treated_as_anonymous(
+    client: TestClient,
+) -> None:
+    token = create_access_token(str(uuid.uuid4()), expires_delta=timedelta(minutes=5))
+    r = client.get(
+        f"{ARTICLES_URL}/",
+        params={"limit": 5},
+        headers={"Authorization": f"Bearer {token}"},
+    )
+    assert r.status_code == 200
+    for article in r.json()["data"]:
+        assert article["liked_by_me"] is False
+
+
+def test_read_articles_sort_likes_desc(client: TestClient, db: Session) -> None:
+    now = datetime.now(UTC)
+    low_score_more_likes = create_random_article(db, score=3, published_at=now)
+    high_score_no_likes = create_random_article(db, score=9, published_at=now)
+    tied_score_a = create_random_article(db, score=5, published_at=now)
+    tied_score_b = create_random_article(db, score=5, published_at=now)
+
+    headers_list = [
+        authentication_token_from_email(client=client, email=random_email(), db=db)
+        for _ in range(2)
+    ]
+    for headers in headers_list:
+        client.put(f"{ARTICLES_URL}/{low_score_more_likes.id}/like", headers=headers)
+    client.put(f"{ARTICLES_URL}/{tied_score_a.id}/like", headers=headers_list[0])
+
+    r = client.get(f"{ARTICLES_URL}/", params={"sort": "likes-desc", "limit": 50})
+    data = r.json()["data"]
+    ids = [a["id"] for a in data]
+
+    assert ids.index(low_score_more_likes.id) < ids.index(high_score_no_likes.id)
+    # tied like counts (both 0) fall back to score desc
+    assert ids.index(high_score_no_likes.id) < ids.index(tied_score_b.id)
+    # tied_score_a has 1 like, tied_score_b has 0 -> a before b despite equal score
+    assert ids.index(tied_score_a.id) < ids.index(tied_score_b.id)
+
+
+def test_search_articles_has_like_count_and_liked_by_me(
+    client: TestClient, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    fake_vec = [0.05] * 256
+    monkeypatch.setattr(articles, "_embed", lambda text: fake_vec)
+
+    r = client.get(f"{ARTICLES_URL}/search", params={"q": "agents", "limit": 5})
+    assert r.status_code == 200
+    for article in r.json()["data"]:
+        assert "like_count" in article
+        assert "liked_by_me" in article

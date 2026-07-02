@@ -12,6 +12,8 @@ export type ArticlePublic = {
     kind?: (string | null);
     id: number;
     created_at?: (string | null);
+    like_count?: number;
+    liked_by_me?: boolean;
 };
 
 export type ArticlesPublic = {
@@ -194,6 +196,20 @@ export type ItemsDeleteItemData = {
 };
 
 export type ItemsDeleteItemResponse = (Message);
+
+export type LikesLikeArticleData = {
+    articleId: number;
+};
+
+export type LikesLikeArticleResponse = (unknown);
+
+export type LikesUnlikeArticleData = {
+    articleId: number;
+};
+
+export type LikesUnlikeArticleResponse = (unknown);
+
+export type LikesReadLikedArticlesResponse = (ArticlesPublic);
 
 export type LoginLoginAccessTokenData = {
     formData: Body_login_login_access_token;

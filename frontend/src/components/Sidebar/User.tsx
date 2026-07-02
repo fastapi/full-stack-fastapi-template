@@ -1,5 +1,5 @@
 import { Link as RouterLink } from "@tanstack/react-router"
-import { ChevronsUpDown, LogOut, Settings } from "lucide-react"
+import { ChevronsUpDown, LogIn, LogOut, User as UserIcon } from "lucide-react"
 
 import { Avatar, AvatarFallback } from "@/components/ui/avatar"
 import {
@@ -44,8 +44,6 @@ export function User({ user }: { user: any }) {
   const { logout } = useAuth()
   const { isMobile, setOpenMobile } = useSidebar()
 
-  if (!user) return null
-
   const handleMenuClick = () => {
     if (isMobile) {
       setOpenMobile(false)
@@ -53,6 +51,25 @@ export function User({ user }: { user: any }) {
   }
   const handleLogout = async () => {
     logout()
+  }
+
+  if (!user) {
+    return (
+      <SidebarMenu>
+        <SidebarMenuItem>
+          <SidebarMenuButton size="lg" asChild>
+            <RouterLink
+              to="/login"
+              onClick={handleMenuClick}
+              data-testid="login-link"
+            >
+              <LogIn className="size-4" />
+              <span>Log in</span>
+            </RouterLink>
+          </SidebarMenuButton>
+        </SidebarMenuItem>
+      </SidebarMenu>
+    )
   }
 
   return (
@@ -79,10 +96,10 @@ export function User({ user }: { user: any }) {
               <UserInfo fullName={user?.full_name} email={user?.email} />
             </DropdownMenuLabel>
             <DropdownMenuSeparator />
-            <RouterLink to="/settings" onClick={handleMenuClick}>
+            <RouterLink to="/profile" onClick={handleMenuClick}>
               <DropdownMenuItem>
-                <Settings />
-                User Settings
+                <UserIcon />
+                Profile
               </DropdownMenuItem>
             </RouterLink>
             <DropdownMenuItem onClick={handleLogout}>

@@ -85,15 +85,9 @@ dynamic_context = "test_function"
 show_missing = true
 sort = "-Cover"
 omit = [
-    "app/api/routes/login.py",
-    "app/api/routes/users.py",
     "app/api/routes/items.py",
     "app/api/routes/private.py",
     "app/api/routes/utils.py",
-    "app/crud.py",
-    "app/core/security.py",
-    "app/utils.py",
-    "app/api/deps.py",
     "app/seed_articles.py",
     "app/initial_data.py",
 ]
