@@ -97,13 +97,17 @@ def read_articles(
     )
 
     if sort == "published_at-desc":
-        joined_statement = joined_statement.order_by(col(Article.published_at).desc())
+        joined_statement = joined_statement.order_by(
+            col(Article.published_at).desc(), col(Article.id).desc()
+        )
     elif sort == "likes-desc":
         joined_statement = joined_statement.order_by(
-            like_count_expr.desc(), col(Article.score).desc()
+            like_count_expr.desc(), col(Article.score).desc(), col(Article.id).desc()
         )
     else:
-        joined_statement = joined_statement.order_by(col(Article.score).desc())
+        joined_statement = joined_statement.order_by(
+            col(Article.score).desc(), col(Article.id).desc()
+        )
     joined_statement = joined_statement.limit(limit)
 
     rows = session.exec(joined_statement).all()
@@ -137,7 +141,10 @@ def search_articles(
         .outerjoin(like_counts_subq, like_counts_subq.c.article_id == Article.id)
         .where(Article.score.is_not(None))  # type: ignore[union-attr]  # ty: ignore[unresolved-attribute]
         .where(Article.embedding.is_not(None))  # type: ignore[union-attr]  # ty: ignore[unresolved-attribute]
-        .order_by(cast(Article.embedding, Vector(256)).cosine_distance(query_vec))
+        .order_by(
+            cast(Article.embedding, Vector(256)).cosine_distance(query_vec),
+            col(Article.id).desc(),
+        )
         .limit(limit)
     )
 

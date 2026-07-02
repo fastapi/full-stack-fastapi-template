@@ -52,7 +52,7 @@ def read_liked_articles(session: SessionDep, current_user: CurrentUser) -> Any:
         .join(ArticleLike, col(ArticleLike.article_id) == col(Article.id))
         .outerjoin(like_counts_subq, like_counts_subq.c.article_id == Article.id)
         .where(ArticleLike.user_id == current_user.id)
-        .order_by(col(ArticleLike.created_at).desc())
+        .order_by(col(ArticleLike.created_at).desc(), col(Article.id).desc())
     )
     rows = session.exec(statement).all()
 

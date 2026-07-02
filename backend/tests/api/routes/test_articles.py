@@ -5,7 +5,7 @@ import pytest
 from fastapi.testclient import TestClient
 from pgvector.sqlalchemy import Vector
 from sqlalchemy import cast
-from sqlmodel import Session, select
+from sqlmodel import Session, col, select
 
 from app.api.routes import articles
 from app.core.config import settings
@@ -115,7 +115,10 @@ def test_search_articles(
         select(Article.id)
         .where(Article.score.is_not(None))  # type: ignore[union-attr]
         .where(Article.embedding.is_not(None))  # type: ignore[union-attr]
-        .order_by(cast(Article.embedding, Vector(256)).cosine_distance(fake_vec))
+        .order_by(
+            cast(Article.embedding, Vector(256)).cosine_distance(fake_vec),
+            col(Article.id).desc(),
+        )
         .limit(5)
     ).all()
     assert [a["id"] for a in data["data"]] == list(expected_ids)
