@@ -27,6 +27,7 @@
 
 ### Internal
 
+* ⬆️ Update latest-changes to 0.6.1. PR [#2367](https://github.com/fastapi/full-stack-fastapi-template/pull/2367) by [@tiangolo](https://github.com/tiangolo).
 * ➕ Move prek to top level dependencies. PR [#2353](https://github.com/fastapi/full-stack-fastapi-template/pull/2353) by [@tiangolo](https://github.com/tiangolo).
 * 🔧 Sort keys in pyproject.toml. PR [#2350](https://github.com/fastapi/full-stack-fastapi-template/pull/2350) by [@tiangolo](https://github.com/tiangolo).
 * 👷 Simplify pull request workflow triggers. PR [#2349](https://github.com/fastapi/full-stack-fastapi-template/pull/2349) by [@tiangolo](https://github.com/tiangolo).
