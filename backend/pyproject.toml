@@ -2,9 +2,9 @@
 name = "app"
 version = "0.1.0"
 description = ""
-requires-python = ">=3.10,<4.0"
+requires-python = ">=3.14,<4.0"
 dependencies = [
-    "fastapi[standard]<1.0.0,>=0.114.2",
+    "fastapi[standard]>=0.138.1,<1.0.0",
     "python-multipart<1.0.0,>=0.0.27",
     "email-validator<3.0.0.0,>=2.1.0.post1",
     "tenacity<10.0.0,>=8.2.3",
@@ -14,7 +14,7 @@ dependencies = [
     "alembic<2.0.0,>=1.12.1",
     "httpx<1.0.0,>=0.25.1",
     "psycopg[binary]<4.0.0,>=3.1.13",
-    "sqlmodel<1.0.0,>=0.0.21",
+    "sqlmodel>=0.0.39,<1.0.0",
     "pydantic-settings<3.0.0,>=2.2.1",
     "sentry-sdk[fastapi]>=2.0.0,<3.0.0",
     "pyjwt<3.0.0,>=2.13.0",
@@ -27,7 +27,6 @@ dev = [
     "mypy<3.0.0,>=1.8.0",
     "ty>=0.0.25",
     "ruff<1.0.0,>=0.2.2",
-    "prek>=0.2.24,<1.0.0",
     "coverage<8.0.0,>=7.4.3",
 ]
 
@@ -40,7 +39,7 @@ strict = true
 exclude = ["venv", ".venv", "alembic"]
 
 [tool.ruff]
-target-version = "py310"
+target-version = "py314"
 exclude = ["alembic"]
 
 [tool.ruff.lint]
@@ -79,3 +78,6 @@ show_contexts = true
 
 [tool.ty.terminal]
 error-on-warning = true
+
+[tool.fastapi]
+entrypoint = "app.main:app"

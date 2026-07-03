@@ -2,13 +2,21 @@
 
 ## Latest Changes
 
+### Features
+
+* 🔧 Use FastAPI entrypoint. PR [#2360](https://github.com/fastapi/full-stack-fastapi-template/pull/2360) by [@tiangolo](https://github.com/tiangolo).
+* ♻️ Add library-skills for FastAPI and SQLModel. PR [#2354](https://github.com/fastapi/full-stack-fastapi-template/pull/2354) by [@tiangolo](https://github.com/tiangolo).
+
 ### Refactors
 
+* ♻️ Refactor models to improve types. PR [#2356](https://github.com/fastapi/full-stack-fastapi-template/pull/2356) by [@tiangolo](https://github.com/tiangolo).
 * 🔧 Add FastAPI VS Code extension to recommended extensions. PR [#2206](https://github.com/fastapi/full-stack-fastapi-template/pull/2206) by [@tiangolo](https://github.com/tiangolo).
 * ♻️ Update meta titles. PR [#2179](https://github.com/fastapi/full-stack-fastapi-template/pull/2179) by [@alejsdev](https://github.com/alejsdev).
 
 ### Upgrades
 
+* ⬆️ Upgrade FastAPI version. PR [#2357](https://github.com/fastapi/full-stack-fastapi-template/pull/2357) by [@tiangolo](https://github.com/tiangolo).
+* ⬆️ Upgrade Python to 3.14. PR [#2352](https://github.com/fastapi/full-stack-fastapi-template/pull/2352) by [@tiangolo](https://github.com/tiangolo).
 * ⬆️ Upgrade Sentry and FastAPI. PR [#2181](https://github.com/fastapi/full-stack-fastapi-template/pull/2181) by [@patrick91](https://github.com/patrick91).
 
 ### Docs
@@ -19,6 +27,14 @@
 
 ### Internal
 
+* ⬆️ Update latest-changes to 0.6.1. PR [#2367](https://github.com/fastapi/full-stack-fastapi-template/pull/2367) by [@tiangolo](https://github.com/tiangolo).
+* ➕ Move prek to top level dependencies. PR [#2353](https://github.com/fastapi/full-stack-fastapi-template/pull/2353) by [@tiangolo](https://github.com/tiangolo).
+* 🔧 Sort keys in pyproject.toml. PR [#2350](https://github.com/fastapi/full-stack-fastapi-template/pull/2350) by [@tiangolo](https://github.com/tiangolo).
+* 👷 Simplify pull request workflow triggers. PR [#2349](https://github.com/fastapi/full-stack-fastapi-template/pull/2349) by [@tiangolo](https://github.com/tiangolo).
+* 👷 Update issue-manager to 0.7.1. PR [#2348](https://github.com/fastapi/full-stack-fastapi-template/pull/2348) by [@tiangolo](https://github.com/tiangolo).
+* ⬆️ Update issue-manager to 0.7.0. PR [#2347](https://github.com/fastapi/full-stack-fastapi-template/pull/2347) by [@tiangolo](https://github.com/tiangolo).
+* 🔒️ Update zizmor workflow security checks. PR [#2345](https://github.com/fastapi/full-stack-fastapi-template/pull/2345) by [@tiangolo](https://github.com/tiangolo).
+* 👷 Add pre-commit hook to catch typos. PR [#2317](https://github.com/fastapi/full-stack-fastapi-template/pull/2317) by [@YuriiMotov](https://github.com/YuriiMotov).
 * Bump form-data from 4.0.5 to 4.0.6 in /frontend. PR [#2337](https://github.com/fastapi/full-stack-fastapi-template/pull/2337) by [@dependabot[bot]](https://github.com/apps/dependabot).
 * ⬆ Bump starlette from 1.0.1 to 1.3.1. PR [#2338](https://github.com/fastapi/full-stack-fastapi-template/pull/2338) by [@dependabot[bot]](https://github.com/apps/dependabot).
 * ⬆ Bump the python-packages group across 1 directory with 16 updates. PR [#2340](https://github.com/fastapi/full-stack-fastapi-template/pull/2340) by [@dependabot[bot]](https://github.com/apps/dependabot).
