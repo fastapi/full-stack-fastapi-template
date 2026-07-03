@@ -20,6 +20,21 @@ app = FastAPI(
     generate_unique_id_function=custom_generate_unique_id,
 )
 
+start_time = time.time()
+
+
+@app.get("/health")
+def health():
+    uptime = time.time() - start_time
+
+    return {
+        "status": "ok",
+        "service": "backend-test",
+        "uptime_seconds": round(uptime, 2),
+        "timestamp": datetime.utcnow().isoformat()
+    }
+
+
 # Set all CORS enabled origins
 if settings.all_cors_origins:
     app.add_middleware(
