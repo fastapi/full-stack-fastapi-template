@@ -6,6 +6,7 @@ from typing import Any
 
 import emails  # type: ignore[import-untyped]
 import jwt
+import resend
 from jinja2 import Template
 from jwt.exceptions import InvalidTokenError
 
@@ -37,6 +38,18 @@ def send_email(
     html_content: str = "",
 ) -> None:
     assert settings.emails_enabled, "no provided configuration for email variables"
+    if settings.RESEND_API_KEY:
+        resend.api_key = settings.RESEND_API_KEY
+        response = resend.Emails.send(
+            {
+                "from": f"{settings.EMAILS_FROM_NAME} <{settings.EMAILS_FROM_EMAIL}>",
+                "to": email_to,
+                "subject": subject,
+                "html": html_content,
+            }
+        )
+        logger.info(f"send email result: {response}")
+        return
     message = emails.Message(
         subject=subject,
         html=html_content,

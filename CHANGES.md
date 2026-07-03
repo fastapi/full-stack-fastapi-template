@@ -4,6 +4,34 @@ Changes made on top of `fastapi/full-stack-fastapi-template`. Upstream files are
 
 ---
 
+## 2026-07-02 — password reset: switch to Resend
+
+Password recovery had no working email backend. `recover_password`
+(`backend/app/api/routes/login.py`) always called `send_email`, which asserts
+`settings.emails_enabled` and then sends over SMTP via the `emails` package.
+This deployment only ever configures `RESEND_API_KEY` (see `compose.yml`,
+already used by `backend/app/api/routes/newsletter.py`) — `SMTP_HOST`/
+`SMTP_PASSWORD` are never set, so `emails_enabled` was `False` and every
+password-recovery request raised an `AssertionError` (500).
+- **Touched, upstream (low conflict risk):** `backend/app/core/config.py` —
+  added `RESEND_API_KEY: str | None`; `emails_enabled` is now
+  `bool(EMAILS_FROM_EMAIL and (RESEND_API_KEY or SMTP_HOST))` instead of
+  requiring `SMTP_HOST` specifically.
+- **Touched, upstream (low conflict risk):** `backend/app/utils.py` —
+  `send_email` now sends via `resend.Emails.send(...)` when
+  `settings.RESEND_API_KEY` is set (mirrors the `resend` usage pattern already
+  established in `newsletter.py`), falling back to the existing SMTP/`emails`
+  path otherwise so self-hosted SMTP configs keep working unchanged. This
+  applies to all transactional email (password reset, new-account, test
+  email), not just password reset.
+- **Touched, ours:** `backend/tests/api/routes/test_login.py` —
+  `test_recovery_password` now configures `RESEND_API_KEY` and asserts
+  `resend.Emails.send` is called (mirrors `test_newsletter.py`'s mocking
+  style); added `test_recovery_password_smtp_fallback` to keep the original
+  SMTP-path coverage.
+
+---
+
 ## 2026-07-02 — article likes with profile page
 
 Adds boolean article likes (fire icon + count, visible to everyone), a "Popular"

@@ -1,5 +1,6 @@
 from unittest.mock import patch
 
+import resend
 from fastapi.testclient import TestClient
 from pwdlib.hashers.bcrypt import BcryptHasher
 from sqlmodel import Session
@@ -47,12 +48,38 @@ def test_use_access_token(
 
 
 def test_recovery_password(
+    client: TestClient, normal_user_token_headers: dict[str, str], monkeypatch
+) -> None:
+    monkeypatch.setattr(
+        "app.core.config.settings.RESEND_API_KEY", "test-key", raising=False
+    )
+    monkeypatch.setattr(
+        "app.core.config.settings.EMAILS_FROM_EMAIL", "admin@example.com"
+    )
+    calls = []
+    monkeypatch.setattr(resend.Emails, "send", lambda payload: calls.append(payload))
+
+    email = "test@example.com"
+    r = client.post(
+        f"{settings.API_V1_STR}/password-recovery/{email}",
+        headers=normal_user_token_headers,
+    )
+    assert r.status_code == 200
+    assert r.json() == {
+        "message": "If that email is registered, we sent a password recovery link"
+    }
+    assert len(calls) == 1
+    assert calls[0]["to"] == email
+
+
+def test_recovery_password_smtp_fallback(
     client: TestClient, normal_user_token_headers: dict[str, str]
 ) -> None:
     with (
         patch("app.core.config.settings.SMTP_HOST", "smtp.example.com"),
         patch("app.core.config.settings.SMTP_USER", "admin@example.com"),
         patch("app.core.config.settings.EMAILS_FROM_EMAIL", "admin@example.com"),
+        patch("app.core.config.settings.RESEND_API_KEY", None),
     ):
         email = "test@example.com"
         r = client.post(
