@@ -32,7 +32,8 @@ jobs:
         run: echo "$GITHUB_CONTEXT"
       - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
         with:
-          # To allow latest-changes to commit to the main branch
+          ref: ${{ github.event.repository.default_branch }}
+          # To allow latest-changes to commit to the default branch
           token: ${{ secrets.LATEST_CHANGES }} # zizmor: ignore[secrets-outside-env]
           persist-credentials: true # required by tiangolo/latest-changes
       - uses: tiangolo/latest-changes@c9b73efbc8992ef1a401e4235ea307a8ca8a724b # 0.6.1
