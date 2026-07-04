@@ -28,6 +28,7 @@
 
 ### Internal
 
+* ⬆ Bump the npm-packages group across 1 directory with 37 updates. PR [#2333](https://github.com/fastapi/full-stack-fastapi-template/pull/2333) by [@dependabot[bot]](https://github.com/apps/dependabot).
 * 👷 Update latest-changes. PR [#2375](https://github.com/fastapi/full-stack-fastapi-template/pull/2375) by [@tiangolo](https://github.com/tiangolo).
 * ⬆ Bump playwright from v1.58.2-noble to v1.61.1-noble in /frontend in the docker group across 1 directory. PR [#2361](https://github.com/fastapi/full-stack-fastapi-template/pull/2361) by [@dependabot[bot]](https://github.com/apps/dependabot).
 * ⬆️ Update issue-manager to 0.8.1. PR [#2368](https://github.com/fastapi/full-stack-fastapi-template/pull/2368) by [@tiangolo](https://github.com/tiangolo).
