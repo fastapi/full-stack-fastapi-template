@@ -9,7 +9,7 @@ dependencies = [
     "email-validator<3.0.0.0,>=2.1.0.post1",
     "tenacity<10.0.0,>=8.2.3",
     "pydantic>2.0",
-    "emails<1.0,>=0.6",
+    "emails>=1.1.2,<2.0",
     "jinja2<4.0.0,>=3.1.4",
     "alembic<2.0.0,>=1.12.1",
     "httpx<1.0.0,>=0.25.1",

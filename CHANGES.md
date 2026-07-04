@@ -4,6 +4,38 @@ Changes made on top of `fastapi/full-stack-fastapi-template`. Upstream files are
 
 ---
 
+## 2026-07-04 — merge upstream/master (10 commits)
+
+Merged `fastapi/full-stack-fastapi-template@a758585` (release-notes + dependency
+bumps only; no application-code changes upstream). All 10 commits auto-merged
+except `uv.lock`.
+
+- **Only real conflict: `uv.lock`.** Resolved by re-locking, not hand-editing:
+  restored our pre-merge lock (all Agentique deps pinned) and ran `uv lock` in a
+  `ghcr.io/astral-sh/uv:python3.14-bookworm-slim` container (host has no Python
+  3.14, and uv couldn't download it), so uv applied the *minimal* change —
+  `emails` 0.6 → 1.1.2 plus its transitive delta (dropped `premailer`/
+  `cssselect`/`cssutils`/`encutils`/`more-itertools`/`chardet`/`cachetools`,
+  added `dkimpy`/`puremagic`). Everything else stayed pinned. Note: starting the
+  re-lock from *upstream's* lock instead loses our backend deps unless you pass
+  `--upgrade` (which then churns every package); start from ours + plain `uv lock`.
+- **`backend/app/utils.py`, `backend/pyproject.toml` (upstream-owned):** took
+  upstream's `emails` 0.6 → 1.1.2 bump and its API change
+  (`emails.Message` → `emails.message.Message`, added `assert
+  settings.EMAILS_FROM_EMAIL`). Layered on top of our Resend early-return in
+  `send_email` (2026-07-02 entry), so both the Resend and SMTP paths coexist.
+- **Workflows (all touched by both sides):** auto-merged cleanly — upstream's
+  `actions/checkout` v6.0.3 → v7.0.0 bumps landed in the `steps:` blocks while
+  our trigger-neutering stayed in the `on:` blocks (`issue-manager` also picked
+  up `0.8.1`, `latest-changes` `0.6.1`). One manual fixup: our split
+  `deploy-production.yml` build-job checkout (a step we added, so the merge
+  couldn't align upstream's bump onto it) was hand-bumped v6.0.3 → v7.0.0 to
+  match the deploy job. All workflow checkouts now on v7.0.0.
+- `.pre-commit-config.yaml` (`typos` v1.46.0 → v1.47.2) and `release-notes.md`
+  taken as-is (not previously touched by this fork).
+
+---
+
 ## 2026-07-02 — fix stats endpoint URL in footer
 
 `frontend/src/components/Common/Footer.tsx` hand-rolls a `fetch` to the stats

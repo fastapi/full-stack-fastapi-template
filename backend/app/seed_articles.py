@@ -6,7 +6,7 @@ from sqlmodel import Session, delete
 
 from app.core.config import settings
 from app.core.db import engine
-from app.models_agentique import Article
+from app.models_agentique import Article, ArticleLike
 
 # Fixed seed so local dev, CI, and the Playwright stack all get the same 50 rows.
 SEED = 20260701
@@ -63,6 +63,8 @@ def make_sample_articles() -> list[Article]:
 
 
 def seed(session: Session) -> None:
+    # article_like FK-references article, so clear it before wiping articles.
+    session.exec(delete(ArticleLike))
     session.exec(delete(Article))
     session.add_all(make_sample_articles())
     session.commit()
