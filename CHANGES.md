@@ -4,6 +4,21 @@ Changes made on top of `fastapi/full-stack-fastapi-template`. Upstream files are
 
 ---
 
+## 2026-07-02 — fix stats endpoint URL in footer
+
+`frontend/src/components/Common/Footer.tsx` hand-rolls a `fetch` to the stats
+endpoint instead of using the generated `ArticlesService`, and was missing
+the `/api/v1` prefix (`settings.API_V1_STR`) that `app.include_router(api_router,
+prefix=settings.API_V1_STR)` mounts the whole API under in
+`backend/app/main.py`. Every request 404'd, silently caught by the existing
+`if (!res.ok) return { total: 0, lastUpdated: null }` fallback, so the
+footer always rendered blank instead of the article count/last-updated
+label. Backend endpoint (`GET /articles/stats` in
+`backend/app/api/routes/articles.py`) and its test were already correct and
+untouched. Fixed by adding the missing `/api/v1` segment to the fetch URL.
+
+---
+
 ## 2026-07-02 — password reset: switch to Resend
 
 Password recovery had no working email backend. `recover_password`

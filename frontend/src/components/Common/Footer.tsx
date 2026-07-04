@@ -4,7 +4,9 @@ async function fetchStats(): Promise<{
   total: number
   lastUpdated: string | null
 }> {
-  const res = await fetch(`${import.meta.env.VITE_API_URL}/articles/stats`)
+  const res = await fetch(
+    `${import.meta.env.VITE_API_URL}/api/v1/articles/stats`,
+  )
   if (!res.ok) return { total: 0, lastUpdated: null }
   return res.json()
 }
