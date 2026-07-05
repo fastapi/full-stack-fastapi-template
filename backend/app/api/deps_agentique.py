@@ -22,7 +22,7 @@ def get_current_user_optional(request: Request, session: SessionDep) -> User | N
             token, settings.SECRET_KEY, algorithms=[security.ALGORITHM]
         )
         token_data = TokenPayload(**payload)
-    except InvalidTokenError, ValidationError:
+    except (InvalidTokenError, ValidationError):
         return None
 
     user = session.get(User, token_data.sub)
