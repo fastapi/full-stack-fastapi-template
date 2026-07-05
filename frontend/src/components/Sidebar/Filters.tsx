@@ -10,8 +10,8 @@ const DATE_OPTIONS = [
 ]
 
 const SORT_OPTIONS = [
-  { value: "score-desc", label: "Score" },
   { value: "published_at-desc", label: "Date" },
+  { value: "score-desc", label: "Score" },
   { value: "likes-desc", label: "Popular" },
 ]
 

@@ -19,7 +19,7 @@ export function FiltersProvider({ children }: { children: ReactNode }) {
   const [filters, setFilters] = useState<Filters>({
     search: "",
     dateRange: "1w",
-    sort: "score-desc",
+    sort: "published_at-desc",
     category: "",
     kind: "",
   })
