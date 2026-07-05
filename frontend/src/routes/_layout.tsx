@@ -43,5 +43,3 @@ function Layout() {
     </FiltersProvider>
   )
 }
-
-export default Layout
