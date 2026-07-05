@@ -109,3 +109,28 @@ test("Redirects to /login when token is wrong", async ({ page }) => {
   await page.waitForURL("/login")
   await expect(page).toHaveURL("/login")
 })
+
+test("Clears token and redirects to /login when current user is 404 (deleted user)", async ({
+  page,
+}) => {
+  // A well-formed token whose user no longer exists (e.g. the DB was reset in local dev
+  await page.route("**/api/v1/users/me", (route) =>
+    route.fulfill({
+      status: 404,
+      contentType: "application/json",
+      body: JSON.stringify({ detail: "User not found" }),
+    }),
+  )
+
+  await page.goto("/")
+  await page.evaluate(() => {
+    localStorage.setItem("access_token", "stale-token-for-deleted-user")
+  })
+  await page.goto("/")
+
+  await page.waitForURL("/login")
+  await expect(page).toHaveURL("/login")
+
+  const token = await page.evaluate(() => localStorage.getItem("access_token"))
+  expect(token).toBeNull()
+})

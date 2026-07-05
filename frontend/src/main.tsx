@@ -18,15 +18,35 @@ OpenAPI.TOKEN = async () => {
   return localStorage.getItem("access_token") || ""
 }
 
+const clearSession = () => {
+  localStorage.removeItem("access_token")
+  window.location.href = "/login"
+}
+
 const handleApiError = (error: Error) => {
   if (error instanceof ApiError && [401, 403].includes(error.status)) {
-    localStorage.removeItem("access_token")
-    window.location.href = "/login"
+    clearSession()
   }
 }
+
+const AUTH_FAILURE_STATUSES = [400, 401, 403, 404]
+
 const queryClient = new QueryClient({
+  defaultOptions: {
+    queries: { retry: false },
+  },
   queryCache: new QueryCache({
-    onError: handleApiError,
+    onError: (error, query) => {
+      if (
+        query.queryKey[0] === "currentUser" &&
+        error instanceof ApiError &&
+        AUTH_FAILURE_STATUSES.includes(error.status)
+      ) {
+        clearSession()
+        return
+      }
+      handleApiError(error)
+    },
   }),
   mutationCache: new MutationCache({
     onError: handleApiError,
