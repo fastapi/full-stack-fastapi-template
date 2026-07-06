@@ -14,7 +14,8 @@ async function fetchStats(): Promise<{
 function formatLastUpdated(iso: string | null): string {
   if (!iso) return ""
   try {
-    const d = new Date(`${iso}Z`)
+    const hasTimezone = /[+-]\d{2}:\d{2}$|Z$/.test(iso)
+    const d = new Date(hasTimezone ? iso : `${iso}Z`)
     const diffMs = Date.now() - d.getTime()
     const diffH = Math.floor(diffMs / 3_600_000)
     if (diffH < 1) return "Updated just now"
