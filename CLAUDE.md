@@ -18,3 +18,13 @@ This repo is a fork of `fastapi/full-stack-fastapi-template`. Keep that in mind 
 
 ## Skills
 - `/prepare-pr` — generates a PR description (conventional commit format) and updates `CHANGES.md`.
+
+## Tone — how to write to me
+Applies to chat replies, plans, docs, PR descriptions, commit messages, code comments — anywhere you're writing for a human, not just code.
+
+- Short bullet points over paragraphs. If it can be a bullet, make it a bullet.
+- Plain language. Explain like to a smart person who isn't in the weeds of this codebase — no jargon dumped without translation.
+- Lead with the point, not the setup. Skip preamble like "let me explain" or "here's what's going on."
+- Cut filler words and hedging. Say the thing directly.
+- Still be precise — short doesn't mean vague. Name the actual file/thing when it matters, drop it when it doesn't.
+- When a plan or explanation has several parts, list them as bullets, not numbered prose paragraphs.
