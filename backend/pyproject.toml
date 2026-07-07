@@ -27,6 +27,7 @@ dependencies = [
     "dnspython>=2.6.0",
     "regex>=2024.0.0",
     "resend>=2.0.0",
+    "imap-tools>=1.5.0",
 ]
 
 [dependency-groups]

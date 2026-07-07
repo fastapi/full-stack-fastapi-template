@@ -2,6 +2,11 @@
 
 ---
 
+## 2026-07-07 — newsletter + RSS pipeline sources
+
+- `backend/pyproject.toml` — `imap-tools` dependency.
+- New files: `backend/pipeline/sources/email.py` (IMAP newsletter source, wired into `SOURCES`), `backend/pipeline/sources/rss.py` (generic multi-feed RSS source, not wired in — mirrors original TS, which also had it disabled).
+
 ## 2026-07-05
 
 - `frontend/src/main.tsx` — `currentUser` query `onError` clears token and redirects to `/login` on `400/401/403/404`; sets `retry=false` for immediate redirect.
