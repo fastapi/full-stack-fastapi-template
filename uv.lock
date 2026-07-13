@@ -107,7 +107,7 @@ requires-dist = [
     { name = "pydantic-settings", specifier = ">=2.2.1,<3.0.0" },
     { name = "pyjwt", specifier = ">=2.13.0,<3.0.0" },
     { name = "python-multipart", specifier = ">=0.0.27,<1.0.0" },
-    { name = "sentry-sdk", extras = ["fastapi"], specifier = ">=2.0.0,<3.0.0" },
+    { name = "sentry-sdk", extras = ["fastapi"], specifier = ">=2.63.0,<3.0.0" },
     { name = "sqlmodel", specifier = ">=0.0.39,<1.0.0" },
     { name = "tenacity", specifier = ">=8.2.3,<10.0.0" },
 ]
