@@ -28,6 +28,7 @@
 
 ### Internal
 
+* ⬆ Bump the github-actions group across 1 directory with 5 updates. PR [#2379](https://github.com/fastapi/full-stack-fastapi-template/pull/2379) by [@dependabot[bot]](https://github.com/apps/dependabot).
 * 👷 Add GH workflow to bump pre-commit hook versions. PR [#2363](https://github.com/fastapi/full-stack-fastapi-template/pull/2363) by [@YuriiMotov](https://github.com/YuriiMotov).
 * 🔧 Set Dependabot schedule interval to "monthly". PR [#2364](https://github.com/fastapi/full-stack-fastapi-template/pull/2364) by [@YuriiMotov](https://github.com/YuriiMotov).
 * ⬆ Bump the npm-packages group across 1 directory with 37 updates. PR [#2333](https://github.com/fastapi/full-stack-fastapi-template/pull/2333) by [@dependabot[bot]](https://github.com/apps/dependabot).
