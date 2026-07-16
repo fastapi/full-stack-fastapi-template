@@ -1,7 +1,7 @@
 import uuid
 from typing import Any
 
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Depends, HTTPException, Query
 from sqlmodel import col, delete, func, select
 
 from app import crud
@@ -34,7 +34,9 @@ router = APIRouter(prefix="/users", tags=["users"])
     dependencies=[Depends(get_current_active_superuser)],
     response_model=UsersPublic,
 )
-def read_users(session: SessionDep, skip: int = 0, limit: int = 100) -> Any:
+def read_users(
+    session: SessionDep, skip: int = 0, limit: int = Query(default=100, le=100)
+) -> Any:
     """
     Retrieve users.
     """
