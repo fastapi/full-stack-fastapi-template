@@ -4,114 +4,339 @@ export type ClientOptions = {
     baseURL: `${string}://${string}` | (string & {});
 };
 
+/**
+ * Body_login-login_access_token
+ */
 export type Body_login_login_access_token = {
+    /**
+     * Grant Type
+     */
     grant_type?: string | null;
+    /**
+     * Username
+     */
     username: string;
+    /**
+     * Password
+     */
     password: string;
+    /**
+     * Scope
+     */
     scope?: string;
+    /**
+     * Client Id
+     */
     client_id?: string | null;
+    /**
+     * Client Secret
+     */
     client_secret?: string | null;
 };
 
+/**
+ * HTTPValidationError
+ */
 export type HTTPValidationError = {
+    /**
+     * Detail
+     */
     detail?: Array<ValidationError>;
 };
 
+/**
+ * ItemCreate
+ */
 export type ItemCreate = {
+    /**
+     * Title
+     */
     title: string;
+    /**
+     * Description
+     */
     description?: string | null;
 };
 
+/**
+ * ItemPublic
+ */
 export type ItemPublic = {
+    /**
+     * Title
+     */
     title: string;
+    /**
+     * Description
+     */
     description?: string | null;
+    /**
+     * Id
+     */
     id: string;
+    /**
+     * Owner Id
+     */
     owner_id: string;
+    /**
+     * Created At
+     */
     created_at?: string | null;
 };
 
+/**
+ * ItemUpdate
+ */
 export type ItemUpdate = {
+    /**
+     * Title
+     */
     title?: string | null;
+    /**
+     * Description
+     */
     description?: string | null;
 };
 
+/**
+ * ItemsPublic
+ */
 export type ItemsPublic = {
+    /**
+     * Data
+     */
     data: Array<ItemPublic>;
+    /**
+     * Count
+     */
     count: number;
 };
 
+/**
+ * Message
+ */
 export type Message = {
+    /**
+     * Message
+     */
     message: string;
 };
 
+/**
+ * NewPassword
+ */
 export type NewPassword = {
+    /**
+     * Token
+     */
     token: string;
+    /**
+     * New Password
+     */
     new_password: string;
 };
 
+/**
+ * PrivateUserCreate
+ */
 export type PrivateUserCreate = {
+    /**
+     * Email
+     */
     email: string;
+    /**
+     * Password
+     */
     password: string;
+    /**
+     * Full Name
+     */
     full_name: string;
+    /**
+     * Is Verified
+     */
     is_verified?: boolean;
 };
 
+/**
+ * Token
+ */
 export type Token = {
+    /**
+     * Access Token
+     */
     access_token: string;
+    /**
+     * Token Type
+     */
     token_type?: string;
 };
 
+/**
+ * UpdatePassword
+ */
 export type UpdatePassword = {
+    /**
+     * Current Password
+     */
     current_password: string;
+    /**
+     * New Password
+     */
     new_password: string;
 };
 
+/**
+ * UserCreate
+ */
 export type UserCreate = {
+    /**
+     * Email
+     */
     email: string;
+    /**
+     * Is Active
+     */
     is_active?: boolean;
+    /**
+     * Is Superuser
+     */
     is_superuser?: boolean;
+    /**
+     * Full Name
+     */
     full_name?: string | null;
+    /**
+     * Password
+     */
     password: string;
 };
 
+/**
+ * UserPublic
+ */
 export type UserPublic = {
+    /**
+     * Email
+     */
     email: string;
+    /**
+     * Is Active
+     */
     is_active?: boolean;
+    /**
+     * Is Superuser
+     */
     is_superuser?: boolean;
+    /**
+     * Full Name
+     */
     full_name?: string | null;
+    /**
+     * Id
+     */
     id: string;
+    /**
+     * Created At
+     */
     created_at?: string | null;
 };
 
+/**
+ * UserRegister
+ */
 export type UserRegister = {
+    /**
+     * Email
+     */
     email: string;
+    /**
+     * Password
+     */
     password: string;
+    /**
+     * Full Name
+     */
     full_name?: string | null;
 };
 
+/**
+ * UserUpdate
+ */
 export type UserUpdate = {
+    /**
+     * Email
+     */
     email?: string | null;
+    /**
+     * Is Active
+     */
     is_active?: boolean | null;
+    /**
+     * Is Superuser
+     */
     is_superuser?: boolean | null;
+    /**
+     * Full Name
+     */
     full_name?: string | null;
+    /**
+     * Password
+     */
     password?: string | null;
 };
 
+/**
+ * UserUpdateMe
+ */
 export type UserUpdateMe = {
+    /**
+     * Full Name
+     */
     full_name?: string | null;
+    /**
+     * Email
+     */
     email?: string | null;
 };
 
+/**
+ * UsersPublic
+ */
 export type UsersPublic = {
+    /**
+     * Data
+     */
     data: Array<UserPublic>;
+    /**
+     * Count
+     */
     count: number;
 };
 
+/**
+ * ValidationError
+ */
 export type ValidationError = {
+    /**
+     * Location
+     */
     loc: Array<string | number>;
+    /**
+     * Message
+     */
     msg: string;
+    /**
+     * Error Type
+     */
     type: string;
+    /**
+     * Input
+     */
     input?: unknown;
+    /**
+     * Context
+     */
     ctx?: {
         [key: string]: unknown;
     };
@@ -125,12 +350,18 @@ export type loginLoginAccessTokenData = {
 };
 
 export type loginLoginAccessTokenErrors = {
+    /**
+     * Validation Error
+     */
     422: HTTPValidationError;
 };
 
 export type loginLoginAccessTokenError = loginLoginAccessTokenErrors[keyof loginLoginAccessTokenErrors];
 
 export type loginLoginAccessTokenResponses = {
+    /**
+     * Successful Response
+     */
     200: Token;
 };
 
@@ -144,6 +375,9 @@ export type loginTestTokenData = {
 };
 
 export type loginTestTokenResponses = {
+    /**
+     * Successful Response
+     */
     200: UserPublic;
 };
 
@@ -152,6 +386,9 @@ export type loginTestTokenResponse = loginTestTokenResponses[keyof loginTestToke
 export type loginRecoverPasswordData = {
     body?: never;
     path: {
+        /**
+         * Email
+         */
         email: string;
     };
     query?: never;
@@ -159,12 +396,18 @@ export type loginRecoverPasswordData = {
 };
 
 export type loginRecoverPasswordErrors = {
+    /**
+     * Validation Error
+     */
     422: HTTPValidationError;
 };
 
 export type loginRecoverPasswordError = loginRecoverPasswordErrors[keyof loginRecoverPasswordErrors];
 
 export type loginRecoverPasswordResponses = {
+    /**
+     * Successful Response
+     */
     200: Message;
 };
 
@@ -178,12 +421,18 @@ export type loginResetPasswordData = {
 };
 
 export type loginResetPasswordErrors = {
+    /**
+     * Validation Error
+     */
     422: HTTPValidationError;
 };
 
 export type loginResetPasswordError = loginResetPasswordErrors[keyof loginResetPasswordErrors];
 
 export type loginResetPasswordResponses = {
+    /**
+     * Successful Response
+     */
     200: Message;
 };
 
@@ -192,6 +441,9 @@ export type loginResetPasswordResponse = loginResetPasswordResponses[keyof login
 export type loginRecoverPasswordHtmlContentData = {
     body?: never;
     path: {
+        /**
+         * Email
+         */
         email: string;
     };
     query?: never;
@@ -199,12 +451,18 @@ export type loginRecoverPasswordHtmlContentData = {
 };
 
 export type loginRecoverPasswordHtmlContentErrors = {
+    /**
+     * Validation Error
+     */
     422: HTTPValidationError;
 };
 
 export type loginRecoverPasswordHtmlContentError = loginRecoverPasswordHtmlContentErrors[keyof loginRecoverPasswordHtmlContentErrors];
 
 export type loginRecoverPasswordHtmlContentResponses = {
+    /**
+     * Successful Response
+     */
     200: string;
 };
 
@@ -214,19 +472,31 @@ export type usersReadUsersData = {
     body?: never;
     path?: never;
     query?: {
+        /**
+         * Skip
+         */
         skip?: number;
+        /**
+         * Limit
+         */
         limit?: number;
     };
     url: '/api/v1/users/';
 };
 
 export type usersReadUsersErrors = {
+    /**
+     * Validation Error
+     */
     422: HTTPValidationError;
 };
 
 export type usersReadUsersError = usersReadUsersErrors[keyof usersReadUsersErrors];
 
 export type usersReadUsersResponses = {
+    /**
+     * Successful Response
+     */
     200: UsersPublic;
 };
 
@@ -240,12 +510,18 @@ export type usersCreateUserData = {
 };
 
 export type usersCreateUserErrors = {
+    /**
+     * Validation Error
+     */
     422: HTTPValidationError;
 };
 
 export type usersCreateUserError = usersCreateUserErrors[keyof usersCreateUserErrors];
 
 export type usersCreateUserResponses = {
+    /**
+     * Successful Response
+     */
     200: UserPublic;
 };
 
@@ -259,6 +535,9 @@ export type usersDeleteUserMeData = {
 };
 
 export type usersDeleteUserMeResponses = {
+    /**
+     * Successful Response
+     */
     200: Message;
 };
 
@@ -272,6 +551,9 @@ export type usersReadUserMeData = {
 };
 
 export type usersReadUserMeResponses = {
+    /**
+     * Successful Response
+     */
     200: UserPublic;
 };
 
@@ -285,12 +567,18 @@ export type usersUpdateUserMeData = {
 };
 
 export type usersUpdateUserMeErrors = {
+    /**
+     * Validation Error
+     */
     422: HTTPValidationError;
 };
 
 export type usersUpdateUserMeError = usersUpdateUserMeErrors[keyof usersUpdateUserMeErrors];
 
 export type usersUpdateUserMeResponses = {
+    /**
+     * Successful Response
+     */
     200: UserPublic;
 };
 
@@ -304,12 +592,18 @@ export type usersUpdatePasswordMeData = {
 };
 
 export type usersUpdatePasswordMeErrors = {
+    /**
+     * Validation Error
+     */
     422: HTTPValidationError;
 };
 
 export type usersUpdatePasswordMeError = usersUpdatePasswordMeErrors[keyof usersUpdatePasswordMeErrors];
 
 export type usersUpdatePasswordMeResponses = {
+    /**
+     * Successful Response
+     */
     200: Message;
 };
 
@@ -323,12 +617,18 @@ export type usersRegisterUserData = {
 };
 
 export type usersRegisterUserErrors = {
+    /**
+     * Validation Error
+     */
     422: HTTPValidationError;
 };
 
 export type usersRegisterUserError = usersRegisterUserErrors[keyof usersRegisterUserErrors];
 
 export type usersRegisterUserResponses = {
+    /**
+     * Successful Response
+     */
     200: UserPublic;
 };
 
@@ -337,6 +637,9 @@ export type usersRegisterUserResponse = usersRegisterUserResponses[keyof usersRe
 export type usersDeleteUserData = {
     body?: never;
     path: {
+        /**
+         * User Id
+         */
         user_id: string;
     };
     query?: never;
@@ -344,12 +647,18 @@ export type usersDeleteUserData = {
 };
 
 export type usersDeleteUserErrors = {
+    /**
+     * Validation Error
+     */
     422: HTTPValidationError;
 };
 
 export type usersDeleteUserError = usersDeleteUserErrors[keyof usersDeleteUserErrors];
 
 export type usersDeleteUserResponses = {
+    /**
+     * Successful Response
+     */
     200: Message;
 };
 
@@ -358,6 +667,9 @@ export type usersDeleteUserResponse = usersDeleteUserResponses[keyof usersDelete
 export type usersReadUserByIdData = {
     body?: never;
     path: {
+        /**
+         * User Id
+         */
         user_id: string;
     };
     query?: never;
@@ -365,12 +677,18 @@ export type usersReadUserByIdData = {
 };
 
 export type usersReadUserByIdErrors = {
+    /**
+     * Validation Error
+     */
     422: HTTPValidationError;
 };
 
 export type usersReadUserByIdError = usersReadUserByIdErrors[keyof usersReadUserByIdErrors];
 
 export type usersReadUserByIdResponses = {
+    /**
+     * Successful Response
+     */
     200: UserPublic;
 };
 
@@ -379,6 +697,9 @@ export type usersReadUserByIdResponse = usersReadUserByIdResponses[keyof usersRe
 export type usersUpdateUserData = {
     body: UserUpdate;
     path: {
+        /**
+         * User Id
+         */
         user_id: string;
     };
     query?: never;
@@ -386,12 +707,18 @@ export type usersUpdateUserData = {
 };
 
 export type usersUpdateUserErrors = {
+    /**
+     * Validation Error
+     */
     422: HTTPValidationError;
 };
 
 export type usersUpdateUserError = usersUpdateUserErrors[keyof usersUpdateUserErrors];
 
 export type usersUpdateUserResponses = {
+    /**
+     * Successful Response
+     */
     200: UserPublic;
 };
 
@@ -401,18 +728,27 @@ export type utilsTestEmailData = {
     body?: never;
     path?: never;
     query: {
+        /**
+         * Email To
+         */
         email_to: string;
     };
     url: '/api/v1/utils/test-email/';
 };
 
 export type utilsTestEmailErrors = {
+    /**
+     * Validation Error
+     */
     422: HTTPValidationError;
 };
 
 export type utilsTestEmailError = utilsTestEmailErrors[keyof utilsTestEmailErrors];
 
 export type utilsTestEmailResponses = {
+    /**
+     * Successful Response
+     */
     201: Message;
 };
 
@@ -426,6 +762,11 @@ export type utilsHealthCheckData = {
 };
 
 export type utilsHealthCheckResponses = {
+    /**
+     * Response Utils-Health Check
+     *
+     * Successful Response
+     */
     200: boolean;
 };
 
@@ -435,19 +776,31 @@ export type itemsReadItemsData = {
     body?: never;
     path?: never;
     query?: {
+        /**
+         * Skip
+         */
         skip?: number;
+        /**
+         * Limit
+         */
         limit?: number;
     };
     url: '/api/v1/items/';
 };
 
 export type itemsReadItemsErrors = {
+    /**
+     * Validation Error
+     */
     422: HTTPValidationError;
 };
 
 export type itemsReadItemsError = itemsReadItemsErrors[keyof itemsReadItemsErrors];
 
 export type itemsReadItemsResponses = {
+    /**
+     * Successful Response
+     */
     200: ItemsPublic;
 };
 
@@ -461,12 +814,18 @@ export type itemsCreateItemData = {
 };
 
 export type itemsCreateItemErrors = {
+    /**
+     * Validation Error
+     */
     422: HTTPValidationError;
 };
 
 export type itemsCreateItemError = itemsCreateItemErrors[keyof itemsCreateItemErrors];
 
 export type itemsCreateItemResponses = {
+    /**
+     * Successful Response
+     */
     200: ItemPublic;
 };
 
@@ -475,6 +834,9 @@ export type itemsCreateItemResponse = itemsCreateItemResponses[keyof itemsCreate
 export type itemsDeleteItemData = {
     body?: never;
     path: {
+        /**
+         * Id
+         */
         id: string;
     };
     query?: never;
@@ -482,12 +844,18 @@ export type itemsDeleteItemData = {
 };
 
 export type itemsDeleteItemErrors = {
+    /**
+     * Validation Error
+     */
     422: HTTPValidationError;
 };
 
 export type itemsDeleteItemError = itemsDeleteItemErrors[keyof itemsDeleteItemErrors];
 
 export type itemsDeleteItemResponses = {
+    /**
+     * Successful Response
+     */
     200: Message;
 };
 
@@ -496,6 +864,9 @@ export type itemsDeleteItemResponse = itemsDeleteItemResponses[keyof itemsDelete
 export type itemsReadItemData = {
     body?: never;
     path: {
+        /**
+         * Id
+         */
         id: string;
     };
     query?: never;
@@ -503,12 +874,18 @@ export type itemsReadItemData = {
 };
 
 export type itemsReadItemErrors = {
+    /**
+     * Validation Error
+     */
     422: HTTPValidationError;
 };
 
 export type itemsReadItemError = itemsReadItemErrors[keyof itemsReadItemErrors];
 
 export type itemsReadItemResponses = {
+    /**
+     * Successful Response
+     */
     200: ItemPublic;
 };
 
@@ -517,6 +894,9 @@ export type itemsReadItemResponse = itemsReadItemResponses[keyof itemsReadItemRe
 export type itemsUpdateItemData = {
     body: ItemUpdate;
     path: {
+        /**
+         * Id
+         */
         id: string;
     };
     query?: never;
@@ -524,12 +904,18 @@ export type itemsUpdateItemData = {
 };
 
 export type itemsUpdateItemErrors = {
+    /**
+     * Validation Error
+     */
     422: HTTPValidationError;
 };
 
 export type itemsUpdateItemError = itemsUpdateItemErrors[keyof itemsUpdateItemErrors];
 
 export type itemsUpdateItemResponses = {
+    /**
+     * Successful Response
+     */
     200: ItemPublic;
 };
 
@@ -543,12 +929,18 @@ export type privateCreateUserData = {
 };
 
 export type privateCreateUserErrors = {
+    /**
+     * Validation Error
+     */
     422: HTTPValidationError;
 };
 
 export type privateCreateUserError = privateCreateUserErrors[keyof privateCreateUserErrors];
 
 export type privateCreateUserResponses = {
+    /**
+     * Successful Response
+     */
     200: UserPublic;
 };
 
