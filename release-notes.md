@@ -28,6 +28,13 @@
 
 ### Internal
 
+* Bump axios from 1.16.0 to 1.18.0 in /frontend. PR [#2386](https://github.com/fastapi/full-stack-fastapi-template/pull/2386) by [@dependabot[bot]](https://github.com/apps/dependabot).
+* ⬆ Bump pre-commit hooks. PR [#2382](https://github.com/fastapi/full-stack-fastapi-template/pull/2382) by [@tiangolo](https://github.com/tiangolo).
+* ⬆ Bump the python-packages group across 1 directory with 2 updates. PR [#2380](https://github.com/fastapi/full-stack-fastapi-template/pull/2380) by [@dependabot[bot]](https://github.com/apps/dependabot).
+* ⬆ Update sentry-sdk[fastapi] requirement from <3.0.0,>=2.0.0 to >=2.63.0,<3.0.0. PR [#2373](https://github.com/fastapi/full-stack-fastapi-template/pull/2373) by [@dependabot[bot]](https://github.com/apps/dependabot).
+* ⬆ Bump the github-actions group across 1 directory with 5 updates. PR [#2379](https://github.com/fastapi/full-stack-fastapi-template/pull/2379) by [@dependabot[bot]](https://github.com/apps/dependabot).
+* 👷 Add GH workflow to bump pre-commit hook versions. PR [#2363](https://github.com/fastapi/full-stack-fastapi-template/pull/2363) by [@YuriiMotov](https://github.com/YuriiMotov).
+* 🔧 Set Dependabot schedule interval to "monthly". PR [#2364](https://github.com/fastapi/full-stack-fastapi-template/pull/2364) by [@YuriiMotov](https://github.com/YuriiMotov).
 * ⬆ Bump the npm-packages group across 1 directory with 37 updates. PR [#2333](https://github.com/fastapi/full-stack-fastapi-template/pull/2333) by [@dependabot[bot]](https://github.com/apps/dependabot).
 * 👷 Update latest-changes. PR [#2375](https://github.com/fastapi/full-stack-fastapi-template/pull/2375) by [@tiangolo](https://github.com/tiangolo).
 * ⬆ Bump playwright from v1.58.2-noble to v1.61.1-noble in /frontend in the docker group across 1 directory. PR [#2361](https://github.com/fastapi/full-stack-fastapi-template/pull/2361) by [@dependabot[bot]](https://github.com/apps/dependabot).
