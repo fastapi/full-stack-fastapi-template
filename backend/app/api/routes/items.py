@@ -5,12 +5,12 @@ from fastapi import APIRouter, HTTPException
 from sqlmodel import col, func, select
 
 from app.api.deps import CurrentUser, SessionDep
-from app.models import Item, ItemCreate, ItemPublic, ItemsPublic, ItemUpdate, Message
+from app.models import Item, ItemCreate, ItemPublic, PaginatedResponse, ItemUpdate, Message
 
 router = APIRouter(prefix="/items", tags=["items"])
 
 
-@router.get("/", response_model=ItemsPublic)
+@router.get("/", response_model=PaginatedResponse[ItemPublic])
 def read_items(
     session: SessionDep, current_user: CurrentUser, skip: int = 0, limit: int = 100
 ) -> Any:
@@ -42,7 +42,7 @@ def read_items(
         items = session.exec(statement).all()
 
     items_public = [ItemPublic.model_validate(item) for item in items]
-    return ItemsPublic(data=items_public, count=count)
+    return PaginatedResponse(data=items_public, count=count)
 
 
 @router.get("/{id}", response_model=ItemPublic)

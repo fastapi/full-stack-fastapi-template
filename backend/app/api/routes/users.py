@@ -20,7 +20,7 @@ from app.models import (
     UserCreate,
     UserPublic,
     UserRegister,
-    UsersPublic,
+    PaginatedResponse,
     UserUpdate,
     UserUpdateMe,
 )
@@ -32,7 +32,7 @@ router = APIRouter(prefix="/users", tags=["users"])
 @router.get(
     "/",
     dependencies=[Depends(get_current_active_superuser)],
-    response_model=UsersPublic,
+    response_model=PaginatedResponse[UserPublic],
 )
 def read_users(session: SessionDep, skip: int = 0, limit: int = 100) -> Any:
     """
@@ -48,7 +48,7 @@ def read_users(session: SessionDep, skip: int = 0, limit: int = 100) -> Any:
     users = session.exec(statement).all()
 
     users_public = [UserPublic.model_validate(user) for user in users]
-    return UsersPublic(data=users_public, count=count)
+    return PaginatedResponse(data=users_public, count=count)
 
 
 @router.post(

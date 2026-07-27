@@ -1,5 +1,6 @@
 import uuid
 from datetime import UTC, datetime
+from typing import Generic, TypeVar
 
 from pydantic import EmailStr
 from sqlalchemy import DateTime
@@ -8,6 +9,13 @@ from sqlmodel import Field, Relationship, SQLModel
 
 def get_datetime_utc() -> datetime:
     return datetime.now(UTC)
+
+
+T = TypeVar("T")
+
+class PaginatedResponse(SQLModel, Generic[T]):
+    data: list[T]
+    count: int
 
 
 # Shared properties
@@ -65,11 +73,6 @@ class UserPublic(UserBase):
     created_at: datetime | None = None
 
 
-class UsersPublic(SQLModel):
-    data: list[UserPublic]
-    count: int
-
-
 # Shared properties
 class ItemBase(SQLModel):
     title: str = Field(min_length=1, max_length=255)
@@ -105,11 +108,6 @@ class ItemPublic(ItemBase):
     id: uuid.UUID
     owner_id: uuid.UUID
     created_at: datetime | None = None
-
-
-class ItemsPublic(SQLModel):
-    data: list[ItemPublic]
-    count: int
 
 
 # Generic message
