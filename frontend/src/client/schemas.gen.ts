@@ -177,25 +177,6 @@ export const ItemUpdateSchema = {
     title: 'ItemUpdate'
 } as const;
 
-export const ItemsPublicSchema = {
-    properties: {
-        data: {
-            items: {
-                '$ref': '#/components/schemas/ItemPublic'
-            },
-            type: 'array',
-            title: 'Data'
-        },
-        count: {
-            type: 'integer',
-            title: 'Count'
-        }
-    },
-    type: 'object',
-    required: ['data', 'count'],
-    title: 'ItemsPublic'
-} as const;
-
 export const MessageSchema = {
     properties: {
         message: {
@@ -224,6 +205,40 @@ export const NewPasswordSchema = {
     type: 'object',
     required: ['token', 'new_password'],
     title: 'NewPassword'
+} as const;
+
+export const PaginatedResponse_ItemPublic_Schema = {
+    properties: {
+        data: {
+            items: {},
+            type: 'array',
+            title: 'Data'
+        },
+        count: {
+            type: 'integer',
+            title: 'Count'
+        }
+    },
+    type: 'object',
+    required: ['data', 'count'],
+    title: 'PaginatedResponse[ItemPublic]'
+} as const;
+
+export const PaginatedResponse_UserPublic_Schema = {
+    properties: {
+        data: {
+            items: {},
+            type: 'array',
+            title: 'Data'
+        },
+        count: {
+            type: 'integer',
+            title: 'Count'
+        }
+    },
+    type: 'object',
+    required: ['data', 'count'],
+    title: 'PaginatedResponse[UserPublic]'
 } as const;
 
 export const PrivateUserCreateSchema = {
@@ -512,25 +527,6 @@ export const UserUpdateMeSchema = {
     },
     type: 'object',
     title: 'UserUpdateMe'
-} as const;
-
-export const UsersPublicSchema = {
-    properties: {
-        data: {
-            items: {
-                '$ref': '#/components/schemas/UserPublic'
-            },
-            type: 'array',
-            title: 'Data'
-        },
-        count: {
-            type: 'integer',
-            title: 'Count'
-        }
-    },
-    type: 'object',
-    required: ['data', 'count'],
-    title: 'UsersPublic'
 } as const;
 
 export const ValidationErrorSchema = {

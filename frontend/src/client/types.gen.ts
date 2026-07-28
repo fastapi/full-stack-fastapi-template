@@ -26,11 +26,6 @@ export type ItemPublic = {
     created_at?: (string | null);
 };
 
-export type ItemsPublic = {
-    data: Array<ItemPublic>;
-    count: number;
-};
-
 export type ItemUpdate = {
     title?: (string | null);
     description?: (string | null);
@@ -43,6 +38,16 @@ export type Message = {
 export type NewPassword = {
     token: string;
     new_password: string;
+};
+
+export type PaginatedResponse_ItemPublic_ = {
+    data: Array<unknown>;
+    count: number;
+};
+
+export type PaginatedResponse_UserPublic_ = {
+    data: Array<unknown>;
+    count: number;
 };
 
 export type PrivateUserCreate = {
@@ -85,11 +90,6 @@ export type UserRegister = {
     full_name?: (string | null);
 };
 
-export type UsersPublic = {
-    data: Array<UserPublic>;
-    count: number;
-};
-
 export type UserUpdate = {
     email?: (string | null);
     is_active?: (boolean | null);
@@ -118,7 +118,7 @@ export type ItemsReadItemsData = {
     skip?: number;
 };
 
-export type ItemsReadItemsResponse = (ItemsPublic);
+export type ItemsReadItemsResponse = (PaginatedResponse_ItemPublic_);
 
 export type ItemsCreateItemData = {
     requestBody: ItemCreate;
@@ -182,7 +182,7 @@ export type UsersReadUsersData = {
     skip?: number;
 };
 
-export type UsersReadUsersResponse = (UsersPublic);
+export type UsersReadUsersResponse = (PaginatedResponse_UserPublic_);
 
 export type UsersCreateUserData = {
     requestBody: UserCreate;

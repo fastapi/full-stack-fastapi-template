@@ -12,7 +12,7 @@ export class ItemsService {
      * @param data The data for the request.
      * @param data.skip
      * @param data.limit
-     * @returns ItemsPublic Successful Response
+     * @returns PaginatedResponse_ItemPublic_ Successful Response
      * @throws ApiError
      */
     public static readItems(data: ItemsReadItemsData = {}): CancelablePromise<ItemsReadItemsResponse> {
@@ -242,7 +242,7 @@ export class UsersService {
      * @param data The data for the request.
      * @param data.skip
      * @param data.limit
-     * @returns UsersPublic Successful Response
+     * @returns PaginatedResponse_UserPublic_ Successful Response
      * @throws ApiError
      */
     public static readUsers(data: UsersReadUsersData = {}): CancelablePromise<UsersReadUsersResponse> {

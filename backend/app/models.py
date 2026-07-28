@@ -13,6 +13,7 @@ def get_datetime_utc() -> datetime:
 
 T = TypeVar("T")
 
+
 class PaginatedResponse(SQLModel, Generic[T]):
     data: list[T]
     count: int
