@@ -2,15 +2,15 @@
 name = "langid-svc"
 version = "0.1.0"
 description = "Language identification (lingua), restricted to English and French."
-requires-python = ">=3.10,<4.0"
+requires-python = ">=3.14,<4.0"
 dependencies = [
     "fastapi[standard]<1.0.0,>=0.114.2",
     "pydantic>2.0",
     "pydantic-settings<3.0.0,>=2.2.1",
     # Rust-backed; ships its own n-gram data inside the wheel, so there is no
-    # model file to mount. Deliberately unpinned above 2.1.1: 2.2.0+ requires
-    # Python >=3.12, and uv honours requires-python, so this upgrades itself
-    # if the base image moves to 3.12+.
+    # model file to mount. Left unpinned above 2.1.1 so it would pick up 2.2.0
+    # once the base image cleared that version's Python >=3.12 floor — which
+    # the move to 3.14 did, so the lock now holds 2.2.0.
     "lingua-language-detector>=2.1.1",
 ]
 
@@ -27,7 +27,7 @@ dev-dependencies = [
 ]
 
 [tool.ruff]
-target-version = "py310"
+target-version = "py314"
 
 [tool.ruff.lint]
 select = ["E", "W", "F", "I", "B", "C4", "UP"]

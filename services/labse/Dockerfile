@@ -1,4 +1,4 @@
-FROM python:3.11-slim-bookworm
+FROM python:3.14-slim-trixie
 
 # "cuda" pulls the default PyPI torch (CUDA bundled, ~5.5 GB image).
 # "cpu" pulls from the pytorch-cpu index — use this for CPU-only Container Apps.
@@ -18,7 +18,9 @@ ENV PYTHONUNBUFFERED=1 \
 WORKDIR /app
 
 # Needs >=0.5.16 for [tool.uv] conflicts, which the cpu/cuda extras rely on.
-COPY --from=ghcr.io/astral-sh/uv:0.7.5 /uv /uvx /bin/
+# Kept in step with backend/Dockerfile; 0.7.5 predates Python 3.14 and does not
+# resolve cp314 wheels.
+COPY --from=ghcr.io/astral-sh/uv:0.9.26 /uv /uvx /bin/
 
 # Dependencies in their own layer so app edits don't re-resolve torch.
 # --frozen: build from uv.lock exactly, never re-resolve. Regenerate with

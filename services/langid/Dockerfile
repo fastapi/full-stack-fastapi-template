@@ -1,4 +1,4 @@
-FROM python:3.11-slim-bookworm
+FROM python:3.14-slim-trixie
 
 ENV PYTHONUNBUFFERED=1 \
     PYTHONDONTWRITEBYTECODE=1 \
@@ -11,7 +11,9 @@ WORKDIR /app
 
 # No apt packages: lingua ships prebuilt manylinux wheels and there is no torch
 # here, so the triton/C-compiler problem that metricx hit does not apply.
-COPY --from=ghcr.io/astral-sh/uv:0.7.5 /uv /uvx /bin/
+# Kept in step with backend/Dockerfile; 0.7.5 predates Python 3.14 and does not
+# resolve cp314 wheels.
+COPY --from=ghcr.io/astral-sh/uv:0.9.26 /uv /uvx /bin/
 
 RUN --mount=type=cache,target=/root/.cache/uv \
     --mount=type=bind,source=uv.lock,target=uv.lock \

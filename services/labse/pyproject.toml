@@ -2,7 +2,7 @@
 name = "labse-svc"
 version = "0.1.0"
 description = "LaBSE embedding service — vectors in, vectors out."
-requires-python = ">=3.10,<4.0"
+requires-python = ">=3.14,<4.0"
 dependencies = [
     "fastapi[standard]<1.0.0,>=0.114.2",
     "pydantic>2.0",
@@ -45,7 +45,7 @@ explicit = true
 torch = [{ index = "pytorch-cpu", extra = "cpu" }]
 
 [tool.ruff]
-target-version = "py310"
+target-version = "py314"
 
 [tool.ruff.lint]
 select = [

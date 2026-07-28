@@ -2,7 +2,7 @@
 name = "metricx-svc"
 version = "0.1.0"
 description = "MetricX-24 hybrid regression scoring — src/mt/ref in, scores out."
-requires-python = ">=3.10,<4.0"
+requires-python = ">=3.14,<4.0"
 dependencies = [
     "fastapi[standard]<1.0.0,>=0.114.2",
     "pydantic>2.0",
@@ -50,7 +50,7 @@ explicit = true
 torch = [{ index = "pytorch-cpu", extra = "cpu" }]
 
 [tool.ruff]
-target-version = "py310"
+target-version = "py314"
 
 [tool.ruff.lint]
 select = ["E", "W", "F", "I", "B", "C4", "UP"]

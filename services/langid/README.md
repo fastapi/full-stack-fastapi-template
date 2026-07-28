@@ -29,9 +29,16 @@ They are different artifacts with independent versioning. PyPI's Homepage field
 points at `lingua-rs`, which does not help.
 
 Pinned `>=2.1.1` and deliberately not capped: 2.2.0+ requires Python >=3.12, and
-uv honours `requires-python`, so this upgrades itself if the base image moves to
-3.12+. On the current 3.11 base it resolves to 2.1.1, which has `cp310`–`cp313`
-manylinux wheels.
+uv honours `requires-python`, so it upgraded itself when the base image moved to
+3.14. 2.1.1 stops at `cp313`, so on 3.14 there is no choice — 2.2.0 is the only
+installable version.
+
+That upgrade is not free. lingua's bundled n-gram data grew to **292 MB**,
+taking the image from 338 MB to 550 MB. Nothing else changed size (both base
+images are 119 MB). It is disk only, not RAM: `with_preloaded_language_models()`
+still loads just `en` and `fr`. If the image size ever matters more than being
+current, pinning `==2.1.1` and holding this service at Python 3.13 gets the
+212 MB back.
 
 ## The en+fr restriction — and what it costs
 

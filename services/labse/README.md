@@ -145,6 +145,7 @@ environment where it is not externally routable — it is deliberately not behin
 traefik in `docker-compose.yml`. If it ever gets a public hostname, that
 assumption breaks.
 
-**Base image CVEs.** `python:3.11-slim-bookworm` currently flags 1 critical and
-4 high vulnerabilities. All three service images share this base, so bumping it
-is one change in three Dockerfiles.
+**Base image CVEs.** Now on `python:3.14-slim-trixie`, which flags 1 critical
+and 2 high — down from 1 critical and 4 high on the previous
+`python:3.11-slim-bookworm`. The remaining critical is unfixed upstream in
+Debian, so it does not clear by rebuilding.

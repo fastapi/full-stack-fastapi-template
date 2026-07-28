@@ -2,7 +2,11 @@
 name = "qe-svc"
 version = "0.1.0"
 description = "Reference-free quality estimation (CometKiwi) — src + mt in, scores out."
-requires-python = ">=3.10,<4.0"
+# Capped at 3.12 while the other services run 3.14: unbabel-comet pins
+# numpy<2.0.0, and numpy 1.26.4 (the last 1.x) publishes no wheel past cp312.
+# The cap is declared here as well as in the Dockerfile so `uv lock` refuses to
+# resolve something the image could never install.
+requires-python = ">=3.12,<3.13"
 dependencies = [
     "fastapi[standard]<1.0.0,>=0.114.2",
     "pydantic>2.0",
@@ -44,7 +48,7 @@ explicit = true
 torch = [{ index = "pytorch-cpu", extra = "cpu" }]
 
 [tool.ruff]
-target-version = "py310"
+target-version = "py312"
 
 [tool.ruff.lint]
 select = ["E", "W", "F", "I", "B", "C4", "UP"]

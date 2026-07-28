@@ -1,4 +1,4 @@
-FROM python:3.11-slim-bookworm
+FROM python:3.14-slim-trixie
 
 # "cuda" pulls the default PyPI torch (CUDA bundled).
 # "cpu" pulls from the pytorch-cpu index — use this for CPU-only Container Apps.
@@ -20,14 +20,16 @@ WORKDIR /app
 # torch's triton backend JIT-compiles its CUDA utils on first use, so a C
 # compiler has to be present at RUNTIME, not just at build time. The slim base
 # ships none and the model dies during warmup with "Failed to find C compiler".
-# The workbench backend never hit this because it runs the full python:3.10
-# image. Only the CUDA variant needs this; a cpu build can drop it.
+# The workbench backend never hit this because it runs the full python image,
+# not slim. Only the CUDA variant needs this; a cpu build can drop it.
 RUN apt-get update \
     && apt-get install -y --no-install-recommends gcc g++ libc6-dev \
     && rm -rf /var/lib/apt/lists/*
 
 # Needs >=0.5.16 for [tool.uv] conflicts, which the cpu/cuda extras rely on.
-COPY --from=ghcr.io/astral-sh/uv:0.7.5 /uv /uvx /bin/
+# Kept in step with backend/Dockerfile; 0.7.5 predates Python 3.14 and does not
+# resolve cp314 wheels.
+COPY --from=ghcr.io/astral-sh/uv:0.9.26 /uv /uvx /bin/
 
 # --frozen: build from uv.lock exactly, never re-resolve.
 RUN --mount=type=cache,target=/root/.cache/uv \

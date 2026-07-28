@@ -15,13 +15,16 @@ auth and validation, and calls these over HTTP.
       └──────── /data/aimodels (mounted) ────────┘   (no mount)
 ```
 
-| Service | Model | Image | Size | Port | Client |
-|---|---|---|---|---|---|
-| `labse` | LaBSE | `labse-svc` | 5.51 GB | 8071 | `labse_client.py` |
-| `qe` | CometKiwi | `comet-svc` | 5.58 GB | 8072 | `qe_client.py` |
-| `comet` | wmt22-comet-da | `comet-svc` | 5.58 GB | 8073 | `comet_client.py` |
-| `metricx` | MetricX-24 hybrid | `metricx-svc` | 5.55 GB | 8074 | `metricx_client.py` |
-| `langid` | lingua (en+fr) | `langid-svc` | **338 MB** | 8075 | `langid_client.py` |
+| Service | Model | Image | Size | Python | Port | Client |
+|---|---|---|---|---|---|---|
+| `labse` | LaBSE | `labse-svc` | 5.51 GB | 3.14 | 8071 | `labse_client.py` |
+| `qe` | CometKiwi | `comet-svc` | 5.56 GB | **3.12** | 8072 | `qe_client.py` |
+| `comet` | wmt22-comet-da | `comet-svc` | 5.56 GB | **3.12** | 8073 | `comet_client.py` |
+| `metricx` | MetricX-24 hybrid | `metricx-svc` | 5.57 GB | 3.14 | 8074 | `metricx_client.py` |
+| `langid` | lingua (en+fr) | `langid-svc` | **550 MB** | 3.14 | 8075 | `langid_client.py` |
+
+All services run `python:*-slim-trixie`. `comet-svc` is held one minor version
+back on purpose — see trap 4.
 
 `qe` and `comet` are **two deployments of one image**. Their dependency trees
 resolve identically, so separate images would duplicate rather than isolate.
@@ -60,12 +63,14 @@ single lock:
 
 | | labse-svc | qe / comet-svc | metricx-svc | backend before |
 |---|---|---|---|---|
+| `python` | **3.14** | **3.12** | **3.14** | 3.10 |
 | `transformers` | **5.14.1** | **4.57.6** | **4.51.3** (pinned) | 4.51.3 |
-| `numpy` | **2.5.1** | **1.26.4** | 2.x | 1.26.4 |
+| `numpy` | **2.5.1** | **1.26.4** | **2.5.1** | 1.26.4 |
 | `torch` | 2.13.0 | 2.13.0 | 2.13.0 | 2.7.0 |
 
-Three different `transformers` versions across two major releases. One shared
-lock forces all of them to the intersection, which is what the last column is.
+Three different `transformers` versions across two major releases, two numpy
+majors, and now two Python minors. One shared lock forces all of them to the
+intersection, which is what the last column is.
 
 ## Verified parity
 
@@ -82,7 +87,7 @@ both paths live:
 Re-run any of them with `scripts/parity_check.py` in the relevant service
 directory. They now exercise the full backend → client → service path.
 
-## Three traps found the hard way
+## Four traps found the hard way
 
 **1. setuptools 81 removes `pkg_resources`.** `unbabel-comet` pins
 `torchmetrics 0.10.3`, which imports it at module scope. A fresh resolution
@@ -104,7 +109,21 @@ the whole argument for per-service locks.
 its CUDA utils on first use. `python:*-slim` ships no compiler, so MetricX died
 during warmup with "Failed to find C compiler". `services/metricx/Dockerfile`
 installs `gcc g++ libc6-dev`. The backend never hit this because it runs the
-full `python:3.10` image. Only the CUDA variant needs it.
+full `python` image rather than `-slim`. Only the CUDA variant needs it.
+
+**4. `unbabel-comet` caps comet-svc at Python 3.12.** It pins `numpy<2.0.0`.
+The last numpy 1.x is 1.26.4, and its newest wheel is `cp312` — so on 3.13+
+there is no wheel, pip falls back to the sdist, and the meson build fails
+looking for a C compiler. Adding a compiler would not help either; numpy 1.26
+does not build against the 3.14 C API.
+
+This is exactly the failure the split was meant to contain. Under one shared
+lock, `unbabel-comet` would pin **every** service to numpy 1.x and hold the
+whole backend at 3.12. Instead the cap stops at one image, and labse/metricx/
+langid run 3.14 with numpy 2.5.1. The cap is declared in both
+`comet/Dockerfile` and `comet/pyproject.toml` so `uv lock` cannot resolve
+something the image could never install. Revisit when unbabel-comet supports
+numpy 2.
 
 ## Conventions every service follows
 
@@ -138,7 +157,7 @@ Suggested replica policy — hot models stay warm, batch models scale to zero:
 
 | Service | min replicas | Why |
 |---|---|---|
-| `langid` | 1 | 338 MB, ~6 s cold start, trivially cheap to keep warm |
+| `langid` | 1 | 550 MB, ~6 s cold start, trivially cheap to keep warm |
 | `labse` | 1 | small, hot, interactive |
 | `qe` | 1 | interactive |
 | `comet` | 0 | batch-only, callers are background workers |
