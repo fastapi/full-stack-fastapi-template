@@ -67,6 +67,11 @@ class Settings(BaseSettings):
     # Long sequences plus small batches; give it room.
     METRICX_READ_TIMEOUT: float = 1800.0
 
+    # Used only by /memory/align-uni-special, which calls OpenAI directly.
+    # Empty by default so a missing key fails at the call site rather than
+    # shipping a literal in the source.
+    OPENAI_API_KEY: str = ""
+
     BACKEND_CORS_ORIGINS: Annotated[
         list[AnyUrl] | str, BeforeValidator(parse_cors)
     ] = []

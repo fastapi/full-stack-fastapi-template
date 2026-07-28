@@ -1,4 +1,5 @@
 from app.core import labse_client, langid_client
+from app.core.config import settings
 from pydantic import BaseModel
 from datetime import datetime, timezone
 import xml.etree.ElementTree as ET
@@ -216,13 +217,16 @@ async def align_sentences_special(sentences: AlignmentInputSingle):
     for s in sentences.src:
         prompt += f"Source: {s}\n"
 
-    # Call OpenAI's API
-    client = OpenAI(
-        api_key="REDACTED-OPENAI-KEY-SEE-OPENAI_API_KEY-SETTING"
-    )
+    # Call OpenAI's API. The key comes from settings (OPENAI_API_KEY in .env);
+    # it used to be a literal in this file.
+    if not settings.OPENAI_API_KEY:
+        raise RuntimeError(
+            "OPENAI_API_KEY is not set; /memory/align-uni-special needs it."
+        )
+
+    client = OpenAI(api_key=settings.OPENAI_API_KEY)
 
     #You are an experienced translator that is very efficient with bitext extraction. Extract all bitext data for each pair of English and French sentences found.
-    # Set your OpenAI API key from environment variable
     response = client.beta.chat.completions.parse(
         model="gpt-4o-mini-2024-07-18",
         messages=[
