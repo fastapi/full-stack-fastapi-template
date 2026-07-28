@@ -1,21 +1,19 @@
 """HTTP client for labse-svc.
 
-LaBSE no longer runs in this process. Encoding happens in a purpose-built
-container (services/labse); alignment, faiss and TMX stay here because they are
-business logic, not a model primitive.
+LaBSE no longer runs in this process. Encoding, pairwise similarity and the
+alignment kNN all happen in a purpose-built container (services/labse). What
+stays here is business logic: the length filter, language routing, TMX.
+
+No embedding crosses this boundary any more. `/v1/embed` still exists on the
+service for other consumers, but nothing in this app calls it — alignment used
+to pull ~4 KB per sentence over HTTP only to feed a local faiss index, and now
+sends text and receives index pairs.
 """
 
 from __future__ import annotations
 
-import base64
-
-import numpy as np
-
 from app.core.config import settings
 from app.core.model_service import ModelService
-
-# LaBSE is fixed at 768 dimensions; used only to shape an empty result.
-DIM = 768
 
 LABSE = ModelService(
     name="labse-svc",
@@ -26,32 +24,29 @@ LABSE = ModelService(
 )
 
 
-async def embed(texts: list[str], normalize: bool = True) -> np.ndarray:
-    """Encode `texts`, returning a (len(texts), 768) float32 array."""
-    if not texts:
-        return np.zeros((0, DIM), dtype=np.float32)
+async def align(
+    src: list[str],
+    trg: list[str],
+    k: int = 4,
+    min_score: float = 1.1,
+) -> list[tuple[int, int, float]]:
+    """Align two sentence lists, returning (src_idx, trg_idx, score) triples.
 
-    chunks: list[np.ndarray] = []
+    Not chunked, unlike the other calls here: kNN is global over the corpus, so
+    splitting the request would score each part against a partial index and
+    return different pairs. The service caps the size instead.
+    """
+    if not src or not trg:
+        return []
+
     async with LABSE.client() as client:
-        for start in range(0, len(texts), LABSE.chunk_size):
-            payload = await LABSE.post(
-                client,
-                "/v1/embed",
-                {
-                    "texts": texts[start : start + LABSE.chunk_size],
-                    "normalize": normalize,
-                    # base64 ships the matrix as one float32 blob — roughly 4x
-                    # smaller than JSON floats and far cheaper to parse.
-                    "encoding": "base64",
-                },
-            )
-            vectors = np.frombuffer(
-                base64.b64decode(payload["data"]), dtype=np.float32
-            ).reshape(payload["count"], payload["dim"])
-            chunks.append(vectors)
+        payload = await LABSE.post(
+            client,
+            "/v1/align",
+            {"src": src, "trg": trg, "k": k, "min_score": min_score},
+        )
 
-    # frombuffer returns a read-only view; copy so callers can normalise in place.
-    return np.ascontiguousarray(np.vstack(chunks))
+    return [(p["src_idx"], p["trg_idx"], p["score"]) for p in payload["pairs"]]
 
 
 async def similarity(src: list[str], trg: list[str]) -> tuple[list[float], float]:

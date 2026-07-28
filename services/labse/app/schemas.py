@@ -35,7 +35,7 @@ class SimilarityRequest(BaseModel):
     trg: list[str] = Field(..., min_length=1)
 
     @model_validator(mode="after")
-    def _same_length(self) -> "SimilarityRequest":
+    def _same_length(self) -> SimilarityRequest:
         if len(self.src) != len(self.trg):
             raise ValueError(
                 f"src and trg must be the same length (got {len(self.src)} and {len(self.trg)})"
@@ -53,6 +53,38 @@ class SimilarityResponse(BaseModel):
     system_score: float
 
 
+class AlignRequest(BaseModel):
+    src: list[str] = Field(..., min_length=1)
+    trg: list[str] = Field(..., min_length=1)
+
+    # Neighbours per side for the margin denominator.
+    k: int = Field(default=4, ge=1, le=64)
+
+    # Ratio-margin cut-off. Scores are a ratio, so they can exceed 1.
+    min_score: float = 1.1
+
+    # Exact search misses nothing and is the default. ANN is worth it only on
+    # corpora large enough that the clusters have ~10k entries each.
+    use_ann: bool = False
+    ann_num_clusters: int = 32768
+    ann_num_cluster_probe: int = 3
+
+
+class AlignedPair(BaseModel):
+    # Indices into the request's own lists — the caller already holds the text,
+    # so echoing it back would just re-inflate the payload this endpoint exists
+    # to shrink.
+    src_idx: int
+    trg_idx: int
+    score: float
+
+
+class AlignResponse(BaseModel):
+    model: str
+    count: int
+    pairs: list[AlignedPair]
+
+
 class InfoResponse(BaseModel):
     model: str
     ready: bool
@@ -61,4 +93,5 @@ class InfoResponse(BaseModel):
     dtype: str | None
     batch_size: int
     max_texts_per_request: int
+    max_align_texts_per_side: int
     error: str | None = None

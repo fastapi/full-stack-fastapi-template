@@ -1,15 +1,14 @@
 # labse-svc
 
 The reference model container for splitting `workbench-services`. One model, one
-job: **text in, vectors out**.
+job: **text in, numbers out** — vectors, similarities, or aligned index pairs.
 
-It does not know about alignment, faiss, TMX, Postgres, or auth. Those stay in
-`workbench-services`, which keeps `faiss-cpu` + `numpy` (small, no torch) and
-calls this service for embeddings.
+It does not know about TMX, Postgres, or auth. Those stay in
+`workbench-services`, which now ships no vector code at all.
 
 ## Why this boundary
 
-`backend/app/models_ml/labse.py` currently mixes two different things: encoding
+`backend/app/models_ml/labse.py` mixed two different things: encoding
 (a reusable primitive) and bitext alignment + TMX generation (LQA business
 logic). Only the first belongs behind a model boundary. Splitting there means:
 
@@ -31,12 +30,24 @@ logic). Only the first belongs behind a model boundary. Splitting there means:
 | `GET /v1/info` | Device, dtype, dim, batch size, last load error. |
 | `POST /v1/embed` | `{texts[], normalize, encoding}` → vectors. |
 | `POST /v1/similarity` | `{src[], trg[]}` → row-wise cosine + system score. |
+| `POST /v1/align` | `{src[], trg[], k, min_score}` → `{src_idx, trg_idx, score}` pairs. |
 
 Swagger is at `/docs`.
 
-`/similarity` exists so the `/metrics/labse` path doesn't have to ship `2N x 768`
-floats over the wire just to read the diagonal. `/embed` is what `/memory/align`
-uses.
+Two of these three exist so vectors never have to cross the wire.
+`/similarity` keeps `/metrics/labse` from shipping `2N x 768` floats just to
+read the diagonal. `/align` does the same for `/memory/align*`, which used to
+pull every embedding into the backend to feed a local faiss index — about 4 KB
+per sentence, or 820 MB on a 100k+100k corpus — and then discard them. It now
+sends text and receives index pairs.
+
+`/align` returns **indices, not text**: the caller already holds the strings,
+so echoing them back would re-inflate the payload the endpoint exists to
+shrink. Pairs come back best-scoring first and are one-to-one — each index
+appears at most once.
+
+`/embed` has no caller in the backend any more. It stays because the raw
+primitive is the reusable one, and the next consumer may not want alignment.
 
 ```bash
 curl -s localhost:8071/v1/similarity -H 'content-type: application/json' -d '{
@@ -47,6 +58,11 @@ curl -s localhost:8071/v1/similarity -H 'content-type: application/json' -d '{
 curl -s localhost:8071/v1/embed -H 'content-type: application/json' -d '{
   "texts": ["Open the door.", "Ouvrez la porte."],
   "encoding": "base64"
+}'
+
+curl -s localhost:8071/v1/align -H 'content-type: application/json' -d '{
+  "src": ["Open the door.", "The report is late."],
+  "trg": ["Le rapport est en retard.", "Ouvrez la porte."]
 }'
 ```
 
@@ -68,6 +84,7 @@ All plain env vars, no prefix, matching the backend's idiom.
 | `FP16` | `false` | Off by default so scores match the in-process model exactly. |
 | `BATCH_SIZE` | `64` | The throughput knob. |
 | `MAX_TEXTS_PER_REQUEST` | `8192` | Returns 413 rather than OOM-ing mid-batch. |
+| `MAX_ALIGN_TEXTS_PER_SIDE` | `100000` | `/v1/align` only. Separate because alignment cannot be chunked. |
 | `MAX_CONCURRENT_BATCHES` | `1` | One GPU, one forward pass at a time. |
 | `WARMUP` | `true` | One tiny encode after load, so request #1 isn't the slow one. |
 
@@ -81,6 +98,27 @@ from parallel forward passes on one GPU.
 
 Identical strings are encoded once per request and scattered back — translation
 memories repeat heavily, so this is usually free money.
+
+## Alignment notes
+
+**`/v1/align` cannot be chunked.** kNN is global over the corpus, so splitting a
+request would score each part against a partial index and return different
+pairs. Every other call here chunks freely; this one gets
+`MAX_ALIGN_TEXTS_PER_SIDE` instead. Exact search at the 100k default is minutes
+of CPU — raise it only together with `use_ann`.
+
+**The search runs on CPU**, via `faiss-cpu`, even though the vectors are already
+in VRAM. An index sized for a large corpus would compete with the model for GPU
+memory, and that trade has not been measured. Moving the search onto the GPU is
+a separate decision from moving it off the backend; only the second one has
+evidence behind it.
+
+**`k` is clamped to the corpus size.** faiss pads with `-1` when `k` exceeds the
+index, and a `-1` index silently wraps to the last row. The backend never
+clamped, so a corpus smaller than `k` scored against garbage and fell below
+threshold — `/memory/align` on two sentences returned nothing at all. It now
+returns the correct pairs. This is the one behavioural difference from the
+pre-move implementation, and it only affects corpora smaller than `k`.
 
 ## Cold starts
 
@@ -102,8 +140,9 @@ curl -s localhost:8071/v1/info | python -m json.tool
 ```
 
 The backend now depends on this service: `/api/v1/metrics/labse` and
-`/api/v1/memory/align*` call it over HTTP via `app/core/labse_client.py`, and
-`load_labse()` is gone from `app/core/ml.py`.
+`/api/v1/memory/align*` call it over HTTP via `app/core/labse_client.py`.
+`app/core/ml.py` — which held `load_labse()` and the rest of the in-process
+loading — was deleted outright.
 
 There is deliberately no `depends_on` between them. The backend starts fine with
 `labse` down — only those two routes return `503`, and they recover on their own

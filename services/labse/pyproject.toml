@@ -9,6 +9,11 @@ dependencies = [
     "pydantic-settings<3.0.0,>=2.2.1",
     "sentence-transformers>=3.1.1",
     "numpy>=1.26.4",
+    # Alignment kNN. CPU deliberately: the vectors are already in VRAM, but an
+    # index sized for the corpus would compete with the model for it. Moving
+    # the search onto the GPU is a separate decision from moving it off the
+    # backend, and only this one has been measured.
+    "faiss-cpu>=1.14.3",
 ]
 
 # Pick exactly one at build time: `uv sync --extra cuda` or `--extra cpu`.

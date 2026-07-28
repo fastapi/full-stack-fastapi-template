@@ -21,17 +21,23 @@ dependencies = [
     "pwdlib[argon2,bcrypt]>=0.3.0",
     # Every model now runs in its own container under services/; this app talks
     # to them over HTTP and loads no weights of its own. What is left is the
-    # pure lexical metrics plus the faiss/numpy used by alignment.
+    # pure lexical metrics.
     #
-    # hlepor and lepor are gone: hlepor is vendored in app/models_ml/ because
-    # the published package imports nptyping, which is unmaintained and caps
-    # numpy <2 -- which blocked Python 3.14 for the whole backend.
+    # faiss-cpu is gone: the alignment kNN and margin scoring moved into
+    # services/labse, which is where the vectors are produced. No embedding
+    # crosses this process any more.
+    #
+    # hlepor and lepor are gone too: hlepor is vendored in app/models_ml/
+    # because the published package imports nptyping, which is unmaintained and
+    # caps numpy <2 -- which blocked Python 3.14 for the whole backend.
     "nltk>=3.9.1",
     # Was arriving transitively via unbabel-comet. Declared explicitly now that
     # unbabel-comet is gone, or /metrics/sacre-bleu breaks on import.
     "sacrebleu>=2.4.0",
+    # Still required, but only by the vendored hLEPOR (app/models_ml/
+    # hlepor_vendored.py), which is array maths throughout. Nothing else in
+    # this app touches numpy now.
     "numpy>=2.0",
-    "faiss-cpu>=1.14.3",
     "openai>=1.52.0",
     "python-levenshtein>=0.27.1",
 ]

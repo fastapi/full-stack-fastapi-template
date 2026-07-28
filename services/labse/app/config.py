@@ -24,6 +24,12 @@ class Settings(BaseSettings):
     # Refuse absurd payloads rather than OOM the GPU mid-batch.
     MAX_TEXTS_PER_REQUEST: int = 8192
 
+    # /v1/align cannot be chunked — kNN is global over the corpus — so it gets
+    # its own ceiling, per side. 100k x 768 float32 is ~300 MB of vectors plus
+    # the faiss index; exact search at that size is minutes of CPU. Raise it
+    # only alongside use_ann.
+    MAX_ALIGN_TEXTS_PER_SIDE: int = 100_000
+
     # One GPU means one batch at a time. Callers get concurrency by being many;
     # this service gets throughput by batching, not by parallel forward passes.
     MAX_CONCURRENT_BATCHES: int = 1

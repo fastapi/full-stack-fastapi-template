@@ -10,9 +10,13 @@ import numpy as np
 from fastapi import FastAPI, HTTPException, Request, Response, status
 from fastapi.responses import JSONResponse
 
+from app.aligner import align as align_vectors
 from app.config import settings
 from app.encoder import ModelNotReady, encoder
 from app.schemas import (
+    AlignedPair,
+    AlignRequest,
+    AlignResponse,
     EmbedRequest,
     EmbedResponse,
     InfoResponse,
@@ -45,7 +49,7 @@ async def lifespan(app: FastAPI):
 app = FastAPI(
     title="LaBSE embedding service",
     version="0.1.0",
-    summary="Vectors in, vectors out. No alignment, no persistence, no auth.",
+    summary="Embeddings, pairwise similarity and bitext alignment. No persistence, no auth.",
     lifespan=lifespan,
 )
 
@@ -84,6 +88,7 @@ async def info() -> InfoResponse:
         dtype=encoder.dtype,
         batch_size=settings.BATCH_SIZE,
         max_texts_per_request=settings.MAX_TEXTS_PER_REQUEST,
+        max_align_texts_per_side=settings.MAX_ALIGN_TEXTS_PER_SIDE,
         error=encoder.error,
     )
 
@@ -145,4 +150,52 @@ async def similarity(req: SimilarityRequest) -> SimilarityResponse:
         count=len(scores),
         scores=[float(s) for s in scores],
         system_score=float(scores.mean()) if len(scores) else 0.0,
+    )
+
+
+@app.post("/v1/align", response_model=AlignResponse)
+async def align(req: AlignRequest) -> AlignResponse:
+    """Bitext alignment. Text in, index pairs out — vectors never leave.
+
+    Deliberately not chunkable: kNN is global over the whole corpus, so a
+    partial call would score against a partial index and return different
+    pairs. Hence its own, much larger size limit.
+    """
+    for side, texts in (("src", req.src), ("trg", req.trg)):
+        if len(texts) > settings.MAX_ALIGN_TEXTS_PER_SIDE:
+            raise HTTPException(
+                status_code=status.HTTP_413_REQUEST_ENTITY_TOO_LARGE,
+                detail=(
+                    f"{len(texts)} {side} texts exceeds MAX_ALIGN_TEXTS_PER_SIDE="
+                    f"{settings.MAX_ALIGN_TEXTS_PER_SIDE}"
+                ),
+            )
+
+    src = [s.strip() for s in req.src]
+    trg = [s.strip() for s in req.trg]
+
+    # One encode over both sides: more work per forward pass, and the dedup in
+    # Encoder.encode collapses strings that appear on both sides.
+    vectors = await encoder.encode(src + trg, normalize=True)
+    src_vecs, trg_vecs = vectors[: len(src)], vectors[len(src) :]
+
+    # faiss releases the GIL, but this is still seconds of CPU on a large
+    # corpus — keep it off the event loop so /health and /ready stay honest.
+    pairs = await asyncio.to_thread(
+        align_vectors,
+        src_vecs,
+        trg_vecs,
+        req.k,
+        req.min_score,
+        req.use_ann,
+        req.ann_num_clusters,
+        req.ann_num_cluster_probe,
+    )
+
+    return AlignResponse(
+        model=MODEL_NAME,
+        count=len(pairs),
+        pairs=[
+            AlignedPair(src_idx=s, trg_idx=t, score=sc) for s, t, sc in pairs
+        ],
     )

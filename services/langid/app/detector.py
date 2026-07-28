@@ -99,7 +99,9 @@ class Detector:
         confidences = detector.compute_language_confidence_values_in_parallel(texts)
 
         results: list[tuple[str | None, float]] = []
-        for language, values in zip(languages, confidences):
+        # strict: both come from the same `texts`, so a length mismatch would
+        # mean lingua changed its contract — better loud than silently short.
+        for language, values in zip(languages, confidences, strict=True):
             if language is None:
                 results.append((None, 0.0))
                 continue

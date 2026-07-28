@@ -5,8 +5,8 @@ now run in their own containers. The backend keeps its API surface, swagger,
 auth and validation, and calls these over HTTP.
 
 ```
-                    backend  (1.57 GB, no torch, no weights, no mount)
-                    routing · schemas · swagger · auth · faiss · TMX
+                    backend  (1.59 GB, no torch, no weights, no mount)
+                    routing · schemas · swagger · auth · TMX
                               │
       ┌───────────┬───────────┼───────────┬───────────┐
       ▼           ▼           ▼           ▼           ▼
@@ -17,7 +17,7 @@ auth and validation, and calls these over HTTP.
 
 | Service | Model | Image | Size | Python | Port | Client |
 |---|---|---|---|---|---|---|
-| `labse` | LaBSE | `labse-svc` | 5.51 GB | 3.14 | 8071 | `labse_client.py` |
+| `labse` | LaBSE | `labse-svc` | 5.58 GB | 3.14 | 8071 | `labse_client.py` |
 | `qe` | CometKiwi | `comet-svc` | 5.56 GB | **3.12** | 8072 | `qe_client.py` |
 | `comet` | wmt22-comet-da | `comet-svc` | 5.56 GB | **3.12** | 8073 | `comet_client.py` |
 | `metricx` | MetricX-24 hybrid | `metricx-svc` | 5.57 GB | 3.14 | 8074 | `metricx_client.py` |
@@ -41,10 +41,18 @@ model loading, and the `/data/aimodels` mount are all gone.
 
 ## What the split actually bought
 
-**Backend image: 7.39 GB → 1.57 GB.** `torch`, `unbabel-comet`,
-`sentence-transformers`, `transformers`, `sentencepiece` and `fasttext-wheel`
-are gone from `backend/pyproject.toml`; the lock dropped from 145 to 101
-packages.
+**Backend image: 7.39 GB → 1.59 GB.** `torch`, `unbabel-comet`,
+`sentence-transformers`, `transformers`, `sentencepiece`, `fasttext-wheel` and
+`faiss-cpu` are gone from `backend/pyproject.toml`; the lock dropped from 145 to
+99 packages. `numpy` is the last of the numeric stack still there, and only
+because the vendored hLEPOR is array maths throughout.
+
+**No vectors on the wire.** Alignment used to pull every embedding into the
+backend — ~4 KB per sentence after base64, so 820 MB on a 100k+100k corpus —
+purely to feed a local faiss index, then throw them away. The kNN and margin
+scoring now run in `labse-svc` next to the vectors that produce them, and the
+backend sends text and gets index pairs back. Same numbers: the rewritten
+scoring matches the original to `6e-07` and selects identical pairs.
 
 **Startup: ~2 minutes → ~2 seconds.** `load_models()` used to load five models
 serially inside `lifespan`, so nothing served until all five were resident.

@@ -4,9 +4,6 @@ from datetime import datetime, timezone
 import xml.etree.ElementTree as ET
 import xml.sax.saxutils as saxutils
 from openai import OpenAI
-import numpy as np
-import faiss
-import time
 
 # Define request and response models
 class LaBSERequestInput(BaseModel):
@@ -105,37 +102,10 @@ def generate_tmx(data: list[AlignmentOutput]) -> str:
     return ET.tostring(tmx, encoding="unicode", method="xml")
 
 
-########  Functions to find and score candidates
-def score(x, y, fwd_mean, bwd_mean, margin):
-    return margin(x.dot(y), (fwd_mean + bwd_mean) / 2)
-
-def score_candidates(x, y, candidate_inds, fwd_mean, bwd_mean, margin):
-    scores = np.zeros(candidate_inds.shape)
-    for i in range(scores.shape[0]):
-        for j in range(scores.shape[1]):
-            k = candidate_inds[i, j]
-            scores[i, j] = score(x[i], y[k], fwd_mean[i], bwd_mean[k], margin)
-    return scores
-
-def kNN(x, y, k, use_ann_search=False, ann_num_clusters=32768, ann_num_cluster_probe=3):
-    start_time = time.time()
-    if use_ann_search:
-        print("Perform approx. kNN search")
-        n_cluster = min(ann_num_clusters, int(y.shape[0] / 1000))
-        quantizer = faiss.IndexFlatIP(y.shape[1])
-        index = faiss.IndexIVFFlat(quantizer, y.shape[1], n_cluster, faiss.METRIC_INNER_PRODUCT)
-        index.nprobe = ann_num_cluster_probe
-        index.train(y)
-        index.add(y)
-        sim, ind = index.search(x, k)
-    else:
-        print("Perform exact search")
-        idx = faiss.IndexFlatIP(y.shape[1])
-        idx.add(y)
-        sim, ind = idx.search(x, k)
-
-    print(f"Done: {time.time() - start_time:.2f} sec")
-    return sim, ind
+# The margin scoring and faiss kNN that used to live here now run in
+# services/labse (app/aligner.py). They operated on vectors this process only
+# ever received in order to throw them away, so they belonged on the side that
+# produces them.
 
 
 async def calculate_labse(data: list[LaBSERequestInput]) -> LaBSERequestResponse:
@@ -170,96 +140,35 @@ async def align_sentences(request: AlignmentInput) -> AlignmentResponse:
     # Min score for text pairs. Note, score can be larger than 1
     min_threshold = 1.1
 
-    # Do we want to use exact search of approximate nearest neighbor search (ANN)
-    # Exact search: Slower, but we don't miss any parallel sentences
-    # ANN: Faster, but the recall will be lower
-    use_ann_search = False
+    source_sentences = [
+        line for line in (s.strip() for s in request.src)
+        if min_sent_len <= len(line) <= max_sent_len
+    ]
+    target_sentences = [
+        line for line in (s.strip() for s in request.ref)
+        if min_sent_len <= len(line) <= max_sent_len
+    ]
 
-    # Number of clusters for ANN. Each cluster should have at least 10k entries
-    ann_num_clusters = 32768
-
-    # How many cluster to explorer for search. Higher number = better recall, slower
-    ann_num_cluster_probe = 3
-
-    source_sentences = list()
-    target_sentences = list()
-
-    print("Processing source sentences")
-    for line in request.src:
-        line = line.strip()
-        if min_sent_len <= len(line) <= max_sent_len:
-            source_sentences.append(line)
-
-    print("Processing target sentences")
-    for line in request.ref:
-        line = line.strip()
-        if min_sent_len <= len(line) <= max_sent_len:
-            target_sentences.append(line)
-
-    print("Source Sentences:", len(source_sentences))
-    print("Target Sentences:", len(target_sentences))
-
-    ### Encode source sentences
-    print("Encode source sentences")
-    source_embeddings = await labse_client.embed(source_sentences)
-
-    ### Encode target sentences
-    print("Encode target sentences")
-    target_embeddings = await labse_client.embed(target_sentences)
-
-    # Normalize embeddings
-    x = source_embeddings
-    x = x / np.linalg.norm(x, axis=1, keepdims=True)
-
-    y = target_embeddings
-    y = y / np.linalg.norm(y, axis=1, keepdims=True)
-
-    # Perform kNN in both directions
-    x2y_sim, x2y_ind = kNN(x, y, knn_neighbors, use_ann_search, ann_num_clusters, ann_num_cluster_probe)
-    x2y_mean = x2y_sim.mean(axis=1)
-
-    y2x_sim, y2x_ind = kNN(y, x, knn_neighbors, use_ann_search, ann_num_clusters, ann_num_cluster_probe)
-    y2x_mean = y2x_sim.mean(axis=1)
-
-    # Compute forward and backward scores
-    margin = lambda a, b: a / b
-    fwd_scores = score_candidates(x, y, x2y_ind, x2y_mean, y2x_mean, margin)
-    bwd_scores = score_candidates(y, x, y2x_ind, y2x_mean, x2y_mean, margin)
-    fwd_best = x2y_ind[np.arange(x.shape[0]), fwd_scores.argmax(axis=1)]
-    bwd_best = y2x_ind[np.arange(y.shape[0]), bwd_scores.argmax(axis=1)]
-
-    indices = np.stack(
-        [np.concatenate([np.arange(x.shape[0]), bwd_best]), np.concatenate([fwd_best, np.arange(y.shape[0])])], axis=1
+    # Text out, index pairs back. The embeddings, the kNN and the margin
+    # scoring all stay inside labse-svc — see services/labse/app/aligner.py.
+    pairs = await labse_client.align(
+        source_sentences,
+        target_sentences,
+        k=knn_neighbors,
+        min_score=min_threshold,
     )
 
-    scores = np.concatenate([fwd_scores.max(axis=1), bwd_scores.max(axis=1)])
+    # The service returns best-scoring first; this endpoint has always emitted
+    # source order, so sort by src index.
+    results = [
+        AlignmentOutput(
+            src=source_sentences[src_ind],
+            ref=target_sentences[trg_ind],
+        )
+        for src_ind, trg_ind, _score in sorted(pairs)
+    ]
 
-    seen_src, seen_trg = set(), set()
-    results = {}
-
-    # Extract list of parallel sentences
-    print("Write sentences to disc")
-
-    for i in np.argsort(-scores):
-        src_ind, trg_ind = indices[i]
-        src_ind = int(src_ind)
-        trg_ind = int(trg_ind)
-
-        if scores[i] < min_threshold:
-            break
-
-        if src_ind not in seen_src and trg_ind not in seen_trg:
-            seen_src.add(src_ind)
-            seen_trg.add(trg_ind)
-            #score = scores[i]
-
-            results[src_ind] = AlignmentOutput(
-                src=source_sentences[src_ind],
-                ref=target_sentences[trg_ind]
-            )
-
-    sorted_results = dict(sorted(results.items()))
-    return AlignmentResponse(message="Alignment complete", sentences=list(sorted_results.values()))
+    return AlignmentResponse(message="Alignment complete", sentences=results)
 
 
 async def align_sentences_uni(request: AlignmentInputSingle) -> AlignmentResponse:

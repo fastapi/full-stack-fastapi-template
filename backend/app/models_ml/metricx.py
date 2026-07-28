@@ -1,7 +1,6 @@
 from app.core import metricx_client
 from pydantic import BaseModel, ValidationError
 from typing import Union, Optional
-import numpy as np
 
 # Define request and response models
 class MetricXRequestInputList(BaseModel):
@@ -72,12 +71,11 @@ async def calculate_metricx(data: Union[list[MetricXRequestInputList], MetricXRe
     # Scored by metricx-svc. Prompt construction, tokenization, EOS trimming and
     # the length-sorted mini-batching that used to live here now live in that
     # service, which owns the tokenizer alongside the weights.
-    scores, _ = await metricx_client.score(formatted_data)
-    predictions = np.array(scores)
+    scores, mean_score = await metricx_client.score(formatted_data)
 
     estimates = []
     for i, item in enumerate(formatted_data):
-        score = float(predictions[i])
+        score = float(scores[i])
         estimates.append(MetricXRequestOutput(
             src=item['src'],
             mt=item['mt'],
@@ -85,6 +83,8 @@ async def calculate_metricx(data: Union[list[MetricXRequestInputList], MetricXRe
             score=score
         ))
         
-    system_score = float(np.mean(predictions))
+    # The client already averages across chunks and returns 0.0 for an empty
+    # batch, which np.mean did not — it produced a NaN that is not valid JSON.
+    system_score = mean_score
     
     return MetricXRequestResponse(system_score=system_score, estimates=estimates)
