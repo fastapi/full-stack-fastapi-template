@@ -28,6 +28,7 @@ RUN --mount=type=cache,target=/root/.cache/uv \
     uv sync --frozen --no-install-project
 
 ENV PYTHONPATH=/app
+ENV UV_SYSTEM_PYTHON=1
 
 COPY ./scripts /app/scripts
 
@@ -36,9 +37,13 @@ COPY ./pyproject.toml ./uv.lock ./alembic.ini /app/
 COPY ./app /app/app
 COPY ./tests /app/tests
 
+# copy ai models to the data volume
+# COPY ./aimodels /data/aimodels
+
 # Sync the project
 # Ref: https://docs.astral.sh/uv/guides/integration/docker/#intermediate-layers
 RUN --mount=type=cache,target=/root/.cache/uv \
     uv sync
 
-CMD ["fastapi", "run", "--workers", "4", "app/main.py"]
+#CMD ["fastapi", "run", "app/main.py"]
+CMD ["fastapi", "run", "--workers", "1", "app/main.py"]

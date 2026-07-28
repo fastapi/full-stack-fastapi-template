@@ -10,7 +10,7 @@ services:
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
     ports:
-      - "80:80"
+      - "8060:80"
       - "8090:8080"
     # Duplicate the command from docker-compose.yml to add --api.insecure=true
     command:
@@ -58,15 +58,9 @@ services:
   backend:
     restart: "no"
     ports:
-      - "8000:8000"
+      - "8070:8000"
     build:
       context: ./backend
-    # command: sleep infinity  # Infinite loop to keep container alive doing nothing
-    command:
-      - fastapi
-      - run
-      - --reload
-      - "app/main.py"
     develop:
       watch:
         - path: ./backend
@@ -77,14 +71,129 @@ services:
             - .venv
         - path: ./backend/pyproject.toml
           action: rebuild
+    # No /data or aimodels mount, and no GPU reservation: this app holds no
+    # weights. Every model runs in its own container under services/.
     # TODO: remove once coverage is done locally
     volumes:
+      - ./backend/app:/app/app
       - ./backend/htmlcov:/app/htmlcov
     environment:
       SMTP_HOST: "mailcatcher"
       SMTP_PORT: "1025"
       SMTP_TLS: "false"
       EMAILS_FROM_EMAIL: "noreply@example.com"
+
+  labse:
+    restart: "no"
+    ports:
+      - "8071:8000"
+    build:
+      context: ./services/labse
+    develop:
+      watch:
+        - path: ./services/labse/app
+          action: sync+restart
+          target: /app/app
+        - path: ./services/labse/pyproject.toml
+          action: rebuild
+    volumes:
+      # Read-only: this service loads weights, it never writes them.
+      - ./backend/aimodels:/data/aimodels:ro
+    environment:
+      HF_HOME: "/data/aimodels"
+      FORCE_CPU: "false"
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: 1
+              capabilities: [gpu]
+
+  qe:
+    restart: "no"
+    ports:
+      - "8072:8000"
+    build:
+      context: ./services/comet
+    develop:
+      watch:
+        - path: ./services/comet/app
+          action: sync+restart
+          target: /app/app
+        - path: ./services/comet/pyproject.toml
+          action: rebuild
+    volumes:
+      - ./backend/aimodels:/data/aimodels:ro
+    environment:
+      HF_HOME: "/data/aimodels"
+      FORCE_CPU: "false"
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: 1
+              capabilities: [gpu]
+
+  comet:
+    restart: "no"
+    ports:
+      - "8073:8000"
+    build:
+      context: ./services/comet
+    volumes:
+      - ./backend/aimodels:/data/aimodels:ro
+    environment:
+      HF_HOME: "/data/aimodels"
+      FORCE_CPU: "false"
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: 1
+              capabilities: [gpu]
+
+  langid:
+    restart: "no"
+    ports:
+      - "8075:8000"
+    build:
+      context: ./services/langid
+    develop:
+      watch:
+        - path: ./services/langid/app
+          action: sync+restart
+          target: /app/app
+        - path: ./services/langid/pyproject.toml
+          action: rebuild
+
+  metricx:
+    restart: "no"
+    ports:
+      - "8074:8000"
+    build:
+      context: ./services/metricx
+    develop:
+      watch:
+        - path: ./services/metricx/app
+          action: sync+restart
+          target: /app/app
+        - path: ./services/metricx/pyproject.toml
+          action: rebuild
+    volumes:
+      - ./backend/aimodels:/data/aimodels:ro
+    environment:
+      HF_HOME: "/data/aimodels"
+      FORCE_CPU: "false"
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: 1
+              capabilities: [gpu]
 
   mailcatcher:
     image: schickling/mailcatcher
@@ -99,7 +208,7 @@ services:
     build:
       context: ./frontend
       args:
-        - VITE_API_URL=http://localhost:8000
+        - VITE_API_URL=http://localhost:8070
         - NODE_ENV=development
 
   playwright:

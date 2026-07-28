@@ -21,6 +21,25 @@ dependencies = [
     "pydantic-settings<3.0.0,>=2.2.1",
     "sentry-sdk[fastapi]<2.0.0,>=1.40.6",
     "pyjwt<3.0.0,>=2.8.0",
+    # Every model now runs in its own container under services/; this app talks
+    # to them over HTTP and loads no weights of its own. What is left is the
+    # pure lexical metrics plus the faiss/numpy used by alignment.
+    "lepor>=0.1.0",
+    "hlepor>=0.0.4",
+    "nltk>=3.9.1",
+    # Required by hlepor, which does `from nptyping import NDArray` without
+    # declaring it — so uv's metadata shows nothing depending on nptyping and
+    # it looks dead. It is not: removing it breaks /metrics/hlepor at import.
+    # It also hard-caps numpy <2 (nptyping 2.5.0 is the final release), which
+    # is what keeps this app on numpy 1.x and off Python 3.14.
+    "nptyping>=2.5.0",
+    # Was arriving transitively via unbabel-comet. Declared explicitly now that
+    # unbabel-comet is gone, or /metrics/sacre-bleu breaks on import.
+    "sacrebleu>=2.4.0",
+    "numpy>=1.26.4",
+    "faiss-cpu>=1.8.0.post1",
+    "openai>=1.52.0",
+    "python-levenshtein>=0.27.1",
 ]
 
 [tool.uv]

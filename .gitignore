@@ -4,3 +4,14 @@ node_modules/
 /playwright-report/
 /blob-report/
 /playwright/.cache/
+
+# Model weights (~11 GB). Mounted into the model services at runtime from
+# services/, never baked into an image and never committed — individual
+# checkpoints exceed GitHub's 100 MB blob limit.
+backend/aimodels/
+
+# Python build artefacts. The root previously had no Python rules at all;
+# backend/ carried its own, which left services/ uncovered.
+__pycache__/
+*.py[cod]
+.venv/

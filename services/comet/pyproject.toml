@@ -1,0 +1,54 @@
+[project]
+name = "qe-svc"
+version = "0.1.0"
+description = "Reference-free quality estimation (CometKiwi) — src + mt in, scores out."
+requires-python = ">=3.10,<4.0"
+dependencies = [
+    "fastapi[standard]<1.0.0,>=0.114.2",
+    "pydantic>2.0",
+    "pydantic-settings<3.0.0,>=2.2.1",
+    # Owns its own transformers/pytorch-lightning pins here, instead of
+    # negotiating them with MetricX and sentence-transformers in one lock.
+    "unbabel-comet>=2.2.0",
+    "numpy>=1.26.4",
+    # unbabel-comet pins torchmetrics 0.10.3, which imports pkg_resources at
+    # module level. setuptools 81 removed pkg_resources, so a fresh resolution
+    # crashes on import. The workbench backend only survives this because its
+    # lock froze setuptools at 80.7.1 — `uv lock --upgrade` there would break
+    # it the same way. Pin explicitly rather than depend on that luck.
+    "setuptools<81",
+]
+
+# Pick exactly one at build time: `uv sync --extra cuda` or `--extra cpu`.
+[project.optional-dependencies]
+cuda = ["torch>=2.4.1"]
+cpu = ["torch>=2.4.1"]
+
+[tool.uv]
+package = false
+
+conflicts = [[{ extra = "cpu" }, { extra = "cuda" }]]
+
+dev-dependencies = [
+    "pytest<9.0.0,>=7.4.3",
+    "ruff<1.0.0,>=0.2.2",
+    "httpx<1.0.0,>=0.25.1",
+]
+
+[[tool.uv.index]]
+name = "pytorch-cpu"
+url = "https://download.pytorch.org/whl/cpu"
+explicit = true
+
+[tool.uv.sources]
+torch = [{ index = "pytorch-cpu", extra = "cpu" }]
+
+[tool.ruff]
+target-version = "py310"
+
+[tool.ruff.lint]
+select = ["E", "W", "F", "I", "B", "C4", "UP"]
+ignore = [
+    "E501",  # line too long
+    "B008",  # function calls in argument defaults (FastAPI Depends)
+]

@@ -1,0 +1,37 @@
+[project]
+name = "langid-svc"
+version = "0.1.0"
+description = "Language identification (lingua), restricted to English and French."
+requires-python = ">=3.10,<4.0"
+dependencies = [
+    "fastapi[standard]<1.0.0,>=0.114.2",
+    "pydantic>2.0",
+    "pydantic-settings<3.0.0,>=2.2.1",
+    # Rust-backed; ships its own n-gram data inside the wheel, so there is no
+    # model file to mount. Deliberately unpinned above 2.1.1: 2.2.0+ requires
+    # Python >=3.12, and uv honours requires-python, so this upgrades itself
+    # if the base image moves to 3.12+.
+    "lingua-language-detector>=2.1.1",
+]
+
+# No torch, no GPU, no weights — this service needs none of the cpu/cuda
+# machinery the model containers carry.
+
+[tool.uv]
+package = false
+
+dev-dependencies = [
+    "pytest<9.0.0,>=7.4.3",
+    "ruff<1.0.0,>=0.2.2",
+    "httpx<1.0.0,>=0.25.1",
+]
+
+[tool.ruff]
+target-version = "py310"
+
+[tool.ruff.lint]
+select = ["E", "W", "F", "I", "B", "C4", "UP"]
+ignore = [
+    "E501",  # line too long
+    "B008",  # function calls in argument defaults (FastAPI Depends)
+]

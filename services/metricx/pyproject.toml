@@ -1,0 +1,62 @@
+[project]
+name = "metricx-svc"
+version = "0.1.0"
+description = "MetricX-24 hybrid regression scoring — src/mt/ref in, scores out."
+requires-python = ">=3.10,<4.0"
+dependencies = [
+    "fastapi[standard]<1.0.0,>=0.114.2",
+    "pydantic>2.0",
+    "pydantic-settings<3.0.0,>=2.2.1",
+    # Pinned exactly. MT5ForRegression subclasses transformers' MT5 internals
+    # and is unusually sensitive to them — two failures found the hard way:
+    #   5.14.1  -> ImportError, __HEAD_MASK_WARNING_MSG removed from mt5
+    #   4.57.6  -> RuntimeError in MT5Attention, position_bias/causal_mask
+    #              shapes disagree by one during the forward pass
+    # 4.51.3 is what the workbench backend ran successfully, so it is the
+    # known-good version. Re-pin only with a parity check to back it up.
+    #
+    # This is exactly why metricx gets its own lock: labse-svc runs
+    # transformers 5.14.1 quite happily, and one shared lock would drag it back
+    # here — which is what the monolith does today.
+    "transformers==4.51.3",
+    "sentencepiece>=0.1.99",
+    # T5 slow->fast tokenizer conversion needs protobuf.
+    "protobuf>=4.0.0",
+    "numpy>=1.26.4",
+]
+
+# Pick exactly one at build time: `uv sync --extra cuda` or `--extra cpu`.
+[project.optional-dependencies]
+cuda = ["torch>=2.4.1"]
+cpu = ["torch>=2.4.1"]
+
+[tool.uv]
+package = false
+
+conflicts = [[{ extra = "cpu" }, { extra = "cuda" }]]
+
+dev-dependencies = [
+    "pytest<9.0.0,>=7.4.3",
+    "ruff<1.0.0,>=0.2.2",
+    "httpx<1.0.0,>=0.25.1",
+]
+
+[[tool.uv.index]]
+name = "pytorch-cpu"
+url = "https://download.pytorch.org/whl/cpu"
+explicit = true
+
+[tool.uv.sources]
+torch = [{ index = "pytorch-cpu", extra = "cpu" }]
+
+[tool.ruff]
+target-version = "py310"
+
+[tool.ruff.lint]
+select = ["E", "W", "F", "I", "B", "C4", "UP"]
+ignore = [
+    "E501",  # line too long
+    "B008",  # function calls in argument defaults (FastAPI Depends)
+]
+# Vendored from the MetricX reference implementation; not ours to restyle.
+exclude = ["app/metricx_model.py"]

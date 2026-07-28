@@ -37,6 +37,37 @@ class Settings(BaseSettings):
     FRONTEND_HOST: str = "http://localhost:5173"
     ENVIRONMENT: Literal["local", "staging", "production"] = "local"
 
+    # FORCE_CPU, METRICX_BATCH_SIZE and METRICX_MAX_LENGTH moved to the model
+    # services that actually own that hardware and those tensors.
+
+    # LaBSE runs in its own container (services/labse), not in this process.
+    LABSE_SERVICE_URL: str = "http://labse:8000"
+    # Fail fast on a dead service; allow a long read for a large encode.
+    LABSE_CONNECT_TIMEOUT: float = 5.0
+    LABSE_READ_TIMEOUT: float = 600.0
+
+    # CometKiwi and wmt22-comet-da are two deployments of the same image
+    # (services/comet), distinguished only by checkpoint.
+    QE_SERVICE_URL: str = "http://qe:8000"
+    QE_CONNECT_TIMEOUT: float = 5.0
+    QE_READ_TIMEOUT: float = 600.0
+
+    COMET_SERVICE_URL: str = "http://comet:8000"
+    COMET_CONNECT_TIMEOUT: float = 5.0
+    COMET_READ_TIMEOUT: float = 600.0
+
+    # Language identification runs in its own container (services/langid).
+    LANGID_SERVICE_URL: str = "http://langid:8000"
+    LANGID_CONNECT_TIMEOUT: float = 5.0
+    # No model to load and no GPU; detection is fast.
+    LANGID_READ_TIMEOUT: float = 60.0
+
+    # MetricX runs in its own container (services/metricx).
+    METRICX_SERVICE_URL: str = "http://metricx:8000"
+    METRICX_CONNECT_TIMEOUT: float = 5.0
+    # Long sequences plus small batches; give it room.
+    METRICX_READ_TIMEOUT: float = 1800.0
+
     BACKEND_CORS_ORIGINS: Annotated[
         list[AnyUrl] | str, BeforeValidator(parse_cors)
     ] = []

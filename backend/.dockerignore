@@ -6,3 +6,8 @@ app.egg-info
 .coverage
 htmlcov
 .venv
+
+# Model weights (~11 GB). Mounted at /data/aimodels at runtime, never baked
+# into the image — but without this they are still shipped to the daemon as
+# build context on every build.
+aimodels

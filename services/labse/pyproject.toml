@@ -1,0 +1,63 @@
+[project]
+name = "labse-svc"
+version = "0.1.0"
+description = "LaBSE embedding service — vectors in, vectors out."
+requires-python = ">=3.10,<4.0"
+dependencies = [
+    "fastapi[standard]<1.0.0,>=0.114.2",
+    "pydantic>2.0",
+    "pydantic-settings<3.0.0,>=2.2.1",
+    "sentence-transformers>=3.1.1",
+    "numpy>=1.26.4",
+]
+
+# Pick exactly one at build time: `uv sync --extra cuda` or `--extra cpu`.
+# The default PyPI torch bundles CUDA (~2.5 GB in the image), which is dead
+# weight on a CPU-only Container App — hence the separate index below.
+[project.optional-dependencies]
+cuda = ["torch>=2.4.1"]
+cpu = ["torch>=2.4.1"]
+
+[tool.uv]
+# Nothing to build — this is an application, not a library. Keeps the image
+# free of hatchling and the wheel-build step.
+package = false
+
+# Both extras provide torch, so they can never be installed together.
+conflicts = [[{ extra = "cpu" }, { extra = "cuda" }]]
+
+dev-dependencies = [
+    "pytest<9.0.0,>=7.4.3",
+    "ruff<1.0.0,>=0.2.2",
+    "httpx<1.0.0,>=0.25.1",
+]
+
+# `explicit` means nothing resolves from here unless it is named in
+# [tool.uv.sources] — this index must not shadow PyPI for anything else.
+[[tool.uv.index]]
+name = "pytorch-cpu"
+url = "https://download.pytorch.org/whl/cpu"
+explicit = true
+
+[tool.uv.sources]
+# The cuda extra deliberately has no override: default PyPI torch already
+# ships the CUDA build.
+torch = [{ index = "pytorch-cpu", extra = "cpu" }]
+
+[tool.ruff]
+target-version = "py310"
+
+[tool.ruff.lint]
+select = [
+    "E",   # pycodestyle errors
+    "W",   # pycodestyle warnings
+    "F",   # pyflakes
+    "I",   # isort
+    "B",   # flake8-bugbear
+    "C4",  # flake8-comprehensions
+    "UP",  # pyupgrade
+]
+ignore = [
+    "E501",  # line too long
+    "B008",  # function calls in argument defaults (FastAPI Depends)
+]

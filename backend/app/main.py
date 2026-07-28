@@ -6,13 +6,15 @@ from starlette.middleware.cors import CORSMiddleware
 from app.api.main import api_router
 from app.core.config import settings
 
+# No lifespan model loading: every model runs in its own container under
+# services/ and is reached over HTTP. This app holds no weights.
 
 def custom_generate_unique_id(route: APIRoute) -> str:
     return f"{route.tags[0]}-{route.name}"
 
-
 if settings.SENTRY_DSN and settings.ENVIRONMENT != "local":
     sentry_sdk.init(dsn=str(settings.SENTRY_DSN), enable_tracing=True)
+
 
 app = FastAPI(
     title=settings.PROJECT_NAME,

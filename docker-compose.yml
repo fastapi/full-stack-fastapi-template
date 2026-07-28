@@ -134,6 +134,125 @@ services:
       # Enable redirection for HTTP and HTTPS
       - traefik.http.routers.${STACK_NAME?Variable not set}-backend-http.middlewares=https-redirect
 
+  # Model service. Internal only — no traefik labels, no public hostname.
+  # Reached by the backend as http://labse:8000. Owns exactly one thing:
+  # turning text into vectors. Alignment, faiss and TMX stay in the backend.
+  labse:
+    image: '${DOCKER_IMAGE_LABSE-labse-svc}:${TAG-latest}'
+    restart: always
+    networks:
+      - default
+    build:
+      context: ./services/labse
+    volumes:
+      - data:/data
+    environment:
+      - MODEL_PATH=${LABSE_MODEL_PATH-/data/aimodels/LaBSE}
+      - FORCE_CPU=${LABSE_FORCE_CPU-false}
+      - FP16=${LABSE_FP16-false}
+      - BATCH_SIZE=${LABSE_BATCH_SIZE-64}
+    healthcheck:
+      # /ready stays 503 until the weights are resident, so start_period has to
+      # cover a cold load off the mount (~30-90s), not just process start.
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8000/ready', timeout=3)"]
+      interval: 15s
+      timeout: 5s
+      retries: 10
+      start_period: 180s
+
+  # Reference-free quality estimation (CometKiwi). Internal only, same shape as
+  # labse: reached by the backend as http://qe:8000.
+  #
+  # Note this and `comet` below build the same image from ./services/comet.
+  # Their dependency trees are byte-identical, so separate images would
+  # duplicate rather than isolate. They differ only by checkpoint.
+  qe:
+    image: '${DOCKER_IMAGE_COMET-comet-svc}:${TAG-latest}'
+    restart: always
+    networks:
+      - default
+    build:
+      context: ./services/comet
+    volumes:
+      - data:/data
+    environment:
+      - MODEL_NAME=comekiwi
+      - MODEL_PATH=${QE_MODEL_PATH-/data/aimodels/huggingface/checkpoints/model.ckpt}
+      - FORCE_CPU=${QE_FORCE_CPU-false}
+      - BATCH_SIZE=${QE_BATCH_SIZE-32}
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8000/ready', timeout=3)"]
+      interval: 15s
+      timeout: 5s
+      retries: 10
+      start_period: 180s
+
+  # Reference-based COMET (wmt22-comet-da). Same image as `qe`, different
+  # checkpoint. Batch-only workload, so this is the one to scale to zero first.
+  comet:
+    image: '${DOCKER_IMAGE_COMET-comet-svc}:${TAG-latest}'
+    restart: always
+    networks:
+      - default
+    build:
+      context: ./services/comet
+    volumes:
+      - data:/data
+    environment:
+      - MODEL_NAME=comet
+      - MODEL_PATH=${COMET_MODEL_PATH-/data/aimodels/wmt22-comet-da/checkpoints/model.ckpt}
+      - FORCE_CPU=${COMET_FORCE_CPU-false}
+      - BATCH_SIZE=${COMET_BATCH_SIZE-32}
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8000/ready', timeout=3)"]
+      interval: 15s
+      timeout: 5s
+      retries: 10
+      start_period: 180s
+
+  # Language identification (lingua), restricted to en+fr. The odd one out:
+  # no weights to mount, no GPU, no torch — lingua ships its n-gram data inside
+  # the wheel. Hence no `data` volume and no device reservation.
+  langid:
+    image: '${DOCKER_IMAGE_LANGID-langid-svc}:${TAG-latest}'
+    restart: always
+    networks:
+      - default
+    build:
+      context: ./services/langid
+    environment:
+      - LANGUAGES=${LANGID_LANGUAGES-en,fr}
+      - MIN_CONFIDENCE=${LANGID_MIN_CONFIDENCE-0.0}
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8000/ready', timeout=3)"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
+
+  # MetricX-24 hybrid. Own container because MT5ForRegression subclasses
+  # transformers internals and wants to track it independently of comet.
+  metricx:
+    image: '${DOCKER_IMAGE_METRICX-metricx-svc}:${TAG-latest}'
+    restart: always
+    networks:
+      - default
+    build:
+      context: ./services/metricx
+    volumes:
+      - data:/data
+    environment:
+      - MODEL_PATH=${METRICX_MODEL_PATH-/data/aimodels/metricx}
+      - FORCE_CPU=${METRICX_FORCE_CPU-false}
+      - BATCH_SIZE=${METRICX_BATCH_SIZE-8}
+      - MAX_LENGTH=${METRICX_MAX_LENGTH-1536}
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8000/ready', timeout=3)"]
+      interval: 15s
+      timeout: 5s
+      retries: 10
+      start_period: 240s
+
   frontend:
     image: '${DOCKER_IMAGE_FRONTEND?Variable not set}:${TAG-latest}'
     restart: always
@@ -164,6 +283,7 @@ services:
       - traefik.http.routers.${STACK_NAME?Variable not set}-frontend-http.middlewares=https-redirect
 volumes:
   app-db-data:
+  data:
 
 networks:
   traefik-public:
