@@ -10,6 +10,7 @@ config = context.config
 
 # Interpret the config file for Python logging.
 # This line sets up loggers basically.
+assert config.config_file_name is not None
 fileConfig(config.config_file_name)
 
 # add your model's MetaData object here
@@ -18,7 +19,7 @@ fileConfig(config.config_file_name)
 # target_metadata = mymodel.Base.metadata
 # target_metadata = None
 
-from app.models.users import SQLModel  # noqa
+from app.models import SQLModel  # noqa
 from app.core.config import settings # noqa
 
 target_metadata = SQLModel.metadata
@@ -62,6 +63,7 @@ def run_migrations_online():
 
     """
     configuration = config.get_section(config.config_ini_section)
+    assert configuration is not None
     configuration["sqlalchemy.url"] = get_url()
     connectable = engine_from_config(
         configuration,

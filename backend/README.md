@@ -37,7 +37,7 @@ The setup is also already configured so you can run the tests through the VS Cod
 
 ## Docker Compose Override
 
-During development, you can change Docker Compose settings that will only affect the local development environment in the file `docker-compose.override.yml`.
+During development, you can change Docker Compose settings that will only affect the local development environment in the file `compose.override.yml`.
 
 The changes to that file only affect the local development environment, not the production environment. So, you can add "temporary" changes that help the development workflow.
 
@@ -167,6 +167,6 @@ If you don't want to start with the default models and want to remove them / mod
 
 The email templates are in `./backend/app/email-templates/`. Here, there are two directories: `build` and `src`. The `src` directory contains the source files that are used to build the final email templates. The `build` directory contains the final email templates that are used by the application.
 
-Before continuing, ensure you have the [MJML extension](https://marketplace.visualstudio.com/items?itemName=attilabuti.vscode-mjml) installed in your VS Code.
+Before continuing, ensure you have the [MJML extension](https://github.com/mjmlio/vscode-mjml) installed in your VS Code.
 
 Once you have the MJML extension installed, you can create a new email template in the `src` directory. After creating the new email template and with the `.mjml` file open in your editor, open the command palette with `Ctrl+Shift+P` and search for `MJML: Export to HTML`. This will convert the `.mjml` file to a `.html` file and now you can save it in the build directory.

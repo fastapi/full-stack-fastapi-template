@@ -4,43 +4,74 @@ updates:
   - package-ecosystem: github-actions
     directory: /
     schedule:
-      interval: daily
+      interval: "monthly"
+    cooldown:
+      default-days: 7
     commit-message:
       prefix: ⬆
-    labels: [dependencies, internal]
+    labels:
+      - "internal"
+      - "dependencies"
+      - "github_actions"
+    groups:
+      github-actions:
+        patterns:
+          - "*"
   # Python uv
   - package-ecosystem: uv
-    directory: /backend
+    directory: /
     schedule:
-      interval: weekly
+      interval: "monthly"
+    cooldown:
+      default-days: 7
     commit-message:
       prefix: ⬆
     labels: [dependencies, internal]
-  # npm
-  - package-ecosystem: npm
-    directory: /frontend
+    groups:
+      python-packages:
+        patterns:
+          - "*"
+  # bun
+  - package-ecosystem: bun
+    directory: /
     schedule:
-      interval: weekly
+      interval: "monthly"
+    cooldown:
+      default-days: 7
     commit-message:
       prefix: ⬆
     labels: [dependencies, internal]
     ignore:
       - dependency-name: "@hey-api/openapi-ts"
+    groups:
+      npm-packages:
+        patterns:
+          - "*"
   # Docker
   - package-ecosystem: docker
     directories:
       - /backend
       - /frontend
     schedule:
-      interval: weekly
+      interval: "monthly"
+    cooldown:
+      default-days: 7
     commit-message:
       prefix: ⬆
-    labels: [dependencies, internal]
+    groups:
+      docker:
+        patterns:
+          - "*"
   # Docker Compose
   - package-ecosystem: docker-compose
     directory: /
     schedule:
-      interval: weekly
+      interval: "monthly"
+    cooldown:
+      default-days: 7
     commit-message:
       prefix: ⬆
-    labels: [dependencies, internal]
+    groups:
+      docker-compose:
+        patterns:
+          - "*"

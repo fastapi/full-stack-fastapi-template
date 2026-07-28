@@ -75,13 +75,11 @@ test("Sign up with existing email", async ({ page }) => {
   const email = randomEmail()
   const password = randomPassword()
 
-  // Sign up with an email
   await page.goto("/signup")
 
   await fillForm(page, fullName, email, password, password)
   await page.getByRole("button", { name: "Sign Up" }).click()
 
-  // Sign up again with the same email
   await page.goto("/signup")
 
   await fillForm(page, fullName, email, password, password)

@@ -6,13 +6,13 @@ services:
   # etc. To enable it, update .env, set:
   # DOMAIN=localhost.tiangolo.com
   proxy:
-    image: traefik:3.0
+    image: traefik:3.6
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
     ports:
       - "8060:80"
       - "8090:8080"
-    # Duplicate the command from docker-compose.yml to add --api.insecure=true
+    # Duplicate the command from compose.yml to add --api.insecure=true
     command:
       # Enable Docker in Traefik, so that it reads labels from Docker services
       - --providers.docker
@@ -60,12 +60,19 @@ services:
     ports:
       - "8070:8000"
     build:
-      context: ./backend
+      context: .
+      dockerfile: backend/Dockerfile
+    # command: sleep infinity  # Infinite loop to keep container alive doing nothing
+    command:
+      - fastapi
+      - run
+      - --reload
+      - "app/main.py"
     develop:
       watch:
         - path: ./backend
           action: sync
-          target: /app
+          target: /app/backend
           ignore:
             - ./backend/.venv
             - .venv
@@ -75,8 +82,7 @@ services:
     # weights. Every model runs in its own container under services/.
     # TODO: remove once coverage is done locally
     volumes:
-      - ./backend/app:/app/app
-      - ./backend/htmlcov:/app/htmlcov
+      - ./backend/htmlcov:/app/backend/htmlcov
     environment:
       SMTP_HOST: "mailcatcher"
       SMTP_PORT: "1025"
@@ -206,15 +212,16 @@ services:
     ports:
       - "5173:80"
     build:
-      context: ./frontend
+      context: .
+      dockerfile: frontend/Dockerfile
       args:
         - VITE_API_URL=http://localhost:8070
         - NODE_ENV=development
 
   playwright:
     build:
-      context: ./frontend
-      dockerfile: Dockerfile.playwright
+      context: .
+      dockerfile: frontend/Dockerfile.playwright
       args:
         - VITE_API_URL=http://backend:8000
         - NODE_ENV=production
@@ -231,8 +238,8 @@ services:
       - PLAYWRIGHT_HTML_HOST=0.0.0.0
       - CI=${CI}
     volumes:
-      - ./frontend/blob-report:/app/blob-report
-      - ./frontend/test-results:/app/test-results
+      - ./frontend/blob-report:/app/frontend/blob-report
+      - ./frontend/test-results:/app/frontend/test-results
     ports:
       - 9323:9323
 

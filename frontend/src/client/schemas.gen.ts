@@ -6,7 +6,7 @@ export const Body_login_login_access_tokenSchema = {
             anyOf: [
                 {
                     type: 'string',
-                    pattern: 'password'
+                    pattern: '^password$'
                 },
                 {
                     type: 'null'
@@ -20,6 +20,7 @@ export const Body_login_login_access_tokenSchema = {
         },
         password: {
             type: 'string',
+            format: 'password',
             title: 'Password'
         },
         scope: {
@@ -47,6 +48,7 @@ export const Body_login_login_access_tokenSchema = {
                     type: 'null'
                 }
             ],
+            format: 'password',
             title: 'Client Secret'
         }
     },
@@ -124,6 +126,18 @@ export const ItemPublicSchema = {
             type: 'string',
             format: 'uuid',
             title: 'Owner Id'
+        },
+        created_at: {
+            anyOf: [
+                {
+                    type: 'string',
+                    format: 'date-time'
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Created At'
         }
     },
     type: 'object',
@@ -350,6 +364,18 @@ export const UserPublicSchema = {
             type: 'string',
             format: 'uuid',
             title: 'Id'
+        },
+        created_at: {
+            anyOf: [
+                {
+                    type: 'string',
+                    format: 'date-time'
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Created At'
         }
     },
     type: 'object',
@@ -405,14 +431,26 @@ export const UserUpdateSchema = {
             title: 'Email'
         },
         is_active: {
-            type: 'boolean',
-            title: 'Is Active',
-            default: true
+            anyOf: [
+                {
+                    type: 'boolean'
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Is Active'
         },
         is_superuser: {
-            type: 'boolean',
-            title: 'Is Superuser',
-            default: false
+            anyOf: [
+                {
+                    type: 'boolean'
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Is Superuser'
         },
         full_name: {
             anyOf: [
@@ -518,6 +556,13 @@ export const ValidationErrorSchema = {
         type: {
             type: 'string',
             title: 'Error Type'
+        },
+        input: {
+            title: 'Input'
+        },
+        ctx: {
+            type: 'object',
+            title: 'Context'
         }
     },
     type: 'object',

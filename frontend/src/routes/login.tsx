@@ -44,7 +44,7 @@ export const Route = createFileRoute("/login")({
   head: () => ({
     meta: [
       {
-        title: "Log In - FastAPI Cloud",
+        title: "Log In - FastAPI Template",
       },
     ],
   }),
@@ -66,7 +66,6 @@ function Login() {
     if (loginMutation.isPending) return
     loginMutation.mutate(data)
   }
-
 
   return (
     <AuthLayout>

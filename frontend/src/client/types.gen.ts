@@ -23,6 +23,7 @@ export type ItemPublic = {
     description?: (string | null);
     id: string;
     owner_id: string;
+    created_at?: (string | null);
 };
 
 export type ItemsPublic = {
@@ -75,6 +76,7 @@ export type UserPublic = {
     is_superuser?: boolean;
     full_name?: (string | null);
     id: string;
+    created_at?: (string | null);
 };
 
 export type UserRegister = {
@@ -90,8 +92,8 @@ export type UsersPublic = {
 
 export type UserUpdate = {
     email?: (string | null);
-    is_active?: boolean;
-    is_superuser?: boolean;
+    is_active?: (boolean | null);
+    is_superuser?: (boolean | null);
     full_name?: (string | null);
     password?: (string | null);
 };
@@ -105,6 +107,10 @@ export type ValidationError = {
     loc: Array<(string | number)>;
     msg: string;
     type: string;
+    input?: unknown;
+    ctx?: {
+        [key: string]: unknown;
+    };
 };
 
 export type ItemsReadItemsData = {

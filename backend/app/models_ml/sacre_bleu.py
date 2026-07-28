@@ -1,13 +1,19 @@
 from pydantic import BaseModel
 import sacrebleu
 import nltk # HLepor dependencies
-from hlepor import * # HLepor dependencies
+# hlepor is vendored (see hlepor_vendored.py): the published package pulls
+# nptyping, which is unmaintained and caps numpy <2.
+from app.models_ml.hlepor_vendored import hlepor_score, single_hlepor_score
+import os
 import ctypes
 import itertools
 import Levenshtein
 
 #lib_path = os.path.join(os.path.dirname(os.path.dirname(__file__)), 'lib', 'libED.so')
-ed_wrapper = ctypes.CDLL('/app/app/lib/libED.so')
+# Resolved relative to this file: the uv workspace layout moves the app from
+# /app/app to /app/backend/app, so an absolute path does not survive.
+_lib_path = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), 'lib', 'libED.so')
+ed_wrapper = ctypes.CDLL(_lib_path)
 ed_wrapper.wrapper.restype = ctypes.c_float
 
 # Define request and response models

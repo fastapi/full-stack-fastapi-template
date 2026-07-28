@@ -32,7 +32,7 @@ mkdir -p /root/code/traefik-public/
 Copy the Traefik Docker Compose file to your server. You could do it by running the command `rsync` in your local terminal:
 
 ```bash
-rsync -a docker-compose.traefik.yml root@your-server.example.com:/root/code/traefik-public/
+rsync -a compose.traefik.yml root@your-server.example.com:/root/code/traefik-public/
 ```
 
 ### Traefik Public Network
@@ -97,10 +97,10 @@ Go to the directory where you copied the Traefik Docker Compose file in your rem
 cd /root/code/traefik-public/
 ```
 
-Now with the environment variables set and the `docker-compose.traefik.yml` in place, you can start the Traefik Docker Compose running the following command:
+Now with the environment variables set and the `compose.traefik.yml` in place, you can start the Traefik Docker Compose running the following command:
 
 ```bash
-docker compose -f docker-compose.traefik.yml up -d
+docker compose -f compose.traefik.yml up -d
 ```
 
 ## Deploy the FastAPI Project
@@ -109,47 +109,17 @@ Now that you have Traefik in place you can deploy your FastAPI project with Dock
 
 **Note**: You might want to jump ahead to the section about Continuous Deployment with GitHub Actions.
 
+## Copy the Code
+
+```bash
+rsync -av --filter=":- .gitignore" ./ root@your-server.example.com:/root/code/app/
+```
+
+Note: `--filter=":- .gitignore"` tells `rsync` to use the same rules as git, ignore files ignored by git, like the Python virtual environment.
+
 ## Environment Variables
 
 You need to set some environment variables first.
-
-Set the `ENVIRONMENT`, by default `local` (for development), but when deploying to a server you would put something like `staging` or `production`:
-
-```bash
-export ENVIRONMENT=production
-```
-
-Set the `DOMAIN`, by default `localhost` (for development), but when deploying you would use your own domain, for example:
-
-```bash
-export DOMAIN=fastapi-project.example.com
-```
-
-You can set several variables, like:
-
-* `PROJECT_NAME`: The name of the project, used in the API for the docs and emails.
-* `STACK_NAME`: The name of the stack used for Docker Compose labels and project name, this should be different for `staging`, `production`, etc. You could use the same domain replacing dots with dashes, e.g. `fastapi-project-example-com` and `staging-fastapi-project-example-com`.
-* `BACKEND_CORS_ORIGINS`: A list of allowed CORS origins separated by commas.
-* `SECRET_KEY`: The secret key for the FastAPI project, used to sign tokens.
-* `FIRST_SUPERUSER`: The email of the first superuser, this superuser will be the one that can create new users.
-* `FIRST_SUPERUSER_PASSWORD`: The password of the first superuser.
-* `SMTP_HOST`: The SMTP server host to send emails, this would come from your email provider (E.g. Mailgun, Sparkpost, Sendgrid, etc).
-* `SMTP_USER`: The SMTP server user to send emails.
-* `SMTP_PASSWORD`: The SMTP server password to send emails.
-* `EMAILS_FROM_EMAIL`: The email account to send emails from.
-* `POSTGRES_SERVER`: The hostname of the PostgreSQL server. You can leave the default of `db`, provided by the same Docker Compose. You normally wouldn't need to change this unless you are using a third-party provider.
-* `POSTGRES_PORT`: The port of the PostgreSQL server. You can leave the default. You normally wouldn't need to change this unless you are using a third-party provider.
-* `POSTGRES_PASSWORD`: The Postgres password.
-* `POSTGRES_USER`: The Postgres user, you can leave the default.
-* `POSTGRES_DB`: The database name to use for this application. You can leave the default of `app`.
-* `SENTRY_DSN`: The DSN for Sentry, if you are using it.
-
-## GitHub Actions Environment Variables
-
-There are some environment variables only used by GitHub Actions that you can configure:
-
-* `LATEST_CHANGES`: Used by the GitHub Action [latest-changes](https://github.com/tiangolo/latest-changes) to automatically add release notes based on the PRs merged. It's a personal access token, read the docs for details.
-* `SMOKESHOW_AUTH_KEY`: Used to handle and publish the code coverage using [Smokeshow](https://github.com/samuelcolvin/smokeshow), follow their instructions to create a (free) Smokeshow key.
 
 ### Generate secret keys
 
@@ -163,15 +133,80 @@ python -c "import secrets; print(secrets.token_urlsafe(32))"
 
 Copy the content and use that as password / secret key. And run that again to generate another secure key.
 
+### Required Environment Variables
+
+Set the `ENVIRONMENT`, by default `local` (for development), but when deploying to a server you would put something like `staging` or `production`:
+
+```bash
+export ENVIRONMENT=production
+```
+
+Set the `DOMAIN`, by default `localhost` (for development), but when deploying you would use your own domain, for example:
+
+```bash
+export DOMAIN=fastapi-project.example.com
+```
+
+Set the `POSTGRES_PASSWORD` to something different than `changethis`:
+
+```bash
+export POSTGRES_PASSWORD="changethis"
+```
+
+Set the `SECRET_KEY`, used to sign tokens:
+
+```bash
+export SECRET_KEY="changethis"
+```
+
+Note: you can use the Python command above to generate a secure secret key.
+
+Set the `FIRST_SUPER_USER_PASSWORD` to something different than `changethis`:
+
+```bash
+export FIRST_SUPERUSER_PASSWORD="changethis"
+```
+
+Set the `BACKEND_CORS_ORIGINS` to include your domain:
+
+```bash
+export BACKEND_CORS_ORIGINS="https://dashboard.${DOMAIN?Variable not set},https://api.${DOMAIN?Variable not set}"
+```
+
+You can set several other environment variables:
+
+* `PROJECT_NAME`: The name of the project, used in the API for the docs and emails.
+* `STACK_NAME`: The name of the stack used for Docker Compose labels and project name, this should be different for `staging`, `production`, etc. You could use the same domain replacing dots with dashes, e.g. `fastapi-project-example-com` and `staging-fastapi-project-example-com`.
+* `BACKEND_CORS_ORIGINS`: A list of allowed CORS origins separated by commas.
+* `FIRST_SUPERUSER`: The email of the first superuser, this superuser will be the one that can create new users.
+* `SMTP_HOST`: The SMTP server host to send emails, this would come from your email provider (E.g. Mailgun, Sparkpost, Sendgrid, etc).
+* `SMTP_USER`: The SMTP server user to send emails.
+* `SMTP_PASSWORD`: The SMTP server password to send emails.
+* `EMAILS_FROM_EMAIL`: The email account to send emails from.
+* `POSTGRES_SERVER`: The hostname of the PostgreSQL server. You can leave the default of `db`, provided by the same Docker Compose. You normally wouldn't need to change this unless you are using a third-party provider.
+* `POSTGRES_PORT`: The port of the PostgreSQL server. You can leave the default. You normally wouldn't need to change this unless you are using a third-party provider.
+* `POSTGRES_USER`: The Postgres user, you can leave the default.
+* `POSTGRES_DB`: The database name to use for this application. You can leave the default of `app`.
+* `SENTRY_DSN`: The DSN for Sentry, if you are using it.
+
+## GitHub Actions Environment Variables
+
+There are some environment variables only used by GitHub Actions that you can configure:
+
+* `LATEST_CHANGES`: Used by the GitHub Action [latest-changes](https://github.com/tiangolo/latest-changes) to automatically add release notes based on the PRs merged. It's a personal access token, read the docs for details.
+* `SMOKESHOW_AUTH_KEY`: Used to handle and publish the code coverage using [Smokeshow](https://github.com/samuelcolvin/smokeshow), follow their instructions to create a (free) Smokeshow key.
+
 ### Deploy with Docker Compose
 
 With the environment variables in place, you can deploy with Docker Compose:
 
 ```bash
-docker compose -f docker-compose.yml up -d
+cd /root/code/app/
+docker compose -f compose.yml build
+docker compose -f compose.yml up -d
 ```
 
-For production you wouldn't want to have the overrides in `docker-compose.override.yml`, that's why we explicitly specify `docker-compose.yml` as the file to use.
+For production you wouldn't want to have the overrides in `compose.override.yml`, that's why we explicitly specify `compose.yml` as the file to use.
 
 ## Continuous Deployment (CD)
 
@@ -253,9 +288,15 @@ cd /home/github/actions-runner
 
 You can read more about it in the official guide: [Configuring the self-hosted runner application as a service](https://docs.github.com/en/actions/hosting-your-own-runners/managing-self-hosted-runners/configuring-the-self-hosted-runner-application-as-a-service).
 
+### Configure GitHub Environments
+
+The deployment workflows use [GitHub Environments](https://docs.github.com/en/actions/how-tos/deploy/configure-and-manage-deployments/manage-environments) for `staging` and `production`. This enables environment-specific secrets, deployment protection rules (e.g. required reviewers, wait timers), and deployment status tracking.
+
+To configure them, go to your repository's **Settings** > **Environments** and create the `staging` and `production` environments.
+
 ### Set Secrets
 
-On your repository, configure secrets for the environment variables you need, the same ones described above, including `SECRET_KEY`, etc. Follow the [official GitHub guide for setting repository secrets](https://docs.github.com/en/actions/security-guides/using-secrets-in-github-actions#creating-secrets-for-a-repository).
+For each GitHub Environment (`staging` and `production`), configure the required secrets as [environment secrets](https://docs.github.com/en/actions/how-tos/write-workflows/choose-what-workflows-do/use-secrets#creating-secrets-for-an-environment). Environment secrets are preferred over [repository secrets](https://docs.github.com/en/actions/how-tos/write-workflows/choose-what-workflows-do/use-secrets#creating-secrets-for-a-repository) because they are scoped to the specific environment, reducing exposure and aligning with any protection rules you configure.
 
 The current Github Actions workflows expect these secrets:
 
@@ -277,6 +318,8 @@ There are GitHub Action workflows in the `.github/workflows` directory already c
 
 * `staging`: after pushing (or merging) to the branch `master`.
 * `production`: after publishing a release.
+
+Both workflows are associated with their respective GitHub Environments, so deployments will be visible in the repository's **Environments** section and will respect any protection rules you configure.
 
 If you need to add extra environments you could use those as a starting point.
 

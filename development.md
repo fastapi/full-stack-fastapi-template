@@ -63,8 +63,7 @@ docker compose stop frontend
 And then start the local frontend development server:
 
 ```bash
-cd frontend
-npm run dev
+bun run dev
 ```
 
 Or you could stop the `backend` Docker Compose service:
@@ -106,13 +105,13 @@ After you update it, run again:
 docker compose watch
 ```
 
-When deploying, for example in production, the main Traefik is configured outside of the Docker Compose files. For local development, there's an included Traefik in `docker-compose.override.yml`, just to let you test that the domains work as expected, for example with `api.localhost.tiangolo.com` and `dashboard.localhost.tiangolo.com`.
+When deploying, for example in production, the main Traefik is configured outside of the Docker Compose files. For local development, there's an included Traefik in `compose.override.yml`, just to let you test that the domains work as expected, for example with `api.localhost.tiangolo.com` and `dashboard.localhost.tiangolo.com`.
 
 ## Docker Compose files and env vars
 
-There is a main `docker-compose.yml` file with all the configurations that apply to the whole stack, it is used automatically by `docker compose`.
+There is a main `compose.yml` file with all the configurations that apply to the whole stack, it is used automatically by `docker compose`.
 
-And there's also a `docker-compose.override.yml` with overrides for development, for example to mount the source code as a volume. It is used automatically by `docker compose` to apply overrides on top of `docker-compose.yml`.
+And there's also a `compose.override.yml` with overrides for development, for example to mount the source code as a volume. It is used automatically by `docker compose` to apply overrides on top of `compose.yml`.
 
 These Docker Compose files use the `.env` file containing configurations to be injected as environment variables in the containers.
 
@@ -130,28 +129,30 @@ The `.env` file is the one that contains all your configurations, generated keys
 
 Depending on your workflow, you could want to exclude it from Git, for example if your project is public. In that case, you would have to make sure to set up a way for your CI tools to obtain it while building or deploying your project.
 
-One way to do it could be to add each environment variable to your CI/CD system, and updating the `docker-compose.yml` file to read that specific env var instead of reading the `.env` file.
+One way to do it could be to add each environment variable to your CI/CD system, and updating the `compose.yml` file to read that specific env var instead of reading the `.env` file.
 
 ## Pre-commits and code linting
 
-we are using a tool called [pre-commit](https://pre-commit.com/) for code linting and formatting.
+we are using a tool called [prek](https://prek.j178.dev/) (modern alternative to [Pre-commit](https://pre-commit.com/)) for code linting and formatting.
 
 When you install it, it runs right before making a commit in git. This way it ensures that the code is consistent and formatted even before it is committed.
 
 You can find a file `.pre-commit-config.yaml` with configurations at the root of the project.
 
-#### Install pre-commit to run automatically
+#### Install prek to run automatically
 
-`pre-commit` is already part of the dependencies of the project, but you could also install it globally if you prefer to, following [the official pre-commit docs](https://pre-commit.com/).
+`prek` is already part of the dependencies of the project.
 
-After having the `pre-commit` tool installed and available, you need to "install" it in the local repository, so that it runs automatically before each commit.
+After having the `prek` tool installed and available, you need to "install" it in the local repository, so that it runs automatically before each commit.
 
-Using `uv`, you could do it with:
+Using `uv`, you could do it with (make sure you are inside `backend` folder):
 
 ```bash
-❯ uv run pre-commit install
-pre-commit installed at .git/hooks/pre-commit
+❯ uv run prek install -f
+prek installed at `../.git/hooks/pre-commit`
 ```
+
+The `-f` flag forces the installation, in case there was already a `pre-commit` hook previously installed.
 
 Now whenever you try to commit, e.g. with:
 
@@ -159,23 +160,24 @@ Now whenever you try to commit, e.g. with:
 git commit
 ```
 
-...pre-commit will run and check and format the code you are about to commit, and will ask you to add that code (stage it) with git again before committing.
+...prek will run and check and format the code you are about to commit, and will ask you to add that code (stage it) with git again before committing.
 
 Then you can `git add` the modified/fixed files again and now you can commit.
 
-#### Running pre-commit hooks manually
+#### Running prek hooks manually
 
-you can also run `pre-commit` manually on all the files, you can do it using `uv` with:
+you can also run `prek` manually on all the files, you can do it using `uv` with:
 
 ```bash
-❯ uv run pre-commit run --all-files
+❯ uv run prek run --all-files
 check for added large files..............................................Passed
 check toml...............................................................Passed
 check yaml...............................................................Passed
+fix end of files.........................................................Passed
+trim trailing whitespace.................................................Passed
 ruff.....................................................................Passed
 ruff-format..............................................................Passed
-eslint...................................................................Passed
-prettier.................................................................Passed
+biome check..............................................................Passed
 ```
 
 ## URLs

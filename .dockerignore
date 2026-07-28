@@ -1,0 +1,21 @@
+# Build context is the repo root now (uv workspace), so everything here would be
+# shipped to the daemon unless excluded.
+
+# Model weights (~11 GB). Mounted into the model services at runtime.
+backend/aimodels/
+
+# Python / node build artefacts
+**/__pycache__/
+**/*.py[cod]
+**/.venv/
+**/node_modules/
+backend/htmlcov/
+backend/coverage/
+frontend/dist/
+
+# VCS and local tooling
+.git/
+.github/
+**/.pytest_cache/
+**/.ruff_cache/
+**/.mypy_cache/

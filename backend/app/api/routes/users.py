@@ -12,7 +12,7 @@ from app.api.deps import (
 )
 from app.core.config import settings
 from app.core.security import get_password_hash, verify_password
-from app.models.users import (
+from app.models import (
     Item,
     Message,
     UpdatePassword,
@@ -42,10 +42,13 @@ def read_users(session: SessionDep, skip: int = 0, limit: int = 100) -> Any:
     count_statement = select(func.count()).select_from(User)
     count = session.exec(count_statement).one()
 
-    statement = select(User).offset(skip).limit(limit)
+    statement = (
+        select(User).order_by(col(User.created_at).desc()).offset(skip).limit(limit)
+    )
     users = session.exec(statement).all()
 
-    return UsersPublic(data=users, count=count)
+    users_public = [UserPublic.model_validate(user) for user in users]
+    return UsersPublic(data=users_public, count=count)
 
 
 @router.post(
@@ -104,7 +107,8 @@ def update_password_me(
     """
     Update own password.
     """
-    if not verify_password(body.current_password, current_user.hashed_password):
+    verified, _ = verify_password(body.current_password, current_user.hashed_password)
+    if not verified:
         raise HTTPException(status_code=400, detail="Incorrect password")
     if body.current_password == body.new_password:
         raise HTTPException(
@@ -170,6 +174,8 @@ def read_user_by_id(
             status_code=403,
             detail="The user doesn't have enough privileges",
         )
+    if user is None:
+        raise HTTPException(status_code=404, detail="User not found")
     return user
 
 
@@ -220,7 +226,7 @@ def delete_user(
             status_code=403, detail="Super users are not allowed to delete themselves"
         )
     statement = delete(Item).where(col(Item.owner_id) == user_id)
-    session.exec(statement)  # type: ignore
+    session.exec(statement)
     session.delete(user)
     session.commit()
     return Message(message="User deleted successfully")
