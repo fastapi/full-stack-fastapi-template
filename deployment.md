@@ -173,6 +173,12 @@ Set the `BACKEND_CORS_ORIGINS` to include your domain:
 export BACKEND_CORS_ORIGINS="https://${DOMAIN?Variable not set}"
 ```
 
+Set the `FRONTEND_HOST`, used to generate frontend links in emails:
+
+```bash
+export FRONTEND_HOST="https://${DOMAIN?Variable not set}"
+```
+
 You can set several other environment variables:
 
 * `PROJECT_NAME`: The name of the project, used in the API for the docs and emails.
