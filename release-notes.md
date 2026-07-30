@@ -9,6 +9,7 @@
 
 ### Refactors
 
+* ♻️ Serve frontend from FastAPI. PR [#2393](https://github.com/fastapi/full-stack-fastapi-template/pull/2393) by [@tiangolo](https://github.com/tiangolo).
 * 🔧 Refactor PostgreSQL env var config. PR [#2392](https://github.com/fastapi/full-stack-fastapi-template/pull/2392) by [@tiangolo](https://github.com/tiangolo).
 * ♻️ Refactor models to improve types. PR [#2356](https://github.com/fastapi/full-stack-fastapi-template/pull/2356) by [@tiangolo](https://github.com/tiangolo).
 * 🔧 Add FastAPI VS Code extension to recommended extensions. PR [#2206](https://github.com/fastapi/full-stack-fastapi-template/pull/2206) by [@tiangolo](https://github.com/tiangolo).
