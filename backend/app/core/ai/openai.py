@@ -302,15 +302,22 @@ async def generate_questions(
                     raw_message
                 )
             if parsing_error is not None or parsed is None:
-                error = (
-                    str(parsing_error)
-                    if parsing_error
-                    else "Failed to parse LLM output"
+                # parsing_error / raw bodies can contain model output; keep that out of
+                # GenerationResult.error (and thus API responses).
+                exc_type = (
+                    type(parsing_error).__name__
+                    if parsing_error is not None
+                    else "MissingParsedOutput"
+                )
+                logger.error(
+                    "Question generation parse failed (prompt_id=%s, exc_type=%s)",
+                    prompt_id,
+                    exc_type,
                 )
                 return GenerationResult(
                     prompt_id=prompt_id,
                     ok=False,
-                    error=error,
+                    error="Failed to parse LLM output",
                     latency_ms=latency_ms,
                     prompt_tokens=prompt_tokens,
                     completion_tokens=completion_tokens,
@@ -341,11 +348,16 @@ async def generate_questions(
         )
     except ValidationError as ve:
         latency_ms = (time.perf_counter() - started) * 1000
-        logger.error(f"Pydantic validation error: {ve}")
+        # ValidationError.input can include model output; do not forward str(ve).
+        logger.error(
+            "Question generation validation failed (prompt_id=%s, exc_type=%s)",
+            prompt_id,
+            type(ve).__name__,
+        )
         return GenerationResult(
             prompt_id=prompt_id,
             ok=False,
-            error=f"LLM validation error: {ve}",
+            error="LLM validation error",
             latency_ms=latency_ms,
             prompt_tokens=prompt_tokens,
             completion_tokens=completion_tokens,
@@ -357,11 +369,16 @@ async def generate_questions(
         )
     except Exception as e:
         latency_ms = (time.perf_counter() - started) * 1000
-        logger.error(f"Error generating questions from LLM: {e}")
+        # Provider errors may embed response snippets; log type only, not str(e).
+        logger.error(
+            "Question generation LLM call failed (prompt_id=%s, exc_type=%s)",
+            prompt_id,
+            type(e).__name__,
+        )
         return GenerationResult(
             prompt_id=prompt_id,
             ok=False,
-            error=str(e),
+            error="Failed to generate questions",
             latency_ms=latency_ms,
             prompt_tokens=prompt_tokens,
             completion_tokens=completion_tokens,
@@ -395,11 +412,17 @@ async def generate_questions_from_documents(
         question_type_counts=counts,
     )
     if not result.ok:
+        # result.error is already a short sanitized message from generate_questions.
         detail = result.error or "Failed to generate questions"
         if detail.startswith("LLM validation error"):
             raise HTTPException(status_code=500, detail=detail)
         raise HTTPException(
-            status_code=500, detail=f"Failed to generate questions: {detail}"
+            status_code=500,
+            detail=(
+                detail
+                if detail.startswith("Failed to generate questions")
+                else f"Failed to generate questions: {detail}"
+            ),
         )
     return result.questions
 

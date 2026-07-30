@@ -261,7 +261,7 @@ async def test_generate_questions_from_documents_validation_error() -> None:
         mock_generate.return_value = GenerationResult(
             prompt_id="a",
             ok=False,
-            error="LLM validation error: invalid",
+            error="LLM validation error",
             latency_ms=10.0,
             prompt_tokens=None,
             completion_tokens=None,
