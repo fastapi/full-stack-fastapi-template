@@ -5,7 +5,8 @@ on:
     types:
       - published
 
-permissions: {}
+permissions:
+  contents: read
 
 jobs:
   deploy:
