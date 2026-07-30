@@ -1,7 +1,7 @@
 services:
 
   # Local services are available on their ports, but also available on:
-  # http://localhost.tiangolo.com: backend and frontend
+  # http://localhost.tiangolo.com: application
   # etc. To enable it, update .env, set:
   # DOMAIN=localhost.tiangolo.com
   proxy:

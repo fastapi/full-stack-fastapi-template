@@ -10,9 +10,9 @@ docker compose watch
 
 * Now you can open your browser and interact with these URLs:
 
-Backend, JSON based web API based on OpenAPI, and frontend served by FastAPI: <http://localhost:8000>
+Application, with the frontend and API served by FastAPI: <http://localhost:8000>
 
-Automatic interactive documentation with Swagger UI (from the OpenAPI backend): <http://localhost:8000/docs>
+Automatic interactive API documentation with Swagger UI: <http://localhost:8000/docs>
 
 Adminer, database web administration: <http://localhost:8080>
 
@@ -48,7 +48,7 @@ The backend is automatically configured to use Mailcatcher when running with Doc
 
 The Docker Compose files are configured so that each supporting service is available in a different port in `localhost`.
 
-The backend serves the built frontend and the API on the same origin at `http://localhost:8000`. The API routes live under `/api`.
+FastAPI serves the built frontend and the API as one application at `http://localhost:8000`. The API routes live under `/api`.
 
 For frontend development with live reload, you can still run the local Vite development server separately.
 
@@ -75,7 +75,7 @@ fastapi dev app/main.py
 
 When you start the Docker Compose stack, it uses `localhost` by default, with different ports for each service (backend, adminer, etc).
 
-When you deploy it to production (or staging), the frontend and backend use the same domain. The frontend is served at `/` and the API lives under `/api`.
+When you deploy it to production (or staging), the application uses one domain. The frontend is served at `/` and the API lives under `/api`.
 
 In the guide about [deployment](deployment.md) you can read about Traefik, the configured proxy. That's the component in charge of transmitting traffic to the application service based on the domain.
 
@@ -87,7 +87,7 @@ DOMAIN=localhost.tiangolo.com
 
 That will be used by the Docker Compose files to configure the base domain for the services.
 
-Traefik will use this to transmit traffic at `localhost.tiangolo.com` to the backend, which serves both the frontend and API.
+Traefik will transmit application traffic at `localhost.tiangolo.com` to FastAPI, which serves both the frontend and API.
 
 The domain `localhost.tiangolo.com` is a special domain that is configured (with all its subdomains) to point to `127.0.0.1`. This way you can use that for your local development.
 
@@ -180,7 +180,7 @@ The production or staging URLs would use these same paths, but with your own dom
 
 Development URLs, for local development.
 
-Backend and Frontend: <http://localhost:8000>
+Application: <http://localhost:8000>
 
 Automatic Interactive Docs (Swagger UI): <http://localhost:8000/docs>
 
@@ -196,7 +196,7 @@ MailCatcher: <http://localhost:1080>
 
 Development URLs, for local development.
 
-Backend and Frontend: <http://localhost.tiangolo.com>
+Application: <http://localhost.tiangolo.com>
 
 Automatic Interactive Docs (Swagger UI): <http://localhost.tiangolo.com/docs>
 
