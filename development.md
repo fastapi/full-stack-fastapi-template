@@ -10,9 +10,7 @@ docker compose watch
 
 * Now you can open your browser and interact with these URLs:
 
-Frontend, served by FastAPI: <http://localhost:8000>
-
-Backend, JSON based web API based on OpenAPI: <http://localhost:8000>
+Backend, JSON based web API based on OpenAPI, and frontend served by FastAPI: <http://localhost:8000>
 
 Automatic interactive documentation with Swagger UI (from the OpenAPI backend): <http://localhost:8000/docs>
 
