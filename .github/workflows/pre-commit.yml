@@ -2,7 +2,8 @@ name: pre-commit
 
 on:
   pull_request:
-permissions: {}
+permissions:
+  contents: read
 
 env:
   # Forks and Dependabot don't have access to secrets
