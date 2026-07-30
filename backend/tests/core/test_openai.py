@@ -4,7 +4,6 @@ from uuid import UUID
 
 import pytest
 from fastapi import HTTPException
-from pydantic import ValidationError
 
 from app.core.ai.openai import (
     MAX_CHARS,
@@ -32,6 +31,8 @@ def test_generate_questions_prompt() -> None:
     assert "multiple_choice" in prompt
     assert "true_false" in prompt
     assert "options" in prompt
+    assert "Allowed question types" in prompt
+    assert "Required question mix" not in prompt
 
 
 def test_generate_questions_prompt_default_num_questions() -> None:
@@ -41,6 +42,8 @@ def test_generate_questions_prompt_default_num_questions() -> None:
 
     assert "5" in prompt  # Default is 5
     assert text in prompt
+    assert "Allowed question types" in prompt
+    assert "Required question mix" not in prompt
 
 
 def test_fetch_document_texts_success() -> None:
@@ -190,16 +193,34 @@ async def test_generate_questions_from_documents_success() -> None:
     )
 
     mock_session = MagicMock()
-    mock_llm = AsyncMock()
-    mock_llm_output = MagicMock()
-    mock_llm_output.questions = [MagicMock()]
 
-    with patch(
-        "app.core.ai.openai.fetch_document_texts", return_value=["Document text"]
-    ), patch("app.core.ai.openai.structured_question_llm", mock_llm), patch(
-        "app.core.ai.openai.parse_llm_output", return_value=[mock_question]
+    with (
+        patch(
+            "app.core.ai.openai.fetch_document_texts", return_value=["Document text"]
+        ),
+        patch("app.core.ai.openai.generate_questions") as mock_generate,
     ):
-        mock_llm.ainvoke.return_value = mock_llm_output
+        from app.core.ai.openai import GenerationResult
+
+        mock_generate.return_value = GenerationResult(
+            prompt_id="a",
+            ok=True,
+            error=None,
+            latency_ms=10.0,
+            prompt_tokens=1,
+            completion_tokens=1,
+            total_tokens=2,
+            schema_valid=True,
+            final_contract_valid=True,
+            content_checks={
+                "expected_count": num_questions,
+                "actual_count": 1,
+                "answer_in_options_rate": 1.0,
+                "mc_count": 1,
+                "tf_count": 0,
+            },
+            questions=[mock_question],
+        )
 
         result = await generate_questions_from_documents(
             mock_session, document_ids, num_questions
@@ -228,23 +249,34 @@ async def test_generate_questions_from_documents_validation_error() -> None:
     document_ids = [uuid.uuid4()]
 
     mock_session = MagicMock()
-    mock_llm = AsyncMock()
 
-    with patch(
-        "app.core.ai.openai.fetch_document_texts", return_value=["Document text"]
-    ), patch("app.core.ai.openai.structured_question_llm", mock_llm), patch(
-        "app.core.ai.openai.logger"
+    with (
+        patch(
+            "app.core.ai.openai.fetch_document_texts", return_value=["Document text"]
+        ),
+        patch("app.core.ai.openai.generate_questions") as mock_generate,
     ):
-        # Create a ValidationError by actually trying to create an invalid QuestionOutput
-        # This is the most reliable way to get a proper ValidationError
-        try:
-            from app.models import QuestionOutput
+        from app.core.ai.openai import GenerationResult
 
-            QuestionOutput(questions="invalid")  # type: ignore
-        except ValidationError as ve:
-            validation_error = ve
-
-        mock_llm.ainvoke.side_effect = validation_error
+        mock_generate.return_value = GenerationResult(
+            prompt_id="a",
+            ok=False,
+            error="LLM validation error: invalid",
+            latency_ms=10.0,
+            prompt_tokens=None,
+            completion_tokens=None,
+            total_tokens=None,
+            schema_valid=False,
+            final_contract_valid=False,
+            content_checks={
+                "expected_count": 5,
+                "actual_count": 0,
+                "answer_in_options_rate": 0.0,
+                "mc_count": 0,
+                "tf_count": 0,
+            },
+            questions=[],
+        )
 
         with pytest.raises(HTTPException) as exc_info:
             await generate_questions_from_documents(mock_session, document_ids)
@@ -259,14 +291,34 @@ async def test_generate_questions_from_documents_general_error() -> None:
     document_ids = [uuid.uuid4()]
 
     mock_session = MagicMock()
-    mock_llm = AsyncMock()
 
-    with patch(
-        "app.core.ai.openai.fetch_document_texts", return_value=["Document text"]
-    ), patch("app.core.ai.openai.structured_question_llm", mock_llm), patch(
-        "app.core.ai.openai.logger"
+    with (
+        patch(
+            "app.core.ai.openai.fetch_document_texts", return_value=["Document text"]
+        ),
+        patch("app.core.ai.openai.generate_questions") as mock_generate,
     ):
-        mock_llm.ainvoke.side_effect = Exception("API Error")
+        from app.core.ai.openai import GenerationResult
+
+        mock_generate.return_value = GenerationResult(
+            prompt_id="a",
+            ok=False,
+            error="API Error",
+            latency_ms=10.0,
+            prompt_tokens=None,
+            completion_tokens=None,
+            total_tokens=None,
+            schema_valid=False,
+            final_contract_valid=False,
+            content_checks={
+                "expected_count": 5,
+                "actual_count": 0,
+                "answer_in_options_rate": 0.0,
+                "mc_count": 0,
+                "tf_count": 0,
+            },
+            questions=[],
+        )
 
         with pytest.raises(HTTPException) as exc_info:
             await generate_questions_from_documents(mock_session, document_ids)
@@ -283,7 +335,6 @@ async def test_generate_questions_from_documents_truncates_long_text() -> None:
     long_text = "a" * (MAX_CHARS + 1000)
 
     mock_session = MagicMock()
-    mock_llm = AsyncMock()
     mock_llm_output = MagicMock()
     mock_llm_output.questions = [MagicMock()]
 
@@ -294,23 +345,27 @@ async def test_generate_questions_from_documents_truncates_long_text() -> None:
         options=["A", "B", "C"],
     )
 
-    with patch(
-        "app.core.ai.openai.fetch_document_texts", return_value=[long_text]
-    ), patch("app.core.ai.openai.structured_question_llm", mock_llm), patch(
-        "app.core.ai.openai.parse_llm_output", return_value=[mock_question]
-    ), patch("app.core.ai.openai.generate_questions_prompt") as mock_prompt, patch(
-        "app.core.ai.openai.logger"
-    ) as mock_logger:
-        mock_llm.ainvoke.return_value = mock_llm_output
-        # Make generate_questions_prompt return the text passed to it
-        mock_prompt.side_effect = lambda text, **kwargs: text
+    with (
+        patch("app.core.ai.openai.fetch_document_texts", return_value=[long_text]),
+        patch("app.core.ai.openai._question_llm") as mock_question_llm,
+        patch("app.core.ai.openai.parse_llm_output", return_value=[mock_question]),
+        patch("app.core.ai.openai.get_prompt") as mock_prompt,
+        patch("app.core.ai.openai.logger") as mock_logger,
+    ):
+        mock_structured = AsyncMock()
+        mock_structured.ainvoke.return_value = {
+            "raw": MagicMock(usage_metadata={}),
+            "parsed": mock_llm_output,
+            "parsing_error": None,
+        }
+        mock_question_llm.return_value = mock_structured
+        mock_prompt.side_effect = lambda prompt_id, text, **kwargs: text
 
         result = await generate_questions_from_documents(mock_session, document_ids)
 
-        # Verify truncation occurred - the text passed to generate_questions_prompt should be <= MAX_CHARS
-        call_args = mock_prompt.call_args[0][0]
+        # Truncation happens before get_prompt
+        call_args = mock_prompt.call_args[0][1]
         assert len(call_args) == MAX_CHARS
-        # Verify warning was logged
         assert mock_logger.warning.called
         assert "Truncated" in str(mock_logger.warning.call_args)
 
@@ -325,7 +380,6 @@ async def test_generate_questions_from_documents_no_truncation_when_short() -> N
     short_text = "Short document text"
 
     mock_session = MagicMock()
-    mock_llm = AsyncMock()
     mock_llm_output = MagicMock()
     mock_llm_output.questions = [MagicMock()]
 
@@ -336,16 +390,22 @@ async def test_generate_questions_from_documents_no_truncation_when_short() -> N
         options=["A", "B", "C"],
     )
 
-    with patch(
-        "app.core.ai.openai.fetch_document_texts", return_value=[short_text]
-    ), patch("app.core.ai.openai.structured_question_llm", mock_llm), patch(
-        "app.core.ai.openai.parse_llm_output", return_value=[mock_question]
-    ), patch("app.core.ai.openai.logger") as mock_logger:
-        mock_llm.ainvoke.return_value = mock_llm_output
+    with (
+        patch("app.core.ai.openai.fetch_document_texts", return_value=[short_text]),
+        patch("app.core.ai.openai._question_llm") as mock_question_llm,
+        patch("app.core.ai.openai.parse_llm_output", return_value=[mock_question]),
+        patch("app.core.ai.openai.logger") as mock_logger,
+    ):
+        mock_structured = AsyncMock()
+        mock_structured.ainvoke.return_value = {
+            "raw": MagicMock(usage_metadata={}),
+            "parsed": mock_llm_output,
+            "parsing_error": None,
+        }
+        mock_question_llm.return_value = mock_structured
 
         result = await generate_questions_from_documents(mock_session, document_ids)
 
-        # Verify no truncation warning was logged
         assert not any(
             "Truncated" in str(call) for call in mock_logger.warning.call_args_list
         )
@@ -439,11 +499,14 @@ async def test_generate_answer_explanation_success() -> None:
     mock_explanation.key_takeaway = "Takeaway"
     mock_explanation.suggested_review = "Review"
 
-    with patch("app.core.ai.openai.embed_text", return_value=mock_embedding), patch(
-        "app.core.ai.openai.retrieve_top_k_chunks", return_value=mock_chunks
-    ), patch(
-        "app.core.ai.openai.structured_explanation_llm", new_callable=AsyncMock
-    ) as mock_llm, patch("app.core.ai.openai.ExplanationOutput") as mock_output:
+    with (
+        patch("app.core.ai.openai.embed_text", return_value=mock_embedding),
+        patch("app.core.ai.openai.retrieve_top_k_chunks", return_value=mock_chunks),
+        patch(
+            "app.core.ai.openai.structured_explanation_llm", new_callable=AsyncMock
+        ) as mock_llm,
+        patch("app.core.ai.openai.ExplanationOutput") as mock_output,
+    ):
         mock_llm_instance = AsyncMock()
         mock_llm_instance.ainvoke.return_value = mock_explanation
         mock_llm.return_value = mock_llm_instance
@@ -488,11 +551,14 @@ async def test_generate_answer_explanation_api_error() -> None:
     mock_embedding = [0.1, 0.2, 0.3]
     mock_chunks = ["Chunk 1"]
 
-    with patch("app.core.ai.openai.embed_text", return_value=mock_embedding), patch(
-        "app.core.ai.openai.retrieve_top_k_chunks", return_value=mock_chunks
-    ), patch(
-        "app.core.ai.openai.structured_explanation_llm", new_callable=AsyncMock
-    ) as mock_llm, patch("app.core.ai.openai.logger"):
+    with (
+        patch("app.core.ai.openai.embed_text", return_value=mock_embedding),
+        patch("app.core.ai.openai.retrieve_top_k_chunks", return_value=mock_chunks),
+        patch(
+            "app.core.ai.openai.structured_explanation_llm", new_callable=AsyncMock
+        ) as mock_llm,
+        patch("app.core.ai.openai.logger"),
+    ):
         mock_llm_instance = AsyncMock()
         mock_llm_instance.ainvoke.side_effect = Exception("API Error")
         mock_llm.return_value = mock_llm_instance

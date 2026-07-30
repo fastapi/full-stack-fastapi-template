@@ -1,4 +1,6 @@
 import logging
+import time
+from dataclasses import dataclass
 from typing import Any
 from uuid import UUID
 
@@ -9,6 +11,7 @@ from sqlalchemy import select
 from sqlmodel import Session
 
 from app.core.ai.embeddings import embed_text
+from app.core.ai.prompts import PromptId, get_prompt
 from app.core.ai.retrieval import retrieve_top_k_chunks
 from app.core.config import settings
 from app.models import (
@@ -25,15 +28,90 @@ logger = logging.getLogger(__name__)
 
 # Maximum characters for extracted text when generating exam questions
 MAX_CHARS = 15_000
+DEFAULT_MAX_COMPLETION_TOKENS = 500
+DEFAULT_MODEL = "gpt-4o-mini"
+DEFAULT_TEMPERATURE = 0.5
 
 llm = ChatOpenAI(
-    model="gpt-4o-mini",
-    temperature=0.5,
-    max_completion_tokens=500,
+    model=DEFAULT_MODEL,
+    temperature=DEFAULT_TEMPERATURE,
+    max_completion_tokens=DEFAULT_MAX_COMPLETION_TOKENS,
     api_key=settings.OPENAI_API_KEY,  # type: ignore
 )
 
 structured_question_llm = llm.with_structured_output(QuestionOutput)
+
+
+@dataclass
+class GenerationResult:
+    prompt_id: str
+    ok: bool
+    error: str | None
+    latency_ms: float
+    prompt_tokens: int | None
+    completion_tokens: int | None
+    total_tokens: int | None
+    schema_valid: bool
+    final_contract_valid: bool
+    content_checks: dict[str, Any]
+    questions: list[QuestionCreate]
+
+
+def normalize_question_types(
+    question_types: list[QuestionType] | None,
+) -> list[QuestionType]:
+    if question_types is None:
+        return [QuestionType.multiple_choice, QuestionType.true_false]
+    return question_types
+
+
+def normalize_difficulty(difficulty: Difficulty | None) -> Difficulty:
+    if difficulty is None:
+        return Difficulty.medium
+    return difficulty
+
+
+def resolve_question_type_counts(
+    num_questions: int,
+    *,
+    question_types: list[QuestionType] | None = None,
+    question_type_counts: dict[QuestionType, int] | None = None,
+) -> dict[QuestionType, int]:
+    """Resolve an explicit MC/TF mix.
+
+    Defaults for mixed types at num_questions=5: 3 multiple_choice + 2 true_false.
+    """
+    if question_type_counts is not None:
+        total = sum(question_type_counts.values())
+        if total != num_questions:
+            raise ValueError(
+                f"question_type_counts sum ({total}) must equal "
+                f"num_questions ({num_questions})"
+            )
+        return dict(question_type_counts)
+
+    types = normalize_question_types(question_types)
+    if len(types) == 1:
+        return {types[0]: num_questions}
+
+    if num_questions == 5:
+        return {
+            QuestionType.multiple_choice: 3,
+            QuestionType.true_false: 2,
+        }
+
+    mc = (num_questions * 3) // 5
+    tf = num_questions - mc
+    if num_questions >= 2 and tf == 0:
+        tf = 1
+        mc = num_questions - 1
+    if num_questions >= 2 and mc == 0:
+        mc = 1
+        tf = num_questions - 1
+    return {
+        QuestionType.multiple_choice: mc,
+        QuestionType.true_false: tf,
+    }
 
 
 def generate_questions_prompt(
@@ -42,67 +120,15 @@ def generate_questions_prompt(
     difficulty: Difficulty | None = None,
     question_types: list[QuestionType] | None = None,
 ) -> str:
-    difficulty_str = difficulty.value if difficulty else "medium"
-    question_types_str = (
-        ", ".join(question_types) if question_types else "multiple_choice, true_false"
+    """Backward-compatible wrapper around baseline prompt A."""
+    counts = resolve_question_type_counts(num_questions, question_types=question_types)
+    return get_prompt(
+        "a",
+        text,
+        num_questions=num_questions,
+        difficulty=normalize_difficulty(difficulty),
+        question_type_counts=counts,
     )
-    return f"""
-Generate {num_questions} questions from the following document text.
-
-Rules (must follow exactly):
-- Each question MUST include:
-  - question (string)
-  - answer (string or null)
-  - type: "multiple_choice" or "true_false"
-  - options (array of strings)
-
-- For true_false questions:
-  - type MUST be "true_false"
-  - options MUST be exactly ["True", "False"]
-  - Do NOT use true_false type with multiple choice options
-
-- For multiple_choice questions:
-  - type MUST be "multiple_choice"
-  - options MUST contain at least 3 plausible choices (not just True/False)
-  - answer MUST match exactly one option
-  - Do NOT use multiple_choice type with only True/False options
-
-Difficulty rules:
-- EASY:
-  - Focus on direct facts explicitly stated in the text
-  - Minimal inference
-  - Single concept per question
-  - Obvious distractors
-
-- MEDIUM:
-  - Require understanding relationships between concepts
-  - Light inference or comparison
-  - Distractors should be plausible but incorrect
-
-- HARD:
-  - Require multi-step reasoning or synthesis across multiple parts of the text
-  - Subtle distinctions between options
-  - Distractors should be conceptually close to the correct answer
-
-Additional constraints:
-- Do NOT introduce facts not present in the document
-- Do NOT rely on outside knowledge
-- Difficulty MUST affect question complexity, not wording alone
-
-Return structured data only.
-
-Document text:
-{text}
-
-Difficulty: {difficulty_str}
-Allowed question types: {question_types_str}
-
-CRITICAL: The question type MUST match the options:
-- If type is "true_false", options MUST be exactly ["True", "False"]
-- If type is "multiple_choice", options MUST have at least 3 different choices (NOT True/False)
-- Do NOT mix types: a true_false question cannot have multiple choice options, and vice versa
-
-"""
 
 
 def fetch_document_texts(session: Session, document_ids: list[UUID]) -> list[str]:
@@ -144,18 +170,207 @@ def parse_llm_output(llm_output: Any) -> list[QuestionCreate]:
     return questions
 
 
-def normalize_question_types(
-    question_types: list[QuestionType] | None,
-) -> list[QuestionType]:
-    if question_types is None:
-        return [QuestionType.multiple_choice, QuestionType.true_false]
-    return question_types
+def _empty_content_checks(expected_count: int) -> dict[str, Any]:
+    return {
+        "expected_count": expected_count,
+        "actual_count": 0,
+        "answer_in_options_rate": 0.0,
+        "mc_count": 0,
+        "tf_count": 0,
+    }
 
 
-def normalize_difficulty(difficulty: Difficulty | None) -> Difficulty:
-    if difficulty is None:
-        return Difficulty.medium
-    return difficulty
+def _compute_content_checks(
+    questions: list[QuestionCreate],
+    expected_count: int,
+) -> dict[str, Any]:
+    mc_count = sum(1 for q in questions if q.type == QuestionType.multiple_choice)
+    tf_count = sum(1 for q in questions if q.type == QuestionType.true_false)
+    if not questions:
+        answer_in_options_rate = 0.0
+    else:
+        in_options = sum(
+            1
+            for q in questions
+            if q.correct_answer is not None and q.correct_answer in q.options
+        )
+        answer_in_options_rate = in_options / len(questions)
+
+    return {
+        "expected_count": expected_count,
+        "actual_count": len(questions),
+        "answer_in_options_rate": answer_in_options_rate,
+        "mc_count": mc_count,
+        "tf_count": tf_count,
+    }
+
+
+def _final_contract_valid(content_checks: dict[str, Any]) -> bool:
+    return (
+        content_checks["actual_count"] == content_checks["expected_count"]
+        and content_checks["answer_in_options_rate"] == 1.0
+    )
+
+
+def _extract_token_usage(raw_message: Any) -> tuple[int | None, int | None, int | None]:
+    usage = getattr(raw_message, "usage_metadata", None) or {}
+    if usage:
+        prompt_tokens = usage.get("input_tokens")
+        completion_tokens = usage.get("output_tokens")
+        total_tokens = usage.get("total_tokens")
+        if (
+            total_tokens is None
+            and prompt_tokens is not None
+            and completion_tokens is not None
+        ):
+            total_tokens = prompt_tokens + completion_tokens
+        return prompt_tokens, completion_tokens, total_tokens
+
+    metadata = getattr(raw_message, "response_metadata", None) or {}
+    token_usage = metadata.get("token_usage") or metadata.get("usage") or {}
+    prompt_tokens = token_usage.get("prompt_tokens")
+    completion_tokens = token_usage.get("completion_tokens")
+    total_tokens = token_usage.get("total_tokens")
+    return prompt_tokens, completion_tokens, total_tokens
+
+
+def _truncate_text(text: str) -> str:
+    if len(text) <= MAX_CHARS:
+        return text
+    logger.warning(
+        f"Truncated extracted text from {len(text)} to {MAX_CHARS} characters"
+    )
+    return text[:MAX_CHARS]
+
+
+def _question_llm(max_completion_tokens: int) -> Any:
+    chat = ChatOpenAI(
+        model=DEFAULT_MODEL,
+        temperature=DEFAULT_TEMPERATURE,
+        max_completion_tokens=max_completion_tokens,
+        api_key=settings.OPENAI_API_KEY,  # type: ignore
+    )
+    return chat.with_structured_output(QuestionOutput, include_raw=True)
+
+
+async def generate_questions(
+    text: str,
+    *,
+    prompt_id: PromptId = "a",
+    num_questions: int = 5,
+    difficulty: Difficulty | None = None,
+    question_type_counts: dict[QuestionType, int] | None = None,
+    max_completion_tokens: int | None = None,
+) -> GenerationResult:
+    """Shared question generation core used by the API and (later) eval.
+
+    Does not raise HTTPException — callers decide how to surface failures.
+    """
+    resolved_difficulty = normalize_difficulty(difficulty)
+    resolved_counts = resolve_question_type_counts(
+        num_questions, question_type_counts=question_type_counts
+    )
+    token_limit = (
+        DEFAULT_MAX_COMPLETION_TOKENS
+        if max_completion_tokens is None
+        else max_completion_tokens
+    )
+    truncated = _truncate_text(text)
+    prompt = get_prompt(
+        prompt_id,
+        truncated,
+        num_questions=num_questions,
+        difficulty=resolved_difficulty,
+        question_type_counts=resolved_counts,
+    )
+
+    started = time.perf_counter()
+    prompt_tokens: int | None = None
+    completion_tokens: int | None = None
+    total_tokens: int | None = None
+
+    try:
+        raw_result = await _question_llm(token_limit).ainvoke(prompt)
+        latency_ms = (time.perf_counter() - started) * 1000
+
+        if isinstance(raw_result, dict):
+            parsed = raw_result.get("parsed")
+            raw_message = raw_result.get("raw")
+            parsing_error = raw_result.get("parsing_error")
+            if raw_message is not None:
+                prompt_tokens, completion_tokens, total_tokens = _extract_token_usage(
+                    raw_message
+                )
+            if parsing_error is not None or parsed is None:
+                error = (
+                    str(parsing_error)
+                    if parsing_error
+                    else "Failed to parse LLM output"
+                )
+                return GenerationResult(
+                    prompt_id=prompt_id,
+                    ok=False,
+                    error=error,
+                    latency_ms=latency_ms,
+                    prompt_tokens=prompt_tokens,
+                    completion_tokens=completion_tokens,
+                    total_tokens=total_tokens,
+                    schema_valid=False,
+                    final_contract_valid=False,
+                    content_checks=_empty_content_checks(num_questions),
+                    questions=[],
+                )
+            llm_output = parsed
+        else:
+            llm_output = raw_result
+
+        questions = parse_llm_output(llm_output)
+        content_checks = _compute_content_checks(questions, num_questions)
+        return GenerationResult(
+            prompt_id=prompt_id,
+            ok=True,
+            error=None,
+            latency_ms=latency_ms,
+            prompt_tokens=prompt_tokens,
+            completion_tokens=completion_tokens,
+            total_tokens=total_tokens,
+            schema_valid=True,
+            final_contract_valid=_final_contract_valid(content_checks),
+            content_checks=content_checks,
+            questions=questions,
+        )
+    except ValidationError as ve:
+        latency_ms = (time.perf_counter() - started) * 1000
+        logger.error(f"Pydantic validation error: {ve}")
+        return GenerationResult(
+            prompt_id=prompt_id,
+            ok=False,
+            error=f"LLM validation error: {ve}",
+            latency_ms=latency_ms,
+            prompt_tokens=prompt_tokens,
+            completion_tokens=completion_tokens,
+            total_tokens=total_tokens,
+            schema_valid=False,
+            final_contract_valid=False,
+            content_checks=_empty_content_checks(num_questions),
+            questions=[],
+        )
+    except Exception as e:
+        latency_ms = (time.perf_counter() - started) * 1000
+        logger.error(f"Error generating questions from LLM: {e}")
+        return GenerationResult(
+            prompt_id=prompt_id,
+            ok=False,
+            error=str(e),
+            latency_ms=latency_ms,
+            prompt_tokens=prompt_tokens,
+            completion_tokens=completion_tokens,
+            total_tokens=total_tokens,
+            schema_valid=False,
+            final_contract_valid=False,
+            content_checks=_empty_content_checks(num_questions),
+            questions=[],
+        )
 
 
 async def generate_questions_from_documents(
@@ -165,39 +380,28 @@ async def generate_questions_from_documents(
     difficulty: Difficulty | None = None,
     question_types: list[QuestionType] | None = None,
 ) -> list[QuestionCreate]:
-    """Main function: fetch documents, generate questions via LLM, and return QuestionCreate objects."""
+    """API-facing wrapper: fetch documents, generate questions, raise HTTP errors."""
     document_texts = fetch_document_texts(session, document_ids)
     if not document_texts:
         return []
 
-    # Join texts and truncate to MAX_CHARS
     combined_text = "\n".join(document_texts)
-    original_length = len(combined_text)
-    if original_length > MAX_CHARS:
-        combined_text = combined_text[:MAX_CHARS]
-        logger.warning(
-            f"Truncated extracted text from {original_length} to {MAX_CHARS} characters"
-        )
-
-    prompt = generate_questions_prompt(
+    counts = resolve_question_type_counts(num_questions, question_types=question_types)
+    result = await generate_questions(
         combined_text,
+        prompt_id="a",
         num_questions=num_questions,
-        difficulty=normalize_difficulty(difficulty),
-        question_types=normalize_question_types(question_types),
+        difficulty=difficulty,
+        question_type_counts=counts,
     )
-
-    try:
-        # async call to the API
-        llm_output = await structured_question_llm.ainvoke(prompt)
-        return parse_llm_output(llm_output)
-    except ValidationError as ve:
-        logger.error(f"Pydantic validation error: {ve}")
-        raise HTTPException(status_code=500, detail=f"LLM validation error: {ve}")
-    except Exception as e:
-        logger.error(f"Error generating questions from LLM: {e}")
+    if not result.ok:
+        detail = result.error or "Failed to generate questions"
+        if detail.startswith("LLM validation error"):
+            raise HTTPException(status_code=500, detail=detail)
         raise HTTPException(
-            status_code=500, detail=f"Failed to generate questions: {e}"
+            status_code=500, detail=f"Failed to generate questions: {detail}"
         )
+    return result.questions
 
 
 # ------------------------
