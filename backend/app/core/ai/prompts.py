@@ -6,27 +6,17 @@ PromptId = Literal["a", "b", "c"]
 PROMPT_IDS: tuple[PromptId, ...] = ("a", "b", "c")
 PROMPT_NAMES: dict[PromptId, str] = {
     "a": "baseline",
-    "b": "grounded",
-    "c": "difficulty",
+    "b": "difficulty",
+    "c": "distractors",
 }
 
 
 def _format_allowed_types(
     question_type_counts: dict[QuestionType, int],
 ) -> str:
+    """Same production wording: any mix of the listed types is allowed."""
     types_str = ", ".join(question_type.value for question_type in question_type_counts)
     return f"Allowed question types: {types_str}"
-
-
-def _format_question_mix(
-    question_type_counts: dict[QuestionType, int],
-    num_questions: int,
-) -> str:
-    lines = ["Required question mix (must follow exactly):"]
-    for question_type, count in question_type_counts.items():
-        lines.append(f"- {question_type.value}: {count}")
-    lines.append(f"Total questions: {num_questions}")
-    return "\n".join(lines)
 
 
 def _question_structure_rules() -> str:
@@ -50,6 +40,7 @@ def _question_structure_rules() -> str:
 
 
 def _baseline_difficulty_rules() -> str:
+    """Production difficulty wording (prompt A)."""
     return """Difficulty rules:
 - EASY:
   - Focus on direct facts explicitly stated in the text
@@ -68,26 +59,25 @@ def _baseline_difficulty_rules() -> str:
   - Distractors should be conceptually close to the correct answer"""
 
 
-def _grounding_rules() -> str:
-    return """Grounding rules (strict — override other instincts):
-- Every question MUST be answerable using ONLY sentences that appear in the document text
-- Before writing each question, identify the supporting span(s) in the text; if you cannot, discard that question and write a different one
-- Prefer wording that closely mirrors the document's terms; do not paraphrase into new technical claims
-- Distractors MUST also be drawn from concepts present in the text (misapplied), never invented jargon
-- If the text is thin, ask simpler, explicitly supported facts rather than inventing content — still return exactly the required mix"""
-
-
-def _difficulty_contract(difficulty: Difficulty) -> str:
-    return f"""Difficulty contract (must be observable in the question, not just the label):
+def _difficulty_calibration(difficulty: Difficulty) -> str:
+    """Prompt B only: stronger difficulty calibration (not distractor quality)."""
+    return f"""Difficulty calibration (must be observable in the question stem and required reasoning, not wording alone):
 - Target difficulty: {difficulty.value}
-- EASY: answer is a single explicit fact; distractors are clearly wrong to someone who skimmed the text
-- MEDIUM: answer requires connecting 2 ideas from the text; at least 2 distractors are plausible to a partial reader
-- HARD: answer requires synthesizing 2+ non-adjacent parts of the text OR applying a stated rule to a new example still grounded in the text; all distractors must be conceptually adjacent (common confusions)
+- EASY: answer is a single explicit fact from the text; minimal inference; one concept only
+- MEDIUM: answer requires connecting 2 ideas from the text; light inference or comparison
+- HARD: answer requires synthesizing 2+ non-adjacent parts of the text OR applying a stated rule to a new example still grounded in the text
+- Do NOT label a question as harder merely by using denser vocabulary or longer sentences
+- Match the cognitive demand to the target difficulty for every question"""
 
-Distractor rules:
+
+def _distractor_quality_rules() -> str:
+    """Prompt C only: stronger distractor quality on top of baseline A."""
+    return """Distractor quality rules (apply in addition to the difficulty rules above):
 - For multiple_choice: every wrong option must be a realistic mistake a student might make given this material
-- Avoid joke options, absolutes with no basis, or options unrelated to the topic
-- The correct answer must still match exactly one option"""
+- Distractors should be conceptually adjacent to the correct answer (common confusions), not random or unrelated
+- Avoid joke options, absolute statements with no basis in the text, or options from outside the topic
+- The correct answer must still match exactly one option
+- True/false questions are unchanged: options must remain exactly ["True", "False"]"""
 
 
 def _additional_constraints() -> str:
@@ -112,16 +102,8 @@ def _build_prompt(
     question_type_counts: dict[QuestionType, int],
     difficulty_section: str,
     extra_sections: tuple[str, ...] = (),
-    strict_type_mix: bool = False,
 ) -> str:
-    assert sum(question_type_counts.values()) == num_questions
-
-    type_section = (
-        _format_question_mix(question_type_counts, num_questions)
-        if strict_type_mix
-        else _format_allowed_types(question_type_counts)
-    )
-
+    """Assemble a full prompt from shared sections plus variant-specific parts."""
     sections = [
         f"Generate {num_questions} questions from the following document text.",
         "",
@@ -142,7 +124,7 @@ def _build_prompt(
             text,
             "",
             f"Difficulty: {difficulty.value}",
-            type_section,
+            _format_allowed_types(question_type_counts),
             "",
             _critical_footer(),
         ]
@@ -158,15 +140,19 @@ def get_prompt(
     difficulty: Difficulty,
     question_type_counts: dict[QuestionType, int],
 ) -> str:
+    """Return the prompt string for variant a, b, or c.
+
+    A — production baseline wording (any mix of allowed types).
+    B — same as A, but with stronger difficulty calibration.
+    C — same as A, plus stronger distractor-quality instructions.
+    """
     if prompt_id == "a":
-        # Production baseline: allow any mix of the listed types (no fixed counts).
         return _build_prompt(
             text=text,
             num_questions=num_questions,
             difficulty=difficulty,
             question_type_counts=question_type_counts,
             difficulty_section=_baseline_difficulty_rules(),
-            strict_type_mix=False,
         )
     if prompt_id == "b":
         return _build_prompt(
@@ -174,9 +160,7 @@ def get_prompt(
             num_questions=num_questions,
             difficulty=difficulty,
             question_type_counts=question_type_counts,
-            difficulty_section=_baseline_difficulty_rules(),
-            extra_sections=(_grounding_rules(),),
-            strict_type_mix=True,
+            difficulty_section=_difficulty_calibration(difficulty),
         )
     if prompt_id == "c":
         return _build_prompt(
@@ -184,7 +168,7 @@ def get_prompt(
             num_questions=num_questions,
             difficulty=difficulty,
             question_type_counts=question_type_counts,
-            difficulty_section=_difficulty_contract(difficulty),
-            strict_type_mix=True,
+            difficulty_section=_baseline_difficulty_rules(),
+            extra_sections=(_distractor_quality_rules(),),
         )
     raise ValueError(f"Unknown prompt_id: {prompt_id!r}")
