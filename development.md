@@ -10,11 +10,9 @@ docker compose watch
 
 * Now you can open your browser and interact with these URLs:
 
-Frontend, built with Docker, with routes handled based on the path: <http://localhost:5173>
+Application, with the frontend and API served by FastAPI: <http://localhost:8000>
 
-Backend, JSON based web API based on OpenAPI: <http://localhost:8000>
-
-Automatic interactive documentation with Swagger UI (from the OpenAPI backend): <http://localhost:8000/docs>
+Automatic interactive API documentation with Swagger UI: <http://localhost:8000/docs>
 
 Adminer, database web administration: <http://localhost:8080>
 
@@ -48,19 +46,13 @@ The backend is automatically configured to use Mailcatcher when running with Doc
 
 ## Local Development
 
-The Docker Compose files are configured so that each of the services is available in a different port in `localhost`.
+The Docker Compose files are configured so that each supporting service is available in a different port in `localhost`.
 
-For the backend and frontend, they use the same port that would be used by their local development server, so, the backend is at `http://localhost:8000` and the frontend at `http://localhost:5173`.
+FastAPI serves the built frontend and the API as one application at `http://localhost:8000`. The API routes live under `/api`.
 
-This way, you could turn off a Docker Compose service and start its local development service, and everything would keep working, because it all uses the same ports.
+For frontend development with live reload, you can still run the local Vite development server separately.
 
-For example, you can stop that `frontend` service in the Docker Compose, in another terminal, run:
-
-```bash
-docker compose stop frontend
-```
-
-And then start the local frontend development server:
+Start the local frontend development server with:
 
 ```bash
 bun run dev
@@ -81,11 +73,11 @@ fastapi dev app/main.py
 
 ## Docker Compose in `localhost.tiangolo.com`
 
-When you start the Docker Compose stack, it uses `localhost` by default, with different ports for each service (backend, frontend, adminer, etc).
+When you start the Docker Compose stack, it uses `localhost` by default, with different ports for each service (backend, adminer, etc).
 
-When you deploy it to production (or staging), it will deploy each service in a different subdomain, like `api.example.com` for the backend and `dashboard.example.com` for the frontend.
+When you deploy it to production (or staging), the application uses one domain. The frontend is served at `/` and the API lives under `/api`.
 
-In the guide about [deployment](deployment.md) you can read about Traefik, the configured proxy. That's the component in charge of transmitting traffic to each service based on the subdomain.
+In the guide about [deployment](deployment.md) you can read about Traefik, the configured proxy. That's the component in charge of transmitting traffic to the application service based on the domain.
 
 If you want to test that it's all working locally, you can edit the local `.env` file, and change:
 
@@ -95,7 +87,7 @@ DOMAIN=localhost.tiangolo.com
 
 That will be used by the Docker Compose files to configure the base domain for the services.
 
-Traefik will use this to transmit traffic at `api.localhost.tiangolo.com` to the backend, and traffic at `dashboard.localhost.tiangolo.com` to the frontend.
+Traefik will transmit application traffic at `localhost.tiangolo.com` to FastAPI, which serves both the frontend and API.
 
 The domain `localhost.tiangolo.com` is a special domain that is configured (with all its subdomains) to point to `127.0.0.1`. This way you can use that for your local development.
 
@@ -105,7 +97,7 @@ After you update it, run again:
 docker compose watch
 ```
 
-When deploying, for example in production, the main Traefik is configured outside of the Docker Compose files. For local development, there's an included Traefik in `compose.override.yml`, just to let you test that the domains work as expected, for example with `api.localhost.tiangolo.com` and `dashboard.localhost.tiangolo.com`.
+When deploying, for example in production, the main Traefik is configured outside of the Docker Compose files. For local development, there's an included Traefik in `compose.override.yml`, just to let you test that the domain works as expected, for example with `localhost.tiangolo.com`.
 
 ## Docker Compose files and env vars
 
@@ -188,9 +180,7 @@ The production or staging URLs would use these same paths, but with your own dom
 
 Development URLs, for local development.
 
-Frontend: <http://localhost:5173>
-
-Backend: <http://localhost:8000>
+Application: <http://localhost:8000>
 
 Automatic Interactive Docs (Swagger UI): <http://localhost:8000/docs>
 
@@ -206,13 +196,11 @@ MailCatcher: <http://localhost:1080>
 
 Development URLs, for local development.
 
-Frontend: <http://dashboard.localhost.tiangolo.com>
+Application: <http://localhost.tiangolo.com>
 
-Backend: <http://api.localhost.tiangolo.com>
+Automatic Interactive Docs (Swagger UI): <http://localhost.tiangolo.com/docs>
 
-Automatic Interactive Docs (Swagger UI): <http://api.localhost.tiangolo.com/docs>
-
-Automatic Alternative Docs (ReDoc): <http://api.localhost.tiangolo.com/redoc>
+Automatic Alternative Docs (ReDoc): <http://localhost.tiangolo.com/redoc>
 
 Adminer: <http://localhost.tiangolo.com:8080>
 
