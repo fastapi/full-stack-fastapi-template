@@ -5,7 +5,8 @@ on:
     branches:
       - master
 
-permissions: {}
+permissions:
+  contents: read
 
 jobs:
   deploy:
@@ -18,6 +19,7 @@ jobs:
     env:
       ENVIRONMENT: staging
       DOMAIN: ${{ secrets.DOMAIN_STAGING }}
+      FRONTEND_HOST: https://${{ secrets.DOMAIN_STAGING }}
       STACK_NAME: ${{ secrets.STACK_NAME_STAGING }}
       SECRET_KEY: ${{ secrets.SECRET_KEY }}
       FIRST_SUPERUSER: ${{ secrets.FIRST_SUPERUSER }}

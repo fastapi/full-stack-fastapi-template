@@ -9,6 +9,8 @@
 
 ### Refactors
 
+* ♻️ Serve frontend from FastAPI. PR [#2393](https://github.com/fastapi/full-stack-fastapi-template/pull/2393) by [@tiangolo](https://github.com/tiangolo).
+* 🔧 Refactor PostgreSQL env var config. PR [#2392](https://github.com/fastapi/full-stack-fastapi-template/pull/2392) by [@tiangolo](https://github.com/tiangolo).
 * ♻️ Refactor models to improve types. PR [#2356](https://github.com/fastapi/full-stack-fastapi-template/pull/2356) by [@tiangolo](https://github.com/tiangolo).
 * 🔧 Add FastAPI VS Code extension to recommended extensions. PR [#2206](https://github.com/fastapi/full-stack-fastapi-template/pull/2206) by [@tiangolo](https://github.com/tiangolo).
 * ♻️ Update meta titles. PR [#2179](https://github.com/fastapi/full-stack-fastapi-template/pull/2179) by [@alejsdev](https://github.com/alejsdev).
@@ -28,6 +30,8 @@
 
 ### Internal
 
+* 👷 Improve workflows for private repos. PR [#2394](https://github.com/fastapi/full-stack-fastapi-template/pull/2394) by [@tiangolo](https://github.com/tiangolo).
+* ⬆️ Upgrade latest-changes to 0.7.1. PR [#2389](https://github.com/fastapi/full-stack-fastapi-template/pull/2389) by [@tiangolo](https://github.com/tiangolo).
 * Bump axios from 1.16.0 to 1.18.0 in /frontend. PR [#2386](https://github.com/fastapi/full-stack-fastapi-template/pull/2386) by [@dependabot[bot]](https://github.com/apps/dependabot).
 * ⬆ Bump pre-commit hooks. PR [#2382](https://github.com/fastapi/full-stack-fastapi-template/pull/2382) by [@tiangolo](https://github.com/tiangolo).
 * ⬆ Bump the python-packages group across 1 directory with 2 updates. PR [#2380](https://github.com/fastapi/full-stack-fastapi-template/pull/2380) by [@dependabot[bot]](https://github.com/apps/dependabot).

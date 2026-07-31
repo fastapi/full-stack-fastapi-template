@@ -5,7 +5,8 @@ on:
     branches:
       - master
   pull_request:
-permissions: {}
+permissions:
+  contents: read
 
 jobs:
 
@@ -19,9 +20,9 @@ jobs:
           persist-credentials: false
       - run: docker compose build
       - run: docker compose down -v --remove-orphans
-      - run: docker compose up -d --wait backend frontend adminer
+      - run: docker compose up -d --wait backend adminer
       - name: Test backend is up
         run: curl http://localhost:8000/api/v1/utils/health-check
       - name: Test frontend is up
-        run: curl http://localhost:5173
+        run: curl http://localhost:8000
       - run: docker compose down -v --remove-orphans

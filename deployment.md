@@ -11,8 +11,7 @@ But you have to configure a couple things first. 🤓
 ## Preparation
 
 * Have a remote server ready and available.
-* Configure the DNS records of your domain to point to the IP of the server you just created.
-* Configure a wildcard subdomain for your domain, so that you can have multiple subdomains for different services, e.g. `*.fastapi-project.example.com`. This will be useful for accessing different components, like `dashboard.fastapi-project.example.com`, `api.fastapi-project.example.com`, `traefik.fastapi-project.example.com`, `adminer.fastapi-project.example.com`, etc. And also for `staging`, like `dashboard.staging.fastapi-project.example.com`, `adminer.staging.fastapi-project.example.com`, etc.
+* Configure DNS records pointing to the server for the application domain and any supporting service subdomains you want to expose, e.g. `fastapi-project.example.com`, `traefik.fastapi-project.example.com`, and `adminer.fastapi-project.example.com`. Do the same for staging domains such as `staging.fastapi-project.example.com`.
 * Install and configure [Docker](https://docs.docker.com/engine/install/) on the remote server (Docker Engine, not Docker Desktop).
 
 ## Public Traefik
@@ -112,7 +111,7 @@ Now that you have Traefik in place you can deploy your FastAPI project with Dock
 ## Copy the Code
 
 ```bash
-rsync -av --filter=":- .gitignore" ./ root@your-server.example.com:/root/code/app/
+rsync -av --exclude=".git/" --filter=":- .gitignore" ./ root@your-server.example.com:/root/code/app/
 ```
 
 Note: `--filter=":- .gitignore"` tells `rsync` to use the same rules as git, ignore files ignored by git, like the Python virtual environment.
@@ -167,17 +166,17 @@ Set the `FIRST_SUPER_USER_PASSWORD` to something different than `changethis`:
 export FIRST_SUPERUSER_PASSWORD="changethis"
 ```
 
-Set the `BACKEND_CORS_ORIGINS` to include your domain:
+Set the `FRONTEND_HOST` to the application URL. It is used to generate links in emails:
 
 ```bash
-export BACKEND_CORS_ORIGINS="https://dashboard.${DOMAIN?Variable not set},https://api.${DOMAIN?Variable not set}"
+export FRONTEND_HOST="https://${DOMAIN?Variable not set}"
 ```
 
 You can set several other environment variables:
 
 * `PROJECT_NAME`: The name of the project, used in the API for the docs and emails.
 * `STACK_NAME`: The name of the stack used for Docker Compose labels and project name, this should be different for `staging`, `production`, etc. You could use the same domain replacing dots with dashes, e.g. `fastapi-project-example-com` and `staging-fastapi-project-example-com`.
-* `BACKEND_CORS_ORIGINS`: A list of allowed CORS origins separated by commas.
+* `BACKEND_CORS_ORIGINS`: A list of additional allowed CORS origins separated by commas. The frontend served by FastAPI uses the same origin and doesn't need to be added.
 * `FIRST_SUPERUSER`: The email of the first superuser, this superuser will be the one that can create new users.
 * `SMTP_HOST`: The SMTP server host to send emails, this would come from your email provider (E.g. Mailgun, Sparkpost, Sendgrid, etc).
 * `SMTP_USER`: The SMTP server user to send emails.
@@ -333,20 +332,16 @@ Traefik UI: `https://traefik.fastapi-project.example.com`
 
 ### Production
 
-Frontend: `https://dashboard.fastapi-project.example.com`
+Application (frontend and API): `https://fastapi-project.example.com`
 
-Backend API docs: `https://api.fastapi-project.example.com/docs`
-
-Backend API base URL: `https://api.fastapi-project.example.com`
+Interactive API docs: `https://fastapi-project.example.com/docs`
 
 Adminer: `https://adminer.fastapi-project.example.com`
 
 ### Staging
 
-Frontend: `https://dashboard.staging.fastapi-project.example.com`
+Application (frontend and API): `https://staging.fastapi-project.example.com`
 
-Backend API docs: `https://api.staging.fastapi-project.example.com/docs`
-
-Backend API base URL: `https://api.staging.fastapi-project.example.com`
+Interactive API docs: `https://staging.fastapi-project.example.com/docs`
 
 Adminer: `https://adminer.staging.fastapi-project.example.com`

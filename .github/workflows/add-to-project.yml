@@ -12,6 +12,7 @@ permissions: {}
 jobs:
   add-to-project:
     name: Add to project
+    if: github.repository_owner == 'fastapi'
     runs-on: ubuntu-latest
     timeout-minutes: 5
     steps:
