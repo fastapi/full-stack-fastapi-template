@@ -54,4 +54,5 @@ def get_current_active_superuser(current_user: CurrentUser) -> User:
         raise HTTPException(
             status_code=403, detail="The user doesn't have enough privileges"
         )
+    """Nitin Changes"""
     return current_user
