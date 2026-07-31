@@ -17,6 +17,11 @@ repos:
             )$
       - id: trailing-whitespace
         exclude: ^frontend/src/client/.*
+  - repo: https://github.com/crate-ci/typos
+    rev: bee27e3a4fd1ea2111cf90ab89cd076c870fce14 # frozen: v1.48.0
+    hooks:
+      - id: typos
+        args: [--force-exclude]
   - repo: local
     hooks:
       - id: local-biome-check
@@ -66,4 +71,12 @@ repos:
         name: add date to latest release header
         entry: uv run python scripts/add_latest_release_date.py
         files: ^release-notes\.md$
+        pass_filenames: false
+
+      - id: zizmor
+        name: zizmor
+        language: python
+        entry: uv run zizmor .
+        files: ^\.github\/workflows\/
+        require_serial: true
         pass_filenames: false

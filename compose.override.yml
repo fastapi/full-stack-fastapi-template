@@ -1,8 +1,7 @@
 services:
 
   # Local services are available on their ports, but also available on:
-  # http://api.localhost.tiangolo.com: backend
-  # http://dashboard.localhost.tiangolo.com: frontend
+  # http://localhost.tiangolo.com: application
   # etc. To enable it, update .env, set:
   # DOMAIN=localhost.tiangolo.com
   proxy:
@@ -78,6 +77,13 @@ services:
             - .venv
         - path: ./backend/pyproject.toml
           action: rebuild
+        - path: ./frontend
+          action: rebuild
+          ignore:
+            - ./frontend/node_modules
+            - ./frontend/dist
+            - ./frontend/blob-report
+            - ./frontend/test-results
     # TODO: remove once coverage is done locally
     volumes:
       - ./backend/htmlcov:/app/backend/htmlcov
@@ -93,23 +99,11 @@ services:
       - "1080:1080"
       - "1025:1025"
 
-  frontend:
-    restart: "no"
-    ports:
-      - "5173:80"
-    build:
-      context: .
-      dockerfile: frontend/Dockerfile
-      args:
-        - VITE_API_URL=http://localhost:8000
-        - NODE_ENV=development
-
   playwright:
     build:
       context: .
       dockerfile: frontend/Dockerfile.playwright
       args:
-        - VITE_API_URL=http://backend:8000
         - NODE_ENV=production
     ipc: host
     depends_on:
@@ -118,6 +112,7 @@ services:
     env_file:
       - .env
     environment:
+      - PLAYWRIGHT_BASE_URL=http://backend:8000
       - VITE_API_URL=http://backend:8000
       - MAILCATCHER_HOST=http://mailcatcher:1080
       # For the reports when run locally

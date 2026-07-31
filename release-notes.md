@@ -2,21 +2,80 @@
 
 ## Latest Changes
 
+### Features
+
+* 🔧 Use FastAPI entrypoint. PR [#2360](https://github.com/fastapi/full-stack-fastapi-template/pull/2360) by [@tiangolo](https://github.com/tiangolo).
+* ♻️ Add library-skills for FastAPI and SQLModel. PR [#2354](https://github.com/fastapi/full-stack-fastapi-template/pull/2354) by [@tiangolo](https://github.com/tiangolo).
+
 ### Refactors
 
+* ♻️ Serve frontend from FastAPI. PR [#2393](https://github.com/fastapi/full-stack-fastapi-template/pull/2393) by [@tiangolo](https://github.com/tiangolo).
+* 🔧 Refactor PostgreSQL env var config. PR [#2392](https://github.com/fastapi/full-stack-fastapi-template/pull/2392) by [@tiangolo](https://github.com/tiangolo).
+* ♻️ Refactor models to improve types. PR [#2356](https://github.com/fastapi/full-stack-fastapi-template/pull/2356) by [@tiangolo](https://github.com/tiangolo).
 * 🔧 Add FastAPI VS Code extension to recommended extensions. PR [#2206](https://github.com/fastapi/full-stack-fastapi-template/pull/2206) by [@tiangolo](https://github.com/tiangolo).
 * ♻️ Update meta titles. PR [#2179](https://github.com/fastapi/full-stack-fastapi-template/pull/2179) by [@alejsdev](https://github.com/alejsdev).
 
 ### Upgrades
 
+* ⬆️ Upgrade FastAPI version. PR [#2357](https://github.com/fastapi/full-stack-fastapi-template/pull/2357) by [@tiangolo](https://github.com/tiangolo).
+* ⬆️ Upgrade Python to 3.14. PR [#2352](https://github.com/fastapi/full-stack-fastapi-template/pull/2352) by [@tiangolo](https://github.com/tiangolo).
 * ⬆️ Upgrade Sentry and FastAPI. PR [#2181](https://github.com/fastapi/full-stack-fastapi-template/pull/2181) by [@patrick91](https://github.com/patrick91).
 
 ### Docs
 
+* 📝 Improve README screenshot alt text. PR [#2359](https://github.com/fastapi/full-stack-fastapi-template/pull/2359) by [@Bmowville](https://github.com/Bmowville).
+* ✏️ Fix typo in the comment for DOMAIN in the .env file. PR [#2305](https://github.com/fastapi/full-stack-fastapi-template/pull/2305) by [@serhiiur](https://github.com/serhiiur).
+* 📝 Update security policy. PR [#2297](https://github.com/fastapi/full-stack-fastapi-template/pull/2297) by [@tiangolo](https://github.com/tiangolo).
 * 📝 Add `CONTRIBUTING.md`. PR [#2159](https://github.com/fastapi/full-stack-fastapi-template/pull/2159) by [@alejsdev](https://github.com/alejsdev).
 
 ### Internal
 
+* 👷 Improve workflows for private repos. PR [#2394](https://github.com/fastapi/full-stack-fastapi-template/pull/2394) by [@tiangolo](https://github.com/tiangolo).
+* ⬆️ Upgrade latest-changes to 0.7.1. PR [#2389](https://github.com/fastapi/full-stack-fastapi-template/pull/2389) by [@tiangolo](https://github.com/tiangolo).
+* Bump axios from 1.16.0 to 1.18.0 in /frontend. PR [#2386](https://github.com/fastapi/full-stack-fastapi-template/pull/2386) by [@dependabot[bot]](https://github.com/apps/dependabot).
+* ⬆ Bump pre-commit hooks. PR [#2382](https://github.com/fastapi/full-stack-fastapi-template/pull/2382) by [@tiangolo](https://github.com/tiangolo).
+* ⬆ Bump the python-packages group across 1 directory with 2 updates. PR [#2380](https://github.com/fastapi/full-stack-fastapi-template/pull/2380) by [@dependabot[bot]](https://github.com/apps/dependabot).
+* ⬆ Update sentry-sdk[fastapi] requirement from <3.0.0,>=2.0.0 to >=2.63.0,<3.0.0. PR [#2373](https://github.com/fastapi/full-stack-fastapi-template/pull/2373) by [@dependabot[bot]](https://github.com/apps/dependabot).
+* ⬆ Bump the github-actions group across 1 directory with 5 updates. PR [#2379](https://github.com/fastapi/full-stack-fastapi-template/pull/2379) by [@dependabot[bot]](https://github.com/apps/dependabot).
+* 👷 Add GH workflow to bump pre-commit hook versions. PR [#2363](https://github.com/fastapi/full-stack-fastapi-template/pull/2363) by [@YuriiMotov](https://github.com/YuriiMotov).
+* 🔧 Set Dependabot schedule interval to "monthly". PR [#2364](https://github.com/fastapi/full-stack-fastapi-template/pull/2364) by [@YuriiMotov](https://github.com/YuriiMotov).
+* ⬆ Bump the npm-packages group across 1 directory with 37 updates. PR [#2333](https://github.com/fastapi/full-stack-fastapi-template/pull/2333) by [@dependabot[bot]](https://github.com/apps/dependabot).
+* 👷 Update latest-changes. PR [#2375](https://github.com/fastapi/full-stack-fastapi-template/pull/2375) by [@tiangolo](https://github.com/tiangolo).
+* ⬆ Bump playwright from v1.58.2-noble to v1.61.1-noble in /frontend in the docker group across 1 directory. PR [#2361](https://github.com/fastapi/full-stack-fastapi-template/pull/2361) by [@dependabot[bot]](https://github.com/apps/dependabot).
+* ⬆️ Update issue-manager to 0.8.1. PR [#2368](https://github.com/fastapi/full-stack-fastapi-template/pull/2368) by [@tiangolo](https://github.com/tiangolo).
+* ⬆ Bump emails from 0.6 to 1.1.2 in the python-packages group across 1 directory. PR [#2369](https://github.com/fastapi/full-stack-fastapi-template/pull/2369) by [@dependabot[bot]](https://github.com/apps/dependabot).
+* ⬆ Bump https://github.com/crate-ci/typos from v1.46.0 to 1.47.2 in the pre-commit group across 1 directory. PR [#2343](https://github.com/fastapi/full-stack-fastapi-template/pull/2343) by [@dependabot[bot]](https://github.com/apps/dependabot).
+* ⬆ Bump actions/checkout from 6.0.3 to 7.0.0 in the github-actions group. PR [#2362](https://github.com/fastapi/full-stack-fastapi-template/pull/2362) by [@dependabot[bot]](https://github.com/apps/dependabot).
+* ⬆️ Update latest-changes to 0.6.1. PR [#2367](https://github.com/fastapi/full-stack-fastapi-template/pull/2367) by [@tiangolo](https://github.com/tiangolo).
+* ➕ Move prek to top level dependencies. PR [#2353](https://github.com/fastapi/full-stack-fastapi-template/pull/2353) by [@tiangolo](https://github.com/tiangolo).
+* 🔧 Sort keys in pyproject.toml. PR [#2350](https://github.com/fastapi/full-stack-fastapi-template/pull/2350) by [@tiangolo](https://github.com/tiangolo).
+* 👷 Simplify pull request workflow triggers. PR [#2349](https://github.com/fastapi/full-stack-fastapi-template/pull/2349) by [@tiangolo](https://github.com/tiangolo).
+* 👷 Update issue-manager to 0.7.1. PR [#2348](https://github.com/fastapi/full-stack-fastapi-template/pull/2348) by [@tiangolo](https://github.com/tiangolo).
+* ⬆️ Update issue-manager to 0.7.0. PR [#2347](https://github.com/fastapi/full-stack-fastapi-template/pull/2347) by [@tiangolo](https://github.com/tiangolo).
+* 🔒️ Update zizmor workflow security checks. PR [#2345](https://github.com/fastapi/full-stack-fastapi-template/pull/2345) by [@tiangolo](https://github.com/tiangolo).
+* 👷 Add pre-commit hook to catch typos. PR [#2317](https://github.com/fastapi/full-stack-fastapi-template/pull/2317) by [@YuriiMotov](https://github.com/YuriiMotov).
+* Bump form-data from 4.0.5 to 4.0.6 in /frontend. PR [#2337](https://github.com/fastapi/full-stack-fastapi-template/pull/2337) by [@dependabot[bot]](https://github.com/apps/dependabot).
+* ⬆ Bump starlette from 1.0.1 to 1.3.1. PR [#2338](https://github.com/fastapi/full-stack-fastapi-template/pull/2338) by [@dependabot[bot]](https://github.com/apps/dependabot).
+* ⬆ Bump the python-packages group across 1 directory with 16 updates. PR [#2340](https://github.com/fastapi/full-stack-fastapi-template/pull/2340) by [@dependabot[bot]](https://github.com/apps/dependabot).
+* ⬆ Bump the github-actions group with 2 updates. PR [#2332](https://github.com/fastapi/full-stack-fastapi-template/pull/2332) by [@dependabot[bot]](https://github.com/apps/dependabot).
+* ⬆ Bump pyjwt from 2.12.0 to 2.13.0. PR [#2336](https://github.com/fastapi/full-stack-fastapi-template/pull/2336) by [@dependabot[bot]](https://github.com/apps/dependabot).
+* ⬆ Bump pytest from 7.4.4 to 9.0.3. PR [#2330](https://github.com/fastapi/full-stack-fastapi-template/pull/2330) by [@dependabot[bot]](https://github.com/apps/dependabot).
+* ⬆ Bump axios from 1.13.5 to 1.16.0 in /frontend. PR [#2323](https://github.com/fastapi/full-stack-fastapi-template/pull/2323) by [@dependabot[bot]](https://github.com/apps/dependabot).
+* ⬆ Bump lxml from 6.0.2 to 6.1.0. PR [#2266](https://github.com/fastapi/full-stack-fastapi-template/pull/2266) by [@dependabot[bot]](https://github.com/apps/dependabot).
+* ⬆ Bump mako from 1.3.10 to 1.3.12. PR [#2278](https://github.com/fastapi/full-stack-fastapi-template/pull/2278) by [@dependabot[bot]](https://github.com/apps/dependabot).
+* ⬆ Bump pygments from 2.19.2 to 2.20.0. PR [#2248](https://github.com/fastapi/full-stack-fastapi-template/pull/2248) by [@dependabot[bot]](https://github.com/apps/dependabot).
+* ⬆ Bump requests from 2.32.5 to 2.33.0. PR [#2245](https://github.com/fastapi/full-stack-fastapi-template/pull/2245) by [@dependabot[bot]](https://github.com/apps/dependabot).
+* ⬆ Bump python-dotenv from 1.2.1 to 1.2.2. PR [#2265](https://github.com/fastapi/full-stack-fastapi-template/pull/2265) by [@dependabot[bot]](https://github.com/apps/dependabot).
+* ⬆ Bump starlette from 0.46.2 to 1.0.1. PR [#2322](https://github.com/fastapi/full-stack-fastapi-template/pull/2322) by [@dependabot[bot]](https://github.com/apps/dependabot).
+* ⬆ Bump the github-actions group across 1 directory with 6 updates. PR [#2326](https://github.com/fastapi/full-stack-fastapi-template/pull/2326) by [@dependabot[bot]](https://github.com/apps/dependabot).
+* 👷 Configure Dependabot to group updates and update weekly. PR [#2293](https://github.com/fastapi/full-stack-fastapi-template/pull/2293) by [@YuriiMotov](https://github.com/YuriiMotov).
+* 🔥 Remove config files now in central GitHub repo. PR [#2300](https://github.com/fastapi/full-stack-fastapi-template/pull/2300) by [@tiangolo](https://github.com/tiangolo).
+* ⬆ Bump actions/add-to-project from 1.0.2 to 2.0.0. PR [#2273](https://github.com/fastapi/full-stack-fastapi-template/pull/2273) by [@dependabot[bot]](https://github.com/apps/dependabot).
+* ⬆ Bump python-multipart from 0.0.21 to 0.0.27. PR [#2277](https://github.com/fastapi/full-stack-fastapi-template/pull/2277) by [@dependabot[bot]](https://github.com/apps/dependabot).
+* ⬆ Bump idna from 3.11 to 3.15. PR [#2294](https://github.com/fastapi/full-stack-fastapi-template/pull/2294) by [@dependabot[bot]](https://github.com/apps/dependabot).
+* 🔒️ Only allow team members to modify dependencies. PR [#2292](https://github.com/fastapi/full-stack-fastapi-template/pull/2292) by [@svlandeg](https://github.com/svlandeg).
+* ⬆ Bump urllib3 from 2.6.3 to 2.7.0. PR [#2282](https://github.com/fastapi/full-stack-fastapi-template/pull/2282) by [@dependabot[bot]](https://github.com/apps/dependabot).
+* 🔒️ Add zizmor and fix audit findings. PR [#2260](https://github.com/fastapi/full-stack-fastapi-template/pull/2260) by [@YuriiMotov](https://github.com/YuriiMotov).
 * 🔒 Pin GitHub actions by commit SHA. PR [#2246](https://github.com/fastapi/full-stack-fastapi-template/pull/2246) by [@YuriiMotov](https://github.com/YuriiMotov).
 * 🔨 Add pre-commit hook to ensure latest release header has date. PR [#2205](https://github.com/fastapi/full-stack-fastapi-template/pull/2205) by [@YuriiMotov](https://github.com/YuriiMotov).
 * 👷 Add `ty` to precommit. PR [#2227](https://github.com/fastapi/full-stack-fastapi-template/pull/2227) by [@svlandeg](https://github.com/svlandeg).
