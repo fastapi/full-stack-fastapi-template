@@ -30,6 +30,7 @@
 
 ### Internal
 
+* ⬆ Bump the python-packages group with 3 updates. PR [#2398](https://github.com/fastapi/full-stack-fastapi-template/pull/2398) by [@dependabot[bot]](https://github.com/apps/dependabot).
 * 👷 Improve workflows for private repos. PR [#2394](https://github.com/fastapi/full-stack-fastapi-template/pull/2394) by [@tiangolo](https://github.com/tiangolo).
 * ⬆️ Upgrade latest-changes to 0.7.1. PR [#2389](https://github.com/fastapi/full-stack-fastapi-template/pull/2389) by [@tiangolo](https://github.com/tiangolo).
 * Bump axios from 1.16.0 to 1.18.0 in /frontend. PR [#2386](https://github.com/fastapi/full-stack-fastapi-template/pull/2386) by [@dependabot[bot]](https://github.com/apps/dependabot).
