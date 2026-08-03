@@ -1,7 +1,7 @@
 [dependency-groups]
 dev = [
-    "prek>=0.4.8,<1.0.0",
-    "zizmor>=1.25.2",
+    "prek>=0.4.11,<1.0.0",
+    "zizmor>=1.28.0",
 ]
 
 github-actions = [
