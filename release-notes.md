@@ -30,6 +30,7 @@
 
 ### Internal
 
+* ⬆ Bump the github-actions group with 5 updates. PR [#2397](https://github.com/fastapi/full-stack-fastapi-template/pull/2397) by [@dependabot[bot]](https://github.com/apps/dependabot).
 * ⬆ Update sentry-sdk[fastapi] requirement from <3.0.0,>=2.63.0 to >=2.66.1,<3.0.0. PR [#2400](https://github.com/fastapi/full-stack-fastapi-template/pull/2400) by [@dependabot[bot]](https://github.com/apps/dependabot).
 * ⬆ Bump the python-packages group with 3 updates. PR [#2398](https://github.com/fastapi/full-stack-fastapi-template/pull/2398) by [@dependabot[bot]](https://github.com/apps/dependabot).
 * 👷 Improve workflows for private repos. PR [#2394](https://github.com/fastapi/full-stack-fastapi-template/pull/2394) by [@tiangolo](https://github.com/tiangolo).
