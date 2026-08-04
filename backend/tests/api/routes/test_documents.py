@@ -7,6 +7,7 @@ from sqlmodel import Session
 
 from app.core.config import settings
 from tests.utils.document import create_random_document  # type: ignore
+from tests.utils.user import get_bootstrap_user
 
 
 def skip_test_create_document_real_s3(
@@ -33,7 +34,7 @@ def skip_test_create_document_real_s3(
 def test_read_document(
     client: TestClient, superuser_token_headers: dict[str, str], db: Session
 ) -> None:
-    document = create_random_document(db)
+    document = create_random_document(db, user=get_bootstrap_user(db))
     response = client.get(
         f"{settings.API_V1_STR}/documents/{document.id}",
         headers=superuser_token_headers,
@@ -54,8 +55,9 @@ def test_read_document(
 def test_read_documents(
     client: TestClient, superuser_token_headers: dict[str, str], db: Session
 ) -> None:
-    create_random_document(db)
-    create_random_document(db)
+    owner = get_bootstrap_user(db)
+    create_random_document(db, user=owner)
+    create_random_document(db, user=owner)
     response = client.get(
         f"{settings.API_V1_STR}/documents/",
         headers=superuser_token_headers,
@@ -68,7 +70,7 @@ def test_read_documents(
 def test_update_document(
     client: TestClient, superuser_token_headers: dict[str, str], db: Session
 ) -> None:
-    document = create_random_document(db)
+    document = create_random_document(db, user=get_bootstrap_user(db))
     data = {"s3_key": "UpdatedKey"}
     response = client.put(
         f"{settings.API_V1_STR}/documents/{document.id}",
@@ -91,7 +93,7 @@ def test_update_document(
 def test_delete_document(
     client: TestClient, superuser_token_headers: dict[str, str], db: Session
 ) -> None:
-    document = create_random_document(db)
+    document = create_random_document(db, user=get_bootstrap_user(db))
     response = client.delete(
         f"{settings.API_V1_STR}/documents/{document.id}",
         headers=superuser_token_headers,
@@ -360,9 +362,10 @@ def test_read_documents_pagination(
     client: TestClient, superuser_token_headers: dict[str, str], db: Session
 ) -> None:
     """Test reading documents with pagination."""
-    # Create multiple documents
+    # Create multiple documents owned by the authenticated user
+    owner = get_bootstrap_user(db)
     for _ in range(5):
-        create_random_document(db)
+        create_random_document(db, user=owner)
 
     # Test with skip and limit
     response = client.get(
@@ -425,7 +428,7 @@ def test_update_document_partial_update(
     client: TestClient, superuser_token_headers: dict[str, str], db: Session
 ) -> None:
     """Test updating only some fields of a document."""
-    document = create_random_document(db)
+    document = create_random_document(db, user=get_bootstrap_user(db))
     original_size = document.size
 
     # Update only filename
@@ -446,7 +449,7 @@ def test_update_document_multiple_fields(
     client: TestClient, superuser_token_headers: dict[str, str], db: Session
 ) -> None:
     """Test updating multiple fields of a document."""
-    document = create_random_document(db)
+    document = create_random_document(db, user=get_bootstrap_user(db))
 
     data = {
         "filename": "updated-multiple.pdf",
@@ -470,7 +473,9 @@ def test_read_document_with_processing_status(
     """Test reading a document with processing status."""
     from app.models import DocumentStatus
 
-    document = create_random_document(db, status=DocumentStatus("processing"))
+    document = create_random_document(
+        db, user=get_bootstrap_user(db), status=DocumentStatus("processing")
+    )
     response = client.get(
         f"{settings.API_V1_STR}/documents/{document.id}",
         headers=superuser_token_headers,
@@ -486,7 +491,9 @@ def test_read_document_with_ready_status(
     """Test reading a document with ready status."""
     from app.models import DocumentStatus
 
-    document = create_random_document(db, status=DocumentStatus("ready"))
+    document = create_random_document(
+        db, user=get_bootstrap_user(db), status=DocumentStatus("ready")
+    )
     response = client.get(
         f"{settings.API_V1_STR}/documents/{document.id}",
         headers=superuser_token_headers,
@@ -502,7 +509,9 @@ def test_read_document_with_failed_status(
     """Test reading a document with failed status."""
     from app.models import Document, DocumentStatus
 
-    document = create_random_document(db, status=DocumentStatus("failed"))
+    document = create_random_document(
+        db, user=get_bootstrap_user(db), status=DocumentStatus("failed")
+    )
     # Set processing_error for failed documents
     db_document = db.get(Document, document.id)
     if db_document:
@@ -526,8 +535,9 @@ def test_read_documents_includes_status(
     """Test that reading documents list includes status field."""
     from app.models import DocumentStatus
 
-    create_random_document(db, status=DocumentStatus("processing"))
-    create_random_document(db, status=DocumentStatus("ready"))
+    owner = get_bootstrap_user(db)
+    create_random_document(db, user=owner, status=DocumentStatus("processing"))
+    create_random_document(db, user=owner, status=DocumentStatus("ready"))
     response = client.get(
         f"{settings.API_V1_STR}/documents/",
         headers=superuser_token_headers,
@@ -547,7 +557,9 @@ def test_update_document_status_preserved(
     """Test that updating a document preserves its status."""
     from app.models import DocumentStatus
 
-    document = create_random_document(db, status=DocumentStatus("ready"))
+    document = create_random_document(
+        db, user=get_bootstrap_user(db), status=DocumentStatus("ready")
+    )
 
     data = {"filename": "updated.pdf"}
     response = client.put(
