@@ -35,7 +35,7 @@ async def create_exam_attempt(
     if not exam:
         raise HTTPException(status_code=404, detail="Exam not found")
 
-    if not current_user.is_superuser and exam.owner_id != current_user.id:
+    if exam.owner_id != current_user.id:
         raise HTTPException(status_code=403, detail="Not allowed")
 
     # 2️⃣ Create attempt + pre-create answers
@@ -73,7 +73,7 @@ def read_exam_attempt(
     exam_attempt = session.get(ExamAttempt, id)
     if not exam_attempt:
         raise HTTPException(status_code=404, detail="Exam Attempt not found")
-    if not current_user.is_superuser and (exam_attempt.owner_id != current_user.id):
+    if exam_attempt.owner_id != current_user.id:
         raise HTTPException(status_code=403, detail="Not enough permissions")
 
     return exam_attempt

@@ -92,7 +92,7 @@ def read_document(session: SessionDep, current_user: CurrentUser, id: uuid.UUID)
     document = session.get(Document, id)
     if not document:
         raise HTTPException(status_code=404, detail="Document not found")
-    if not current_user.is_superuser and (document.owner_id != current_user.id):
+    if document.owner_id != current_user.id:
         raise HTTPException(status_code=400, detail="Not enough permissions")
     return document
 
@@ -104,26 +104,19 @@ def read_documents(
     """
     Retrieve documents.
     """
-
-    if current_user.is_superuser:
-        count_statement = select(func.count()).select_from(Document)
-        count = session.exec(count_statement).one()
-        statement = select(Document).offset(skip).limit(limit)
-        documents = session.exec(statement).all()
-    else:
-        count_statement = (
-            select(func.count())
-            .select_from(Document)
-            .where(Document.owner_id == current_user.id)
-        )
-        count = session.exec(count_statement).one()
-        statement = (
-            select(Document)
-            .where(Document.owner_id == current_user.id)
-            .offset(skip)
-            .limit(limit)
-        )
-        documents = session.exec(statement).all()
+    count_statement = (
+        select(func.count())
+        .select_from(Document)
+        .where(Document.owner_id == current_user.id)
+    )
+    count = session.exec(count_statement).one()
+    statement = (
+        select(Document)
+        .where(Document.owner_id == current_user.id)
+        .offset(skip)
+        .limit(limit)
+    )
+    documents = session.exec(statement).all()
 
     return DocumentsPublic(data=documents, count=count)
 
@@ -142,7 +135,7 @@ def update_document(
     document = session.get(Document, id)
     if not document:
         raise HTTPException(status_code=404, detail="Document not found")
-    if not current_user.is_superuser and (document.owner_id != current_user.id):
+    if document.owner_id != current_user.id:
         raise HTTPException(status_code=400, detail="Not enough permissions")
     update_dict = document_in.model_dump(exclude_unset=True)
     document.sqlmodel_update(update_dict)
@@ -162,7 +155,7 @@ def delete_document(
     document = session.get(Document, id)
     if not document:
         raise HTTPException(status_code=404, detail="Document not found")
-    if not current_user.is_superuser and (document.owner_id != current_user.id):
+    if document.owner_id != current_user.id:
         raise HTTPException(status_code=400, detail="Not enough permissions")
     session.delete(document)
     session.commit()
