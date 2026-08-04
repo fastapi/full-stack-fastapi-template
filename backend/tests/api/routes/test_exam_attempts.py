@@ -5,6 +5,7 @@ from sqlmodel import Session
 
 from app.core.config import settings
 from tests.utils.exam import create_random_exam
+from tests.utils.user import get_bootstrap_user
 
 
 def test_create_exam_attempt_success(
@@ -13,7 +14,7 @@ def test_create_exam_attempt_success(
     db: Session,
 ) -> None:
     """Test creating an exam attempt successfully (answers should be pre-created)."""
-    exam = create_random_exam(db)
+    exam = create_random_exam(db, user=get_bootstrap_user(db))
 
     response = client.post(
         f"{settings.API_V1_STR}/exam-attempts/",
@@ -77,7 +78,7 @@ def test_read_exam_attempt(
     db: Session,
 ) -> None:
     """Test reading an existing exam attempt (created via API so answers exist)."""
-    exam = create_random_exam(db)
+    exam = create_random_exam(db, user=get_bootstrap_user(db))
 
     # Create attempt via API so answers are created consistently
     create_resp = client.post(

@@ -8,6 +8,7 @@ from app.core.config import settings
 from app.models import Difficulty, QuestionCreate, QuestionType
 from tests.utils.document import create_random_documents
 from tests.utils.exam import create_random_exam
+from tests.utils.user import get_bootstrap_user
 
 
 def test_generate_exam(
@@ -206,7 +207,7 @@ def skip_test_generate_exam_real(
 def test_read_exam(
     client: TestClient, superuser_token_headers: dict[str, str], db: Session
 ) -> None:
-    exam = create_random_exam(db)
+    exam = create_random_exam(db, user=get_bootstrap_user(db))
     response = client.get(
         f"{settings.API_V1_STR}/exams/{exam.id}",
         headers=superuser_token_headers,
@@ -226,8 +227,9 @@ def test_read_exam(
 def test_read_exams(
     client: TestClient, superuser_token_headers: dict[str, str], db: Session
 ) -> None:
-    create_random_exam(db)
-    create_random_exam(db)
+    owner = get_bootstrap_user(db)
+    create_random_exam(db, user=owner)
+    create_random_exam(db, user=owner)
     response = client.get(
         f"{settings.API_V1_STR}/exams/",
         headers=superuser_token_headers,
@@ -240,7 +242,7 @@ def test_read_exams(
 def test_update_exam(
     client: TestClient, superuser_token_headers: dict[str, str], db: Session
 ) -> None:
-    exam = create_random_exam(db)
+    exam = create_random_exam(db, user=get_bootstrap_user(db))
     data = {"title": "UpdatedKey"}
     response = client.put(
         f"{settings.API_V1_STR}/exams/{exam.id}",
@@ -262,7 +264,7 @@ def test_update_exam(
 def test_delete_exam(
     client: TestClient, superuser_token_headers: dict[str, str], db: Session
 ) -> None:
-    exam = create_random_exam(db)
+    exam = create_random_exam(db, user=get_bootstrap_user(db))
     response = client.delete(
         f"{settings.API_V1_STR}/exams/{exam.id}",
         headers=superuser_token_headers,
