@@ -6,6 +6,5 @@
     "ghcr.io/devcontainers-extra/features/bun:1": {},
     "ghcr.io/devcontainers/features/docker-in-docker:2": {}
   },
-  "appPort": [8000, 5173],
   "postCreateCommand": "uv sync && bun install"
 }
