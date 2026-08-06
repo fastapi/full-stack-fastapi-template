@@ -1,0 +1,11 @@
+{
+  "name": "full-stack-fastapi-template",
+  "image": "mcr.microsoft.com/devcontainers/python:3-3.14-bookworm",
+  "features": {
+    "ghcr.io/devcontainers-extra/features/uv:1": {},
+    "ghcr.io/devcontainers-extra/features/bun:1": {},
+    "ghcr.io/devcontainers/features/docker-in-docker:2": {}
+  },
+  "appPort": [8000, 5173],
+  "postCreateCommand": "uv sync && bun install"
+}
