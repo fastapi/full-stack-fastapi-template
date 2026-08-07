@@ -30,6 +30,7 @@
 
 ### Internal
 
+* ⬆️ Bump `@hey-api/openapi-ts` from 0.73.0 to 0.97.3 and migrate to new client. PR [#2388](https://github.com/fastapi/full-stack-fastapi-template/pull/2388) by [@YuriiMotov](https://github.com/YuriiMotov).
 * 🔥 Remove the old Latest Changes workflow. PR [#2403](https://github.com/fastapi/full-stack-fastapi-template/pull/2403) by [@tiangolo](https://github.com/tiangolo).
 * ⬆ Update psycopg[binary] requirement from <4.0.0,>=3.1.13 to >=3.3.4,<4.0.0. PR [#2399](https://github.com/fastapi/full-stack-fastapi-template/pull/2399) by [@dependabot[bot]](https://github.com/apps/dependabot).
 * ⬆ Bump the github-actions group with 5 updates. PR [#2397](https://github.com/fastapi/full-stack-fastapi-template/pull/2397) by [@dependabot[bot]](https://github.com/apps/dependabot).
