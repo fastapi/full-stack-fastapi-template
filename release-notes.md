@@ -30,6 +30,7 @@
 
 ### Internal
 
+* 🔐 Use PR Submit for pull requests. PR [#2411](https://github.com/fastapi/full-stack-fastapi-template/pull/2411) by [@tiangolo](https://github.com/tiangolo).
 * 👷 Use GitHub CLI for Git authentication. PR [#2410](https://github.com/fastapi/full-stack-fastapi-template/pull/2410) by [@tiangolo](https://github.com/tiangolo).
 * 👷 Use PR Push commit identity. PR [#2409](https://github.com/fastapi/full-stack-fastapi-template/pull/2409) by [@tiangolo](https://github.com/tiangolo).
 * 🔒 Replace pre-commit PAT with PR Push. PR [#2407](https://github.com/fastapi/full-stack-fastapi-template/pull/2407) by [@tiangolo](https://github.com/tiangolo).
