@@ -7,5 +7,6 @@ frontend/blob-report
 frontend/dist
 frontend/node_modules
 frontend/playwright-report
+frontend/playwright/.auth
 frontend/test-results
 node_modules
