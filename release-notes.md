@@ -30,6 +30,7 @@
 
 ### Internal
 
+* 👷 Use PR Push commit identity. PR [#2409](https://github.com/fastapi/full-stack-fastapi-template/pull/2409) by [@tiangolo](https://github.com/tiangolo).
 * 🔒 Replace pre-commit PAT with PR Push. PR [#2407](https://github.com/fastapi/full-stack-fastapi-template/pull/2407) by [@tiangolo](https://github.com/tiangolo).
 * ⬆️ Bump `@hey-api/openapi-ts` from 0.73.0 to 0.97.3 and migrate to new client. PR [#2388](https://github.com/fastapi/full-stack-fastapi-template/pull/2388) by [@YuriiMotov](https://github.com/YuriiMotov).
 * 🔥 Remove the old Latest Changes workflow. PR [#2403](https://github.com/fastapi/full-stack-fastapi-template/pull/2403) by [@tiangolo](https://github.com/tiangolo).
