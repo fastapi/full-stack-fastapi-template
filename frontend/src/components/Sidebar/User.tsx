@@ -1,5 +1,6 @@
 import { Link as RouterLink } from "@tanstack/react-router"
 import { ChevronsUpDown, LogOut, Settings } from "lucide-react"
+import { useState } from "react"
 
 import { Avatar, AvatarFallback } from "@/components/ui/avatar"
 import {
@@ -42,23 +43,32 @@ function UserInfo({ fullName, email }: UserInfoProps) {
 
 export function User({ user }: { user: any }) {
   const { logout } = useAuth()
-  const { isMobile, setOpenMobile } = useSidebar()
+  const { isMobile, setOpenMobile, closeMobileSidebar } = useSidebar()
+  const [isMenuOpen, setIsMenuOpen] = useState(false)
 
   if (!user) return null
 
   const handleMenuClick = () => {
+    setIsMenuOpen(false)
     if (isMobile) {
       setOpenMobile(false)
     }
   }
-  const handleLogout = async () => {
-    logout()
+  const handleLogout = () => {
+    setIsMenuOpen(false)
+
+    if (isMobile) {
+      void closeMobileSidebar().then(logout)
+      return
+    }
+
+    window.requestAnimationFrame(logout)
   }
 
   return (
     <SidebarMenu>
       <SidebarMenuItem>
-        <DropdownMenu>
+        <DropdownMenu open={isMenuOpen} onOpenChange={setIsMenuOpen}>
           <DropdownMenuTrigger asChild>
             <SidebarMenuButton
               size="lg"
@@ -85,7 +95,12 @@ export function User({ user }: { user: any }) {
                 User Settings
               </DropdownMenuItem>
             </RouterLink>
-            <DropdownMenuItem onClick={handleLogout}>
+            <DropdownMenuItem
+              onSelect={(event) => {
+                event.preventDefault()
+                handleLogout()
+              }}
+            >
               <LogOut />
               Log Out
             </DropdownMenuItem>

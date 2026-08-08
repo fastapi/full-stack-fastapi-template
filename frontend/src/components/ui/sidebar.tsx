@@ -36,6 +36,8 @@ type SidebarContextProps = {
   setOpen: (open: boolean) => void
   openMobile: boolean
   setOpenMobile: (open: boolean) => void
+  closeMobileSidebar: () => Promise<void>
+  completeMobileSidebarClose: () => void
   isMobile: boolean
   toggleSidebar: () => void
 }
@@ -66,6 +68,36 @@ function SidebarProvider({
 }) {
   const isMobile = useIsMobile()
   const [openMobile, setOpenMobile] = React.useState(false)
+  const mobileCloseResolversRef = React.useRef(new Set<() => void>())
+
+  const completeMobileSidebarClose = React.useCallback(() => {
+    const resolvers = Array.from(mobileCloseResolversRef.current)
+    mobileCloseResolversRef.current.clear()
+    resolvers.forEach((resolve) => resolve())
+  }, [])
+
+  const closeMobileSidebar = React.useCallback(() => {
+    if (!isMobile || !openMobile) {
+      return Promise.resolve()
+    }
+
+    setOpenMobile(false)
+
+    return new Promise<void>((resolve) => {
+      let timeoutId: number | undefined
+      const resolveOnce = () => {
+        if (timeoutId !== undefined) {
+          window.clearTimeout(timeoutId)
+        }
+        mobileCloseResolversRef.current.delete(resolveOnce)
+        resolve()
+      }
+
+      mobileCloseResolversRef.current.add(resolveOnce)
+      // Fallback for environments that do not fire CSS animation events.
+      timeoutId = window.setTimeout(resolveOnce, 350)
+    })
+  }, [isMobile, openMobile])
 
   const getInitialOpen = () => {
     if (typeof document === "undefined") return defaultOpen
@@ -131,9 +163,20 @@ function SidebarProvider({
       isMobile,
       openMobile,
       setOpenMobile,
+      closeMobileSidebar,
+      completeMobileSidebarClose,
       toggleSidebar,
     }),
-    [state, open, setOpen, isMobile, openMobile, toggleSidebar],
+    [
+      state,
+      open,
+      setOpen,
+      isMobile,
+      openMobile,
+      closeMobileSidebar,
+      completeMobileSidebarClose,
+      toggleSidebar,
+    ],
   )
 
   return (
@@ -173,7 +216,13 @@ function Sidebar({
   variant?: "sidebar" | "floating" | "inset"
   collapsible?: "offcanvas" | "icon" | "none"
 }) {
-  const { isMobile, state, openMobile, setOpenMobile } = useSidebar()
+  const {
+    isMobile,
+    state,
+    openMobile,
+    setOpenMobile,
+    completeMobileSidebarClose,
+  } = useSidebar()
 
   if (collapsible === "none") {
     return (
@@ -198,6 +247,11 @@ function Sidebar({
           data-slot="sidebar"
           data-mobile="true"
           className="bg-sidebar text-sidebar-foreground w-(--sidebar-width) p-0 [&>button]:hidden"
+          onAnimationEnd={(event) => {
+            if (event.currentTarget === event.target && !openMobile) {
+              completeMobileSidebarClose()
+            }
+          }}
           style={
             {
               "--sidebar-width": SIDEBAR_WIDTH_MOBILE,
