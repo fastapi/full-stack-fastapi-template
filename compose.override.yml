@@ -6,7 +6,6 @@ services:
   # DOMAIN=localhost.tiangolo.com
   proxy:
     image: traefik:3.6
-    restart: "no"
     ports:
       - "80:80"
       - "8090:8080"
@@ -18,8 +17,6 @@ services:
       - --providers.docker.exposedbydefault=false
       # Create an entrypoint "http" listening on port 80
       - --entrypoints.http.address=:80
-      # Create an entrypoint "https" listening on port 443
-      - --entrypoints.https.address=:443
       # Enable the access log, with HTTP requests
       - --accesslog
       # Enable the Traefik log, for configurations and errors
@@ -31,17 +28,14 @@ services:
       # Enable the Dashboard and API in insecure mode for local development
       - --api.insecure=true
   db:
-    restart: "no"
     ports:
       - "5432:5432"
 
   adminer:
-    restart: "no"
     ports:
       - "8080:8080"
 
   backend:
-    restart: "no"
     ports:
       - "8000:8000"
     build:

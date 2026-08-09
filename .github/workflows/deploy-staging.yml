@@ -34,5 +34,5 @@ jobs:
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           persist-credentials: false
-      - run: docker compose -f compose.yml build
-      - run: docker compose -f compose.yml up -d
+      - run: docker compose -f compose.yml -f compose.deploy.yml build
+      - run: docker compose -f compose.yml -f compose.deploy.yml up -d

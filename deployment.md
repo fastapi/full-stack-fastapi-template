@@ -2,7 +2,7 @@
 
 You can deploy the project using Docker Compose to a remote server.
 
-The production Docker Compose configuration includes Traefik to handle HTTPS and route incoming traffic to the application.
+The deployment Docker Compose configuration includes Traefik to handle HTTPS and route incoming traffic to the application.
 
 You can use CI/CD (continuous integration and continuous deployment) systems to deploy automatically, there are already configurations to do it with GitHub Actions.
 
@@ -112,11 +112,11 @@ With the environment variables in place, you can deploy with Docker Compose:
 
 ```bash
 cd /root/code/app/
-docker compose -f compose.yml build
-docker compose -f compose.yml up -d
+docker compose -f compose.yml -f compose.deploy.yml build
+docker compose -f compose.yml -f compose.deploy.yml up -d
 ```
 
-For production you wouldn't want to have the overrides in `compose.override.yml`, that's why we explicitly specify `compose.yml` as the file to use.
+The `compose.deploy.yml` file adds the deployment settings to the shared configuration in `compose.yml`, including HTTPS and automatic certificate handling. Explicitly listing these files also excludes the local development settings in `compose.override.yml`.
 
 ## Continuous Deployment (CD)
 
