@@ -97,7 +97,7 @@ After you update it, run again:
 docker compose watch
 ```
 
-When deploying, for example in production, the main Traefik is configured outside of the Docker Compose files. For local development, there's an included Traefik in `compose.override.yml`, just to let you test that the domain works as expected, for example with `localhost.tiangolo.com`.
+Traefik is included in the main Docker Compose file. The development overrides enable its local dashboard and disable the production HTTPS configuration so you can test the domain with `localhost.tiangolo.com`.
 
 ## Docker Compose files and env vars
 
