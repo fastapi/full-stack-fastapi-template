@@ -49,65 +49,36 @@ services:
       # Define the port inside of the Docker service to use
       - traefik.http.services.adminer.loadbalancer.server.port=8080
 
-  prestart:
-    image: '${DOCKER_IMAGE_BACKEND?Variable not set}:${TAG-latest}'
-    build:
-      context: .
-      dockerfile: backend/Dockerfile
-    depends_on:
-      db:
-        condition: service_healthy
-        restart: true
-    command: bash scripts/prestart.sh
-    env_file:
-      - .env
-    environment:
-      - DOMAIN=${DOMAIN}
-      - FRONTEND_HOST=${FRONTEND_HOST?Variable not set}
-      - ENVIRONMENT=${ENVIRONMENT}
-      - BACKEND_CORS_ORIGINS=${BACKEND_CORS_ORIGINS}
-      - SECRET_KEY=${SECRET_KEY?Variable not set}
-      - FIRST_SUPERUSER=${FIRST_SUPERUSER?Variable not set}
-      - FIRST_SUPERUSER_PASSWORD=${FIRST_SUPERUSER_PASSWORD?Variable not set}
-      - SMTP_HOST=${SMTP_HOST}
-      - SMTP_USER=${SMTP_USER}
-      - SMTP_PASSWORD=${SMTP_PASSWORD}
-      - EMAILS_FROM_EMAIL=${EMAILS_FROM_EMAIL}
-      - POSTGRES_SERVER=db
-      - POSTGRES_PORT=${POSTGRES_PORT}
-      - POSTGRES_DB=${POSTGRES_DB}
-      - POSTGRES_USER=${POSTGRES_USER?Variable not set}
-      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD?Variable not set}
-      - SENTRY_DSN=${SENTRY_DSN}
-
   backend:
-    image: '${DOCKER_IMAGE_BACKEND?Variable not set}:${TAG-latest}'
+    image: backend:latest
     depends_on:
       db:
         condition: service_healthy
         restart: true
       prestart:
         condition: service_completed_successfully
-    env_file:
-      - .env
-    environment:
-      - DOMAIN=${DOMAIN}
-      - FRONTEND_HOST=${FRONTEND_HOST?Variable not set}
-      - ENVIRONMENT=${ENVIRONMENT}
-      - BACKEND_CORS_ORIGINS=${BACKEND_CORS_ORIGINS}
-      - SECRET_KEY=${SECRET_KEY?Variable not set}
-      - FIRST_SUPERUSER=${FIRST_SUPERUSER?Variable not set}
-      - FIRST_SUPERUSER_PASSWORD=${FIRST_SUPERUSER_PASSWORD?Variable not set}
-      - SMTP_HOST=${SMTP_HOST}
-      - SMTP_USER=${SMTP_USER}
-      - SMTP_PASSWORD=${SMTP_PASSWORD}
-      - EMAILS_FROM_EMAIL=${EMAILS_FROM_EMAIL}
-      - POSTGRES_SERVER=db
-      - POSTGRES_PORT=${POSTGRES_PORT}
-      - POSTGRES_DB=${POSTGRES_DB}
-      - POSTGRES_USER=${POSTGRES_USER?Variable not set}
-      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD?Variable not set}
-      - SENTRY_DSN=${SENTRY_DSN}
+    # The YAML anchor lets the prestart service reuse this environment mapping.
+    environment: &backend-environment
+      FRONTEND_HOST: ${FRONTEND_HOST?Variable not set}
+      ENVIRONMENT: ${ENVIRONMENT}
+      PROJECT_NAME: ${PROJECT_NAME?Variable not set}
+      BACKEND_CORS_ORIGINS: ${BACKEND_CORS_ORIGINS}
+      SECRET_KEY: ${SECRET_KEY?Variable not set}
+      FIRST_SUPERUSER: ${FIRST_SUPERUSER?Variable not set}
+      FIRST_SUPERUSER_PASSWORD: ${FIRST_SUPERUSER_PASSWORD?Variable not set}
+      SMTP_HOST: ${SMTP_HOST}
+      SMTP_USER: ${SMTP_USER}
+      SMTP_PASSWORD: ${SMTP_PASSWORD}
+      EMAILS_FROM_EMAIL: ${EMAILS_FROM_EMAIL}
+      SMTP_TLS: ${SMTP_TLS}
+      SMTP_SSL: ${SMTP_SSL}
+      SMTP_PORT: ${SMTP_PORT}
+      POSTGRES_SERVER: db
+      POSTGRES_PORT: ${POSTGRES_PORT}
+      POSTGRES_DB: ${POSTGRES_DB}
+      POSTGRES_USER: ${POSTGRES_USER?Variable not set}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD?Variable not set}
+      SENTRY_DSN: ${SENTRY_DSN}
 
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:8000/api/v1/utils/health-check/"]
@@ -128,6 +99,18 @@ services:
       # Route HTTP traffic for this domain
       - traefik.http.routers.backend-http.rule=Host(`${DOMAIN?Variable not set}`)
       - traefik.http.routers.backend-http.entrypoints=http
+
+  prestart:
+    image: backend:latest
+    build:
+      context: .
+      dockerfile: backend/Dockerfile
+    depends_on:
+      db:
+        condition: service_healthy
+        restart: true
+    command: bash scripts/prestart.sh
+    environment: *backend-environment
 
 volumes:
   app-db-data:
