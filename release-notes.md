@@ -9,6 +9,7 @@
 
 ### Refactors
 
+* ♻️ Simplify environment configuration. PR [#2413](https://github.com/fastapi/full-stack-fastapi-template/pull/2413) by [@tiangolo](https://github.com/tiangolo).
 * ♻️ Simplify Traefik deployment, make it part of the stack. PR [#2412](https://github.com/fastapi/full-stack-fastapi-template/pull/2412) by [@tiangolo](https://github.com/tiangolo).
 * ♻️ Serve frontend from FastAPI. PR [#2393](https://github.com/fastapi/full-stack-fastapi-template/pull/2393) by [@tiangolo](https://github.com/tiangolo).
 * 🔧 Refactor PostgreSQL env var config. PR [#2392](https://github.com/fastapi/full-stack-fastapi-template/pull/2392) by [@tiangolo](https://github.com/tiangolo).
