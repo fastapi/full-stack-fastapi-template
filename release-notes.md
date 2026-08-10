@@ -14,6 +14,7 @@
 
 ### Refactors
 
+* ♻️ Simplify uv workspace setup. PR [#2423](https://github.com/fastapi/full-stack-fastapi-template/pull/2423) by [@tiangolo](https://github.com/tiangolo).
 * ♻️ Use FastAPI entrypoint in Compose. PR [#2420](https://github.com/fastapi/full-stack-fastapi-template/pull/2420) by [@tiangolo](https://github.com/tiangolo).
 * ♻️ Require non-empty Compose configuration. PR [#2418](https://github.com/fastapi/full-stack-fastapi-template/pull/2418) by [@tiangolo](https://github.com/tiangolo).
 * ♻️ Simplify optional environment configuration. PR [#2417](https://github.com/fastapi/full-stack-fastapi-template/pull/2417) by [@tiangolo](https://github.com/tiangolo).
