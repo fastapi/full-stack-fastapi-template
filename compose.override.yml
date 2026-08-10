@@ -67,7 +67,7 @@ services:
     volumes:
       - ./backend/htmlcov:/app/backend/htmlcov
     environment:
-      ENVIRONMENT: "local"
+      FASTAPI_ENV: "development"
       SMTP_HOST: "mailcatcher"
       SMTP_PORT: "1025"
       SMTP_TLS: "false"
