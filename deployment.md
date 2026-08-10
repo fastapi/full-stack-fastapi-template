@@ -200,16 +200,22 @@ To configure them, go to your repository's **Settings** > **Environments** and c
 
 For each GitHub Environment (`staging` and `production`), configure the required secrets as [environment secrets](https://docs.github.com/en/actions/how-tos/write-workflows/choose-what-workflows-do/use-secrets#creating-secrets-for-an-environment). Environment secrets are preferred over [repository secrets](https://docs.github.com/en/actions/how-tos/write-workflows/choose-what-workflows-do/use-secrets#creating-secrets-for-a-repository) because they are scoped to the specific environment, reducing exposure and aligning with any protection rules you configure.
 
-The current Github Actions workflows expect these secrets:
+The deployment workflows require these secrets:
 
 * `DOMAIN`
-* `EMAILS_FROM_EMAIL`
 * `FIRST_SUPERUSER`
 * `FIRST_SUPERUSER_PASSWORD`
 * `POSTGRES_PASSWORD`
 * `SECRET_KEY`
-* `LATEST_CHANGES`
-* `SMOKESHOW_AUTH_KEY`
+
+To enable emails, configure these additional secrets with the values from your email provider:
+
+* `SMTP_HOST`
+* `SMTP_USER`
+* `SMTP_PASSWORD`
+* `EMAILS_FROM_EMAIL`
+
+To enable Sentry, configure the `SENTRY_DSN` secret.
 
 ## GitHub Action Deployment Workflows
 

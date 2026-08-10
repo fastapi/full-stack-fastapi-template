@@ -9,9 +9,20 @@ answers_path = Path(__file__).parent / ".copier-answers.yml"
 answers = json.loads(answers_path.read_text())
 env_path = root_path / ".env"
 env_content = env_path.read_text()
+# Keep deployment provider settings from replacing local development defaults.
+env_answer_keys = {
+    "emails_from_email",
+    "first_superuser",
+    "first_superuser_password",
+    "postgres_password",
+    "project_name",
+    "secret_key",
+}
 lines = []
 for line in env_content.splitlines():
     for key, value in answers.items():
+        if key not in env_answer_keys:
+            continue
         upper_key = key.upper()
         if line.startswith(f"{upper_key}="):
             if " " in value:
