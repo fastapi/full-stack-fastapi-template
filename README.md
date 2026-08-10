@@ -17,7 +17,7 @@
   - 🤖 An automatically generated frontend client.
   - 🧪 [Playwright](https://playwright.dev) for End-to-End testing.
   - 🦇 Dark mode support.
-- 🐋 [Docker Compose](https://www.docker.com) for development and production.
+- 🐋 [Docker Compose](https://www.docker.com) for local services and deployment.
 - 🔒 Secure password hashing by default.
 - 🔑 JWT (JSON Web Token) authentication.
 - 📫 Email based password recovery.
@@ -222,7 +222,7 @@ Deployment docs: [deployment.md](./deployment.md).
 
 General development docs: [development.md](./development.md).
 
-This includes using Docker Compose, custom local domains, `.env` configurations, etc.
+This includes the local FastAPI and Vite workflow, Docker Compose services, custom local domains, `.env` configuration, and more.
 
 ## Release Notes
 
