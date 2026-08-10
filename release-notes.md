@@ -14,6 +14,7 @@
 
 ### Refactors
 
+* ♻️ Require explicit SECRET_KEY. PR [#2425](https://github.com/fastapi/full-stack-fastapi-template/pull/2425) by [@tiangolo](https://github.com/tiangolo).
 * ♻️ Simplify uv workspace setup. PR [#2423](https://github.com/fastapi/full-stack-fastapi-template/pull/2423) by [@tiangolo](https://github.com/tiangolo).
 * ♻️ Use FastAPI entrypoint in Compose. PR [#2420](https://github.com/fastapi/full-stack-fastapi-template/pull/2420) by [@tiangolo](https://github.com/tiangolo).
 * ♻️ Require non-empty Compose configuration. PR [#2418](https://github.com/fastapi/full-stack-fastapi-template/pull/2418) by [@tiangolo](https://github.com/tiangolo).
