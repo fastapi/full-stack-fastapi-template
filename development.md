@@ -75,39 +75,11 @@ Mailcatcher: <http://localhost:1080>
 
 Stop a locally running FastAPI server before starting the Compose backend because both use port `8000`.
 
-**Note**: The first time you start the stack, it might take a minute to be ready while the backend waits for the database and configures everything. To monitor it, use `docker compose logs`, or `docker compose logs backend` for the backend service.
+**Note**: The first time you start the stack, it might take a minute for all the services to be ready. To monitor it, use `docker compose logs`, or `docker compose logs backend` for the backend service.
 
 ## Mailcatcher
 
 Mailcatcher captures emails sent during local development instead of delivering them. The local backend connects to it at `localhost:1025`, and the Compose backend connects to the `mailcatcher` service. Captured emails are available at <http://localhost:1080>.
-
-## Docker Compose in `localhost.tiangolo.com`
-
-When you start the Docker Compose stack, it uses `localhost` by default, with different ports for each service (backend, adminer, etc).
-
-When you deploy it to production (or staging), the application uses one domain. The frontend is served at `/` and the API lives under `/api`.
-
-In the guide about [deployment](deployment.md) you can read about Traefik, the configured proxy. That's the component in charge of transmitting traffic to the application service based on the domain.
-
-If you want to test that it's all working locally, you can edit the local `.env` file, and change:
-
-```dotenv
-DOMAIN=localhost.tiangolo.com
-```
-
-That will be used by the Docker Compose files to configure the base domain for the services.
-
-Traefik will transmit application traffic at `localhost.tiangolo.com` to FastAPI, which serves both the frontend and API.
-
-The domain `localhost.tiangolo.com` is a special domain that is configured (with all its subdomains) to point to `127.0.0.1`. This way you can use that for your local development.
-
-After you update it, run again:
-
-```bash
-docker compose watch
-```
-
-Traefik is included in the main Docker Compose file. The development overrides expose its local dashboard so you can inspect the routes used with `localhost.tiangolo.com`.
 
 ## Docker Compose files and env vars
 
@@ -118,8 +90,6 @@ And there's also a `compose.override.yml` with overrides for development, for ex
 The `compose.deploy.yml` file contains the deployment-specific settings, including HTTPS and automatic certificate handling. It is explicitly combined with `compose.yml` when deploying the application.
 
 The backend reads local settings from the `.env` file. Docker Compose also uses it for variable interpolation and passes the settings each container needs.
-
-They also use some additional configurations taken from environment variables set in the scripts before calling the `docker compose` command.
 
 After changing variables, make sure you restart the stack:
 
@@ -203,19 +173,3 @@ Adminer: <http://localhost:8080>
 Traefik UI: <http://localhost:8090>
 
 MailCatcher: <http://localhost:1080>
-
-### Development URLs with `localhost.tiangolo.com` Configured
-
-Development URLs, for local development.
-
-Application: <http://localhost.tiangolo.com>
-
-Automatic Interactive Docs (Swagger UI): <http://localhost.tiangolo.com/docs>
-
-Automatic Alternative Docs (ReDoc): <http://localhost.tiangolo.com/redoc>
-
-Adminer: <http://localhost.tiangolo.com:8080>
-
-Traefik UI: <http://localhost.tiangolo.com:8090>
-
-MailCatcher: <http://localhost.tiangolo.com:1080>
