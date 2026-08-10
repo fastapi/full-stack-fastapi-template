@@ -46,7 +46,7 @@ Copy the content and use that as password / secret key. And run that again to ge
 
 ### Required Environment Variables
 
-Set the `DOMAIN`, by default `localhost` (for development), but when deploying you would use your own domain, for example:
+Set the `DOMAIN` to your own domain, for example:
 
 ```bash
 export DOMAIN=fastapi-project.example.com
