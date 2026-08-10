@@ -4,6 +4,7 @@
 
 ### Features
 
+* ✨ Add react-email for email templates. PR [#2421](https://github.com/fastapi/full-stack-fastapi-template/pull/2421) by [@alejsdev](https://github.com/alejsdev).
 * 🔧 Use FastAPI entrypoint. PR [#2360](https://github.com/fastapi/full-stack-fastapi-template/pull/2360) by [@tiangolo](https://github.com/tiangolo).
 * ♻️ Add library-skills for FastAPI and SQLModel. PR [#2354](https://github.com/fastapi/full-stack-fastapi-template/pull/2354) by [@tiangolo](https://github.com/tiangolo).
 
