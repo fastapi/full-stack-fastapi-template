@@ -1,0 +1,3 @@
+{
+  "extends": ["../../frontend/biome.json"]
+}
