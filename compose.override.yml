@@ -44,9 +44,9 @@ services:
     # command: sleep infinity  # Infinite loop to keep container alive doing nothing
     command:
       - fastapi
-      - run
-      - --reload
-      - "app/main.py"
+      - dev
+      - --host
+      - "0.0.0.0"
     develop:
       watch:
         - path: ./backend
