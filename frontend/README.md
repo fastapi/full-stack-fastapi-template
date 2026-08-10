@@ -15,9 +15,9 @@ bun run dev
 
 * Then open your browser at http://localhost:5173/.
 
-Run the backend locally with `uv run fastapi dev` and PostgreSQL in Docker Compose. See [../development.md](../development.md) for the complete setup.
+Run `uv run bash scripts/prestart.sh` and `uv run fastapi dev` from the `backend` directory, with PostgreSQL running in Docker Compose. See [../development.md](../development.md) for the complete setup.
 
-To serve the frontend with FastAPI, run `bun run build` from the `frontend` directory and open `http://localhost:8000`. To run the full stack with Docker Compose, use `docker compose watch`.
+To serve the frontend with FastAPI, run `bun run build` from the `frontend` directory and open `http://localhost:8000`.
 
 Check the file `package.json` to see other available options.
 
@@ -89,6 +89,7 @@ The frontend code is structured as follows:
 The frontend includes initial end-to-end tests using Playwright. To run the tests, you need to have the Docker Compose stack running. Start the stack with the following command:
 
 ```bash
+docker compose run --rm backend bash scripts/prestart.sh
 docker compose up -d --wait backend
 ```
 

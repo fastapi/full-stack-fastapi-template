@@ -42,6 +42,7 @@ The setup is also already configured so you can run the tests through the VS Cod
 To run the backend and built frontend in Docker Compose:
 
 ```console
+$ docker compose run --rm backend bash scripts/prestart.sh
 $ docker compose watch
 ```
 

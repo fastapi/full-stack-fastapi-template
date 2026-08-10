@@ -33,4 +33,5 @@ jobs:
         with:
           persist-credentials: false
       - run: docker compose -f compose.yml -f compose.deploy.yml build
+      - run: docker compose -f compose.yml -f compose.deploy.yml run --rm backend bash scripts/prestart.sh
       - run: docker compose -f compose.yml -f compose.deploy.yml up -d

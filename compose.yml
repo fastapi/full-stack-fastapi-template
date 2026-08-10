@@ -53,10 +53,7 @@ services:
       db:
         condition: service_healthy
         restart: true
-      prestart:
-        condition: service_completed_successfully
-    # The YAML anchor lets the prestart service reuse this environment mapping.
-    environment: &backend-environment
+    environment:
       PROJECT_NAME: ${PROJECT_NAME:?Variable not set}
       BACKEND_CORS_ORIGINS: ${BACKEND_CORS_ORIGINS:-}
       SECRET_KEY: ${SECRET_KEY:?Variable not set}
@@ -91,18 +88,6 @@ services:
       # Route HTTP traffic for this domain
       - traefik.http.routers.backend-http.rule=Host(`${DOMAIN:-localhost}`)
       - traefik.http.routers.backend-http.entrypoints=http
-
-  prestart:
-    image: backend:latest
-    build:
-      context: .
-      dockerfile: backend/Dockerfile
-    depends_on:
-      db:
-        condition: service_healthy
-        restart: true
-    command: bash scripts/prestart.sh
-    environment: *backend-environment
 
 volumes:
   app-db-data:

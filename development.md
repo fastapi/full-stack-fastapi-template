@@ -57,6 +57,7 @@ The build is written to `backend/app/frontend` and served by FastAPI at <http://
 To run the backend and built frontend in Docker Compose:
 
 ```bash
+docker compose run --rm backend bash scripts/prestart.sh
 docker compose watch
 ```
 
