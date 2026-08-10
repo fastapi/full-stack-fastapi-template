@@ -9,6 +9,7 @@
 
 ### Refactors
 
+* ♻️ Simplify Copier environment configuration. PR [#2416](https://github.com/fastapi/full-stack-fastapi-template/pull/2416) by [@tiangolo](https://github.com/tiangolo).
 * ♻️ Simplify environment defaults. PR [#2415](https://github.com/fastapi/full-stack-fastapi-template/pull/2415) by [@tiangolo](https://github.com/tiangolo).
 * ♻️ Simplify local development workflow. PR [#2414](https://github.com/fastapi/full-stack-fastapi-template/pull/2414) by [@tiangolo](https://github.com/tiangolo).
 * ♻️ Simplify environment configuration. PR [#2413](https://github.com/fastapi/full-stack-fastapi-template/pull/2413) by [@tiangolo](https://github.com/tiangolo).
