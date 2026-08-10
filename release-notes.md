@@ -7,6 +7,10 @@
 * 🔧 Use FastAPI entrypoint. PR [#2360](https://github.com/fastapi/full-stack-fastapi-template/pull/2360) by [@tiangolo](https://github.com/tiangolo).
 * ♻️ Add library-skills for FastAPI and SQLModel. PR [#2354](https://github.com/fastapi/full-stack-fastapi-template/pull/2354) by [@tiangolo](https://github.com/tiangolo).
 
+### Fixes
+
+* ✅ Fix sign-up test race. PR [#2422](https://github.com/fastapi/full-stack-fastapi-template/pull/2422) by [@tiangolo](https://github.com/tiangolo).
+
 ### Refactors
 
 * ♻️ Require non-empty Compose configuration. PR [#2418](https://github.com/fastapi/full-stack-fastapi-template/pull/2418) by [@tiangolo](https://github.com/tiangolo).
