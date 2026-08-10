@@ -68,9 +68,14 @@ services:
     volumes:
       - ./backend/htmlcov:/app/backend/htmlcov
     environment:
+      ENVIRONMENT: "local"
       SMTP_HOST: "mailcatcher"
       SMTP_PORT: "1025"
       SMTP_TLS: "false"
+
+  prestart:
+    environment:
+      ENVIRONMENT: "local"
 
   mailcatcher:
     image: schickling/mailcatcher
