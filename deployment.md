@@ -75,7 +75,6 @@ export FIRST_SUPERUSER_PASSWORD="$(python -c 'import secrets; print(secrets.toke
 You can set several other environment variables:
 
 * `PROJECT_NAME`: The name of the project, used in the API for the docs and emails.
-* `BACKEND_CORS_ORIGINS`: A list of additional allowed CORS origins separated by commas. The frontend served by FastAPI uses the same origin and doesn't need to be added.
 * `FIRST_SUPERUSER`: The email of the first superuser, this superuser will be the one that can create new users.
 * `SMTP_HOST`: The SMTP server host to send emails, this would come from your email provider (E.g. Mailgun, Sparkpost, Sendgrid, etc).
 * `SMTP_USER`: The SMTP server user to send emails.
