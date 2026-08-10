@@ -27,8 +27,6 @@ services:
       timeout: 10s
     volumes:
       - app-db-data:/var/lib/postgresql
-    env_file:
-      - .env
     environment:
       - POSTGRES_PASSWORD=${POSTGRES_PASSWORD?Variable not set}
       - POSTGRES_USER=${POSTGRES_USER?Variable not set}
@@ -59,7 +57,6 @@ services:
         condition: service_completed_successfully
     # The YAML anchor lets the prestart service reuse this environment mapping.
     environment: &backend-environment
-      FRONTEND_HOST: ${FRONTEND_HOST?Variable not set}
       ENVIRONMENT: ${ENVIRONMENT}
       PROJECT_NAME: ${PROJECT_NAME?Variable not set}
       BACKEND_CORS_ORIGINS: ${BACKEND_CORS_ORIGINS}
@@ -71,7 +68,6 @@ services:
       SMTP_PASSWORD: ${SMTP_PASSWORD}
       EMAILS_FROM_EMAIL: ${EMAILS_FROM_EMAIL}
       POSTGRES_SERVER: db
-      POSTGRES_PORT: ${POSTGRES_PORT}
       POSTGRES_DB: ${POSTGRES_DB}
       POSTGRES_USER: ${POSTGRES_USER?Variable not set}
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD?Variable not set}
