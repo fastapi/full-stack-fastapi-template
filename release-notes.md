@@ -30,6 +30,7 @@
 
 ### Docs
 
+* 📝 Clarify environment configuration. PR [#2419](https://github.com/fastapi/full-stack-fastapi-template/pull/2419) by [@tiangolo](https://github.com/tiangolo).
 * 📝 Improve README screenshot alt text. PR [#2359](https://github.com/fastapi/full-stack-fastapi-template/pull/2359) by [@Bmowville](https://github.com/Bmowville).
 * ✏️ Fix typo in the comment for DOMAIN in the .env file. PR [#2305](https://github.com/fastapi/full-stack-fastapi-template/pull/2305) by [@serhiiur](https://github.com/serhiiur).
 * 📝 Update security policy. PR [#2297](https://github.com/fastapi/full-stack-fastapi-template/pull/2297) by [@tiangolo](https://github.com/tiangolo).
