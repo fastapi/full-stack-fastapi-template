@@ -14,6 +14,7 @@
 
 ### Refactors
 
+* ♻️ Simplify CORS configuration. PR [#2429](https://github.com/fastapi/full-stack-fastapi-template/pull/2429) by [@tiangolo](https://github.com/tiangolo).
 * ♻️ Use `FASTAPI_ENV` for development. PR [#2427](https://github.com/fastapi/full-stack-fastapi-template/pull/2427) by [@tiangolo](https://github.com/tiangolo).
 * ♻️ Run database setup explicitly before startup, no need for prestart. PR [#2426](https://github.com/fastapi/full-stack-fastapi-template/pull/2426) by [@tiangolo](https://github.com/tiangolo).
 * ♻️ Require explicit SECRET_KEY. PR [#2425](https://github.com/fastapi/full-stack-fastapi-template/pull/2425) by [@tiangolo](https://github.com/tiangolo).
