@@ -72,10 +72,6 @@ services:
       SMTP_PORT: "1025"
       SMTP_TLS: "false"
 
-  prestart:
-    environment:
-      ENVIRONMENT: "local"
-
   mailcatcher:
     image: schickling/mailcatcher
     ports:

@@ -99,6 +99,7 @@ With the environment variables in place, you can deploy with Docker Compose:
 ```bash
 cd /root/code/app/
 docker compose -f compose.yml -f compose.deploy.yml build
+docker compose -f compose.yml -f compose.deploy.yml run --rm backend bash scripts/prestart.sh
 docker compose -f compose.yml -f compose.deploy.yml up -d
 ```
 

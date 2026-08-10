@@ -44,10 +44,6 @@ services:
       # Use the Let's Encrypt resolver
       - traefik.http.routers.adminer-https.tls.certresolver=le
 
-  prestart:
-    environment:
-      FRONTEND_HOST: https://${DOMAIN:?Variable not set}
-
   backend:
     restart: always
     environment:
