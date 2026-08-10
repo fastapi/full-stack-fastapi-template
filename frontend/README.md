@@ -39,7 +39,6 @@ Done, you have a frontend-less (api-only) app. 🤓
 
 ### Automatically
 
-* Activate the backend virtual environment.
 * From the top level project directory, run the script:
 
 ```bash
