@@ -9,6 +9,8 @@
 
 ### Refactors
 
+* ♻️ Simplify environment configuration. PR [#2413](https://github.com/fastapi/full-stack-fastapi-template/pull/2413) by [@tiangolo](https://github.com/tiangolo).
+* ♻️ Simplify Traefik deployment, make it part of the stack. PR [#2412](https://github.com/fastapi/full-stack-fastapi-template/pull/2412) by [@tiangolo](https://github.com/tiangolo).
 * ♻️ Serve frontend from FastAPI. PR [#2393](https://github.com/fastapi/full-stack-fastapi-template/pull/2393) by [@tiangolo](https://github.com/tiangolo).
 * 🔧 Refactor PostgreSQL env var config. PR [#2392](https://github.com/fastapi/full-stack-fastapi-template/pull/2392) by [@tiangolo](https://github.com/tiangolo).
 * ♻️ Refactor models to improve types. PR [#2356](https://github.com/fastapi/full-stack-fastapi-template/pull/2356) by [@tiangolo](https://github.com/tiangolo).
@@ -30,6 +32,10 @@
 
 ### Internal
 
+* 🔐 Use PR Submit for pull requests. PR [#2411](https://github.com/fastapi/full-stack-fastapi-template/pull/2411) by [@tiangolo](https://github.com/tiangolo).
+* 👷 Use GitHub CLI for Git authentication. PR [#2410](https://github.com/fastapi/full-stack-fastapi-template/pull/2410) by [@tiangolo](https://github.com/tiangolo).
+* 👷 Use PR Push commit identity. PR [#2409](https://github.com/fastapi/full-stack-fastapi-template/pull/2409) by [@tiangolo](https://github.com/tiangolo).
+* 🔒 Replace pre-commit PAT with PR Push. PR [#2407](https://github.com/fastapi/full-stack-fastapi-template/pull/2407) by [@tiangolo](https://github.com/tiangolo).
 * ⬆️ Bump `@hey-api/openapi-ts` from 0.73.0 to 0.97.3 and migrate to new client. PR [#2388](https://github.com/fastapi/full-stack-fastapi-template/pull/2388) by [@YuriiMotov](https://github.com/YuriiMotov).
 * 🔥 Remove the old Latest Changes workflow. PR [#2403](https://github.com/fastapi/full-stack-fastapi-template/pull/2403) by [@tiangolo](https://github.com/tiangolo).
 * ⬆ Update psycopg[binary] requirement from <4.0.0,>=3.1.13 to >=3.3.4,<4.0.0. PR [#2399](https://github.com/fastapi/full-stack-fastapi-template/pull/2399) by [@dependabot[bot]](https://github.com/apps/dependabot).

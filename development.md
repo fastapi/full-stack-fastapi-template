@@ -97,13 +97,15 @@ After you update it, run again:
 docker compose watch
 ```
 
-When deploying, for example in production, the main Traefik is configured outside of the Docker Compose files. For local development, there's an included Traefik in `compose.override.yml`, just to let you test that the domain works as expected, for example with `localhost.tiangolo.com`.
+Traefik is included in the main Docker Compose file. The development overrides expose its local dashboard so you can inspect the routes used with `localhost.tiangolo.com`.
 
 ## Docker Compose files and env vars
 
 There is a main `compose.yml` file with all the configurations that apply to the whole stack, it is used automatically by `docker compose`.
 
 And there's also a `compose.override.yml` with overrides for development, for example to mount the source code as a volume. It is used automatically by `docker compose` to apply overrides on top of `compose.yml`.
+
+The `compose.deploy.yml` file contains the deployment-specific settings, including HTTPS and automatic certificate handling. It is explicitly combined with `compose.yml` when deploying the application.
 
 These Docker Compose files use the `.env` file containing configurations to be injected as environment variables in the containers.
 

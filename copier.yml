@@ -3,11 +3,6 @@ project_name:
   help: The name of the project, shown to API users (in .env)
   default: FastAPI Project
 
-stack_name:
-  type: str
-  help: The name of the stack used for Docker Compose labels (no spaces) (in .env)
-  default: fastapi-project
-
 secret_key:
   type: str
   help: |
