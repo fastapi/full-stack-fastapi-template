@@ -2,6 +2,8 @@
 
 ## Latest Changes
 
+## 0.10.1 (2026-08-11)
+
 ### Features
 
 * ✨ Add react-email for email templates. PR [#2421](https://github.com/fastapi/full-stack-fastapi-template/pull/2421) by [@alejsdev](https://github.com/alejsdev).
