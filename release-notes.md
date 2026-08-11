@@ -2,6 +2,10 @@
 
 ## Latest Changes
 
+### Refactors
+
+* ♻️ Migrate to `DATABASE_URL` instead of separate variables. PR [#2184](https://github.com/fastapi/full-stack-fastapi-template/pull/2184) by [@patrick91](https://github.com/patrick91).
+
 ## 0.11.0 (2026-08-11)
 
 ### Features
