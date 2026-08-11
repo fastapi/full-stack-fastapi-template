@@ -51,6 +51,7 @@
 
 ### Internal
 
+* 👷 Add release automation. PR [#2431](https://github.com/fastapi/full-stack-fastapi-template/pull/2431) by [@tiangolo](https://github.com/tiangolo).
 * 👷 Remove legacy label check. PR [#2424](https://github.com/fastapi/full-stack-fastapi-template/pull/2424) by [@tiangolo](https://github.com/tiangolo).
 * 🔐 Use PR Submit for pull requests. PR [#2411](https://github.com/fastapi/full-stack-fastapi-template/pull/2411) by [@tiangolo](https://github.com/tiangolo).
 * 👷 Use GitHub CLI for Git authentication. PR [#2410](https://github.com/fastapi/full-stack-fastapi-template/pull/2410) by [@tiangolo](https://github.com/tiangolo).
