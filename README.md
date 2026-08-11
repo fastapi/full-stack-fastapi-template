@@ -80,6 +80,62 @@ I chose **simplicity and reliability over maximum scale**, given the project’s
 | Explanation relevance | pgvector in PostgreSQL instead of a separate vector DB | Simpler deployment and atomic writes; not designed for massive scale. |
 | Long-running AI and document-processing tasks | Asynchronous background jobs | Keeps the API responsive during generation and extraction. |
 | Development hygiene | Early CI/CD investment | Slower initial setup, but caught critical bugs early. |
+| Prompt quality over time | Offline eval harness comparing prompt variants | Extra tooling cost; prevents shipping prompt changes on vibes alone. |
+
+---
+
+## Prompt evaluation harness ⭐
+
+Interview-relevant: this is how I make prompt changes **measurable** instead of anecdotal—aligned with production-style AI eval (gates + human rubric).
+
+### What it compares
+
+| ID | Name | Axis |
+|----|------|------|
+| A | baseline | Production question-generation prompt |
+| B | difficulty | Stronger difficulty calibration only |
+| C | distractors | Stronger multiple-choice distractors only |
+
+Same model, temperature, question count, and corpus for every variant. One axis changes at a time.
+
+### How to run
+
+```bash
+cd backend
+python scripts/evaluate.py --prompts a,b,c
+# or smoke: python scripts/evaluate.py --limit 1
+```
+
+Writes `results/<run_id>/`:
+
+- `config.json` — recorded generation controls (model, temp, tokens, max chars)
+- `prompt_{a,b,c}.json` — per-doc outputs + summaries
+- `report.md` — reliability → correctness → efficiency → blank manual rubric
+
+Rubric: `evals/rubric.md`. Corpus: `evals/corpus/*.txt`.
+
+### Metric philosophy
+
+1. **Reliability (gates):** success rate, schema validity
+2. **Correctness (gates):** answer-in-options rate, MC/TF distribution
+3. **Efficiency (tradeoffs):** latency and token usage — not quality
+4. **Quality (primary):** human rubric on the five-question set
+
+### Sample smoke results (1 short doc)
+
+| Prompt | Success | Schema | Answer-in-options | Latency | Total tokens |
+|--------|---------|--------|-------------------|---------|--------------|
+| A baseline | 100% | 100% | 100% | ~5.4s | 851 |
+| B difficulty | 100% | 100% | 60% | ~4.4s | 936 |
+| C distractors | 100% | 100% | 80% | ~3.6s | 939 |
+
+**Takeaway so far:** schema validity alone is not enough—B/C can look “successful” while answer-in-options drops. That’s exactly why automatic gates exist before any human preference call. Next: score a larger corpus with the rubric and decide which prompt to ship.
+
+### Limitations (called out on purpose)
+
+- Temperature 0.5 → single sample per cell is **directional**, not statistically conclusive
+- Final ship decision should use the **same** `max_completion_tokens` as production (currently 500)
+- Generation uses bounded document text; **RAG is for explanations**, not this eval
 
 ---
 

@@ -2,7 +2,8 @@
 """Minimal prompt-variant eval runner.
 
 Reads local .txt corpus files, calls shared generate_questions for each
-document × prompt ID, and writes JSON artifacts to a timestamped run directory.
+document × prompt ID, and writes JSON artifacts plus a focused report.md
+(reliability → correctness → efficiency → manual quality).
 
 Example (from backend/):
 
@@ -118,6 +119,169 @@ def _write_json(path: Path, payload: dict[str, Any]) -> None:
     path.write_text(json.dumps(payload, indent=2, ensure_ascii=False) + "\n")
 
 
+def _mean(values: list[float]) -> float | None:
+    if not values:
+        return None
+    return sum(values) / len(values)
+
+
+def _summarize_results(results: list[dict[str, Any]]) -> dict[str, Any]:
+    """Summarize quality gates, type distribution, and efficiency only."""
+    n_docs = len(results)
+    n_ok = sum(1 for r in results if r["ok"])
+    n_failed = n_docs - n_ok
+    n_schema_valid = sum(1 for r in results if r.get("schema_valid"))
+
+    answer_rates: list[float] = []
+    total_mc = 0
+    total_tf = 0
+    latencies: list[float] = []
+    prompt_tokens: list[float] = []
+    completion_tokens: list[float] = []
+    total_tokens: list[float] = []
+
+    for r in results:
+        checks = r.get("content_checks") or {}
+        if "answer_in_options_rate" in checks:
+            answer_rates.append(float(checks["answer_in_options_rate"]))
+        total_mc += int(checks.get("mc_count") or 0)
+        total_tf += int(checks.get("tf_count") or 0)
+        if r.get("latency_ms") is not None:
+            latencies.append(float(r["latency_ms"]))
+        if r.get("prompt_tokens") is not None:
+            prompt_tokens.append(float(r["prompt_tokens"]))
+        if r.get("completion_tokens") is not None:
+            completion_tokens.append(float(r["completion_tokens"]))
+        if r.get("total_tokens") is not None:
+            total_tokens.append(float(r["total_tokens"]))
+
+    return {
+        "n_docs": n_docs,
+        "n_ok": n_ok,
+        "n_failed": n_failed,
+        "success_rate": (n_ok / n_docs) if n_docs else None,
+        "schema_valid_rate": (n_schema_valid / n_docs) if n_docs else None,
+        "mean_answer_in_options_rate": _mean(answer_rates),
+        "question_type_distribution": {
+            "multiple_choice": total_mc,
+            "true_false": total_tf,
+        },
+        "mean_latency_ms": _mean(latencies),
+        "mean_prompt_tokens": _mean(prompt_tokens),
+        "mean_completion_tokens": _mean(completion_tokens),
+        "mean_total_tokens": _mean(total_tokens),
+    }
+
+
+def _fmt_rate(value: float | None) -> str:
+    if value is None:
+        return "n/a"
+    return f"{value:.0%}"
+
+
+def _fmt_num(value: float | None, digits: int = 1) -> str:
+    if value is None:
+        return "n/a"
+    return f"{value:.{digits}f}"
+
+
+def _write_report(
+    run_dir: Path,
+    *,
+    config: dict[str, Any],
+    prompt_payloads: dict[PromptId, dict[str, Any]],
+) -> None:
+    """Write report.md: reliability → correctness → efficiency → manual quality."""
+    lines: list[str] = [
+        f"# Prompt evaluation report (`{config['run_id']}`)",
+        "",
+        "## Setup",
+        "",
+        f"- Prompts: {', '.join(config['prompts'])}",
+        f"- Docs: {len(config['doc_ids'])} (`{', '.join(config['doc_ids'])}`)",
+        f"- Difficulty: `{config['difficulty']}`",
+        f"- Questions per doc: `{config['num_questions']}`",
+        f"- Allowed types: `{', '.join(config['question_types'])}`",
+        f"- Model: `{config['model']}` · temperature `{config['temperature']}` · "
+        f"max_completion_tokens `{config['max_completion_tokens']}` · "
+        f"max_chars `{config['max_chars']}`",
+        "",
+        "Efficiency metrics explain tradeoffs; they are not question-quality scores. "
+        "Manual rubric scores are the primary quality evidence.",
+        "",
+        "## 1. Reliability (quality gates)",
+        "",
+        "| Prompt | Name | Success | Schema valid |",
+        "|--------|------|---------|--------------|",
+    ]
+    for prompt_id, payload in prompt_payloads.items():
+        s = payload["summary"]
+        lines.append(
+            f"| {prompt_id} | {payload['prompt_name']} | "
+            f"{s['n_ok']}/{s['n_docs']} ({_fmt_rate(s['success_rate'])}) | "
+            f"{_fmt_rate(s['schema_valid_rate'])} |"
+        )
+    lines.extend(
+        [
+            "",
+            "## 2. Correctness (quality gates)",
+            "",
+            "| Prompt | Mean answer-in-options | MC count | TF count |",
+            "|--------|------------------------|----------|----------|",
+        ]
+    )
+    for prompt_id, payload in prompt_payloads.items():
+        s = payload["summary"]
+        dist = s["question_type_distribution"]
+        lines.append(
+            f"| {prompt_id} | {_fmt_rate(s['mean_answer_in_options_rate'])} | "
+            f"{dist['multiple_choice']} | {dist['true_false']} |"
+        )
+    lines.extend(
+        [
+            "",
+            "## 3. Efficiency (cost / performance tradeoffs)",
+            "",
+            "| Prompt | Mean latency (ms) | Mean prompt tokens | "
+            "Mean completion tokens | Mean total tokens |",
+            "|--------|-------------------|--------------------|"
+            "------------------------|-------------------|",
+        ]
+    )
+    for prompt_id, payload in prompt_payloads.items():
+        s = payload["summary"]
+        lines.append(
+            f"| {prompt_id} | {_fmt_num(s['mean_latency_ms'], 0)} | "
+            f"{_fmt_num(s['mean_prompt_tokens'], 0)} | "
+            f"{_fmt_num(s['mean_completion_tokens'], 0)} | "
+            f"{_fmt_num(s['mean_total_tokens'], 0)} |"
+        )
+    lines.extend(
+        [
+            "",
+            "## 4. Quality (manual rubric — primary evidence)",
+            "",
+            "Score the five-question set as a whole (1–5). See `evals/rubric.md`.",
+            "",
+            "| Criterion | A | B | C |",
+            "|-----------|---|---|---|",
+            "| Appropriate difficulty |  |  |  |",
+            "| Clear wording |  |  |  |",
+            "| Good distractors |  |  |  |",
+            "| Grounded in lecture |  |  |  |",
+            "| Overall |  |  |  |",
+            "",
+            "### Takeaway",
+            "",
+            "_Fill in after manual scoring._",
+            "",
+        ]
+    )
+    path = run_dir / "report.md"
+    path.write_text("\n".join(lines))
+    logger.info("Wrote %s", path)
+
+
 async def _run(
     *,
     prompts: list[PromptId],
@@ -154,6 +318,7 @@ async def _run(
 
     # prompt_id -> list of per-doc results
     by_prompt: dict[PromptId, list[dict[str, Any]]] = {p: [] for p in prompts}
+    prompt_payloads: dict[PromptId, dict[str, Any]] = {}
 
     for path in files:
         doc_id = path.stem
@@ -169,22 +334,24 @@ async def _run(
             by_prompt[prompt_id].append(_serialize_result(doc_id, prompt_id, result))
 
     for prompt_id, results in by_prompt.items():
-        n_ok = sum(1 for r in results if r["ok"])
-        n_failed = len(results) - n_ok
+        summary = _summarize_results(results)
         payload = {
             "prompt_id": prompt_id,
             "prompt_name": PROMPT_NAMES[prompt_id],
             "results": results,
-            "summary": {
-                "n_docs": len(results),
-                "n_ok": n_ok,
-                "n_failed": n_failed,
-            },
+            "summary": summary,
         }
+        prompt_payloads[prompt_id] = payload
         out_path = run_dir / f"prompt_{prompt_id}.json"
         _write_json(out_path, payload)
-        logger.info("Wrote %s (ok=%d failed=%d)", out_path, n_ok, n_failed)
+        logger.info(
+            "Wrote %s (ok=%d failed=%d)",
+            out_path,
+            summary["n_ok"],
+            summary["n_failed"],
+        )
 
+    _write_report(run_dir, config=config, prompt_payloads=prompt_payloads)
     return run_dir
 
 

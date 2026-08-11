@@ -1,0 +1,7 @@
+Functions are named blocks of code that perform a specific task. In Python, you define a function with the def keyword, followed by a name and parentheses.
+
+Functions help with decomposition: breaking a large problem into smaller, reusable pieces. Abstraction lets a caller use a function without knowing how it is implemented inside.
+
+Parameters are inputs listed in the function definition. Arguments are the concrete values passed when the function is called. A return statement sends a value back to the caller; without it, the function returns None.
+
+A function should generally do one clear job. Side effects (printing, writing files, changing global state) should be intentional and documented, because they make programs harder to reason about.
