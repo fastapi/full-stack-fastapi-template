@@ -1,6 +1,7 @@
 [dependency-groups]
 dev = [
     "prek>=0.4.11,<1.0.0",
+    "typer>=0.20.0,<1.0.0",
     "zizmor>=1.28.0",
 ]
 

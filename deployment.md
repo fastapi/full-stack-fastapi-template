@@ -218,6 +218,14 @@ There are GitHub Action workflows in the `.github/workflows` directory already c
 
 Both workflows are associated with their respective GitHub Environments, so deployments will be visible in the repository's **Environments** section and will respect any protection rules you configure.
 
+### Prepare a Release
+
+Install the [PR Submit GitHub App](https://github.com/apps/pr-submit) in your repository to enable the **Prepare Release** workflow.
+
+Run the workflow manually from the **Actions** tab and select the version bump. It creates a pull request that updates the release notes. When you merge that pull request, the **Create Draft Release** workflow creates a draft GitHub release with the corresponding release notes.
+
+Review and publish the draft release to trigger the production deployment.
+
 If you need to add extra environments you could use those as a starting point.
 
 ## URLs
