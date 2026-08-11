@@ -1,0 +1,7 @@
+An algorithm is a finite sequence of well-defined steps for solving a problem. Good algorithms are correct, terminate, and use resources efficiently.
+
+Big-O notation describes how runtime or memory grows as input size n grows. O(1) is constant time. O(n) grows linearly. O(n^2) grows quadratically and can become expensive quickly for large n.
+
+When comparing algorithms, consider the common case and the worst case. An algorithm that is fast on average but catastrophic in the worst case may be unacceptable for interactive systems.
+
+Sorting is a classic example: insertion sort is simple and fine for small lists, while mergesort and heapsort provide stronger guarantees for larger inputs.

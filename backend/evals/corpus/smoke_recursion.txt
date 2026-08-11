@@ -1,0 +1,7 @@
+Recursion is a programming technique where a function calls itself to solve a problem.
+
+Every recursive function needs a base case that stops further recursive calls. Without a base case, recursion continues forever and typically causes a stack overflow.
+
+A classic example is computing factorial. The factorial of n, written n!, is n multiplied by (n-1)! when n is greater than 0. The base case is that 0! equals 1.
+
+Recursive solutions often mirror the structure of inductive definitions in mathematics. They can be elegant, but they may use more stack memory than an equivalent iterative loop.
