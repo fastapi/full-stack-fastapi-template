@@ -1,21 +1,20 @@
-name: Deploy to Staging
+name: Deploy
 
 on:
   push:
     branches:
       - master
+    paths-ignore:
+      - release-notes.md
 
 permissions:
   contents: read
 
 jobs:
   deploy:
-    environment: staging
     # Do not deploy in the main repository, only in user projects
     if: github.repository_owner != 'fastapi'
-    runs-on:
-      - self-hosted
-      - staging
+    runs-on: self-hosted
     env:
       DOMAIN: ${{ secrets.DOMAIN }}
       SECRET_KEY: ${{ secrets.SECRET_KEY }}

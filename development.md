@@ -156,7 +156,7 @@ biome check..............................................................Passed
 
 ## URLs
 
-The production or staging URLs would use these same paths, but with your own domain.
+The deployed URLs use these same paths, but with your own domain.
 
 ### Development URLs
 
