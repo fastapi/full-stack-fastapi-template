@@ -6,6 +6,7 @@ from pydantic import (
     HttpUrl,
     PostgresDsn,
     computed_field,
+    field_validator,
     model_validator,
 )
 from pydantic_settings import BaseSettings, SettingsConfigDict
@@ -27,23 +28,16 @@ class Settings(BaseSettings):
 
     PROJECT_NAME: str
     SENTRY_DSN: HttpUrl | None = None
-    POSTGRES_SERVER: str
-    POSTGRES_PORT: int = 5432
-    POSTGRES_USER: str
-    POSTGRES_PASSWORD: str = ""
-    POSTGRES_DB: str = ""
+    DATABASE_URL: PostgresDsn
 
-    @computed_field  # type: ignore[prop-decorator]
-    @property
-    def SQLALCHEMY_DATABASE_URI(self) -> PostgresDsn:
-        return PostgresDsn.build(
-            scheme="postgresql+psycopg",
-            username=self.POSTGRES_USER,
-            password=self.POSTGRES_PASSWORD,
-            host=self.POSTGRES_SERVER,
-            port=self.POSTGRES_PORT,
-            path=self.POSTGRES_DB,
-        )
+    @field_validator("DATABASE_URL", mode="before")
+    @classmethod
+    def _use_psycopg_driver(cls, value: str | PostgresDsn) -> str:
+        database_url = str(value)
+        for scheme in ("postgres://", "postgresql://"):
+            if database_url.startswith(scheme):
+                return database_url.replace(scheme, "postgresql+psycopg://", 1)
+        return database_url
 
     SMTP_TLS: bool = True
     SMTP_SSL: bool = False
@@ -85,7 +79,8 @@ class Settings(BaseSettings):
     @model_validator(mode="after")
     def _enforce_non_default_secrets(self) -> Self:
         self._check_default_secret("SECRET_KEY", self.SECRET_KEY)
-        self._check_default_secret("POSTGRES_PASSWORD", self.POSTGRES_PASSWORD)
+        for host in self.DATABASE_URL.hosts():
+            self._check_default_secret("DATABASE_URL password", host["password"])
         self._check_default_secret(
             "FIRST_SUPERUSER_PASSWORD", self.FIRST_SUPERUSER_PASSWORD
         )

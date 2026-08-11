@@ -20,7 +20,7 @@ services:
   db:
     image: postgres:18
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER} -d ${POSTGRES_DB}"]
+      test: ["CMD-SHELL", "pg_isready -U postgres -d app"]
       interval: 10s
       retries: 5
       start_period: 30s
@@ -29,8 +29,7 @@ services:
       - app-db-data:/var/lib/postgresql
     environment:
       - POSTGRES_PASSWORD=${POSTGRES_PASSWORD:?Variable not set}
-      - POSTGRES_USER=${POSTGRES_USER:?Variable not set}
-      - POSTGRES_DB=${POSTGRES_DB:?Variable not set}
+      - POSTGRES_DB=app
 
   adminer:
     image: adminer
@@ -62,10 +61,7 @@ services:
       SMTP_USER: ${SMTP_USER:-}
       SMTP_PASSWORD: ${SMTP_PASSWORD:-}
       EMAILS_FROM_EMAIL: ${EMAILS_FROM_EMAIL}
-      POSTGRES_SERVER: db
-      POSTGRES_DB: ${POSTGRES_DB:?Variable not set}
-      POSTGRES_USER: ${POSTGRES_USER:?Variable not set}
-      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?Variable not set}
+      DATABASE_URL: postgresql://postgres:${POSTGRES_PASSWORD:?Variable not set}@db:5432/app
       SENTRY_DSN: ${SENTRY_DSN:-}
 
     healthcheck:
