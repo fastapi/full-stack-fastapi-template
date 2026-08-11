@@ -96,6 +96,7 @@ def _serialize_result(
         "prompt_id": prompt_id,
         "ok": result.ok,
         "error": result.error,
+        "error_kind": result.error_kind,
         "latency_ms": result.latency_ms,
         "prompt_tokens": result.prompt_tokens,
         "completion_tokens": result.completion_tokens,

@@ -1,7 +1,7 @@
 import logging
 import time
 from dataclasses import dataclass
-from typing import Any
+from typing import Any, Literal
 from uuid import UUID
 
 from fastapi import HTTPException
@@ -39,7 +39,7 @@ llm = ChatOpenAI(
     api_key=settings.OPENAI_API_KEY,  # type: ignore
 )
 
-structured_question_llm = llm.with_structured_output(QuestionOutput)
+ErrorKind = Literal["validation", "parse", "provider"]
 
 
 @dataclass
@@ -47,6 +47,7 @@ class GenerationResult:
     prompt_id: str
     ok: bool
     error: str | None
+    error_kind: ErrorKind | None
     latency_ms: float
     prompt_tokens: int | None
     completion_tokens: int | None
@@ -318,6 +319,7 @@ async def generate_questions(
                     prompt_id=prompt_id,
                     ok=False,
                     error="Failed to parse LLM output",
+                    error_kind="parse",
                     latency_ms=latency_ms,
                     prompt_tokens=prompt_tokens,
                     completion_tokens=completion_tokens,
@@ -337,6 +339,7 @@ async def generate_questions(
             prompt_id=prompt_id,
             ok=True,
             error=None,
+            error_kind=None,
             latency_ms=latency_ms,
             prompt_tokens=prompt_tokens,
             completion_tokens=completion_tokens,
@@ -358,6 +361,7 @@ async def generate_questions(
             prompt_id=prompt_id,
             ok=False,
             error="LLM validation error",
+            error_kind="validation",
             latency_ms=latency_ms,
             prompt_tokens=prompt_tokens,
             completion_tokens=completion_tokens,
@@ -379,6 +383,7 @@ async def generate_questions(
             prompt_id=prompt_id,
             ok=False,
             error="Failed to generate questions",
+            error_kind="provider",
             latency_ms=latency_ms,
             prompt_tokens=prompt_tokens,
             completion_tokens=completion_tokens,
@@ -412,18 +417,13 @@ async def generate_questions_from_documents(
         question_type_counts=counts,
     )
     if not result.ok:
-        # result.error is already a short sanitized message from generate_questions.
-        detail = result.error or "Failed to generate questions"
-        if detail.startswith("LLM validation error"):
-            raise HTTPException(status_code=500, detail=detail)
-        raise HTTPException(
-            status_code=500,
-            detail=(
-                detail
-                if detail.startswith("Failed to generate questions")
-                else f"Failed to generate questions: {detail}"
-            ),
-        )
+        if result.error_kind == "validation":
+            detail = "LLM validation error"
+        elif result.error_kind == "parse":
+            detail = "Failed to parse LLM output"
+        else:
+            detail = "Failed to generate questions"
+        raise HTTPException(status_code=500, detail=detail)
     return result.questions
 
 
