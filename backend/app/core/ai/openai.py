@@ -206,10 +206,10 @@ def _compute_content_checks(
 
 
 def _final_contract_valid(content_checks: dict[str, Any]) -> bool:
-    return (
-        content_checks["actual_count"] == content_checks["expected_count"]
-        and content_checks["answer_in_options_rate"] == 1.0
-    )
+    actual_count = int(content_checks["actual_count"])
+    expected_count = int(content_checks["expected_count"])
+    answer_in_options_rate = float(content_checks["answer_in_options_rate"])
+    return actual_count == expected_count and answer_in_options_rate == 1.0
 
 
 def _extract_token_usage(raw_message: Any) -> tuple[int | None, int | None, int | None]:
