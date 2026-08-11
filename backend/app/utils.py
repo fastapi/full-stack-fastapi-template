@@ -1,10 +1,10 @@
 import logging
 from dataclasses import dataclass
-from datetime import datetime, timedelta, timezone
+from datetime import UTC, datetime, timedelta
 from pathlib import Path
 from typing import Any
 
-import emails  # type: ignore
+import emails
 import jwt
 from jinja2 import Template
 from jwt.exceptions import InvalidTokenError
@@ -24,7 +24,7 @@ class EmailData:
 
 def render_email_template(*, template_name: str, context: dict[str, Any]) -> str:
     template_str = (
-        Path(__file__).parent / "email-templates" / "build" / template_name
+        Path(__file__).parent / "email-templates" / template_name
     ).read_text()
     html_content = Template(template_str).render(context)
     return html_content
@@ -37,7 +37,8 @@ def send_email(
     html_content: str = "",
 ) -> None:
     assert settings.emails_enabled, "no provided configuration for email variables"
-    message = emails.Message(
+    assert settings.EMAILS_FROM_EMAIL  # For type checker
+    message = emails.message.Message(
         subject=subject,
         html=html_content,
         mail_from=(settings.EMAILS_FROM_NAME, settings.EMAILS_FROM_EMAIL),
@@ -102,7 +103,7 @@ def generate_new_account_email(
 
 def generate_password_reset_token(email: str) -> str:
     delta = timedelta(hours=settings.EMAIL_RESET_TOKEN_EXPIRE_HOURS)
-    now = datetime.now(timezone.utc)
+    now = datetime.now(UTC)
     expires = now + delta
     exp = expires.timestamp()
     encoded_jwt = jwt.encode(

@@ -15,7 +15,9 @@ bun run dev
 
 * Then open your browser at http://localhost:5173/.
 
-Notice that this live server is not running inside Docker, it's for local development, and that is the recommended workflow. Once you are happy with your frontend, you can build the frontend Docker image and start it, to test it in a production-like environment. But building the image at every change will not be as productive as running the local development server with live reload.
+Run `uv run bash scripts/prestart.sh` and `uv run fastapi dev` from the `backend` directory, with PostgreSQL running in Docker Compose. See [../development.md](../development.md) for the complete setup.
+
+To serve the frontend with FastAPI, run `bun run build` from the `frontend` directory and open `http://localhost:8000`.
 
 Check the file `package.json` to see other available options.
 
@@ -25,26 +27,18 @@ If you are developing an API-only app and want to remove the frontend, you can d
 
 * Remove the `./frontend` directory.
 
-* In the `compose.yml` file, remove the whole service / section `frontend`.
+* In the `backend/app/main.py` file, remove the `app.frontend()` call.
 
-* In the `compose.override.yml` file, remove the whole service / section `frontend` and `playwright`.
+* In the `backend/Dockerfile` file, remove the frontend build stage and the `COPY --from=frontend-build` instruction.
+
+* In the `compose.override.yml` file, remove the `playwright` service.
 
 Done, you have a frontend-less (api-only) app. 🤓
-
----
-
-If you want, you can also remove the `FRONTEND` environment variables from:
-
-* `.env`
-* `./scripts/*.sh`
-
-But it would be only to clean them up, leaving them won't really have any effect either way.
 
 ## Generate Client
 
 ### Automatically
 
-* Activate the backend virtual environment.
 * From the top level project directory, run the script:
 
 ```bash
@@ -55,9 +49,9 @@ bash ./scripts/generate-client.sh
 
 ### Manually
 
-* Start the Docker Compose stack.
+* Make sure the backend is running.
 
-* Download the OpenAPI JSON file from `http://localhost/api/v1/openapi.json` and copy it to a new file `openapi.json` at the root of the `frontend` directory.
+* Download the OpenAPI JSON file from `http://localhost:8000/api/v1/openapi.json` and copy it to a new file `openapi.json` at the root of the `frontend` directory.
 
 * To generate the frontend client, run:
 
@@ -71,10 +65,10 @@ Notice that everytime the backend changes (changing the OpenAPI schema), you sho
 
 ## Using a Remote API
 
-If you want to use a remote API, you can set the environment variable `VITE_API_URL` to the URL of the remote API. For example, you can set it in the `frontend/.env` file:
+By default, the built frontend uses the same origin as the FastAPI app. If you want to use a remote API while running the Vite development server, you can set the environment variable `VITE_API_URL` to the URL of the remote API. For example, you can set it in the `frontend/.env` file:
 
 ```env
-VITE_API_URL=https://api.my-domain.example.com
+VITE_API_URL=https://my-domain.example.com
 ```
 
 Then, when you run the frontend, it will use that URL as the base URL for the API.
@@ -95,6 +89,7 @@ The frontend code is structured as follows:
 The frontend includes initial end-to-end tests using Playwright. To run the tests, you need to have the Docker Compose stack running. Start the stack with the following command:
 
 ```bash
+docker compose run --rm backend bash scripts/prestart.sh
 docker compose up -d --wait backend
 ```
 

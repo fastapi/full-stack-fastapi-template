@@ -11,5 +11,6 @@ if [ $(uname -s) = "Linux" ]; then
 fi
 
 docker-compose build
+docker-compose run --rm backend bash scripts/prestart.sh
 docker-compose up -d
 docker-compose exec -T backend bash scripts/tests-start.sh "$@"
