@@ -33,6 +33,10 @@ If you are developing an API-only app and want to remove the frontend, you can d
 
 * In the `compose.override.yml` file, remove the `playwright` service.
 
+* In the `.github/workflows/deploy.yml` file, remove the **Set up Bun**, **Install frontend dependencies**, and **Build frontend** steps.
+
+* In the `.fastapicloudignore` file, remove the `!backend/app/frontend/` entry.
+
 Done, you have a frontend-less (api-only) app. 🤓
 
 ## Generate Client
