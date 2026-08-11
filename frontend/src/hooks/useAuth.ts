@@ -22,13 +22,13 @@ const useAuth = () => {
 
   const { data: user } = useQuery<UserPublic | null, Error>({
     queryKey: ["currentUser"],
-    queryFn: UsersService.readUserMe,
+    queryFn: async () => (await UsersService.readUserMe()).data,
     enabled: isLoggedIn(),
   })
 
   const signUpMutation = useMutation({
     mutationFn: (data: UserRegister) =>
-      UsersService.registerUser({ requestBody: data }),
+      UsersService.registerUser({ body: data }),
     onSuccess: () => {
       navigate({ to: "/login" })
     },
@@ -40,9 +40,9 @@ const useAuth = () => {
 
   const login = async (data: AccessToken) => {
     const response = await LoginService.loginAccessToken({
-      formData: data,
+      body: data,
     })
-    localStorage.setItem("access_token", response.access_token)
+    localStorage.setItem("access_token", response.data.access_token)
   }
 
   const loginMutation = useMutation({

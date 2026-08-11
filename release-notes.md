@@ -2,13 +2,40 @@
 
 ## Latest Changes
 
+### Refactors
+
+* ♻️ Migrate to `DATABASE_URL` instead of separate variables. PR [#2184](https://github.com/fastapi/full-stack-fastapi-template/pull/2184) by [@patrick91](https://github.com/patrick91).
+
+## 0.11.0 (2026-08-11)
+
 ### Features
 
+* ✨ Add react-email for email templates. PR [#2421](https://github.com/fastapi/full-stack-fastapi-template/pull/2421) by [@alejsdev](https://github.com/alejsdev).
 * 🔧 Use FastAPI entrypoint. PR [#2360](https://github.com/fastapi/full-stack-fastapi-template/pull/2360) by [@tiangolo](https://github.com/tiangolo).
 * ♻️ Add library-skills for FastAPI and SQLModel. PR [#2354](https://github.com/fastapi/full-stack-fastapi-template/pull/2354) by [@tiangolo](https://github.com/tiangolo).
 
+### Fixes
+
+* ✅ Fix sign-up test race. PR [#2422](https://github.com/fastapi/full-stack-fastapi-template/pull/2422) by [@tiangolo](https://github.com/tiangolo).
+
 ### Refactors
 
+* ♻️ Remove Copier project generation. PR [#2430](https://github.com/fastapi/full-stack-fastapi-template/pull/2430) by [@tiangolo](https://github.com/tiangolo).
+* ♻️ Simplify CORS configuration. PR [#2429](https://github.com/fastapi/full-stack-fastapi-template/pull/2429) by [@tiangolo](https://github.com/tiangolo).
+* ♻️ Use `FASTAPI_ENV` for development. PR [#2427](https://github.com/fastapi/full-stack-fastapi-template/pull/2427) by [@tiangolo](https://github.com/tiangolo).
+* ♻️ Run database setup explicitly before startup, no need for prestart. PR [#2426](https://github.com/fastapi/full-stack-fastapi-template/pull/2426) by [@tiangolo](https://github.com/tiangolo).
+* ♻️ Require explicit SECRET_KEY. PR [#2425](https://github.com/fastapi/full-stack-fastapi-template/pull/2425) by [@tiangolo](https://github.com/tiangolo).
+* ♻️ Simplify uv workspace setup. PR [#2423](https://github.com/fastapi/full-stack-fastapi-template/pull/2423) by [@tiangolo](https://github.com/tiangolo).
+* ♻️ Use FastAPI entrypoint in Compose. PR [#2420](https://github.com/fastapi/full-stack-fastapi-template/pull/2420) by [@tiangolo](https://github.com/tiangolo).
+* ♻️ Require non-empty Compose configuration. PR [#2418](https://github.com/fastapi/full-stack-fastapi-template/pull/2418) by [@tiangolo](https://github.com/tiangolo).
+* ♻️ Simplify optional environment configuration. PR [#2417](https://github.com/fastapi/full-stack-fastapi-template/pull/2417) by [@tiangolo](https://github.com/tiangolo).
+* ♻️ Simplify Copier environment configuration. PR [#2416](https://github.com/fastapi/full-stack-fastapi-template/pull/2416) by [@tiangolo](https://github.com/tiangolo).
+* ♻️ Simplify environment defaults. PR [#2415](https://github.com/fastapi/full-stack-fastapi-template/pull/2415) by [@tiangolo](https://github.com/tiangolo).
+* ♻️ Simplify local development workflow. PR [#2414](https://github.com/fastapi/full-stack-fastapi-template/pull/2414) by [@tiangolo](https://github.com/tiangolo).
+* ♻️ Simplify environment configuration. PR [#2413](https://github.com/fastapi/full-stack-fastapi-template/pull/2413) by [@tiangolo](https://github.com/tiangolo).
+* ♻️ Simplify Traefik deployment, make it part of the stack. PR [#2412](https://github.com/fastapi/full-stack-fastapi-template/pull/2412) by [@tiangolo](https://github.com/tiangolo).
+* ♻️ Serve frontend from FastAPI. PR [#2393](https://github.com/fastapi/full-stack-fastapi-template/pull/2393) by [@tiangolo](https://github.com/tiangolo).
+* 🔧 Refactor PostgreSQL env var config. PR [#2392](https://github.com/fastapi/full-stack-fastapi-template/pull/2392) by [@tiangolo](https://github.com/tiangolo).
 * ♻️ Refactor models to improve types. PR [#2356](https://github.com/fastapi/full-stack-fastapi-template/pull/2356) by [@tiangolo](https://github.com/tiangolo).
 * 🔧 Add FastAPI VS Code extension to recommended extensions. PR [#2206](https://github.com/fastapi/full-stack-fastapi-template/pull/2206) by [@tiangolo](https://github.com/tiangolo).
 * ♻️ Update meta titles. PR [#2179](https://github.com/fastapi/full-stack-fastapi-template/pull/2179) by [@alejsdev](https://github.com/alejsdev).
@@ -21,6 +48,8 @@
 
 ### Docs
 
+* 📝 Remove obsolete local domain setup. PR [#2428](https://github.com/fastapi/full-stack-fastapi-template/pull/2428) by [@tiangolo](https://github.com/tiangolo).
+* 📝 Clarify environment configuration. PR [#2419](https://github.com/fastapi/full-stack-fastapi-template/pull/2419) by [@tiangolo](https://github.com/tiangolo).
 * 📝 Improve README screenshot alt text. PR [#2359](https://github.com/fastapi/full-stack-fastapi-template/pull/2359) by [@Bmowville](https://github.com/Bmowville).
 * ✏️ Fix typo in the comment for DOMAIN in the .env file. PR [#2305](https://github.com/fastapi/full-stack-fastapi-template/pull/2305) by [@serhiiur](https://github.com/serhiiur).
 * 📝 Update security policy. PR [#2297](https://github.com/fastapi/full-stack-fastapi-template/pull/2297) by [@tiangolo](https://github.com/tiangolo).
@@ -28,6 +57,21 @@
 
 ### Internal
 
+* 👷 Add release automation. PR [#2431](https://github.com/fastapi/full-stack-fastapi-template/pull/2431) by [@tiangolo](https://github.com/tiangolo).
+* 👷 Remove legacy label check. PR [#2424](https://github.com/fastapi/full-stack-fastapi-template/pull/2424) by [@tiangolo](https://github.com/tiangolo).
+* 🔐 Use PR Submit for pull requests. PR [#2411](https://github.com/fastapi/full-stack-fastapi-template/pull/2411) by [@tiangolo](https://github.com/tiangolo).
+* 👷 Use GitHub CLI for Git authentication. PR [#2410](https://github.com/fastapi/full-stack-fastapi-template/pull/2410) by [@tiangolo](https://github.com/tiangolo).
+* 👷 Use PR Push commit identity. PR [#2409](https://github.com/fastapi/full-stack-fastapi-template/pull/2409) by [@tiangolo](https://github.com/tiangolo).
+* 🔒 Replace pre-commit PAT with PR Push. PR [#2407](https://github.com/fastapi/full-stack-fastapi-template/pull/2407) by [@tiangolo](https://github.com/tiangolo).
+* ⬆️ Bump `@hey-api/openapi-ts` from 0.73.0 to 0.97.3 and migrate to new client. PR [#2388](https://github.com/fastapi/full-stack-fastapi-template/pull/2388) by [@YuriiMotov](https://github.com/YuriiMotov).
+* 🔥 Remove the old Latest Changes workflow. PR [#2403](https://github.com/fastapi/full-stack-fastapi-template/pull/2403) by [@tiangolo](https://github.com/tiangolo).
+* ⬆ Update psycopg[binary] requirement from <4.0.0,>=3.1.13 to >=3.3.4,<4.0.0. PR [#2399](https://github.com/fastapi/full-stack-fastapi-template/pull/2399) by [@dependabot[bot]](https://github.com/apps/dependabot).
+* ⬆ Bump the github-actions group with 5 updates. PR [#2397](https://github.com/fastapi/full-stack-fastapi-template/pull/2397) by [@dependabot[bot]](https://github.com/apps/dependabot).
+* ⬆ Update sentry-sdk[fastapi] requirement from <3.0.0,>=2.63.0 to >=2.66.1,<3.0.0. PR [#2400](https://github.com/fastapi/full-stack-fastapi-template/pull/2400) by [@dependabot[bot]](https://github.com/apps/dependabot).
+* ⬆ Bump the python-packages group with 3 updates. PR [#2398](https://github.com/fastapi/full-stack-fastapi-template/pull/2398) by [@dependabot[bot]](https://github.com/apps/dependabot).
+* 👷 Improve workflows for private repos. PR [#2394](https://github.com/fastapi/full-stack-fastapi-template/pull/2394) by [@tiangolo](https://github.com/tiangolo).
+* ⬆️ Upgrade latest-changes to 0.7.1. PR [#2389](https://github.com/fastapi/full-stack-fastapi-template/pull/2389) by [@tiangolo](https://github.com/tiangolo).
+* Bump axios from 1.16.0 to 1.18.0 in /frontend. PR [#2386](https://github.com/fastapi/full-stack-fastapi-template/pull/2386) by [@dependabot[bot]](https://github.com/apps/dependabot).
 * ⬆ Bump pre-commit hooks. PR [#2382](https://github.com/fastapi/full-stack-fastapi-template/pull/2382) by [@tiangolo](https://github.com/tiangolo).
 * ⬆ Bump the python-packages group across 1 directory with 2 updates. PR [#2380](https://github.com/fastapi/full-stack-fastapi-template/pull/2380) by [@dependabot[bot]](https://github.com/apps/dependabot).
 * ⬆ Update sentry-sdk[fastapi] requirement from <3.0.0,>=2.0.0 to >=2.63.0,<3.0.0. PR [#2373](https://github.com/fastapi/full-stack-fastapi-template/pull/2373) by [@dependabot[bot]](https://github.com/apps/dependabot).

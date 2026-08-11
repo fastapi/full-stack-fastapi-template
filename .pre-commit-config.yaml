@@ -13,7 +13,7 @@ repos:
         exclude: |
             (?x)^(
                 frontend/src/client/.*|
-                backend/app/email-templates/build/.*
+                backend/app/email-templates/.*
             )$
       - id: trailing-whitespace
         exclude: ^frontend/src/client/.*
@@ -64,7 +64,7 @@ repos:
         entry: bash ./scripts/generate-client.sh
         pass_filenames: false
         language: unsupported
-        files: ^backend/.*$|^scripts/generate-client\.sh$
+        files: ^backend/app/.*\.py$|^backend/pyproject\.toml$|^uv\.lock$|^frontend/openapi-ts\.config\.ts$|^scripts/generate-client\.sh$
 
       - id: add-release-date
         language: unsupported

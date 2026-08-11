@@ -1,111 +1,85 @@
 # FastAPI Project - Development
 
-## Docker Compose
+## Local Development
 
-* Start the local stack with Docker Compose:
+For local development, run PostgreSQL and Mailcatcher with Docker Compose, and run the FastAPI and Vite development servers locally.
+
+Start the supporting services:
 
 ```bash
+docker compose up -d db mailcatcher
+```
+
+Then, from the `backend` directory, install the dependencies and prepare the database:
+
+```bash
+uv sync
+uv run bash scripts/prestart.sh
+```
+
+Start the FastAPI development server:
+
+```bash
+uv run fastapi dev
+```
+
+In another terminal, from the project root, install the frontend dependencies and start the Vite development server:
+
+```bash
+bun install
+bun run dev
+```
+
+Now you can open these URLs:
+
+Frontend development server: <http://localhost:5173>
+
+Backend API: <http://localhost:8000>
+
+Automatic interactive API documentation with Swagger UI: <http://localhost:8000/docs>
+
+Mailcatcher: <http://localhost:1080>
+
+The frontend development server uses the backend at `http://localhost:8000`, as configured in `frontend/.env`.
+
+### Frontend Served by FastAPI
+
+Build the frontend from the `frontend` directory:
+
+```bash
+bun run build
+```
+
+The build is written to `backend/app/frontend` and served by FastAPI at <http://localhost:8000>. Rebuild the frontend after making frontend changes.
+
+## Full Stack with Docker Compose
+
+To run the backend and built frontend in Docker Compose:
+
+```bash
+docker compose run --rm backend bash scripts/prestart.sh
 docker compose watch
 ```
 
-* Now you can open your browser and interact with these URLs:
+Now you can open these URLs:
 
-Frontend, built with Docker, with routes handled based on the path: <http://localhost:5173>
+Application, with the frontend and API served by FastAPI: <http://localhost:8000>
 
-Backend, JSON based web API based on OpenAPI: <http://localhost:8000>
-
-Automatic interactive documentation with Swagger UI (from the OpenAPI backend): <http://localhost:8000/docs>
+Automatic interactive API documentation with Swagger UI: <http://localhost:8000/docs>
 
 Adminer, database web administration: <http://localhost:8080>
 
 Traefik UI, to see how the routes are being handled by the proxy: <http://localhost:8090>
 
-**Note**: The first time you start your stack, it might take a minute for it to be ready. While the backend waits for the database to be ready and configures everything. You can check the logs to monitor it.
+Mailcatcher: <http://localhost:1080>
 
-To check the logs, run (in another terminal):
+Stop a locally running FastAPI server before starting the Compose backend because both use port `8000`.
 
-```bash
-docker compose logs
-```
-
-To check the logs of a specific service, add the name of the service, e.g.:
-
-```bash
-docker compose logs backend
-```
+**Note**: The first time you start the stack, it might take a minute for all the services to be ready. To monitor it, use `docker compose logs`, or `docker compose logs backend` for the backend service.
 
 ## Mailcatcher
 
-Mailcatcher is a simple SMTP server that catches all emails sent by the backend during local development. Instead of sending real emails, they are captured and displayed in a web interface.
-
-This is useful for:
-
-* Testing email functionality during development
-* Verifying email content and formatting
-* Debugging email-related functionality without sending real emails
-
-The backend is automatically configured to use Mailcatcher when running with Docker Compose locally (SMTP on port 1025). All captured emails can be viewed at <http://localhost:1080>.
-
-## Local Development
-
-The Docker Compose files are configured so that each of the services is available in a different port in `localhost`.
-
-For the backend and frontend, they use the same port that would be used by their local development server, so, the backend is at `http://localhost:8000` and the frontend at `http://localhost:5173`.
-
-This way, you could turn off a Docker Compose service and start its local development service, and everything would keep working, because it all uses the same ports.
-
-For example, you can stop that `frontend` service in the Docker Compose, in another terminal, run:
-
-```bash
-docker compose stop frontend
-```
-
-And then start the local frontend development server:
-
-```bash
-bun run dev
-```
-
-Or you could stop the `backend` Docker Compose service:
-
-```bash
-docker compose stop backend
-```
-
-And then you can run the local development server for the backend:
-
-```bash
-cd backend
-fastapi dev app/main.py
-```
-
-## Docker Compose in `localhost.tiangolo.com`
-
-When you start the Docker Compose stack, it uses `localhost` by default, with different ports for each service (backend, frontend, adminer, etc).
-
-When you deploy it to production (or staging), it will deploy each service in a different subdomain, like `api.example.com` for the backend and `dashboard.example.com` for the frontend.
-
-In the guide about [deployment](deployment.md) you can read about Traefik, the configured proxy. That's the component in charge of transmitting traffic to each service based on the subdomain.
-
-If you want to test that it's all working locally, you can edit the local `.env` file, and change:
-
-```dotenv
-DOMAIN=localhost.tiangolo.com
-```
-
-That will be used by the Docker Compose files to configure the base domain for the services.
-
-Traefik will use this to transmit traffic at `api.localhost.tiangolo.com` to the backend, and traffic at `dashboard.localhost.tiangolo.com` to the frontend.
-
-The domain `localhost.tiangolo.com` is a special domain that is configured (with all its subdomains) to point to `127.0.0.1`. This way you can use that for your local development.
-
-After you update it, run again:
-
-```bash
-docker compose watch
-```
-
-When deploying, for example in production, the main Traefik is configured outside of the Docker Compose files. For local development, there's an included Traefik in `compose.override.yml`, just to let you test that the domains work as expected, for example with `api.localhost.tiangolo.com` and `dashboard.localhost.tiangolo.com`.
+Mailcatcher captures emails sent during local development instead of delivering them. The local backend connects to it at `localhost:1025`, and the Compose backend connects to the `mailcatcher` service. Captured emails are available at <http://localhost:1080>.
 
 ## Docker Compose files and env vars
 
@@ -113,9 +87,9 @@ There is a main `compose.yml` file with all the configurations that apply to the
 
 And there's also a `compose.override.yml` with overrides for development, for example to mount the source code as a volume. It is used automatically by `docker compose` to apply overrides on top of `compose.yml`.
 
-These Docker Compose files use the `.env` file containing configurations to be injected as environment variables in the containers.
+The `compose.deploy.yml` file contains the deployment-specific settings, including HTTPS and automatic certificate handling. It is explicitly combined with `compose.yml` when deploying the application.
 
-They also use some additional configurations taken from environment variables set in the scripts before calling the `docker compose` command.
+The backend reads local settings from the `.env` file. Docker Compose also uses it for variable interpolation and passes the settings each container needs.
 
 After changing variables, make sure you restart the stack:
 
@@ -125,11 +99,11 @@ docker compose watch
 
 ## The .env file
 
-The `.env` file is the one that contains all your configurations, generated keys and passwords, etc.
+The `.env` file contains the shared local defaults, generated keys, passwords, and other configuration. Its hostnames use `localhost` for processes running on your machine. Docker Compose overrides hostnames such as the database and SMTP server with their Compose service names.
 
 Depending on your workflow, you could want to exclude it from Git, for example if your project is public. In that case, you would have to make sure to set up a way for your CI tools to obtain it while building or deploying your project.
 
-One way to do it could be to add each environment variable to your CI/CD system, and updating the `compose.yml` file to read that specific env var instead of reading the `.env` file.
+One way to do it could be to add each environment variable to your CI/CD system.
 
 ## Pre-commits and code linting
 
@@ -188,9 +162,7 @@ The production or staging URLs would use these same paths, but with your own dom
 
 Development URLs, for local development.
 
-Frontend: <http://localhost:5173>
-
-Backend: <http://localhost:8000>
+Application: <http://localhost:8000>
 
 Automatic Interactive Docs (Swagger UI): <http://localhost:8000/docs>
 
@@ -201,21 +173,3 @@ Adminer: <http://localhost:8080>
 Traefik UI: <http://localhost:8090>
 
 MailCatcher: <http://localhost:1080>
-
-### Development URLs with `localhost.tiangolo.com` Configured
-
-Development URLs, for local development.
-
-Frontend: <http://dashboard.localhost.tiangolo.com>
-
-Backend: <http://api.localhost.tiangolo.com>
-
-Automatic Interactive Docs (Swagger UI): <http://api.localhost.tiangolo.com/docs>
-
-Automatic Alternative Docs (ReDoc): <http://api.localhost.tiangolo.com/redoc>
-
-Adminer: <http://localhost.tiangolo.com:8080>
-
-Traefik UI: <http://localhost.tiangolo.com:8090>
-
-MailCatcher: <http://localhost.tiangolo.com:1080>

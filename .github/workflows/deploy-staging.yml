@@ -5,7 +5,8 @@ on:
     branches:
       - master
 
-permissions: {}
+permissions:
+  contents: read
 
 jobs:
   deploy:
@@ -16,9 +17,7 @@ jobs:
       - self-hosted
       - staging
     env:
-      ENVIRONMENT: staging
-      DOMAIN: ${{ secrets.DOMAIN_STAGING }}
-      STACK_NAME: ${{ secrets.STACK_NAME_STAGING }}
+      DOMAIN: ${{ secrets.DOMAIN }}
       SECRET_KEY: ${{ secrets.SECRET_KEY }}
       FIRST_SUPERUSER: ${{ secrets.FIRST_SUPERUSER }}
       FIRST_SUPERUSER_PASSWORD: ${{ secrets.FIRST_SUPERUSER_PASSWORD }}
@@ -30,8 +29,9 @@ jobs:
       SENTRY_DSN: ${{ secrets.SENTRY_DSN }}
     steps:
       - name: Checkout
-        uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           persist-credentials: false
-      - run: docker compose -f compose.yml --project-name ${{ secrets.STACK_NAME_STAGING }} build
-      - run: docker compose -f compose.yml --project-name ${{ secrets.STACK_NAME_STAGING }} up -d
+      - run: docker compose -f compose.yml -f compose.deploy.yml build
+      - run: docker compose -f compose.yml -f compose.deploy.yml run --rm backend bash scripts/prestart.sh
+      - run: docker compose -f compose.yml -f compose.deploy.yml up -d
