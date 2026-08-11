@@ -4,6 +4,7 @@
 
 ### Refactors
 
+* ♻️ Simplify Docker Compose deployment. PR [#2435](https://github.com/fastapi/full-stack-fastapi-template/pull/2435) by [@tiangolo](https://github.com/tiangolo).
 * ♻️ Migrate to `DATABASE_URL` instead of separate variables. PR [#2184](https://github.com/fastapi/full-stack-fastapi-template/pull/2184) by [@patrick91](https://github.com/patrick91).
 
 ### Internal
