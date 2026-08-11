@@ -2,6 +2,8 @@
 
 ## Latest Changes
 
+## 0.11.1 (2026-08-11)
+
 ### Refactors
 
 * ♻️ Simplify Docker Compose deployment. PR [#2435](https://github.com/fastapi/full-stack-fastapi-template/pull/2435) by [@tiangolo](https://github.com/tiangolo).
