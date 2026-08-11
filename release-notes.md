@@ -6,6 +6,10 @@
 
 * ♻️ Migrate to `DATABASE_URL` instead of separate variables. PR [#2184](https://github.com/fastapi/full-stack-fastapi-template/pull/2184) by [@patrick91](https://github.com/patrick91).
 
+### Internal
+
+* ⬆ Bump the npm-packages group across 1 directory with 33 updates. PR [#2433](https://github.com/fastapi/full-stack-fastapi-template/pull/2433) by [@dependabot[bot]](https://github.com/apps/dependabot).
+
 ## 0.11.0 (2026-08-11)
 
 ### Features
