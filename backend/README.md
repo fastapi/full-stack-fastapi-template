@@ -58,19 +58,19 @@ To open a shell in the backend container:
 $ docker compose exec backend bash
 ```
 
-## Backend tests
+## Backend Tests
 
 To test the backend from the `backend` directory, run:
 
 ```console
-$ uv run bash ./scripts/test.sh
+$ uv run bash scripts/test.sh
 ```
 
-The tests run with Pytest, modify and add tests to `./backend/tests/`.
+The tests run with Pytest. Modify existing tests or add new ones in `./backend/tests/`.
 
-If you use GitHub Actions the tests will run automatically.
+If you use GitHub Actions, the tests will run automatically.
 
-### Test running stack
+### Test a Running Stack
 
 If your stack is already up and you just want to run the tests, you can use:
 
@@ -78,7 +78,7 @@ If your stack is already up and you just want to run the tests, you can use:
 docker compose exec backend bash scripts/tests-start.sh
 ```
 
-That `/app/scripts/tests-start.sh` script just calls `pytest` after making sure that the rest of the stack is running. If you need to pass extra arguments to `pytest`, you can pass them to that command and they will be forwarded.
+The `/app/backend/scripts/tests-start.sh` script calls `pytest` after making sure that the rest of the stack is running. If you need to pass extra arguments to `pytest`, you can pass them to that command and they will be forwarded.
 
 For example, to stop on first error:
 
@@ -88,7 +88,7 @@ docker compose exec backend bash scripts/tests-start.sh -x
 
 ### Test Coverage
 
-When the tests are run, a file `htmlcov/index.html` is generated, you can open it in your browser to see the coverage of the tests.
+When the tests run, they generate `htmlcov/index.html`. Open it in your browser to inspect the test coverage.
 
 ## Migrations
 
@@ -128,7 +128,7 @@ If you don't want to start with the default models and want to remove them / mod
 
 The email templates are written with [React Email](https://react.email) in `./packages/react-email/`. The `emails` directory holds one component per email and the `ui` directory holds the shared components (layout, heading, button, link, callout).
 
-The rendered HTML in `./backend/app/email-templates/` is generated from those components, it is what the application sends, and it shouldn't be edited by hand.
+The rendered HTML in `./backend/app/email-templates/` is generated from those components. It is what the application sends and should not be edited by hand.
 
 To preview the emails while editing them, start the dev server from the root of the project:
 

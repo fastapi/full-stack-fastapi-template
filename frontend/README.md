@@ -1,27 +1,29 @@
 # FastAPI Project - Frontend
 
-The frontend is built with [Vite](https://vitejs.dev/), [React](https://reactjs.org/), [TypeScript](https://www.typescriptlang.org/), [TanStack Query](https://tanstack.com/query), [TanStack Router](https://tanstack.com/router) and [Tailwind CSS](https://tailwindcss.com/).
+The frontend is built with [Vite](https://vitejs.dev/), [React](https://react.dev/), [TypeScript](https://www.typescriptlang.org/), [TanStack Query](https://tanstack.com/query), [TanStack Router](https://tanstack.com/router), [Tailwind CSS](https://tailwindcss.com/), and [shadcn/ui](https://ui.shadcn.com/).
 
 ## Requirements
 
-- [Bun](https://bun.sh/) (recommended) or [Node.js](https://nodejs.org/)
+- [Bun](https://bun.sh/)
 
 ## Quick Start
+
+From the project root, install the dependencies and start the frontend development server:
 
 ```bash
 bun install
 bun run dev
 ```
 
-* Then open your browser at http://localhost:5173/.
+Then open <http://localhost:5173/> in your browser.
 
 Run `uv run bash scripts/prestart.sh` and `uv run fastapi dev` from the `backend` directory, with PostgreSQL running in Docker Compose. See [../development.md](../development.md) for the complete setup.
 
 To serve the frontend with FastAPI, run `bun run build` from the `frontend` directory and open `http://localhost:8000`.
 
-Check the file `package.json` to see other available options.
+Check `frontend/package.json` to see the other available commands.
 
-### Removing the frontend
+## Removing the Frontend
 
 If you are developing an API-only app and want to remove the frontend, you can do it easily:
 
@@ -37,13 +39,13 @@ If you are developing an API-only app and want to remove the frontend, you can d
 
 * In the `.fastapicloudignore` file, remove the `!backend/app/frontend/` entry.
 
-Done, you have a frontend-less (api-only) app. 🤓
+Done, you now have an API-only app. 🤓
 
 ## Generate Client
 
 ### Automatically
 
-* From the top level project directory, run the script:
+* From the project root, run the script:
 
 ```bash
 bash ./scripts/generate-client.sh
@@ -65,7 +67,7 @@ bun run generate-client
 
 * Commit the changes.
 
-Notice that everytime the backend changes (changing the OpenAPI schema), you should follow these steps again to update the frontend client.
+Regenerate the client whenever backend changes affect the OpenAPI schema.
 
 ## Using a Remote API
 
@@ -82,11 +84,12 @@ Then, when you run the frontend, it will use that URL as the base URL for the AP
 The frontend code is structured as follows:
 
 * `frontend/src` - The main frontend code.
-* `frontend/src/assets` - Static assets.
+* `frontend/public` - Static assets.
 * `frontend/src/client` - The generated OpenAPI client.
-* `frontend/src/components` -  The different components of the frontend.
+* `frontend/src/components` - The components of the frontend, including the shadcn/ui components in `frontend/src/components/ui`.
 * `frontend/src/hooks` - Custom hooks.
-* `frontend/src/routes` - The different routes of the frontend which include the pages.
+* `frontend/src/lib` - Shared frontend utilities.
+* `frontend/src/routes` - The frontend routes and pages.
 
 ## End-to-End Testing with Playwright
 
