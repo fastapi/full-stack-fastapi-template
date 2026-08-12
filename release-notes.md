@@ -6,6 +6,10 @@
 
 * ☁️ Add FastAPI Cloud deployment. PR [#2438](https://github.com/fastapi/full-stack-fastapi-template/pull/2438) by [@tiangolo](https://github.com/tiangolo).
 
+### Internal
+
+* 👷 Migrate automatic labels to Latest Changes. PR [#2439](https://github.com/fastapi/full-stack-fastapi-template/pull/2439) by [@tiangolo](https://github.com/tiangolo).
+
 ## 0.11.1 (2026-08-11)
 
 ### Refactors
