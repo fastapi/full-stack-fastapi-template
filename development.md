@@ -81,11 +81,11 @@ Stop a locally running FastAPI server before starting the Compose backend becaus
 
 Mailcatcher captures emails sent during local development instead of delivering them. The local backend connects to it at `localhost:1025`, and the Compose backend connects to the `mailcatcher` service. Captured emails are available at <http://localhost:1080>.
 
-## Docker Compose files and env vars
+## Docker Compose Files and Environment Variables
 
-There is a main `compose.yml` file with all the configurations that apply to the whole stack, it is used automatically by `docker compose`.
+The main `compose.yml` file contains the configuration shared by the whole stack. Docker Compose loads it automatically.
 
-And there's also a `compose.override.yml` with overrides for development, for example to mount the source code as a volume. It is used automatically by `docker compose` to apply overrides on top of `compose.yml`.
+The `compose.override.yml` file adds local development settings, such as mounting the source code as a volume. Docker Compose also loads it automatically and applies it on top of `compose.yml`.
 
 The `compose.deploy.yml` file contains the deployment-specific settings, including HTTPS and automatic certificate handling. It is explicitly combined with `compose.yml` when deploying the application.
 
@@ -97,79 +97,42 @@ After changing variables, make sure you restart the stack:
 docker compose watch
 ```
 
-## The .env file
+## The `.env` File
 
-The `.env` file contains the shared local defaults, generated keys, passwords, and other configuration. Its hostnames use `localhost` for processes running on your machine. Docker Compose overrides hostnames such as the database and SMTP server with their Compose service names.
+The tracked `.env` file contains local development defaults, passwords, and other configuration. Its hostnames use `localhost` for processes running on your machine. Docker Compose overrides hostnames such as the database and SMTP server with their Compose service names.
 
-Depending on your workflow, you could want to exclude it from Git, for example if your project is public. In that case, you would have to make sure to set up a way for your CI tools to obtain it while building or deploying your project.
+Do not store deployment secrets in `.env`. Configure them as described in the [FastAPI Cloud deployment guide](./deployment.md) or the [Docker Compose deployment guide](./deployment-docker-compose.md).
 
-One way to do it could be to add each environment variable to your CI/CD system.
+## Pre-commit Hooks and Code Linting
 
-## Pre-commits and code linting
-
-we are using a tool called [prek](https://prek.j178.dev/) (modern alternative to [Pre-commit](https://pre-commit.com/)) for code linting and formatting.
-
-When you install it, it runs right before making a commit in git. This way it ensures that the code is consistent and formatted even before it is committed.
+The project uses [prek](https://prek.j178.dev/), a modern alternative to [pre-commit](https://pre-commit.com/), for code linting and formatting.
 
 You can find a file `.pre-commit-config.yaml` with configurations at the root of the project.
 
-#### Install prek to run automatically
+### Install `prek` to Run Automatically
 
 `prek` is already part of the dependencies of the project.
 
-After having the `prek` tool installed and available, you need to "install" it in the local repository, so that it runs automatically before each commit.
-
-Using `uv`, you could do it with (make sure you are inside `backend` folder):
+From the project root, install the Git hook so that `prek` runs automatically before each commit:
 
 ```bash
-❯ uv run prek install -f
-prek installed at `../.git/hooks/pre-commit`
+uv run prek install -f
 ```
 
 The `-f` flag forces the installation, in case there was already a `pre-commit` hook previously installed.
 
-Now whenever you try to commit, e.g. with:
+Now whenever you try to commit, for example with:
 
 ```bash
 git commit
 ```
 
-...prek will run and check and format the code you are about to commit, and will ask you to add that code (stage it) with git again before committing.
+`prek` will check and format the code you are about to commit. If it modifies any files, add those files to Git again before committing.
 
-Then you can `git add` the modified/fixed files again and now you can commit.
+### Run `prek` Manually
 
-#### Running prek hooks manually
-
-you can also run `prek` manually on all the files, you can do it using `uv` with:
+You can also run `prek` manually on all files from the project root:
 
 ```bash
-❯ uv run prek run --all-files
-check for added large files..............................................Passed
-check toml...............................................................Passed
-check yaml...............................................................Passed
-fix end of files.........................................................Passed
-trim trailing whitespace.................................................Passed
-ruff.....................................................................Passed
-ruff-format..............................................................Passed
-biome check..............................................................Passed
+uv run prek run --all-files
 ```
-
-## URLs
-
-The deployed URLs use these same paths, but with your own domain.
-
-### Development URLs
-
-Development URLs, for local development.
-
-Application: <http://localhost:8000>
-
-Automatic Interactive Docs (Swagger UI): <http://localhost:8000/docs>
-
-Automatic Alternative Docs (ReDoc): <http://localhost:8000/redoc>
-
-Adminer: <http://localhost:8080>
-
-Traefik UI: <http://localhost:8090>
-
-MailCatcher: <http://localhost:1080>
