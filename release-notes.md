@@ -2,8 +2,29 @@
 
 ## Latest Changes
 
+### Docs
+
+* 📝 Simplify project documentation. PR [#2442](https://github.com/fastapi/full-stack-fastapi-template/pull/2442) by [@tiangolo](https://github.com/tiangolo).
+
+## 0.12.0 (2026-08-12)
+
+### Features
+
+* ☁️ Add FastAPI Cloud deployment. PR [#2438](https://github.com/fastapi/full-stack-fastapi-template/pull/2438) by [@tiangolo](https://github.com/tiangolo).
+
+### Fixes
+
+* 🐳 Include frontend assets in Docker build context. PR [#2440](https://github.com/fastapi/full-stack-fastapi-template/pull/2440) by [@tiangolo](https://github.com/tiangolo).
+
+### Internal
+
+* 👷 Migrate automatic labels to Latest Changes. PR [#2439](https://github.com/fastapi/full-stack-fastapi-template/pull/2439) by [@tiangolo](https://github.com/tiangolo).
+
+## 0.11.1 (2026-08-11)
+
 ### Refactors
 
+* ♻️ Simplify Docker Compose deployment. PR [#2435](https://github.com/fastapi/full-stack-fastapi-template/pull/2435) by [@tiangolo](https://github.com/tiangolo).
 * ♻️ Migrate to `DATABASE_URL` instead of separate variables. PR [#2184](https://github.com/fastapi/full-stack-fastapi-template/pull/2184) by [@patrick91](https://github.com/patrick91).
 
 ### Internal

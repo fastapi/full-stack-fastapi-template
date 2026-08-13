@@ -1,0 +1,12 @@
+auto-labels:
+  docs:
+    - exclude: frontend/**
+    - exclude: backend/**
+    - exclude: .github/**
+    - exclude: scripts/**
+    - '**/*.md'
+  internal:
+    - .github/**
+    - scripts/**
+    - .gitignore
+    - .pre-commit-config.yaml

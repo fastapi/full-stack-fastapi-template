@@ -1,0 +1,41 @@
+name: Deploy with Docker Compose
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: deploy-docker-compose
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    # Do not deploy the template repository, only projects created from it
+    if: github.repository != 'fastapi/full-stack-fastapi-template'
+    runs-on: self-hosted
+    timeout-minutes: 30
+    env:
+      DOMAIN: ${{ vars.DOMAIN }}
+      PROJECT_NAME: ${{ vars.PROJECT_NAME }}
+      SECRET_KEY: ${{ secrets.SECRET_KEY }}
+      FIRST_SUPERUSER: ${{ vars.FIRST_SUPERUSER }}
+      FIRST_SUPERUSER_PASSWORD: ${{ secrets.FIRST_SUPERUSER_PASSWORD }}
+      SMTP_HOST: ${{ vars.SMTP_HOST }}
+      SMTP_USER: ${{ vars.SMTP_USER }}
+      SMTP_PASSWORD: ${{ secrets.SMTP_PASSWORD }}
+      EMAILS_FROM_EMAIL: ${{ vars.EMAILS_FROM_EMAIL }}
+      POSTGRES_PASSWORD: ${{ secrets.POSTGRES_PASSWORD }}
+      SENTRY_DSN: ${{ vars.SENTRY_DSN }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - name: Build
+        run: docker compose -f compose.yml -f compose.deploy.yml build
+      - name: Prepare database
+        run: docker compose -f compose.yml -f compose.deploy.yml run --rm backend bash scripts/prestart.sh
+      - name: Start application
+        run: docker compose -f compose.yml -f compose.deploy.yml up -d
