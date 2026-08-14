@@ -2,6 +2,10 @@
 
 ## Latest Changes
 
+### Fixes
+
+* 🐛 Add background to the sticky layout header. PR [#2384](https://github.com/fastapi/full-stack-fastapi-template/pull/2384) by [@istoutjesdijk](https://github.com/istoutjesdijk).
+
 ### Docs
 
 * 📝 Simplify project documentation. PR [#2442](https://github.com/fastapi/full-stack-fastapi-template/pull/2442) by [@tiangolo](https://github.com/tiangolo).
