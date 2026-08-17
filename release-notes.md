@@ -6,6 +6,10 @@
 
 * 🐛 Add background to the sticky layout header. PR [#2384](https://github.com/fastapi/full-stack-fastapi-template/pull/2384) by [@istoutjesdijk](https://github.com/istoutjesdijk).
 
+### Refactors
+
+* ♻️ Replace Mailcatcher with Mailpit for local email testing. PR [#2436](https://github.com/fastapi/full-stack-fastapi-template/pull/2436) by [@alejsdev](https://github.com/alejsdev).
+
 ### Docs
 
 * 📝 Simplify project documentation. PR [#2442](https://github.com/fastapi/full-stack-fastapi-template/pull/2442) by [@tiangolo](https://github.com/tiangolo).
