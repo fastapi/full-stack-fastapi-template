@@ -2,12 +2,12 @@
 
 ## Local Development
 
-For local development, run PostgreSQL and Mailcatcher with Docker Compose, and run the FastAPI and Vite development servers locally.
+For local development, run PostgreSQL and Mailpit with Docker Compose, and run the FastAPI and Vite development servers locally.
 
 Start the supporting services:
 
 ```bash
-docker compose up -d db mailcatcher
+docker compose up -d db mailpit
 ```
 
 Then, from the `backend` directory, install the dependencies and prepare the database:
@@ -38,7 +38,7 @@ Backend API: <http://localhost:8000>
 
 Automatic interactive API documentation with Swagger UI: <http://localhost:8000/docs>
 
-Mailcatcher: <http://localhost:1080>
+Mailpit: <http://localhost:8025>
 
 The frontend development server uses the backend at `http://localhost:8000`, as configured in `frontend/.env`.
 
@@ -71,15 +71,15 @@ Adminer, database web administration: <http://localhost:8080>
 
 Traefik UI, to see how the routes are being handled by the proxy: <http://localhost:8090>
 
-Mailcatcher: <http://localhost:1080>
+Mailpit: <http://localhost:8025>
 
 Stop a locally running FastAPI server before starting the Compose backend because both use port `8000`.
 
 **Note**: The first time you start the stack, it might take a minute for all the services to be ready. To monitor it, use `docker compose logs`, or `docker compose logs backend` for the backend service.
 
-## Mailcatcher
+## Mailpit
 
-Mailcatcher captures emails sent during local development instead of delivering them. The local backend connects to it at `localhost:1025`, and the Compose backend connects to the `mailcatcher` service. Captured emails are available at <http://localhost:1080>.
+[Mailpit](https://mailpit.axllent.org) captures emails sent during local development instead of delivering them. The local backend connects to it at `localhost:1025`, and the Compose backend connects to the `mailpit` service. Captured emails are available at <http://localhost:8025>.
 
 ## Docker Compose Files and Environment Variables
 

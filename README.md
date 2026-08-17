@@ -22,7 +22,7 @@
 - 🔒 Secure password hashing by default.
 - 🔑 JWT (JSON Web Token) authentication.
 - 📫 Email-based password recovery.
-- 📬 [Mailcatcher](https://mailcatcher.me) for local email testing during development.
+- 📬 [Mailpit](https://mailpit.axllent.org) for local email testing during development.
 - ✅ Tests with [Pytest](https://pytest.org).
 - 🏭 CI (continuous integration) and CD (continuous deployment) based on GitHub Actions.
 
