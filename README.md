@@ -2,12 +2,14 @@
 
 This project extends the [Full Stack FastAPI Template](https://github.com/fastapi/full-stack-fastapi-template) with role-based access control (RBAC) for the [Fullstack Dev Test Task](https://github.com/evios/Fullstack-Dev-Test-Task).
 
-## Quick Start (Ubuntu + Docker)
+## Quick Start (Docker)
 
-Project path on Ubuntu: `/home/yan/htdocs/test` (mapped from `Z:/` on Windows).
+Requires [Docker Desktop](https://www.docker.com/products/docker-desktop/) (macOS, Linux, or Windows).
 
 ```bash
-cd /home/yan/htdocs/test
+git clone <repository-url>
+cd <project-directory>
+cp compose.override.example.yml compose.override.yml
 docker compose build backend
 docker compose run --rm backend bash scripts/prestart.sh
 docker compose up -d
@@ -21,9 +23,9 @@ Open:
 | API docs | http://localhost:8000/docs |
 | Adminer | http://localhost:8080 |
 | Mailpit | http://localhost:8025 |
-| Traefik (via proxy) | http://localhost:8888 |
+| Traefik (via proxy) | http://localhost |
 
-**Note:** Ports `80` and `5432` were already in use on the host, so this setup uses `8888` (proxy) and `5433` (Postgres) instead.
+`compose.override.yml` is local-only (see `compose.override.example.yml`). Adjust ports there if `80` or `5432` are already in use on your machine.
 
 ## Seed Users
 
@@ -54,15 +56,49 @@ Backend authorization is centralized in `backend/app/core/permissions.py`. FastA
 
 The frontend mirrors the same permission matrix in `frontend/src/lib/permissions.ts`. The `usePermissions()` hook drives sidebar visibility, route-level UI guards, and an `AccessDenied` component for direct navigation to forbidden pages. The backend remains the source of truth; the UI only hides or blocks navigation for better UX.
 
+Denied access attempts are logged at `WARNING` level from `app.api.deps` (user id, email, role, permission) for observability.
+
+### Authorization Flow
+
+```mermaid
+flowchart TB
+  subgraph client [Frontend]
+    Login[Login / JWT stored]
+    Hook[usePermissions from user.role]
+    Nav[Sidebar hides forbidden links]
+    Guard[Route guard / AccessDenied]
+    Login --> Hook --> Nav
+    Hook --> Guard
+  end
+
+  subgraph api [Backend API]
+    JWT[get_current_user validates JWT]
+    Perm[require_permission dependency]
+    Matrix[user_has_permission in permissions.py]
+    Route[Route handler]
+    JWT --> Perm --> Matrix
+    Matrix -->|allowed| Route
+    Matrix -->|denied| Log403[Log WARNING + HTTP 403]
+  end
+
+  Guard -->|API call| JWT
+  Nav -->|API call| JWT
+```
+
+Further reading:
+
+- [NOTES.md](NOTES.md) — scope cuts, trade-offs, follow-ups
+- [docs/ai-conversations/](docs/ai-conversations/) — English copies of AI-assisted development sessions (submission requirement)
+- [docs/adr/001-permission-based-rbac.md](docs/adr/001-permission-based-rbac.md)
+- [docs/adr/002-frontend-permission-mirror.md](docs/adr/002-frontend-permission-mirror.md)
+
 ## Running Tests
 
 ```bash
-# Authorization-focused tests
-docker compose run --rm \
-  -v /home/yan/htdocs/test/backend/tests:/app/backend/tests \
-  backend pytest tests/api/routes/test_authorization.py -v
+# Authorization-focused tests (rebuild backend image after pulling changes)
+docker compose run --rm backend pytest tests/api/routes/test_authorization.py -v
 
-# Smoke check (host Python, stack must be up)
+# Smoke check (Python 3 on the host; stack must be up)
 python3 scripts/smoke_rbac.py
 ```
 

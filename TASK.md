@@ -215,6 +215,7 @@ Make it easy for us to run your solution without hunting for setup instructions.
 - [ ] Backend tests covering critical authorization scenarios
 - [ ] Working implementation of RBAC
 - [ ] Optional: `NOTES.md` with anything you want us to know (scope cuts, trade-offs, what you'd do with more time)
+- [ ] Copies of conversations with AI tools (`docs/ai-conversations/`, English)
 
 ---
 
