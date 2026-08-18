@@ -85,7 +85,7 @@ Stop a locally running FastAPI server before starting the Compose backend becaus
 
 The main `compose.yml` file contains the configuration shared by the whole stack. Docker Compose loads it automatically.
 
-The `compose.override.yml` file adds local development settings, such as mounting the source code as a volume. Docker Compose also loads it automatically and applies it on top of `compose.yml`.
+The `compose.override.example.yml` file documents local development settings (published ports, backend reload, Mailpit, Playwright). Copy it to `compose.override.yml` (gitignored); Docker Compose applies the override automatically when you run `docker compose` without an explicit file list.
 
 The `compose.deploy.yml` file contains the deployment-specific settings, including HTTPS and automatic certificate handling. It is explicitly combined with `compose.yml` when deploying the application.
 

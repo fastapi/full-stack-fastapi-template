@@ -33,7 +33,7 @@ If you are developing an API-only app and want to remove the frontend, you can d
 
 * In the `backend/Dockerfile` file, remove the frontend build stage and the `COPY --from=frontend-build` instruction.
 
-* In the `compose.override.yml` file, remove the `playwright` service.
+* In `compose.override.yml` (copy from `compose.override.example.yml`), remove the `playwright` service.
 
 * In the `.github/workflows/deploy.yml` file, remove the **Set up Bun**, **Install frontend dependencies**, and **Build frontend** steps.
 

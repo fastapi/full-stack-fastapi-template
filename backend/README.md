@@ -50,7 +50,7 @@ The application is available at `http://localhost:8000`.
 
 ### Docker Compose Override
 
-The `compose.override.yml` file contains local settings for published ports, source synchronization, automatic image rebuilds, and backend reloads. Docker Compose applies it automatically when you run `docker compose` without an explicit file list.
+The `compose.override.example.yml` file contains local settings for published ports, source synchronization, automatic image rebuilds, and backend reloads. Copy it to `compose.override.yml` (gitignored). Docker Compose applies it automatically when you run `docker compose` without an explicit file list.
 
 To open a shell in the backend container:
 
