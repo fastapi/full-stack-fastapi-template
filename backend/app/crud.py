@@ -4,13 +4,26 @@ from typing import Any
 from sqlmodel import Session, select
 
 from app.core.security import get_password_hash, verify_password
-from app.models import Item, ItemCreate, User, UserCreate, UserUpdate
+from app.models import Item, ItemCreate, User, UserCreate, UserRole, UserUpdate
+
+
+def _sync_superuser_flag(user_data: dict) -> None:
+    role = user_data.get("role")
+    if role is not None:
+        user_data["is_superuser"] = role == UserRole.ADMIN
 
 
 def create_user(*, session: Session, user_create: UserCreate) -> User:
+    user_data = user_create.model_dump()
+    if "role" not in user_data or user_data["role"] is None:
+        user_data["role"] = UserRole.MEMBER
+    _sync_superuser_flag(user_data)
     db_obj = User.model_validate(
         user_create, update={"hashed_password": get_password_hash(user_create.password)}
     )
+    if user_data.get("role"):
+        db_obj.role = user_data["role"]
+        db_obj.is_superuser = user_data["role"] == UserRole.ADMIN
     session.add(db_obj)
     session.commit()
     session.refresh(db_obj)
@@ -19,6 +32,7 @@ def create_user(*, session: Session, user_create: UserCreate) -> User:
 
 def update_user(*, session: Session, db_user: User, user_in: UserUpdate) -> Any:
     user_data = user_in.model_dump(exclude_unset=True)
+    _sync_superuser_flag(user_data)
     extra_data = {}
     if "password" in user_data:
         password = user_data["password"]
