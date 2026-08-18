@@ -3,7 +3,6 @@ import logging
 
 import pytest
 from fastapi.testclient import TestClient
-from sqlmodel import Session
 
 from app.core.config import settings
 from tests.utils.user import (
@@ -109,7 +108,6 @@ def test_metrics_admin_and_manager_allowed_member_denied(
 def test_member_cannot_update_other_users(
     client: TestClient,
     member_token_headers: dict[str, str],
-    db: Session,
 ) -> None:
     admin_headers = user_authentication_headers(
         client=client,
