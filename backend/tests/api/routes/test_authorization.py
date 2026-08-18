@@ -1,4 +1,7 @@
 # Backend authorization tests for admin, manager, and member roles.
+import logging
+
+import pytest
 from fastapi.testclient import TestClient
 from sqlmodel import Session
 
@@ -36,6 +39,21 @@ def test_member_cannot_list_users(
 ) -> None:
     response = client.get(f"{settings.API_V1_STR}/users/", headers=member_token_headers)
     assert response.status_code == 403
+
+
+def test_permission_denial_is_logged(
+    client: TestClient,
+    member_token_headers: dict[str, str],
+    caplog: pytest.LogCaptureFixture,
+) -> None:
+    with caplog.at_level(logging.WARNING, logger="app.api.deps"):
+        response = client.get(
+            f"{settings.API_V1_STR}/users/", headers=member_token_headers
+        )
+
+    assert response.status_code == 403
+    assert "Access denied" in caplog.text
+    assert "users:list" in caplog.text
 
 
 def test_member_can_update_own_profile(
