@@ -75,20 +75,35 @@ else
   echo "Fork created: ${FORK_NAME}"
 fi
 
-if git remote get-url upstream >/dev/null 2>&1; then
-  git remote set-url upstream "git@github.com:${UPSTREAM}.git"
-else
-  git remote add upstream "git@github.com:${UPSTREAM}.git"
-fi
-
 if git remote get-url origin | grep -q "${FORK_REPO}"; then
   :
 else
   git remote set-url origin "git@github.com:${FORK_NAME}.git"
 fi
 
+if git remote get-url upstream >/dev/null 2>&1; then
+  git remote set-url upstream "git@github.com:${UPSTREAM}.git"
+else
+  git remote add upstream "git@github.com:${UPSTREAM}.git"
+fi
+
+echo "Rebasing RBAC commits onto upstream/master (shared history for PR)..."
+git fetch upstream master
+BACKUP_DIR="$(mktemp -d)"
+for f in compose.override.yml .vscode/launch.json; do
+  [[ -f "${f}" ]] && mv "${f}" "${BACKUP_DIR}/"
+done
+if ! git rebase --onto upstream/master "${BASE_COMMIT}" main; then
+  echo "Rebase failed. Resolve conflicts, run: git rebase --continue" >&2
+  exit 1
+fi
+for f in compose.override.yml .vscode/launch.json; do
+  [[ -f "${BACKUP_DIR}/$(basename "${f}")" ]] && mv "${BACKUP_DIR}/$(basename "${f}")" "${f}"
+done
+rmdir "${BACKUP_DIR}" 2>/dev/null || true
+
 echo "Pushing main to fork..."
-git push -u origin main --force-with-lease
+git push -u origin main --force
 
 COMPARE_URL="https://github.com/${UPSTREAM}/compare/master...${FORK_OWNER}:${FORK_REPO}:main"
 PR_URL=""
