@@ -1,6 +1,6 @@
 import uuid
 from datetime import UTC, datetime
-from enum import Enum
+from enum import StrEnum
 
 from pydantic import EmailStr
 from sqlalchemy import Column, DateTime
@@ -12,7 +12,7 @@ def get_datetime_utc() -> datetime:
     return datetime.now(UTC)
 
 
-class UserRole(str, Enum):
+class UserRole(StrEnum):
     ADMIN = "admin"
     MANAGER = "manager"
     MEMBER = "member"

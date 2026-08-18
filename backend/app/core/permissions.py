@@ -1,10 +1,10 @@
 # Central RBAC permission definitions and role-to-permission mapping.
-from enum import Enum
+from enum import StrEnum
 
 from app.models import User, UserRole
 
 
-class Permission(str, Enum):
+class Permission(StrEnum):
     USERS_LIST = "users:list"
     USERS_CREATE = "users:create"
     USERS_UPDATE_ANY = "users:update_any"
