@@ -98,7 +98,7 @@ State it clearly in your docs and enforce it consistently in the backend and fro
 ### 3. Code Quality Expectations
 
 **We prioritize maintainable, readable code over clever solutions.**
- 
+
 - **Clear naming**: Function/variable names that explain intent without comments
 - **Single responsibility**: Small, focused functions
 - **Easy to extend**: Adding a new role shouldn't require touching 10+ files
@@ -128,7 +128,7 @@ Document your implementation approach clearly but concisely.
 - [ ] **Simple diagram** showing where auth/authz checks happen
   - Mermaid, C4-style, or hand-drawn PNG is fine
 
-**Philosophy**: We value clear thinking over formal documentation. 
+**Philosophy**: We value clear thinking over formal documentation.
 Your code should clearly explain your approach; that's usually sufficient.
 RBAC implementation, though, usually has at least a few options to implement, hence an additional README will add value.
 

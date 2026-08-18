@@ -8,10 +8,10 @@ import {
   SidebarFooter,
   SidebarHeader,
 } from "@/components/ui/sidebar"
+import useAuth from "@/hooks/useAuth"
 import usePermissions from "@/hooks/usePermissions"
 import { type Item, Main } from "./Main"
 import { User } from "./User"
-import useAuth from "@/hooks/useAuth"
 
 const baseItems: Item[] = [
   { icon: Home, title: "Dashboard", path: "/" },

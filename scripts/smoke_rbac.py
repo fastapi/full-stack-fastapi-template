@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 """Smoke test for RBAC API endpoints."""
+
 import json
 import sys
 import urllib.error
@@ -11,7 +12,9 @@ BASE = "http://localhost:8000"
 
 def token(email: str, password: str) -> str:
     data = urllib.parse.urlencode({"username": email, "password": password}).encode()
-    req = urllib.request.Request(f"{BASE}/api/v1/login/access-token", data=data, method="POST")
+    req = urllib.request.Request(
+        f"{BASE}/api/v1/login/access-token", data=data, method="POST"
+    )
     req.add_header("Content-Type", "application/x-www-form-urlencoded")
     with urllib.request.urlopen(req) as resp:
         return json.load(resp)["access_token"]

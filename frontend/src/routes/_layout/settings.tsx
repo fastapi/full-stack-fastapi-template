@@ -1,10 +1,9 @@
 import { createFileRoute } from "@tanstack/react-router"
-
-import GlobalSettings from "@/components/UserSettings/GlobalSettings"
+import AccessDenied from "@/components/Common/AccessDenied"
 import ChangePassword from "@/components/UserSettings/ChangePassword"
 import DeleteAccount from "@/components/UserSettings/DeleteAccount"
+import GlobalSettings from "@/components/UserSettings/GlobalSettings"
 import UserInformation from "@/components/UserSettings/UserInformation"
-import AccessDenied from "@/components/Common/AccessDenied"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import useAuth from "@/hooks/useAuth"
 import usePermissions from "@/hooks/usePermissions"

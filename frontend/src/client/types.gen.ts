@@ -202,10 +202,7 @@ export type UserCreate = {
      * Is Superuser
      */
     is_superuser?: boolean;
-    /**
-     * Role
-     */
-    role?: 'admin' | 'manager' | 'member';
+    role?: UserRole;
     /**
      * Full Name
      */
@@ -232,10 +229,7 @@ export type UserPublic = {
      * Is Superuser
      */
     is_superuser?: boolean;
-    /**
-     * Role
-     */
-    role?: 'admin' | 'manager' | 'member';
+    role?: UserRole;
     /**
      * Full Name
      */
@@ -269,6 +263,11 @@ export type UserRegister = {
 };
 
 /**
+ * UserRole
+ */
+export type UserRole = 'admin' | 'manager' | 'member';
+
+/**
  * UserUpdate
  */
 export type UserUpdate = {
@@ -284,10 +283,7 @@ export type UserUpdate = {
      * Is Superuser
      */
     is_superuser?: boolean | null;
-    /**
-     * Role
-     */
-    role?: 'admin' | 'manager' | 'member' | null;
+    role?: UserRole | null;
     /**
      * Full Name
      */
@@ -735,6 +731,22 @@ export type usersUpdateUserResponses = {
 };
 
 export type usersUpdateUserResponse = usersUpdateUserResponses[keyof usersUpdateUserResponses];
+
+export type metricsReadMetricsData = {
+    body?: never;
+    path?: never;
+    query?: never;
+    url: '/api/v1/metrics/';
+};
+
+export type metricsReadMetricsResponses = {
+    /**
+     * Successful Response
+     */
+    200: Message;
+};
+
+export type metricsReadMetricsResponse = metricsReadMetricsResponses[keyof metricsReadMetricsResponses];
 
 export type utilsTestEmailData = {
     body?: never;

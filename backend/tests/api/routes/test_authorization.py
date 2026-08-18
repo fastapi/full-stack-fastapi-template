@@ -7,7 +7,6 @@ from sqlmodel import Session
 
 from app.core.config import settings
 from tests.utils.user import (
-    authentication_token_from_email,
     user_authentication_headers,
 )
 
@@ -15,7 +14,9 @@ from tests.utils.user import (
 def test_manager_can_list_users(
     client: TestClient, manager_token_headers: dict[str, str]
 ) -> None:
-    response = client.get(f"{settings.API_V1_STR}/users/", headers=manager_token_headers)
+    response = client.get(
+        f"{settings.API_V1_STR}/users/", headers=manager_token_headers
+    )
     assert response.status_code == 200
     assert "data" in response.json()
 

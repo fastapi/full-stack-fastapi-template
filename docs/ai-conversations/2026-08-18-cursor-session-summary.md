@@ -1,7 +1,7 @@
 # Cursor Session Summary — RBAC Fullstack Dev Test Task
 
-Date: 2026-08-18  
-Tool: Cursor (Composer)  
+Date: 2026-08-18
+Tool: Cursor (Composer)
 Language: English (submission copy)
 
 ## User Request

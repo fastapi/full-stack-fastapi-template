@@ -1,7 +1,7 @@
 # Cursor Conversation Export — RBAC Fullstack Dev Test Task (Task 1)
 
-Exported: 2026-08-18  
-Tool: Cursor (Composer)  
+Exported: 2026-08-18
+Tool: Cursor (Composer)
 Topic: Role-based access control on Full Stack FastAPI Template
 
 English copy of the AI-assisted design and implementation session, as required for submission.
