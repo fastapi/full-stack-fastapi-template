@@ -2,8 +2,6 @@
 
 This project extends the [Full Stack FastAPI Template](https://github.com/fastapi/full-stack-fastapi-template) with role-based access control (RBAC) for the [Fullstack Dev Test Task](https://github.com/evios/Fullstack-Dev-Test-Task).
 
-**For reviewers:** this is not a GitHub fork, so there is no fork PR diff. See [docs/REVIEW.md](docs/REVIEW.md) for how to compare changes against the pristine `Init commit` or upstream template.
-
 ## Quick Start (Docker)
 
 Requires [Docker Desktop](https://www.docker.com/products/docker-desktop/) (macOS, Linux, or Windows).
