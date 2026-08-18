@@ -7,12 +7,14 @@ This project extends the [Full Stack FastAPI Template](https://github.com/fastap
 Submit as a **GitHub fork** of [full-stack-fastapi-template](https://github.com/fastapi/full-stack-fastapi-template) so reviewers get a web diff/PR:
 
 ```bash
-# One-time: GitHub CLI auth (or set GITHUB_TOKEN)
-gh auth login
+# One-time: GitHub CLI auth (use /usr/local/bin/gh — NOT /usr/bin/gh)
+/usr/local/bin/gh auth login
 
 # Fork upstream, push this branch, open PR
 ./scripts/setup-fork-and-pr.sh
 ```
+
+If `gh auth login` fails with `No such command "auth"`, your `gh` is the wrong package. Use `/usr/local/bin/gh` or install from https://cli.github.com.
 
 Manual fork: https://github.com/fastapi/full-stack-fastapi-template/fork → then set `origin` to your fork and `git push -u origin main`.
 

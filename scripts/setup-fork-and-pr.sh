@@ -10,6 +10,24 @@ BASE_COMMIT="${BASE_COMMIT:-3f52abe}"
 
 cd "${ROOT_DIR}"
 
+gh_cli() {
+  if [[ -x /usr/local/bin/gh ]] && /usr/local/bin/gh --version >/dev/null 2>&1; then
+    /usr/local/bin/gh "$@"
+    return
+  fi
+  if [[ -x "${HOME}/bin/gh" ]] && "${HOME}/bin/gh" --version >/dev/null 2>&1; then
+    "${HOME}/bin/gh" "$@"
+    return
+  fi
+  if command -v gh >/dev/null 2>&1 && gh --version >/dev/null 2>&1; then
+    gh "$@"
+    return
+  fi
+  echo "GitHub CLI not found. Install: https://cli.github.com" >&2
+  echo "Note: /usr/bin/gh on some systems is NOT GitHub CLI." >&2
+  exit 1
+}
+
 get_github_token() {
   if [[ -n "${GITHUB_TOKEN:-}" ]]; then
     echo "${GITHUB_TOKEN}"
@@ -19,13 +37,17 @@ get_github_token() {
     echo "${GH_TOKEN}"
     return
   fi
+  if gh_cli auth status >/dev/null 2>&1; then
+    gh_cli auth token 2>/dev/null && return
+  fi
   printf 'protocol=https\nhost=github.com\n\n' | git credential fill 2>/dev/null \
     | awk -F= '/^password=/{print $2; exit}'
 }
 
 TOKEN="$(get_github_token || true)"
 if [[ -z "${TOKEN}" ]]; then
-  echo "No GitHub token. Set GITHUB_TOKEN or run: gh auth login" >&2
+  echo "No GitHub token. Run: /usr/local/bin/gh auth login" >&2
+  echo "Or set GITHUB_TOKEN, then re-run this script." >&2
   echo "Manual fork: https://github.com/${UPSTREAM}/fork" >&2
   exit 1
 fi
