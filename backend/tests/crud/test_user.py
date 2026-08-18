@@ -1,7 +1,7 @@
 import pytest
 from fastapi.encoders import jsonable_encoder
-from pydantic import ValidationError
 from pwdlib.hashers.bcrypt import BcryptHasher
+from pydantic import ValidationError
 from sqlalchemy import text
 from sqlalchemy.exc import DBAPIError
 from sqlmodel import Session

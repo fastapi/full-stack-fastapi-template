@@ -2,7 +2,7 @@ import uuid
 from datetime import UTC, datetime
 from enum import StrEnum
 
-from pydantic import EmailStr, computed_field, ConfigDict
+from pydantic import ConfigDict, EmailStr, computed_field
 from sqlalchemy import Boolean, Column, Computed, DateTime
 from sqlalchemy import Enum as SqlEnum
 from sqlmodel import Field, Relationship, SQLModel
@@ -87,7 +87,7 @@ class User(UserFields, table=True):
         default_factory=get_datetime_utc,
         sa_type=DateTime(timezone=True),  # type: ignore
     )
-    items: list["Item"] = Relationship(back_populates="owner", cascade_delete=True)
+    items: list[Item] = Relationship(back_populates="owner", cascade_delete=True)
 
 
 # Properties to return via API, id is always required

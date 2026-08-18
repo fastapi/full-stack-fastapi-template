@@ -221,10 +221,6 @@ export type UserPublic = {
      * Is Active
      */
     is_active?: boolean;
-    /**
-     * Is Superuser
-     */
-    is_superuser?: boolean;
     role?: UserRole;
     /**
      * Full Name
@@ -238,6 +234,10 @@ export type UserPublic = {
      * Created At
      */
     created_at?: string | null;
+    /**
+     * Is Superuser
+     */
+    readonly is_superuser: boolean;
 };
 
 /**
@@ -340,6 +340,47 @@ export type ValidationError = {
     ctx?: {
         [key: string]: unknown;
     };
+};
+
+/**
+ * UserPublic
+ */
+export type UserPublicWritable = {
+    /**
+     * Email
+     */
+    email: string;
+    /**
+     * Is Active
+     */
+    is_active?: boolean;
+    role?: UserRole;
+    /**
+     * Full Name
+     */
+    full_name?: string | null;
+    /**
+     * Id
+     */
+    id: string;
+    /**
+     * Created At
+     */
+    created_at?: string | null;
+};
+
+/**
+ * UsersPublic
+ */
+export type UsersPublicWritable = {
+    /**
+     * Data
+     */
+    data: Array<UserPublicWritable>;
+    /**
+     * Count
+     */
+    count: number;
 };
 
 export type loginLoginAccessTokenData = {
