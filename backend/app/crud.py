@@ -9,13 +9,14 @@ from app.models import Item, ItemCreate, User, UserCreate, UserRole, UserUpdate
 
 def _sync_role_and_superuser(user_data: dict) -> None:
     role = user_data.get("role")
-    if role is not None:
-        user_data["is_superuser"] = role == UserRole.ADMIN
-    elif user_data.get("is_superuser"):
+    is_superuser = user_data.get("is_superuser")
+
+    if is_superuser and (role is None or role == UserRole.MEMBER):
         user_data["role"] = UserRole.ADMIN
-    else:
-        user_data.setdefault("role", UserRole.MEMBER)
-        user_data["is_superuser"] = False
+    elif role is None:
+        user_data["role"] = UserRole.MEMBER
+
+    user_data["is_superuser"] = user_data["role"] == UserRole.ADMIN
 
 
 def create_user(*, session: Session, user_create: UserCreate) -> User:
