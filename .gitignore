@@ -1,8 +1,12 @@
 .vscode/*
 !.vscode/extensions.json
+.idea/
+.agents/
+.claude/
 node_modules/
 backend/app/frontend/
 /test-results/
 /playwright-report/
 /blob-report/
 /playwright/.cache/
+compose.override.yml
