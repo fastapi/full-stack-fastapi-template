@@ -217,6 +217,8 @@ Make it easy for us to run your solution without hunting for setup instructions.
 - [ ] Optional: `NOTES.md` with anything you want us to know (scope cuts, trade-offs, what you'd do with more time)
 - [ ] Copies of conversations with AI tools (`docs/ai-conversations/`, English)
 
+**Note for reviewers:** this repo is not a GitHub fork of the template. Use [docs/REVIEW.md](docs/REVIEW.md) to diff against commit `3f52abe` (Init commit) or upstream [full-stack-fastapi-template](https://github.com/fastapi/full-stack-fastapi-template).
+
 ---
 
 **Good luck!** Focus on demonstrating clear thinking and solid engineering fundamentals. We're looking for maintainable code, not perfect code.
