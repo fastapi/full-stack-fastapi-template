@@ -36,7 +36,6 @@ def authentication_token_for_role(
             email=email,
             password=password,
             role=role,
-            is_superuser=role == UserRole.ADMIN,
         )
         crud.create_user(session=db, user_create=user_in_create)
     else:

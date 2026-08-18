@@ -9,6 +9,8 @@ export type Permission =
   | "metrics:view"
   | "profile:update_self"
   | "settings:global"
+  | "items:list_any"
+  | "items:manage_any"
 
 const ROLE_PERMISSIONS: Record<UserRole, readonly Permission[]> = {
   admin: [
@@ -19,6 +21,8 @@ const ROLE_PERMISSIONS: Record<UserRole, readonly Permission[]> = {
     "metrics:view",
     "profile:update_self",
     "settings:global",
+    "items:list_any",
+    "items:manage_any",
   ],
   manager: ["users:list", "metrics:view", "profile:update_self"],
   member: ["profile:update_self"],

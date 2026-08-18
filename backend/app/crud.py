@@ -1,3 +1,4 @@
+# User and item CRUD helpers; role is the sole writable authorization field.
 import uuid
 from typing import Any
 
@@ -7,28 +8,20 @@ from app.core.security import get_password_hash, verify_password
 from app.models import Item, ItemCreate, User, UserCreate, UserRole, UserUpdate
 
 
-def _sync_role_and_superuser(user_data: dict) -> None:
-    role = user_data.get("role")
-    is_superuser = user_data.get("is_superuser")
-
-    if is_superuser and (role is None or role == UserRole.MEMBER):
-        user_data["role"] = UserRole.ADMIN
-    elif role is None:
+def _default_role_for_create(user_data: dict) -> None:
+    if user_data.get("role") is None:
         user_data["role"] = UserRole.MEMBER
-
-    user_data["is_superuser"] = user_data["role"] == UserRole.ADMIN
 
 
 def create_user(*, session: Session, user_create: UserCreate) -> User:
     user_data = user_create.model_dump()
-    _sync_role_and_superuser(user_data)
-    db_obj = User.model_validate(
-        user_create,
-        update={
-            "hashed_password": get_password_hash(user_create.password),
-            "role": user_data["role"],
-            "is_superuser": user_data["is_superuser"],
-        },
+    _default_role_for_create(user_data)
+    db_obj = User(
+        email=user_create.email,
+        is_active=user_create.is_active,
+        full_name=user_create.full_name,
+        role=user_data["role"],
+        hashed_password=get_password_hash(user_create.password),
     )
     session.add(db_obj)
     session.commit()
@@ -38,7 +31,6 @@ def create_user(*, session: Session, user_create: UserCreate) -> User:
 
 def update_user(*, session: Session, db_user: User, user_in: UserUpdate) -> Any:
     user_data = user_in.model_dump(exclude_unset=True)
-    _sync_role_and_superuser(user_data)
     extra_data = {}
     if "password" in user_data:
         password = user_data["password"]

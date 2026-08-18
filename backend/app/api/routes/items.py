@@ -5,6 +5,7 @@ from fastapi import APIRouter, HTTPException
 from sqlmodel import col, func, select
 
 from app.api.deps import CurrentUser, SessionDep
+from app.core.permissions import Permission, user_can_manage_item, user_has_permission
 from app.models import Item, ItemCreate, ItemPublic, ItemsPublic, ItemUpdate, Message
 
 router = APIRouter(prefix="/items", tags=["items"])
@@ -18,7 +19,7 @@ def read_items(
     Retrieve items.
     """
 
-    if current_user.is_superuser:
+    if user_has_permission(current_user, Permission.ITEMS_LIST_ANY):
         count_statement = select(func.count()).select_from(Item)
         count = session.exec(count_statement).one()
         statement = (
@@ -53,7 +54,7 @@ def read_item(session: SessionDep, current_user: CurrentUser, id: uuid.UUID) -> 
     item = session.get(Item, id)
     if not item:
         raise HTTPException(status_code=404, detail="Item not found")
-    if not current_user.is_superuser and (item.owner_id != current_user.id):
+    if not user_can_manage_item(current_user, item.owner_id):
         raise HTTPException(status_code=403, detail="Not enough permissions")
     return item
 
@@ -86,7 +87,7 @@ def update_item(
     item = session.get(Item, id)
     if not item:
         raise HTTPException(status_code=404, detail="Item not found")
-    if not current_user.is_superuser and (item.owner_id != current_user.id):
+    if not user_can_manage_item(current_user, item.owner_id):
         raise HTTPException(status_code=403, detail="Not enough permissions")
     update_dict = item_in.model_dump(exclude_unset=True)
     item.sqlmodel_update(update_dict)
@@ -106,7 +107,7 @@ def delete_item(
     item = session.get(Item, id)
     if not item:
         raise HTTPException(status_code=404, detail="Item not found")
-    if not current_user.is_superuser and (item.owner_id != current_user.id):
+    if not user_can_manage_item(current_user, item.owner_id):
         raise HTTPException(status_code=403, detail="Not enough permissions")
     session.delete(item)
     session.commit()

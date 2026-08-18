@@ -2,8 +2,8 @@ import uuid
 from datetime import UTC, datetime
 from enum import StrEnum
 
-from pydantic import EmailStr
-from sqlalchemy import Column, DateTime
+from pydantic import EmailStr, computed_field, ConfigDict
+from sqlalchemy import Boolean, Column, Computed, DateTime
 from sqlalchemy import Enum as SqlEnum
 from sqlmodel import Field, Relationship, SQLModel
 
@@ -18,17 +18,18 @@ class UserRole(StrEnum):
     MEMBER = "member"
 
 
-# Shared properties
-class UserBase(SQLModel):
+# Shared user fields for API input/output (role is the source of truth).
+class UserFields(SQLModel):
     email: EmailStr = Field(unique=True, index=True, max_length=255)
     is_active: bool = True
-    is_superuser: bool = False
     role: UserRole = Field(default=UserRole.MEMBER)
     full_name: str | None = Field(default=None, max_length=255)
 
 
 # Properties to receive via API on creation
-class UserCreate(UserBase):
+class UserCreate(UserFields):
+    model_config = ConfigDict(extra="forbid")
+
     password: str = Field(min_length=8, max_length=128)
 
 
@@ -40,9 +41,10 @@ class UserRegister(SQLModel):
 
 # Properties to receive via API on update, all are optional
 class UserUpdate(SQLModel):
+    model_config = ConfigDict(extra="forbid")
+
     email: EmailStr | None = Field(default=None, max_length=255)
     is_active: bool | None = None
-    is_superuser: bool | None = None
     role: UserRole | None = None
     full_name: str | None = Field(default=None, max_length=255)
     password: str | None = Field(default=None, min_length=8, max_length=128)
@@ -59,7 +61,7 @@ class UpdatePassword(SQLModel):
 
 
 # Database model, database table inferred from class name
-class User(UserBase, table=True):
+class User(UserFields, table=True):
     id: uuid.UUID = Field(default_factory=uuid.uuid4, primary_key=True)
     hashed_password: str
     role: UserRole = Field(
@@ -73,17 +75,30 @@ class User(UserBase, table=True):
             nullable=False,
         ),
     )
+    is_superuser: bool = Field(
+        default=None,  # type: ignore[assignment]
+        sa_column=Column(
+            Boolean,
+            Computed("(role = 'admin')", persisted=True),
+            nullable=False,
+        ),
+    )
     created_at: datetime | None = Field(
         default_factory=get_datetime_utc,
         sa_type=DateTime(timezone=True),  # type: ignore
     )
-    items: list[Item] = Relationship(back_populates="owner", cascade_delete=True)
+    items: list["Item"] = Relationship(back_populates="owner", cascade_delete=True)
 
 
 # Properties to return via API, id is always required
-class UserPublic(UserBase):
+class UserPublic(UserFields):
     id: uuid.UUID
     created_at: datetime | None = None
+
+    @computed_field  # type: ignore[prop-decorator]
+    @property
+    def is_superuser(self) -> bool:
+        return self.role == UserRole.ADMIN
 
 
 class UsersPublic(SQLModel):

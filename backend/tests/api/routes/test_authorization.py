@@ -8,6 +8,7 @@ from sqlmodel import Session
 from app import crud
 from app.core.config import settings
 from app.models import UserCreate, UserUpdate
+from tests.utils.item import create_random_item
 from tests.utils.user import (
     user_authentication_headers,
 )
@@ -107,6 +108,18 @@ def test_metrics_admin_and_manager_allowed_member_denied(
     assert admin_response.status_code == 200
     assert manager_response.status_code == 200
     assert member_response.status_code == 403
+
+
+def test_manager_cannot_access_other_users_item(
+    client: TestClient, manager_token_headers: dict[str, str], db: Session
+) -> None:
+    item = create_random_item(db)
+    response = client.get(
+        f"{settings.API_V1_STR}/items/{item.id}",
+        headers=manager_token_headers,
+    )
+    assert response.status_code == 403
+    assert response.json()["detail"] == "Not enough permissions"
 
 
 def test_invalid_access_token(client: TestClient) -> None:

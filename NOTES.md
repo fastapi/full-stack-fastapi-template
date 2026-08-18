@@ -20,7 +20,8 @@ Supplementary context for the [Fullstack Dev Test Task](https://github.com/evios
 
 ## Trade-offs
 
-- **`is_superuser` kept in sync with `role`** — Template compatibility; admin maps to `role=admin` in CRUD layer.
+- **`is_superuser` is derived from `role`** — PostgreSQL generated column plus read-only `@computed_field` in API responses; writable schemas accept `role` only (`extra="forbid"` blocks legacy `is_superuser` input).
+- **Items use the permission layer** — Admin holds `items:list_any` / `items:manage_any`; manager and member manage only their own items.
 - **Frontend permission duplication** — Acceptable for three roles; would generate or fetch capabilities in a larger system.
 
 ## Observability

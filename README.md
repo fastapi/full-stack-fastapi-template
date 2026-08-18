@@ -52,6 +52,9 @@ Credentials are configured in `.env` (`FIRST_SUPERUSER*`, `MANAGER_USER*`, `MEMB
 | Update own profile | yes | yes | yes |
 | Update any profile | yes | no | no |
 | Global settings | yes | no | no |
+| List all items | yes | no | no |
+| Manage any item (read/update/delete) | yes | no | no |
+| Manage own items | yes | yes | yes |
 
 ## Authorization Approach
 

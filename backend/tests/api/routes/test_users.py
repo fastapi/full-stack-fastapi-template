@@ -7,7 +7,7 @@ from sqlmodel import Session, select
 from app import crud
 from app.core.config import settings
 from app.core.security import verify_password
-from app.models import User, UserCreate
+from app.models import User, UserCreate, UserRole
 from tests.utils.user import create_random_user
 from tests.utils.utils import random_email, random_lower_string
 
@@ -355,6 +355,21 @@ def test_register_user_already_exists_error(client: TestClient) -> None:
     assert r.json()["detail"] == "The user with this email already exists in the system"
 
 
+def test_create_user_rejects_is_superuser_in_request_body(
+    client: TestClient, superuser_token_headers: dict[str, str]
+) -> None:
+    response = client.post(
+        f"{settings.API_V1_STR}/users/",
+        headers=superuser_token_headers,
+        json={
+            "email": "legacy-superuser-flag@example.com",
+            "password": "securepass1",
+            "is_superuser": True,
+        },
+    )
+    assert response.status_code == 422
+
+
 def test_update_user(
     client: TestClient, superuser_token_headers: dict[str, str], db: Session
 ) -> None:
@@ -379,6 +394,74 @@ def test_update_user(
     db.refresh(user_db)
     assert user_db
     assert user_db.full_name == "Updated_full_name"
+    assert user_db.role == UserRole.MEMBER
+
+
+def test_update_user_preserves_manager_role_on_partial_patch(
+    client: TestClient, superuser_token_headers: dict[str, str], db: Session
+) -> None:
+    username = random_email()
+    password = random_lower_string()
+    user_in = UserCreate(email=username, password=password, role=UserRole.MANAGER)
+    user = crud.create_user(session=db, user_create=user_in)
+    assert user.role == UserRole.MANAGER
+
+    r = client.patch(
+        f"{settings.API_V1_STR}/users/{user.id}",
+        headers=superuser_token_headers,
+        json={"full_name": "Manager Renamed"},
+    )
+    assert r.status_code == 200
+    assert r.json()["full_name"] == "Manager Renamed"
+    assert r.json()["role"] == UserRole.MANAGER.value
+
+    db.refresh(user)
+    assert user.role == UserRole.MANAGER
+    assert user.is_superuser is False
+
+
+def test_update_user_password_preserves_role(
+    client: TestClient, superuser_token_headers: dict[str, str], db: Session
+) -> None:
+    username = random_email()
+    password = random_lower_string()
+    user_in = UserCreate(email=username, password=password, role=UserRole.MANAGER)
+    user = crud.create_user(session=db, user_create=user_in)
+
+    new_password = random_lower_string()
+    r = client.patch(
+        f"{settings.API_V1_STR}/users/{user.id}",
+        headers=superuser_token_headers,
+        json={"password": new_password},
+    )
+    assert r.status_code == 200
+
+    db.refresh(user)
+    assert user.role == UserRole.MANAGER
+    verified, _ = verify_password(new_password, user.hashed_password)
+    assert verified
+
+
+def test_update_user_role_syncs_is_superuser(
+    client: TestClient, superuser_token_headers: dict[str, str], db: Session
+) -> None:
+    username = random_email()
+    password = random_lower_string()
+    user_in = UserCreate(email=username, password=password, role=UserRole.MEMBER)
+    user = crud.create_user(session=db, user_create=user_in)
+
+    r = client.patch(
+        f"{settings.API_V1_STR}/users/{user.id}",
+        headers=superuser_token_headers,
+        json={"role": UserRole.ADMIN.value},
+    )
+    assert r.status_code == 200
+    assert r.json()["role"] == UserRole.ADMIN.value
+    assert r.json()["is_superuser"] is True
+
+    db.refresh(user)
+    assert user.role == UserRole.ADMIN
+    assert user.is_superuser is True
 
 
 def test_update_user_not_exists(

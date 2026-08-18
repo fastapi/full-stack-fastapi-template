@@ -20,7 +20,6 @@ def _ensure_user(
             email=email,
             password=password,
             role=role,
-            is_superuser=role == UserRole.ADMIN,
         )
         crud.create_user(session=session, user_create=user_in)
 
