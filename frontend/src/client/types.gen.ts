@@ -203,6 +203,10 @@ export type UserCreate = {
      */
     is_superuser?: boolean;
     /**
+     * Role
+     */
+    role?: 'admin' | 'manager' | 'member';
+    /**
      * Full Name
      */
     full_name?: string | null;
@@ -228,6 +232,10 @@ export type UserPublic = {
      * Is Superuser
      */
     is_superuser?: boolean;
+    /**
+     * Role
+     */
+    role?: 'admin' | 'manager' | 'member';
     /**
      * Full Name
      */
@@ -276,6 +284,10 @@ export type UserUpdate = {
      * Is Superuser
      */
     is_superuser?: boolean | null;
+    /**
+     * Role
+     */
+    role?: 'admin' | 'manager' | 'member' | null;
     /**
      * Full Name
      */
