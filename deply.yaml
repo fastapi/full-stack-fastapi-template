@@ -1,0 +1,81 @@
+deply:
+  paths:
+    - backend/app
+
+  exclude_files:
+    - '^alembic/.*'
+
+  layers:
+    - name: interface
+      collectors:
+        - type: bool
+          any_of:
+            - type: directory
+              directories:
+                - api
+              element_type: function
+            - type: directory
+              directories:
+                - api
+              element_type: class
+            - type: file_regex
+              regex: '^api/main\.py$'
+              element_type: variable
+            - type: file_regex
+              regex: '^main\.py$'
+              element_type: function
+
+    - name: data
+      collectors:
+        - type: file_regex
+          regex: '^(crud|models)\.py$'
+          element_type: function
+        - type: file_regex
+          regex: '^(crud|models)\.py$'
+          element_type: class
+
+    - name: infrastructure
+      collectors:
+        - type: bool
+          any_of:
+            - type: directory
+              directories:
+                - core
+              element_type: function
+            - type: directory
+              directories:
+                - core
+              element_type: class
+            - type: file_regex
+              regex: '^utils\.py$'
+              element_type: function
+            - type: file_regex
+              regex: '^utils\.py$'
+              element_type: class
+
+    - name: bootstrap
+      collectors:
+        - type: file_regex
+          regex: '^(backend_pre_start|initial_data|tests_pre_start)\.py$'
+          element_type: function
+
+  ruleset:
+    interface:
+      disallow_layer_dependencies:
+        - bootstrap
+
+    data:
+      disallow_layer_dependencies:
+        - interface
+        - bootstrap
+      disallow_external_imports:
+        - fastapi
+        - starlette
+
+    infrastructure:
+      disallow_layer_dependencies:
+        - interface
+        - bootstrap
+      disallow_external_imports:
+        - fastapi
+        - starlette

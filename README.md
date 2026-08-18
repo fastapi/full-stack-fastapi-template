@@ -70,6 +70,18 @@ General development docs: [development.md](./development.md).
 
 This includes the local FastAPI and Vite workflow, Docker Compose services, `.env` configuration, and more.
 
+## Architecture Analysis
+
+[Deply](https://github.com/Vashkatsi/deply) provides an optional baseline for this template's pragmatic Active Record-style architecture.
+It does not enforce Clean Architecture boundaries; the [verified recipe](https://vashkatsi.github.io/deply/doc/full-stack-fastapi-template.html) documents the scope and trade-offs.
+
+Run from the project root with the template's Python version:
+
+```bash
+uvx --from deply==1.0.0 --python 3.14 deply validate --config=deply.yaml
+uvx --from deply==1.0.0 --python 3.14 deply analyze --parallel --config=deply.yaml
+```
+
 ## Release Notes
 
 Check the file [release-notes.md](./release-notes.md).
