@@ -1,10 +1,13 @@
 import { createFileRoute } from "@tanstack/react-router"
 
+import GlobalSettings from "@/components/UserSettings/GlobalSettings"
 import ChangePassword from "@/components/UserSettings/ChangePassword"
 import DeleteAccount from "@/components/UserSettings/DeleteAccount"
 import UserInformation from "@/components/UserSettings/UserInformation"
+import AccessDenied from "@/components/Common/AccessDenied"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import useAuth from "@/hooks/useAuth"
+import usePermissions from "@/hooks/usePermissions"
 
 const tabsConfig = [
   { value: "my-profile", title: "My profile", component: UserInformation },
@@ -25,12 +28,25 @@ export const Route = createFileRoute("/_layout/settings")({
 
 function UserSettings() {
   const { user: currentUser } = useAuth()
-  const finalTabs = currentUser?.is_superuser
-    ? tabsConfig.slice(0, 3)
+  const { can } = usePermissions()
+
+  const finalTabs = can("settings:global")
+    ? [
+        ...tabsConfig,
+        {
+          value: "global",
+          title: "Global settings",
+          component: GlobalSettings,
+        },
+      ]
     : tabsConfig
 
   if (!currentUser) {
     return null
+  }
+
+  if (!can("profile:update_self")) {
+    return <AccessDenied message="You cannot access account settings." />
   }
 
   return (
