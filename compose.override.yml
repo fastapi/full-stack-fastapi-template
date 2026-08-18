@@ -3,7 +3,7 @@ services:
   proxy:
     image: traefik:3.6
     ports:
-      - "80:80"
+      - "8888:80"
       - "8090:8080"
     # Duplicate the command from compose.yml to add --api.insecure=true
     command:
@@ -25,7 +25,7 @@ services:
       - --api.insecure=true
   db:
     ports:
-      - "5432:5432"
+      - "5433:5432"
 
   adminer:
     ports:
@@ -43,22 +43,6 @@ services:
       - dev
       - --host
       - "0.0.0.0"
-    develop:
-      watch:
-        - path: ./backend
-          action: sync
-          target: /app/backend
-          ignore:
-            - .venv
-        - path: ./backend/pyproject.toml
-          action: rebuild
-        - path: ./frontend
-          action: rebuild
-          ignore:
-            - ./frontend/node_modules
-            - ./frontend/dist
-            - ./frontend/blob-report
-            - ./frontend/test-results
     # TODO: remove once coverage is done locally
     volumes:
       - ./backend/htmlcov:/app/backend/htmlcov

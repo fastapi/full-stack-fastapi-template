@@ -51,7 +51,6 @@ services:
     depends_on:
       db:
         condition: service_healthy
-        restart: true
     environment:
       PROJECT_NAME: ${PROJECT_NAME:?Variable not set}
       SECRET_KEY: ${SECRET_KEY:?Variable not set}
