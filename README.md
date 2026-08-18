@@ -4,7 +4,7 @@ This project extends the [Full Stack FastAPI Template](https://github.com/fastap
 
 ## Submission
 
-Fork PR: https://github.com/fastapi/full-stack-fastapi-template/pull/2445  
+Fork PR: https://github.com/fastapi/full-stack-fastapi-template/pull/2445
 Fork: https://github.com/yanhub/full-stack-fastapi-template
 
 ## Quick Start (Docker)
