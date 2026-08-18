@@ -216,7 +216,7 @@ Make it easy for us to run your solution without hunting for setup instructions.
 - [ ] Working implementation of RBAC
 - [ ] Optional: `NOTES.md` with anything you want us to know (scope cuts, trade-offs, what you'd do with more time)
 - [ ] Copies of conversations with AI tools (`docs/ai-conversations/`, English)
-- [ ] Fork of [full-stack-fastapi-template](https://github.com/fastapi/full-stack-fastapi-template) with an open PR (see `./scripts/setup-fork-and-pr.sh`)
+- [ ] Fork of [full-stack-fastapi-template](https://github.com/fastapi/full-stack-fastapi-template) with an open PR
 
 ---
 

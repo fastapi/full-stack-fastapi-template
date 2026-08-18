@@ -2,23 +2,10 @@
 
 This project extends the [Full Stack FastAPI Template](https://github.com/fastapi/full-stack-fastapi-template) with role-based access control (RBAC) for the [Fullstack Dev Test Task](https://github.com/evios/Fullstack-Dev-Test-Task).
 
-## Submission (fork + PR)
+## Submission
 
-Submit as a **GitHub fork** of [full-stack-fastapi-template](https://github.com/fastapi/full-stack-fastapi-template) so reviewers get a web diff/PR:
-
-```bash
-# One-time: GitHub CLI auth (use /usr/local/bin/gh — NOT /usr/bin/gh)
-/usr/local/bin/gh auth login
-
-# Fork upstream, push this branch, open PR
-./scripts/setup-fork-and-pr.sh
-```
-
-If `gh auth login` fails with `No such command "auth"`, your `gh` is the wrong package. Use `/usr/local/bin/gh` or install from https://cli.github.com.
-
-Manual fork: https://github.com/fastapi/full-stack-fastapi-template/fork → then set `origin` to your fork and `git push -u origin main`.
-
-Compare URL shape: `https://github.com/fastapi/full-stack-fastapi-template/compare/master...YOUR_USER:full-stack-fastapi-template:main`
+Fork PR: https://github.com/fastapi/full-stack-fastapi-template/pull/2445  
+Fork: https://github.com/yanhub/full-stack-fastapi-template
 
 ## Quick Start (Docker)
 
