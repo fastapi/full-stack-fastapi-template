@@ -3,6 +3,9 @@
 [![Test Docker Compose](../../actions/workflows/test-docker-compose.yml/badge.svg)](../../actions/workflows/test-docker-compose.yml)
 [![Test Backend](../../actions/workflows/test-backend.yml/badge.svg)](../../actions/workflows/test-backend.yml)
 
+## What Is This?
+- ❓ This repository is a development-ready boilerplate template designed to skip the tedious setup of building a modern web application from scratch. Instead of spending precious time configuring user authentication , setting up databases, connecting a frontend framework, and configuring Docker, this template provides a fully functional general use full-stack ecosystem out of the box.
+
 ## Technology Stack and Features
 
 - ⚡ [**FastAPI**](https://fastapi.tiangolo.com) for the Python backend API.
