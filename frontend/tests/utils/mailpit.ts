@@ -1,36 +1,10 @@
 import type { APIRequestContext } from "@playwright/test"
 
-type Address = {
-  Name: string
-  Address: string
-}
-
-type Email = {
+type EmailSummary = {
   ID: string
-  To: Address[]
-  Subject: string
 }
 
-async function findEmail({
-  request,
-  query,
-}: {
-  request: APIRequestContext
-  query: string
-}) {
-  const response = await request.get(
-    `${process.env.MAILPIT_HOST}/api/v1/search`,
-    {
-      params: { query, limit: 1 },
-    },
-  )
-
-  const { messages }: { messages: Email[] } = await response.json()
-
-  return messages[0] ?? null
-}
-
-export async function findLastEmail({
+export async function waitForEmailHtml({
   request,
   query,
   timeout = 5000,
@@ -42,18 +16,31 @@ export async function findLastEmail({
   const deadline = Date.now() + timeout
 
   while (Date.now() < deadline) {
-    const email = await findEmail({ request, query })
+    const response = await request.get(
+      `${process.env.MAILPIT_HOST}/api/v1/search`,
+      {
+        params: { query, limit: 1 },
+      },
+    )
+    const { messages }: { messages: EmailSummary[] } = await response.json()
+    const email = messages[0]
 
     if (email) {
-      return email
+      const htmlResponse = await request.get(
+        `${process.env.MAILPIT_HOST}/view/${email.ID}.html`,
+      )
+
+      if (!htmlResponse.ok()) {
+        throw new Error(
+          `Could not get the HTML for email "${email.ID}": ${htmlResponse.status()}`,
+        )
+      }
+
+      return htmlResponse.text()
     }
 
     await new Promise((resolve) => setTimeout(resolve, 100))
   }
 
   throw new Error(`Timeout while trying to get the latest email for "${query}"`)
-}
-
-export function emailUrl(email: Email) {
-  return `${process.env.MAILPIT_HOST}/view/${email.ID}.html`
 }
