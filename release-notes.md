@@ -9,6 +9,7 @@
 
 ### Refactors
 
+* 💄 Refactor email templates and components for improved styling. PR [#2451](https://github.com/fastapi/full-stack-fastapi-template/pull/2451) by [@alejsdev](https://github.com/alejsdev).
 * ♻️ Replace Mailcatcher with Mailpit for local email testing. PR [#2436](https://github.com/fastapi/full-stack-fastapi-template/pull/2436) by [@alejsdev](https://github.com/alejsdev).
 
 ### Docs
