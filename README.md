@@ -70,6 +70,10 @@ General development docs: [development.md](./development.md).
 
 This includes the local FastAPI and Vite workflow, Docker Compose services, `.env` configuration, and more.
 
+## Authorization
+
+Role-based access control (roles, permissions, and how the frontend learns a user's capabilities): [docs/AUTHORIZATION.md](./docs/AUTHORIZATION.md).
+
 ## Release Notes
 
 Check the file [release-notes.md](./release-notes.md).

@@ -1,5 +1,7 @@
 import { AxiosError } from "axios"
 
+import type { UserMePublic } from "@/client"
+
 function extractErrorMessage(err: Error): string {
   if (err instanceof AxiosError) {
     const errDetail = (err.response?.data as any)?.detail
@@ -26,4 +28,19 @@ export const getInitials = (name: string): string => {
     .map((word) => word[0])
     .join("")
     .toUpperCase()
+}
+
+export const PERMISSIONS = {
+  usersList: "users:list",
+  usersCreate: "users:create",
+  usersManage: "users:manage",
+  metricsView: "metrics:view",
+  systemAdmin: "system:admin",
+} as const
+
+export const hasPermission = (
+  user: UserMePublic | null | undefined,
+  code: string,
+): boolean => {
+  return user?.permissions.includes(code) ?? false
 }

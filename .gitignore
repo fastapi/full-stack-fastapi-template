@@ -6,3 +6,13 @@ backend/app/frontend/
 /playwright-report/
 /blob-report/
 /playwright/.cache/
+
+# IDE
+.idea/
+
+# Duplicate OpenSpec tool scaffolding
+.agent/
+.agents/
+.commandcode/
+.claude/commands/opsx/
+.claude/skills/openspec-*/

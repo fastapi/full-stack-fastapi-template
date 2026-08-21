@@ -9,6 +9,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
 import useAuth from "@/hooks/useAuth"
+import { hasPermission, PERMISSIONS } from "@/utils"
 import DeleteUser from "./DeleteUser"
 import EditUser from "./EditUser"
 
@@ -24,10 +25,14 @@ export const UserActionsMenu = ({ user }: UserActionsMenuProps) => {
     return null
   }
 
+  if (!hasPermission(currentUser, PERMISSIONS.usersManage)) {
+    return null
+  }
+
   return (
     <DropdownMenu open={open} onOpenChange={setOpen}>
       <DropdownMenuTrigger asChild>
-        <Button variant="ghost" size="icon">
+        <Button variant="ghost" size="icon" aria-label="User actions">
           <EllipsisVertical />
         </Button>
       </DropdownMenuTrigger>

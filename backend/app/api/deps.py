@@ -1,4 +1,4 @@
-from collections.abc import Generator
+from collections.abc import Callable, Generator
 from typing import Annotated
 
 import jwt
@@ -8,7 +8,7 @@ from jwt.exceptions import InvalidTokenError
 from pydantic import ValidationError
 from sqlmodel import Session
 
-from app.core import security
+from app.core import rbac, security
 from app.core.config import settings
 from app.core.db import engine
 from app.models import TokenPayload, User
@@ -33,7 +33,7 @@ def get_current_user(session: SessionDep, token: TokenDep) -> User:
             token, settings.SECRET_KEY, algorithms=[security.ALGORITHM]
         )
         token_data = TokenPayload(**payload)
-    except InvalidTokenError, ValidationError:
+    except (InvalidTokenError, ValidationError):
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,
             detail="Could not validate credentials",
@@ -49,9 +49,14 @@ def get_current_user(session: SessionDep, token: TokenDep) -> User:
 CurrentUser = Annotated[User, Depends(get_current_user)]
 
 
-def get_current_active_superuser(current_user: CurrentUser) -> User:
-    if not current_user.is_superuser:
-        raise HTTPException(
-            status_code=403, detail="The user doesn't have enough privileges"
-        )
-    return current_user
+def require_permission(code: str) -> Callable[[CurrentUser], User]:
+    # Factory, not a dependency itself: `Depends(require_permission("x"))` calls
+    # this to build the actual per-code dependency below.
+    def dependency(current_user: CurrentUser) -> User:
+        if not rbac.has_permission(current_user, code):
+            raise HTTPException(
+                status_code=403, detail="The user doesn't have enough privileges"
+            )
+        return current_user
+
+    return dependency

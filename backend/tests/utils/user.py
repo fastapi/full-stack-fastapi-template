@@ -28,17 +28,18 @@ def create_random_user(db: Session) -> User:
 
 
 def authentication_token_from_email(
-    *, client: TestClient, email: str, db: Session
+    *, client: TestClient, email: str, db: Session, role: str | None = None
 ) -> dict[str, str]:
     """
     Return a valid token for the user with given email.
 
-    If the user doesn't exist it is created first.
+    If the user doesn't exist it is created first, with the given role
+    (defaults to `member`).
     """
     password = random_lower_string()
     user = crud.get_user_by_email(session=db, email=email)
     if not user:
-        user_in_create = UserCreate(email=email, password=password)
+        user_in_create = UserCreate(email=email, password=password, role=role)
         user = crud.create_user(session=db, user_create=user_in_create)
     else:
         user_in_update = UserUpdate(password=password)

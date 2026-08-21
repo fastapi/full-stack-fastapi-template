@@ -19,7 +19,14 @@ def test_get_users_superuser_me(
     current_user = r.json()
     assert current_user
     assert current_user["is_active"] is True
-    assert current_user["is_superuser"]
+    assert current_user["role"] == "admin"
+    assert set(current_user["permissions"]) == {
+        "users:list",
+        "users:create",
+        "users:manage",
+        "metrics:view",
+        "system:admin",
+    }
     assert current_user["email"] == settings.FIRST_SUPERUSER
 
 
@@ -30,7 +37,8 @@ def test_get_users_normal_user_me(
     current_user = r.json()
     assert current_user
     assert current_user["is_active"] is True
-    assert current_user["is_superuser"] is False
+    assert current_user["role"] == "member"
+    assert current_user["permissions"] == []
     assert current_user["email"] == settings.EMAIL_TEST_USER
 
 
@@ -457,7 +465,7 @@ def test_delete_user_me_as_superuser(
     )
     assert r.status_code == 403
     response = r.json()
-    assert response["detail"] == "Super users are not allowed to delete themselves"
+    assert response["detail"] == "Admins are not allowed to delete themselves"
 
 
 def test_delete_user_super_user(
@@ -502,7 +510,7 @@ def test_delete_user_current_super_user_error(
         headers=superuser_token_headers,
     )
     assert r.status_code == 403
-    assert r.json()["detail"] == "Super users are not allowed to delete themselves"
+    assert r.json()["detail"] == "Admins are not allowed to delete themselves"
 
 
 def test_delete_user_without_privileges(

@@ -3,13 +3,25 @@ from typing import Any
 
 from sqlmodel import Session, select
 
+from app.core import rbac
 from app.core.security import get_password_hash, verify_password
-from app.models import Item, ItemCreate, User, UserCreate, UserUpdate
+from app.models import Item, ItemCreate, Role, User, UserCreate, UserUpdate
+
+
+def get_role_by_slug(*, session: Session, slug: str) -> Role:
+    role = session.exec(select(Role).where(Role.slug == slug)).first()
+    if role is None:
+        raise ValueError(f"Unknown role: {slug}")
+    return role
 
 
 def create_user(*, session: Session, user_create: UserCreate) -> User:
-    db_obj = User.model_validate(
-        user_create, update={"hashed_password": get_password_hash(user_create.password)}
+    role = get_role_by_slug(session=session, slug=user_create.role or rbac.ROLE_MEMBER)
+    user_data = user_create.model_dump(exclude={"password", "role"})
+    db_obj = User(
+        **user_data,
+        hashed_password=get_password_hash(user_create.password),
+        role_id=role.id,
     )
     session.add(db_obj)
     session.commit()
@@ -21,9 +33,11 @@ def update_user(*, session: Session, db_user: User, user_in: UserUpdate) -> Any:
     user_data = user_in.model_dump(exclude_unset=True)
     extra_data = {}
     if "password" in user_data:
-        password = user_data["password"]
-        hashed_password = get_password_hash(password)
-        extra_data["hashed_password"] = hashed_password
+        password = user_data.pop("password")
+        extra_data["hashed_password"] = get_password_hash(password)
+    if "role" in user_data:
+        role_slug = user_data.pop("role")
+        extra_data["role_id"] = get_role_by_slug(session=session, slug=role_slug).id
     db_user.sqlmodel_update(user_data, update=extra_data)
     session.add(db_user)
     session.commit()

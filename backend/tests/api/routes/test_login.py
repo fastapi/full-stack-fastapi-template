@@ -4,6 +4,7 @@ from fastapi.testclient import TestClient
 from pwdlib.hashers.bcrypt import BcryptHasher
 from sqlmodel import Session
 
+from app import crud
 from app.core.config import settings
 from app.core.security import get_password_hash, verify_password
 from app.crud import create_user
@@ -89,7 +90,6 @@ def test_reset_password(client: TestClient, db: Session) -> None:
         full_name="Test User",
         password=password,
         is_active=True,
-        is_superuser=False,
     )
     user = create_user(session=db, user_create=user_create)
     token = generate_password_reset_token(email=email)
@@ -138,7 +138,10 @@ def test_login_with_bcrypt_password_upgrades_to_argon2(
     bcrypt_hash = bcrypt_hasher.hash(password)
     assert bcrypt_hash.startswith("$2")  # bcrypt hashes start with $2
 
-    user = User(email=email, hashed_password=bcrypt_hash, is_active=True)
+    member_role = crud.get_role_by_slug(session=db, slug="member")
+    user = User(
+        email=email, hashed_password=bcrypt_hash, is_active=True, role_id=member_role.id
+    )
     db.add(user)
     db.commit()
     db.refresh(user)
@@ -172,7 +175,10 @@ def test_login_with_argon2_password_keeps_hash(client: TestClient, db: Session) 
     assert argon2_hash.startswith("$argon2")
 
     # Create user with argon2 hash
-    user = User(email=email, hashed_password=argon2_hash, is_active=True)
+    member_role = crud.get_role_by_slug(session=db, slug="member")
+    user = User(
+        email=email, hashed_password=argon2_hash, is_active=True, role_id=member_role.id
+    )
     db.add(user)
     db.commit()
     db.refresh(user)

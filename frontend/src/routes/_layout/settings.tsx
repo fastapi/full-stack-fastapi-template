@@ -5,6 +5,7 @@ import DeleteAccount from "@/components/UserSettings/DeleteAccount"
 import UserInformation from "@/components/UserSettings/UserInformation"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import useAuth from "@/hooks/useAuth"
+import { hasPermission, PERMISSIONS } from "@/utils"
 
 const tabsConfig = [
   { value: "my-profile", title: "My profile", component: UserInformation },
@@ -25,8 +26,8 @@ export const Route = createFileRoute("/_layout/settings")({
 
 function UserSettings() {
   const { user: currentUser } = useAuth()
-  const finalTabs = currentUser?.is_superuser
-    ? tabsConfig.slice(0, 3)
+  const finalTabs = hasPermission(currentUser, PERMISSIONS.systemAdmin)
+    ? tabsConfig.filter((tab) => tab.value !== "danger-zone")
     : tabsConfig
 
   if (!currentUser) {

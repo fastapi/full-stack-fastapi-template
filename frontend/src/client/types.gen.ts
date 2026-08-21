@@ -123,6 +123,20 @@ export type Message = {
 };
 
 /**
+ * MetricsPublic
+ */
+export type MetricsPublic = {
+    /**
+     * User Count
+     */
+    user_count: number;
+    /**
+     * Item Count
+     */
+    item_count: number;
+};
+
+/**
  * NewPassword
  */
 export type NewPassword = {
@@ -199,10 +213,6 @@ export type UserCreate = {
      */
     is_active?: boolean;
     /**
-     * Is Superuser
-     */
-    is_superuser?: boolean;
-    /**
      * Full Name
      */
     full_name?: string | null;
@@ -210,6 +220,44 @@ export type UserCreate = {
      * Password
      */
     password: string;
+    /**
+     * Role
+     */
+    role?: string | null;
+};
+
+/**
+ * UserMePublic
+ */
+export type UserMePublic = {
+    /**
+     * Email
+     */
+    email: string;
+    /**
+     * Is Active
+     */
+    is_active?: boolean;
+    /**
+     * Full Name
+     */
+    full_name?: string | null;
+    /**
+     * Id
+     */
+    id: string;
+    /**
+     * Created At
+     */
+    created_at?: string | null;
+    /**
+     * Role
+     */
+    role: string;
+    /**
+     * Permissions
+     */
+    permissions: Array<string>;
 };
 
 /**
@@ -225,10 +273,6 @@ export type UserPublic = {
      */
     is_active?: boolean;
     /**
-     * Is Superuser
-     */
-    is_superuser?: boolean;
-    /**
      * Full Name
      */
     full_name?: string | null;
@@ -240,6 +284,10 @@ export type UserPublic = {
      * Created At
      */
     created_at?: string | null;
+    /**
+     * Role
+     */
+    role: string;
 };
 
 /**
@@ -273,9 +321,9 @@ export type UserUpdate = {
      */
     is_active?: boolean | null;
     /**
-     * Is Superuser
+     * Role
      */
-    is_superuser?: boolean | null;
+    role?: string | null;
     /**
      * Full Name
      */
@@ -554,7 +602,7 @@ export type usersReadUserMeResponses = {
     /**
      * Successful Response
      */
-    200: UserPublic;
+    200: UserMePublic;
 };
 
 export type usersReadUserMeResponse = usersReadUserMeResponses[keyof usersReadUserMeResponses];
@@ -920,6 +968,22 @@ export type itemsUpdateItemResponses = {
 };
 
 export type itemsUpdateItemResponse = itemsUpdateItemResponses[keyof itemsUpdateItemResponses];
+
+export type metricsReadMetricsData = {
+    body?: never;
+    path?: never;
+    query?: never;
+    url: '/api/v1/metrics/';
+};
+
+export type metricsReadMetricsResponses = {
+    /**
+     * Successful Response
+     */
+    200: MetricsPublic;
+};
+
+export type metricsReadMetricsResponse = metricsReadMetricsResponses[keyof metricsReadMetricsResponses];
 
 export type privateCreateUserData = {
     body: PrivateUserCreate;

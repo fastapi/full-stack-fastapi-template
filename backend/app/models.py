@@ -1,7 +1,8 @@
 import uuid
 from datetime import UTC, datetime
+from typing import Any
 
-from pydantic import EmailStr
+from pydantic import EmailStr, field_validator
 from sqlalchemy import DateTime
 from sqlmodel import Field, Relationship, SQLModel
 
@@ -10,17 +11,52 @@ def get_datetime_utc() -> datetime:
     return datetime.now(UTC)
 
 
+# Permission-role link table
+class RolePermissionLink(SQLModel, table=True):
+    __tablename__ = "role_permission"
+
+    role_id: uuid.UUID = Field(
+        foreign_key="role.id", primary_key=True, ondelete="CASCADE"
+    )
+    permission_id: uuid.UUID = Field(
+        foreign_key="permission.id", primary_key=True, ondelete="CASCADE"
+    )
+
+
+class PermissionBase(SQLModel):
+    code: str = Field(unique=True, index=True, max_length=64)
+
+
+class Permission(PermissionBase, table=True):
+    id: uuid.UUID = Field(default_factory=uuid.uuid4, primary_key=True)
+    roles: list[Role] = Relationship(
+        back_populates="permissions", link_model=RolePermissionLink
+    )
+
+
+class RoleBase(SQLModel):
+    slug: str = Field(unique=True, index=True, max_length=64)
+
+
+class Role(RoleBase, table=True):
+    id: uuid.UUID = Field(default_factory=uuid.uuid4, primary_key=True)
+    permissions: list[Permission] = Relationship(
+        back_populates="roles", link_model=RolePermissionLink
+    )
+    users: list[User] = Relationship(back_populates="role")
+
+
 # Shared properties
 class UserBase(SQLModel):
     email: EmailStr = Field(unique=True, index=True, max_length=255)
     is_active: bool = True
-    is_superuser: bool = False
     full_name: str | None = Field(default=None, max_length=255)
 
 
 # Properties to receive via API on creation
 class UserCreate(UserBase):
     password: str = Field(min_length=8, max_length=128)
+    role: str | None = Field(default=None, max_length=64)
 
 
 class UserRegister(SQLModel):
@@ -33,7 +69,7 @@ class UserRegister(SQLModel):
 class UserUpdate(SQLModel):
     email: EmailStr | None = Field(default=None, max_length=255)
     is_active: bool | None = None
-    is_superuser: bool | None = None
+    role: str | None = Field(default=None, max_length=64)
     full_name: str | None = Field(default=None, max_length=255)
     password: str | None = Field(default=None, min_length=8, max_length=128)
 
@@ -56,6 +92,8 @@ class User(UserBase, table=True):
         default_factory=get_datetime_utc,
         sa_type=DateTime(timezone=True),  # type: ignore
     )
+    role_id: uuid.UUID = Field(foreign_key="role.id", nullable=False)
+    role: Role = Relationship(back_populates="users")
     items: list[Item] = Relationship(back_populates="owner", cascade_delete=True)
 
 
@@ -63,6 +101,17 @@ class User(UserBase, table=True):
 class UserPublic(UserBase):
     id: uuid.UUID
     created_at: datetime | None = None
+    role: str
+
+    @field_validator("role", mode="before")
+    @classmethod
+    def _role_slug(cls, value: Any) -> Any:
+        slug = getattr(value, "slug", None)
+        return slug if slug is not None else value
+
+
+class UserMePublic(UserPublic):
+    permissions: list[str]
 
 
 class UsersPublic(SQLModel):
@@ -110,6 +159,11 @@ class ItemPublic(ItemBase):
 class ItemsPublic(SQLModel):
     data: list[ItemPublic]
     count: int
+
+
+class MetricsPublic(SQLModel):
+    user_count: int
+    item_count: int
 
 
 # Generic message

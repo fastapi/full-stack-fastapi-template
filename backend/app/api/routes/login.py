@@ -6,8 +6,8 @@ from fastapi.responses import HTMLResponse
 from fastapi.security import OAuth2PasswordRequestForm
 
 from app import crud
-from app.api.deps import CurrentUser, SessionDep, get_current_active_superuser
-from app.core import security
+from app.api.deps import CurrentUser, SessionDep, require_permission
+from app.core import rbac, security
 from app.core.config import settings
 from app.models import Message, NewPassword, Token, UserPublic, UserUpdate
 from app.utils import (
@@ -99,7 +99,7 @@ def reset_password(session: SessionDep, body: NewPassword) -> Message:
 
 @router.post(
     "/password-recovery-html-content/{email}",
-    dependencies=[Depends(get_current_active_superuser)],
+    dependencies=[Depends(require_permission(rbac.PERMISSION_SYSTEM_ADMIN))],
     response_class=HTMLResponse,
 )
 def recover_password_html_content(email: str, session: SessionDep) -> Any:
