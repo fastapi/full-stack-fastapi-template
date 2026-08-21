@@ -25,8 +25,8 @@ export default function NewAccount({
       project_name={project_name}
     >
       <Heading>Welcome to {project_name}!</Heading>
-      <Text className="text-[15px] leading-7 text-body">Hi,</Text>
-      <Text className="text-[15px] leading-7 text-body">
+      <Text style={bodyTextStyle}>Hi,</Text>
+      <Text style={bodyTextStyle}>
         Your account has been successfully created and is ready to use. These
         are your credentials:
       </Text>
@@ -34,18 +34,32 @@ export default function NewAccount({
         <Detail label="Username" value={username} />
         <Detail label="Password" value={password} />
       </Callout>
-      <Text className="text-[15px] leading-7 text-body">
+      <Text style={bodyTextStyle}>
         Get started by signing in to your dashboard:
       </Text>
       <LinkButton href={link}>Go to Dashboard</LinkButton>
-      <Text className="text-sm leading-6 text-muted">
+      <Text style={supportingTextStyle}>
         Or copy and paste this link into your browser:
         <br />
         <Link href={link}>{link}</Link>
       </Text>
-      <Text className="text-sm leading-6 text-muted">
+      <Text style={supportingTextStyle}>
         For security reasons, change your password after your first sign in.
       </Text>
     </Layout>
   )
+}
+
+const bodyTextStyle = {
+  color: "#334155",
+  fontSize: "15px",
+  lineHeight: "26px",
+  margin: "0 0 18px",
+}
+
+const supportingTextStyle = {
+  color: "#64748b",
+  fontSize: "14px",
+  lineHeight: "23px",
+  margin: "0 0 16px",
 }

@@ -1,7 +1,15 @@
+import { Link as EmailLink } from "@react-email/components"
+
 type LinkProps = React.PropsWithChildren & { href: string }
 
 export const Link = ({ children, href }: LinkProps) => (
-  <a href={href} className="text-brand-dark underline break-all">
+  <EmailLink href={href} style={linkStyle}>
     {children}
-  </a>
+  </EmailLink>
 )
+
+const linkStyle = {
+  color: "#00695c",
+  textDecoration: "underline",
+  wordBreak: "break-all" as const,
+}

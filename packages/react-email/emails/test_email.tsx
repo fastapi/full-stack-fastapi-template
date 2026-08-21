@@ -19,17 +19,31 @@ export default function TestEmail({
       project_name={project_name}
     >
       <Heading>Test email</Heading>
-      <Text className="text-[15px] leading-7 text-body">Hi,</Text>
-      <Text className="text-[15px] leading-7 text-body">
+      <Text style={bodyTextStyle}>Hi,</Text>
+      <Text style={bodyTextStyle}>
         This is a test email from {project_name}. If you're reading it, email
         delivery is configured correctly.
       </Text>
       <Callout>
         <Detail label="Sent to" value={email} />
       </Callout>
-      <Text className="text-sm leading-6 text-muted">
+      <Text style={supportingTextStyle}>
         If you weren't expecting this email, you can safely ignore it.
       </Text>
     </Layout>
   )
+}
+
+const bodyTextStyle = {
+  color: "#334155",
+  fontSize: "15px",
+  lineHeight: "26px",
+  margin: "0 0 18px",
+}
+
+const supportingTextStyle = {
+  color: "#64748b",
+  fontSize: "14px",
+  lineHeight: "23px",
+  margin: "0 0 16px",
 }
