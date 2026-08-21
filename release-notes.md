@@ -4,6 +4,7 @@
 
 ### Fixes
 
+* 🐛 Fix Sonner toast theme sync. PR [#2450](https://github.com/fastapi/full-stack-fastapi-template/pull/2450) by [@chris-bs23](https://github.com/chris-bs23).
 * 🐛 Add background to the sticky layout header. PR [#2384](https://github.com/fastapi/full-stack-fastapi-template/pull/2384) by [@istoutjesdijk](https://github.com/istoutjesdijk).
 
 ### Refactors
