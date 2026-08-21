@@ -22,6 +22,7 @@
 - 🔒 Secure password hashing by default.
 - 🔑 JWT (JSON Web Token) authentication.
 - 📫 Email-based password recovery.
+- ✉️ [React Email](https://react.email) for email templates.
 - 📬 [Mailpit](https://mailpit.axllent.org) for local email testing during development.
 - ✅ Tests with [Pytest](https://pytest.org).
 - 🏭 CI (continuous integration) and CD (continuous deployment) based on GitHub Actions.
@@ -41,6 +42,14 @@
 ### Dashboard - Dark Mode
 
 ![Dark mode dashboard screenshot](img/dashboard-dark.png)
+
+### React Email Templates
+
+![Email templates screenshot](img/react-email.png)
+
+### Mailpit - Local Email Testing
+
+![Mailpit screenshot](img/mailpit.png)
 
 ### Interactive API Documentation
 
