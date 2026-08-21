@@ -249,7 +249,9 @@ test.describe("Admin page access control", () => {
       page.getByRole("button", { name: "Add User" }),
     ).not.toBeVisible()
 
-    const otherUserRow = page.getByRole("row").filter({ hasText: firstSuperuser })
+    const otherUserRow = page
+      .getByRole("row")
+      .filter({ hasText: firstSuperuser })
     await expect(
       otherUserRow.getByRole("button", { name: "User actions" }),
     ).not.toBeVisible()

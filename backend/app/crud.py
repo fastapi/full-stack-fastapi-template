@@ -31,7 +31,7 @@ def create_user(*, session: Session, user_create: UserCreate) -> User:
 
 def update_user(*, session: Session, db_user: User, user_in: UserUpdate) -> Any:
     user_data = user_in.model_dump(exclude_unset=True)
-    extra_data = {}
+    extra_data: dict[str, Any] = {}
     if "password" in user_data:
         password = user_data.pop("password")
         extra_data["hashed_password"] = get_password_hash(password)

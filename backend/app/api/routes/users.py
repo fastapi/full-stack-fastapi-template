@@ -131,7 +131,9 @@ def read_user_me(current_user: CurrentUser) -> Any:
     Get current user.
     """
     permissions = rbac.get_permission_codes(current_user)
-    return UserMePublic.model_validate(current_user, update={"permissions": permissions})
+    return UserMePublic.model_validate(
+        current_user, update={"permissions": permissions}
+    )
 
 
 @router.delete("/me", response_model=Message)

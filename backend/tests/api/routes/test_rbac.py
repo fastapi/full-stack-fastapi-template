@@ -39,7 +39,9 @@ def test_manager_cannot_create_user(
 def test_manager_can_view_metrics(
     client: TestClient, manager_user_token_headers: dict[str, str]
 ) -> None:
-    r = client.get(f"{settings.API_V1_STR}/metrics/", headers=manager_user_token_headers)
+    r = client.get(
+        f"{settings.API_V1_STR}/metrics/", headers=manager_user_token_headers
+    )
     assert r.status_code == 200
     assert "user_count" in r.json()
 
@@ -73,8 +75,6 @@ def test_member_cannot_escalate_role_via_self_update(
     )
     assert r.status_code == 200
 
-    user = db.exec(
-        select(User).where(User.email == settings.EMAIL_TEST_USER)
-    ).first()
+    user = db.exec(select(User).where(User.email == settings.EMAIL_TEST_USER)).first()
     assert user
     assert user.role.slug == "member"
