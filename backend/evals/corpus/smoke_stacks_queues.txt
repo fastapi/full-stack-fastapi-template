@@ -1,0 +1,7 @@
+A stack is a last-in, first-out (LIFO) structure. Push adds an item; pop removes the most recently added item. Call stacks in programming languages are a classic example.
+
+A queue is first-in, first-out (FIFO). Enqueue adds at the back; dequeue removes from the front. Print spoolers and breadth-first search use queues.
+
+In Python, a list can act as a stack with append and pop. For queues, collections.deque is preferred because popping from the left of a list is O(n).
+
+Choosing the wrong structure often shows up as awkward code: scanning an entire list to remove the oldest item is a sign you wanted a queue.

@@ -1,0 +1,7 @@
+Object-oriented programming organizes code around objects that combine state and behavior. A class is a blueprint; an instance is a concrete object created from that class.
+
+Methods are functions defined on a class. The first parameter is usually named self and refers to the instance. Attributes store per-instance data such as a balance or a name.
+
+Encapsulation means hiding internal details behind a clear interface. Inheritance lets a subclass reuse and extend a parent class. Polymorphism lets callers use objects through a shared interface without knowing the concrete type.
+
+Prefer composition (has-a) when inheritance (is-a) feels forced. Deep inheritance hierarchies are a common source of brittle design.

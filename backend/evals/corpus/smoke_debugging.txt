@@ -1,0 +1,7 @@
+Debugging is the process of finding and fixing defects. Start by reproducing the bug reliably. If you cannot reproduce it, you cannot confirm a fix.
+
+Read the error message and traceback carefully. The last few frames usually point near the failure, though the root cause may be earlier.
+
+Print debugging and interactive debuggers both help. Change one thing at a time, then re-run. Large speculative edits make it hard to know which change mattered.
+
+Form a hypothesis about why the code fails, then design a small experiment that would falsify it. Guessing randomly wastes time compared with systematic isolation.

@@ -1,0 +1,7 @@
+Dictionaries map keys to values. In Python you write them with curly braces, for example {"alice": 3, "bob": 5}.
+
+Keys must be hashable (immutable types like str, int, and tuple of immutables). Values can be any object. Looking up a missing key with d[key] raises KeyError; d.get(key) returns None or a default instead.
+
+Dictionaries are unordered in older Python versions and insertion-ordered since 3.7. Iteration over a dict yields keys by default; use .values() or .items() when you need values or pairs.
+
+Use a dict when you need fast lookup by identifier. Prefer a list when order and positional access matter more than keyed retrieval.

@@ -4,6 +4,7 @@ from uuid import UUID
 
 import pytest
 from fastapi import HTTPException
+from pydantic import ValidationError
 
 from app.core.ai.openai import (
     MAX_CHARS,
@@ -123,6 +124,18 @@ def test_validate_and_convert_question_item_true_false() -> None:
     assert result.options == ["True", "False"]
 
 
+def test_validate_and_convert_question_item_rejects_answer_not_in_options() -> None:
+    """Bad T/F answers must raise ValidationError (generation maps to error_kind=validation)."""
+    mock_question = MagicMock()
+    mock_question.question = "Every recursive function needs a base case."
+    mock_question.answer = "A base case"
+    mock_question.type = "true_false"
+    mock_question.options = ["True", "False"]
+
+    with pytest.raises(ValidationError):
+        validate_and_convert_question_item(mock_question)
+
+
 def test_parse_llm_output_success() -> None:
     """Test parsing LLM output successfully."""
     mock_question1 = MagicMock()
@@ -177,6 +190,34 @@ def test_parse_llm_output_filters_none() -> None:
         result = parse_llm_output(mock_llm_output)
 
     assert result == []
+
+
+@pytest.mark.asyncio
+async def test_generate_questions_maps_answer_not_in_options_to_validation() -> None:
+    """Invalid answer∉options during parse must fail with error_kind=validation."""
+    from app.core.ai.openai import generate_questions
+
+    mock_llm = MagicMock()
+    mock_parsed = MagicMock()
+    bad_q = MagicMock()
+    bad_q.question = "Every recursive function needs a base case."
+    bad_q.answer = "A base case"
+    bad_q.type = "true_false"
+    bad_q.options = ["True", "False"]
+    mock_parsed.questions = [bad_q]
+    mock_llm.ainvoke = AsyncMock(
+        return_value={"parsed": mock_parsed, "raw": None, "parsing_error": None}
+    )
+
+    with patch("app.core.ai.openai._question_llm", return_value=mock_llm):
+        result = await generate_questions(
+            "lecture text", prompt_id="a", num_questions=1
+        )
+
+    assert result.ok is False
+    assert result.error_kind == "validation"
+    assert result.questions == []
+    assert result.schema_valid is False
 
 
 @pytest.mark.asyncio

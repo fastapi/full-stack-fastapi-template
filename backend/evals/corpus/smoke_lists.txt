@@ -1,0 +1,7 @@
+A list is an ordered, mutable collection of values. In Python you write lists with square brackets, for example [3, 1, 4].
+
+Indexing starts at 0. Negative indices count from the end: lst[-1] is the last element. Slicing lst[a:b] returns a new list from index a up to but not including b.
+
+Common operations include append to add at the end, insert at a position, and pop to remove. Lists can hold mixed types, but homogeneous lists are easier to reason about.
+
+List comprehensions build a new list from an iterable in one expression. They are concise for map/filter style transforms, but nested comprehensions can become unreadable.

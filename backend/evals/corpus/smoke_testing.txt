@@ -1,0 +1,7 @@
+Testing checks that code behaves as intended. A unit test focuses on a small piece in isolation, usually a function or method.
+
+A good test has a clear arrange/act/assert structure: set up inputs, call the code, and check the result. Assertions fail the test when the actual value differs from the expected value.
+
+Regression tests catch bugs that return after a fix. Edge cases (empty input, zero, negatives, duplicates) often reveal mistakes that happy-path tests miss.
+
+Automated tests should be fast and deterministic. Tests that depend on the network, the current time, or random values without control become flaky and lose trust.

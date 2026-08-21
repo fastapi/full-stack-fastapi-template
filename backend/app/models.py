@@ -417,7 +417,11 @@ class QuestionItem(PydanticBaseModel):
 
     @model_validator(mode="after")
     def validate_type_matches_options(self) -> "QuestionItem":
-        """Validate and correct question type based on options."""
+        """Validate and correct question type based on options.
+
+        Also requires answer ∈ options (exact match after T/F normalization),
+        matching the answer-in-options content gate used before persist/grade.
+        """
         options = self.options
 
         # Check if options match true_false pattern
@@ -448,6 +452,27 @@ class QuestionItem(PydanticBaseModel):
                 raise ValueError(
                     f"Multiple choice question must have at least 3 options, got {len(self.options) if isinstance(self.options, list) else 0}"
                 )
+
+        # Correct answer must be one of the selectable options (exact membership).
+        # For T/F, normalize case so "true"/"false" become "True"/"False".
+        if self.answer is None:
+            raise ValueError(
+                "Question answer is required and must be one of the options"
+            )
+        if self.type == "true_false":
+            answer_norm = str(self.answer).strip().lower()
+            if answer_norm == "true":
+                self.answer = "True"
+            elif answer_norm == "false":
+                self.answer = "False"
+            else:
+                raise ValueError(
+                    f"True/false answer must be one of {self.options}, got {self.answer!r}"
+                )
+        elif self.answer not in self.options:
+            raise ValueError(
+                f"Answer must be one of the options {self.options}, got {self.answer!r}"
+            )
 
         return self
 

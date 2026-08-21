@@ -1,0 +1,7 @@
+Variables store values that a program can use and update. In Python, you create a variable by assigning with =, for example x = 3.
+
+Python is dynamically typed: the same name can later hold a different type. Types still matter. Common built-in types include int, float, str, and bool.
+
+Names should describe what the value means. Avoid single-letter names except for short loop indices. Constants that should not change are often written in ALL_CAPS by convention, even though Python does not enforce immutability.
+
+An expression produces a value. A statement performs an action, such as an assignment or a print call. Understanding the difference helps when reading error messages and debugging.

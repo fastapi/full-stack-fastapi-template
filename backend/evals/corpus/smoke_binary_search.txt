@@ -1,0 +1,7 @@
+Binary search finds a target in a sorted sequence by repeatedly discarding half of the remaining range. Each step compares the target to the middle element.
+
+If the middle element is too small, search the right half. If it is too large, search the left half. The algorithm terminates when the range is empty or the target is found.
+
+Binary search runs in O(log n) time, which is much faster than linear scan for large sorted inputs. The critical precondition is that the data must already be sorted.
+
+Off-by-one errors in the low/high bounds are the most common implementation bugs. Writing careful loop invariants helps keep the inclusive/exclusive endpoints consistent.

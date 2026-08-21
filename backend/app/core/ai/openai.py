@@ -19,6 +19,7 @@ from app.models import (
     Document,
     ExplanationOutput,
     QuestionCreate,
+    QuestionItem,
     QuestionOutput,
     QuestionType,
 )
@@ -147,13 +148,26 @@ def fetch_document_texts(session: Session, document_ids: list[UUID]) -> list[str
 
 
 def validate_and_convert_question_item(q: Any) -> QuestionCreate | None:
-    """Validate LLM question item and convert to QuestionCreate."""
+    """Validate LLM question item and convert to QuestionCreate.
+
+    Re-validates via QuestionItem so answer ∈ options is enforced even when
+    callers pass a duck-typed object (not only structured-output parsing).
+    """
     try:
+        if isinstance(q, QuestionItem):
+            item = q
+        else:
+            item = QuestionItem(
+                question=q.question,
+                answer=q.answer,
+                type=q.type,
+                options=list(q.options) if q.options is not None else [],
+            )
         return QuestionCreate(
-            question=q.question,
-            correct_answer=q.answer,
-            type=QuestionType(q.type),
-            options=q.options,
+            question=item.question,
+            correct_answer=item.answer,
+            type=QuestionType(item.type),
+            options=item.options,
         )
     except ValidationError as ve:
         logger.error(f"Validation error for question item {q}: {ve}")

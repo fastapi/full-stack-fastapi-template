@@ -22,3 +22,24 @@ Score each **five-question set as a whole** (not each question). Scale **1–5**
 - **Reliability:** success rate, schema validity — did generation work?
 - **Correctness gates:** answer-in-options, MC/TF counts — contract compliance
 - **Efficiency:** latency / tokens — cost tradeoffs, not quality
+
+## Manual scores — smoke run `2026-07-31T00-10-58Z` (1 doc: `smoke_recursion`)
+
+Scored from saved artifacts (not a live re-run). Auto gates from that run: A 100% / B 60% / C 80% answer-in-options.
+
+| Criterion | A (baseline) | B (difficulty) | C (distractors) |
+|-----------|--------------|----------------|-----------------|
+| Appropriate difficulty | 3 | 4 | 3 |
+| Clear wording | 4 | 2 | 4 |
+| Good distractors | 3 | 3 | 4 |
+| Grounded in lecture | 5 | 4 | 5 |
+| **Overall** | **4** | **2** | **3** |
+
+Notes:
+- **A:** Contract-clean; questions are grounded and usable. Some MC options are soft/near-tautological.
+- **B:** Intended harder items, but two T/F rows used sentence answers (`"A base case"`, long memory phrase) instead of `True`/`False` → ungradable. Overall capped by correctness failure.
+- **C:** Stronger distractors on MC; one MC failed exact answer∈options because the answer string had a trailing period the option lacked.
+
+### Takeaway (ship / no-ship)
+
+**Ship prompt A.** It alone passed correctness gates and produced exam-usable grounded questions. Hold B/C until the answer∈options validator is merged and a re-smoke shows 100% contract compliance (or clean validation failures with nothing persisted).

@@ -1,0 +1,7 @@
+Loops repeat a block of code. A for loop iterates over a sequence such as a range, list, or string. A while loop repeats as long as a condition stays True.
+
+Use for when you know the collection or count of iterations in advance. Use while when the stopping condition depends on something that changes inside the loop.
+
+Infinite loops happen when the condition never becomes False. They usually mean a missing update to the loop variable or a logic error in the condition.
+
+break exits the nearest loop immediately. continue skips the rest of the current iteration and moves to the next one. Both are useful sparingly; overusing them can hide the main loop logic.

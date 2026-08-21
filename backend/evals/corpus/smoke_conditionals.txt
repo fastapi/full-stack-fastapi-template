@@ -1,0 +1,7 @@
+Conditionals let a program choose different paths. The basic form is if, optionally followed by elif branches and a final else.
+
+A Boolean expression evaluates to True or False. Comparison operators include ==, !=, <, >, <=, and >=. Logical operators and, or, and not combine Boolean values.
+
+Only one branch in an if/elif/else chain runs. Order matters: put more specific conditions before broader ones so the intended case is not skipped.
+
+Nested conditionals are legal but can become hard to read. Prefer flattening logic with early returns or clearer Boolean expressions when the nesting grows deep.
