@@ -23,8 +23,6 @@ The five underlying permission codes are `users:list`, `users:create`, `users:ma
 
 **Frontend.** The frontend never re-derives permissions from a role name. `GET /users/me` returns the current user's role slug and their full list of permission codes; the frontend stores that on the authenticated user object and checks it with one helper, `hasPermission(user, code)` (`frontend/src/utils.ts`), mirrored against a `PERMISSIONS` constants object with the same five codes. Every gated nav item, route guard, and form control calls that helper — never `user.role === "..."`. Route guards that fail redirect to a shared `/forbidden` page (`AccessDenied` component) rather than silently bouncing to `/` or showing a blank screen, so a user who follows a stale link or bookmark gets an explicit, friendly explanation instead of a mystery.
 
-See [`ADR.md`](./ADR.md) for the reasoning behind the two decisions above — why checks live in a FastAPI dependency rather than middleware or decorators, and why the frontend treats `/users/me` as its single source of capability rather than duplicating a role→screens map. See [`DIAGRAM.md`](./DIAGRAM.md) for a visual walkthrough of where each check happens along a request.
-
 ## Setup
 
 Requirements: [Docker](https://www.docker.com/), [uv](https://docs.astral.sh/uv/), [Bun](https://bun.sh/). See the root [`development.md`](../development.md) for the full local-dev workflow; the RBAC-relevant steps are below.
