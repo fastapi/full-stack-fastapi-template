@@ -1,9 +1,11 @@
 import { expect, test } from "@playwright/test"
-import { emailUrl, findLastEmail } from "./utils/mailpit"
+import { waitForEmailHtml } from "./utils/mailpit"
 import { randomEmail, randomPassword } from "./utils/random"
 import { logInUser, signUpNewUser } from "./utils/user"
 
 test.use({ storageState: { cookies: [], origins: [] } })
+
+const resetPath = "/reset-password?token="
 
 test("Password Recovery title is visible", async ({ page }) => {
   await page.goto("/recover-password")
@@ -44,21 +46,17 @@ test("User can reset password successfully using the link", async ({
 
   await page.getByRole("button", { name: "Continue" }).click()
 
-  const emailData = await findLastEmail({
+  const emailHtml = await waitForEmailHtml({
     request,
     query: `to:${email}`,
-    timeout: 5000,
   })
 
-  await page.goto(emailUrl(emailData))
-
-  const selector = 'a[href*="/reset-password?token="]'
-
-  const url = await page.getAttribute(selector, "href")
-  const resetUrl = new URL(url!)
+  expect(emailHtml).toContain(resetPath)
+  const resetUrl = emailHtml.match(/\/reset-password\?token=[^"]+/)?.[0]
+  expect(resetUrl).toBeDefined()
 
   // Set the new password and confirm it
-  await page.goto(`${resetUrl.pathname}${resetUrl.search}`)
+  await page.goto(resetUrl!)
 
   await page.getByTestId("new-password-input").fill(newPassword)
   await page.getByTestId("confirm-password-input").fill(newPassword)
@@ -95,20 +93,17 @@ test("Weak new password validation", async ({ page, request }) => {
   await page.getByTestId("email-input").fill(email)
   await page.getByRole("button", { name: "Continue" }).click()
 
-  const emailData = await findLastEmail({
+  const emailHtml = await waitForEmailHtml({
     request,
     query: `to:${email}`,
-    timeout: 5000,
   })
 
-  await page.goto(emailUrl(emailData))
-
-  const selector = 'a[href*="/reset-password?token="]'
-  const url = await page.getAttribute(selector, "href")
-  const resetUrl = new URL(url!)
+  expect(emailHtml).toContain(resetPath)
+  const resetUrl = emailHtml.match(/\/reset-password\?token=[^"]+/)?.[0]
+  expect(resetUrl).toBeDefined()
 
   // Set a weak new password
-  await page.goto(`${resetUrl.pathname}${resetUrl.search}`)
+  await page.goto(resetUrl!)
   await page.getByTestId("new-password-input").fill(weakPassword)
   await page.getByTestId("confirm-password-input").fill(weakPassword)
   await page.getByRole("button", { name: "Reset Password" }).click()
