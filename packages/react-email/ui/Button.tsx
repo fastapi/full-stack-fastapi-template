@@ -3,10 +3,21 @@ import { Button } from "@react-email/components"
 type ButtonProps = React.PropsWithChildren & { href: string }
 
 export const LinkButton = ({ children, href }: ButtonProps) => (
-  <Button
-    href={href}
-    className="bg-brand text-white rounded-md font-semibold text-sm mt-2 mb-7 inline-block text-center no-underline px-7 py-3.5"
-  >
+  <Button href={href} style={buttonStyle}>
     {children}
   </Button>
 )
+
+const buttonStyle = {
+  backgroundColor: "#00796b",
+  borderRadius: "6px",
+  color: "#ffffff",
+  display: "inline-block",
+  fontSize: "14px",
+  fontWeight: "700",
+  lineHeight: "20px",
+  margin: "8px 0 28px",
+  padding: "13px 28px",
+  textAlign: "center" as const,
+  textDecoration: "none",
+}

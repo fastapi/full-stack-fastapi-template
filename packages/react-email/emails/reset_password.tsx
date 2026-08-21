@@ -24,24 +24,38 @@ export default function ResetPassword({
       project_name={project_name}
     >
       <Heading>Reset your password</Heading>
-      <Text className="text-[15px] leading-7 text-body">Hi {username},</Text>
-      <Text className="text-[15px] leading-7 text-body">
+      <Text style={bodyTextStyle}>Hi {username},</Text>
+      <Text style={bodyTextStyle}>
         We've received a request to reset the password for your {project_name}{" "}
         account. Choose a new one by clicking the button below:
       </Text>
       <LinkButton href={link}>Reset password</LinkButton>
-      <Text className="text-sm leading-6 text-muted">
+      <Text style={supportingTextStyle}>
         Or copy and paste this link into your browser:
         <br />
         <Link href={link}>{link}</Link>
       </Text>
-      <Text className="text-sm leading-6 text-muted">
+      <Text style={supportingTextStyle}>
         This link will expire in {valid_hours} hours.
       </Text>
-      <Text className="text-sm leading-6 text-muted">
+      <Text style={supportingTextStyle}>
         If you didn't request a password recovery, you can safely ignore this
         email.
       </Text>
     </Layout>
   )
+}
+
+const bodyTextStyle = {
+  color: "#334155",
+  fontSize: "15px",
+  lineHeight: "26px",
+  margin: "0 0 18px",
+}
+
+const supportingTextStyle = {
+  color: "#64748b",
+  fontSize: "14px",
+  lineHeight: "23px",
+  margin: "0 0 16px",
 }
