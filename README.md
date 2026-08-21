@@ -121,15 +121,21 @@ Rubric: `evals/rubric.md`. Corpus: `evals/corpus/*.txt`.
 3. **Efficiency (tradeoffs):** latency and token usage — not quality
 4. **Quality (primary):** human rubric on the five-question set
 
-### Sample smoke results (1 short doc)
+### Results (directional)
 
-| Prompt | Success | Schema | Answer-in-options | Latency | Total tokens |
-|--------|---------|--------|-------------------|---------|--------------|
-| A baseline | 100% | 100% | 100% | ~5.4s | 851 |
-| B difficulty | 100% | 100% | 60% | ~4.4s | 936 |
-| C distractors | 100% | 100% | 80% | ~3.6s | 939 |
+**Smoke (pre-validator, 1 doc)** surfaced the bug: A 100% / B 60% / C 80% answer-in-options — schema-valid runs can still ship ungradable answers. That’s why automatic gates exist.
 
-**Takeaway so far:** schema validity alone is not enough—B/C can look “successful” while answer-in-options drops. That’s exactly why automatic gates exist before any human preference call. Next: score a larger corpus with the rubric and decide which prompt to ship.
+**Full corpus (post-validator, 13 docs, run `2026-08-21T01-52-36Z`):**
+
+| Prompt | Success | Answer∈options on successes | Mean latency | Mean total tokens |
+|--------|---------|------------------------------|--------------|-------------------|
+| A baseline | 10/13 (77%) | 100% | ~3.6s | ~866 |
+| B difficulty | 10/13 (77%) | 100% | ~3.6s | ~910 |
+| C distractors | 11/13 (85%) | 100% | ~3.2s | ~968 |
+
+Failures are validation rejects (nothing bad persisted). Manual spot-check (~4 docs / ~20 questions per prompt): see `evals/rubric.md`.
+
+**Ship / no-ship: ship prompt A.** Keep the production baseline; B/C aren’t a clear quality upgrade in the sampled rubric.
 
 ### Limitations (called out on purpose)
 

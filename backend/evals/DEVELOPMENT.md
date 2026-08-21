@@ -29,29 +29,35 @@ Working notes for MidtermMock prompt evaluation. Not a substitute for the README
 
 ### 2026-08-20 — Validator fix + evidence pack
 - Unit tests cover valid MC/T/F, invalid T/F sentence-as-answer, invalid MC, missing answer, and generation → `error_kind=validation`.
-- Corpus expanded to **12** short lecture-like `.txt` docs under `evals/corpus/`.
-- Live re-smoke **skipped** locally: `OPENAI_API_KEY` in `.env` is the placeholder `changethis` (not a real key). Re-run when a real key is available:
-  ```bash
-  cd backend
-  python scripts/evaluate.py --prompts a,b,c --limit 1   # smoke
-  python scripts/evaluate.py --prompts a,b,c             # full corpus
-  ```
-- Manual rubric filled from the `2026-07-31T00-10-58Z` artifacts (see `evals/rubric.md`).
+- Corpus expanded to **13** short lecture-like `.txt` docs under `evals/corpus/`.
+- Manual rubric for the pre-fix smoke filled in `evals/rubric.md` (historical section).
+
+### 2026-08-21 — Full-corpus re-eval (`2026-08-21T01-52-36Z`)
+Post-validator live run: 13 docs × A/B/C, `gpt-4o-mini`, difficulty `medium`, 5 questions/doc, `max_completion_tokens=500`.
+
+| Prompt | Success | Answer∈options on successes | Notes |
+|--------|---------|------------------------------|-------|
+| A baseline | 10/13 (**77%**) | **100%** | 3 validation failures |
+| B difficulty | 10/13 (**77%**) | **100%** | 3 validation failures |
+| C distractors | 11/13 (**85%**) | **100%** | 2 validation failures |
+
+Mean answer-in-options in `report.md` (~77/77/85) counts failed docs as 0; every `ok` doc had `answer_in_options_rate=1.0`. Failures are `error_kind=validation` (bad answers not persisted). Manual spot-check (4 docs / ~20 questions per prompt): see `evals/rubric.md` — **ship A**.
 
 ## Open follow-ups
 - [x] Enforce `answer ∈ options` in structured-output validation
-- [ ] Re-run smoke after fix with a real OpenAI key; confirm answer-in-options = 100% on successful A/B/C runs (failures should be validation, not persisted bad answers)
+- [x] Re-run after fix with a real OpenAI key; confirm answer-in-options = 100% on successful A/B/C runs (failures are validation, not persisted bad answers)
 - [x] Fill manual rubric; write ship/no-ship takeaway
 - [x] Land harness (PR #60); validator as fast follow (PR #61)
+- [ ] Optional: raise reliability (fewer validation rejects) without changing the shipped A prompt semantics
 
 ## Ship / no-ship takeaway
 
-**Ship prompt A (baseline) in production.** It was the only variant with 100% answer-in-options and `final_contract_valid` on the smoke set, with clear grounded wording. Do **not** ship B or C until a post-validator re-smoke shows contract compliance; B produced ungradable T/F answers, and C failed exact answer∈options on a trailing-period mismatch.
+**Ship prompt A (baseline) in production.** Full-corpus gates show contract compliance on all successes; sampled rubric quality is highest/most consistent for A. Do **not** switch to B or C — B isn’t a clear quality upgrade at the same success rate; C’s slightly higher success and stronger distractors don’t outweigh uneven item quality in the spot-check.
 
 ## How to reproduce the finding
 ```bash
 cd backend
-# inspect existing artifact, or:
-python scripts/evaluate.py --prompts b --limit 1
-# open results/<run_id>/prompt_b.json — look for true_false rows where answer is not True/False
+python scripts/evaluate.py --prompts a,b,c
+# open results/<run_id>/report.md and prompt_{a,b,c}.json
+# pre-fix bug (historical): look in older smoke artifacts for true_false rows where answer is not True/False
 ```
