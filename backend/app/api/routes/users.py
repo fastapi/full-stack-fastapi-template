@@ -10,6 +10,7 @@ from app.api.deps import (
     SessionDep,
     get_current_active_superuser,
 )
+from app.api.params import LimitQuery, SkipQuery
 from app.core.config import settings
 from app.core.security import get_password_hash, verify_password
 from app.models import (
@@ -34,7 +35,7 @@ router = APIRouter(prefix="/users", tags=["users"])
     dependencies=[Depends(get_current_active_superuser)],
     response_model=UsersPublic,
 )
-def read_users(session: SessionDep, skip: int = 0, limit: int = 100) -> Any:
+def read_users(session: SessionDep, skip: SkipQuery = 0, limit: LimitQuery = 100) -> Any:
     """
     Retrieve users.
     """

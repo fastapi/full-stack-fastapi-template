@@ -1,12 +1,12 @@
 from typing import Any
 
-from fastapi import APIRouter
-from pydantic import BaseModel
+from fastapi import APIRouter, HTTPException
+from pydantic import BaseModel, EmailStr, Field
 
+from app import crud
 from app.api.deps import SessionDep
-from app.core.security import get_password_hash
 from app.models import (
-    User,
+    UserCreate,
     UserPublic,
 )
 
@@ -14,10 +14,9 @@ router = APIRouter(tags=["private"], prefix="/private")
 
 
 class PrivateUserCreate(BaseModel):
-    email: str
-    password: str
+    email: EmailStr = Field(max_length=255)
+    password: str = Field(min_length=8, max_length=128)
     full_name: str
-    is_verified: bool = False
 
 
 @router.post("/users/", response_model=UserPublic)
@@ -25,14 +24,20 @@ def create_user(user_in: PrivateUserCreate, session: SessionDep) -> Any:
     """
     Create a new user.
     """
+    existing_user = crud.get_user_by_email(session=session, email=user_in.email)
+    if existing_user:
+        raise HTTPException(
+            status_code=400,
+            detail="The user with this email already exists in the system",
+        )
 
-    user = User(
-        email=user_in.email,
-        full_name=user_in.full_name,
-        hashed_password=get_password_hash(user_in.password),
+    user = crud.create_user(
+        session=session,
+        user_create=UserCreate(
+            email=user_in.email,
+            password=user_in.password,
+            full_name=user_in.full_name,
+        ),
     )
-
-    session.add(user)
-    session.commit()
 
     return user

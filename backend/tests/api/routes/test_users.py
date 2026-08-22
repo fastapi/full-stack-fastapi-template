@@ -519,3 +519,13 @@ def test_delete_user_without_privileges(
     )
     assert r.status_code == 403
     assert r.json()["detail"] == "The user doesn't have enough privileges"
+
+
+def test_read_users_negative_skip_returns_422(
+    client: TestClient, superuser_token_headers: dict[str, str]
+) -> None:
+    r = client.get(
+        f"{settings.API_V1_STR}/users/?skip=-1",
+        headers=superuser_token_headers,
+    )
+    assert r.status_code == 422
