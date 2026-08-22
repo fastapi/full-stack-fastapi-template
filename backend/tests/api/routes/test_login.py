@@ -189,3 +189,38 @@ def test_login_with_argon2_password_keeps_hash(client: TestClient, db: Session) 
 
     assert user.hashed_password == original_hash
     assert user.hashed_password.startswith("$argon2")
+
+
+def test_recover_password_html_content_has_valid_subject_header(
+    client: TestClient, superuser_token_headers: dict[str, str]
+) -> None:
+    r = client.post(
+        f"{settings.API_V1_STR}/password-recovery-html-content/{settings.FIRST_SUPERUSER}",
+        headers=superuser_token_headers,
+    )
+    # Header name must be "subject" (not "subject:"); the invalid name
+    # previously raised RuntimeError: Invalid HTTP header name.
+    assert r.status_code == 200
+    assert "subject" in r.headers
+
+
+def test_recovery_password_sends_email_in_background_for_existing_user(
+    client: TestClient,
+) -> None:
+    with patch("app.api.routes.login.send_email") as mock_send:
+        r = client.post(
+            f"{settings.API_V1_STR}/password-recovery/{settings.FIRST_SUPERUSER}",
+        )
+        assert r.status_code == 200
+        mock_send.assert_called_once()
+
+
+def test_recovery_password_skips_email_for_unknown_user(
+    client: TestClient,
+) -> None:
+    with patch("app.api.routes.login.send_email") as mock_send:
+        r = client.post(
+            f"{settings.API_V1_STR}/password-recovery/does-not-exist@example.com",
+        )
+        assert r.status_code == 200
+        mock_send.assert_not_called()

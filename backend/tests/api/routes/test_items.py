@@ -162,3 +162,13 @@ def test_delete_item_not_enough_permissions(
     assert response.status_code == 403
     content = response.json()
     assert content["detail"] == "Not enough permissions"
+
+
+def test_read_items_negative_limit_returns_422(
+    client: TestClient, normal_user_token_headers: dict[str, str]
+) -> None:
+    r = client.get(
+        f"{settings.API_V1_STR}/items/?limit=-1",
+        headers=normal_user_token_headers,
+    )
+    assert r.status_code == 422
