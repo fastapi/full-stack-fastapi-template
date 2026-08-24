@@ -14,16 +14,14 @@ def init() -> None:
 
 
 def main() -> None:
-    
+
     logger.info("Creating initial data")
     try:
         init()
-        logger.info("Initial data created")   
+        logger.info("Initial data created")
     except Exception as e:
         logger.error(e)
         raise e
-
-    
 
 
 if __name__ == "__main__":
