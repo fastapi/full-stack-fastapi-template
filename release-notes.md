@@ -18,6 +18,10 @@
 * 📝 Update README.md with Mailpit and React Email. PR [#2452](https://github.com/fastapi/full-stack-fastapi-template/pull/2452) by [@alejsdev](https://github.com/alejsdev).
 * 📝 Simplify project documentation. PR [#2442](https://github.com/fastapi/full-stack-fastapi-template/pull/2442) by [@tiangolo](https://github.com/tiangolo).
 
+### Internal
+
+* ⬆️ Bump setup-uv action to 10.0.1. PR [#2458](https://github.com/fastapi/full-stack-fastapi-template/pull/2458) by [@YuriiMotov](https://github.com/YuriiMotov).
+
 ## 0.12.0 (2026-08-12)
 
 ### Features
