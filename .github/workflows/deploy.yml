@@ -37,7 +37,7 @@ jobs:
       - name: Set up uv
         uses: astral-sh/setup-uv@20cfd1bf945f4377ade1205e4dbc17946fc9a30d # v10.0.1
         with:
-          version: "0.11.18"
+          version: "latest-known"
       - name: Prepare database
         run: uv run bash scripts/prestart.sh
         working-directory: backend
