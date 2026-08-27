@@ -1,14 +1,67 @@
 # FastAPI Project - Development
 
-## Docker Compose
+## Local Development
 
-* Start the local stack with Docker Compose:
+For local development, run PostgreSQL and Mailpit with Docker Compose, and run the FastAPI and Vite development servers locally.
+
+Start the supporting services:
 
 ```bash
+docker compose up -d db mailpit
+```
+
+Then, from the `backend` directory, install the dependencies and prepare the database:
+
+```bash
+uv sync
+uv run bash scripts/prestart.sh
+```
+
+Start the FastAPI development server:
+
+```bash
+uv run fastapi dev
+```
+
+In another terminal, from the project root, install the frontend dependencies and start the Vite development server:
+
+```bash
+bun install
+bun run dev
+```
+
+Now you can open these URLs:
+
+Frontend development server: <http://localhost:5173>
+
+Backend API: <http://localhost:8000>
+
+Automatic interactive API documentation with Swagger UI: <http://localhost:8000/docs>
+
+Mailpit: <http://localhost:8025>
+
+The frontend development server uses the backend at `http://localhost:8000`, as configured in `frontend/.env`.
+
+### Frontend Served by FastAPI
+
+Build the frontend from the `frontend` directory:
+
+```bash
+bun run build
+```
+
+The build is written to `backend/app/frontend` and served by FastAPI at <http://localhost:8000>. Rebuild the frontend after making frontend changes.
+
+## Full Stack with Docker Compose
+
+To run the backend and built frontend in Docker Compose:
+
+```bash
+docker compose run --rm backend bash scripts/prestart.sh
 docker compose watch
 ```
 
-* Now you can open your browser and interact with these URLs:
+Now you can open these URLs:
 
 Application, with the frontend and API served by FastAPI: <http://localhost:8000>
 
@@ -18,96 +71,25 @@ Adminer, database web administration: <http://localhost:8080>
 
 Traefik UI, to see how the routes are being handled by the proxy: <http://localhost:8090>
 
-**Note**: The first time you start your stack, it might take a minute for it to be ready. While the backend waits for the database to be ready and configures everything. You can check the logs to monitor it.
+Mailpit: <http://localhost:8025>
 
-To check the logs, run (in another terminal):
+Stop a locally running FastAPI server before starting the Compose backend because both use port `8000`.
 
-```bash
-docker compose logs
-```
+**Note**: The first time you start the stack, it might take a minute for all the services to be ready. To monitor it, use `docker compose logs`, or `docker compose logs backend` for the backend service.
 
-To check the logs of a specific service, add the name of the service, e.g.:
+## Mailpit
 
-```bash
-docker compose logs backend
-```
+[Mailpit](https://mailpit.axllent.org) captures emails sent during local development instead of delivering them. The local backend connects to it at `localhost:1025`, and the Compose backend connects to the `mailpit` service. Captured emails are available at <http://localhost:8025>.
 
-## Mailcatcher
+## Docker Compose Files and Environment Variables
 
-Mailcatcher is a simple SMTP server that catches all emails sent by the backend during local development. Instead of sending real emails, they are captured and displayed in a web interface.
+The main `compose.yml` file contains the configuration shared by the whole stack. Docker Compose loads it automatically.
 
-This is useful for:
+The `compose.override.yml` file adds local development settings, such as mounting the source code as a volume. Docker Compose also loads it automatically and applies it on top of `compose.yml`.
 
-* Testing email functionality during development
-* Verifying email content and formatting
-* Debugging email-related functionality without sending real emails
+The `compose.deploy.yml` file contains the deployment-specific settings, including HTTPS and automatic certificate handling. It is explicitly combined with `compose.yml` when deploying the application.
 
-The backend is automatically configured to use Mailcatcher when running with Docker Compose locally (SMTP on port 1025). All captured emails can be viewed at <http://localhost:1080>.
-
-## Local Development
-
-The Docker Compose files are configured so that each supporting service is available in a different port in `localhost`.
-
-FastAPI serves the built frontend and the API as one application at `http://localhost:8000`. The API routes live under `/api`.
-
-For frontend development with live reload, you can still run the local Vite development server separately.
-
-Start the local frontend development server with:
-
-```bash
-bun run dev
-```
-
-Or you could stop the `backend` Docker Compose service:
-
-```bash
-docker compose stop backend
-```
-
-And then you can run the local development server for the backend:
-
-```bash
-cd backend
-fastapi dev app/main.py
-```
-
-## Docker Compose in `localhost.tiangolo.com`
-
-When you start the Docker Compose stack, it uses `localhost` by default, with different ports for each service (backend, adminer, etc).
-
-When you deploy it to production (or staging), the application uses one domain. The frontend is served at `/` and the API lives under `/api`.
-
-In the guide about [deployment](deployment.md) you can read about Traefik, the configured proxy. That's the component in charge of transmitting traffic to the application service based on the domain.
-
-If you want to test that it's all working locally, you can edit the local `.env` file, and change:
-
-```dotenv
-DOMAIN=localhost.tiangolo.com
-```
-
-That will be used by the Docker Compose files to configure the base domain for the services.
-
-Traefik will transmit application traffic at `localhost.tiangolo.com` to FastAPI, which serves both the frontend and API.
-
-The domain `localhost.tiangolo.com` is a special domain that is configured (with all its subdomains) to point to `127.0.0.1`. This way you can use that for your local development.
-
-After you update it, run again:
-
-```bash
-docker compose watch
-```
-
-When deploying, for example in production, the main Traefik is configured outside of the Docker Compose files. For local development, there's an included Traefik in `compose.override.yml`, just to let you test that the domain works as expected, for example with `localhost.tiangolo.com`.
-
-## Docker Compose files and env vars
-
-There is a main `compose.yml` file with all the configurations that apply to the whole stack, it is used automatically by `docker compose`.
-
-And there's also a `compose.override.yml` with overrides for development, for example to mount the source code as a volume. It is used automatically by `docker compose` to apply overrides on top of `compose.yml`.
-
-These Docker Compose files use the `.env` file containing configurations to be injected as environment variables in the containers.
-
-They also use some additional configurations taken from environment variables set in the scripts before calling the `docker compose` command.
+The backend reads local settings from the `.env` file. Docker Compose also uses it for variable interpolation and passes the settings each container needs.
 
 After changing variables, make sure you restart the stack:
 
@@ -115,95 +97,42 @@ After changing variables, make sure you restart the stack:
 docker compose watch
 ```
 
-## The .env file
+## The `.env` File
 
-The `.env` file is the one that contains all your configurations, generated keys and passwords, etc.
+The tracked `.env` file contains local development defaults, passwords, and other configuration. Its hostnames use `localhost` for processes running on your machine. Docker Compose overrides hostnames such as the database and SMTP server with their Compose service names.
 
-Depending on your workflow, you could want to exclude it from Git, for example if your project is public. In that case, you would have to make sure to set up a way for your CI tools to obtain it while building or deploying your project.
+Do not store deployment secrets in `.env`. Configure them as described in the [FastAPI Cloud deployment guide](./deployment.md) or the [Docker Compose deployment guide](./deployment-docker-compose.md).
 
-One way to do it could be to add each environment variable to your CI/CD system, and updating the `compose.yml` file to read that specific env var instead of reading the `.env` file.
+## Pre-commit Hooks and Code Linting
 
-## Pre-commits and code linting
-
-we are using a tool called [prek](https://prek.j178.dev/) (modern alternative to [Pre-commit](https://pre-commit.com/)) for code linting and formatting.
-
-When you install it, it runs right before making a commit in git. This way it ensures that the code is consistent and formatted even before it is committed.
+The project uses [prek](https://prek.j178.dev/), a modern alternative to [pre-commit](https://pre-commit.com/), for code linting and formatting.
 
 You can find a file `.pre-commit-config.yaml` with configurations at the root of the project.
 
-#### Install prek to run automatically
+### Install `prek` to Run Automatically
 
 `prek` is already part of the dependencies of the project.
 
-After having the `prek` tool installed and available, you need to "install" it in the local repository, so that it runs automatically before each commit.
-
-Using `uv`, you could do it with (make sure you are inside `backend` folder):
+From the project root, install the Git hook so that `prek` runs automatically before each commit:
 
 ```bash
-❯ uv run prek install -f
-prek installed at `../.git/hooks/pre-commit`
+uv run prek install -f
 ```
 
 The `-f` flag forces the installation, in case there was already a `pre-commit` hook previously installed.
 
-Now whenever you try to commit, e.g. with:
+Now whenever you try to commit, for example with:
 
 ```bash
 git commit
 ```
 
-...prek will run and check and format the code you are about to commit, and will ask you to add that code (stage it) with git again before committing.
+`prek` will check and format the code you are about to commit. If it modifies any files, add those files to Git again before committing.
 
-Then you can `git add` the modified/fixed files again and now you can commit.
+### Run `prek` Manually
 
-#### Running prek hooks manually
-
-you can also run `prek` manually on all the files, you can do it using `uv` with:
+You can also run `prek` manually on all files from the project root:
 
 ```bash
-❯ uv run prek run --all-files
-check for added large files..............................................Passed
-check toml...............................................................Passed
-check yaml...............................................................Passed
-fix end of files.........................................................Passed
-trim trailing whitespace.................................................Passed
-ruff.....................................................................Passed
-ruff-format..............................................................Passed
-biome check..............................................................Passed
+uv run prek run --all-files
 ```
-
-## URLs
-
-The production or staging URLs would use these same paths, but with your own domain.
-
-### Development URLs
-
-Development URLs, for local development.
-
-Application: <http://localhost:8000>
-
-Automatic Interactive Docs (Swagger UI): <http://localhost:8000/docs>
-
-Automatic Alternative Docs (ReDoc): <http://localhost:8000/redoc>
-
-Adminer: <http://localhost:8080>
-
-Traefik UI: <http://localhost:8090>
-
-MailCatcher: <http://localhost:1080>
-
-### Development URLs with `localhost.tiangolo.com` Configured
-
-Development URLs, for local development.
-
-Application: <http://localhost.tiangolo.com>
-
-Automatic Interactive Docs (Swagger UI): <http://localhost.tiangolo.com/docs>
-
-Automatic Alternative Docs (ReDoc): <http://localhost.tiangolo.com/redoc>
-
-Adminer: <http://localhost.tiangolo.com:8080>
-
-Traefik UI: <http://localhost.tiangolo.com:8090>
-
-MailCatcher: <http://localhost.tiangolo.com:1080>

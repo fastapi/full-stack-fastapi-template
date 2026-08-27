@@ -1,13 +1,7 @@
 services:
 
-  # Local services are available on their ports, but also available on:
-  # http://localhost.tiangolo.com: application
-  # etc. To enable it, update .env, set:
-  # DOMAIN=localhost.tiangolo.com
   proxy:
     image: traefik:3.6
-    volumes:
-      - /var/run/docker.sock:/var/run/docker.sock
     ports:
       - "80:80"
       - "8090:8080"
@@ -15,14 +9,10 @@ services:
     command:
       # Enable Docker in Traefik, so that it reads labels from Docker services
       - --providers.docker
-      # Add a constraint to only use services with the label for this stack
-      - --providers.docker.constraints=Label(`traefik.constraint-label`, `traefik-public`)
       # Do not expose all Docker services, only the ones explicitly exposed
       - --providers.docker.exposedbydefault=false
       # Create an entrypoint "http" listening on port 80
       - --entrypoints.http.address=:80
-      # Create an entrypoint "https" listening on port 443
-      - --entrypoints.https.address=:443
       # Enable the access log, with HTTP requests
       - --accesslog
       # Enable the Traefik log, for configurations and errors
@@ -33,29 +23,15 @@ services:
       - --api
       # Enable the Dashboard and API in insecure mode for local development
       - --api.insecure=true
-    labels:
-      # Enable Traefik for this service, to make it available in the public network
-      - traefik.enable=true
-      - traefik.constraint-label=traefik-public
-      # Dummy https-redirect middleware that doesn't really redirect, only to
-      # allow running it locally
-      - traefik.http.middlewares.https-redirect.contenttype.autodetect=false
-    networks:
-      - traefik-public
-      - default
-
   db:
-    restart: "no"
     ports:
       - "5432:5432"
 
   adminer:
-    restart: "no"
     ports:
       - "8080:8080"
 
   backend:
-    restart: "no"
     ports:
       - "8000:8000"
     build:
@@ -64,16 +40,15 @@ services:
     # command: sleep infinity  # Infinite loop to keep container alive doing nothing
     command:
       - fastapi
-      - run
-      - --reload
-      - "app/main.py"
+      - dev
+      - --host
+      - "0.0.0.0"
     develop:
       watch:
         - path: ./backend
           action: sync
           target: /app/backend
           ignore:
-            - ./backend/.venv
             - .venv
         - path: ./backend/pyproject.toml
           action: rebuild
@@ -88,15 +63,15 @@ services:
     volumes:
       - ./backend/htmlcov:/app/backend/htmlcov
     environment:
-      SMTP_HOST: "mailcatcher"
+      FASTAPI_ENV: "development"
+      SMTP_HOST: "mailpit"
       SMTP_PORT: "1025"
       SMTP_TLS: "false"
-      EMAILS_FROM_EMAIL: "noreply@example.com"
 
-  mailcatcher:
-    image: schickling/mailcatcher
+  mailpit:
+    image: axllent/mailpit
     ports:
-      - "1080:1080"
+      - "8025:8025"
       - "1025:1025"
 
   playwright:
@@ -108,23 +83,18 @@ services:
     ipc: host
     depends_on:
       - backend
-      - mailcatcher
-    env_file:
-      - .env
+      - mailpit
     environment:
+      - FIRST_SUPERUSER=${FIRST_SUPERUSER:?Variable not set}
+      - FIRST_SUPERUSER_PASSWORD=${FIRST_SUPERUSER_PASSWORD:?Variable not set}
       - PLAYWRIGHT_BASE_URL=http://backend:8000
       - VITE_API_URL=http://backend:8000
-      - MAILCATCHER_HOST=http://mailcatcher:1080
+      - MAILPIT_HOST=http://mailpit:8025
       # For the reports when run locally
       - PLAYWRIGHT_HTML_HOST=0.0.0.0
-      - CI=${CI}
+      - CI=${CI:-}
     volumes:
       - ./frontend/blob-report:/app/frontend/blob-report
       - ./frontend/test-results:/app/frontend/test-results
     ports:
       - 9323:9323
-
-networks:
-  traefik-public:
-    # For local dev, don't expect an external Traefik network
-    external: false
