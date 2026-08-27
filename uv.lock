@@ -14,7 +14,7 @@ members = [
 [manifest.dependency-groups]
 dev = [
     { name = "prek", specifier = ">=0.4.11,<1.0.0" },
-    { name = "typer", specifier = ">=0.20.0,<1.0.0" },
+    { name = "typer", specifier = ">=0.26.1,<1.0.0" },
     { name = "zizmor", specifier = ">=1.28.0" },
 ]
 github-actions = [{ name = "smokeshow", specifier = ">=0.5.0" }]
