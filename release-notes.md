@@ -20,6 +20,7 @@
 
 ### Internal
 
+* ⬆️ Bump Typer min version to `0.26.1`. PR [#2459](https://github.com/fastapi/full-stack-fastapi-template/pull/2459) by [@YuriiMotov](https://github.com/YuriiMotov).
 * ⬆️ Bump setup-uv action to 10.0.1. PR [#2458](https://github.com/fastapi/full-stack-fastapi-template/pull/2458) by [@YuriiMotov](https://github.com/YuriiMotov).
 
 ## 0.12.0 (2026-08-12)
