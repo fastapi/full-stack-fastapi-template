@@ -78,7 +78,7 @@ If your stack is already up and you just want to run the tests, you can use:
 docker compose exec backend bash scripts/tests-start.sh
 ```
 
-The `/app/backend/scripts/tests-start.sh` script calls `pytest` after making sure that the rest of the stack is running. If you need to pass extra arguments to `pytest`, you can pass them to that command and they will be forwarded.
+The `/app/backend/scripts/tests-start.sh` script calls `pytest`. If you need to pass extra arguments to `pytest`, you can pass them to that command and they will be forwarded.
 
 For example, to stop on first error:
 
