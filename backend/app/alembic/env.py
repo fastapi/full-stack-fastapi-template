@@ -8,11 +8,6 @@ from sqlalchemy import engine_from_config, pool
 # access to the values within the .ini file in use.
 config = context.config
 
-# Interpret the config file for Python logging.
-# This line sets up loggers basically.
-assert config.config_file_name is not None
-fileConfig(config.config_file_name)
-
 # add your model's MetaData object here
 # for 'autogenerate' support
 # from myapp import mymodel
@@ -29,9 +24,7 @@ target_metadata = SQLModel.metadata
 # my_important_option = config.get_main_option("my_important_option")
 # ... etc.
 
-
-def get_url():
-    return str(settings.DATABASE_URL)
+config.set_main_option("sqlalchemy.url", str(settings.DATABASE_URL))
 
 
 def run_migrations_offline():
@@ -46,7 +39,7 @@ def run_migrations_offline():
     script output.
 
     """
-    url = get_url()
+    url = config.get_main_option("sqlalchemy.url")
     context.configure(
         url=url, target_metadata=target_metadata, literal_binds=True, compare_type=True
     )
@@ -62,11 +55,8 @@ def run_migrations_online():
     and associate a connection with the context.
 
     """
-    configuration = config.get_section(config.config_ini_section)
-    assert configuration is not None
-    configuration["sqlalchemy.url"] = get_url()
     connectable = engine_from_config(
-        configuration,
+        config.get_section(config.config_ini_section, {}),
         prefix="sqlalchemy.",
         poolclass=pool.NullPool,
     )
