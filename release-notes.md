@@ -21,6 +21,12 @@
 
 ### Internal
 
+* ⬆ Bump traefik from 3.6 to v3.7 in the docker-compose group. PR [#2465](https://github.com/fastapi/full-stack-fastapi-template/pull/2465) by [@dependabot[bot]](https://github.com/apps/dependabot).
+* ⬆ Bump pre-commit hooks. PR [#2471](https://github.com/fastapi/full-stack-fastapi-template/pull/2471) by [@pr-submit[bot]](https://github.com/apps/pr-submit).
+* ⬆ Update pwdlib[argon2,bcrypt] requirement from >=0.3.0 to >=0.3.1. PR [#2468](https://github.com/fastapi/full-stack-fastapi-template/pull/2468) by [@dependabot[bot]](https://github.com/apps/dependabot).
+* ⬆ Update sentry-sdk[fastapi] requirement from <3.0.0,>=2.66.1 to >=2.68.1,<3.0.0. PR [#2467](https://github.com/fastapi/full-stack-fastapi-template/pull/2467) by [@dependabot[bot]](https://github.com/apps/dependabot).
+* ⬆ Bump the python-packages group with 4 updates. PR [#2466](https://github.com/fastapi/full-stack-fastapi-template/pull/2466) by [@dependabot[bot]](https://github.com/apps/dependabot).
+* ⬆ Bump the github-actions group with 4 updates. PR [#2464](https://github.com/fastapi/full-stack-fastapi-template/pull/2464) by [@dependabot[bot]](https://github.com/apps/dependabot).
 * ⬆️ Bump Typer min version to `0.26.1`. PR [#2459](https://github.com/fastapi/full-stack-fastapi-template/pull/2459) by [@YuriiMotov](https://github.com/YuriiMotov).
 * ⬆️ Bump setup-uv action to 10.0.1. PR [#2458](https://github.com/fastapi/full-stack-fastapi-template/pull/2458) by [@YuriiMotov](https://github.com/YuriiMotov).
 
