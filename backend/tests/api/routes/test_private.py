@@ -15,7 +15,7 @@ def test_create_user(client: TestClient, db: Session) -> None:
         },
     )
 
-    assert r.status_code == 200
+    assert r.status_code == 201
 
     data = r.json()
 
