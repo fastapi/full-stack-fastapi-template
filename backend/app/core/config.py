@@ -88,4 +88,4 @@ class Settings(BaseSettings):
         return self
 
 
-settings = Settings()  # type: ignore
+settings = Settings()  # type: ignore # ty: ignore[unused-ignore-comment]
