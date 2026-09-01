@@ -1,7 +1,7 @@
 services:
 
   proxy:
-    image: traefik:3.6
+    image: traefik:v3.7
     volumes:
       # Add Docker as a mounted volume, so that Traefik can read the labels of other services
       - /var/run/docker.sock:/var/run/docker.sock:ro

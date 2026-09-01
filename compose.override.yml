@@ -1,7 +1,7 @@
 services:
 
   proxy:
-    image: traefik:3.6
+    image: traefik:v3.7
     ports:
       - "80:80"
       - "8090:8080"
