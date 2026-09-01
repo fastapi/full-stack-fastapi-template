@@ -121,6 +121,11 @@ class Message(SQLModel):
 class Token(SQLModel):
     access_token: str
     token_type: str = "bearer"
+    refresh_token: str | None = None
+
+
+class RefreshTokenRequest(SQLModel):
+    refresh_token: str
 
 
 # Contents of JWT token

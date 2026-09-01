@@ -1,3 +1,4 @@
+import logging
 from datetime import timedelta
 from typing import Annotated, Any
 
@@ -9,13 +10,23 @@ from app import crud
 from app.api.deps import CurrentUser, SessionDep, get_current_active_superuser
 from app.core import security
 from app.core.config import settings
-from app.models import Message, NewPassword, Token, UserPublic, UserUpdate
+from app.models import (
+    Message,
+    NewPassword,
+    RefreshTokenRequest,
+    Token,
+    User,
+    UserPublic,
+    UserUpdate,
+)
 from app.utils import (
     generate_password_reset_token,
     generate_reset_password_email,
     send_email,
     verify_password_reset_token,
 )
+
+logger = logging.getLogger(__name__)
 
 router = APIRouter(tags=["login"])
 
@@ -35,11 +46,44 @@ def login_access_token(
     elif not user.is_active:
         raise HTTPException(status_code=400, detail="Inactive user")
     access_token_expires = timedelta(minutes=settings.ACCESS_TOKEN_EXPIRE_MINUTES)
-    return Token(
+    refresh_token_expires = timedelta(minutes=settings.REFRESH_TOKEN_EXPIRE_MINUTES)
+    token = Token(
         access_token=security.create_access_token(
             user.id, expires_delta=access_token_expires
-        )
+        ),
+        refresh_token=security.create_refresh_token(
+            user.id, expires_delta=refresh_token_expires
+        ),
     )
+    logger.info("access token issued for user %s", user.id)
+    return token
+
+
+@router.post("/login/refresh-token")
+def refresh_access_token(session: SessionDep, body: RefreshTokenRequest) -> Token:
+    """
+    Refresh access token using a valid refresh token
+    """
+    user_id = security.verify_refresh_token(body.refresh_token)
+    if not user_id:
+        raise HTTPException(status_code=400, detail="Invalid token")
+    user = session.get(User, user_id)
+    if not user:
+        raise HTTPException(status_code=400, detail="Invalid token")
+    elif not user.is_active:
+        raise HTTPException(status_code=400, detail="Inactive user")
+    access_token_expires = timedelta(minutes=settings.ACCESS_TOKEN_EXPIRE_MINUTES)
+    refresh_token_expires = timedelta(minutes=settings.REFRESH_TOKEN_EXPIRE_MINUTES)
+    token = Token(
+        access_token=security.create_access_token(
+            user.id, expires_delta=access_token_expires
+        ),
+        refresh_token=security.create_refresh_token(
+            user.id, expires_delta=refresh_token_expires
+        ),
+    )
+    logger.info("access token refreshed for user %s", user.id)
+    return token
 
 
 @router.post("/login/test-token", response_model=UserPublic)

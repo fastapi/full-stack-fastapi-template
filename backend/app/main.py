@@ -1,3 +1,4 @@
+import logging
 from pathlib import Path
 
 import sentry_sdk
@@ -7,6 +8,11 @@ from starlette.middleware.cors import CORSMiddleware
 
 from app.api.main import api_router
 from app.core.config import settings
+
+logging.basicConfig(
+    level=logging.INFO,
+    format="%(asctime)s - %(name)s - %(levelname)s - %(message)s",
+)
 
 FRONTEND_DIR = Path(__file__).parent / "frontend"
 
