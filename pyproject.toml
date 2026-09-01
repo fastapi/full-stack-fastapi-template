@@ -1,8 +1,8 @@
 [dependency-groups]
 dev = [
-    "prek>=0.4.11,<1.0.0",
-    "typer>=0.26.1,<1.0.0",
-    "zizmor>=1.28.0",
+    "prek>=0.4.14,<1.0.0",
+    "typer>=0.27.1,<1.0.0",
+    "zizmor>=1.29.0",
 ]
 
 github-actions = [

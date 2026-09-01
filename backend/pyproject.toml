@@ -10,7 +10,7 @@ dependencies = [
     "pydantic>2.0",
     "emails>=1.1.2,<2.0",
     "jinja2<4.0.0,>=3.1.4",
-    "alembic<2.0.0,>=1.12.1",
+    "alembic>=1.19.1,<2.0.0",
     "httpx<1.0.0,>=0.25.1",
     "psycopg[binary]>=3.3.4,<4.0.0",
     "sqlmodel>=0.0.39,<1.0.0",
