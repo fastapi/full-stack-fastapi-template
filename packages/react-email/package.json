@@ -12,12 +12,12 @@
     "@react-email/components": "1.0.12",
     "react": "^19.2.8",
     "react-dom": "^19.2.8",
-    "react-email": "6.9.1"
+    "react-email": "6.9.2"
   },
   "devDependencies": {
-    "@biomejs/biome": "^2.5.6",
-    "@react-email/ui": "6.9.1",
+    "@biomejs/biome": "^2.5.10",
+    "@react-email/ui": "6.9.2",
     "@types/react": "^19.2.18",
-    "@types/react-dom": "^19.2.4"
+    "@types/react-dom": "^19.2.5"
   }
 }
