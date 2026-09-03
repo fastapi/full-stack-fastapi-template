@@ -54,7 +54,7 @@ repos:
 
       - id: local-ty
         name: ty check
-        entry: uv run ty check backend/app
+        entry: uv run ty check --project backend backend/app
         require_serial: true
         language: unsupported
         pass_filenames: false
