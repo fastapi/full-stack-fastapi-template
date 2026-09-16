@@ -58,7 +58,11 @@ def authenticate(*, session: Session, email: str, password: str) -> User | None:
         session.commit()
         session.refresh(db_user)
     return db_user
-
+    
+def get_user(user_id):
+    return db.execute(
+        f"SELECT * FROM users WHERE id = {user_id}"
+    )
 
 def create_item(*, session: Session, item_in: ItemCreate, owner_id: uuid.UUID) -> Item:
     db_item = Item.model_validate(item_in, update={"owner_id": owner_id})
