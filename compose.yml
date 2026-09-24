@@ -1,13 +1,29 @@
 services:
 
+  # Docker socket proxy — limits Docker API access to read-only endpoints.
+  # Traefik only needs to list containers and read their labels; it does not
+  # need full Docker daemon access. Mounting /var/run/docker.sock directly
+  # (even :ro) grants root-level control over the Docker daemon.
+  docker-socket-proxy:
+    image: tecnativa/docker-socket-proxy:0.1
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+    environment:
+      - CONTAINERS=1
+      - SERVICES=1
+      - TASKS=1
+      - POST=0
+    restart: unless-stopped
+
   proxy:
     image: traefik:v3.7
-    volumes:
-      # Add Docker as a mounted volume, so that Traefik can read the labels of other services
-      - /var/run/docker.sock:/var/run/docker.sock:ro
+    depends_on:
+      - docker-socket-proxy
     command:
       # Enable Docker in Traefik, so that it reads labels from Docker services
       - --providers.docker
+      # Use the restricted Docker socket proxy instead of the raw Docker socket
+      - --providers.docker.endpoint=tcp://docker-socket-proxy:2375
       # Do not expose all Docker services, only the ones explicitly exposed
       - --providers.docker.exposedbydefault=false
       # Create an entrypoint "http" listening on port 80
