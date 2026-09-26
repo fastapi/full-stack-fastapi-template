@@ -5,7 +5,10 @@
   "method": "GET",
   "summary_plain_english": "The 'full_name' field on Item was renamed to 'name'. Any frontend code reading item.full_name will now get undefined.",
   "severity": "high",
-  "affected_files": ["frontend/src/components/ItemCard.tsx", "frontend/src/api/client.ts"],
+  "affected_files": [
+    "frontend/src/components/ItemCard.tsx",
+    "frontend/src/api/client.ts"
+  ],
   "patch_applied": true,
   "patch_description": "Updated ItemCard.tsx and the generated client type to use 'name' instead of 'full_name'.",
   "verify_status": "pass",

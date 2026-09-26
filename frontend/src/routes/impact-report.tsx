@@ -3,11 +3,11 @@ import { useState } from "react"
 import { Badge } from "@/components/ui/badge"
 import { Card, CardContent, CardHeader } from "@/components/ui/card"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
-import type { ImpactReport } from "@/types/impactReport"
+import endpointRemoved from "@/mocks/impact-reports/drift-endpoint-removed.json"
 
 import fieldRenamed from "@/mocks/impact-reports/drift-field-renamed.json"
 import typeChanged from "@/mocks/impact-reports/drift-type-changed.json"
-import endpointRemoved from "@/mocks/impact-reports/drift-endpoint-removed.json"
+import type { ImpactReport } from "@/types/impactReport"
 
 export const Route = createFileRoute("/impact-report")({
   component: ImpactReportPage,
@@ -17,9 +17,21 @@ export const Route = createFileRoute("/impact-report")({
 })
 
 const scenarios: { key: string; label: string; data: ImpactReport }[] = [
-  { key: "field-renamed", label: "Field Renamed", data: fieldRenamed as ImpactReport },
-  { key: "type-changed", label: "Type Changed", data: typeChanged as ImpactReport },
-  { key: "endpoint-removed", label: "Endpoint Removed", data: endpointRemoved as ImpactReport },
+  {
+    key: "field-renamed",
+    label: "Field Renamed",
+    data: fieldRenamed as ImpactReport,
+  },
+  {
+    key: "type-changed",
+    label: "Type Changed",
+    data: typeChanged as ImpactReport,
+  },
+  {
+    key: "endpoint-removed",
+    label: "Endpoint Removed",
+    data: endpointRemoved as ImpactReport,
+  },
 ]
 
 const severityStyles: Record<ImpactReport["severity"], string> = {
