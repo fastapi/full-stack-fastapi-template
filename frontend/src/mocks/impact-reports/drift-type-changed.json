@@ -5,7 +5,10 @@
   "method": "GET",
   "summary_plain_english": "The 'price' field on Item changed from a number to a string. Any frontend code doing math with item.price (e.g. formatting, totals) will now break or behave unexpectedly.",
   "severity": "medium",
-  "affected_files": ["frontend/src/components/ItemCard.tsx", "frontend/src/api/client.ts"],
+  "affected_files": [
+    "frontend/src/components/ItemCard.tsx",
+    "frontend/src/api/client.ts"
+  ],
   "patch_applied": true,
   "patch_description": "Updated the client type for 'price' to string and wrapped its usage in ItemCard.tsx with Number() before formatting.",
   "verify_status": "pass",

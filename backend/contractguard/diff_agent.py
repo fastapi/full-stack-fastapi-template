@@ -18,7 +18,7 @@ all 3 of your drift branches before handing off to Khushi.
 
 import json
 import sys
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from pathlib import Path
 
 
@@ -100,9 +100,16 @@ def diff_specs(old_spec: dict, new_spec: dict) -> list[dict]:
     old_endpoints = get_endpoint_schemas(old_spec)
     new_endpoints = get_endpoint_schemas(new_spec)
     changes: list[dict] = []
-    now = datetime.now(timezone.utc).isoformat()
+    now = datetime.now(UTC).isoformat()
 
-    def base_entry(key: str, change_type: str, breaking: bool, old_frag: dict, new_frag: dict, severity: str) -> dict:
+    def base_entry(
+        key: str,
+        change_type: str,
+        breaking: bool,
+        old_frag: dict,
+        new_frag: dict,
+        severity: str,
+    ) -> dict:
         method, endpoint = key.split(" ", 1)
         return {
             "endpoint": endpoint,
@@ -118,7 +125,9 @@ def diff_specs(old_spec: dict, new_spec: dict) -> list[dict]:
     for key, old_fields in old_endpoints.items():
         # Endpoint removed entirely
         if key not in new_endpoints:
-            changes.append(base_entry(key, "endpoint_removed", True, old_fields, {}, "high"))
+            changes.append(
+                base_entry(key, "endpoint_removed", True, old_fields, {}, "high")
+            )
             continue
 
         new_fields = new_endpoints[key]
@@ -131,34 +140,54 @@ def diff_specs(old_spec: dict, new_spec: dict) -> list[dict]:
         for r in list(removed):
             match = next((a for a in added if old_fields[r] == new_fields[a]), None)
             if match:
-                changes.append(base_entry(
-                    key, "field_renamed", True,
-                    {r: old_fields[r]}, {match: new_fields[match]}, "high"
-                ))
+                changes.append(
+                    base_entry(
+                        key,
+                        "field_renamed",
+                        True,
+                        {r: old_fields[r]},
+                        {match: new_fields[match]},
+                        "high",
+                    )
+                )
                 removed.discard(r)
                 added.discard(match)
 
         for r in removed:
-            changes.append(base_entry(key, "field_removed", True, {r: old_fields[r]}, {}, "medium"))
+            changes.append(
+                base_entry(key, "field_removed", True, {r: old_fields[r]}, {}, "medium")
+            )
 
         for a in added:
             # A genuinely new field on a response is usually non-breaking (additive),
             # but flagged low severity so the team can eyeball it.
-            changes.append(base_entry(key, "field_added_required", False, {}, {a: new_fields[a]}, "low"))
+            changes.append(
+                base_entry(
+                    key, "field_added_required", False, {}, {a: new_fields[a]}, "low"
+                )
+            )
 
         for f in common:
             if old_fields[f] != new_fields[f]:
-                changes.append(base_entry(
-                    key, "field_type_changed", True,
-                    {f: old_fields[f]}, {f: new_fields[f]}, "high"
-                ))
+                changes.append(
+                    base_entry(
+                        key,
+                        "field_type_changed",
+                        True,
+                        {f: old_fields[f]},
+                        {f: new_fields[f]},
+                        "high",
+                    )
+                )
 
     return changes
 
 
 def main():
     if len(sys.argv) != 4:
-        print("Usage: python diff_agent.py <old_openapi.json> <new_openapi.json> <output.json>")
+        print(
+            "Usage: python diff_agent.py <old_openapi.json> <new_openapi.json> <output.json>"
+        )
         sys.exit(1)
 
     old_path, new_path, out_path = sys.argv[1], sys.argv[2], sys.argv[3]
@@ -171,7 +200,9 @@ def main():
     Path(out_path).write_text(json.dumps(changes, indent=2))
     print(f"Wrote {len(changes)} change(s) to {out_path}")
     for c in changes:
-        print(f"  - [{c['severity']}] {c['change_type']} on {c['method']} {c['endpoint']}")
+        print(
+            f"  - [{c['severity']}] {c['change_type']} on {c['method']} {c['endpoint']}"
+        )
 
 
 if __name__ == "__main__":

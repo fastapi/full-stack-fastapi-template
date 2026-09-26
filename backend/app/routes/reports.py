@@ -18,11 +18,13 @@ def list_reports():
     reports = []
     for file in sorted(REPORTS_DIR.glob("impact_report_*.json")):
         data = json.loads(file.read_text())
-        reports.append({
-            "change_id": data.get("change_id"),
-            "severity": data.get("severity"),
-            "verify_status": data.get("verify_status"),
-        })
+        reports.append(
+            {
+                "change_id": data.get("change_id"),
+                "severity": data.get("severity"),
+                "verify_status": data.get("verify_status"),
+            }
+        )
     return reports
 
 

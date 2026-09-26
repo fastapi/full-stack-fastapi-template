@@ -76,7 +76,6 @@ class ItemBase(SQLModel):
     description: str | None = Field(default=None, max_length=255)
 
 
-
 # Properties to receive on item creation
 class ItemCreate(ItemBase):
     pass

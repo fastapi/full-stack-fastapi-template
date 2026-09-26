@@ -5,7 +5,10 @@
   "method": "DELETE",
   "summary_plain_english": "The endpoint to delete an item was removed entirely. Any frontend code calling this (e.g. a delete button) will now fail when clicked.",
   "severity": "high",
-  "affected_files": ["frontend/src/components/ItemCard.tsx", "frontend/src/api/client.ts"],
+  "affected_files": [
+    "frontend/src/components/ItemCard.tsx",
+    "frontend/src/api/client.ts"
+  ],
   "patch_applied": true,
   "patch_description": "Removed the delete button and its API call from ItemCard.tsx, and removed the now-dead deleteItem() method from the generated client.",
   "verify_status": "pass",
