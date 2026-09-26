@@ -1,16 +1,44 @@
 [
   {
-    "endpoint": "/chat",
+    "endpoint": "/api/v1/items/",
     "method": "POST",
     "change_type": "field_type_changed",
     "breaking": true,
     "old_schema_fragment": {
-      "top_k": "integer"
+      "description": "string"
     },
     "new_schema_fragment": {
-      "top_k": "string"
+      "description": "array"
     },
     "severity": "high",
-    "detected_at": "2026-09-26T12:32:56.215675+00:00"
+    "detected_at": "2026-09-26T17:00:00.789863+00:00"
+  },
+  {
+    "endpoint": "/api/v1/items/{id}",
+    "method": "GET",
+    "change_type": "field_type_changed",
+    "breaking": true,
+    "old_schema_fragment": {
+      "description": "string"
+    },
+    "new_schema_fragment": {
+      "description": "array"
+    },
+    "severity": "high",
+    "detected_at": "2026-09-26T17:00:00.789863+00:00"
+  },
+  {
+    "endpoint": "/api/v1/items/{id}",
+    "method": "PUT",
+    "change_type": "field_type_changed",
+    "breaking": true,
+    "old_schema_fragment": {
+      "description": "string"
+    },
+    "new_schema_fragment": {
+      "description": "array"
+    },
+    "severity": "high",
+    "detected_at": "2026-09-26T17:00:00.789863+00:00"
   }
 ]
