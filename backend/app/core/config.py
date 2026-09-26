@@ -1,7 +1,6 @@
 import warnings
-from typing import Literal, Self
-
 from pathlib import Path
+from typing import Literal, Self
 
 from pydantic import (
     EmailStr,
@@ -16,11 +15,10 @@ from pydantic_settings import BaseSettings, SettingsConfigDict
 
 class Settings(BaseSettings):
     model_config = SettingsConfigDict(
-    env_file=Path(__file__).resolve().parents[3] / ".env",
-    env_ignore_empty=True,
-    extra="ignore",
-)
-
+        env_file=Path(__file__).resolve().parents[3] / ".env",
+        env_ignore_empty=True,
+        extra="ignore",
+    )
 
     API_V1_STR: str = "/api/v1"
     SECRET_KEY: str

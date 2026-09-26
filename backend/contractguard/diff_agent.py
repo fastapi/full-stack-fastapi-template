@@ -177,7 +177,11 @@ def diff_specs(old_spec: dict, new_spec: dict) -> list[dict]:
             )
 
         for a in added:
-            changes.append(base_entry(key, "field_added_required", False, {}, {a: new_fields[a]}, "low"))
+            changes.append(
+                base_entry(
+                    key, "field_added_required", False, {}, {a: new_fields[a]}, "low"
+                )
+            )
 
         for f in common:
             if old_fields[f] != new_fields[f]:
