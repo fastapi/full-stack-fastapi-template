@@ -1,0 +1,16 @@
+[
+  {
+    "endpoint": "/chat",
+    "method": "POST",
+    "change_type": "field_renamed",
+    "breaking": true,
+    "old_schema_fragment": {
+      "answer": "string"
+    },
+    "new_schema_fragment": {
+      "response_text": "string"
+    },
+    "severity": "high",
+    "detected_at": "2026-09-26T12:32:56.064254+00:00"
+  }
+]

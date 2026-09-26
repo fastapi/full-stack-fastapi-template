@@ -1,6 +1,8 @@
 import warnings
 from typing import Literal, Self
 
+from pathlib import Path
+
 from pydantic import (
     EmailStr,
     HttpUrl,
@@ -14,11 +16,12 @@ from pydantic_settings import BaseSettings, SettingsConfigDict
 
 class Settings(BaseSettings):
     model_config = SettingsConfigDict(
-        # Use top level .env file (one level above ./backend/)
-        env_file="../.env",
-        env_ignore_empty=True,
-        extra="ignore",
-    )
+    env_file=Path(__file__).resolve().parents[3] / ".env",
+    env_ignore_empty=True,
+    extra="ignore",
+)
+
+
     API_V1_STR: str = "/api/v1"
     SECRET_KEY: str
     # 60 minutes * 24 hours * 8 days = 8 days

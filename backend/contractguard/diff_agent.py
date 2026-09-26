@@ -3,17 +3,6 @@ Diff Agent — Mahi's core deliverable.
 
 Usage:
     python diff_agent.py <old_openapi.json> <new_openapi.json> <output_diff_report.json>
-
-What it does:
-    1. Loads two OpenAPI specs (before/after a backend change).
-    2. Extracts a simplified {endpoint: {field: type}} view of each.
-    3. Diffs them and classifies each difference into one of:
-       field_renamed, field_type_changed, field_added_required,
-       field_removed, endpoint_removed
-    4. Writes a list of diff entries matching diff_report.schema.json
-
-This is plain deterministic Python — no Bob calls needed here. Test it against
-all 3 of your drift branches before handing off to Khushi.
 """
 
 import json
@@ -26,70 +15,101 @@ def load_spec(path: str) -> dict:
     return json.loads(Path(path).read_text())
 
 
-def _resolve_schema_name(schema_obj: dict) -> str | None:
-    """Follow a $ref (including inside 'items' for arrays) to find the schema name."""
-    if not schema_obj:
+def _resolve_ref(obj: dict) -> str | None:
+    if not isinstance(obj, dict):
         return None
-    if "$ref" in schema_obj:
-        return schema_obj["$ref"].split("/")[-1]
-    if "items" in schema_obj and "$ref" in schema_obj["items"]:
-        return schema_obj["items"]["$ref"].split("/")[-1]
+    if "$ref" in obj:
+        return obj["$ref"].split("/")[-1]
+    if "items" in obj and isinstance(obj["items"], dict) and "$ref" in obj["items"]:
+        return obj["items"]["$ref"].split("/")[-1]
     return None
 
 
-def _unwrap_list_envelope(schema_name: str, components: dict) -> str:
-    """
-    Some endpoints (e.g. GET /items/) return a paginated envelope like:
-        { "data": [ {...ItemPublic...} ], "count": 5 }
-    rather than the item schema directly (this is ItemsPublic in the
-    standard tiangolo template). If `schema_name` looks like one of these
-    envelopes — has a "data" property that's an array of $ref items — this
-    resolves through to the *inner* item schema instead, since that's the
-    schema whose fields (title, description, etc.) actually matter for
-    drift detection. Non-envelope schemas pass through unchanged.
-    """
-    schema = components.get(schema_name, {})
+def _extract_type(field_def: dict) -> str:
+    if not isinstance(field_def, dict):
+        return "unknown"
+    if "type" in field_def:
+        t = field_def["type"]
+        if isinstance(t, list):
+            types = [x for x in t if x != "null"]
+            return types[0] if types else "null"
+        return str(t)
+    if "anyOf" in field_def or "oneOf" in field_def:
+        variants = field_def.get("anyOf") or field_def.get("oneOf") or []
+        for v in variants:
+            if isinstance(v, dict):
+                if "$ref" in v:
+                    return v["$ref"].split("/")[-1]
+                if "type" in v:
+                    return str(v["type"])
+    if "$ref" in field_def:
+        return field_def["$ref"].split("/")[-1]
+    return "unknown"
+
+
+def _extract_fields_from_schema(schema: dict, components: dict) -> dict[str, str]:
+    fields = {}
+    if not isinstance(schema, dict):
+        return fields
+
+    ref_name = _resolve_ref(schema)
+    if ref_name and ref_name in components:
+        schema = components[ref_name]
+
+    # Unwrap allOf / anyOf wrappers
+    if "allOf" in schema:
+        for sub in schema["allOf"]:
+            fields.update(_extract_fields_from_schema(sub, components))
+
     props = schema.get("properties", {})
-    data_prop = props.get("data", {})
-    if data_prop.get("type") == "array":
-        inner_ref = data_prop.get("items", {}).get("$ref")
-        if inner_ref:
-            return inner_ref.split("/")[-1]
-    return schema_name
+    if isinstance(props, dict):
+        for fname, fdef in props.items():
+            fields[fname] = _extract_type(fdef)
+
+    return fields
 
 
 def get_endpoint_schemas(spec: dict) -> dict:
-    """
-    Returns { "METHOD /path": { field_name: field_type } } using each
-    endpoint's 200-response body schema. Automatically unwraps paginated
-    "data"-envelope responses (e.g. ItemsPublic -> ItemPublic) so drift is
-    detected on the actual item fields, not the envelope shape. Extend this
-    if you also want to diff request bodies (POST/PUT) — same pattern, just
-    read details["requestBody"] instead of details["responses"]["200"].
-    """
     result = {}
     paths = spec.get("paths", {})
     components = spec.get("components", {}).get("schemas", {})
 
     for path, methods in paths.items():
+        if not isinstance(methods, dict):
+            continue
         for method, details in methods.items():
-            if method.lower() not in ("get", "post", "put", "delete", "patch"):
+            m = method.upper()
+            if m not in ("GET", "POST", "PUT", "DELETE", "PATCH"):
                 continue
-            key = f"{method.upper()} {path}"
+
+            key = f"{m} {path}"
             fields = {}
 
+            # 1. Extract from Request Body (POST, PUT, PATCH)
+            req_body = details.get("requestBody", {})
+            if isinstance(req_body, dict):
+                content = req_body.get("content", {}).get("application/json", {})
+                req_schema = content.get("schema", {})
+                fields.update(_extract_fields_from_schema(req_schema, components))
+
+            # 2. Extract from Responses (200, 201, 204, or default)
             responses = details.get("responses", {})
-            ok_response = responses.get("200", {})
-            content = ok_response.get("content", {}).get("application/json", {})
-            schema_name = _resolve_schema_name(content.get("schema", {}))
+            if isinstance(responses, dict):
+                res_obj = (
+                    responses.get("200")
+                    or responses.get("201")
+                    or responses.get("204")
+                    or responses.get("200 OK")
+                    or {}
+                )
+                if isinstance(res_obj, dict):
+                    content = res_obj.get("content", {}).get("application/json", {})
+                    res_schema = content.get("schema", {})
+                    fields.update(_extract_fields_from_schema(res_schema, components))
 
-            if schema_name and schema_name in components:
-                schema_name = _unwrap_list_envelope(schema_name, components)
-
-            if schema_name and schema_name in components:
-                props = components[schema_name].get("properties", {})
-                for field_name, field_def in props.items():
-                    fields[field_name] = field_def.get("type", "unknown")
+            # Fallback if no explicit fields resolved
+            if not fields:
+                fields["$response"] = "void" if m == "DELETE" else "unknown"
 
             result[key] = fields
 
@@ -116,7 +136,6 @@ def diff_specs(old_spec: dict, new_spec: dict) -> list[dict]:
         }
 
     for key, old_fields in old_endpoints.items():
-        # Endpoint removed entirely
         if key not in new_endpoints:
             changes.append(base_entry(key, "endpoint_removed", True, old_fields, {}, "high"))
             continue
@@ -126,8 +145,7 @@ def diff_specs(old_spec: dict, new_spec: dict) -> list[dict]:
         added = set(new_fields) - set(old_fields)
         common = set(old_fields) & set(new_fields)
 
-        # Heuristic: a removed field + an added field of the SAME type in the
-        # same commit is treated as a rename, not two separate changes.
+        # Rename heuristic: removed key + added key with matching type
         for r in list(removed):
             match = next((a for a in added if old_fields[r] == new_fields[a]), None)
             if match:
@@ -142,8 +160,6 @@ def diff_specs(old_spec: dict, new_spec: dict) -> list[dict]:
             changes.append(base_entry(key, "field_removed", True, {r: old_fields[r]}, {}, "medium"))
 
         for a in added:
-            # A genuinely new field on a response is usually non-breaking (additive),
-            # but flagged low severity so the team can eyeball it.
             changes.append(base_entry(key, "field_added_required", False, {}, {a: new_fields[a]}, "low"))
 
         for f in common:
