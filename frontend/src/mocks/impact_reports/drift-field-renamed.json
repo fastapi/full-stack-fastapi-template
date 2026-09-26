@@ -1,0 +1,16 @@
+{
+  "change_id": "field_renamed_full_name",
+  "change_type": "field_renamed",
+  "endpoint": "/items/{id}",
+  "method": "GET",
+  "summary_plain_english": "The 'full_name' field on Item was renamed to 'name'. Any frontend code reading item.full_name will now get undefined.",
+  "severity": "high",
+  "affected_files": ["frontend/src/components/ItemCard.tsx", "frontend/src/api/client.ts"],
+  "patch_applied": true,
+  "patch_description": "Updated ItemCard.tsx and the generated client type to use 'name' instead of 'full_name'.",
+  "verify_status": "pass",
+  "verify_log": "tsc --noEmit: 0 errors. vitest: 4/4 passed.",
+  "old_schema_fragment": { "full_name": "string" },
+  "new_schema_fragment": { "name": "string" },
+  "detected_at": "2026-09-26T13:00:00Z"
+}
