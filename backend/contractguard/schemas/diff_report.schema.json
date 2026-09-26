@@ -1,0 +1,19 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "DiffReportEntry",
+  "type": "object",
+  "required": ["endpoint", "method", "change_type", "breaking", "severity", "detected_at"],
+  "properties": {
+    "endpoint": { "type": "string", "example": "/items/{id}" },
+    "method": { "type": "string", "enum": ["GET", "POST", "PUT", "DELETE", "PATCH"] },
+    "change_type": {
+      "type": "string",
+      "enum": ["field_renamed", "field_type_changed", "field_added_required", "field_removed", "endpoint_removed"]
+    },
+    "breaking": { "type": "boolean" },
+    "old_schema_fragment": { "type": "object" },
+    "new_schema_fragment": { "type": "object" },
+    "severity": { "type": "string", "enum": ["high", "medium", "low"] },
+    "detected_at": { "type": "string", "format": "date-time" }
+  }
+}

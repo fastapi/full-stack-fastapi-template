@@ -8,6 +8,10 @@ from starlette.middleware.cors import CORSMiddleware
 from app.api.main import api_router
 from app.core.config import settings
 
+from app.routes import reports
+# ...
+
+
 FRONTEND_DIR = Path(__file__).parent / "frontend"
 
 
@@ -23,6 +27,8 @@ app = FastAPI(
     openapi_url=f"{settings.API_V1_STR}/openapi.json",
     generate_unique_id_function=custom_generate_unique_id,
 )
+
+app.include_router(reports.router)
 
 app.add_middleware(
     CORSMiddleware,
