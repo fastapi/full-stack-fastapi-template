@@ -46,9 +46,25 @@ services:
       # Define the port inside of the Docker service to use
       - traefik.http.services.adminer.loadbalancer.server.port=8080
 
+  prestart:
+    image: backend:latest
+    depends_on:
+      db:
+        condition: service_healthy
+    environment:
+      FASTAPI_ENV: development
+      PROJECT_NAME: ${PROJECT_NAME:?Variable not set}
+      SECRET_KEY: ${SECRET_KEY:?Variable not set}
+      FIRST_SUPERUSER: ${FIRST_SUPERUSER:?Variable not set}
+      FIRST_SUPERUSER_PASSWORD: ${FIRST_SUPERUSER_PASSWORD:?Variable not set}
+      DATABASE_URL: postgresql://postgres:${POSTGRES_PASSWORD:?Variable not set}@db:5432/app
+    command: bash scripts/prestart.sh
+
   backend:
     image: backend:latest
     depends_on:
+      prestart:
+        condition: service_completed_successfully
       db:
         condition: service_healthy
         restart: true
