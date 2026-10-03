@@ -10,14 +10,14 @@
   },
   "dependencies": {
     "@react-email/components": "1.0.12",
-    "react": "^19.2.8",
-    "react-dom": "^19.2.8",
-    "react-email": "6.9.1"
+    "react": "^19.3.0",
+    "react-dom": "^19.3.0",
+    "react-email": "6.11.0"
   },
   "devDependencies": {
-    "@biomejs/biome": "^2.5.6",
-    "@react-email/ui": "6.9.1",
-    "@types/react": "^19.2.18",
-    "@types/react-dom": "^19.2.4"
+    "@biomejs/biome": "^2.5.14",
+    "@react-email/ui": "6.11.0",
+    "@types/react": "^19.3.0",
+    "@types/react-dom": "^19.3.0"
   }
 }
