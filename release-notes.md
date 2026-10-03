@@ -21,6 +21,7 @@
 
 ### Internal
 
+* Bump axios from 1.18.0 to 1.20.0 in /frontend. PR [#2505](https://github.com/fastapi/full-stack-fastapi-template/pull/2505) by [@dependabot[bot]](https://github.com/apps/dependabot).
 * ⬆ Bump anyio from 4.14.1 to 4.14.2. PR [#2483](https://github.com/fastapi/full-stack-fastapi-template/pull/2483) by [@dependabot[bot]](https://github.com/apps/dependabot).
 * ⬆ Update sentry-sdk[fastapi] requirement from <3.0.0,>=2.68.1 to >=2.70.0,<3.0.0. PR [#2498](https://github.com/fastapi/full-stack-fastapi-template/pull/2498) by [@dependabot[bot]](https://github.com/apps/dependabot).
 * ⬆ Bump pre-commit hooks. PR [#2501](https://github.com/fastapi/full-stack-fastapi-template/pull/2501) by [@pr-submit[bot]](https://github.com/apps/pr-submit).
