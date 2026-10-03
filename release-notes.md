@@ -21,6 +21,7 @@
 
 ### Internal
 
+* ⬆ Update psycopg[binary] requirement from <4.0.0,>=3.3.4 to >=3.3.6,<4.0.0. PR [#2499](https://github.com/fastapi/full-stack-fastapi-template/pull/2499) by [@dependabot[bot]](https://github.com/apps/dependabot).
 * ⬆ Bump pyjwt from 2.13.0 to 2.15.0. PR [#2494](https://github.com/fastapi/full-stack-fastapi-template/pull/2494) by [@dependabot[bot]](https://github.com/apps/dependabot).
 * ⬆ Bump the github-actions group with 2 updates. PR [#2495](https://github.com/fastapi/full-stack-fastapi-template/pull/2495) by [@dependabot[bot]](https://github.com/apps/dependabot).
 * ⬆ Bump traefik from 3.6 to v3.7 in the docker-compose group. PR [#2465](https://github.com/fastapi/full-stack-fastapi-template/pull/2465) by [@dependabot[bot]](https://github.com/apps/dependabot).
