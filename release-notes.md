@@ -21,6 +21,7 @@
 
 ### Internal
 
+* ⬆ Bump anyio from 4.14.1 to 4.14.2. PR [#2483](https://github.com/fastapi/full-stack-fastapi-template/pull/2483) by [@dependabot[bot]](https://github.com/apps/dependabot).
 * ⬆ Update sentry-sdk[fastapi] requirement from <3.0.0,>=2.68.1 to >=2.70.0,<3.0.0. PR [#2498](https://github.com/fastapi/full-stack-fastapi-template/pull/2498) by [@dependabot[bot]](https://github.com/apps/dependabot).
 * ⬆ Bump pre-commit hooks. PR [#2501](https://github.com/fastapi/full-stack-fastapi-template/pull/2501) by [@pr-submit[bot]](https://github.com/apps/pr-submit).
 * ⬆ Bump playwright from v1.62.1-noble to v1.63.0-noble in /frontend in the docker group across 1 directory. PR [#2496](https://github.com/fastapi/full-stack-fastapi-template/pull/2496) by [@dependabot[bot]](https://github.com/apps/dependabot).
