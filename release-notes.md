@@ -21,6 +21,7 @@
 
 ### Internal
 
+* ⬆ Bump pyjwt from 2.13.0 to 2.15.0. PR [#2494](https://github.com/fastapi/full-stack-fastapi-template/pull/2494) by [@dependabot[bot]](https://github.com/apps/dependabot).
 * ⬆ Bump the github-actions group with 2 updates. PR [#2495](https://github.com/fastapi/full-stack-fastapi-template/pull/2495) by [@dependabot[bot]](https://github.com/apps/dependabot).
 * ⬆ Bump traefik from 3.6 to v3.7 in the docker-compose group. PR [#2465](https://github.com/fastapi/full-stack-fastapi-template/pull/2465) by [@dependabot[bot]](https://github.com/apps/dependabot).
 * ⬆ Bump pre-commit hooks. PR [#2471](https://github.com/fastapi/full-stack-fastapi-template/pull/2471) by [@pr-submit[bot]](https://github.com/apps/pr-submit).
