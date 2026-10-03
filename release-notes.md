@@ -21,6 +21,12 @@
 
 ### Internal
 
+* ⬆ Bump anyio from 4.14.1 to 4.14.2. PR [#2483](https://github.com/fastapi/full-stack-fastapi-template/pull/2483) by [@dependabot[bot]](https://github.com/apps/dependabot).
+* ⬆ Update sentry-sdk[fastapi] requirement from <3.0.0,>=2.68.1 to >=2.70.0,<3.0.0. PR [#2498](https://github.com/fastapi/full-stack-fastapi-template/pull/2498) by [@dependabot[bot]](https://github.com/apps/dependabot).
+* ⬆ Bump pre-commit hooks. PR [#2501](https://github.com/fastapi/full-stack-fastapi-template/pull/2501) by [@pr-submit[bot]](https://github.com/apps/pr-submit).
+* ⬆ Bump playwright from v1.62.1-noble to v1.63.0-noble in /frontend in the docker group across 1 directory. PR [#2496](https://github.com/fastapi/full-stack-fastapi-template/pull/2496) by [@dependabot[bot]](https://github.com/apps/dependabot).
+* ⬆ Bump urllib3 from 2.7.0 to 2.8.0. PR [#2503](https://github.com/fastapi/full-stack-fastapi-template/pull/2503) by [@dependabot[bot]](https://github.com/apps/dependabot).
+* ⬆ Update psycopg[binary] requirement from <4.0.0,>=3.3.4 to >=3.3.6,<4.0.0. PR [#2499](https://github.com/fastapi/full-stack-fastapi-template/pull/2499) by [@dependabot[bot]](https://github.com/apps/dependabot).
 * ⬆ Bump pyjwt from 2.13.0 to 2.15.0. PR [#2494](https://github.com/fastapi/full-stack-fastapi-template/pull/2494) by [@dependabot[bot]](https://github.com/apps/dependabot).
 * ⬆ Bump the github-actions group with 2 updates. PR [#2495](https://github.com/fastapi/full-stack-fastapi-template/pull/2495) by [@dependabot[bot]](https://github.com/apps/dependabot).
 * ⬆ Bump traefik from 3.6 to v3.7 in the docker-compose group. PR [#2465](https://github.com/fastapi/full-stack-fastapi-template/pull/2465) by [@dependabot[bot]](https://github.com/apps/dependabot).
