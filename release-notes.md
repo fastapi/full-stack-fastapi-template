@@ -21,6 +21,7 @@
 
 ### Internal
 
+* ⬆ Bump pre-commit hooks. PR [#2501](https://github.com/fastapi/full-stack-fastapi-template/pull/2501) by [@pr-submit[bot]](https://github.com/apps/pr-submit).
 * ⬆ Bump playwright from v1.62.1-noble to v1.63.0-noble in /frontend in the docker group across 1 directory. PR [#2496](https://github.com/fastapi/full-stack-fastapi-template/pull/2496) by [@dependabot[bot]](https://github.com/apps/dependabot).
 * ⬆ Bump urllib3 from 2.7.0 to 2.8.0. PR [#2503](https://github.com/fastapi/full-stack-fastapi-template/pull/2503) by [@dependabot[bot]](https://github.com/apps/dependabot).
 * ⬆ Update psycopg[binary] requirement from <4.0.0,>=3.3.4 to >=3.3.6,<4.0.0. PR [#2499](https://github.com/fastapi/full-stack-fastapi-template/pull/2499) by [@dependabot[bot]](https://github.com/apps/dependabot).
