@@ -7,7 +7,7 @@ dependencies = [
     "fastapi[standard]>=0.141.1,<1.0.0",
     "python-multipart<1.0.0,>=0.0.27",
     "email-validator<3.0.0.0,>=2.1.0.post1",
-    "pydantic>2.0",
+    "pydantic>=2.13.5",
     "emails>=1.1.2,<2.0",
     "jinja2<4.0.0,>=3.1.4",
     "alembic>=1.19.1,<2.0.0",
