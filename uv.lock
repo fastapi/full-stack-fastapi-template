@@ -108,7 +108,7 @@ requires-dist = [
     { name = "pyjwt", specifier = ">=2.15.0,<3.0.0" },
     { name = "python-multipart", specifier = ">=0.0.27,<1.0.0" },
     { name = "sentry-sdk", extras = ["fastapi"], specifier = ">=2.70.0,<3.0.0" },
-    { name = "sqlmodel", specifier = ">=0.0.39,<1.0.0" },
+    { name = "sqlmodel", specifier = ">=0.0.46,<1.0.0" },
 ]
 
 [package.metadata.requires-dev]
