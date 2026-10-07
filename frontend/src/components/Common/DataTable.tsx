@@ -1,6 +1,5 @@
 import {
   type ColumnDef,
-  columnVisibilityFeature,
   createPaginatedRowModel,
   flexRender,
   type RowData,
@@ -33,7 +32,6 @@ import {
 } from "@/components/ui/table"
 
 const dataTableFeatures = tableFeatures({
-  columnVisibilityFeature,
   rowPaginationFeature,
   paginatedRowModel: createPaginatedRowModel(),
 })
@@ -80,7 +78,7 @@ export function DataTable<TData extends RowData>({
           {table.getRowModel().rows.length ? (
             table.getRowModel().rows.map((row) => (
               <TableRow key={row.id}>
-                {row.getVisibleCells().map((cell) => (
+                {row.getAllCells().map((cell) => (
                   <TableCell key={cell.id}>
                     {flexRender(cell.column.columnDef.cell, cell.getContext())}
                   </TableCell>
