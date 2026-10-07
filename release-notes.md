@@ -21,6 +21,7 @@
 
 ### Internal
 
+* ⬆ Bump the npm-packages group across 1 directory with 25 updates. PR [#2506](https://github.com/fastapi/full-stack-fastapi-template/pull/2506) by [@dependabot[bot]](https://github.com/apps/dependabot).
 * ⬆ Bump mako from 1.3.12 to 1.4.2. PR [#2507](https://github.com/fastapi/full-stack-fastapi-template/pull/2507) by [@dependabot[bot]](https://github.com/apps/dependabot).
 * ⬆ Bump the python-packages group across 1 directory with 8 updates. PR [#2497](https://github.com/fastapi/full-stack-fastapi-template/pull/2497) by [@dependabot[bot]](https://github.com/apps/dependabot).
 * Bump axios from 1.18.0 to 1.20.0 in /frontend. PR [#2505](https://github.com/fastapi/full-stack-fastapi-template/pull/2505) by [@dependabot[bot]](https://github.com/apps/dependabot).
