@@ -25,7 +25,7 @@ class EmailData:
 def render_email_template(*, template_name: str, context: dict[str, Any]) -> str:
     template_str = (
         Path(__file__).parent / "email-templates" / template_name
-    ).read_text()
+    ).read_text(encoding="utf-8")
     template: Template = Template(template_str)
     html_content = template.render(context)
     return html_content
