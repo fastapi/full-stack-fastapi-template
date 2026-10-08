@@ -21,6 +21,7 @@
 
 ### Internal
 
+* ⬆️ Migrate `@tanstack/react-table` to 9.x. PR [#2509](https://github.com/fastapi/full-stack-fastapi-template/pull/2509) by [@YuriiMotov](https://github.com/YuriiMotov).
 * ⬆ Bump the npm-packages group across 1 directory with 25 updates. PR [#2506](https://github.com/fastapi/full-stack-fastapi-template/pull/2506) by [@dependabot[bot]](https://github.com/apps/dependabot).
 * ⬆ Bump mako from 1.3.12 to 1.4.2. PR [#2507](https://github.com/fastapi/full-stack-fastapi-template/pull/2507) by [@dependabot[bot]](https://github.com/apps/dependabot).
 * ⬆ Bump the python-packages group across 1 directory with 8 updates. PR [#2497](https://github.com/fastapi/full-stack-fastapi-template/pull/2497) by [@dependabot[bot]](https://github.com/apps/dependabot).
