@@ -1,5 +1,8 @@
 # Full Stack FastAPI Template
 
+For this fork's disposable backend, system and browser testing workflow, see
+the [TestNexus setup guide](scripts/testnexus/README.md).
+
 [![Test Docker Compose](../../actions/workflows/test-docker-compose.yml/badge.svg)](../../actions/workflows/test-docker-compose.yml)
 [![Test Backend](../../actions/workflows/test-backend.yml/badge.svg)](../../actions/workflows/test-backend.yml)
 

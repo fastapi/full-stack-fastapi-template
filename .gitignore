@@ -6,3 +6,14 @@ backend/app/frontend/
 /playwright-report/
 /blob-report/
 /playwright/.cache/
+
+# Disposable TestNexus evidence and local credentials.
+.env
+.venv/
+backend/test-results/
+frontend/test-results/
+frontend/playwright-report/
+frontend/playwright/.auth/
+frontend/blob-report/
+test-results/
+.coverage*
