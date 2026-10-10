@@ -10,7 +10,6 @@ from datetime import UTC, datetime, timedelta
 
 import jwt
 from fastapi.testclient import TestClient
-from sqlmodel import Session
 
 from app.core import security
 from app.core.config import settings
