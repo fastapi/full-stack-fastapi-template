@@ -118,7 +118,12 @@ def generate_password_reset_token(email: str) -> str:
 def verify_password_reset_token(token: str) -> str | None:
     try:
         decoded_token = jwt.decode(
-            token, settings.SECRET_KEY, algorithms=[security.ALGORITHM]
+            token,
+            settings.SECRET_KEY,
+            algorithms=[security.ALGORITHM],
+            # Require the expiry claim so an unexpired reset token can never be
+            # replayed indefinitely if one is minted without a lifetime bound.
+            options={"require": ["exp"]},
         )
         return str(decoded_token["sub"])
     except InvalidTokenError:
