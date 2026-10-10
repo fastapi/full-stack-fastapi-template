@@ -48,9 +48,7 @@ def test_placeholder_superuser_password_is_rejected() -> None:
 
 def test_placeholder_database_password_is_rejected() -> None:
     with pytest.raises(ValidationError):
-        _settings(
-            DATABASE_URL="postgresql://postgres:changethis@localhost:5432/app"
-        )
+        _settings(DATABASE_URL="postgresql://postgres:changethis@localhost:5432/app")
 
 
 def test_valid_secret_key_is_accepted() -> None:
