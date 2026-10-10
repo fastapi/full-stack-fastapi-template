@@ -99,7 +99,15 @@ docker compose watch
 
 ## The `.env` File
 
-The tracked `.env` file contains local development defaults, passwords, and other configuration. Its hostnames use `localhost` for processes running on your machine. Docker Compose overrides hostnames such as the database and SMTP server with their Compose service names.
+Local settings come from the `.env` file. It is ignored by Git and Docker and is **not** tracked, so each checkout holds its own secrets. Its hostnames use `localhost` for processes running on your machine. Docker Compose overrides hostnames such as the database and SMTP server with their Compose service names.
+
+Create it with strong, random secrets before starting the stack:
+
+```bash
+bash scripts/generate-env.sh
+```
+
+`.env.example` documents every supported variable. The backend refuses to start when `SECRET_KEY` or `FIRST_SUPERUSER_PASSWORD` is left as a placeholder (`changethis`) or when `SECRET_KEY` is shorter than 32 characters, so the application can never boot with a shipped default signing key.
 
 Do not store deployment secrets in `.env`. Configure them as described in the [FastAPI Cloud deployment guide](./deployment.md) or the [Docker Compose deployment guide](./deployment-docker-compose.md).
 

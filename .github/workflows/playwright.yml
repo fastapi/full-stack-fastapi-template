@@ -65,6 +65,9 @@ jobs:
       if: ${{ github.event_name == 'workflow_dispatch' && github.event.inputs.debug_enabled == 'true' }}
       with:
         limit-access-to-actor: true
+    # Generate a local .env with strong random secrets (see scripts/generate-env.sh).
+    # Placeholder secrets are rejected at startup, so CI must provide real ones.
+    - run: bash scripts/generate-env.sh
     - name: Install uv
       uses: astral-sh/setup-uv@c18668ad3cf93ea998bef934396af7bb5c839dc7 # v10.2.0
       with:

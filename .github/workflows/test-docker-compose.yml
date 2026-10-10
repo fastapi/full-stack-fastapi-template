@@ -18,6 +18,9 @@ jobs:
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           persist-credentials: false
+      # Generate a local .env with strong random secrets (see scripts/generate-env.sh).
+      # Placeholder secrets are rejected at startup, so CI must provide real ones.
+      - run: bash scripts/generate-env.sh
       - run: docker compose build
       - run: docker compose down -v --remove-orphans
       - run: docker compose run --rm backend bash scripts/prestart.sh

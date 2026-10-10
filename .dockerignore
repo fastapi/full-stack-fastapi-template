@@ -8,3 +8,8 @@ frontend/node_modules
 frontend/playwright-report
 frontend/test-results
 node_modules
+
+# Local environment files hold secrets and must never be sent to the Docker daemon.
+.env
+.env.*
+!.env.example

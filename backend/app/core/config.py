@@ -1,4 +1,3 @@
-import warnings
 from typing import Literal, Self
 
 from pydantic import (
@@ -10,6 +9,10 @@ from pydantic import (
     model_validator,
 )
 from pydantic_settings import BaseSettings, SettingsConfigDict
+
+# Minimum acceptable length (in characters) for the token signing key. A shorter
+# key is treated as insecure and rejected outright, in every environment.
+MINIMUM_SECRET_KEY_LENGTH = 32
 
 
 class Settings(BaseSettings):
@@ -66,19 +69,27 @@ class Settings(BaseSettings):
     FIRST_SUPERUSER_PASSWORD: str
 
     def _check_default_secret(self, var_name: str, value: str | None) -> None:
+        # Fail closed in *every* environment (including development): a
+        # placeholder secret must never be silently accepted, because the same
+        # signing key is used to verify access and password-reset tokens, so a
+        # known default allows anyone to forge a token for any user.
         if value == "changethis":
             message = (
                 f'The value of {var_name} is "changethis", '
                 "for security, please change it, at least for deployments."
             )
-            if self.FASTAPI_ENV == "development":
-                warnings.warn(message, stacklevel=1)
-            else:
-                raise ValueError(message)
+            raise ValueError(message)
 
     @model_validator(mode="after")
     def _enforce_non_default_secrets(self) -> Self:
         self._check_default_secret("SECRET_KEY", self.SECRET_KEY)
+        if len(self.SECRET_KEY) < MINIMUM_SECRET_KEY_LENGTH:
+            raise ValueError(
+                "SECRET_KEY must be at least "
+                f"{MINIMUM_SECRET_KEY_LENGTH} characters long, "
+                "for security, please generate a strong random value "
+                "(e.g. `python -c 'import secrets; print(secrets.token_urlsafe(32))'`)."
+            )
         for host in self.DATABASE_URL.hosts():
             self._check_default_secret("DATABASE_URL password", host["password"])
         self._check_default_secret(

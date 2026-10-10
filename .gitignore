@@ -1,6 +1,12 @@
 .vscode/*
 !.vscode/extensions.json
 node_modules/
+
+# Local environment files hold secrets and must never be committed.
+.env
+.env.*
+!.env.example
+
 backend/app/frontend/
 /test-results/
 /playwright-report/
