@@ -1,9 +1,11 @@
 import uuid
 
 from fastapi.testclient import TestClient
-from sqlmodel import Session
+from sqlmodel import Session, delete
 
 from app.core.config import settings
+from app.core.db import engine
+from app.models import Item
 from tests.utils.item import create_random_item
 
 
@@ -162,3 +164,38 @@ def test_delete_item_not_enough_permissions(
     assert response.status_code == 403
     content = response.json()
     assert content["detail"] == "Not enough permissions"
+
+
+def test_read_items_count(
+    client: TestClient, superuser_token_headers: dict[str, str], db: Session
+) -> None:
+    # Create some items first
+    create_random_item(db)
+    create_random_item(db)
+    
+    response = client.get(
+        f"{settings.API_V1_STR}/items/count",
+        headers=superuser_token_headers,
+    )
+    assert response.status_code == 200
+    content = response.json()
+    assert "count" in content
+    assert content["count"] >= 2
+
+
+def test_read_items_count_zero(
+    client: TestClient, superuser_token_headers: dict[str, str], db: Session
+) -> None:
+    # Clear all items first
+    statement = delete(Item)
+    db.execute(statement)
+    db.commit()
+    
+    response = client.get(
+        f"{settings.API_V1_STR}/items/count",
+        headers=superuser_token_headers,
+    )
+    assert response.status_code == 200
+    content = response.json()
+    assert "count" in content
+    assert content["count"] == 0

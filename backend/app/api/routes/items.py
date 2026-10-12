@@ -45,6 +45,25 @@ def read_items(
     return ItemsPublic(data=items_public, count=count)
 
 
+@router.get("/count")
+def read_items_count(
+    session: SessionDep, current_user: CurrentUser
+) -> Any:
+    """
+    Retrieve total item count.
+    """
+    if current_user.is_superuser:
+        count_statement = select(func.count()).select_from(Item)
+    else:
+        count_statement = (
+            select(func.count())
+            .select_from(Item)
+            .where(Item.owner_id == current_user.id)
+        )
+    count = session.exec(count_statement).one()
+    return {"count": count}
+
+
 @router.get("/{id}", response_model=ItemPublic)
 def read_item(session: SessionDep, current_user: CurrentUser, id: uuid.UUID) -> Any:
     """
