@@ -1,3 +1,4 @@
+import logging
 from datetime import timedelta
 from typing import Annotated, Any
 
@@ -18,6 +19,7 @@ from app.utils import (
 )
 
 router = APIRouter(tags=["login"])
+logger = logging.getLogger(__name__)
 
 
 @router.post("/login/access-token")
@@ -55,23 +57,29 @@ def recover_password(email: str, session: SessionDep) -> Message:
     """
     Password Recovery
     """
-    user = crud.get_user_by_email(session=session, email=email)
-
-    # Always return the same response to prevent email enumeration attacks
-    # Only send email if user actually exists
-    if user:
-        password_reset_token = generate_password_reset_token(email=email)
-        email_data = generate_reset_password_email(
-            email_to=user.email, email=email, token=password_reset_token
-        )
-        send_email(
-            email_to=user.email,
-            subject=email_data.subject,
-            html_content=email_data.html_content,
-        )
-    return Message(
+    # Always return the same response to prevent email enumeration attacks.
+    recovery_message = Message(
         message="If that email is registered, we sent a password recovery link"
     )
+    if not settings.emails_enabled:
+        logger.warning("Password recovery requested, but email delivery is disabled")
+        return recovery_message
+
+    user = crud.get_user_by_email(session=session, email=email)
+    if user:
+        try:
+            password_reset_token = generate_password_reset_token(email=email)
+            email_data = generate_reset_password_email(
+                email_to=user.email, email=email, token=password_reset_token
+            )
+            send_email(
+                email_to=user.email,
+                subject=email_data.subject,
+                html_content=email_data.html_content,
+            )
+        except Exception:
+            return recovery_message
+    return recovery_message
 
 
 @router.post("/reset-password/")

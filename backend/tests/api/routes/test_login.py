@@ -1,5 +1,8 @@
+import logging
+from types import SimpleNamespace
 from unittest.mock import patch
 
+import pytest
 from fastapi.testclient import TestClient
 from pwdlib.hashers.bcrypt import BcryptHasher
 from sqlmodel import Session
@@ -77,6 +80,162 @@ def test_recovery_password_user_not_exits(
     assert r.json() == {
         "message": "If that email is registered, we sent a password recovery link"
     }
+
+
+def test_recovery_password_with_disabled_email_skips_user_lookup_and_email(
+    client: TestClient,
+    caplog: pytest.LogCaptureFixture,
+) -> None:
+    email = random_email()
+
+    with caplog.at_level(logging.WARNING, logger="app.api.routes.login"):
+        with (
+            patch("app.api.routes.login.crud.get_user_by_email") as get_user_mock,
+            patch("app.core.config.settings.SMTP_HOST", None),
+            patch("app.core.config.settings.EMAILS_FROM_EMAIL", None),
+            patch("app.api.routes.login.generate_password_reset_token") as token_mock,
+            patch("app.api.routes.login.generate_reset_password_email") as email_mock,
+            patch("app.api.routes.login.send_email") as send_email_mock,
+        ):
+            r = client.post(f"{settings.API_V1_STR}/password-recovery/{email}")
+
+    assert r.status_code == 200
+    assert r.json() == {
+        "message": "If that email is registered, we sent a password recovery link"
+    }
+    get_user_mock.assert_not_called()
+    token_mock.assert_not_called()
+    email_mock.assert_not_called()
+    send_email_mock.assert_not_called()
+    assert "email delivery is disabled" in caplog.text
+    assert email not in caplog.text
+
+
+def test_recovery_password_with_existing_user_and_email_enabled(
+    client: TestClient,
+) -> None:
+    email = random_email()
+    user = User(
+        email=email,
+        hashed_password="not-used",
+        full_name="Test User",
+        is_active=True,
+        is_superuser=False,
+    )
+
+    email_data = SimpleNamespace(
+        subject="Reset password",
+        html_content="<p>reset-password</p>",
+    )
+
+    with (
+        patch("app.api.routes.login.crud.get_user_by_email", return_value=user),
+        patch("app.core.config.settings.SMTP_HOST", "smtp.example.com"),
+        patch("app.core.config.settings.EMAILS_FROM_EMAIL", "test@example.com"),
+        patch(
+            "app.api.routes.login.generate_password_reset_token",
+            return_value="reset-token",
+        ) as token_mock,
+        patch(
+            "app.api.routes.login.generate_reset_password_email",
+            return_value=email_data,
+        ) as email_mock,
+        patch("app.api.routes.login.send_email") as send_email_mock,
+    ):
+        r = client.post(f"{settings.API_V1_STR}/password-recovery/{email}")
+
+    assert r.status_code == 200
+    assert r.json() == {
+        "message": "If that email is registered, we sent a password recovery link"
+    }
+    token_mock.assert_called_once_with(email=email)
+    email_mock.assert_called_once_with(
+        email_to=user.email,
+        email=email,
+        token="reset-token",
+    )
+    send_email_mock.assert_called_once_with(
+        email_to=user.email,
+        subject=email_data.subject,
+        html_content=email_data.html_content,
+    )
+
+
+def test_recovery_password_with_email_failure_returns_generic_response(
+    client: TestClient,
+    caplog: pytest.LogCaptureFixture,
+) -> None:
+    email = random_email()
+    user = User(
+        email=email,
+        hashed_password="not-used",
+        full_name="Test User",
+        is_active=True,
+        is_superuser=False,
+    )
+
+    with caplog.at_level(logging.ERROR, logger="app.api.routes.login"):
+        with (
+            patch("app.api.routes.login.crud.get_user_by_email", return_value=user),
+            patch("app.core.config.settings.SMTP_HOST", "smtp.example.com"),
+            patch("app.core.config.settings.EMAILS_FROM_EMAIL", "test@example.com"),
+            patch(
+                "app.api.routes.login.send_email",
+                side_effect=RuntimeError("SMTP unavailable"),
+            ) as send_email_mock,
+        ):
+            r = client.post(f"{settings.API_V1_STR}/password-recovery/{email}")
+
+    assert r.status_code == 200
+    assert r.json() == {
+        "message": "If that email is registered, we sent a password recovery link"
+    }
+    send_email_mock.assert_called_once()
+    assert caplog.text == ""
+
+
+def test_recovery_password_with_email_template_failure_returns_generic_response(
+    client: TestClient,
+    caplog: pytest.LogCaptureFixture,
+) -> None:
+    email = random_email()
+    user = User(
+        email=email,
+        hashed_password="not-used",
+        full_name="Test User",
+        is_active=True,
+        is_superuser=False,
+    )
+
+    with caplog.at_level(logging.ERROR, logger="app.api.routes.login"):
+        with (
+            patch("app.api.routes.login.crud.get_user_by_email", return_value=user),
+            patch("app.core.config.settings.SMTP_HOST", "smtp.example.com"),
+            patch("app.core.config.settings.EMAILS_FROM_EMAIL", "test@example.com"),
+            patch(
+                "app.api.routes.login.generate_password_reset_token",
+                return_value="reset-token",
+            ) as token_mock,
+            patch(
+                "app.api.routes.login.generate_reset_password_email",
+                side_effect=RuntimeError("template unavailable"),
+            ) as email_mock,
+            patch("app.api.routes.login.send_email") as send_email_mock,
+        ):
+            r = client.post(f"{settings.API_V1_STR}/password-recovery/{email}")
+
+    assert r.status_code == 200
+    assert r.json() == {
+        "message": "If that email is registered, we sent a password recovery link"
+    }
+    token_mock.assert_called_once_with(email=email)
+    email_mock.assert_called_once_with(
+        email_to=user.email,
+        email=email,
+        token="reset-token",
+    )
+    send_email_mock.assert_not_called()
+    assert caplog.text == ""
 
 
 def test_reset_password(client: TestClient, db: Session) -> None:
