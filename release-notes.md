@@ -16,6 +16,7 @@
 
 ### Docs
 
+* 🎨 Enable Ruff formatting for Python in Markdown. PR [#2517](https://github.com/fastapi/full-stack-fastapi-template/pull/2517) by [@tiangolo](https://github.com/tiangolo).
 * 📝 Update README.md with Mailpit and React Email. PR [#2452](https://github.com/fastapi/full-stack-fastapi-template/pull/2452) by [@alejsdev](https://github.com/alejsdev).
 * 📝 Simplify project documentation. PR [#2442](https://github.com/fastapi/full-stack-fastapi-template/pull/2442) by [@tiangolo](https://github.com/tiangolo).
 
