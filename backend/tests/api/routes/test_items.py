@@ -23,6 +23,36 @@ def test_create_item(
     assert "id" in content
     assert "owner_id" in content
 
+def test_create_item_empty_title(
+    client: TestClient, superuser_token_headers: dict[str, str]
+) -> None:
+    data = {"title": "", "description": "测试空标题"}
+    response = client.post(
+        f"{settings.API_V1_STR}/items/",
+        headers=superuser_token_headers,
+        json=data,
+    )
+    # print(response.json())
+    assert response.status_code == 422
+
+def test_create_item_missing_title(
+    client: TestClient, superuser_token_headers: dict[str, str]
+) -> None:
+    data = {"description": "测试缺少标题"}
+    response = client.post(
+        f"{settings.API_V1_STR}/items/",
+        headers=superuser_token_headers,
+        json=data,
+    )
+    # print(response.json())
+    assert response.status_code == 422
+
+    errors = response.json()["detail"]
+    assert any(
+        error["loc"] == ["body", "title"]
+        and error["type"] == "missing"
+        for error in errors
+    )
 
 def test_read_item(
     client: TestClient, superuser_token_headers: dict[str, str], db: Session
@@ -38,7 +68,6 @@ def test_read_item(
     assert content["description"] == item.description
     assert content["id"] == str(item.id)
     assert content["owner_id"] == str(item.owner_id)
-
 
 def test_read_item_not_found(
     client: TestClient, superuser_token_headers: dict[str, str]
