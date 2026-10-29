@@ -16,33 +16,34 @@ def read_items(
     current_user: CurrentUser,
     skip: Annotated[int, Query(ge=0)] = 0,
     limit: Annotated[int, Query(ge=1, le=100)] = 100,
+    q: str | None = None,
 ) -> Any:
     """
     Retrieve items.
     """
+    count_statement = select(func.count()).select_from(Item)
+    statement = select(Item)
 
-    if current_user.is_superuser:
-        count_statement = select(func.count()).select_from(Item)
-        count = session.exec(count_statement).one()
-        statement = (
-            select(Item).order_by(col(Item.created_at).desc()).offset(skip).limit(limit)
-        )
-        items = session.exec(statement).all()
-    else:
-        count_statement = (
-            select(func.count())
-            .select_from(Item)
-            .where(Item.owner_id == current_user.id)
-        )
-        count = session.exec(count_statement).one()
-        statement = (
-            select(Item)
-            .where(Item.owner_id == current_user.id)
-            .order_by(col(Item.created_at).desc())
-            .offset(skip)
-            .limit(limit)
-        )
-        items = session.exec(statement).all()
+    # 普通用户只能看到自己的数据
+    if not current_user.is_superuser:
+        owner_condition = Item.owner_id == current_user.id
+        count_statement = count_statement.where(owner_condition)
+        statement = statement.where(owner_condition)
+
+    # 去除关键词两端的空格；空关键词不进行过滤
+    keyword = q.strip() if q else ""
+
+    if keyword:
+        search_condition = col(Item.title).icontains(keyword, autoescape=True)
+        count_statement = count_statement.where(search_condition)
+        statement = statement.where(search_condition)
+
+    count = session.exec(count_statement).one()
+
+    statement = (
+        statement.order_by(col(Item.created_at).desc()).offset(skip).limit(limit)
+    )
+    items = session.exec(statement).all()
 
     items_public = [ItemPublic.model_validate(item) for item in items]
     return ItemsPublic(data=items_public, count=count)
