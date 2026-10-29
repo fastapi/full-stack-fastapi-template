@@ -1,5 +1,6 @@
 import uuid
 
+import pytest
 from fastapi.testclient import TestClient
 from sqlmodel import Session
 
@@ -23,6 +24,7 @@ def test_create_item(
     assert "id" in content
     assert "owner_id" in content
 
+
 def test_create_item_empty_title(
     client: TestClient, superuser_token_headers: dict[str, str]
 ) -> None:
@@ -34,6 +36,7 @@ def test_create_item_empty_title(
     )
     # print(response.json())
     assert response.status_code == 422
+
 
 def test_create_item_missing_title(
     client: TestClient, superuser_token_headers: dict[str, str]
@@ -49,10 +52,10 @@ def test_create_item_missing_title(
 
     errors = response.json()["detail"]
     assert any(
-        error["loc"] == ["body", "title"]
-        and error["type"] == "missing"
+        error["loc"] == ["body", "title"] and error["type"] == "missing"
         for error in errors
     )
+
 
 def test_read_item(
     client: TestClient, superuser_token_headers: dict[str, str], db: Session
@@ -68,6 +71,49 @@ def test_read_item(
     assert content["description"] == item.description
     assert content["id"] == str(item.id)
     assert content["owner_id"] == str(item.owner_id)
+
+
+@pytest.mark.parametrize(
+    "params",
+    [
+        {"skip": -1},
+        {"limit": 0},
+        {"limit": 101},
+    ],
+)
+def test_read_items_invalid_pagination(
+    client: TestClient,
+    superuser_token_headers: dict[str, str],
+    params: dict[str, int],
+) -> None:
+    response = client.get(
+        f"{settings.API_V1_STR}/items/",
+        headers=superuser_token_headers,
+        params=params,
+    )
+    assert response.status_code == 422
+
+
+@pytest.mark.parametrize("limit", [1, 100])
+def test_read_items_valid_limit(
+    client: TestClient,
+    superuser_token_headers: dict[str, str],
+    db: Session,
+    limit: int,
+) -> None:
+    create_random_item(db)
+    create_random_item(db)
+
+    response = client.get(
+        f"{settings.API_V1_STR}/items/",
+        headers=superuser_token_headers,
+        params={"skip": 0, "limit": limit},
+    )
+
+    assert response.status_code == 200
+    content = response.json()
+    assert len(content["data"]) == min(limit, content["count"])
+
 
 def test_read_item_not_found(
     client: TestClient, superuser_token_headers: dict[str, str]
