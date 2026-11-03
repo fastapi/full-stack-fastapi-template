@@ -50,7 +50,7 @@
   "devDependencies": {
     "@biomejs/biome": "^2.5.14",
     "@hey-api/openapi-ts": "0.97.3",
-    "@playwright/test": "1.63.0",
+    "@playwright/test": "1.64.1",
     "@tanstack/router-devtools": "^1.167.2",
     "@tanstack/router-plugin": "^1.168.40",
     "@types/node": "^26.6.3",
