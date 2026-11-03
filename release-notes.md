@@ -22,6 +22,7 @@
 
 ### Internal
 
+* ⬆ Bump dnspython from 2.8.0 to 2.9.0. PR [#2524](https://github.com/fastapi/full-stack-fastapi-template/pull/2524) by [@dependabot[bot]](https://github.com/apps/dependabot).
 * ⬆ Bump certifi from 2026.6.17 to 2026.10.19. PR [#2518](https://github.com/fastapi/full-stack-fastapi-template/pull/2518) by [@dependabot[bot]](https://github.com/apps/dependabot).
 * ⬆️ Migrate `@tanstack/react-table` to 9.x. PR [#2509](https://github.com/fastapi/full-stack-fastapi-template/pull/2509) by [@YuriiMotov](https://github.com/YuriiMotov).
 * ⬆ Bump the npm-packages group across 1 directory with 25 updates. PR [#2506](https://github.com/fastapi/full-stack-fastapi-template/pull/2506) by [@dependabot[bot]](https://github.com/apps/dependabot).
