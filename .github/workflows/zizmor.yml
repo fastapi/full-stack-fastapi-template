@@ -24,7 +24,7 @@ jobs:
         with:
           persist-credentials: false
       - name: Run zizmor
-        uses: zizmorcore/zizmor-action@v0.8.0
+        uses: zizmorcore/zizmor-action@v0.8.1
         with:
           advanced-security: ${{ github.repository_owner == 'fastapi' }}
           annotations: ${{ github.repository_owner != 'fastapi' }}
