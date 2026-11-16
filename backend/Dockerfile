@@ -1,3 +1,6 @@
+# ==============================================================================
+# Frontend: build
+# ==============================================================================
 FROM oven/bun:1 AS frontend-build
 
 WORKDIR /app
@@ -15,14 +18,17 @@ ARG VITE_API_URL=
 
 RUN bun run build
 
+# ==============================================================================
+# Dependency: pull in the standalone uv binary
+# ==============================================================================
+FROM ghcr.io/astral-sh/uv:0.12.2 AS uv-binary
 
-FROM python:3.14
+# ==============================================================================
+# Runtime: backend build + app run
+# ==============================================================================
+FROM python:3.14 AS runtime
 
 ENV PYTHONUNBUFFERED=1
-
-# Install uv
-# Ref: https://docs.astral.sh/uv/guides/integration/docker/#installing-uv
-COPY --from=ghcr.io/astral-sh/uv:0.9.26 /uv /uvx /bin/
 
 # Compile bytecode
 # Ref: https://docs.astral.sh/uv/guides/integration/docker/#compiling-bytecode
@@ -37,6 +43,9 @@ WORKDIR /app/
 # Place executables in the environment at the front of the path
 # Ref: https://docs.astral.sh/uv/guides/integration/docker/#using-the-environment
 ENV PATH="/app/.venv/bin:$PATH"
+
+# provision package manager
+COPY --from=uv-binary /uv /usr/local/bin/uv
 
 # Install dependencies
 # Ref: https://docs.astral.sh/uv/guides/integration/docker/#intermediate-layers
