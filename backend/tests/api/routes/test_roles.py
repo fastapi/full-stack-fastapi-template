@@ -13,13 +13,9 @@ def create_manager(client: TestClient, db: Session) -> tuple[str, dict[str, str]
     password = random_lower_string()
     crud.create_user(
         session=db,
-        user_create=UserCreate(
-            email=email, password=password, role=UserRole.MANAGER
-        ),
+        user_create=UserCreate(email=email, password=password, role=UserRole.MANAGER),
     )
-    headers = user_authentication_headers(
-        client=client, email=email, password=password
-    )
+    headers = user_authentication_headers(client=client, email=email, password=password)
     return email, headers
 
 
@@ -33,7 +29,9 @@ def test_manager_can_view_users_and_metrics_but_not_change_access(
         == 200
     )
     assert (
-        client.get(f"{settings.API_V1_STR}/metrics/", headers=manager_headers).status_code
+        client.get(
+            f"{settings.API_V1_STR}/metrics/", headers=manager_headers
+        ).status_code
         == 200
     )
     manager = client.get(
@@ -108,6 +106,8 @@ def test_role_and_active_changes_apply_to_existing_sessions(
     )
     assert response.status_code == 200
     assert (
-        client.get(f"{settings.API_V1_STR}/users/me", headers=manager_headers).status_code
+        client.get(
+            f"{settings.API_V1_STR}/users/me", headers=manager_headers
+        ).status_code
         == 400
     )
