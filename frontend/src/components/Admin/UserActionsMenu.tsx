@@ -20,7 +20,7 @@ export const UserActionsMenu = ({ user }: UserActionsMenuProps) => {
   const [open, setOpen] = useState(false)
   const { user: currentUser } = useAuth()
 
-  if (user.id === currentUser?.id) {
+  if (user.id === currentUser?.id || currentUser?.role !== "admin") {
     return null
   }
 

@@ -1,5 +1,7 @@
 import { createFileRoute, Outlet, redirect } from "@tanstack/react-router"
+import axios from "axios"
 
+import { UsersService } from "@/client"
 import { Footer } from "@/components/Common/Footer"
 import AppSidebar from "@/components/Sidebar/AppSidebar"
 import {
@@ -16,6 +18,18 @@ export const Route = createFileRoute("/_layout")({
       throw redirect({
         to: "/login",
       })
+    }
+    try {
+      await UsersService.readUserMe()
+    } catch (error) {
+      if (
+        axios.isAxiosError(error) &&
+        [400, 401, 403, 404].includes(error.response?.status ?? 0)
+      ) {
+        localStorage.removeItem("access_token")
+        throw redirect({ to: "/login" })
+      }
+      throw error
     }
   },
 })

@@ -1,7 +1,9 @@
 import uuid
 from datetime import UTC, datetime
+from enum import StrEnum
 
-from pydantic import EmailStr
+from pydantic import EmailStr, computed_field, model_validator
+from sqlalchemy import String
 from sqlmodel import Field, Relationship, SQLModel
 
 
@@ -9,17 +11,35 @@ def get_datetime_utc() -> datetime:
     return datetime.now(UTC)
 
 
+class UserRole(StrEnum):
+    ADMIN = "admin"
+    MANAGER = "manager"
+    MEMBER = "member"
+
+
 # Shared properties
 class UserBase(SQLModel):
     email: EmailStr = Field(unique=True, index=True, max_length=255)
     is_active: bool = True
-    is_superuser: bool = False
+    role: UserRole = Field(default=UserRole.MEMBER, sa_type=String(16))
     full_name: str | None = Field(default=None, max_length=255)
 
 
 # Properties to receive via API on creation
 class UserCreate(UserBase):
     password: str = Field(min_length=8, max_length=128)
+    is_superuser: bool | None = Field(default=None, exclude=True)
+
+    @model_validator(mode="before")
+    @classmethod
+    def map_legacy_superuser(cls, values: object) -> object:
+        if isinstance(values, dict) and values.get("is_superuser") is not None:
+            values = values.copy()
+            if "role" not in values:
+                values["role"] = (
+                    UserRole.ADMIN if values["is_superuser"] else UserRole.MEMBER
+                )
+        return values
 
 
 class UserRegister(SQLModel):
@@ -32,9 +52,21 @@ class UserRegister(SQLModel):
 class UserUpdate(SQLModel):
     email: EmailStr | None = Field(default=None, max_length=255)
     is_active: bool | None = None
-    is_superuser: bool | None = None
+    role: UserRole | None = Field(default=None, sa_type=String(16))
+    is_superuser: bool | None = Field(default=None, exclude=True)
     full_name: str | None = Field(default=None, max_length=255)
     password: str | None = Field(default=None, min_length=8, max_length=128)
+
+    @model_validator(mode="before")
+    @classmethod
+    def map_legacy_superuser(cls, values: object) -> object:
+        if isinstance(values, dict) and values.get("is_superuser") is not None:
+            values = values.copy()
+            if "role" not in values:
+                values["role"] = (
+                    UserRole.ADMIN if values["is_superuser"] else UserRole.MEMBER
+                )
+        return values
 
 
 class UserUpdateMe(SQLModel):
@@ -54,16 +86,31 @@ class User(UserBase, table=True):
     created_at: datetime | None = Field(default_factory=get_datetime_utc)
     items: list[Item] = Relationship(back_populates="owner", cascade_delete=True)
 
+    @property
+    def is_superuser(self) -> bool:
+        return self.role == UserRole.ADMIN
+
 
 # Properties to return via API, id is always required
 class UserPublic(UserBase):
     id: uuid.UUID
+    role: UserRole
     created_at: datetime | None = None
+
+    @computed_field  # type: ignore[prop-decorator]
+    @property
+    def is_superuser(self) -> bool:
+        return self.role == UserRole.ADMIN
 
 
 class UsersPublic(SQLModel):
     data: list[UserPublic]
     count: int
+
+
+class MetricsPublic(SQLModel):
+    user_count: int
+    item_count: int
 
 
 # Shared properties

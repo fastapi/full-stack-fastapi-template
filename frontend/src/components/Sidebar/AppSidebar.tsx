@@ -1,4 +1,4 @@
-import { Briefcase, Home, Users } from "lucide-react"
+import { BarChart3, Briefcase, Home, Users } from "lucide-react"
 
 import { SidebarAppearance } from "@/components/Common/Appearance"
 import { Logo } from "@/components/Common/Logo"
@@ -20,8 +20,14 @@ const baseItems: Item[] = [
 export function AppSidebar() {
   const { user: currentUser } = useAuth()
 
-  const items = currentUser?.is_superuser
-    ? [...baseItems, { icon: Users, title: "Admin", path: "/admin" }]
+  const canViewAdminPages =
+    currentUser?.role === "admin" || currentUser?.role === "manager"
+  const items = canViewAdminPages
+    ? [
+        ...baseItems,
+        { icon: Users, title: "Users", path: "/admin" },
+        { icon: BarChart3, title: "Metrics", path: "/metrics" },
+      ]
     : baseItems
 
   return (
