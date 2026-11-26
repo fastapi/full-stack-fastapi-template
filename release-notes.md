@@ -22,6 +22,7 @@
 
 ### Internal
 
+* 🔒️ Generate GH actions workflow lockfile and bump Zizmor. PR [#2530](https://github.com/fastapi/full-stack-fastapi-template/pull/2530) by [@YuriiMotov](https://github.com/YuriiMotov).
 * ⬆ Bump dnspython from 2.9.0 to 2.9.2. PR [#2529](https://github.com/fastapi/full-stack-fastapi-template/pull/2529) by [@dependabot[bot]](https://github.com/apps/dependabot).
 * ⬆ Bump the npm-packages group across 1 directory with 30 updates. PR [#2525](https://github.com/fastapi/full-stack-fastapi-template/pull/2525) by [@dependabot[bot]](https://github.com/apps/dependabot).
 * ⬆ Bump playwright from v1.63.0-noble to v1.64.1-noble in /frontend in the docker group across 1 directory. PR [#2521](https://github.com/fastapi/full-stack-fastapi-template/pull/2521) by [@dependabot[bot]](https://github.com/apps/dependabot).
