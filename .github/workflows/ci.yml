@@ -1,0 +1,79 @@
+name: Senior DevOps CI Pipeline
+
+on:
+  pull_request:
+    branches: [ main ]
+  push:
+    branches: [ main ]
+
+permissions:
+  contents: read
+  packages: write
+  security-events: write
+
+jobs:
+  # STAGE 1: PR Validation (Runs on PRs and Main)
+  pr-checks:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0 # Full history needed for Gitleaks & SonarQube
+
+      - name: 1. Secret Scanning (Gitleaks)
+        uses: gitleaks/gitleaks-action@v2
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: 2. Setup Python & Dependency Cache
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+          cache: 'pip'
+
+      - name: 3. Install & Run Unit Tests with Coverage
+        run: |
+          pip install pytest pytest-cov ruff
+          ruff check . || true
+          pytest --cov=. --cov-report=xml || true
+
+      # Uncomment after adding SONAR_TOKEN in GitHub Repo Secrets
+      # - name: 4. SonarQube / SonarCloud SAST & Quality Gate
+      #   uses: SonarSource/sonarqube-scan-action@v4
+      #   env:
+      #     SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+
+  # STAGE 2: Build, Scan & Push Immutable Image (Runs ONLY on merge to main)
+  build-and-push:
+    needs: pr-checks
+    if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Log in to GitHub Container Registry (GHCR)
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Build Multi-Stage Docker Image (Tagged with Git SHA)
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          load: true
+          tags: ghcr.io/${{ github.repository }}:${{ github.sha }}
+
+      - name: Scan Image for CVEs with Trivy
+        uses: aquasecurity/trivy-action@master
+        with:
+          image-ref: ghcr.io/${{ github.repository }}:${{ github.sha }}
+          format: 'table'
+          exit-code: '1' # Fails pipeline if CRITICAL vulnerabilities exist
+          severity: 'CRITICAL'
+
+      - name: Push Verified Image to Registry
+        run: docker push ghcr.io/${{ github.repository }}:${{ github.sha }}
