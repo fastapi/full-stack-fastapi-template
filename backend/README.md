@@ -124,6 +124,18 @@ $ alembic upgrade head
 
 If you don't want to start with the default models and want to remove them / modify them, from the beginning, without having any previous revision, you can remove the revision files (`.py` Python files) under `./backend/app/alembic/versions/`. And then create a first migration as described above.
 
+## Demo Users
+
+Each user has one role: `admin`, `manager`, or `member`. Admins manage users. Managers can view users and metrics but not change them. Members only see their own items.
+
+To create one demo user per role in a local database, run this from the `backend` directory with `FASTAPI_ENV=development`:
+
+```console
+$ uv run python -m app.seed_demo_users
+```
+
+It creates `demo-admin@example.com`, `demo-manager@example.com`, and `demo-member@example.com` with the password from `DEMO_USER_PASSWORD` (default `DemoPass123!`). Running it again resets those three users to their demo role, active state, and password.
+
 ## Email Templates
 
 The email templates are written with [React Email](https://react.email) in `./packages/react-email/`. The `emails` directory holds one component per email and the `ui` directory holds the shared components (layout, heading, button, link, callout).
