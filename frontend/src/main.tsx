@@ -19,13 +19,19 @@ client.setConfig({
   auth: () => localStorage.getItem("access_token") || "",
 })
 
+const isSessionError = (status: number | undefined, detail: unknown) =>
+  status === 401 ||
+  (status === 400 && detail === "Inactive user") ||
+  (status === 403 && detail === "Could not validate credentials")
+
 const handleApiError = (error: Error) => {
-  if (
-    error instanceof AxiosError &&
-    [401, 403].includes(error.response?.status ?? 0)
-  ) {
+  if (!(error instanceof AxiosError)) return
+  const status = error.response?.status
+  if (isSessionError(status, error.response?.data?.detail)) {
     localStorage.removeItem("access_token")
     window.location.href = "/login"
+  } else if (status === 403) {
+    queryClient.invalidateQueries({ queryKey: ["currentUser"] })
   }
 }
 const queryClient = new QueryClient({

@@ -9,6 +9,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
 import useAuth from "@/hooks/useAuth"
+import { isAdmin } from "@/lib/roles"
 import DeleteUser from "./DeleteUser"
 import EditUser from "./EditUser"
 
@@ -20,7 +21,7 @@ export const UserActionsMenu = ({ user }: UserActionsMenuProps) => {
   const [open, setOpen] = useState(false)
   const { user: currentUser } = useAuth()
 
-  if (user.id === currentUser?.id) {
+  if (!isAdmin(currentUser) || user.id === currentUser?.id) {
     return null
   }
 
