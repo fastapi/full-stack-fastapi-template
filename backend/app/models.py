@@ -1,6 +1,8 @@
 import uuid
 from datetime import UTC, datetime
+from enum import StrEnum
 
+import sqlalchemy as sa
 from pydantic import EmailStr
 from sqlmodel import Field, Relationship, SQLModel
 
@@ -9,11 +11,27 @@ def get_datetime_utc() -> datetime:
     return datetime.now(UTC)
 
 
+class UserRole(StrEnum):
+    ADMIN = "admin"
+    MANAGER = "manager"
+    MEMBER = "member"
+
+
 # Shared properties
 class UserBase(SQLModel):
     email: EmailStr = Field(unique=True, index=True, max_length=255)
     is_active: bool = True
-    is_superuser: bool = False
+    role: UserRole = Field(
+        default=UserRole.MEMBER,
+        sa_type=sa.Enum(
+            UserRole,
+            native_enum=False,
+            length=32,
+            create_constraint=True,
+            name="ck_user_role",
+            values_callable=lambda roles: [role.value for role in roles],
+        ),
+    )
     full_name: str | None = Field(default=None, max_length=255)
 
 
@@ -32,7 +50,7 @@ class UserRegister(SQLModel):
 class UserUpdate(SQLModel):
     email: EmailStr | None = Field(default=None, max_length=255)
     is_active: bool | None = None
-    is_superuser: bool | None = None
+    role: UserRole | None = None
     full_name: str | None = Field(default=None, max_length=255)
     password: str | None = Field(default=None, min_length=8, max_length=128)
 
@@ -64,6 +82,12 @@ class UserPublic(UserBase):
 class UsersPublic(SQLModel):
     data: list[UserPublic]
     count: int
+
+
+class MetricsPublic(SQLModel):
+    total_users: int
+    active_users: int
+    total_items: int
 
 
 # Shared properties
